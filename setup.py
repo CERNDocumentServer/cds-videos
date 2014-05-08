@@ -17,7 +17,7 @@
 
 """
 CDS Demosite
-----------------
+------------
 
 CDS demosite repository.
 """
@@ -50,7 +50,6 @@ setup(
     description='Digital library software',
     long_description=__doc__,
     packages=find_packages(),
-    namespace_packages=['cds', ],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
@@ -58,8 +57,7 @@ setup(
     dependency_links=dependency_links,
     entry_points={
         'invenio.config': [
-            "cds = cds.config"
+            "cds_demosite = cds_demosite.config"
         ]
-    },
-    test_suite='cds.testsuite.suite'
+    }
 )
