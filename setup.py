@@ -21,74 +21,45 @@ CDS Demosite
 
 CDS demosite repository.
 """
-from __future__ import print_function
-
-import re
-import glob
-
 from setuptools import setup, find_packages
+import os
 
-
-def match_feature_name(filename):
-    return re.match(r".*requirements-(\w+).txt$", filename).group(1)
-
-
-def match_egg_name_and_version(dependency_link, version='=='):
-    return version.join(
-        re.sub(
-            r'.+://.*[@#&]egg=([^&]*)&?.*$',
-            r'\1',
-            dependency_link
-        ).rsplit('-', 1))
-
-
-def read_requirements(filename='requirements.txt'):
+def requirements():
     req = []
     dep = []
-    with open(filename, 'r') as f:
-        for line in f.readlines():
-            line = line.strip('\n')
-            if line.startswith('#'):
-                continue
-            if '://' in line:
-                dep.append(str(line))
-                req.append(match_egg_name_and_version(str(line)))
-            else:
-                req.append(str(line))
+    for filename in ['requirements.txt']:
+        with open(os.path.join(os.path.dirname(__file__), filename), 'r') as f:
+            for line in f.readlines():
+                if line.startswith('#'):
+                    continue
+                if '://' in line:
+                    dep.append(str(line[:-1]))
+                else:
+                    req.append(str(line))
     return req, dep
 
-install_requires, dependency_links = read_requirements()
-
-# Finds all `requirements-*.txt` files and prepares dictionary with extra
-# requirements (NOTE: no links are allowed here!)
-extras_require = dict(map(
-    lambda filename: (match_feature_name(filename),
-                      read_requirements(filename)[0]),
-    glob.glob('requirements-*.txt')))
-
-packages = find_packages(exclude=['docs'])
+install_requires, dependency_links = requirements()
 
 setup(
     name='CDS Demosite',
     version='1.9999-dev',
-    url='https://github.com/CERNDocumentServer/cds-demosite',
-    license='GPLv2',
+    url='http://cds.cern.ch',
+    license='GPLv3',
     author='CERN',
     author_email='info@invenio-software.org',
     description='Digital library software',
     long_description=__doc__,
-    packages=packages,
-    package_dir={'invenio_docs': 'docs'},
+    packages=find_packages(),
+    namespace_packages=['cds', ],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    extras_require=extras_require,
     entry_points={
         'invenio.config': [
             "cds = cds.config"
         ]
     },
-    test_suite='cds.testsuite.suite',
+    test_suite='cds.testsuite.suite'
 )

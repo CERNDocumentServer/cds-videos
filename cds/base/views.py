@@ -20,7 +20,6 @@
 """
     cds.views
     -------------------------------
-
     Demosite interface.
 """
 

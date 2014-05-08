@@ -17,7 +17,33 @@
 ## along with Invenio; if not, write to the Free Software Foundation, Inc.,
 ## 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 
+"""
+CDS Configuration
+-----------------
+Instance independent configuration (e.g. which extensions to load) is defined
+in ``cds.config'' while instance dependent configuration (e.g. database
+host etc.) is defined in an optional ``cds.instance_config'' which
+can be installed by a separate package.
+
+This config module is loaded by the Flask application factory via an entry
+point specified in the setup.py::
+
+    entry_points={
+        'invenio.config': [
+            "cds = cds.config"
+        ]
+    },
+"""
+
 PACKAGES = [
     "cds.base",
+    "cds.modules.*",
     "invenio.modules.*",
 ]
+
+PACKAGES_EXCLUDE = []
+
+try:
+    from cds.instance_config import *  # noqa
+except ImportError:
+    pass
