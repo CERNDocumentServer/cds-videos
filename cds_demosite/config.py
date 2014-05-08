@@ -20,6 +20,7 @@
 """
 CDS Configuration
 -----------------
+
 Instance independent configuration (e.g. which extensions to load) is defined
 in ``cds.config'' while instance dependent configuration (e.g. database
 host etc.) is defined in an optional ``cds.instance_config'' which
@@ -30,14 +31,14 @@ point specified in the setup.py::
 
     entry_points={
         'invenio.config': [
-            "cds = cds.config"
+            "cds_demosite = cds_demosite.config"
         ]
     },
 """
 
 PACKAGES = [
-    "cds.base",
-    "cds.modules.*",
+    "cds_demosite.base",
+    "cds_demosite.modules.*",
     "invenio.modules.*",
 ]
 
