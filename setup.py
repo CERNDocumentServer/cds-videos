@@ -50,7 +50,6 @@ setup(
     description='Digital library software',
     long_description=__doc__,
     packages=find_packages(),
-    namespace_packages=['cds', ],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
@@ -60,6 +59,5 @@ setup(
         'invenio.config': [
             "cds = cds.config"
         ]
-    },
-    test_suite='cds.testsuite.suite'
+    }
 )
