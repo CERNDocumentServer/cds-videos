@@ -1,0 +1,9 @@
+{
+  "name": "cds-grunt",
+  "version": "0.1.0",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-copy": "*",
+    "grunt-newer": "*"
+  }
+}

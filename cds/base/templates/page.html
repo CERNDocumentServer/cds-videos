@@ -26,6 +26,11 @@
   {%- css url_for("webtag.static", filename="css/tags/popover.css"), "00-invenio" -%}
 {%- endblock -%}
 
+{%- block global_javascript -%}
+  {{ super() }}
+  {%- js url_for("base.static", filename="js/prototype.js"), "91-prototype", "requirejs" -%}
+{%- endblock -%}
+
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
   {%- include "cern_header.html" -%}
