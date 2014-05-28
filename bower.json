@@ -1,0 +1,9 @@
+{
+    "name": "cds-grunt",
+    "version": "0.1.0",
+    "dependencies": {
+        "react": "latest",
+        "backbone": "latest",
+        "require-jsx": "latest"
+    }
+}

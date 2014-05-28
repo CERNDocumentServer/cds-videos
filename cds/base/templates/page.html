@@ -19,6 +19,11 @@
 
 {%- extends "page_base.html" -%}
 
+{%- block global_bundles -%}
+  {{- super() -}}
+  {%- bundle "cds.js" -%}
+{%- endblock -%}
+
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
   {%- include "cern_header.html" -%}
