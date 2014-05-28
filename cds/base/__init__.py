@@ -23,4 +23,5 @@ from .receivers import post_handler_demosite_populate
 from invenio.base.scripts.demosite import populate as demosite_populate
 from invenio.base.signals import post_command
 
+
 post_command.connect(post_handler_demosite_populate, sender=demosite_populate)
