@@ -24,6 +24,14 @@
   {%- bundle "cds.js" -%}
 {%- endblock -%}
 
+{%- block _bottom_assets -%}
+  <!--[if lt IE 9]>
+    <script src="/vendors/es5-shim/es5-shim.min.js"></script>
+    <script src="/vendors/es5-shim/es5-sham.min.js"></script>
+  <![endif]-->
+  {{- super() -}}
+{%- endblock -%}
+
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
   {%- include "cern_header.html" -%}

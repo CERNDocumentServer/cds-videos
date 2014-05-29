@@ -18,13 +18,15 @@
  */
 
 require.config({
-    baseUrl: 'js',
+    baseUrl: 'vendors',
     paths: {
-        backbone: 'vendors/backbone',
-        react: 'vendors/react',
-        underscore: 'vendors/underscore',
-        jsx: 'vendors/jsx',
-        JSXTransformer: 'vendors/JSXTransformer'
+        bootstrap: 'bootstrap/js',
+        backbone: 'backbone/backbone',
+        react: 'react/react',
+        underscore: 'underscore/underscore',
+        jsx: 'require-jsx/jsx',
+        JSXTransformer: 'react/JSXTransformer',
+        prototype: '../js/prototype'
     },
     shim: {
         'bootstrap/affix': { deps: ['jquery'], exports: '$.fn.affix' },
@@ -47,6 +49,7 @@ require.config({
         },
         underscore: { exports: '_' },
         react: { exports: 'React' },
-        JSXTransformer: { exports: 'JSXTranformer' }
+        JSXTransformer: { exports: 'JSXTranformer' },
+        jquery: { exports: '$' }
     }
 })
