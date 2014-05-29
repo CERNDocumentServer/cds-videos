@@ -52,3 +52,4 @@ docs/_build/
 # Vendors assets
 bower_components
 node_modules
+vendors

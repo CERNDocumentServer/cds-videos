@@ -2,8 +2,10 @@
     "name": "cds-grunt",
     "version": "0.1.0",
     "dependencies": {
+        "bootstrap": "latest",
         "react": "latest",
         "backbone": "latest",
-        "require-jsx": "latest"
+        "require-jsx": "latest",
+        "es5-shim": "latest"
     }
 }

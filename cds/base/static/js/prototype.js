@@ -17,22 +17,62 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require(["jquery", "react", "jsx!prototype/prototype.js"], function($, React, proto) {
+define(
+    "prototype",
+    ["jquery",
+     "react",
+     "jsx!prototype/boxes/text.js",
+     "jsx!prototype/prototype.js",
+     "jsx!prototype/row.js"],
+    function($, React, text, proto, row)
+{
     "use strict"
 
-    $("div.websearch")
-        .hide()
-        .before("<div id=prototype></div>")
+    var original = $("div.websearch")
+        .before("<div id=prototype-topbar></div>")
+        .before("<div id=prototype-row></div>")
 
     React.renderComponent(
-        proto.Switch({
+        proto.TopBar({
             labels: {
-                on: "Show all the collections",
-                off: "Show your personal collections"
-            }
+                on: "Switch to all the collections",
+                off: "Switch to your personal collections"
+            },
+            original: original,
+            related: $("#prototype-row")
         }),
-        $("#prototype")[0]
+        $("#prototype-topbar")[0]
+    )
+
+    React.renderComponent(
+        row.Row({
+            boxes: [{
+                    id: "b0",
+                    box: text.Box({
+                        title: "Title 1",
+                        subtitle: "Subtitle 1",
+                        body: "kikoo lol"
+                    })
+            }, {
+                    id: "b1",
+                    box: text.Box({
+                        title: "Title 2",
+                        subtitle: "Subtitle 2",
+                        body: "kikoo lol"
+                    })
+            }, {
+                    id: "b2",
+                    box: text.Box({
+                        title: "Title 3",
+                        subtitle: "Subtitle 4",
+                        body: "kikoo lol"
+                    })
+            }]
+        }),
+        $("#prototype-row")[0]
     )
 
     new proto.Proto("Hello world!")
-});
+})
+
+require(["prototype"], function(prototype) {})

@@ -1,5 +1,6 @@
 @import "base.less";
 @import "base/cern-toolbar.less";
+@import "base/prototype.less";
 
 body {
     font-family: 'PT Sans','Trebuchet MS',Tahoma,sans-serif;
@@ -104,6 +105,11 @@ footer, footer p {  font-size: inherit; /* hot fix */ }
     padding:0;
 }
 
+@media (min-width: @screen-md-min) {
+    #searchform-input-group {
+        width: @container-md - 30 !important;
+    }
+}
 @media (min-width: @screen-lg-min) {
     #searchform-input-group {
         width: @container-lg - 30 !important;
