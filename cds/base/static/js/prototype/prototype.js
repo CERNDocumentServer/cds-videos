@@ -19,12 +19,12 @@
  */
 
 // AMD format
-//define(["backbone", "react"], function(Backbone, React) {
+//define(["jquery", "react"], function($, React) {
 // CommonJS format
 define(function(require, exports, module) {
     "use strict"
 
-    var Backbone = require('backbone'),
+    var $ = require('jquery'),
         React = require('react')
 
     var Switch = React.createClass({
@@ -33,6 +33,7 @@ define(function(require, exports, module) {
         },
         handleClick: function() {
             this.setState({personal: !this.state.personal})
+            return false
         },
         render: function() {
             var label = this.state.personal ?
@@ -42,9 +43,11 @@ define(function(require, exports, module) {
             if (this.state.personal) {
                 this.props.original.hide();
                 this.props.related.show();
+                $(".hamburger").show();
             } else {
                 this.props.original.show();
                 this.props.related.hide();
+                $(".hamburger").hide();
             }
 
             return (
@@ -60,10 +63,11 @@ define(function(require, exports, module) {
             return {active: false}
         },
         handleClick: function() {
-            alert("foo")
+            alert("admin mode")
+            return false
         },
         render: function() {
-            var className = this.props.className + " text-right"
+            var className = this.props.className + " hamburger text-right"
             return (
                 <p className={className}>
                     <a href="#" onClick={this.handleClick}>
@@ -89,24 +93,15 @@ define(function(require, exports, module) {
         }
     })
 
-    function Proto(foo) {
-        this.foo = foo
-        this.derp()
-    }
-
-    Proto.prototype = {
-        constructor: Proto,
-        derp: function() {
-            alert(this.foo)
-        }
-    }
-
     // AMD format
     //return {
     //    Proto: Proto,
     //    Switch: Switch
     //};
     // CommonJS format
-    exports.Proto = Proto
     exports.TopBar = TopBar
+    exports.Grid = require("jsx!prototype/grid.js").Grid,
+    exports.Row = require("jsx!prototype/row.js").Row,
+    exports.Box = require("jsx!prototype/boxes/text.js").Box
+    exports.PictureBox = require("jsx!prototype/boxes/picture.js").Box
 })

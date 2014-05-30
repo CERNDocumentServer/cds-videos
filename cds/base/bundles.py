@@ -28,7 +28,7 @@ _styles.contents.remove("less/base.less")
 _styles.contents += ("less/cds.less",)
 
 script = Bundle(
-    "js/prototype.js",
+    "js/main.js",
     output="cds.js",
     weight=91,
     filters="requirejs"

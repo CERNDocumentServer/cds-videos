@@ -19,7 +19,7 @@
  */
 
 define(["react"], function(React) {
-    var Text = React.createClass({
+    var Picture = React.createClass({
         onClose: function() {
             confirm('Closing "' + this.props.title + '"?')
             return false
@@ -29,17 +29,16 @@ define(["react"], function(React) {
                 more = this.props.more || href,
                 footer = this.props.footer || "more {this.props.title}",
                 title = this.props.title,
+                style = {background: "url(" + this.props.img + ") 50% 50%",
+                         minHeight: "330px"},
                 subtitle
 
             if (this.props.subtitle) {
                 subtitle = <p>{this.props.subtitle}</p>
             }
-            if (this.props.img) {
-                title = <img src={this.props.img} alt={this.props.title}/>
-            }
 
             return (
-                <article className="box">
+                <article className="box box-picture" style={style}>
                     <p className="box-close">
                         <a href="#" onClick={this.onClose}>
                             <i className="glyphicon glyphicon-remove"></i>
@@ -62,5 +61,5 @@ define(["react"], function(React) {
         }
     })
 
-    return {Box: Text}
+    return {Box: Picture}
 })
