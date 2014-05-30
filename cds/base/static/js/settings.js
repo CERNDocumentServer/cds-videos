@@ -26,7 +26,8 @@ require.config({
         underscore: 'underscore/underscore',
         jsx: 'require-jsx/jsx',
         JSXTransformer: 'react/JSXTransformer',
-        prototype: '../js/prototype'
+        prototype: '../js/prototype',
+        typeahead: '../js/typeahead'
     },
     shim: {
         'bootstrap/affix': { deps: ['jquery'], exports: '$.fn.affix' },

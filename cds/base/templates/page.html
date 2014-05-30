@@ -28,7 +28,7 @@
 
 {%- block global_javascript -%}
   {{ super() }}
-  {%- js url_for("base.static", filename="js/prototype.js"), "91-prototype", "requirejs" -%}
+  {%- js url_for("base.static", filename="js/main.js"), "91-cds", "requirejs" -%}
 {%- endblock -%}
 
 {%- block _bottom_assets -%}

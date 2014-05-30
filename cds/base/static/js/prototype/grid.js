@@ -23,22 +23,33 @@ define(function(require, exports, module) {
 
     var React = require('react')
 
-    var Row = React.createClass({
+    var Grid = React.createClass({
+        onPlus: function() {
+            alert("+1!")
+            return false
+        },
         render: function() {
-            var boxes = this.props.boxes
+            var rows = this.props.rows
             return (
-                <div className="row">
-                    {boxes.map(function(box) {
+                <div className="grid">
+                    {rows.map(function(row) {
                         return (
-                            <div className="col-md-4" key={box.id}>
-                                {box.box}
+                            <div key={row.id}>
+                                {row.row}
                             </div>
                         )
                     })}
+                    <div className="row">
+                        <p className="plus">
+                            <a href="#" onClick={this.onPlus}>
+                                <i className="glyphicon glyphicon-plus"></i>
+                            </a>
+                        </p>
+                    </div>
                 </div>
             )
         }
     })
 
-    exports.Row = Row
+    exports.Grid = Grid
 })
