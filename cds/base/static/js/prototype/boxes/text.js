@@ -18,8 +18,10 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-define(["react"], function(React) {
-    var Text = React.createClass({
+define(function(require, exports, module) {
+    var React = require("react")
+
+    module.exports = React.createClass({
         onClose: function() {
             confirm('Closing "' + this.props.title + '"?')
             return false
@@ -61,6 +63,4 @@ define(["react"], function(React) {
             )
         }
     })
-
-    return {Box: Text}
 })

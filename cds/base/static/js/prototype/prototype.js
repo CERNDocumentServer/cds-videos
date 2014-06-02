@@ -27,28 +27,86 @@ define(function(require, exports, module) {
     var $ = require('jquery'),
         React = require('react')
 
+    var AdminBar = React.createClass({
+        onRow: function() {
+            alert("row <todo>")
+        },
+        onEnable: function() {
+            alert("enable back <todo>")
+            return false
+        },
+        onCancel: function() {
+            alert("cancel")
+        },
+        onSave: function() {
+            alert("save")
+        },
+        render: function() {
+            var style = {display: this.props.personal && this.props.admin ? "block": "none"}
+            return (
+                <div className="prototype-admin" style={style}>
+                    <div className="row">
+                        <p className="col-md-6 text-right">
+                            Visible boxes by default
+                        </p>
+                        <div className="col-md-6">
+                            <div className="btn-group" onClick={this.onRow}>
+                                <button type="button" className="btn btn-primary">3</button>
+                                <button type="button" className="btn btn-default">6</button>
+                                <button type="button" className="btn btn-default">9</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <p className="col-md-6 text-right">
+                            Disabled boxes
+                        </p>
+                        <div className="col-md-6">
+                            <ul onClick={this.onEnable}>
+                                <li><a href="#">
+                                    <i className="glyphicon glyphicon-remove"></i> CDS Meetings
+                                </a></li>
+                                <li><a href="#">
+                                    <i className="glyphicon glyphicon-remove"></i> Your Messages
+                                </a></li>
+                                <li><a href="#">
+                                    <i className="glyphicon glyphicon-remove"></i> Your Alerts
+                                </a></li>
+                                <li><a href="#">
+                                    <i className="glyphicon glyphicon-remove"></i> LHC
+                                </a></li>
+                                <li><a href="#">
+                                    <i className="glyphicon glyphicon-remove"></i> Presentations
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <p className="col-md-6 text-right">
+                            <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
+                        </p>
+                        <p className="col-md-6">
+                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
+                        </p>
+                    </div>
+                </div>
+            )
+        }
+    })
+
     var Switch = React.createClass({
         getInitialState: function() {
-            return {personal: true}
+            return {personal: this.props.personal || true}
         },
         handleClick: function() {
+            $(document).triggerHandler(this.props.eventName, [!this.state.personal])
             this.setState({personal: !this.state.personal})
             return false
         },
         render: function() {
-            var label = this.state.personal ?
+            var label = this.props.personal ?
                 this.props.labels.on :
                 this.props.labels.off
-
-            if (this.state.personal) {
-                this.props.original.hide();
-                this.props.related.show();
-                $(".hamburger").show();
-            } else {
-                this.props.original.show();
-                this.props.related.hide();
-                $(".hamburger").hide();
-            }
 
             return (
                 <p className={this.props.className}>
@@ -60,16 +118,21 @@ define(function(require, exports, module) {
 
     var Hamburger = React.createClass({
         getInitialState: function() {
-            return {active: false}
+            return {admin: this.props.admin || false}
         },
         handleClick: function() {
-            alert("admin mode")
+            $(document).triggerHandler(this.props.eventName, [!this.state.admin])
+            this.setState({admin: !this.state.admin})
             return false
         },
         render: function() {
             var className = this.props.className + " hamburger text-right"
+            var style = {};
+            if (!this.props.personal) {
+                style.display = "none"
+            }
             return (
-                <p className={className}>
+                <p className={className} style={style}>
                     <a href="#" onClick={this.handleClick}>
                         <i className="glyphicon glyphicon-th"></i>
                     </a>
@@ -84,10 +147,12 @@ define(function(require, exports, module) {
             return (
                 <div className="row">
                     <Switch labels={this.props.labels}
-                            original={this.props.original}
-                            related={this.props.related}
+                            personal={this.props.personal}
+                            eventName={this.props.eventsName.switch}
                             className={className} />
-                    <Hamburger className={className} />
+                    <Hamburger className={className}
+                               eventName={this.props.eventsName.admin}
+                               personal={this.props.personal} />
                 </div>
             )
         }
@@ -100,8 +165,9 @@ define(function(require, exports, module) {
     //};
     // CommonJS format
     exports.TopBar = TopBar
-    exports.Grid = require("jsx!prototype/grid.js").Grid,
-    exports.Row = require("jsx!prototype/row.js").Row,
-    exports.Box = require("jsx!prototype/boxes/text.js").Box
-    exports.PictureBox = require("jsx!prototype/boxes/picture.js").Box
+    exports.AdminBar = AdminBar
+    exports.Grid = require("jsx!prototype/grid.js")
+    exports.Row = require("jsx!prototype/row.js")
+    exports.Box = require("jsx!prototype/boxes/text.js")
+    exports.PictureBox = require("jsx!prototype/boxes/picture.js")
 })

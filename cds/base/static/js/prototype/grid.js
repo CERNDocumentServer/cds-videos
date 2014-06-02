@@ -23,23 +23,44 @@ define(function(require, exports, module) {
 
     var React = require('react')
 
-    var Grid = React.createClass({
+    module.exports = React.createClass({
+        getInitialState: function() {
+            return {
+                row: this.props.row || 0
+            }
+        },
         onPlus: function() {
-            alert("+1!")
+            this.setState({row: this.state.row + 1})
             return false
         },
         render: function() {
-            var rows = this.props.rows
+            var show = this.state.row,
+                rows = this.props.rows,
+                style = {},
+                stylePlus = {}
+
+            if (!this.props.personal) {
+                style.display = "none"
+            }
+
+            if (show >= this.props.rows.length - 1) {
+                stylePlus.display = "none"
+            }
+
             return (
-                <div className="grid">
-                    {rows.map(function(row) {
+                <div className="grid" style={style}>
+                    {rows.map(function(row, index) {
+                        var style = {}
+                        if (index > show) {
+                            style.display = "none"
+                        }
                         return (
-                            <div key={row.id}>
+                            <div key={row.id} style={style}>
                                 {row.row}
                             </div>
                         )
                     })}
-                    <div className="row">
+                    <div className="row" style={stylePlus}>
                         <p className="plus">
                             <a href="#" onClick={this.onPlus}>
                                 <i className="glyphicon glyphicon-plus"></i>
@@ -50,6 +71,4 @@ define(function(require, exports, module) {
             )
         }
     })
-
-    exports.Grid = Grid
 })

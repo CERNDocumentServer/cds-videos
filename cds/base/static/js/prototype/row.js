@@ -40,5 +40,5 @@ define(function(require, exports, module) {
         }
     })
 
-    exports.Row = Row
+    module.exports = Row
 })

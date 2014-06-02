@@ -61,6 +61,32 @@
     }
 }
 
+.prototype-admin {
+    background: #f6f6f6;
+    border-bottom: 1px solid #eee;
+    padding: 2em 0;
+    position: relative;
+
+    &:before {
+        position:absolute;
+        top:-14px;
+        right:0;
+        content:"";
+        display:block;
+        width:0px;
+        height:0px;
+        border-style: solid;
+        border-color: transparent;
+        border-bottom-color:#f6f6f6;
+        border-width:0 14px 14px;
+    }
+
+    ul {
+        list-style: none;
+        margin-left: 0;
+    }
+}
+
 .hamburger {
     font-size: 24px;
 
