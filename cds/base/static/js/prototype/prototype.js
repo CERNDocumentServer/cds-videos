@@ -27,73 +27,6 @@ define(function(require, exports, module) {
     var $ = require('jquery'),
         React = require('react')
 
-    var AdminBar = React.createClass({
-        onRow: function() {
-            alert("row <todo>")
-        },
-        onEnable: function() {
-            alert("enable back <todo>")
-            return false
-        },
-        onCancel: function() {
-            alert("cancel")
-        },
-        onSave: function() {
-            alert("save")
-        },
-        render: function() {
-            var style = {display: this.props.personal && this.props.admin ? "block": "none"}
-            return (
-                <div className="prototype-admin" style={style}>
-                    <div className="row">
-                        <p className="col-md-6 text-right">
-                            Visible boxes by default
-                        </p>
-                        <div className="col-md-6">
-                            <div className="btn-group" onClick={this.onRow}>
-                                <button type="button" className="btn btn-primary">3</button>
-                                <button type="button" className="btn btn-default">6</button>
-                                <button type="button" className="btn btn-default">9</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <p className="col-md-6 text-right">
-                            Disabled boxes
-                        </p>
-                        <div className="col-md-6">
-                            <ul onClick={this.onEnable}>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> CDS Meetings
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Your Messages
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Your Alerts
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> LHC
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Presentations
-                                </a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <p className="col-md-6 text-right">
-                            <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
-                        </p>
-                        <p className="col-md-6">
-                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
-                        </p>
-                    </div>
-                </div>
-            )
-        }
-    })
-
     var Switch = React.createClass({
         getInitialState: function() {
             return {personal: this.props.personal || true}
@@ -117,12 +50,8 @@ define(function(require, exports, module) {
     })
 
     var Hamburger = React.createClass({
-        getInitialState: function() {
-            return {admin: this.props.admin || false}
-        },
         handleClick: function() {
-            $(document).triggerHandler(this.props.eventName, [!this.state.admin])
-            this.setState({admin: !this.state.admin})
+            $(document).triggerHandler(this.props.eventName, [!this.props.admin])
             return false
         },
         render: function() {
@@ -152,6 +81,7 @@ define(function(require, exports, module) {
                             className={className} />
                     <Hamburger className={className}
                                eventName={this.props.eventsName.admin}
+                               admin={this.props.admin}
                                personal={this.props.personal} />
                 </div>
             )
@@ -165,9 +95,9 @@ define(function(require, exports, module) {
     //};
     // CommonJS format
     exports.TopBar = TopBar
-    exports.AdminBar = AdminBar
-    exports.Grid = require("jsx!prototype/grid.js")
-    exports.Row = require("jsx!prototype/row.js")
-    exports.Box = require("jsx!prototype/boxes/text.js")
-    exports.PictureBox = require("jsx!prototype/boxes/picture.js")
+    exports.AdminBar = require("jsx!./admin")
+    exports.Grid = require("jsx!./grid")
+    exports.Row = require("jsx!./row")
+    exports.Box = require("jsx!./boxes/text")
+    exports.PictureBox = require("jsx!./boxes/picture")
 })

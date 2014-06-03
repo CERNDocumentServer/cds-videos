@@ -25,6 +25,8 @@ require.config({
         react: 'react/react',
         underscore: 'underscore/underscore',
         jsx: 'require-jsx/jsx',
+        text: 'requirejs-text/text',
+        json: 'requirejs-json/json',
         JSXTransformer: 'react/JSXTransformer',
         prototype: '../js/prototype',
         typeahead: '../js/typeahead'

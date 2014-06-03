@@ -61,10 +61,29 @@
     }
 }
 
+.box-video {
+    position:relative;
+    background-size:100% auto;
+    background-position: 50% 50%;
+    height: 180px;
+
+    a {
+        display:block;
+        position:absolute;
+        left:50%;
+        top:50%;
+        font-size:42px;
+        width:42px;
+        height:42px;
+        margin:-21px 0 0 -21px
+    }
+}
+
 .prototype-admin {
     background: #f6f6f6;
     border-bottom: 1px solid #eee;
-    padding: 2em 0;
+    padding: 1em 0;
+    margin-bottom: 2em;
     position: relative;
 
     &:before {
@@ -81,9 +100,14 @@
         border-width:0 14px 14px;
     }
 
+    .row {
+        margin-bottom: 1em;
+    }
+
     ul {
         list-style: none;
         margin-left: 0;
+        padding-left: 0;
     }
 }
 

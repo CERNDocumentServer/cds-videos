@@ -6,6 +6,8 @@
         "react": "latest",
         "backbone": "latest",
         "require-jsx": "latest",
+        "requirejs-text": "latest",
+        "requirejs-json": "latest",
         "es5-shim": "latest"
     }
 }
