@@ -22,41 +22,28 @@ define(function(require, exports, module) {
     var React = require("react")
 
     module.exports = React.createClass({
-        onClose: function() {
-            confirm('Closing "' + this.props.title + '"?')
-            return false
-        },
         render: function() {
-            var href = this.props.href || "#",
-                more = this.props.more || href,
-                footer = this.props.footer || "more {this.props.title}",
-                title = this.props.title,
-                subtitle
+            var header = $.extend({"href": "#"}, this.props.header),
+                footer = $.extend({"label": "more {this.props.header.title}", "href": header.href}, this.props.footer)
 
-            if (this.props.subtitle) {
-                subtitle = <p>{this.props.subtitle}</p>
-            }
-            if (this.props.img) {
-                title = <img src={this.props.img} alt={this.props.title}/>
+            var className = "box-body";
+            if (!("wrap" in this.props) || this.props.wrap) {
+                className += " wrap";
             }
 
             return (
                 <article className="box">
-                    <p className="box-close">
-                        <a href="#" onClick={this.onClose}>
-                            <i className="glyphicon glyphicon-remove"></i>
-                        </a>
-                    </p>
                     <header>
                         <h2>
-                            <a href={href}>{title}</a>
+                            <a href={header.href}>
+                                {header.title}
+                            </a>
                         </h2>
-                        {subtitle}
                     </header>
-                    <div className="box-body" dangerouslySetInnerHTML={{__html: this.props.body}}/>
+                    <div className={className} dangerouslySetInnerHTML={{__html: this.props.body}}/>
                     <footer>
                         <p>
-                            <a href="{more}">{footer} »</a>
+                            <a href="{footer.href}">{footer.label} »</a>
                         </p>
                     </footer>
                 </article>

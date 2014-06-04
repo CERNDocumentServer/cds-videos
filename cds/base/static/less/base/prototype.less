@@ -1,39 +1,36 @@
+@box-padding: 10px;
+
 .box {
-    max-height:330px;
+    height:330px;
     overflow-x:hidden;
     overflow-y:auto;
     margin-bottom:2em;
     position:relative;
+    border:2px solid #eee;
 
-    .box-close {
-        position:absolute;
-        top:0;
-        right:0;
-        display:none;
-
-        a {
-            color: #999;
-        }
-    }
-
-    &:hover .box-close{
-        display:block;
-    }
-
-    h2 {
+    h3 {
         margin-top:0;
         padding-top:10px;
         font-size:24px;
         font-weight: 400;
     }
 
-    h3 {
+    h4 {
         font-size:18px;
     }
 
     header {
-        p {
-            font-weight:bold;
+        h2 {
+            font-size:12px;
+            float:right;
+            background:#eee;
+            color:#555;
+            margin:0;
+            padding:5px @box-padding;
+
+            a {
+                color: #555;
+            }
         }
     }
 
@@ -43,21 +40,35 @@
         padding:0;
     }
 
+    .box-body {
+        margin-bottom:30px; /* for the footer */
+
+        .subtitle {
+            font-weight:bold;
+        }
+
+    }
+
     footer {
-        text-align:right
+        text-align:right;
+        position:absolute;
+        bottom:0;
+        width:100%;
+
+        p {
+            padding-right: @box-padding;
+        }
+    }
+
+    .wrap {
+        padding-left: @box-padding;
+        padding-right: @box-padding;
     }
 }
 
 .box-picture {
-    header, .box-body {
-        padding-left:10px;
-        padding-right:10px;
-    }
-    .box-body {
-        margin-top:200px;
-    }
     .box-body, footer {
-        background: rgba(255,255,255,.80);
+        background: rgba(255,255,255,.90);
     }
 }
 
@@ -65,7 +76,7 @@
     position:relative;
     background-size:100% auto;
     background-position: 50% 50%;
-    height: 180px;
+    background-repeat: no-repeat;
 
     a {
         display:block;
