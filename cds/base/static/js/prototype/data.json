@@ -3,7 +3,7 @@
     "data": {
         "title": "Polarisation confirmed",
         "href": "http://cds.cern.ch/record/1698254?ln=en",
-        "subtitle": "by Ana�s Schaeffer, the CERN Bulletin",
+        "subtitle": "by Anaïs Schaeffer, the CERN Bulletin",
         "body": "<img src=\"https://cds.cern.ch/record/1698254/files/LHCbEvent_1_image.jpg?subformat=icon\" alt=\"\" style=\"margin:0 1em 1em 0;width:50%\" align=\"left\"><p>The polarisation of photons emitted in the decay of a bottom quark into a strange quark, as predicted by the Standard Model, has just been observed for the first time by the LHCb collaboration. More detailed research is still required to determine the value of this polarisation with precision.</p>",
         "footer": "visit the CERN Bulletin",
         "more": "http://cds.cern.ch/journal/CERNBulletin/2014/20/News%20Articles"
@@ -14,7 +14,7 @@
         "title": "Helix Nebula",
         "href": "http://cds.cern.ch/collection/Helix%20Nebula",
         "subtitle": "The Science Cloud",
-        "body": "<ul><li><a href=\"#\">D7.4: Information as a Service %u2013 Towards Value Co-Creation in %u2026</a></li><li><a href=\"#\">D7.3:Costing exercise comparing in-house vs. cloud based operation %u2026</a></li><li><a href=\"#\">MS19_Governance Model Workshop 2</a></li><li><a href=\"#\">MS12_Security Challenge Performed </a></li><li><a href=\"#\">MS16:Technical workshop (co-located with EGI Technical Forum 2013)</a></li><li><a href=\"#\">D7.2_Synthesis and Analysis of Overall Business Models</a></li></ul>",
+        "body": "<ul><li><a href=\"#\">D7.4: Information as a Service « Towards Value Co-Creation in &hellip;</a></li><li><a href=\"#\">D7.3:Costing exercise comparing in-house vs. cloud based operation &hellip;</a></li><li><a href=\"#\">MS19_Governance Model Workshop 2</a></li><li><a href=\"#\">MS12_Security Challenge Performed </a></li><li><a href=\"#\">MS16:Technical workshop (co-located with EGI Technical Forum 2013)</a></li><li><a href=\"#\">D7.2_Synthesis and Analysis of Overall Business Models</a></li></ul>",
         "footer": "more recent publications"
     }
 }, {
@@ -64,7 +64,7 @@
     "data": {
         "title": "Ignatios Antionadis interview",
         "href": "http://cds.cern.ch/record/1696914",
-        "body": "<p class=\"box-video\" style=\"background-image:url(https://mediastream.cern.ch/MediaArchive/Video/Public/Movies/2014/CERN-MOVIE-2014-013/CERN-MOVIE-2014-013-001/CERN-MOVIE-2014-013-001-posterframe-640x360-at-10-percent.jpg);\"><a href=\"#\"><i class=\"glyphicon glyphicon-play\"></i></a></p>",
+        "body": "<p class=\"box-video\" style=\"background-image:url(https://mediastream.cern.ch/MediaArchive/Video/Public/Movies/2014/CERN-MOVIE-2014-013/CERN-MOVIE-2014-013-001/CERN-MOVIE-2014-013-001-posterframe-640x360-at-10-percent.jpg);\"><a href=\"http://cds.cern.ch/record/1696914\"><i class=\"glyphicon glyphicon-play\"></i></a></p>",
         "footer": "more videos",
         "more": "http://cds.cern.ch/collection/Videos"
     }

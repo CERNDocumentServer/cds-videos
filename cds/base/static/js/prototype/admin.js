@@ -51,9 +51,9 @@ define(function(require, exports, module) {
             return (
                 <div className="prototype-admin" style={style}>
                     <div className="row">
-                        <p className="col-md-6 text-right">
-                            Visible boxes by default
-                        </p>
+                        <div className="col-md-6 text-right">
+                            <p className="box-label">Visible boxes by default</p>
+                        </div>
                         <div className="col-md-6">
                             <div className="btn-group" onClick={this.onRow}>
                                 <button type="button" className="btn btn-primary">3</button>
@@ -63,9 +63,14 @@ define(function(require, exports, module) {
                         </div>
                     </div>
                     <div className="row">
-                        <p className="col-md-6 text-right">
-                            Disabled boxes
-                        </p>
+                        <div className="col-md-6 text-right">
+                            <p className="box-label">Disabled boxes</p>
+                            <p>
+                                By removing some of this list,<br/>
+                                they may appear again<br/>
+                                on your homepage.
+                            </p>
+                        </div>
                         <div className="col-md-6">
                             <ul onClick={this.onEnable}>
                                 <li><a href="#">
