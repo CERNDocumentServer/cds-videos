@@ -25,10 +25,10 @@ require.config({
         react: 'react/react',
         underscore: 'underscore/underscore',
         jsx: 'require-jsx/jsx',
-        text: 'requirejs-text/text',
-        json: 'requirejs-json/json',
+        text: 'requirejs-plugins/lib/text',
+        json: 'requirejs-plugins/src/json',
         JSXTransformer: 'react/JSXTransformer',
-        prototype: '../js/prototype',
+        'prototype': '../js/prototype',
         typeahead: '../js/typeahead'
     },
     shim: {
