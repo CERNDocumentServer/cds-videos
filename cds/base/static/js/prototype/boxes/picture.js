@@ -19,19 +19,32 @@
  */
 
 define(function(require, exports, module) {
-    var React = require("react");
+    var React = require("react"),
+        Admin = require("jsx!./admin")
 
     module.exports = React.createClass({
+        getInitialState: function() {
+            return {edit: false}
+        },
+        onMenu: function(event) {
+            this.setState({edit: !this.state.edit})
+            return false
+        },
         render: function() {
             var header = $.extend({"href": "#"}, this.props.header),
                 footer = $.extend({"label": "more {header.title}", "href": header.href}, this.props.footer),
                 style = {background: "url(" + this.props.backgroundImage + ") 50% 50%",
-                         minHeight: "330px"}
+                         minHeight: "330px"},
+                edit = ""
+
+            if (this.state.edit) {
+                edit = <Admin title={header.title} href={header.href} onMenu={this.onMenu}/>
+            }
 
             return (
                 <article className="box box-picture" style={style}>
                     <header>
-                        <h2><a href={header.href}>{header.title}</a></h2>
+                        <h2><a href={header.href} onClick={this.onMenu}>{header.title}</a></h2>
                     </header>
                     <div className="box-body wrap" dangerouslySetInnerHTML={{__html: this.props.body}}/>
                     <footer>
@@ -39,6 +52,7 @@ define(function(require, exports, module) {
                             <a href="{footer.href}">{footer.label} »</a>
                         </p>
                     </footer>
+                    {edit}
                 </article>
             )
         }

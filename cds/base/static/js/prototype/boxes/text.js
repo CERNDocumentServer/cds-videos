@@ -19,23 +19,36 @@
  */
 
 define(function(require, exports, module) {
-    var React = require("react")
+    var React = require("react"),
+        Admin = require("jsx!./admin")
 
     module.exports = React.createClass({
+        getInitialState: function() {
+            return {edit: false}
+        },
+        onMenu: function(event) {
+            this.setState({edit: !this.state.edit})
+            return false
+        },
         render: function() {
             var header = $.extend({"href": "#"}, this.props.header),
-                footer = $.extend({"label": "more {this.props.header.title}", "href": header.href}, this.props.footer)
+                footer = $.extend({"label": "more {this.props.header.title}", "href": header.href},
+                                  this.props.footer),
+                edit = ""
 
             var className = "box-body";
             if (!("wrap" in this.props) || this.props.wrap) {
                 className += " wrap";
+            }
+            if (this.state.edit) {
+                edit = <Admin title={header.title} href={header.href} onMenu={this.onMenu}/>
             }
 
             return (
                 <article className="box">
                     <header>
                         <h2>
-                            <a href={header.href}>
+                            <a href={header.href} onClick={this.onMenu}>
                                 {header.title}
                             </a>
                         </h2>
@@ -46,6 +59,7 @@ define(function(require, exports, module) {
                             <a href="{footer.href}">{footer.label} »</a>
                         </p>
                     </footer>
+                    {edit}
                 </article>
             )
         }
