@@ -44,7 +44,7 @@ define(function(require, exports, module) {
             this.onClose()
         },
         onClose: function() {
-            $(document).triggerHandler(this.props.eventName, [false]);
+            this.props.setState({admin: false})
         },
         render: function() {
             var style = {display: this.props.personal && this.props.admin ? "block": "none"}

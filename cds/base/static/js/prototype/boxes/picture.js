@@ -19,7 +19,9 @@
  */
 
 define(function(require, exports, module) {
-    var React = require("react"),
+
+    var $ = require("jquery"),
+        React = require("react"),
         Admin = require("jsx!./admin")
 
     module.exports = React.createClass({

@@ -18,86 +18,58 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// AMD format
-//define(["jquery", "react"], function($, React) {
-// CommonJS format
 define(function(require, exports, module) {
     "use strict"
 
-    var $ = require('jquery'),
-        React = require('react')
+    var React = require('react'),
+        AdminBar = require("jsx!./admin"),
+        TopBar = require("jsx!./topbar"),
+        Grid = require("jsx!./grid"),
+        Row = require("jsx!./row")
 
-    var Switch = React.createClass({
+    module.exports = React.createClass({
         getInitialState: function() {
-            return {personal: this.props.personal || true}
-        },
-        handleClick: function() {
-            $(document).triggerHandler(this.props.eventName, [!this.state.personal])
-            this.setState({personal: !this.state.personal})
-            return false
-        },
-        render: function() {
-            var label = this.props.personal ?
-                this.props.labels.on :
-                this.props.labels.off
+            this.props.onToggle()
 
-            return (
-                <p className={this.props.className}>
-                    <a href="#" onClick={this.handleClick}>{label}</a>
-                </p>
-            )
-        }
-    })
-
-    var Hamburger = React.createClass({
-        handleClick: function() {
-            $(document).triggerHandler(this.props.eventName, [!this.props.admin])
-            return false
-        },
-        render: function() {
-            var className = this.props.className + " hamburger text-right"
-            var style = {};
-            if (!this.props.personal) {
-                style.display = "none"
+            return {
+                personal: true,
+                admin: false
             }
-            return (
-                <p className={className} style={style}>
-                    <a href="#" onClick={this.handleClick}>
-                        <i className="glyphicon glyphicon-th"></i>
-                    </a>
-                </p>
-            )
-        }
-    })
-
-    var TopBar = React.createClass({
+        },
+        onState: function(state) {
+            if ("personal" in state && state.personal != this.state.personal) {
+                this.props.onToggle()
+            }
+            this.setState(state)
+        },
         render: function() {
-            var className = "col-md-6"
+
+            var rows = [];
+            this.props.rows.forEach(function(row, i) {
+                rows.push({
+                    id: "r" + i,
+                    row: Row({boxes: row})
+                })
+            })
+
             return (
-                <div className="row">
-                    <Switch labels={this.props.labels}
-                            personal={this.props.personal}
-                            eventName={this.props.eventsName.switch}
-                            className={className} />
-                    <Hamburger className={className}
-                               eventName={this.props.eventsName.admin}
-                               admin={this.props.admin}
-                               personal={this.props.personal} />
+                <div>
+                    <TopBar labels={this.props.labels}
+                            personal={this.state.personal}
+                            admin={this.state.admin}
+                            setState={this.onState}/>
+                    <AdminBar personal={this.state.personal}
+                              admin={this.state.admin}
+                              setState={this.onState}/>
+                    <Grid rows={rows}
+                          personal={this.state.personal}
+                          admin={this.state.admin}/>
                 </div>
             )
+        },
+        statics: {
+            Box: require("jsx!./boxes/text"),
+            PictureBox: require("jsx!./boxes/picture")
         }
     })
-
-    // AMD format
-    //return {
-    //    Proto: Proto,
-    //    Switch: Switch
-    //};
-    // CommonJS format
-    exports.TopBar = TopBar
-    exports.AdminBar = require("jsx!./admin")
-    exports.Grid = require("jsx!./grid")
-    exports.Row = require("jsx!./row")
-    exports.Box = require("jsx!./boxes/text")
-    exports.PictureBox = require("jsx!./boxes/picture")
 })

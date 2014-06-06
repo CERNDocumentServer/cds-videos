@@ -19,25 +19,37 @@
  */
 
 define(function(require, exports, module) {
+
     var React = require("react")
 
     module.exports = React.createClass({
         render: function() {
             var href = this.props.href || "#",
-                title = this.props.title || "Untitled"
+                title = this.props.title || "Untitled",
+                labels = {
+                    visit: "Visit: ",
+                    move: "Move",
+                    pushpin: "Pin",
+                    remove: "Disable"
+                }
 
             return (
                 <div className="box-admin" onClick={this.props.onMenu}>
                     <div className="box-admin-buttons btn-group-vertical">
-                        <a href={href} className="btn btn-primary">Visit “{title}”</a>
+                        <a href={href} className="btn btn-primary">
+                            {labels.visit} “{title}”
+                        </a>
                         <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-move"></i> Move
+                            <i className="glyphicon glyphicon-move"></i>
+                            {labels.move}
                         </button>
                         <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-pushpin"></i> Pin
+                            <i className="glyphicon glyphicon-pushpin"></i>
+                            {labels.pushpin}
                         </button>
                         <button type="button" className="btn btn-danger">
-                            <i className="glyphicon glyphicon-remove"></i> Disable
+                            <i className="glyphicon glyphicon-remove"></i>
+                            {labels.remove}
                         </button>
                     </div>
                 </div>

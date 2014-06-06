@@ -18,20 +18,28 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// AMD format
+// ----------
+// define(
+//     ["jquery",
+//      "react",
+//      "jsx!prototype/prototype",
+//      "!jsx!prototype/data.json"],
+//     function($, React, proto, boxes)
+// {
+//
+// CommonJS-like format
+// --------------------
 define(function(require, exports, module) {
     "use strict"
 
     var $ = require("jquery"),
         React = require("react"),
-        proto = require("jsx!prototype/prototype"),
+        Proto = require("jsx!prototype/prototype"),
         boxes = require("json!prototype/data.json")
 
-    var rows = [[]],
-        grid = {rows: [], personal: true}
 
-    // Ordered boxes
-    //$.each(boxes, function(i, box) {
-    // Randomly sorted boxes
+    var rows = [[]]
     var picked = [];
     while (picked.length < boxes.length) {
         var i, box;
@@ -46,71 +54,26 @@ define(function(require, exports, module) {
         }
         rows[rows.length - 1].push({
             id: "b" + i,
-            box: proto[box.box](box.data)
+            box: Proto[box.box](box.data)
         })
-    //})
     }
-    $.each(rows, function(i, row) {
-        grid.rows.push({
-            id: "r" + i,
-            row: proto.Row({boxes: row})
-        })
-    })
 
-    var original = $("div.websearch")
-        .before("<div id=prototype-topbar></div>")
-        .before("<div id=prototype-adminbar></div>")
-        .before("<div id=prototype-row></div>")
+    var original = $("div.websearch").before("<div id=__proto__></div>")
 
-    var topBar = React.renderComponent(proto.TopBar({
-                labels: {
-                    on: "Switch to all the collections",
-                    off: "Switch to your personal collections"
-                },
-                personal: "true",
-                eventsName: {
-                    "switch": "prototype:switch",
-                    "admin": "prototype:admin"
-                }
-            }),
-            $("#prototype-topbar")[0])
-
-    var adminBar = React.renderComponent(
-            proto.AdminBar({
-                admin: false,
-                eventName: "prototype:admin"
-            }),
-            $("#prototype-adminbar")[0])
-
-    var grid = React.renderComponent(
-            proto.Grid(grid),
-            $("#prototype-row")[0])
-
-    $(document)
-        .on("prototype:switch", function(event, show) {
-            var props = {personal: show}
-            adminBar.setProps(props)
-            topBar.setProps(props)
-            grid.setProps(props)
-
-            if (show) {
-                original.hide()
-            } else {
-                original.show()
+    var p = React.renderComponent(Proto({
+            labels: {
+                on: "Switch to all the collections",
+                off: "Switch to your personal collections"
+            },
+            rows: rows,
+            onToggle: function(event) {
+                original.toggle();
             }
-        })
-        .on("prototype:admin", function(event, show) {
-            var props = {admin: show}
-            topBar.setProps(props)
-            adminBar.setProps(props)
-        })
-        .trigger("prototype:switch", [true])
-        .trigger("prototype:admin", [false])
+        }),
+        $("#__proto__")[0])
 
     module.exports = {
         original: original[0],
-        topBar: topBar,
-        adminBar: adminBar,
-        grid: grid
+        proto: p
     }
 })
