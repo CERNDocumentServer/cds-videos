@@ -40,15 +40,15 @@ define(function(require, exports, module) {
                             {labels.visit} “{title}”
                         </a>
                         <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-move"></i>
+                            <i className="glyphicon glyphicon-move"></i>&nbsp;
                             {labels.move}
                         </button>
                         <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-pushpin"></i>
+                            <i className="glyphicon glyphicon-pushpin"></i>&nbsp;
                             {labels.pushpin}
                         </button>
                         <button type="button" className="btn btn-danger">
-                            <i className="glyphicon glyphicon-remove"></i>
+                            <i className="glyphicon glyphicon-remove"></i>&nbsp;
                             {labels.remove}
                         </button>
                     </div>

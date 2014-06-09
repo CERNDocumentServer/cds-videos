@@ -3,9 +3,7 @@
     "version": "0.1.0",
     "dependencies": {
         "bootstrap": "latest",
-        "react": "latest",
-        "backbone": "latest",
-        "require-jsx": "latest",
+        "jsx-requirejs-plugin": "latest",
         "requirejs-plugins": "latest",
         "es5-shim": "latest"
     }

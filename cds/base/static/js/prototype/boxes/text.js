@@ -32,6 +32,17 @@ define(function(require, exports, module) {
             this.setState({edit: !this.state.edit})
             return false
         },
+        onDragOver: function(event) {
+            event.preventDefault();
+        },
+        onDragStart: function(event) {
+            event.dataTransfer.setData("text", this.props.header.title)
+        },
+        onDrop: function(event) {
+            event.preventDefault();
+
+            alert(event.dataTransfer.getData("text"))
+        },
         render: function() {
             var header = $.extend({"href": "#"}, this.props.header),
                 footer = $.extend({"label": "more {this.props.header.title}", "href": header.href},
@@ -47,7 +58,7 @@ define(function(require, exports, module) {
             }
 
             return (
-                <article className="box">
+                <article className="box" draggable="true" onDragStart={this.onDragStart} onDrop={this.onDrop} onDragOver={this.onDragOver}>
                     <header>
                         <h2>
                             <a href={header.href} onClick={this.onMenu}>

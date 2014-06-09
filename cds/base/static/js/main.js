@@ -17,4 +17,4 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require(["jsx!../js/app"], function(main) {})
+require(["jsx!app"], function(main) {})

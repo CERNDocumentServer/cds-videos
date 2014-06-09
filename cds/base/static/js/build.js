@@ -17,9 +17,23 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require.config({
+({
     baseUrl: '',
+    preserveLicenseComments: false,
+    optimize: 'uglify2',
+    uglify2: {
+        output: {
+            beautify: false,
+            comments: false
+        },
+        compress: {
+            drop_console: true
+        },
+        warnings: true,
+        mangle: false
+    },
     paths: {
+        jquery: 'empty:',
         bootstrap: 'vendors/bootstrap/js',
         react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
@@ -48,5 +62,12 @@ require.config({
         'bootstrap/transition': { deps: ['jquery'], exports: '$.fn.transition' },
         react: { exports: 'React' },
         jquery: { exports: '$' }
+    },
+    onBuildWrite: function (moduleName, path, singleContents) {
+        // Dropping jsx related files
+        if (['jsx', 'JSXTransformer'].indexOf(moduleName) >= 0) {
+            return '';
+        }
+        return singleContents.replace(/jsx!/g, '');
     }
 })
