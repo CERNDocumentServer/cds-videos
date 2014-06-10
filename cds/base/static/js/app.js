@@ -24,7 +24,7 @@
 //     ["jquery",
 //      "react",
 //      "jsx!prototype/prototype",
-//      "!jsx!prototype/data.json"],
+//      "json!prototype/data.json"],
 //     function($, React, proto, boxes)
 // {
 //
@@ -54,7 +54,7 @@ define(function(require, exports, module) {
         }
         rows[rows.length - 1].push({
             id: "b" + i,
-            box: Proto[box.box](box.data)
+            box: box
         })
     }
 

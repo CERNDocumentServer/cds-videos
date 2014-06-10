@@ -21,7 +21,11 @@
 define(function(require, exports, module) {
     "use strict"
 
-    var React = require('react')
+    var React = require('react'),
+        Boxes = {
+            Box: require('jsx!./boxes/text'),
+            PictureBox: require('jsx!./boxes/picture')
+        }
 
     module.exports = React.createClass({
         getInitialState: function() {
@@ -51,12 +55,22 @@ define(function(require, exports, module) {
                 <div className="grid" style={style}>
                     {rows.map(function(row, index) {
                         var style = {}
+
                         if (index > show) {
                             style.display = "none"
                         }
                         return (
-                            <div key={row.id} style={style}>
-                                {row.row}
+                            <div className="row" key={row.id} style={style}>
+                                {row.boxes.map(function(box) {
+                                    console.log(box)
+                                    console.log(box.box)
+                                    var comp = Boxes[box.box.box](box.box.data)
+                                    return (
+                                        <div className="col-md-4" key={box.id}>
+                                            {comp}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )
                     })}

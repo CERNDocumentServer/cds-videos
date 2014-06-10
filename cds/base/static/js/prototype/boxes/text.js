@@ -36,12 +36,11 @@ define(function(require, exports, module) {
             event.preventDefault();
         },
         onDragStart: function(event) {
-            event.dataTransfer.setData("text", this.props.header.title)
+            event.dataTransfer.setData("text", this.props.id)
         },
         onDrop: function(event) {
             event.preventDefault();
-
-            alert(event.dataTransfer.getData("text"))
+            this.props.swap(this.props.id, event.dataTransfer.getData("text"))
         },
         render: function() {
             var header = $.extend({"href": "#"}, this.props.header),
