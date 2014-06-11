@@ -26,7 +26,10 @@ require.config({
         JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
         text: 'vendors/requirejs-plugins/lib/text',
         json: 'vendors/requirejs-plugins/src/json',
-        'prototype': 'js/prototype',
+        backbone: 'vendors/backbone/backbone',
+        'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
+        underscore: 'vendors/underscore/underscore',
+        prototype: 'js/prototype',
         typeahead: 'js/typeahead',
         app: 'js/app'
     },
@@ -47,6 +50,9 @@ require.config({
         'bootstrap/tooltip': { deps: ['jquery'], exports: '$.fn.tooltip' },
         'bootstrap/transition': { deps: ['jquery'], exports: '$.fn.transition' },
         react: { exports: 'React' },
-        jquery: { exports: '$' }
+        jquery: { exports: '$' },
+        //backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
+        //'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
+        underscore: { exports: '_' }
     }
 })

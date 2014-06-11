@@ -24,31 +24,17 @@ define(function(require, exports, module) {
     var React = require('react'),
         AdminBar = require("jsx!./admin"),
         TopBar = require("jsx!./topbar"),
-        Grid = require("jsx!./grid")
+        Grid = require("jsx!./grid"),
+        _ = require("underscore")
 
     module.exports = React.createClass({
         getInitialState: function() {
             this.props.onToggle()
 
-            var rows = [],
-                swap = this.onSwap
-
-            this.props.rows.forEach(function(row, i) {
-                row.forEach(function(box, i) {
-                    box.box.data.id = box.id
-                    box.box.data.swap = swap
-                })
-
-                rows.push({
-                    id: "r" + i,
-                    boxes: row
-                })
-            })
-
             return {
                 personal: true,
                 admin: false,
-                rows: rows
+                rows: 1
             }
         },
         onState: function(state) {
@@ -61,27 +47,28 @@ define(function(require, exports, module) {
          * Swaping box A and box B in the list of boxes.
          */
         onSwap: function(a, b) {
-            var rows = this.state.rows
+            var collection = this.props.collection,
+                boxA = collection.findWhere({id: a}),
+                boxB = collection.findWhere({id: b}),
+                positionA = boxA.get("position")
 
-            for (var i=rows.length-1; i>=0; i--) {
-                for (var j=rows[i].boxes.length-1; j>=0; j--) {
-                    if (rows[i].boxes[j].id === a) {
-                        for (var k=rows.length-1; k>=0; k--) {
-                            for (var l=rows[k].boxes.length-1; l>= 0; l--) {
-                                if (rows[k].boxes[l].id === b) {
-                                    var tmp = rows[i].boxes[j]
-                                    rows[i].boxes.splice(j, 1, rows[k].boxes[l])
-                                    rows[k].boxes.splice(l, 1, tmp)
+            boxA.set("position", boxB.get("position"))
+            boxB.set("position", positionA)
 
-                                    return this.setState({rows: rows})
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            boxA.save()
+            boxB.save()
+            collection.sort()
+            this.setProps({collection: collection})
         },
         render: function() {
+            var boxes = [],
+                swap = this.onSwap
+
+            this.props.collection.forEach(function(box) {
+                box.set("data", _.extend({swap: swap}, box.get("data")))
+                boxes.push(box)
+            })
+
             return (
                 <div>
                     <TopBar labels={this.props.labels}
@@ -91,9 +78,11 @@ define(function(require, exports, module) {
                     <AdminBar personal={this.state.personal}
                               admin={this.state.admin}
                               setState={this.onState}/>
-                    <Grid rows={this.state.rows}
+                    <Grid boxes={boxes}
+                          plus={this.state.plus}
                           personal={this.state.personal}
                           admin={this.state.admin}
+                          onPlus={this.onPlus}
                           onSwap={this.onSwap}/>
                 </div>
             )

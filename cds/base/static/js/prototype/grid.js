@@ -39,40 +39,43 @@ define(function(require, exports, module) {
         },
         render: function() {
             var show = this.state.row,
-                rows = this.props.rows,
+                boxes = this.props.boxes,
+                rows = [],
                 style = {},
                 stylePlus = {}
 
             if (!this.props.personal) {
-                style.display = "none"
+                return (<div />)
             }
 
-            if (show >= this.props.rows.length - 1) {
+            if (show >= Math.floor(boxes.length / 3)) {
                 stylePlus.display = "none"
             }
 
-            return (
-                <div className="grid" style={style}>
-                    {rows.map(function(row, index) {
-                        var style = {}
+            for (var i=0; i < boxes.length ; i += 3) {
+                rows.push([boxes[i], boxes[i+1], boxes[i+2]])
+            }
 
-                        if (index > show) {
-                            style.display = "none"
+            return (
+                <div className="grid">
+                    {rows.map(function(row, index) {
+                        if (index <= show) {
+                            var key = "r" + index
+                            return (
+                                <div className="row" key={key}>
+                                    {row.map(function(box) {
+                                        if (box) {
+                                            var comp = Boxes[box.get("box")](box.get("data"))
+                                            return (
+                                                <div className="col-md-4" key={box.id}>
+                                                    {comp}
+                                                </div>
+                                            )
+                                        }
+                                    })}
+                                </div>
+                            )
                         }
-                        return (
-                            <div className="row" key={row.id} style={style}>
-                                {row.boxes.map(function(box) {
-                                    console.log(box)
-                                    console.log(box.box)
-                                    var comp = Boxes[box.box.box](box.box.data)
-                                    return (
-                                        <div className="col-md-4" key={box.id}>
-                                            {comp}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )
                     })}
                     <div className="row" style={stylePlus}>
                         <p className="plus">

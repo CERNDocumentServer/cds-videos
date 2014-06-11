@@ -36,44 +36,77 @@ define(function(require, exports, module) {
     var $ = require("jquery"),
         React = require("react"),
         Proto = require("jsx!prototype/prototype"),
-        boxes = require("json!prototype/data.json")
+        Backbone = require("backbone")
 
+    require("backbone.localStorage")
 
-    var rows = [[]]
-    var picked = [];
-    while (picked.length < boxes.length) {
-        var i, box;
-        do {
-            i = Math.floor(Math.random() * boxes.length);
-        } while (picked.indexOf(i) >= 0)
-        box = boxes[i]
-        picked.push(i)
-
-        if (!rows[rows.length - 1] || rows[rows.length - 1].length >= 3) {
-            rows.push([])
+    var Box = Backbone.Model.extend({
+        defaults: {
+            box: "Box",
+            id: 0,
+            position: 0,
+            data: {}
         }
-        rows[rows.length - 1].push({
-            id: "b" + i,
-            box: box
+    })
+
+    var BoxesCollection = Backbone.Collection.extend({
+            model: Box,
+            localStorage: new Backbone.LocalStorage("prototype"),
+            comparator: "position"
+        }),
+        collection = new BoxesCollection()
+
+    // Reading from local storage
+    collection.fetch()
+
+    if (!collection.length) {
+        require("json!prototype/data.json").forEach(function(box, i) {
+            box.position = i
+            box.id = "b" + i
+            box.data.id = "b" + i
+            var b = new Box(box)
+            collection.add(b)
+            b.save()
         })
     }
 
-    var original = $("div.websearch").before("<div id=__proto__></div>")
+    var original = $("div.websearch").before("<div id=__proto__></div>"),
+        where = $("#__proto__")[0]
 
-    var p = React.renderComponent(Proto({
-            labels: {
-                on: "Switch to all the collections",
-                off: "Switch to your personal collections"
-            },
-            rows: rows,
-            onToggle: function(event) {
-                original.toggle();
-            }
-        }),
-        $("#__proto__")[0])
+    var current;
+    function setView(view) {
+        if (current) {
+            React.unmountComponentAtNode(where)
+        }
+        current = view
+        React.renderComponent(view, where)
+    }
+
+    var p =Proto({
+        labels: {
+            on: "Switch to all the collections",
+            off: "Switch to your personal collections"
+        },
+        collection: collection,
+        onToggle: function(event) {
+            original.toggle();
+        }
+    })
+
+    var Router = Backbone.Router.extend({
+        initialize: function() {
+            Backbone.history.start()
+        },
+        routes: {
+            '': 'index'
+        },
+        index: function() {
+            setView(p)
+        }
+    })
 
     module.exports = {
         original: original[0],
-        proto: p
+        router: new Router()
     }
 })

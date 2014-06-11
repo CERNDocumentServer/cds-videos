@@ -2,6 +2,8 @@
     "name": "cds-grunt",
     "version": "0.1.0",
     "dependencies": {
+        "backbone": "latest",
+        "backbone.localstorage": "latest",
         "bootstrap": "latest",
         "jsx-requirejs-plugin": "latest",
         "requirejs-plugins": "latest",
