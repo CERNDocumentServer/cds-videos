@@ -31,7 +31,8 @@ define(function(require, exports, module) {
         onEnable: function(event) {
             var target = $(event.target).closest("a");
             if (target.length) {
-                alert("enable back:" + target.text());
+                console.info("enable back:" + target.text());
+                this.props.onEnable(target.data("id"))
             }
             return false
         },
@@ -47,7 +48,25 @@ define(function(require, exports, module) {
             this.props.setState({admin: false})
         },
         render: function() {
-            var style = {display: this.props.personal && this.props.admin ? "block": "none"}
+            var style = {display: this.props.personal && this.props.admin ? "block": "none"},
+                disabledBoxes = <p>All the boxes are enabled.</p>
+
+            if (this.props.boxes.length) {
+                disabledBoxes = <ul onClick={this.onEnable}>
+                    {this.props.boxes.map(function(box){
+                        var data = box.get("data")
+                        return (
+                            <li key={box.get("id")}>
+                                <a href={data.header.href} data-id={box.get("id")}>
+                                    <i className="glyphicon glyphicon-remove"></i>
+                                    {' '}{data.header.title}
+                                </a>
+                            </li>
+                        )
+                    })}
+                </ul>
+            }
+
             return (
                 <div className="prototype-admin" style={style}>
                     <div className="row">
@@ -72,23 +91,7 @@ define(function(require, exports, module) {
                             </p>
                         </div>
                         <div className="col-md-6">
-                            <ul onClick={this.onEnable}>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> CDS Meetings
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Your Messages
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Your Alerts
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> LHC
-                                </a></li>
-                                <li><a href="#">
-                                    <i className="glyphicon glyphicon-remove"></i> Presentations
-                                </a></li>
-                            </ul>
+                            {disabledBoxes}
                         </div>
                     </div>
                     <div className="row">

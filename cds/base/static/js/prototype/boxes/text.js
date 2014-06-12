@@ -42,6 +42,9 @@ define(function(require, exports, module) {
             event.preventDefault();
             this.props.swap(this.props.id, event.dataTransfer.getData("text"))
         },
+        onDisable: function(box) {
+            this.props.onDisable(box)
+        },
         render: function() {
             var header = $.extend({"href": "#"}, this.props.header),
                 footer = $.extend({"label": "more {this.props.header.title}", "href": header.href},
@@ -53,7 +56,11 @@ define(function(require, exports, module) {
                 className += " wrap";
             }
             if (this.state.edit) {
-                edit = <Admin title={header.title} href={header.href} onMenu={this.onMenu}/>
+                edit = <Admin id={this.props.id}
+                              title={header.title}
+                              href={header.href}
+                              onMenu={this.onMenu}
+                              onDisable={this.props.disable}/>
             }
 
             return (

@@ -98,4 +98,56 @@
             "label": "more videos"
         }
     }
+}, {
+    "box": "Box",
+    "disabled": true,
+    "data": {
+        "header": {
+            "title": "CDS Meetings",
+            "href": "/collection/CDS Meetings/"
+        },
+        "body": "<h3>Last meeting</h3><p>TODO</p>",
+        "footer": {
+            "label": "all the meetings"
+        }
+    }
+}, {
+    "box": "Box",
+    "disabled": true,
+    "data": {
+        "header": {
+            "title": "Your Alerts",
+            "href": "/youralerts/"
+        },
+        "body": "<h3>Recent alerts</h3><p>TODO</p>",
+        "footer": {
+            "label": "your alerts"
+        }
+    }
+}, {
+    "box": "Box",
+    "disabled": true,
+    "data": {
+        "header": {
+            "title": "Your Messages",
+            "href": "/yourmessages/"
+        },
+        "body": "<h3>Recent messages</h3><p>TODO</p>",
+        "footer": {
+            "label": "your message inbox"
+        }
+    }
+}, {
+    "box": "Box",
+    "disabled": true,
+    "data": {
+        "header": {
+            "title": "LHC",
+            "href": "/collection/LHC"
+        },
+        "body": "<h3>Fresh collisions</h3><p>TODO</p>",
+        "footer": {
+            "label": "the LHC"
+        }
+    }
 }]

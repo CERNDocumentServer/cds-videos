@@ -18,7 +18,6 @@
  */
 
 ({
-    baseUrl: '',
     preserveLicenseComments: false,
     optimize: 'uglify2',
     uglify2: {
@@ -43,9 +42,9 @@
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
-        prototype: 'js/prototype',
         typeahead: 'js/typeahead',
-        app: 'js/app'
+        prototype: 'js/prototype',
+        app: 'js/app',
     },
     shim: {
         'bootstrap/affix': { deps: ['jquery'], exports: '$.fn.affix' },
@@ -65,8 +64,8 @@
         'bootstrap/transition': { deps: ['jquery'], exports: '$.fn.transition' },
         react: { exports: 'React' },
         jquery: { exports: '$' },
-        //backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
-        //'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
+        backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
+        'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
         underscore: { exports: '_' }
     },
     onBuildWrite: function (moduleName, path, singleContents) {

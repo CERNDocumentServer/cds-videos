@@ -35,32 +35,19 @@ define(function(require, exports, module) {
 
     var $ = require("jquery"),
         React = require("react"),
-        Proto = require("jsx!prototype/prototype"),
-        Backbone = require("backbone")
+        Proto = require("jsx!./prototype/prototype"),
+        Backbone = require("backbone"),
+        Box = require("./prototype/models/box"),
+        BoxesCollection = require("./prototype/collections/boxes")
 
-    require("backbone.localStorage")
-
-    var Box = Backbone.Model.extend({
-        defaults: {
-            box: "Box",
-            id: 0,
-            position: 0,
-            data: {}
-        }
-    })
-
-    var BoxesCollection = Backbone.Collection.extend({
-            model: Box,
-            localStorage: new Backbone.LocalStorage("prototype"),
-            comparator: "position"
-        }),
-        collection = new BoxesCollection()
+    var collection = new BoxesCollection()
 
     // Reading from local storage
     collection.fetch()
 
     if (!collection.length) {
-        require("json!prototype/data.json").forEach(function(box, i) {
+        // for some reason json! fails here
+        JSON.parse(require("text!./prototype/data.json")).forEach(function(box, i) {
             box.position = i
             box.id = "b" + i
             box.data.id = "b" + i

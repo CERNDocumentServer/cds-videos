@@ -43,9 +43,6 @@ define(function(require, exports, module) {
             }
             this.setState(state)
         },
-        /**
-         * Swaping box A and box B in the list of boxes.
-         */
         onSwap: function(a, b) {
             var collection = this.props.collection,
                 boxA = collection.findWhere({id: a}),
@@ -60,12 +57,33 @@ define(function(require, exports, module) {
             collection.sort()
             this.setProps({collection: collection})
         },
+        onEnable: function(a) {
+            var collection = this.props.collection,
+                boxA = collection.findWhere({id: a}),
+                minPosition = collection.at(0).get("position")
+
+            boxA.set("disabled", false)
+            boxA.set("position", minPosition - 1)
+            boxA.save()
+            collection.sort()
+            this.setProps({collection: collection})
+        },
+        onDisable: function(a) {
+            var collection = this.props.collection,
+                boxA = collection.findWhere({id: a})
+
+            boxA.set("disabled", true)
+            boxA.save()
+            this.setProps({collection: collection})
+        },
         render: function() {
             var boxes = [],
-                swap = this.onSwap
+                swap = this.onSwap,
+                disable = this.onDisable
 
-            this.props.collection.forEach(function(box) {
-                box.set("data", _.extend({swap: swap}, box.get("data")))
+            this.props.collection.enabled().forEach(function(box) {
+                box.set("data", _.extend({swap: swap, disable: disable},
+                                         box.get("data")))
                 boxes.push(box)
             })
 
@@ -75,15 +93,16 @@ define(function(require, exports, module) {
                             personal={this.state.personal}
                             admin={this.state.admin}
                             setState={this.onState}/>
-                    <AdminBar personal={this.state.personal}
+                    <AdminBar boxes={this.props.collection.disabled()}
+                              personal={this.state.personal}
                               admin={this.state.admin}
-                              setState={this.onState}/>
+                              setState={this.onState}
+                              onEnable={this.onEnable}/>
                     <Grid boxes={boxes}
                           plus={this.state.plus}
                           personal={this.state.personal}
                           admin={this.state.admin}
-                          onPlus={this.onPlus}
-                          onSwap={this.onSwap}/>
+                          onPlus={this.onPlus}/>
                 </div>
             )
         }

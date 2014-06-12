@@ -23,6 +23,10 @@ define(function(require, exports, module) {
     var React = require("react")
 
     module.exports = React.createClass({
+        onDisable: function(event) {
+            this.props.onDisable(this.props.id)
+            return false
+        },
         render: function() {
             var href = this.props.href || "#",
                 title = this.props.title || "Untitled",
@@ -47,7 +51,7 @@ define(function(require, exports, module) {
                             <i className="glyphicon glyphicon-pushpin"></i>&nbsp;
                             {labels.pushpin}
                         </button>
-                        <button type="button" className="btn btn-danger">
+                        <button type="button" className="btn btn-danger" onClick={this.onDisable}>
                             <i className="glyphicon glyphicon-remove"></i>&nbsp;
                             {labels.remove}
                         </button>
