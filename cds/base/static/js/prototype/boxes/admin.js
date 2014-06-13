@@ -27,33 +27,37 @@ define(function(require, exports, module) {
             this.props.onDisable(this.props.id)
             return false
         },
+        killEvent: function(event) {
+            event.stopPropagation()
+        },
         render: function() {
             var href = this.props.href || "#",
                 title = this.props.title || "Untitled",
-                labels = {
-                    visit: "Visit: ",
-                    move: "Move",
-                    pushpin: "Pin",
-                    remove: "Disable"
-                }
+                labels = this.props.labels
 
+            /* Not a feature as of yet.
+                        <button type="button" className="btn btn-default">
+                            <i className="glyphicon glyphicon-pushpin"></i>
+                            {' '}{labels.pushpin}
+                        </button>
+            */
             return (
-                <div className="box-admin" onClick={this.props.onMenu}>
-                    <div className="box-admin-buttons btn-group-vertical">
+                <div className="box-admin" onClick={this.props.onMenu} onTouchStart={this.props.onMenu}>
+                    <div className="box-admin-buttons btn-group-vertical" onTouchStart={this.killEvent}>
                         <a href={href} className="btn btn-primary">
                             {labels.visit} “{title}”
                         </a>
-                        <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-move"></i>&nbsp;
-                            {labels.move}
+                        <button type="button" className="btn btn-default" onClick={this.props.onMoveUp}>
+                            <i className="glyphicon glyphicon-arrow-up"></i>
+                            {' '}{labels.moveUp}
                         </button>
-                        <button type="button" className="btn btn-default">
-                            <i className="glyphicon glyphicon-pushpin"></i>&nbsp;
-                            {labels.pushpin}
+                        <button type="button" className="btn btn-default" onClick={this.props.onMoveDown}>
+                            <i className="glyphicon glyphicon-arrow-down"></i>
+                            {' '}{labels.moveDown}
                         </button>
                         <button type="button" className="btn btn-danger" onClick={this.onDisable}>
-                            <i className="glyphicon glyphicon-remove"></i>&nbsp;
-                            {labels.remove}
+                            <i className="glyphicon glyphicon-remove"></i>
+                            {' '}{labels.remove}
                         </button>
                     </div>
                 </div>

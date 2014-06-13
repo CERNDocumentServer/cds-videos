@@ -43,11 +43,43 @@ define(function(require, exports, module) {
             }
             this.setState(state)
         },
+        // a is null, means b moves up
+        // b is null, means a moves down
         onSwap: function(a, b) {
             var collection = this.props.collection,
-                boxA = collection.findWhere({id: a}),
-                boxB = collection.findWhere({id: b}),
-                positionA = boxA.get("position")
+                boxA, boxB, positionA
+
+            if (!b && !a) {
+                boxB = collection.findWhere({id: b})
+            }
+            if (a) {
+                boxA = collection.findWhere({id: a})
+                if (!b) {
+                    var position = collection.indexOf(boxA)
+                    do {
+                        position += 1
+                        boxB = collection.at(position)
+                    } while(boxB !== undefined && boxB.get("disabled"))
+                    if (!boxB) {
+                        return // no changes
+                    }
+                } else {
+                    boxB = collection.findWhere({id: b})
+                }
+            } else {
+                boxB = collection.findWhere({id: b})
+
+                var position = collection.indexOf(boxB)
+                do {
+                    position -= 1
+                    boxA = collection.at(position)
+                } while(boxA !== undefined && boxA.get("disabled"))
+                if (!boxA) {
+                    return  // no changes
+                }
+            }
+
+            positionA = boxA.get("position")
 
             boxA.set("position", boxB.get("position"))
             boxB.set("position", positionA)
@@ -77,15 +109,13 @@ define(function(require, exports, module) {
             this.setProps({collection: collection})
         },
         render: function() {
-            var boxes = [],
-                swap = this.onSwap,
-                disable = this.onDisable
-
-            this.props.collection.enabled().forEach(function(box) {
-                box.set("data", _.extend({swap: swap, disable: disable},
+            var boxes = this.props.collection.enabled().map(_.bind(function(box) {
+                box.set("data", _.extend({swap: this.onSwap,
+                                          disable: this.onDisable,
+                                          labels: this.props.labels},
                                          box.get("data")))
-                boxes.push(box)
-            })
+                return box
+            }, this))
 
             return (
                 <div>

@@ -67,6 +67,14 @@ define(function(require, exports, module) {
                 </ul>
             }
 
+            /*
+                        <p className="col-md-6 text-right">
+                            <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
+                        </p>
+                        <p className="col-md-6">
+                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
+                        </p>
+            */
             return (
                 <div className="prototype-admin" style={style}>
                     <div className="row">
@@ -95,11 +103,9 @@ define(function(require, exports, module) {
                         </div>
                     </div>
                     <div className="row">
-                        <p className="col-md-6 text-right">
-                            <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
-                        </p>
+                        <p className="col-md-6 text-right">{' '}</p>
                         <p className="col-md-6">
-                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
+                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Close</button>
                         </p>
                     </div>
                 </div>

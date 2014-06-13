@@ -40,6 +40,9 @@ define(function(require, exports, module) {
         Box = require("./prototype/models/box"),
         BoxesCollection = require("./prototype/collections/boxes")
 
+    // Shall be done before any rendering.
+    React.initializeTouchEvents(true)
+
     var collection = new BoxesCollection()
 
     // Reading from local storage
@@ -72,7 +75,12 @@ define(function(require, exports, module) {
     var p =Proto({
         labels: {
             on: "Switch to all the collections",
-            off: "Switch to your personal collections"
+            off: "Switch to your personal collections",
+            visit: "Visit: ",
+            moveUp: "Move Up",
+            moveDown: "Move Down",
+            pushpin: "Pin",
+            remove: "Disable"
         },
         collection: collection,
         onToggle: function(event) {

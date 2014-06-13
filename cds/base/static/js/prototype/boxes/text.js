@@ -20,7 +20,7 @@
 
 define(function(require, exports, module) {
 
-    var $ = require("jquery"),
+    var _ = require("underscore"),
         React = require("react"),
         Admin = require("jsx!./admin")
 
@@ -32,8 +32,19 @@ define(function(require, exports, module) {
             this.setState({edit: !this.state.edit})
             return false
         },
+        onMoveUp: function(event) {
+            this.props.swap(null, this.props.id)
+            event.preventDefault()
+        },
+        onMoveDown: function(event) {
+            this.props.swap(this.props.id, null)
+            event.preventDefault()
+        },
+        onDisable: function(box) {
+            this.props.onDisable(box)
+        },
         onDragOver: function(event) {
-            event.preventDefault();
+            event.preventDefault()
         },
         onDragStart: function(event) {
             event.dataTransfer.setData("text", this.props.id)
@@ -42,12 +53,26 @@ define(function(require, exports, module) {
             event.preventDefault();
             this.props.swap(this.props.id, event.dataTransfer.getData("text"))
         },
-        onDisable: function(box) {
-            this.props.onDisable(box)
+        onTouchStart: function(event) {
+            // don't break multi-touch
+            if (event.touches.length == 1) {
+                // double tap in under 300ms
+                if (this.timer) {
+                    this.setState({edit: !this.state.edit})
+                    clearTimeout(this.timer)
+                    this.timer = 0
+                } else {
+                    this.timer = setTimeout(_.bind(function(){
+                        this.timer = 0
+                    }, this), 300)
+                }
+            }
+        },
+        onTouchEnd: function(event) {
         },
         render: function() {
-            var header = $.extend({"href": "#"}, this.props.header),
-                footer = $.extend({"label": "more {this.props.header.title}", "href": header.href},
+            var header = _.extend({"href": "#"}, this.props.header),
+                footer = _.extend({"label": "more {this.props.header.title}", "href": header.href},
                                   this.props.footer),
                 edit = ""
 
@@ -59,12 +84,17 @@ define(function(require, exports, module) {
                 edit = <Admin id={this.props.id}
                               title={header.title}
                               href={header.href}
+                              labels={this.props.labels}
                               onMenu={this.onMenu}
+                              onMoveUp={this.onMoveUp}
+                              onMoveDown={this.onMoveDown}
                               onDisable={this.props.disable}/>
             }
 
             return (
-                <article className="box" draggable="true" onDragStart={this.onDragStart} onDrop={this.onDrop} onDragOver={this.onDragOver}>
+                <article className="box"
+                         draggable="true" onDragStart={this.onDragStart} onDrop={this.onDrop} onDragOver={this.onDragOver}
+                         onTouchStart={this.onTouchStart} onTouchEnd={this.onTouchEnd}>
                     <header>
                         <h2>
                             <a href={header.href} onClick={this.onMenu}>
