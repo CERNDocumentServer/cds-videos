@@ -19,20 +19,13 @@
 
 
 define(function(require, exports, module) {
-    var Backbone = require("backbone"),
-        Box = require("../models/box")
+    var Backbone = require("backbone")
 
-    require("backbone.localStorage")
-
-    module.exports = Backbone.Collection.extend({
-        model: Box,
-        localStorage: new Backbone.LocalStorage("prototype.boxes"),
-        comparator: "position",
-        enabled: function() {
-            return this.where({disabled: false})
-        },
-        disabled: function() {
-            return this.where({disabled: true})
+    /* A simple container for user preferences. Not much right now.
+     */
+    module.exports = Backbone.Model.extend({
+        defaults: {
+            boxes: 3
         }
     })
 })

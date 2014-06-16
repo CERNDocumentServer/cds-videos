@@ -21,6 +21,9 @@
 define(function(require, exports, module) {
     var Backbone = require("backbone")
 
+    /* A container for a HTML snippet.
+     * It feeds the prototype/boxes/*
+     */
     module.exports = Backbone.Model.extend({
         defaults: {
             box: "Box",

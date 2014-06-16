@@ -34,7 +34,7 @@ define(function(require, exports, module) {
             return {
                 personal: true,
                 admin: false,
-                rows: 1
+                length: this.props.preferences.get("boxes")
             }
         },
         onState: function(state) {
@@ -107,6 +107,15 @@ define(function(require, exports, module) {
             boxA.set("disabled", true)
             boxA.save()
             this.setProps({collection: collection})
+            this.setState({length: boxes})
+        },
+        onVisibleBoxes: function(boxes) {
+            var preferences = this.props.preferences
+            console.log(boxes)
+            preferences.set("boxes", boxes)
+            preferences.save()
+            this.setState({length: boxes})
+            this.setProps({preferences: preferences})
         },
         render: function() {
             var boxes = this.props.collection.enabled().map(_.bind(function(box) {
@@ -124,11 +133,14 @@ define(function(require, exports, module) {
                             admin={this.state.admin}
                             setState={this.onState}/>
                     <AdminBar boxes={this.props.collection.disabled()}
+                              preferences={this.props.preferences}
+                              onVisibleBoxes={this.onVisibleBoxes}
                               personal={this.state.personal}
                               admin={this.state.admin}
                               setState={this.onState}
                               onEnable={this.onEnable}/>
                     <Grid boxes={boxes}
+                          length={this.state.length}
                           plus={this.state.plus}
                           personal={this.state.personal}
                           admin={this.state.admin}

@@ -26,7 +26,8 @@ define(function(require, exports, module) {
 
     module.exports = React.createClass({
         onRow: function(event) {
-            alert("row to show: " + $(event.target).html())
+            var boxes = parseInt($(event.target).text(), 10)
+            this.props.onVisibleBoxes(boxes)
         },
         onEnable: function(event) {
             var target = $(event.target).closest("a");
@@ -49,6 +50,7 @@ define(function(require, exports, module) {
         },
         render: function() {
             var style = {display: this.props.personal && this.props.admin ? "block": "none"},
+                boxes = this.props.preferences.get("boxes"),
                 disabledBoxes = <p>All the boxes are enabled.</p>
 
             if (this.props.boxes.length) {
@@ -67,7 +69,8 @@ define(function(require, exports, module) {
                 </ul>
             }
 
-            /*
+            /* Not needed for now, it requires undoable actions.
+
                         <p className="col-md-6 text-right">
                             <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
                         </p>
@@ -83,9 +86,21 @@ define(function(require, exports, module) {
                         </div>
                         <div className="col-md-6">
                             <div className="btn-group" onClick={this.onRow}>
-                                <button type="button" className="btn btn-primary">3</button>
-                                <button type="button" className="btn btn-default">6</button>
-                                <button type="button" className="btn btn-default">9</button>
+                            {[3,6,9].map(function(row, index) {
+                                var classes = "btn",
+                                    key = "btn" + index
+
+                                if (row == boxes) {
+                                    classes += " btn-primary"
+                                } else {
+                                    classes += " btn-default"
+                                }
+                                return (
+                                    <button type="button" className={classes} key={key}>
+                                        {row}
+                                    </button>
+                                )
+                            })}
                             </div>
                         </div>
                     </div>

@@ -30,7 +30,7 @@ define(function(require, exports, module) {
     module.exports = React.createClass({
         getInitialState: function() {
             return {
-                row: this.props.row || 0
+                row: Math.ceil(this.props.length / 3) || 1
             }
         },
         onPlus: function() {
@@ -38,7 +38,7 @@ define(function(require, exports, module) {
             return false
         },
         render: function() {
-            var show = this.state.row,
+            var show = Math.max(this.state.row, Math.ceil(this.props.length / 3)),
                 boxes = this.props.boxes,
                 rows = [],
                 style = {},
@@ -48,7 +48,7 @@ define(function(require, exports, module) {
                 return (<div />)
             }
 
-            if (show >= Math.floor(boxes.length / 3)) {
+            if (show > Math.floor(boxes.length / 3)) {
                 stylePlus.display = "none"
             }
 
@@ -59,7 +59,7 @@ define(function(require, exports, module) {
             return (
                 <div className="grid">
                     {rows.map(function(row, index) {
-                        if (index <= show) {
+                        if (index < show) {
                             var key = "r" + index
                             return (
                                 <div className="row" key={key}>

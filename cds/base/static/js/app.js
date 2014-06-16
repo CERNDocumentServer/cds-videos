@@ -38,15 +38,20 @@ define(function(require, exports, module) {
         Proto = require("jsx!./prototype/prototype"),
         Backbone = require("backbone"),
         Box = require("./prototype/models/box"),
-        BoxesCollection = require("./prototype/collections/boxes")
+        Preferences = require("./prototype/models/preferences"),
+        BoxesCollection = require("./prototype/collections/boxes"),
+        PreferencesCollection = require("./prototype/collections/preferences")
 
     // Shall be done before any rendering.
     React.initializeTouchEvents(true)
 
-    var collection = new BoxesCollection()
+    var collection = new BoxesCollection(),
+        prefsColl = new PreferencesCollection(),
+        preferences
 
     // Reading from local storage
     collection.fetch()
+    prefsColl.fetch()
 
     if (!collection.length) {
         // for some reason json! fails here
@@ -58,6 +63,14 @@ define(function(require, exports, module) {
             collection.add(b)
             b.save()
         })
+    }
+
+    if (!prefsColl.length) {
+        preferences = new Preferences()
+        prefsColl.add(preferences)
+        preferences.save()
+    } else {
+        preferences = prefsColl.at(0)
     }
 
     var original = $("div.websearch").before("<div id=__proto__></div>"),
@@ -82,6 +95,7 @@ define(function(require, exports, module) {
             pushpin: "Pin",
             remove: "Disable"
         },
+        preferences: preferences,
         collection: collection,
         onToggle: function(event) {
             original.toggle();
