@@ -78,12 +78,12 @@ define(function(require, exports, module) {
                         </p>
             */
             return (
-                <div className="prototype-admin" style={style}>
-                    <div className="row">
-                        <div className="col-md-6 text-right">
+                <div className="prototype-admin form-horizontal" style={style}>
+                    <div className="form-group">
+                        <div className="col-sm-4 control-label">
                             <p className="box-label">Visible boxes by default</p>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-sm-8">
                             <div className="btn-group" onClick={this.onRow}>
                             {[3,6,9].map(function(row, index) {
                                 var classes = "btn",
@@ -103,22 +103,21 @@ define(function(require, exports, module) {
                             </div>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-md-6 text-right">
-                            <p className="box-label">Disabled boxes</p>
-                            <p>
+                    <div className="form-group">
+                        <div className="col-sm-4 control-label">
+                            <p>Disabled boxes</p>
+                            <p className="control-label-help">
                                 By removing some of this list,<br/>
                                 they may appear again<br/>
                                 on your homepage.
                             </p>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-sm-8">
                             {disabledBoxes}
                         </div>
                     </div>
-                    <div className="row">
-                        <p className="col-md-6 text-right">{' '}</p>
-                        <p className="col-md-6">
+                    <div className="form-group">
+                        <p className="col-sm-offset-4 col-sm-8">
                             <button type="button" className="btn btn-primary" onClick={this.onSave}>Close</button>
                         </p>
                     </div>
