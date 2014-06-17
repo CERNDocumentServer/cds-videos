@@ -20,15 +20,25 @@
 
 define(function(require, exports, module) {
 
-    var React = require("react")
+    var $ = require("jquery"),
+        React = require("react")
 
     module.exports = React.createClass({
+        onMenu: function(event) {
+            this.killEvent(event)
+            this.props.onMenu(event)
+        },
         onDisable: function(event) {
             this.props.onDisable(this.props.id)
-            return false
         },
+        /*
+         * Killing the event if it doesn't come from an anchor.
+         */
         killEvent: function(event) {
-            event.stopPropagation()
+            var target = $(event.target).closest("a");
+            if (!target.length) {
+                event.stopPropagation()
+            }
         },
         render: function() {
             var href = this.props.href || "#",
@@ -42,7 +52,7 @@ define(function(require, exports, module) {
                         </button>
             */
             return (
-                <div className="box-admin" onClick={this.props.onMenu} onTouchStart={this.props.onMenu}>
+                <div className="box-admin" onClick={this.onMenu} onTouchStart={this.props.onMenu}>
                     <div className="box-admin-buttons btn-group-vertical" onTouchStart={this.killEvent}>
                         <a href={href} className="btn btn-primary">
                             {labels.visit} “{title}”

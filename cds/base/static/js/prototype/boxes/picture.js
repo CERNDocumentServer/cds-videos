@@ -98,7 +98,7 @@ define(function(require, exports, module) {
                     <div className="box-body wrap" dangerouslySetInnerHTML={{__html: this.props.body}}/>
                     <footer>
                         <p>
-                            <a href="{footer.href}">{footer.label} »</a>
+                            <a href={footer.href}>{footer.label} »</a>
                         </p>
                     </footer>
                     {edit}

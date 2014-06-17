@@ -103,10 +103,10 @@
     "disabled": true,
     "data": {
         "header": {
-            "title": "CDS Meetings",
-            "href": "/collection/CDS Meetings/"
+            "title": "DLS Section meetings",
+            "href": "https://cds.cern.ch/collection/Events from Indico/"
         },
-        "body": "<h3>Last meeting</h3><p>TODO</p>",
+        "body": "<h3>Last meetings</h3><ul><li><a href=\"https://cds.cern.ch/record/1704041?ln=en\">DLT section meeting</a> 15 May 2014</li><li><a href=\"https://cds.cern.ch/record/1704038?ln=en\">DLS section meeting</a> 15 May 2014</li><li><a href=\"https://cds.cern.ch/record/1700778?ln=en\">DLT section meeting</a> 1 May 2014</li><li><a href=\"https://cds.cern.ch/record/1698136?ln=en\">DLT section meeting</a> 24 Apr 2014</li><li><a href=\"https://cds.cern.ch/record/1698135?ln=en\">DLS section meeting</a> 24 Apr 2014</li></ul>",
         "footer": {
             "label": "all the meetings"
         }
@@ -117,9 +117,9 @@
     "data": {
         "header": {
             "title": "Your Alerts",
-            "href": "/youralerts/"
+            "href": "/youralerts/list"
         },
-        "body": "<h3>Recent alerts</h3><p>TODO</p>",
+        "body": "<h3>Your Alerts</h3><ul><li>LHC presentations (<a href=\"#\">Execute search</a>)</li><li>Photos of myself (<a href=\"#\">Execute search</a>)</li><li>Polarized Beams (<a href=\"#\">Execute search</a>)</li><li>Dark Matter (<a href=\"#\">Execute search</a>)</li><li>AIDA public report (<a href=\"#\">Execute search</a>)</li></ul>",
         "footer": {
             "label": "your alerts"
         }
@@ -132,9 +132,9 @@
             "title": "Your Messages",
             "href": "/yourmessages/"
         },
-        "body": "<h3>Recent messages</h3><p>TODO</p>",
+        "body": "<h3><a href=\"#\">Latest message</a></h3><p><strong>from:</strong> user #42<br><strong>subject:</strong> Hi there!</p><div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ornare faucibus quam, eu iaculis erat vehicula eget. Nullam pretium massa non nunc tincidunt sollicitudin. Pellentesque ultricies scelerisque augue quis fringilla. Ut nec libero at risus vestibulum faucibus non eget neque. Fusce convallis nunc nec odio rhoncus, in adipiscing nisl facilisis.</p><p>Cras a augue nec ipsum sollicitudin aliquam eu in neque. Sed pharetra ac nibh in luctus<a href=\"#\">&hellip; (continue reading)</a></p></div>",
         "footer": {
-            "label": "your message inbox"
+            "label": "3 unread messages"
         }
     }
 }, {
@@ -145,9 +145,9 @@
             "title": "LHC",
             "href": "/collection/LHC"
         },
-        "body": "<h3>Fresh collisions</h3><p>TODO</p>",
+        "body": "<h3>Thesis</h3><h4><a href=\"#\">A reliability analysis of the BLEAC signal acquisition card for the LHC injectors</a></h4><p class=subtitle>Moseng, Vegard Joa. 148p</p><p>As a required part of an Electronics and Mobile Communications Bachelor's degree at the University of Agder, all students have to complete a Bachelor's Thesis within the framework of a course named ELE300, in order to obtain their degree. This Thesis is thus my eort to complete this course.</p><p><a href=\"#\">&hellip; continue reading</a></p>",
         "footer": {
-            "label": "the LHC"
+            "label": "view more thesis"
         }
     }
 }]

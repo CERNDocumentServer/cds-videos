@@ -32,7 +32,6 @@ define(function(require, exports, module) {
         onEnable: function(event) {
             var target = $(event.target).closest("a");
             if (target.length) {
-                console.info("enable back:" + target.text());
                 this.props.onEnable(target.data("id"))
             }
             return false
