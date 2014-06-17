@@ -48,7 +48,7 @@ define(function(require, exports, module) {
                 return (<div />)
             }
 
-            if (show > Math.floor(boxes.length / 3)) {
+            if (show >= Math.ceil(boxes.length / 3)) {
                 stylePlus.display = "none"
             }
 

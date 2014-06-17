@@ -5,7 +5,7 @@
             "title": "CERN Bulletin",
             "href": "http://cds.cern.ch/collection/CERN Bulletin Printable Version"
         },
-        "body": "<h3><a href=\"http://cds.cern.ch/collection/CERN Bulletin Printable Version\">Polarisation confirmed</a></h3><p class=\"subtitle\">by Anaïs Schaeffer, the CERN Bulletin</p><img src=\"https://cds.cern.ch/record/1698254/files/LHCbEvent_1_image.jpg?subformat=icon\" alt=\"\" style=\"margin:0 1em 1em 0;width:50%\" align=\"left\"><p>The polarisation of photons emitted in the decay of a bottom quark into a strange quark, as predicted by the Standard Model, has just been observed for the first time by the LHCb collaboration. More detailed research is still required to determine the value of this polarisation with precision.</p>",
+        "body": "<h3><a href=\"http://cds.cern.ch/collection/CERN Bulletin Printable Version\">Polarisation confirmed</a></h3><p class=\"subtitle\">by Anaïs Schaeffer, the CERN Bulletin</p><img src=\"https://cds.cern.ch/record/1698254/files/LHCbEvent_1_image.jpg?subformat=icon\" alt=\"\" style=\"margin:0 1em 1em 0;width:50%\" align=\"left\"><p>The polarisation of photons emitted in the decay of a bottom quark into a strange quark, as predicted by the Standard Model, has just been observed for the first time by the LHCb collaboration. More detailed research is still required to determine <a href=\"#\">&hellip; (read more)</a>.</p>",
         "footer": {
             "label": "visit the CERN Bulletin",
             "href": "http://cds.cern.ch/journal/CERNBulletin/2014/20/News%20Articles"
@@ -67,8 +67,9 @@
             "title": "Photos",
             "href": "http://cds.cern.ch/collection/Photos"
         },
+        "wrap": false,
         "backgroundImage": "http://cds.cern.ch/record/1700467/files/_B1A0931.jpg?subformat=icon-640",
-        "body": "<p style=\"margin-top:200px;padding-top:1em;padding-bottom:1em\"><a href=\"#\">CERN openlab Automation and Controls Competence Center - Team 2013</a></p>",
+        "body": "<div style=\"height:150px\"></div><div class=\"white-wrap wrap\"><p><a href=\"#\">CERN openlab Automation and Controls Competence Center - Team 2013</a></p></div>",
         "footer": {
             "label": "more photos"
         }

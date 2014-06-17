@@ -98,7 +98,7 @@ define(function(require, exports, module) {
                     <header>
                         <h2>
                             <a href={header.href} onClick={this.onMenu}>
-                                {header.title}
+                                {header.title}&nbsp;&nbsp;<i className="glyphicon glyphicon-cog"></i>
                             </a>
                         </h2>
                     </header>

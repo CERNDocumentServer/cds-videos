@@ -77,6 +77,11 @@ define(function(require, exports, module) {
                          minHeight: "330px"},
                 edit = ""
 
+            var className = "box-body";
+            if (!("wrap" in this.props) || this.props.wrap) {
+                className += " wrap";
+            }
+
             if (this.state.edit) {
                 edit = <Admin id={this.props.id}
                               title={header.title}
@@ -93,9 +98,13 @@ define(function(require, exports, module) {
                          draggable="true" onDragStart={this.onDragStart} onDrop={this.onDrop} onDragOver={this.onDragOver}
                          onTouchStart={this.onTouchStart} onTouchEnd={this.onTouchEnd}>
                     <header>
-                        <h2><a href={header.href} onClick={this.onMenu}>{header.title}</a></h2>
+                        <h2>
+                            <a href={header.href} onClick={this.onMenu}>
+                                {header.title}&nbsp;&nbsp;<i className="glyphicon glyphicon-cog"></i>
+                            </a>
+                        </h2>
                     </header>
-                    <div className="box-body wrap" dangerouslySetInnerHTML={{__html: this.props.body}}/>
+                    <div className={className} dangerouslySetInnerHTML={{__html: this.props.body}}/>
                     <footer>
                         <p>
                             <a href={footer.href}>{footer.label} »</a>

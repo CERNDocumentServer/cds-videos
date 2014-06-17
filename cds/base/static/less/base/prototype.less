@@ -41,7 +41,10 @@
     }
 
     .box-body {
-        margin-bottom: 30px; /* for the footer */
+        height: auto;
+        min-height: 100%;
+        padding-bottom: 35px;
+        margin-bottom: -35px; /* for the footer */
 
         .subtitle {
             font-weight: bold;
@@ -51,9 +54,6 @@
 
     footer {
         text-align: right;
-        position: absolute;
-        bottom: 0;
-        width: 100%;
 
         p {
             padding-right: @box-padding;
@@ -82,7 +82,7 @@
 }
 
 .box-picture {
-    .box-body, footer {
+    .box-body .white-wrap, footer {
         background: rgba(255,255,255,.90);
     }
 }

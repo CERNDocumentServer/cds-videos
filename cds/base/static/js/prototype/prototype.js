@@ -107,7 +107,6 @@ define(function(require, exports, module) {
             boxA.set("disabled", true)
             boxA.save()
             this.setProps({collection: collection})
-            this.setState({length: boxes})
         },
         onVisibleBoxes: function(boxes) {
             var preferences = this.props.preferences

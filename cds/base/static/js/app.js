@@ -53,8 +53,10 @@ define(function(require, exports, module) {
     collection.fetch()
     prefsColl.fetch()
 
-    if (!collection.length) {
+    function bootstrapBoxes() {
+        collection.reset()
         // for some reason json! fails here
+        //require("json!./prototype/data.json").forEach(function(box, i) {
         JSON.parse(require("text!./prototype/data.json")).forEach(function(box, i) {
             box.position = i
             box.id = "b" + i
@@ -65,10 +67,19 @@ define(function(require, exports, module) {
         })
     }
 
-    if (!prefsColl.length) {
+    function bootstrapPreferences() {
         preferences = new Preferences()
+        prefsColl.reset()
         prefsColl.add(preferences)
         preferences.save()
+    }
+
+    if (!collection.length) {
+        bootstrapBoxes()
+    }
+
+    if (!prefsColl.length) {
+        bootstrapPreferences()
     } else {
         preferences = prefsColl.at(0)
     }
@@ -107,15 +118,24 @@ define(function(require, exports, module) {
             Backbone.history.start()
         },
         routes: {
-            '': 'index'
+            '': 'index',
+            'reset': 'reset'
         },
         index: function() {
             setView(p)
+        },
+        reset: function() {
+            bootstrapBoxes()
+            bootstrapPreferences()
+            //this.navigate("", {trigger: true})
         }
     })
 
+    var router = new Router()
+    //router.navigate("reset", {trigger: true, replace: true})
+
     module.exports = {
         original: original[0],
-        router: new Router()
+        router: router
     }
 })
