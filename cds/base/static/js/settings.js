@@ -18,6 +18,7 @@
  */
 
 require.config({
+    baseUrl: '/',
     paths: {
         bootstrap: 'vendors/bootstrap/js',
         react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',

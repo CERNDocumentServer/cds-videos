@@ -18,6 +18,7 @@
  */
 
 ({
+    baseUrl: '',
     preserveLicenseComments: false,
     optimize: 'uglify2',
     uglify2: {
