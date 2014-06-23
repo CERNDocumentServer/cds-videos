@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+##
 ## This file is part of Invenio.
 ## Copyright (C) 2014 CERN.
 ##
@@ -15,6 +15,21 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with Invenio; if not, write to the Free Software Foundation, Inc.,
-## 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
+## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS (upcoming) modules."""
+
+def get_filetypes(recid):
+    """
+        Returns filetypes extensions associated with given record.
+
+        Takes as a parameter the recid of a record.
+        @param url_field: recid of a record
+    """
+    from invenio.legacy.bibdocfile.api import BibRecDocs
+    docs = BibRecDocs(recid)
+    return [_get_filetype(d.format) for d in docs.list_latest_files()]
+
+
+def _get_filetype(pre_ext):
+    ext = pre_ext.split(";")[0]
+    return ext[1:]
