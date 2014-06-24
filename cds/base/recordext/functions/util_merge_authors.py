@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+##
 ## This file is part of Invenio.
 ## Copyright (C) 2014 CERN.
 ##
@@ -15,6 +15,18 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with Invenio; if not, write to the Free Software Foundation, Inc.,
-## 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
+## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS (upcoming) modules."""
+
+def util_merge_authors(self):
+    if self.get('_first_author'):
+        authors = [self.get('_first_author')]
+    else:
+        authors = []
+
+    if isinstance(self.get('_additional_authors', []), list):
+        authors.extend(self.get('_additional_authors', []))
+    else:
+        authors.append(self.get('_additional_authors'))
+
+    return authors
