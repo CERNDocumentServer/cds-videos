@@ -29,18 +29,24 @@ define(function(require, exports, module) {
 
     module.exports = React.createClass({
         getInitialState: function() {
-            this.props.onToggle()
-
-            return {
-                personal: true,
-                admin: false,
+            var state = {
+                personal: this.props.preferences.get("personal"),
+                admin: this.props.preferences.get("admin"),
                 length: this.props.preferences.get("boxes")
             }
+
+            if (state.personal) {
+                this.props.onToggle()
+            }
+
+            return state
         },
         onState: function(state) {
             if ("personal" in state && state.personal != this.state.personal) {
                 this.props.onToggle()
             }
+            this.props.preferences.set(state)
+            this.props.preferences.save()
             this.setState(state)
         },
         // a is null, means b moves up

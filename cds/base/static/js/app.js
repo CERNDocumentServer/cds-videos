@@ -109,7 +109,7 @@ define(function(require, exports, module) {
         preferences: preferences,
         collection: collection,
         onToggle: function(event) {
-            original.toggle();
+            original.toggle()
         }
     })
 

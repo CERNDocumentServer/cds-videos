@@ -21,10 +21,12 @@
 define(function(require, exports, module) {
     var Backbone = require("backbone")
 
-    /* A simple container for user preferences. Not much right now.
+    /* A simple container for user preferences.
      */
     module.exports = Backbone.Model.extend({
         defaults: {
+            personal: true,
+            admin: false,
             boxes: 3
         }
     })
