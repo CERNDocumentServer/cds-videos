@@ -77,8 +77,49 @@ define(function(require, exports, module) {
                             <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
                         </p>
             */
+            var hide = {"display": "none"}
             return (
                 <div className="prototype-admin form-horizontal" style={style}>
+                    <div className="form-group" style={hide}>
+                        <div className="col-sm-4 control-label">
+                            <p>More boxes</p>
+                        </div>
+                        <div className="col-sm-4">
+                            <div className="input-group">
+                                <span className="input-group-addon">
+                                    <i className="glyphicon glyphicon-search"></i>
+                                </span>
+                                <input type="search" className="form-control" placeholder="collection name" />
+                            </div>
+                        </div>
+                        <div className="col-sm-4">
+                            <p>
+                                <button type="button" className="btn btn-default">Search</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="form-group" style={hide}>
+                        <div className="col-sm-offset-4 col-sm-8">
+                            <ul>
+                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
+                                    {' '}ATLAS eNews
+                                </a></li>
+                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
+                                    {' '}ATLAS collaboration (Archives)
+                                </a></li>
+                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
+                                    {' '}ATLAS Videos
+                                </a></li>
+                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
+                                    {' '}ATLAS Theses
+                                </a></li>
+                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
+                                    {' '}ATLAS Scientific
+                                </a></li>
+                                <li><a href="#">... more suggestions</a></li>
+                            </ul>
+                        </div>
+                    </div>
                     <div className="form-group">
                         <div className="col-sm-4 control-label">
                             <p className="box-label">Visible boxes by default</p>
