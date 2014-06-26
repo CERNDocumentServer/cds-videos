@@ -19,14 +19,10 @@
 
 {% extends "search/index_base.html" %}
 
-{%- block page_body_before -%}
-<div id="search-form">
-  <div class="container">
-    {% include "search/form/index.html" -%}
-  </div>
-</div>
-{%- endblock -%}
-
-{%- block body -%}
-  {%- block inner_content -%}{{ super() }}{%- endblock -%}
+{%- block _bottom_assets -%}
+  <!--[if lt IE 9]>
+    <script src="{{ url_for("base.static", filename="/vendors/es5-shim/es5-shim.min.js") }}"></script>
+    <script src="{{ url_for("base.static", filename="/vendors/es5-shim/es5-sham.min.js") }}"></script>
+  <![endif]-->
+  {{- super() -}}
 {%- endblock -%}

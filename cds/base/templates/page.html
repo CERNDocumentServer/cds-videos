@@ -81,7 +81,7 @@
     <div id=push></div>
   </div> {# end wrap #}
   <footer id="footer">
-    {%- block pagefooteradd -%}{{ body }}{%- endblock pagefooteradd -%}
+    {%- block pagefooteradd -%}{{ pagefooteradd | safe }}{%- endblock pagefooteradd -%}
     {%- include "footer.html" -%}
   </footer>
 {%- endblock -%}
