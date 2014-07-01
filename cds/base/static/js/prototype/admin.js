@@ -22,20 +22,12 @@ define(function(require, exports, module) {
     "use strict"
 
     var $ = require("jquery"),
-        React = require("react")
+        React = require("react"),
+        Configuration = require("jsx!./admin/configuration"),
+        Hidden = require("jsx!./admin/hidden"),
+        Search = require("jsx!./admin/search")
 
     module.exports = React.createClass({
-        onRow: function(event) {
-            var boxes = parseInt($(event.target).text(), 10)
-            this.props.onVisibleBoxes(boxes)
-        },
-        onEnable: function(event) {
-            var target = $(event.target).closest("a");
-            if (target.length) {
-                this.props.onEnable(target.data("id"))
-            }
-            return false
-        },
         onCancel: function() {
             console.log("cancel")
             this.onClose()
@@ -47,120 +39,63 @@ define(function(require, exports, module) {
         onClose: function() {
             this.props.setState({admin: false})
         },
+        onTabClick: function(event) {
+            var target = $(event.target).closest("a")
+            if (target.length) {
+                var tab = parseInt(target.attr("href").slice(-1), 10)
+                this.props.setState({tab: tab})
+            }
+            return false
+        },
         render: function() {
             var style = {display: this.props.personal && this.props.admin ? "block": "none"},
                 boxes = this.props.preferences.get("boxes"),
-                disabledBoxes = <p>All the boxes are enabled.</p>
+                hide = {"display": "block"},
+                tab1 = "tab-pane",
+                item1, item2, item3,
+                tab2 = tab1,
+                tab3 = tab2,
+                active = "active"
 
-            if (this.props.boxes.length) {
-                disabledBoxes = <ul onClick={this.onEnable}>
-                    {this.props.boxes.map(function(box){
-                        var data = box.get("data")
-                        return (
-                            <li key={box.get("id")}>
-                                <a href={data.header.href} data-id={box.get("id")}>
-                                    <i className="glyphicon glyphicon-remove"></i>
-                                    {' '}{data.header.title}
-                                </a>
-                            </li>
-                        )
-                    })}
-                </ul>
+            switch (this.props.tab) {
+                case 1:
+                    tab1 += " " + active
+                    item1 = active
+                    break
+                case 2:
+                    tab2 += " " + active
+                    item2 = active
+                    break
+                case 3:
+                default:
+                    tab3 += " " + active
+                    item3 = active
+                    break
             }
 
-            /* Not needed for now, it requires undoable actions.
-
-                        <p className="col-md-6 text-right">
-                            <button type="button" className="btn btn-default" onClick={this.onCancel}>Cancel</button>
-                        </p>
-                        <p className="col-md-6">
-                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Save and close</button>
-                        </p>
-            */
-            var hide = {"display": "none"}
             return (
                 <div className="prototype-admin form-horizontal" style={style}>
-                    <div className="form-group" style={hide}>
-                        <div className="col-sm-4 control-label">
-                            <p>More boxes</p>
-                        </div>
+                    <div className="row">
                         <div className="col-sm-4">
-                            <div className="input-group">
-                                <span className="input-group-addon">
-                                    <i className="glyphicon glyphicon-search"></i>
-                                </span>
-                                <input type="search" className="form-control" placeholder="collection name" />
-                            </div>
-                        </div>
-                        <div className="col-sm-4">
-                            <p>
-                                <button type="button" className="btn btn-default">Search</button>
-                            </p>
-                        </div>
-                    </div>
-                    <div className="form-group" style={hide}>
-                        <div className="col-sm-offset-4 col-sm-8">
-                            <ul>
-                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
-                                    {' '}ATLAS eNews
-                                </a></li>
-                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
-                                    {' '}ATLAS collaboration (Archives)
-                                </a></li>
-                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
-                                    {' '}ATLAS Videos
-                                </a></li>
-                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
-                                    {' '}ATLAS Theses
-                                </a></li>
-                                <li><a href="#"><i className="glyphicon glyphicon-plus"></i>
-                                    {' '}ATLAS Scientific
-                                </a></li>
-                                <li><a href="#">... more suggestions</a></li>
+                            <ul className="nav nav-pills nav-stacked" role="tablist" onClick={this.onTabClick}>
+                                <li className={item1}><a href="#prototype-admin-tab1">Find more collections</a></li>
+                                <li className={item2}><a href="#prototype-admin-tab2">Configuration</a></li>
+                                <li className={item3}><a href="#prototype-admin-tab3">Disabled collections</a></li>
                             </ul>
                         </div>
-                    </div>
-                    <div className="form-group">
-                        <div className="col-sm-4 control-label">
-                            <p className="box-label">Visible boxes by default</p>
+                        <div className="tab-content">
+                            <Search className={tab1}
+                                    id="prototype-admin-tab1"/>
+                            <Configuration className={tab2}
+                                           id="prototype-admin-tab2"
+                                           boxes={boxes}
+                                           onVisibleBoxes={this.props.onVisibleBoxes}/>
+                            <Hidden className={tab3}
+                                    id="prototype-admin-tab3"
+                                    collection={this.props.collection}
+                                    onEnable={this.props.onEnable}
+                                    onDisable={this.props.onDisable}/>
                         </div>
-                        <div className="col-sm-8">
-                            <div className="btn-group" onClick={this.onRow}>
-                            {[3,6,9].map(function(row, index) {
-                                var classes = "btn",
-                                    key = "btn" + index
-
-                                if (row == boxes) {
-                                    classes += " btn-primary"
-                                } else {
-                                    classes += " btn-default"
-                                }
-                                return (
-                                    <button type="button" className={classes} key={key}>
-                                        {row}
-                                    </button>
-                                )
-                            })}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <div className="col-sm-4 control-label">
-                            <p>Disabled boxes</p>
-                            <p className="control-label-help">
-                                By removing some of this list,<br/>
-                                they may appear again<br/>
-                                on your homepage.
-                            </p>
-                        </div>
-                        <div className="col-sm-8">
-                            {disabledBoxes}
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <p className="col-sm-offset-4 col-sm-8">
-                            <button type="button" className="btn btn-primary" onClick={this.onSave}>Close</button>
-                        </p>
                     </div>
                 </div>
             )

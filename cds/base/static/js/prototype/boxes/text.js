@@ -33,25 +33,25 @@ define(function(require, exports, module) {
             return false
         },
         onMoveUp: function(event) {
-            this.props.swap(null, this.props.id)
+            this.props.onSwap(null, this.props.id)
             event.preventDefault()
         },
         onMoveDown: function(event) {
-            this.props.swap(this.props.id, null)
+            this.props.onSwap(this.props.id, null)
             event.preventDefault()
         },
         onDisable: function(box) {
             this.props.onDisable(box)
         },
         onDragOver: function(event) {
-            event.preventDefault()
+            event.preventDefault();
         },
         onDragStart: function(event) {
             event.dataTransfer.setData("text", this.props.id)
         },
         onDrop: function(event) {
+            this.props.onSwap(this.props.id, event.dataTransfer.getData("text"))
             event.preventDefault();
-            this.props.swap(this.props.id, event.dataTransfer.getData("text"))
         },
         onTouchStart: function(event) {
             // don't break multi-touch
@@ -69,6 +69,7 @@ define(function(require, exports, module) {
             }
         },
         onTouchEnd: function(event) {
+            // meh!
         },
         render: function() {
             var header = _.extend({"href": "#"}, this.props.header),
@@ -88,7 +89,7 @@ define(function(require, exports, module) {
                               onMenu={this.onMenu}
                               onMoveUp={this.onMoveUp}
                               onMoveDown={this.onMoveDown}
-                              onDisable={this.props.disable}/>
+                              onDisable={this.props.onDisable}/>
             }
 
             return (

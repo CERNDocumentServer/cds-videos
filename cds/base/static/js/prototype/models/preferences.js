@@ -27,7 +27,8 @@ define(function(require, exports, module) {
         defaults: {
             personal: true,
             admin: false,
-            boxes: 3
+            boxes: 3,
+            tab: 1
         }
     })
 })

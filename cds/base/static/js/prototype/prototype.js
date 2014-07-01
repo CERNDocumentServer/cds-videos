@@ -32,7 +32,8 @@ define(function(require, exports, module) {
             var state = {
                 personal: this.props.preferences.get("personal"),
                 admin: this.props.preferences.get("admin"),
-                length: this.props.preferences.get("boxes")
+                length: this.props.preferences.get("boxes"),
+                tab: this.props.preferences.get("tab")
             }
 
             if (state.personal) {
@@ -87,8 +88,20 @@ define(function(require, exports, module) {
 
             positionA = boxA.get("position")
 
-            boxA.set("position", boxB.get("position"))
-            boxB.set("position", positionA)
+            if (!boxB.get("disabled")) {
+                boxA.set("position", boxB.get("position"))
+                boxB.set("position", positionA)
+            } else {
+                // update all the position!!
+                collection.each(function(box) {
+                    if (box.get("position") > boxA.get("position")) {
+                        box.set("position", box.get("position") + 1)
+                    }
+                })
+                boxB.set("position", boxA.get("position"))
+                boxB.set("disabled", false);
+                boxA.set("position", boxA.get("position") + 1)
+            }
 
             boxA.save()
             boxB.save()
@@ -124,9 +137,7 @@ define(function(require, exports, module) {
         },
         render: function() {
             var boxes = this.props.collection.enabled().map(_.bind(function(box) {
-                box.set("data", _.extend({swap: this.onSwap,
-                                          disable: this.onDisable,
-                                          labels: this.props.labels},
+                box.set("data", _.extend({labels: this.props.labels},
                                          box.get("data")))
                 return box
             }, this))
@@ -137,18 +148,22 @@ define(function(require, exports, module) {
                             personal={this.state.personal}
                             admin={this.state.admin}
                             setState={this.onState}/>
-                    <AdminBar boxes={this.props.collection.disabled()}
+                    <AdminBar collection={this.props.collection}
                               preferences={this.props.preferences}
                               onVisibleBoxes={this.onVisibleBoxes}
                               personal={this.state.personal}
                               admin={this.state.admin}
+                              tab={this.state.tab}
                               setState={this.onState}
-                              onEnable={this.onEnable}/>
+                              onEnable={this.onEnable}
+                              onDisable={this.onDisable}/>
                     <Grid boxes={boxes}
                           length={this.state.length}
                           plus={this.state.plus}
                           personal={this.state.personal}
                           admin={this.state.admin}
+                          onSwap={this.onSwap}
+                          onDisable={this.onDisable}
                           onPlus={this.onPlus}/>
                 </div>
             )

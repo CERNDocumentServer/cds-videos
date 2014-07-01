@@ -56,7 +56,7 @@ define(function(require, exports, module) {
             return (
                 <p className={className} style={style}>
                     <a href="#" onClick={this.handleClick}>
-                        <i className="glyphicon glyphicon-th"></i>
+                        <i className="fa fa-pencil"></i>{' '}edit
                     </a>
                 </p>
             )

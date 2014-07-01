@@ -7,6 +7,7 @@
     margin-bottom: 2em;
     position: relative;
     border: 2px solid #eee;
+    background: #fff;
 
     h3 {
         margin-top: 0;
@@ -107,16 +108,18 @@
 }
 
 .prototype-admin {
+    .row;
+
     background: #f6f6f6;
     border-bottom: 1px solid #eee;
-    padding: 1em 0;
+    padding: 15px;
     margin-bottom: 2em;
     position: relative;
 
     &:before {
         position: absolute;
         top: -14px;
-        right: 0;
+        right: 14px;
         content: "";
         display: block;
         width: 0px;
@@ -127,23 +130,57 @@
         border-width: 0 14px 14px;
     }
 
-    .control-label-help {
-        font-size: 12px;
-    }
-
     ul {
         list-style: none;
         margin-left: 0;
         padding-left: 0;
     }
+
+    .nav-pills .active a {
+        font-weight: bold;
+
+        &:before {
+            position: absolute;
+            top: 2px;
+            right: -17px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: transparent;
+            border-left-color: #428BCA;
+            border-width: 18px 0 18px 19px;
+            content: "";
+        }
+    }
+
+    .tab-pane {
+        .clearfix;
+
+        .active {
+            background-color: #ddd;
+            font-weight: bold;
+        }
+    }
+
+    .box-drop {
+        border: 4px dotted #ddd;
+        background: #eee;
+
+        p {
+            text-align: center;
+            padding: 4em 0 0;
+            font-style: italic;
+            font-size: 36px;
+        }
+    }
 }
 
 .hamburger {
-    font-size: 24px;
+    /*font-size: 24px;
 
     a {
         color: #999
-    }
+    }*/
 }
 
 .plus {

@@ -119,20 +119,18 @@ define(function(require, exports, module) {
         },
         routes: {
             '': 'index',
-            'reset': 'reset'
         },
         index: function() {
             setView(p)
-        },
-        reset: function() {
-            bootstrapBoxes()
-            bootstrapPreferences()
-            //this.navigate("", {trigger: true})
         }
     })
 
     var router = new Router()
-    //router.navigate("reset", {trigger: true, replace: true})
+
+    // Easter-egg
+    $(".cern-logo a").on("click", function() {
+        localStorage.clear()
+    })
 
     module.exports = {
         original: original[0],

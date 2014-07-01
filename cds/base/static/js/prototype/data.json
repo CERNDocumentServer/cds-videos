@@ -146,9 +146,35 @@
             "title": "LHC",
             "href": "/collection/LHC"
         },
-        "body": "<h3>Thesis</h3><h4><a href=\"#\">A reliability analysis of the BLEAC signal acquisition card for the LHC injectors</a></h4><p class=subtitle>Moseng, Vegard Joa. 148p</p><p>As a required part of an Electronics and Mobile Communications Bachelor's degree at the University of Agder, all students have to complete a Bachelor's Thesis within the framework of a course named ELE300, in order to obtain their degree. This Thesis is thus my eort to complete this course.</p><p><a href=\"#\">&hellip; continue reading</a></p>",
+        "body": "<h3>Last Thesis</h3><h4><a href=\"#\">A reliability analysis of the BLEAC signal acquisition card for the LHC injectors</a></h4><p class=subtitle>Moseng, Vegard Joa. 148p</p><p>As a required part of an Electronics and Mobile Communications Bachelor's degree at the University of Agder, all students have to complete a Bachelor's Thesis within the framework of a course named ELE300, in order to obtain their degree. This Thesis is thus my eort to complete this course.</p><p><a href=\"#\">&hellip; continue reading</a></p>",
         "footer": {
-            "label": "view more thesis"
+            "label": "view more theses"
+        }
+    }
+}, {
+    "box": "Box",
+    "disabled": false,
+    "data": {
+        "header": {
+            "title": "CMS Theses",
+            "href": "http://cds.cern.ch/collection/CMS Theses"
+        },
+        "body": "<h3><a href=\"http://cds.cern.ch/record/1711636?ln=en\">A search for a heavy resonance decaying to a top quark and a bottom quark with the CMS experiment</a></h3><p class=subtitle>by Sperka, David (Boston U.)</p><p>The standard model of particle physics can explain most measurements of elementary par- ticle properties and interactions performed to date&hellip;</p>",
+        "footer": {
+            "label": "view all recent theses"
+        }
+    }
+}, {
+    "box": "Box",
+    "disabled": false,
+    "data": {
+        "header": {
+            "title": "CMS Physics Analysis Summaries",
+            "href": "http://cds.cern.ch/collection/CMS Physics Analysis Summaries"
+        },
+        "body": "<h3>Latest additions</h3><ul><li><a href=\"http://cds.cern.ch/record/1709826\">Measurements of differential dijet cross section in proton-proton collisions at sqrt(s)=8 TeV with the CMS detector</a><li><a href=\"http://cds.cern.ch/record/1709129\">Search for vector-like top quark partners produced in association with Higgs bosons in the diphoton final state</a><li><a href=\"http://cds.cern.ch/record/1708245\">Search for Contact Interactions in Dilepton Mass Spectra in pp Collisions at sqrt(s) = 8 TeV</a><li><a href=\"http://cds.cern.ch/record/1706154\">Search for Displaced SUSY in Dilepton Final States</a></ul>",
+        "footer": {
+            "label": "more summaries"
         }
     }
 }]

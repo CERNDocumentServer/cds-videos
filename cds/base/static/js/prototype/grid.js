@@ -22,6 +22,7 @@ define(function(require, exports, module) {
     "use strict"
 
     var React = require('react'),
+        _ = require('underscore'),
         Boxes = {
             Box: require('jsx!./boxes/text'),
             PictureBox: require('jsx!./boxes/picture')
@@ -58,25 +59,28 @@ define(function(require, exports, module) {
 
             return (
                 <div className="grid">
-                    {rows.map(function(row, index) {
+                    {rows.map(_.bind(function(row, index) {
                         if (index < show) {
                             var key = "r" + index
                             return (
                                 <div className="row" key={key}>
-                                    {row.map(function(box) {
+                                    {row.map(_.bind(function(box) {
                                         if (box) {
-                                            var comp = Boxes[box.get("box")](box.get("data"))
+                                            var comp = Boxes[box.get("box")](
+                                                _.extend({onSwap: this.props.onSwap,
+                                                          onDisable: this.props.onDisable},
+                                                         box.get("data")))
                                             return (
                                                 <div className="col-md-4" key={box.id}>
                                                     {comp}
                                                 </div>
                                             )
                                         }
-                                    })}
+                                    }, this))}
                                 </div>
                             )
                         }
-                    })}
+                    }, this))}
                     <div className="row" style={stylePlus}>
                         <p className="plus">
                             <a href="#" onClick={this.onPlus}>

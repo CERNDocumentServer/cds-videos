@@ -33,11 +33,11 @@ define(function(require, exports, module) {
             return false
         },
         onMoveUp: function(event) {
-            this.props.swap(null, this.props.id)
+            this.props.onSwap(null, this.props.id)
             event.preventDefault()
         },
         onMoveDown: function(event) {
-            this.props.swap(this.props.id, null)
+            this.props.onSwap(this.props.id, null)
             event.preventDefault()
         },
         onDragOver: function(event) {
@@ -48,7 +48,7 @@ define(function(require, exports, module) {
         },
         onDrop: function(event) {
             event.preventDefault();
-            this.props.swap(this.props.id, event.dataTransfer.getData("text"))
+            this.props.onSwap(this.props.id, event.dataTransfer.getData("text"))
         },
         onDisable: function(box) {
             this.props.onDisable(box)
@@ -90,7 +90,7 @@ define(function(require, exports, module) {
                               onMenu={this.onMenu}
                               onMoveUp={this.onMoveUp}
                               onMoveDown={this.onMoveDown}
-                              onDisable={this.props.disable}/>
+                              onDisable={this.props.onDisable}/>
             }
 
             return (
