@@ -21,6 +21,7 @@
 define(function(require, exports, module) {
 
     var $ = require("jquery"),
+        _ = require("underscore"),
         React = require("react")
 
     module.exports = React.createClass({
@@ -35,10 +36,25 @@ define(function(require, exports, module) {
          * Killing the event if it doesn't come from an anchor.
          */
         killEvent: function(event) {
-            var target = $(event.target).closest("a");
+            var target = $(event.target).closest("a, button")
             if (!target.length) {
                 event.stopPropagation()
             }
+        },
+        componentDidMount: function() {
+            // If we click outside the component, then we should hide the
+            // admin menu.
+            this.handler = _.bind(function(event) {
+                var target = $(event.target).closest("*[data-reactid=" + this._rootNodeID + "]")
+                if (!target.length) {
+                    this.props.onMenu(event)
+                }
+            }, this)
+            $("body").on("click", this.handler)
+        },
+        componentWillUnmount: function() {
+            $("body").off("click", this.handler)
+            this.handler = undefined
         },
         render: function() {
             var href = this.props.href || "#",
