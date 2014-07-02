@@ -26,7 +26,6 @@
         <a href="{{ url_for("webaccount.login", referer=request.url) }}">
           {{- _("Sign in") -}}
         </a>
-        {
 {%- else -%}
         Signed in as:
         <a href="{{ url_for("webaccount.index") }}">

@@ -50,6 +50,7 @@ define(function(require, exports, module) {
             this.props.preferences.save()
             this.setState(state)
         },
+        // DEPRECATED! Use onShuffle
         // a is null, means b moves up
         // b is null, means a moves down
         onSwap: function(a, b) {
@@ -108,6 +109,95 @@ define(function(require, exports, module) {
             collection.sort()
             this.setProps({collection: collection})
         },
+        // a: target, b: source
+        onShuffle: function(a, b) {
+            console.log(b + " -> " + a)
+            var collection = this.props.collection,
+                boxA, boxB, positionA
+
+            if (!b && !a) {
+                boxB = collection.findWhere({id: b})
+            }
+            if (a) {
+                boxA = collection.findWhere({id: a})
+                if (!b) {
+                    var position = collection.indexOf(boxA)
+                    do {
+                        position += 1
+                        boxB = collection.at(position)
+                    } while(boxB !== undefined && boxB.get("disabled"))
+                    if (!boxB) {
+                        return // no changes
+                    }
+                } else {
+                    boxB = collection.findWhere({id: b})
+                }
+            } else {
+                boxB = collection.findWhere({id: b})
+
+                var position = collection.indexOf(boxB)
+                do {
+                    position -= 1
+                    boxA = collection.at(position)
+                } while(boxA !== undefined && boxA.get("disabled"))
+                if (!boxA) {
+                    return  // no changes
+                }
+            }
+
+            collection.each(function(b) {
+                console.log(b.get("id") + ") " + b.get("position") + " " + typeof b.get("position"))
+            })
+
+            if (!boxB.get("disabled")) {
+                var posA = parseInt(boxA.get("position"), 10),
+                    posB = parseInt(boxB.get("position"), 10)
+
+                // B goes towards A that is before in the list
+                if (posA < posB) {
+                    collection.each(function(box) {
+                        var pos = parseInt(box.get("position"), 10)
+                        if (pos >= posA && pos < posB) {
+                            box.set("position", pos + 1)
+                            box.save()
+                        }
+                    })
+                    boxB.set("position", posA)
+                    boxB.save()
+                // B goes towards A that is after in the list
+                } else {
+                    collection.each(function(box) {
+                        var pos = parseInt(box.get("position"), 10)
+                        if (pos > posB && pos <= posA) {
+                            box.set("position", pos - 1)
+                            box.save()
+                        }
+                    })
+                    boxB.set("position", posA)
+                    boxB.save()
+                }
+            } else {
+                // update all the position!!
+                collection.each(function(box) {
+                    if (box.get("position") > boxA.get("position")) {
+                        box.set("position", box.get("position") + 1)
+                        box.save()
+                    }
+                })
+                boxB.set("position", boxA.get("position"))
+                boxB.set("disabled", false);
+                boxA.set("position", boxA.get("position") + 1)
+                boxA.save()
+                boxB.save()
+            }
+
+            collection.each(function(b) {
+                console.log(b.get("id") + ") " + b.get("position") + " " + typeof b.get("position"))
+            })
+
+            collection.sort()
+            this.setProps({collection: collection})
+        },
         onEnable: function(a) {
             var collection = this.props.collection,
                 boxA = collection.findWhere({id: a}),
@@ -162,7 +252,7 @@ define(function(require, exports, module) {
                           plus={this.state.plus}
                           personal={this.state.personal}
                           admin={this.state.admin}
-                          onSwap={this.onSwap}
+                          onSwap={this.onShuffle}
                           onDisable={this.onDisable}
                           onPlus={this.onPlus}/>
                 </div>
