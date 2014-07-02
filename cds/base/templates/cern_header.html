@@ -21,7 +21,24 @@
   <h1><a href="//cern.ch/">CERN <span>Accelerating science</span></a></h1>
   <nav>
     <ul>
-      <li><a href="#TODO">Sign in</a></li>
+      <li>
+{%- if current_user.is_guest -%}
+        <a href="{{ url_for("webaccount.login", referer=request.url) }}">
+          {{- _("Sign in") -}}
+        </a>
+        {
+{%- else -%}
+        Signed in as:
+        <a href="{{ url_for("webaccount.index") }}">
+          {{- current_user.nickname | default(current_user.email) -}}
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
+          {{- _("Sign out") -}}
+        </a>
+{%- endif -%}
+      </li>
       <li><a href="//cern.ch/directory">Directory</a></li>
     </ul>
   </nav>

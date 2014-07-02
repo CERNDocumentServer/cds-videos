@@ -21,6 +21,11 @@
 
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
+  {#
+   # The CERN header shouldn't be part of the Invenio application as it's
+   # added automagically by the apache server (I guess) and the login goes to
+   # sibboleth.
+   #}
   {%- include "cern_header.html" -%}
   <div id="heading">
     <div id="mainmenu" class="container">
@@ -39,17 +44,6 @@
   {%- for item in current_menu.submenu("main").children if item.visible and item.name not in ("admin", "search") -%}
               <li><a href="{{ item.url }}">{{ item.text | safe }}</a></li>
   {%- endfor -%}
-              <li>
-  {%- if current_user.is_guest -%}
-              <a href="{{ url_for("webaccount.login", referer=request.url) }}">
-                {{- _("Sign in") -}}
-              </a>
-  {%- else -%}
-              <a href="{{ url_for("webaccount.index") }}">
-                {{- current_user.nickname | default(current_user.email) -}}
-              </a>
-  {%- endif -%}
-              </li>
             </ul>
           </nav>
         </div>
