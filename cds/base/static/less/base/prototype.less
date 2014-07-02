@@ -9,6 +9,29 @@
     border: 2px solid #eee;
     background: #fff;
 
+    &::-webkit-scrollbar {
+        -webkit-appearance: none;
+    }
+
+    &::-webkit-scrollbar:vertical {
+        width: 11px;
+    }
+
+    &::-webkit-scrollbar:horizontal {
+        height: 11px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        border: 2px solid #fff;
+        background-color: rgba(0, 0, 0, .25);
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: #fff;
+        border-radius: 8px;
+    }
+
     h3 {
         margin-top: 0;
         padding-top: 10px;
@@ -41,7 +64,7 @@
         padding: 0;
     }
 
-    .box-body {
+    &-body {
         height: auto;
         min-height: 100%;
         padding-bottom: 35px;
@@ -66,7 +89,7 @@
         padding-right: @box-padding;
     }
 
-    .box-admin {
+    &-admin {
         position:absolute;
         top: 0;
         left: 0;
@@ -74,36 +97,36 @@
         bottom: 0;
         background-color: rgba(0,0,0,.25);
 
-        .box-admin-buttons {
+        &-buttons {
             width: 60%;
             margin-top: 20%;
             .center-block();
         }
     }
-}
 
-.box-picture {
-    .box-body .white-wrap, footer {
-        background: rgba(255,255,255,.90);
+    &-picture {
+        .box-body .white-wrap, footer {
+            background: rgba(255,255,255,.90);
+        }
     }
-}
 
-.box-video {
-    position: relative;
-    background-size: 100% auto;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
+    &-video {
+        position: relative;
+        background-size: 100% auto;
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
 
-    a {
-        @box-video-a-size: 42px;
-        display: block;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        font-size: @box-video-a-size;
-        width: @box-video-a-size;
-        height: @box-video-a-size;
-        margin: (@box-video-a-size / -2) 0 0 (@box-video-a-size / -2);
+        a {
+            @box-video-a-size: 42px;
+            display: block;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-size: @box-video-a-size;
+            width: @box-video-a-size;
+            height: @box-video-a-size;
+            margin: (@box-video-a-size / -2) 0 0 (@box-video-a-size / -2);
+        }
     }
 }
 
