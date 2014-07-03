@@ -53,24 +53,6 @@ define(function(require, exports, module) {
             this.props.onSwap(this.props.id, event.dataTransfer.getData("text"))
             event.preventDefault();
         },
-        onTouchStart: function(event) {
-            // don't break multi-touch
-            if (event.touches.length == 1) {
-                // double tap in under 300ms
-                if (this.timer) {
-                    this.setState({edit: !this.state.edit})
-                    clearTimeout(this.timer)
-                    this.timer = 0
-                } else {
-                    this.timer = setTimeout(_.bind(function(){
-                        this.timer = 0
-                    }, this), 300)
-                }
-            }
-        },
-        onTouchEnd: function(event) {
-            // meh!
-        },
         render: function() {
             var header = _.extend({"href": "#"}, this.props.header),
                 footer = _.extend({"label": "more {this.props.header.title}", "href": header.href},
@@ -94,8 +76,8 @@ define(function(require, exports, module) {
 
             return (
                 <article className="box"
-                         draggable="true" onDragStart={this.onDragStart} onDrop={this.onDrop} onDragOver={this.onDragOver}
-                         onTouchStart={this.onTouchStart} onTouchEnd={this.onTouchEnd}>
+                         draggable="true" onDragStart={this.onDragStart}
+                         onDrop={this.onDrop} onDragOver={this.onDragOver}>
                     <header>
                         <h2>
                             <a href={header.href} onClick={this.onMenu}>

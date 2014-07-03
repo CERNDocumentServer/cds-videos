@@ -35,7 +35,7 @@ define(function(require, exports, module) {
 
     var $ = require("jquery"),
         React = require("react"),
-        Proto = require("jsx!./prototype/prototype"),
+        Main = require("jsx!./prototype/main"),
         Backbone = require("backbone"),
         Box = require("./prototype/models/box"),
         Preferences = require("./prototype/models/preferences"),
@@ -43,7 +43,7 @@ define(function(require, exports, module) {
         PreferencesCollection = require("./prototype/collections/preferences")
 
     // Shall be done before any rendering.
-    React.initializeTouchEvents(true)
+    //React.initializeTouchEvents(true)
 
     var collection = new BoxesCollection(),
         prefsColl = new PreferencesCollection(),
@@ -96,7 +96,7 @@ define(function(require, exports, module) {
         React.renderComponent(view, where)
     }
 
-    var p =Proto({
+    var main = Main({
         labels: {
             on: "Switch to all the collections",
             off: "Switch to your personal collections",
@@ -121,7 +121,7 @@ define(function(require, exports, module) {
             '': 'index',
         },
         index: function() {
-            setView(p)
+            setView(main)
         }
     })
 
