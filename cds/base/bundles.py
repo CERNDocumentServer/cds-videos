@@ -27,9 +27,17 @@ from invenio.base.bundles import styles as _styles
 _styles.contents.remove("less/base.less")
 _styles.contents += ("less/cds.less",)
 
-script = Bundle(
+
+js = Bundle(
     "js/main.js",
     output="cds.js",
     weight=91,
-    filters="requirejs"
+    filters="requirejs",
+    bower={
+        "backbone": "latest",
+        "backbone.localstorage": "latest",
+        "jsx-requirejs-plugin": "latest",
+        "requirejs-plugins": "latest",
+        "es5-shim": "latest"
+    }
 )
