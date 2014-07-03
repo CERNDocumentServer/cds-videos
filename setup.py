@@ -43,6 +43,15 @@ setup(
     install_requires=[
         "Invenio>=1.9999"
     ],
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GPLv2 License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+    ],
     entry_points={
         'invenio.config': [
             "cds = cds.config"
