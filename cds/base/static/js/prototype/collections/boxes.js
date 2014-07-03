@@ -17,8 +17,9 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
 define(function(require, exports, module) {
+    "use strict";
+
     var Backbone = require("backbone"),
         Box = require("../models/box")
 

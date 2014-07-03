@@ -18,9 +18,8 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
 define(function(require, exports, module) {
-    "use strict"
+    "use strict";
 
     var React = require('react')
 

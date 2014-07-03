@@ -31,7 +31,7 @@
 // CommonJS-like format
 // --------------------
 define(function(require, exports, module) {
-    "use strict"
+    "use strict";
 
     var $ = require("jquery"),
         React = require("react"),

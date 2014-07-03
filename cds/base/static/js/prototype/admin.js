@@ -19,7 +19,7 @@
  */
 
 define(function(require, exports, module) {
-    "use strict"
+    "use strict";
 
     var $ = require("jquery"),
         React = require("react"),
@@ -67,7 +67,6 @@ define(function(require, exports, module) {
                     item2 = active
                     break
                 case 3:
-                default:
                     tab3 += " " + active
                     item3 = active
                     break

@@ -19,7 +19,7 @@
  */
 
 define(function(require, exports, module) {
-    "use strict"
+    "use strict";
 
     var React = require('react'),
         AdminBar = require("jsx!./admin"),
@@ -55,7 +55,7 @@ define(function(require, exports, module) {
         // b is null, means a moves down
         onSwap: function(a, b) {
             var collection = this.props.collection,
-                boxA, boxB, positionA
+                boxA, boxB, position
 
             if (!b && !a) {
                 boxB = collection.findWhere({id: b})
@@ -63,7 +63,7 @@ define(function(require, exports, module) {
             if (a) {
                 boxA = collection.findWhere({id: a})
                 if (!b) {
-                    var position = collection.indexOf(boxA)
+                    position = collection.indexOf(boxA)
                     do {
                         position += 1
                         boxB = collection.at(position)
@@ -77,7 +77,7 @@ define(function(require, exports, module) {
             } else {
                 boxB = collection.findWhere({id: b})
 
-                var position = collection.indexOf(boxB)
+                position = collection.indexOf(boxB)
                 do {
                     position -= 1
                     boxA = collection.at(position)
@@ -87,11 +87,11 @@ define(function(require, exports, module) {
                 }
             }
 
-            positionA = boxA.get("position")
+            position = boxA.get("position")
 
             if (!boxB.get("disabled")) {
                 boxA.set("position", boxB.get("position"))
-                boxB.set("position", positionA)
+                boxB.set("position", position)
             } else {
                 // update all the position!!
                 collection.each(function(box) {
@@ -113,7 +113,7 @@ define(function(require, exports, module) {
         onShuffle: function(a, b) {
             console.log(b + " -> " + a)
             var collection = this.props.collection,
-                boxA, boxB, positionA
+                boxA, boxB, position
 
             if (!b && !a) {
                 boxB = collection.findWhere({id: b})
@@ -121,7 +121,7 @@ define(function(require, exports, module) {
             if (a) {
                 boxA = collection.findWhere({id: a})
                 if (!b) {
-                    var position = collection.indexOf(boxA)
+                    position = collection.indexOf(boxA)
                     do {
                         position += 1
                         boxB = collection.at(position)
@@ -135,7 +135,7 @@ define(function(require, exports, module) {
             } else {
                 boxB = collection.findWhere({id: b})
 
-                var position = collection.indexOf(boxB)
+                position = collection.indexOf(boxB)
                 do {
                     position -= 1
                     boxA = collection.at(position)
@@ -156,9 +156,9 @@ define(function(require, exports, module) {
                 // B goes towards A that is before in the list
                 if (posA < posB) {
                     collection.each(function(box) {
-                        var pos = parseInt(box.get("position"), 10)
-                        if (pos >= posA && pos < posB) {
-                            box.set("position", pos + 1)
+                        position = parseInt(box.get("position"), 10)
+                        if (position >= posA && position < posB) {
+                            box.set("position", position + 1)
                             box.save()
                         }
                     })
@@ -167,9 +167,9 @@ define(function(require, exports, module) {
                 // B goes towards A that is after in the list
                 } else {
                     collection.each(function(box) {
-                        var pos = parseInt(box.get("position"), 10)
-                        if (pos > posB && pos <= posA) {
-                            box.set("position", pos - 1)
+                        position = parseInt(box.get("position"), 10)
+                        if (position > posB && position <= posA) {
+                            box.set("position", position - 1)
                             box.save()
                         }
                     })

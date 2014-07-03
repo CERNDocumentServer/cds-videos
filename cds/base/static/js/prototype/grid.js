@@ -19,7 +19,7 @@
  */
 
 define(function(require, exports, module) {
-    "use strict"
+    "use strict";
 
     var React = require('react'),
         _ = require('underscore'),
