@@ -30,10 +30,22 @@ define(function(require, exports, module) {
         localStorage: new Backbone.LocalStorage("prototype.boxes"),
         comparator: "position",
         enabled: function() {
-            return this.where({disabled: false})
+            return this.where({disabled: false, searchable: false})
         },
         disabled: function() {
             return this.where({disabled: true})
+        },
+        searchable: function() {
+            return this.where({disabled: false, searchable: true})
+        },
+        search: function(query) {
+            // dummy search!
+            if (query) {
+                return this.searchable()
+            } else {
+                return []
+            }
         }
+
     })
 })

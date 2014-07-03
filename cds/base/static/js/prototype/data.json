@@ -140,7 +140,7 @@
     }
 }, {
     "box": "Box",
-    "disabled": true,
+    "searchable": true,
     "data": {
         "header": {
             "title": "LHC",
@@ -153,7 +153,7 @@
     }
 }, {
     "box": "Box",
-    "disabled": false,
+    "searchable": true,
     "data": {
         "header": {
             "title": "CMS Theses",
@@ -166,7 +166,7 @@
     }
 }, {
     "box": "Box",
-    "disabled": false,
+    "searchable": true,
     "data": {
         "header": {
             "title": "CMS Physics Analysis Summaries",

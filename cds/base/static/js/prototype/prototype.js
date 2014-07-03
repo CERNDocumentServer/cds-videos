@@ -22,7 +22,7 @@ define(function(require, exports, module) {
     "use strict";
 
     var React = require('react'),
-        AdminBar = require("jsx!./admin"),
+        AdminBar = require("jsx!./admin/main"),
         TopBar = require("jsx!./topbar"),
         Grid = require("jsx!./grid"),
         _ = require("underscore")
@@ -89,7 +89,7 @@ define(function(require, exports, module) {
 
             position = boxA.get("position")
 
-            if (!boxB.get("disabled")) {
+            if (!boxB.get("disabled") && !boxB.get("searchable")) {
                 boxA.set("position", boxB.get("position"))
                 boxB.set("position", position)
             } else {
@@ -100,7 +100,7 @@ define(function(require, exports, module) {
                     }
                 })
                 boxB.set("position", boxA.get("position"))
-                boxB.set("disabled", false);
+                boxB.set("disabled", false)
                 boxA.set("position", boxA.get("position") + 1)
             }
 
@@ -145,11 +145,7 @@ define(function(require, exports, module) {
                 }
             }
 
-            collection.each(function(b) {
-                console.log(b.get("id") + ") " + b.get("position") + " " + typeof b.get("position"))
-            })
-
-            if (!boxB.get("disabled")) {
+            if (!boxB.get("disabled") && !boxB.get("searchable")) {
                 var posA = parseInt(boxA.get("position"), 10),
                     posB = parseInt(boxB.get("position"), 10)
 
@@ -185,15 +181,12 @@ define(function(require, exports, module) {
                     }
                 })
                 boxB.set("position", boxA.get("position"))
-                boxB.set("disabled", false);
+                boxB.set("disabled", false)
+                boxB.set("searchable", false)
                 boxA.set("position", boxA.get("position") + 1)
                 boxA.save()
                 boxB.save()
             }
-
-            collection.each(function(b) {
-                console.log(b.get("id") + ") " + b.get("position") + " " + typeof b.get("position"))
-            })
 
             collection.sort()
             this.setProps({collection: collection})
@@ -204,6 +197,7 @@ define(function(require, exports, module) {
                 minPosition = collection.at(0).get("position")
 
             boxA.set("disabled", false)
+            boxA.set("searchable", false)
             boxA.set("position", minPosition - 1)
             boxA.save()
             collection.sort()

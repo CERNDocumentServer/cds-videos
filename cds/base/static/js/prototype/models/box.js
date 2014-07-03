@@ -30,6 +30,7 @@ define(function(require, exports, module) {
             id: 0,
             position: 0,
             disabled: false,
+            searchable: false,
             data: {}
         }
     })

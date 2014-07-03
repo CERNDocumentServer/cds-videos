@@ -23,9 +23,9 @@ define(function(require, exports, module) {
 
     var $ = require("jquery"),
         React = require("react"),
-        Configuration = require("jsx!./admin/configuration"),
-        Hidden = require("jsx!./admin/hidden"),
-        Search = require("jsx!./admin/search")
+        Configuration = require("jsx!./configuration"),
+        Hidden = require("jsx!./hidden"),
+        Search = require("jsx!./search")
 
     module.exports = React.createClass({
         onCancel: function() {
@@ -84,7 +84,9 @@ define(function(require, exports, module) {
                         </div>
                         <div className="tab-content">
                             <Search className={tab1}
-                                    id="prototype-admin-tab1"/>
+                                    id="prototype-admin-tab1"
+                                    collection={this.props.collection}
+                                    onEnable={this.props.onEnable}/>
                             <Configuration className={tab2}
                                            id="prototype-admin-tab2"
                                            boxes={boxes}

@@ -24,9 +24,10 @@ define(function(require, exports, module) {
     var $ = require("jquery"),
         _ = require("underscore"),
         React = require("react"),
+        BoxList = require("jsx!./boxlist"),
         Boxes = {
-            Box: require('jsx!../boxes/text'),
-            PictureBox: require('jsx!../boxes/picture')
+            Box: require("jsx!../boxes/text"),
+            PictureBox: require("jsx!../boxes/picture")
         }
 
     module.exports = React.createClass({
@@ -50,7 +51,10 @@ define(function(require, exports, module) {
             return false
         },
         onDisable: function(event) {
-            this.props.onDisable(event.dataTransfer.getData("text"))
+            var id = event.dataTransfer.getData("text")
+            this.setState({"box": id})
+            this.props.onDisable(id)
+
             event.preventDefault()
         },
         onDragOver: function(event) {
@@ -58,43 +62,28 @@ define(function(require, exports, module) {
         },
         // Swap acts as disabling here as it's put on the trashbin.
         onSwap: function(a, b) {
-            this.setState({"box": null})
+            this.setState({"box": b})
             this.props.onDisable(b)
         },
         render: function() {
-            var disabledBoxes = <p>All the boxes are enabled.</p>,
+            var boxList = <p>All the boxes are enabled.</p>,
                 box = <article onDragOver={this.onDragOver} onDrop={this.onDisable} className="box box-drop">
                         <p>
-                            <i className="glyphicon glyphicon-trash"></i>
+                            <i className="glyphicon glyphicon-trash"></i><br/>
+                            drop here to disable
                         </p>
                     </article>,
                 disabled = this.props.collection.disabled(),
                 found = false
 
             if (disabled.length) {
-                //box = <p>&larr; Select a collection to preview it.</p>,
-                disabledBoxes = <ul className="nav nav-stacked">
-                        {disabled.map(_.bind(function(box){
-                            var data = box.get("data"),
-                                glyphicon = "",
-                                className = ""
-                            if (box.get("id") == this.state.box) {
-                                found = true
-                                className = "active"
-                                glyphicon = <span className="pull-right">
-                                        <i className="glyphicon glyphicon-plus"></i>
-                                    </span>
-                            }
-                            return (
-                                <li key={box.get("id")} className={className}>
-                                    <a href={data.header.href} data-id={box.get("id")}>
-                                        {glyphicon}{' '}{data.header.title}
-                                    </a>
-                                </li>
-                            )
-                        }, this))}
-                    </ul>
+                boxList = <BoxList boxes={disabled}
+                                         current={this.state.box}/>
             }
+
+            found = _.inject(disabled, _.bind(function(found, box) {
+                return found || (box.get("id") == this.state.box)
+            }, this), found)
 
             if (this.state.box && found) {
                 var b = this.props.collection.findWhere({id: this.state.box})
@@ -108,7 +97,7 @@ define(function(require, exports, module) {
                         <h4>Disabled collections</h4>
                     </div>
                     <div className="col-sm-4" onClick={this.onEnable}>
-                        {disabledBoxes}
+                        {boxList}
                     </div>
                     <div className="col-sm-4">
                         {box}
