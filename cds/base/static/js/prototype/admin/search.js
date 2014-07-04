@@ -39,28 +39,44 @@ define(function(require, exports, module) {
             }
         },
         onSearch: function(event) {
-            this.setState({"q": this.state.temp})
+            var box = this.pickDefaultBox(this.state.temp)
+            this.setState({"q": this.state.temp, "box": box})
             event.preventDefault()
         },
         onEnable: function(event) {
+            event.preventDefault()
             var target = $(event.target).closest("a")
             if (target.length) {
                 if (this.state.box === target.data("id")) {
-                    this.setState({"box": null})
                     this.props.onEnable(target.data("id"))
                 } else {
-                    this.setState({"box": target.data("id")})
+                    return this.setState({"box": target.data("id")})
                 }
-            } else {
-                this.setState({"box": null})
             }
-            return false
+            this.setState({"box": this.pickDefaultBox()})
         },
         onSwap: function() {
             // do nothing
         },
         handleChange: function(event) {
             this.setState({"temp": event.target.value})
+        },
+        pickDefaultBox: function(query) {
+            var query = query || this.state.q
+            if (query) {
+                var searchable = this.props.collection.search(query),
+                    found = false;
+
+                if (this.state.box) {
+                    found = _.inject(searchable, _.bind(function(found, box) {
+                        return found || (box.get("id") == this.state.box)
+                    }, this), found)
+                }
+                if (!found && searchable.length) {
+                    return searchable[0].get("id")
+                }
+            }
+            return null
         },
         render: function() {
             var boxList,
@@ -69,24 +85,10 @@ define(function(require, exports, module) {
                 searchable = this.props.collection.search(this.state.q),
                 found = false
 
-            found = _.inject(searchable, _.bind(function(found, box) {
-                return found || (box.get("id") == this.state.box)
-            }, this), found)
-
             if (searchable.length) {
-                var b
-
-                //box = <p>&larr; Select a collection to preview it.</p>,
                 results = <p>{searchable.length} matches for <em>{this.state.q}</em></p>
-                box = <article className="box">
-                        <header><h2>Preview</h2></header>
-                    </article>
 
-                if (this.state.box && found) {
-                    b = this.props.collection.findWhere({id: this.state.box})
-                } else {
-                    b = searchable[0]
-                }
+                var b = this.props.collection.findWhere({id: this.state.box})
 
                 boxList = <BoxList boxes={searchable}
                                    current={b.get("id")}/>
