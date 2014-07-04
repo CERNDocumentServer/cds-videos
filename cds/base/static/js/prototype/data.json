@@ -5,7 +5,7 @@
             "title": "CERN Bulletin",
             "href": "http://cds.cern.ch/collection/CERN Bulletin Printable Version"
         },
-        "body": "<h3><a href=\"http://cds.cern.ch/collection/CERN Bulletin Printable Version\">Polarisation confirmed</a></h3><p class=\"subtitle\">by Anaïs Schaeffer, the CERN Bulletin</p><img src=\"https://cds.cern.ch/record/1698254/files/LHCbEvent_1_image.jpg?subformat=icon\" alt=\"\" style=\"margin:0 1em 1em 0;width:50%\" align=\"left\"><p>The polarisation of photons emitted in the decay of a bottom quark into a strange quark, as predicted by the Standard Model, has just been observed for the first time by the LHCb collaboration. More detailed research is still required to determine <a href=\"#\">&hellip; (read more)</a>.</p>",
+        "body": "<h3><a href=\"http://cds.cern.ch/journal/CERNBulletin/2014/20/News%20Articles/1698254?ln=en\">Polarisation confirmed</a></h3><p class=\"subtitle\">by Anaïs Schaeffer, the CERN Bulletin</p><img src=\"https://cds.cern.ch/record/1698254/files/LHCbEvent_1_image.jpg?subformat=icon\" alt=\"\" style=\"margin:0 1em 1em 0;width:50%\" align=\"left\"><p>The polarisation of photons emitted in the decay of a bottom quark into a strange quark, as predicted by the Standard Model, has just been observed for the first time by the LHCb collaboration. More detailed research is still required to determine <a href=\"http://cds.cern.ch/journal/CERNBulletin/2014/20/News%20Articles/1698254?ln=en\">&hellip; (read more)</a>.</p>",
         "footer": {
             "label": "visit the CERN Bulletin",
             "href": "http://cds.cern.ch/journal/CERNBulletin/2014/20/News%20Articles"
@@ -30,7 +30,7 @@
             "title": "Books",
             "href": "http://cds.cern.ch/collection/Books"
         },
-        "body": "<h3>Recent Book</h3><h4><a href=\"#\"><img src=\"http://ecx.images-amazon.com/images/I/51YgkOd%2BBpL._SL160_.jpg\" alt=\"cover\" style=\"margin:0 1em 1em 0\" align=\"left\"> Discrete of continuous? : the quest for fundamental length in modern physics</h4></a><p>by Hagar, Amit</p>",
+        "body": "<h3><a href=\"http://cds.cern.ch/collection/Books\">Recent Books</a></h3><h4><a href=\"http://cds.cern.ch/record/1712998?ln=en\"><img src=\"http://ecx.images-amazon.com/images/I/51YgkOd%2BBpL._SL160_.jpg\" alt=\"cover\" style=\"margin:0 1em 1em 0\" align=\"left\"> Discrete of continuous? : the quest for fundamental length in modern physics</h4></a><p>by Hagar, Amit</p>",
         "footer": {
             "label": "more recent books"
 
@@ -133,7 +133,7 @@
             "title": "Your Messages",
             "href": "/yourmessages/"
         },
-        "body": "<h3><a href=\"#\">Latest message</a></h3><p><strong>from:</strong> user #42<br><strong>subject:</strong> Hi there!</p><div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ornare faucibus quam, eu iaculis erat vehicula eget. Nullam pretium massa non nunc tincidunt sollicitudin. Pellentesque ultricies scelerisque augue quis fringilla. Ut nec libero at risus vestibulum faucibus non eget neque. Fusce convallis nunc nec odio rhoncus, in adipiscing nisl facilisis.</p><p>Cras a augue nec ipsum sollicitudin aliquam eu in neque. Sed pharetra ac nibh in luctus<a href=\"#\">&hellip; (continue reading)</a></p></div>",
+        "body": "<h3><a href=\"/yourmessages/\">Latest message</a></h3><p><strong>from:</strong> user #42<br><strong>subject:</strong> Hi there!</p><div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ornare faucibus quam, eu iaculis erat vehicula eget. Nullam pretium massa non nunc tincidunt sollicitudin. Pellentesque ultricies scelerisque augue quis fringilla. Ut nec libero at risus vestibulum faucibus non eget neque. Fusce convallis nunc nec odio rhoncus, in adipiscing nisl facilisis.</p><p>Cras a augue nec ipsum sollicitudin aliquam eu in neque. Sed pharetra ac nibh in luctus<a href=\"#\">&hellip; (continue reading)</a></p></div>",
         "footer": {
             "label": "3 unread messages"
         }

@@ -35,7 +35,7 @@ define(function(require, exports, module) {
             return (
                 <div className={this.props.className} id={this.props.id}>
                     <div className="col-sm-8">
-                        <h4>Configuration</h4>
+                        <h4>Settings</h4>
                     </div>
                     <div className="col-sm-4">
                         <p className="box-label">Visible boxes by default</p>

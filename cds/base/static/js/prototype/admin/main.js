@@ -78,8 +78,8 @@ define(function(require, exports, module) {
                         <div className="col-sm-4">
                             <ul className="nav nav-pills nav-stacked" role="tablist" onClick={this.onTabClick}>
                                 <li className={item1}><a href="#prototype-admin-tab1">Find more collections</a></li>
-                                <li className={item2}><a href="#prototype-admin-tab2">Configuration</a></li>
-                                <li className={item3}><a href="#prototype-admin-tab3">Disabled collections</a></li>
+                                <li className={item2}><a href="#prototype-admin-tab2">Disabled collections</a></li>
+                                <li className={item3}><a href="#prototype-admin-tab3">Settings</a></li>
                             </ul>
                         </div>
                         <div className="tab-content">
@@ -87,15 +87,15 @@ define(function(require, exports, module) {
                                     id="prototype-admin-tab1"
                                     collection={this.props.collection}
                                     onEnable={this.props.onEnable}/>
-                            <Configuration className={tab2}
-                                           id="prototype-admin-tab2"
-                                           boxes={boxes}
-                                           onVisibleBoxes={this.props.onVisibleBoxes}/>
-                            <Hidden className={tab3}
-                                    id="prototype-admin-tab3"
+                            <Hidden className={tab2}
+                                    id="prototype-admin-tab2"
                                     collection={this.props.collection}
                                     onEnable={this.props.onEnable}
                                     onDisable={this.props.onDisable}/>
+                            <Configuration className={tab3}
+                                           id="prototype-admin-tab3"
+                                           boxes={boxes}
+                                           onVisibleBoxes={this.props.onVisibleBoxes}/>
                         </div>
                     </div>
                 </div>
