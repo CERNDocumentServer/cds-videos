@@ -26,7 +26,10 @@ define(function(require, exports, module) {
 
     module.exports = React.createClass({
         getInitialState: function() {
-            return {edit: false}
+            return {
+                edit: false,
+                hover: false
+            }
         },
         onMenu: function(event) {
             this.setState({edit: !this.state.edit})
@@ -44,14 +47,20 @@ define(function(require, exports, module) {
             this.props.onDisable(box)
         },
         onDragOver: function(event) {
-            event.preventDefault();
+            event.preventDefault()
+            this.setState({hover: true})
+        },
+        onDragLeave: function(event) {
+            event.preventDefault()
+            this.setState({hover: false})
         },
         onDragStart: function(event) {
             event.dataTransfer.setData("text", this.props.id)
         },
         onDrop: function(event) {
+            event.preventDefault()
             this.props.onSwap(this.props.id, event.dataTransfer.getData("text"))
-            event.preventDefault();
+            this.setState({hover: false})
         },
         render: function() {
             var header = _.extend({"href": "#"}, this.props.header),
@@ -61,8 +70,13 @@ define(function(require, exports, module) {
 
             var className = "box-body";
             if (!("wrap" in this.props) || this.props.wrap) {
-                className += " wrap";
+                className += " wrap"
             }
+
+            if (this.state.hover) {
+                className += " hover"
+            }
+
             if (this.state.edit) {
                 edit = <Admin id={this.props.id}
                               title={header.title}
@@ -77,7 +91,8 @@ define(function(require, exports, module) {
             return (
                 <article className="box"
                          draggable="true" onDragStart={this.onDragStart}
-                         onDrop={this.onDrop} onDragOver={this.onDragOver}>
+                         onDrop={this.onDrop} onDragOver={this.onDragOver}
+                         onDragLeave={this.onDragLeave}>
                     <header>
                         <h2>
                             <a href={header.href} onClick={this.onMenu}>
