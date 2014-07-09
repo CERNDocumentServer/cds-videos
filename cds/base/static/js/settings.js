@@ -20,7 +20,6 @@
 require.config({
     baseUrl: '/',
     paths: {
-        bootstrap: 'vendors/bootstrap/js',
         react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
         JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
@@ -30,27 +29,14 @@ require.config({
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
         typeahead: 'js/typeahead',
+        'jquery.form': 'js/jquery.form',
         prototype: 'js/prototype',
         app: 'js/app',
     },
     shim: {
-        'bootstrap/affix': { deps: ['jquery'], exports: '$.fn.affix' },
-        'bootstrap/alert': { deps: ['jquery'], exports: '$.fn.alert' },
-        'bootstrap/button': { deps: ['jquery'], exports: '$.fn.button' },
-        'bootstrap/carousel': { deps: ['jquery'], exports: '$.fn.carousel' },
-        'bootstrap/collapse': { deps: ['jquery'], exports: '$.fn.collapse' },
-        'bootstrap/dropdown': { deps: ['jquery'], exports: '$.fn.dropdown' },
-        'bootstrap/modal': { deps: ['jquery'], exports: '$.fn.modal' },
-        'bootstrap/popover': {
-            deps: ['jquery', 'bootstrap/tooltip'],
-            exports: '$.fn.popover'
-        },
-        'bootstrap/scrollspy': { deps: ['jquery'], exports: '$.fn.scrollspy' },
-        'bootstrap/tab': { deps: ['jquery'], exports: '$.fn.tab' },
-        'bootstrap/tooltip': { deps: ['jquery'], exports: '$.fn.tooltip' },
-        'bootstrap/transition': { deps: ['jquery'], exports: '$.fn.transition' },
         react: { exports: 'React' },
         jquery: { exports: '$' },
+        'jquery.form': { deps: ['jquery'] },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
         'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
         underscore: { exports: '_' }

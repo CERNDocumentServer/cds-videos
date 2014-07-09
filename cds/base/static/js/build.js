@@ -34,7 +34,7 @@
     },
     paths: {
         jquery: 'empty:',
-        bootstrap: 'vendors/bootstrap/js',
+        'jquery.form': 'empty:',
         react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
         JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
@@ -48,21 +48,6 @@
         app: 'js/app',
     },
     shim: {
-        'bootstrap/affix': { deps: ['jquery'], exports: '$.fn.affix' },
-        'bootstrap/alert': { deps: ['jquery'], exports: '$.fn.alert' },
-        'bootstrap/button': { deps: ['jquery'], exports: '$.fn.button' },
-        'bootstrap/carousel': { deps: ['jquery'], exports: '$.fn.carousel' },
-        'bootstrap/collapse': { deps: ['jquery'], exports: '$.fn.collapse' },
-        'bootstrap/dropdown': { deps: ['jquery'], exports: '$.fn.dropdown' },
-        'bootstrap/modal': { deps: ['jquery'], exports: '$.fn.modal' },
-        'bootstrap/popover': {
-            deps: ['jquery', 'bootstrap/tooltip'],
-            exports: '$.fn.popover'
-        },
-        'bootstrap/scrollspy': { deps: ['jquery'], exports: '$.fn.scrollspy' },
-        'bootstrap/tab': { deps: ['jquery'], exports: '$.fn.tab' },
-        'bootstrap/tooltip': { deps: ['jquery'], exports: '$.fn.tooltip' },
-        'bootstrap/transition': { deps: ['jquery'], exports: '$.fn.transition' },
         react: { exports: 'React' },
         jquery: { exports: '$' },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
