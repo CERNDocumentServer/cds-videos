@@ -50,68 +50,8 @@ define(function(require, exports, module) {
             this.props.preferences.save()
             this.setState(state)
         },
-        // DEPRECATED! Use onShuffle
-        // a is null, means b moves up
-        // b is null, means a moves down
-        onSwap: function(a, b) {
-            var collection = this.props.collection,
-                boxA, boxB, position
-
-            if (!b && !a) {
-                boxB = collection.findWhere({id: b})
-            }
-            if (a) {
-                boxA = collection.findWhere({id: a})
-                if (!b) {
-                    position = collection.indexOf(boxA)
-                    do {
-                        position += 1
-                        boxB = collection.at(position)
-                    } while(boxB !== undefined && boxB.get("disabled"))
-                    if (!boxB) {
-                        return // no changes
-                    }
-                } else {
-                    boxB = collection.findWhere({id: b})
-                }
-            } else {
-                boxB = collection.findWhere({id: b})
-
-                position = collection.indexOf(boxB)
-                do {
-                    position -= 1
-                    boxA = collection.at(position)
-                } while(boxA !== undefined && boxA.get("disabled"))
-                if (!boxA) {
-                    return  // no changes
-                }
-            }
-
-            position = boxA.get("position")
-
-            if (!boxB.get("disabled") && !boxB.get("searchable")) {
-                boxA.set("position", boxB.get("position"))
-                boxB.set("position", position)
-            } else {
-                // update all the position!!
-                collection.each(function(box) {
-                    if (box.get("position") > boxA.get("position")) {
-                        box.set("position", box.get("position") + 1)
-                    }
-                })
-                boxB.set("position", boxA.get("position"))
-                boxB.set("disabled", false)
-                boxA.set("position", boxA.get("position") + 1)
-            }
-
-            boxA.save()
-            boxB.save()
-            collection.sort()
-            this.setProps({collection: collection})
-        },
         // a: target, b: source
         onShuffle: function(a, b) {
-            console.log(b + " -> " + a)
             var collection = this.props.collection,
                 boxA, boxB, position
 
@@ -213,7 +153,6 @@ define(function(require, exports, module) {
         },
         onVisibleBoxes: function(boxes) {
             var preferences = this.props.preferences
-            console.log(boxes)
             preferences.set("boxes", boxes)
             preferences.save()
             this.setState({length: boxes})

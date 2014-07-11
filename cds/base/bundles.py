@@ -29,6 +29,7 @@ _styles.contents += ("less/cds.less",)
 
 
 js = Bundle(
+    "js/app.js",
     "js/main.js",
     output="cds.js",
     weight=91,
@@ -39,5 +40,10 @@ js = Bundle(
         "jsx-requirejs-plugin": "latest",
         "requirejs-plugins": "latest",
         "es5-shim": "latest"
-    }
+    },
+    depends=[
+        "js/app.js",
+        "js/main.js",
+        "js/prototype/**/*.js"
+    ]
 )

@@ -30,7 +30,13 @@
 //
 // CommonJS-like format
 // --------------------
-define(function(require, exports, module) {
+define("js/app",
+       ["require", "jquery", "react", "backbone",
+        "jsx!./prototype/main", "./prototype/models/box",
+        "./prototype/models/preferences", "./prototype/collections/boxes",
+        "./prototype/collections/preferences", "text!./prototype/data.json"
+       ],
+       function(require) {
     "use strict";
 
     var $ = require("jquery"),
@@ -132,7 +138,7 @@ define(function(require, exports, module) {
         localStorage.clear()
     })
 
-    module.exports = {
+    return {
         original: original[0],
         router: router
     }

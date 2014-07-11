@@ -43,9 +43,7 @@
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
-        typeahead: 'js/typeahead',
-        prototype: 'js/prototype',
-        app: 'js/app',
+        typeahead: 'js/typeahead'
     },
     shim: {
         react: { exports: 'React' },

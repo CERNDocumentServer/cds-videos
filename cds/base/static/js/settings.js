@@ -30,8 +30,6 @@ require.config({
         underscore: 'vendors/underscore/underscore',
         typeahead: 'js/typeahead',
         'jquery.form': 'js/jquery.form',
-        prototype: 'js/prototype',
-        app: 'js/app',
     },
     shim: {
         react: { exports: 'React' },
