@@ -84,7 +84,8 @@ define(function(require, exports, module) {
                     <div className="row" style={stylePlus}>
                         <p className="plus">
                             <a href="#" onClick={this.onPlus}>
-                                <i className="glyphicon glyphicon-plus"></i>
+                                <i className="glyphicon glyphicon-chevron-down"></i>
+                                {' '}show more
                             </a>
                         </p>
                     </div>

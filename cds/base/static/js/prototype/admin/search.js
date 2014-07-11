@@ -73,7 +73,7 @@ define(function(require, exports, module) {
                     }, this), found)
                 }
                 if (!found && searchable.length) {
-                    return searchable[0].get("id")
+                    //return searchable[0].get("id")
                 }
             }
             return null
@@ -88,12 +88,24 @@ define(function(require, exports, module) {
             if (searchable.length) {
                 results = <p>{searchable.length} matches for <em>{this.state.q}</em></p>
 
-                var b = this.props.collection.findWhere({id: this.state.box})
+                var b = this.props.collection.findWhere({id: this.state.box}),
+                    bid = null
+
+                if (b) {
+                    bid = b.get("id")
+                    box = Boxes[b.get("box")](_.extend({onSwap: this.onSwap},
+                                                       b.get("data")))
+                } else {
+                    box = <article  className="box box-preview">
+                        <p>
+                            <i className="glyphicon glyphicon-eye-open"></i><br/>
+                            Select an item for a preview
+                        </p>
+                    </article>
+                }
 
                 boxList = <BoxList boxes={searchable}
-                                   current={b.get("id")}/>
-                box = Boxes[b.get("box")](_.extend({onSwap: this.onSwap},
-                                                   b.get("data")))
+                                   current={bid}/>
 
             } else if (this.state.q) {
                 results = <p>No results match <em>{this.state.q}</em>.</p>

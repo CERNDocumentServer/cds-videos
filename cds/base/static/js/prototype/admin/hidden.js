@@ -70,7 +70,7 @@ define(function(require, exports, module) {
                 box = <article onDragOver={this.onDragOver} onDrop={this.onDisable} className="box box-drop">
                         <p>
                             <i className="glyphicon glyphicon-trash"></i><br/>
-                            drop here to disable
+                            Drop here to disable
                         </p>
                     </article>,
                 disabled = this.props.collection.disabled(),
