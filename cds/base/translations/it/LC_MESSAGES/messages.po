@@ -1,0 +1,25 @@
+# Italian translations for CDS Demosite.
+# Copyright (C) 2014 ORGANIZATION
+# This file is distributed under the same license as the CDS Demosite
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: CDS Demosite 0.1.0a0.dev20140626\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2014-07-25 07:56+0000\n"
+"PO-Revision-Date: 2014-07-25 10:00+0100\n"
+"Last-Translator: Yoan Blanc <yoan.blanc@cern.ch>\n"
+"Language-Team: it <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.5\n"
+
+#: cds/base/templates/page.html:45
+msgid "Sign in"
+msgstr "Registrati"
