@@ -36,11 +36,13 @@ point specified in the setup.py::
 
 from __future__ import unicode_literals
 
+from invenio.base.config import PACKAGES as _PACKAGES
+
+
 PACKAGES = [
     "cds.base",
     "cds.modules.*",
-    "invenio.modules.*",
-]
+] + _PACKAGES
 
 PACKAGES_EXCLUDE = [
     "invenio.modules.annotations",

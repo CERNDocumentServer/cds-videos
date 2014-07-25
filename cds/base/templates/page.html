@@ -19,13 +19,6 @@
 
 {%- extends "page_base.html" -%}
 
-{%- block global_css -%}
-  {%- css url_for("static", filename="css/token-input.css"), "00-invenio" -%}
-  {%- css url_for("static", filename="css/token-input-facebook.css"), "00-invenio" -%}
-  {%- css url_for("base.static", filename="less/cds.less"), "00-invenio", "less" -%}
-  {%- css url_for("webtag.static", filename="css/tags/popover.css"), "00-invenio" -%}
-{%- endblock -%}
-
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
   {%- include "cern_header.html" -%}
@@ -43,7 +36,7 @@
         <div class="col-md-6">
           <nav>
             <ul>
-  {%- for item in current_menu.submenu("main").children if item.visible and item.name != "search" -%}
+  {%- for item in current_menu.submenu("main").children if item.visible and item.name not in ("admin", "search") -%}
               <li><a href="{{ item.url }}">{{ item.text | safe }}</a></li>
   {%- endfor -%}
               <li>
