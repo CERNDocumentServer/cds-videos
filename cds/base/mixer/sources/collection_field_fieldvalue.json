@@ -1,0 +1,2844 @@
+[
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 1,
+        "score": 52,
+        "score_fieldvalue": 24,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 2,
+        "score": 52,
+        "score_fieldvalue": 23,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 3,
+        "score": 52,
+        "score_fieldvalue": 22,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 4,
+        "score": 52,
+        "score_fieldvalue": 21,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 5,
+        "score": 52,
+        "score_fieldvalue": 20,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 6,
+        "score": 52,
+        "score_fieldvalue": 19,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 7,
+        "score": 52,
+        "score_fieldvalue": 18,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 8,
+        "score": 52,
+        "score_fieldvalue": 17,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 9,
+        "score": 52,
+        "score_fieldvalue": 16,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 10,
+        "score": 52,
+        "score_fieldvalue": 15,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 11,
+        "score": 52,
+        "score_fieldvalue": 14,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 12,
+        "score": 52,
+        "score_fieldvalue": 13,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 13,
+        "score": 52,
+        "score_fieldvalue": 12,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 14,
+        "score": 52,
+        "score_fieldvalue": 11,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 15,
+        "score": 52,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 16,
+        "score": 52,
+        "score_fieldvalue": 9,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 17,
+        "score": 52,
+        "score_fieldvalue": 8,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 18,
+        "score": 52,
+        "score_fieldvalue": 7,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 19,
+        "score": 52,
+        "score_fieldvalue": 6,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 20,
+        "score": 52,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 21,
+        "score": 52,
+        "score_fieldvalue": 4,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 22,
+        "score": 52,
+        "score_fieldvalue": 3,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 23,
+        "score": 52,
+        "score_fieldvalue": 2,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 7,
+        "id_fieldvalue": 24,
+        "score": 52,
+        "score_fieldvalue": 1,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 25,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 26,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 27,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 28,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 29,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 30,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 31,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 32,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 33,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 34,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 35,
+        "score": 50,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 39,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 37,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 38,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 40,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 41,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 42,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 43,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 44,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 45,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 46,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 47,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 48,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 49,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 50,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 6,
+        "id_fieldvalue": 51,
+        "score": 50,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 2,
+        "score": 53,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 3,
+        "score": 52,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 2,
+        "score": 53,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 9,
+        "score": 51,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "score": 51,
+        "score_fieldvalue": 0,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 52,
+        "score": 51,
+        "score_fieldvalue": 14,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 53,
+        "score": 51,
+        "score_fieldvalue": 13,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 54,
+        "score": 51,
+        "score_fieldvalue": 2,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 55,
+        "score": 51,
+        "score_fieldvalue": 3,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 56,
+        "score": 51,
+        "score_fieldvalue": 4,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 57,
+        "score": 51,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 58,
+        "score": 51,
+        "score_fieldvalue": 6,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 59,
+        "score": 51,
+        "score_fieldvalue": 7,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 60,
+        "score": 51,
+        "score_fieldvalue": 8,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 61,
+        "score": 51,
+        "score_fieldvalue": 9,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 62,
+        "score": 51,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 63,
+        "score": 51,
+        "score_fieldvalue": 11,
+        "type": "seo"
+    },
+    {
+        "id_collection": 244,
+        "id_field": 7,
+        "id_fieldvalue": 64,
+        "score": 51,
+        "score_fieldvalue": 12,
+        "type": "seo"
+    },
+    {
+        "id_collection": 17,
+        "id_field": 22,
+        "score": 29,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 518,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 519,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 520,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 521,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 522,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 523,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 524,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 525,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 526,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 527,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 528,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 529,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 530,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 531,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 532,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 533,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 534,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 535,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 536,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 537,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 538,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 34,
+        "id_field": 7,
+        "id_fieldvalue": 223,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 518,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 519,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 520,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 521,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 522,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 523,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 524,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 525,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 526,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 527,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 528,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 529,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 530,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 531,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 532,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 533,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 534,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 535,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 536,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 537,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 538,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 293,
+        "id_field": 7,
+        "id_fieldvalue": 223,
+        "score": 60,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 7,
+        "id_fieldvalue": 590,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 7,
+        "id_fieldvalue": 591,
+        "score": 150,
+        "score_fieldvalue": 90,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 28,
+        "id_fieldvalue": 592,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 28,
+        "id_fieldvalue": 593,
+        "score": 140,
+        "score_fieldvalue": 5,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 29,
+        "id_fieldvalue": 594,
+        "score": 160,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 29,
+        "id_fieldvalue": 595,
+        "score": 160,
+        "score_fieldvalue": 90,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 29,
+        "id_fieldvalue": 596,
+        "score": 160,
+        "score_fieldvalue": 80,
+        "type": "seo"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 2,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 3,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 6,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 12,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 9,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 28,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 29,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 5,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 470,
+        "id_field": 4,
+        "score": 60,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 464,
+        "id_field": 31,
+        "id_fieldvalue": 599,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 464,
+        "id_field": 31,
+        "id_fieldvalue": 600,
+        "score": 150,
+        "score_fieldvalue": 90,
+        "type": "seo"
+    },
+    {
+        "id_collection": 464,
+        "id_field": 31,
+        "id_fieldvalue": 601,
+        "score": 150,
+        "score_fieldvalue": 80,
+        "type": "seo"
+    },
+    {
+        "id_collection": 464,
+        "id_field": 32,
+        "id_fieldvalue": 597,
+        "score": 140,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 464,
+        "id_field": 32,
+        "id_fieldvalue": 598,
+        "score": 140,
+        "score_fieldvalue": 90,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 602,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 603,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 604,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 605,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 606,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 607,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 608,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 609,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 610,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 611,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 612,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 613,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 614,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 615,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 602,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 603,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 604,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 605,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 606,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 607,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 608,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 609,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 610,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 611,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 612,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 613,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 614,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 615,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 616,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 616,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 602,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 603,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 604,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 605,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 606,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 607,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 608,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 609,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 610,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 611,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 612,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 613,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 614,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 615,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 616,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 629,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 630,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 628,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 635,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 636,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 637,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 638,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 639,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 640,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 641,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 634,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 631,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 632,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 633,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 629,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 630,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 628,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 635,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 636,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 637,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 638,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 639,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 640,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 641,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 634,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 631,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 632,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 633,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 634,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 633,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 632,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 631,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 630,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 629,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 628,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 635,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 636,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 637,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 638,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 639,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 640,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 641,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 645,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 646,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 647,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 648,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 649,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 650,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 651,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 652,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 653,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 654,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 655,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 656,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 6,
+        "id_fieldvalue": 657,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 658,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 659,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 660,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 661,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 662,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 663,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 664,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 665,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 667,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 48,
+        "id_field": 21,
+        "id_fieldvalue": 666,
+        "score": 140,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 37,
+        "id_field": 48,
+        "score": 11,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 37,
+        "id_field": 46,
+        "score": 14,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 37,
+        "id_field": 45,
+        "score": 13,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 37,
+        "id_field": 47,
+        "score": 15,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 7,
+        "id_fieldvalue": 668,
+        "score": 43,
+        "score_fieldvalue": 9,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 7,
+        "id_fieldvalue": 668,
+        "score": 166,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 7,
+        "id_fieldvalue": 668,
+        "score": 166,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 12,
+        "score": 50,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 602,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 603,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 604,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 605,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 606,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 607,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 608,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 609,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 610,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 611,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 612,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 613,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 614,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 615,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 616,
+        "score": 150,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 7,
+        "id_fieldvalue": 668,
+        "score": 166,
+        "score_fieldvalue": 100,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 634,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 633,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 632,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 631,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 630,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 629,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 628,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 635,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 636,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 637,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 638,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 639,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 640,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 641,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 31,
+        "id_field": 5,
+        "id_fieldvalue": 689,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 32,
+        "id_field": 5,
+        "id_fieldvalue": 689,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 288,
+        "id_field": 5,
+        "id_fieldvalue": 689,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 579,
+        "id_field": 5,
+        "id_fieldvalue": 689,
+        "score": 150,
+        "score_fieldvalue": 10,
+        "type": "seo"
+    },
+    {
+        "id_collection": 247,
+        "id_field": 2,
+        "score": 91,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 247,
+        "id_field": 3,
+        "score": 81,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 247,
+        "id_field": 54,
+        "score": 71,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 247,
+        "id_field": 6,
+        "score": 61,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 247,
+        "id_field": 12,
+        "score": 51,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 1,
+        "id_field": 2,
+        "score": 141,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 1,
+        "id_field": 3,
+        "score": 131,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 1,
+        "id_field": 6,
+        "score": 121,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 1,
+        "id_field": 12,
+        "score": 111,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 629,
+        "id_field": 2,
+        "score": 41,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 629,
+        "id_field": 3,
+        "score": 40,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 629,
+        "id_field": 6,
+        "score": 39,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 629,
+        "id_field": 12,
+        "score": 38,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 629,
+        "id_field": 9,
+        "score": 37,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 625,
+        "id_field": 2,
+        "score": 36,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 625,
+        "id_field": 3,
+        "score": 35,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 625,
+        "id_field": 6,
+        "score": 34,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 625,
+        "id_field": 12,
+        "score": 33,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 625,
+        "id_field": 9,
+        "score": 32,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 17,
+        "id_field": 2,
+        "score": 52,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 13,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 13,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 13,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 13,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 13,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 642,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 642,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 642,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 642,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 642,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 662,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 662,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 662,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 662,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 662,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 679,
+        "id_field": 5,
+        "score": 26,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 679,
+        "id_field": 2,
+        "score": 28,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 679,
+        "id_field": 4,
+        "score": 27,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 679,
+        "id_field": 54,
+        "score": 25,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 680,
+        "id_field": 2,
+        "score": 24,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 680,
+        "id_field": 4,
+        "score": 23,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 680,
+        "id_field": 5,
+        "score": 22,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 680,
+        "id_field": 54,
+        "score": 21,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 681,
+        "id_field": 2,
+        "score": 20,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 681,
+        "id_field": 5,
+        "score": 18,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 681,
+        "id_field": 4,
+        "score": 19,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 681,
+        "id_field": 54,
+        "score": 17,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 682,
+        "id_field": 2,
+        "score": 16,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 682,
+        "id_field": 4,
+        "score": 15,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 682,
+        "id_field": 5,
+        "score": 14,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 682,
+        "id_field": 54,
+        "score": 13,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 682,
+        "id_field": 3,
+        "score": 12,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 37,
+        "id_field": 3,
+        "score": 12,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 65,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 65,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 65,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 65,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 65,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 684,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 684,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 684,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 684,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 684,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 64,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 64,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 64,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 64,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 64,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 63,
+        "id_field": 55,
+        "score": 138,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 63,
+        "id_field": 2,
+        "score": 128,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 63,
+        "id_field": 3,
+        "score": 118,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 63,
+        "id_field": 6,
+        "score": 108,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 63,
+        "id_field": 12,
+        "score": 98,
+        "score_fieldvalue": 0,
+        "type": "soo"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 2,
+        "score": 9,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 54,
+        "score": 8,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 3,
+        "score": 7,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 4,
+        "score": 6,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 6,
+        "score": 5,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 20,
+        "id_field": 12,
+        "score": 4,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    },
+    {
+        "id_collection": 1,
+        "id_field": 9,
+        "score": 3,
+        "score_fieldvalue": 0,
+        "type": "seo"
+    },
+    {
+        "id_collection": 250,
+        "id_field": 9,
+        "score": 1,
+        "score_fieldvalue": 0,
+        "type": "sew"
+    }
+]

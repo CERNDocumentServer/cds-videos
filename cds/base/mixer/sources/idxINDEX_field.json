@@ -1,0 +1,86 @@
+[
+    {
+        "id_field": 1,
+        "id_idxINDEX": 1,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 10,
+        "id_idxINDEX": 2,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 4,
+        "id_idxINDEX": 3,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 3,
+        "id_idxINDEX": 4,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 5,
+        "id_idxINDEX": 5,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 8,
+        "id_idxINDEX": 6,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 6,
+        "id_idxINDEX": 7,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 2,
+        "id_idxINDEX": 8,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 9,
+        "id_idxINDEX": 9,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 12,
+        "id_idxINDEX": 10,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 53,
+        "id_idxINDEX": 11,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 16,
+        "id_idxINDEX": 18,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 49,
+        "id_idxINDEX": 19,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    },
+    {
+        "id_field": 77,
+        "id_idxINDEX": 20,
+        "regexp_alphanumeric_separators": "[!\"#$\\%&'()*+,-./:;<=>?@[\\]^\\_`{|}~]",
+        "regexp_punctuation": "[.,:;?!\"]"
+    }
+]

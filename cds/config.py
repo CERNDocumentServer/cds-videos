@@ -50,6 +50,35 @@ PACKAGES_EXCLUDE = [
     "invenio.modules.pages",
 ]
 
+EXTENSIONS = [
+    'invenio.ext.confighacks',
+    'invenio.ext.jinja2hacks',
+    'invenio.ext.debug_toolbar',
+    'invenio.ext.babel',
+    'invenio.ext.sqlalchemy',
+    'invenio.ext.sslify',
+    'invenio.ext.cache',
+    'invenio.ext.session',
+    'invenio.ext.login',
+    'invenio.ext.principal',
+    'invenio.ext.email',
+    'invenio.ext.mixer',
+    'invenio.ext.legacy',
+    'invenio.ext.assets',
+    'invenio.ext.template',
+    'invenio.ext.admin',
+    'invenio.ext.logging',
+    'invenio.ext.logging.backends.fs',
+    'invenio.ext.logging.backends.legacy',
+    'invenio.ext.logging.backends.sentry',
+    'invenio.ext.gravatar',
+    'invenio.ext.collect',
+    'invenio.ext.restful',
+    'invenio.ext.menu',
+    'flask.ext.breadcrumbs:Breadcrumbs',
+    'invenio.modules.deposit.url_converters',
+]
+
 
 CFG_SITE_NAME = "CERN Document Server"
 CFG_SITE_NAME_INTL = {

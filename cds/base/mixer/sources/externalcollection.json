@@ -1,0 +1,90 @@
+[
+    {
+        "id": 1,
+        "name": "Amazon"
+    },
+    {
+        "id": 2,
+        "name": "CERN EDMS"
+    },
+    {
+        "id": 3,
+        "name": "CERN Indico"
+    },
+    {
+        "id": 4,
+        "name": "CERN Intranet"
+    },
+    {
+        "id": 5,
+        "name": "CiteSeer"
+    },
+    {
+        "id": 6,
+        "name": "Google Books"
+    },
+    {
+        "id": 7,
+        "name": "Google Scholar"
+    },
+    {
+        "id": 8,
+        "name": "Google Web"
+    },
+    {
+        "id": 9,
+        "name": "IEC"
+    },
+    {
+        "id": 10,
+        "name": "IHS"
+    },
+    {
+        "id": 11,
+        "name": "INSPEC"
+    },
+    {
+        "id": 12,
+        "name": "ISO"
+    },
+    {
+        "id": 13,
+        "name": "KISS Books/Journals"
+    },
+    {
+        "id": 14,
+        "name": "KISS Preprints"
+    },
+    {
+        "id": 15,
+        "name": "NEBIS"
+    },
+    {
+        "id": 16,
+        "name": "SLAC Library Catalog"
+    },
+    {
+        "id": 17,
+        "name": "INSPIRE"
+    },
+    {
+        "id": 18,
+        "name": "Scirus"
+    },
+    {
+        "id": 19,
+        "name": "Atlantis Institute Articles"
+    },
+    {
+        "id": 20,
+        "name": "Atlantis Institute Books"
+    },
+    {
+        "id": 21,
+        "name": "CDS DEV"
+    },
+    {
+        "id": 22,
+        "name": "ScienceCinema"
+    }
+]

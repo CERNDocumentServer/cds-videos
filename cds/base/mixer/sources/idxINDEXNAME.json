@@ -1,0 +1,32 @@
+[
+    {
+        "id_idxINDEX": 18,
+        "ln": "en",
+        "type": "ln",
+        "value": "experiment"
+    },
+    {
+        "id_idxINDEX": 18,
+        "ln": "fr",
+        "type": "ln",
+        "value": "exp\u00e9rience"
+    },
+    {
+        "id_idxINDEX": 19,
+        "ln": "en",
+        "type": "ln",
+        "value": "journal"
+    },
+    {
+        "id_idxINDEX": 20,
+        "ln": "en",
+        "type": "ln",
+        "value": "author count"
+    },
+    {
+        "id_idxINDEX": 20,
+        "ln": "fr",
+        "type": "ln",
+        "value": "nombre d'auteurs"
+    }
+]

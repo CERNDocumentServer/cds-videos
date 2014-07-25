@@ -1,0 +1,1432 @@
+[
+    {
+        "id": 1,
+        "name": "first author",
+        "value": "100__%"
+    },
+    {
+        "id": 2,
+        "name": "additional author",
+        "value": "700__%"
+    },
+    {
+        "id": 3,
+        "name": "main title",
+        "value": "245__%"
+    },
+    {
+        "id": 4,
+        "name": "additional title",
+        "value": "246_%"
+    },
+    {
+        "id": 5,
+        "name": "abstract",
+        "value": "520__%"
+    },
+    {
+        "id": 6,
+        "name": "keyword",
+        "value": "6531_a"
+    },
+    {
+        "id": 7,
+        "name": "primary report number",
+        "value": "037__a"
+    },
+    {
+        "id": 8,
+        "name": "additional report number",
+        "value": "088__a"
+    },
+    {
+        "id": 9,
+        "name": "added report number",
+        "value": "088__9"
+    },
+    {
+        "id": 10,
+        "name": "reference",
+        "value": "999C5%"
+    },
+    {
+        "id": 11,
+        "name": "collection identifier",
+        "value": "980__%"
+    },
+    {
+        "id": 12,
+        "name": "main subject",
+        "value": "65017a"
+    },
+    {
+        "id": 13,
+        "name": "additional subject",
+        "value": "65027a"
+    },
+    {
+        "id": 14,
+        "name": "division",
+        "value": "710__5"
+    },
+    {
+        "id": 15,
+        "name": "year",
+        "value": "260__c"
+    },
+    {
+        "id": 16,
+        "name": "00x",
+        "value": "00%"
+    },
+    {
+        "id": 17,
+        "name": "01x",
+        "value": "01%"
+    },
+    {
+        "id": 18,
+        "name": "02x",
+        "value": "02%"
+    },
+    {
+        "id": 19,
+        "name": "03x",
+        "value": "03%"
+    },
+    {
+        "id": 20,
+        "name": "04x",
+        "value": "04%"
+    },
+    {
+        "id": 21,
+        "name": "05x",
+        "value": "05%"
+    },
+    {
+        "id": 22,
+        "name": "06x",
+        "value": "06%"
+    },
+    {
+        "id": 23,
+        "name": "07x",
+        "value": "07%"
+    },
+    {
+        "id": 24,
+        "name": "08x",
+        "value": "08%"
+    },
+    {
+        "id": 25,
+        "name": "09x",
+        "value": "09%"
+    },
+    {
+        "id": 26,
+        "name": "10x",
+        "value": "10%"
+    },
+    {
+        "id": 27,
+        "name": "11x",
+        "value": "11%"
+    },
+    {
+        "id": 28,
+        "name": "12x",
+        "value": "12%"
+    },
+    {
+        "id": 29,
+        "name": "13x",
+        "value": "13%"
+    },
+    {
+        "id": 30,
+        "name": "14x",
+        "value": "14%"
+    },
+    {
+        "id": 31,
+        "name": "15x",
+        "value": "15%"
+    },
+    {
+        "id": 32,
+        "name": "16x",
+        "value": "16%"
+    },
+    {
+        "id": 33,
+        "name": "17x",
+        "value": "17%"
+    },
+    {
+        "id": 34,
+        "name": "18x",
+        "value": "18%"
+    },
+    {
+        "id": 35,
+        "name": "19x",
+        "value": "19%"
+    },
+    {
+        "id": 36,
+        "name": "20x",
+        "value": "20%"
+    },
+    {
+        "id": 37,
+        "name": "21x",
+        "value": "21%"
+    },
+    {
+        "id": 38,
+        "name": "22x",
+        "value": "22%"
+    },
+    {
+        "id": 39,
+        "name": "23x",
+        "value": "23%"
+    },
+    {
+        "id": 40,
+        "name": "24x",
+        "value": "24%"
+    },
+    {
+        "id": 41,
+        "name": "25x",
+        "value": "25%"
+    },
+    {
+        "id": 42,
+        "name": "26x",
+        "value": "26%"
+    },
+    {
+        "id": 43,
+        "name": "27x",
+        "value": "27%"
+    },
+    {
+        "id": 44,
+        "name": "28x",
+        "value": "28%"
+    },
+    {
+        "id": 45,
+        "name": "29x",
+        "value": "29%"
+    },
+    {
+        "id": 46,
+        "name": "30x",
+        "value": "30%"
+    },
+    {
+        "id": 47,
+        "name": "31x",
+        "value": "31%"
+    },
+    {
+        "id": 48,
+        "name": "32x",
+        "value": "32%"
+    },
+    {
+        "id": 49,
+        "name": "33x",
+        "value": "33%"
+    },
+    {
+        "id": 50,
+        "name": "34x",
+        "value": "34%"
+    },
+    {
+        "id": 51,
+        "name": "35x",
+        "value": "35%"
+    },
+    {
+        "id": 52,
+        "name": "36x",
+        "value": "36%"
+    },
+    {
+        "id": 53,
+        "name": "37x",
+        "value": "37%"
+    },
+    {
+        "id": 54,
+        "name": "38x",
+        "value": "38%"
+    },
+    {
+        "id": 55,
+        "name": "39x",
+        "value": "39%"
+    },
+    {
+        "id": 56,
+        "name": "40x",
+        "value": "40%"
+    },
+    {
+        "id": 57,
+        "name": "41x",
+        "value": "41%"
+    },
+    {
+        "id": 58,
+        "name": "42x",
+        "value": "42%"
+    },
+    {
+        "id": 59,
+        "name": "43x",
+        "value": "43%"
+    },
+    {
+        "id": 60,
+        "name": "44x",
+        "value": "44%"
+    },
+    {
+        "id": 61,
+        "name": "45x",
+        "value": "45%"
+    },
+    {
+        "id": 62,
+        "name": "46x",
+        "value": "46%"
+    },
+    {
+        "id": 63,
+        "name": "47x",
+        "value": "47%"
+    },
+    {
+        "id": 64,
+        "name": "48x",
+        "value": "48%"
+    },
+    {
+        "id": 65,
+        "name": "49x",
+        "value": "49%"
+    },
+    {
+        "id": 66,
+        "name": "50x",
+        "value": "50%"
+    },
+    {
+        "id": 67,
+        "name": "51x",
+        "value": "51%"
+    },
+    {
+        "id": 68,
+        "name": "52x",
+        "value": "52%"
+    },
+    {
+        "id": 69,
+        "name": "53x",
+        "value": "53%"
+    },
+    {
+        "id": 70,
+        "name": "54x",
+        "value": "54%"
+    },
+    {
+        "id": 71,
+        "name": "55x",
+        "value": "55%"
+    },
+    {
+        "id": 72,
+        "name": "56x",
+        "value": "56%"
+    },
+    {
+        "id": 73,
+        "name": "57x",
+        "value": "57%"
+    },
+    {
+        "id": 74,
+        "name": "58x",
+        "value": "58%"
+    },
+    {
+        "id": 75,
+        "name": "59x",
+        "value": "59%"
+    },
+    {
+        "id": 76,
+        "name": "60x",
+        "value": "60%"
+    },
+    {
+        "id": 77,
+        "name": "61x",
+        "value": "61%"
+    },
+    {
+        "id": 78,
+        "name": "62x",
+        "value": "62%"
+    },
+    {
+        "id": 79,
+        "name": "63x",
+        "value": "63%"
+    },
+    {
+        "id": 80,
+        "name": "64x",
+        "value": "64%"
+    },
+    {
+        "id": 81,
+        "name": "65x",
+        "value": "65%"
+    },
+    {
+        "id": 82,
+        "name": "66x",
+        "value": "66%"
+    },
+    {
+        "id": 83,
+        "name": "67x",
+        "value": "67%"
+    },
+    {
+        "id": 84,
+        "name": "68x",
+        "value": "68%"
+    },
+    {
+        "id": 85,
+        "name": "69x",
+        "value": "69%"
+    },
+    {
+        "id": 86,
+        "name": "70x",
+        "value": "70%"
+    },
+    {
+        "id": 87,
+        "name": "71x",
+        "value": "71%"
+    },
+    {
+        "id": 88,
+        "name": "72x",
+        "value": "72%"
+    },
+    {
+        "id": 89,
+        "name": "73x",
+        "value": "73%"
+    },
+    {
+        "id": 90,
+        "name": "74x",
+        "value": "74%"
+    },
+    {
+        "id": 91,
+        "name": "75x",
+        "value": "75%"
+    },
+    {
+        "id": 92,
+        "name": "76x",
+        "value": "76%"
+    },
+    {
+        "id": 93,
+        "name": "77x",
+        "value": "77%"
+    },
+    {
+        "id": 94,
+        "name": "78x",
+        "value": "78%"
+    },
+    {
+        "id": 95,
+        "name": "79x",
+        "value": "79%"
+    },
+    {
+        "id": 96,
+        "name": "80x",
+        "value": "80%"
+    },
+    {
+        "id": 97,
+        "name": "81x",
+        "value": "81%"
+    },
+    {
+        "id": 98,
+        "name": "82x",
+        "value": "82%"
+    },
+    {
+        "id": 99,
+        "name": "83x",
+        "value": "83%"
+    },
+    {
+        "id": 100,
+        "name": "84x",
+        "value": "84%"
+    },
+    {
+        "id": 101,
+        "name": "85x",
+        "value": "85%"
+    },
+    {
+        "id": 102,
+        "name": "86x",
+        "value": "86%"
+    },
+    {
+        "id": 103,
+        "name": "87x",
+        "value": "87%"
+    },
+    {
+        "id": 104,
+        "name": "88x",
+        "value": "88%"
+    },
+    {
+        "id": 105,
+        "name": "89x",
+        "value": "89%"
+    },
+    {
+        "id": 106,
+        "name": "90x",
+        "value": "90%"
+    },
+    {
+        "id": 107,
+        "name": "91x",
+        "value": "91%"
+    },
+    {
+        "id": 108,
+        "name": "92x",
+        "value": "92%"
+    },
+    {
+        "id": 109,
+        "name": "93x",
+        "value": "93%"
+    },
+    {
+        "id": 110,
+        "name": "94x",
+        "value": "94%"
+    },
+    {
+        "id": 111,
+        "name": "95x",
+        "value": "95%"
+    },
+    {
+        "id": 112,
+        "name": "96x",
+        "value": "96%"
+    },
+    {
+        "id": 113,
+        "name": "97x",
+        "value": "97%"
+    },
+    {
+        "id": 114,
+        "name": "98x",
+        "value": "98%"
+    },
+    {
+        "id": 115,
+        "name": "url",
+        "value": "8564_u"
+    },
+    {
+        "id": 116,
+        "name": "experiment",
+        "value": "693__e"
+    },
+    {
+        "id": 117,
+        "name": "abstract french",
+        "value": "590__%"
+    },
+    {
+        "id": 118,
+        "name": "keyword french",
+        "value": "6532_a"
+    },
+    {
+        "id": 119,
+        "name": "keyword other",
+        "value": "695__a"
+    },
+    {
+        "id": 120,
+        "name": "title/250",
+        "value": "250__a"
+    },
+    {
+        "id": 121,
+        "name": "conference title",
+        "value": "711__a"
+    },
+    {
+        "id": 122,
+        "name": "title/210",
+        "value": "210__a"
+    },
+    {
+        "id": 123,
+        "name": "title/222",
+        "value": "222__a"
+    },
+    {
+        "id": 124,
+        "name": "base number",
+        "value": "960__a"
+    },
+    {
+        "id": 125,
+        "name": "series",
+        "value": "490__%"
+    },
+    {
+        "id": 126,
+        "name": "indicator",
+        "value": "690C_a"
+    },
+    {
+        "id": 127,
+        "name": "accelerator",
+        "value": "693__a"
+    },
+    {
+        "id": 128,
+        "name": "sysno",
+        "value": "970__a"
+    },
+    {
+        "id": 129,
+        "name": "disp",
+        "value": "916__d"
+    },
+    {
+        "id": 130,
+        "name": "imprint",
+        "value": "269__c"
+    },
+    {
+        "id": 131,
+        "name": "key title",
+        "value": "222__a"
+    },
+    {
+        "id": 132,
+        "name": "internal note",
+        "value": "595__%"
+    },
+    {
+        "id": 133,
+        "name": "translator",
+        "value": "721__a"
+    },
+    {
+        "id": 134,
+        "name": "division/work",
+        "value": "710__9"
+    },
+    {
+        "id": 135,
+        "name": "040x",
+        "value": "040%"
+    },
+    {
+        "id": 136,
+        "name": "041x",
+        "value": "041%"
+    },
+    {
+        "id": 137,
+        "name": "042x",
+        "value": "042%"
+    },
+    {
+        "id": 138,
+        "name": "043x",
+        "value": "043%"
+    },
+    {
+        "id": 144,
+        "name": "049x",
+        "value": "049%"
+    },
+    {
+        "id": 140,
+        "name": "045x",
+        "value": "045%"
+    },
+    {
+        "id": 141,
+        "name": "046x",
+        "value": "046%"
+    },
+    {
+        "id": 142,
+        "name": "047x",
+        "value": "047%"
+    },
+    {
+        "id": 143,
+        "name": "048x",
+        "value": "048%"
+    },
+    {
+        "id": 145,
+        "name": "301x",
+        "value": "301%"
+    },
+    {
+        "id": 146,
+        "name": "302x",
+        "value": "302%"
+    },
+    {
+        "id": 147,
+        "name": "303x",
+        "value": "303%"
+    },
+    {
+        "id": 148,
+        "name": "304x",
+        "value": "304%"
+    },
+    {
+        "id": 149,
+        "name": "305x",
+        "value": "305%"
+    },
+    {
+        "id": 150,
+        "name": "306x",
+        "value": "306%"
+    },
+    {
+        "id": 151,
+        "name": "307x",
+        "value": "307%"
+    },
+    {
+        "id": 152,
+        "name": "308x",
+        "value": "308%"
+    },
+    {
+        "id": 153,
+        "name": "309x",
+        "value": "309%"
+    },
+    {
+        "id": 154,
+        "name": "311x",
+        "value": "311%"
+    },
+    {
+        "id": 155,
+        "name": "312x",
+        "value": "312%"
+    },
+    {
+        "id": 156,
+        "name": "313x",
+        "value": "313%"
+    },
+    {
+        "id": 157,
+        "name": "314x",
+        "value": "314%"
+    },
+    {
+        "id": 158,
+        "name": "315x",
+        "value": "315%"
+    },
+    {
+        "id": 159,
+        "name": "316x",
+        "value": "316%"
+    },
+    {
+        "id": 160,
+        "name": "317x",
+        "value": "317%"
+    },
+    {
+        "id": 161,
+        "name": "318x",
+        "value": "318%"
+    },
+    {
+        "id": 162,
+        "name": "319x",
+        "value": "319%"
+    },
+    {
+        "id": 163,
+        "name": "500x",
+        "value": "500%"
+    },
+    {
+        "id": 164,
+        "name": "501x",
+        "value": "501%"
+    },
+    {
+        "id": 165,
+        "name": "503x",
+        "value": "503%"
+    },
+    {
+        "id": 166,
+        "name": "504x",
+        "value": "504%"
+    },
+    {
+        "id": 167,
+        "name": "505x",
+        "value": "505%"
+    },
+    {
+        "id": 168,
+        "name": "506x",
+        "value": "506%"
+    },
+    {
+        "id": 169,
+        "name": "507x",
+        "value": "507%"
+    },
+    {
+        "id": 170,
+        "name": "508x",
+        "value": "508%"
+    },
+    {
+        "id": 171,
+        "name": "509x",
+        "value": "509%"
+    },
+    {
+        "id": 172,
+        "name": "590x",
+        "value": "590%"
+    },
+    {
+        "id": 173,
+        "name": "591x",
+        "value": "591%"
+    },
+    {
+        "id": 174,
+        "name": "592x",
+        "value": "592%"
+    },
+    {
+        "id": 175,
+        "name": "593x",
+        "value": "593%"
+    },
+    {
+        "id": 176,
+        "name": "594x",
+        "value": "594%"
+    },
+    {
+        "id": 177,
+        "name": "596x",
+        "value": "596%"
+    },
+    {
+        "id": 178,
+        "name": "597x",
+        "value": "597%"
+    },
+    {
+        "id": 179,
+        "name": "598x",
+        "value": "598%"
+    },
+    {
+        "id": 180,
+        "name": "599x",
+        "value": "599%"
+    },
+    {
+        "id": 181,
+        "name": "850x",
+        "value": "850%"
+    },
+    {
+        "id": 182,
+        "name": "851x",
+        "value": "851%"
+    },
+    {
+        "id": 183,
+        "name": "852x",
+        "value": "852%"
+    },
+    {
+        "id": 184,
+        "name": "853x",
+        "value": "853%"
+    },
+    {
+        "id": 185,
+        "name": "854x",
+        "value": "854%"
+    },
+    {
+        "id": 186,
+        "name": "855x",
+        "value": "855%"
+    },
+    {
+        "id": 187,
+        "name": "857x",
+        "value": "857%"
+    },
+    {
+        "id": 188,
+        "name": "858x",
+        "value": "858%"
+    },
+    {
+        "id": 189,
+        "name": "859x",
+        "value": "859%"
+    },
+    {
+        "id": 190,
+        "name": "909CAx",
+        "value": "900%"
+    },
+    {
+        "id": 191,
+        "name": "909CBx",
+        "value": "901%"
+    },
+    {
+        "id": 192,
+        "name": "909CDx",
+        "value": "902%"
+    },
+    {
+        "id": 193,
+        "name": "909CFx",
+        "value": "904%"
+    },
+    {
+        "id": 194,
+        "name": "909CGx",
+        "value": "905%"
+    },
+    {
+        "id": 195,
+        "name": "909CHx",
+        "value": "906%"
+    },
+    {
+        "id": 196,
+        "name": "909CIx",
+        "value": "907%"
+    },
+    {
+        "id": 197,
+        "name": "909CJx",
+        "value": "908%"
+    },
+    {
+        "id": 198,
+        "name": "909CKx",
+        "value": "909%"
+    },
+    {
+        "id": 199,
+        "name": "909CMx",
+        "value": "910%"
+    },
+    {
+        "id": 200,
+        "name": "909CNx",
+        "value": "911%"
+    },
+    {
+        "id": 201,
+        "name": "909COx",
+        "value": "912%"
+    },
+    {
+        "id": 202,
+        "name": "909CPx",
+        "value": "913%"
+    },
+    {
+        "id": 203,
+        "name": "909CQx",
+        "value": "914%"
+    },
+    {
+        "id": 204,
+        "name": "909CRx",
+        "value": "915%"
+    },
+    {
+        "id": 205,
+        "name": "909CTx",
+        "value": "917%"
+    },
+    {
+        "id": 206,
+        "name": "909CUx",
+        "value": "918%"
+    },
+    {
+        "id": 207,
+        "name": "909CVx",
+        "value": "919%"
+    },
+    {
+        "id": 208,
+        "name": "909CWx",
+        "value": "930%"
+    },
+    {
+        "id": 209,
+        "name": "909CXx",
+        "value": "931%"
+    },
+    {
+        "id": 210,
+        "name": "909CYx",
+        "value": "932%"
+    },
+    {
+        "id": 211,
+        "name": "909CZx",
+        "value": "933%"
+    },
+    {
+        "id": 212,
+        "name": "909C0x",
+        "value": "934%"
+    },
+    {
+        "id": 213,
+        "name": "909C1x",
+        "value": "935%"
+    },
+    {
+        "id": 214,
+        "name": "909C2x",
+        "value": "936%"
+    },
+    {
+        "id": 215,
+        "name": "909C3x",
+        "value": "937%"
+    },
+    {
+        "id": 216,
+        "name": "909C4x",
+        "value": "939%"
+    },
+    {
+        "id": 217,
+        "name": "909C5x",
+        "value": "909C5%"
+    },
+    {
+        "id": 218,
+        "name": "909C6x",
+        "value": "909C6%"
+    },
+    {
+        "id": 219,
+        "name": "909C7x",
+        "value": "909C7%"
+    },
+    {
+        "id": 220,
+        "name": "909C8x",
+        "value": "909C8%"
+    },
+    {
+        "id": 221,
+        "name": "909C9x",
+        "value": "909C9%"
+    },
+    {
+        "id": 222,
+        "name": "964x",
+        "value": "964%"
+    },
+    {
+        "id": 223,
+        "name": "965x",
+        "value": "965%"
+    },
+    {
+        "id": 224,
+        "name": "966x",
+        "value": "966%"
+    },
+    {
+        "id": 225,
+        "name": "967x",
+        "value": "967%"
+    },
+    {
+        "id": 226,
+        "name": "968x",
+        "value": "968%"
+    },
+    {
+        "id": 227,
+        "name": "969x",
+        "value": "969%"
+    },
+    {
+        "id": 228,
+        "name": "971x",
+        "value": "971%"
+    },
+    {
+        "id": 229,
+        "name": "972x",
+        "value": "972%"
+    },
+    {
+        "id": 230,
+        "name": "973x",
+        "value": "973%"
+    },
+    {
+        "id": 231,
+        "name": "974x",
+        "value": "974%"
+    },
+    {
+        "id": 232,
+        "name": "975x",
+        "value": "975%"
+    },
+    {
+        "id": 233,
+        "name": "976x",
+        "value": "976%"
+    },
+    {
+        "id": 234,
+        "name": "977x",
+        "value": "977%"
+    },
+    {
+        "id": 235,
+        "name": "978x",
+        "value": "978%"
+    },
+    {
+        "id": 236,
+        "name": "979x",
+        "value": "979%"
+    },
+    {
+        "id": 237,
+        "name": "001",
+        "value": "001"
+    },
+    {
+        "id": 238,
+        "name": "sysno_aleph_300",
+        "value": "035__a"
+    },
+    {
+        "id": 239,
+        "name": "collaboration",
+        "value": "710__g"
+    },
+    {
+        "id": 240,
+        "name": "base aleph 500",
+        "value": "961__l"
+    },
+    {
+        "id": 241,
+        "name": "archive file number",
+        "value": "927__a"
+    },
+    {
+        "id": 242,
+        "name": "510x",
+        "value": "510%"
+    },
+    {
+        "id": 243,
+        "name": "511x",
+        "value": "511%"
+    },
+    {
+        "id": 244,
+        "name": "512x",
+        "value": "512%"
+    },
+    {
+        "id": 245,
+        "name": "513x",
+        "value": "513%"
+    },
+    {
+        "id": 246,
+        "name": "514x",
+        "value": "514%"
+    },
+    {
+        "id": 247,
+        "name": "515x",
+        "value": "515%"
+    },
+    {
+        "id": 248,
+        "name": "516x",
+        "value": "516%"
+    },
+    {
+        "id": 249,
+        "name": "517x",
+        "value": "517%"
+    },
+    {
+        "id": 250,
+        "name": "519x",
+        "value": "519%"
+    },
+    {
+        "id": 251,
+        "name": "media",
+        "value": "340__a"
+    },
+    {
+        "id": 252,
+        "name": "conference title/111",
+        "value": "111__a"
+    },
+    {
+        "id": 253,
+        "name": "773__s",
+        "value": "773__s"
+    },
+    {
+        "id": 254,
+        "name": "archive opening date",
+        "value": "925__a"
+    },
+    {
+        "id": 255,
+        "name": "country",
+        "value": "270__d"
+    },
+    {
+        "id": 256,
+        "name": "journal title",
+        "value": "773__p"
+    },
+    {
+        "id": 257,
+        "name": "virtual indicator",
+        "value": "697C_a"
+    },
+    {
+        "id": 258,
+        "name": "opening date",
+        "value": "111__9"
+    },
+    {
+        "id": 259,
+        "name": "standard number",
+        "value": "021__a"
+    },
+    {
+        "id": 260,
+        "name": "first author affiliation",
+        "value": "100__u"
+    },
+    {
+        "id": 261,
+        "name": "additional author affiliation",
+        "value": "700__u"
+    },
+    {
+        "id": 262,
+        "name": "affiliation",
+        "value": "901__u"
+    },
+    {
+        "id": 263,
+        "name": "beam",
+        "value": "692__%"
+    },
+    {
+        "id": 264,
+        "name": "location of meeting",
+        "value": "111__c"
+    },
+    {
+        "id": 265,
+        "name": "country",
+        "value": "111__w"
+    },
+    {
+        "id": 266,
+        "name": "closing date",
+        "value": "111__z"
+    },
+    {
+        "id": 267,
+        "name": "address",
+        "value": "270__a"
+    },
+    {
+        "id": 268,
+        "name": "meeting year",
+        "value": "111__f"
+    },
+    {
+        "id": 269,
+        "name": "chronological order",
+        "value": "084__a"
+    },
+    {
+        "id": 270,
+        "name": "accession number",
+        "value": "541__e"
+    },
+    {
+        "id": 271,
+        "name": "020__a",
+        "value": "020__a"
+    },
+    {
+        "id": 272,
+        "name": "022__a",
+        "value": "022__a"
+    },
+    {
+        "id": 273,
+        "name": "translation of title",
+        "value": "242__%"
+    },
+    {
+        "id": 274,
+        "name": "0247_a",
+        "value": "0247_a"
+    },
+    {
+        "id": 275,
+        "name": "title",
+        "value": "245__a"
+    },
+    {
+        "id": 276,
+        "name": "additional author name",
+        "value": "700__a"
+    },
+    {
+        "id": 277,
+        "name": "first author name",
+        "value": "100__a"
+    },
+    {
+        "id": 278,
+        "name": "study",
+        "value": "993__q"
+    },
+    {
+        "id": 279,
+        "name": "project",
+        "value": "693__p"
+    },
+    {
+        "id": 280,
+        "name": "funding project number",
+        "value": "536__f"
+    },
+    {
+        "id": 281,
+        "name": "technology",
+        "value": "993__t"
+    },
+    {
+        "id": 282,
+        "name": "study",
+        "value": "693__s"
+    },
+    {
+        "id": 283,
+        "name": "facility",
+        "value": "693__f"
+    },
+    {
+        "id": 284,
+        "name": "accelerator physics",
+        "value": "993__r"
+    },
+    {
+        "id": 285,
+        "name": "030__a",
+        "value": "coden"
+    },
+    {
+        "id": 286,
+        "name": "caption",
+        "value": "8564_y"
+    },
+    {
+        "id": 287,
+        "name": "year for thesis",
+        "value": "502__c"
+    }
+]
