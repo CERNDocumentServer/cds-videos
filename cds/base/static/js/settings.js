@@ -20,22 +20,32 @@
 require.config({
     baseUrl: '/',
     paths: {
-        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
+        // Invenio
+        jquery: 'vendors/jquery/dist/jquery',
+        'jquery-ui': 'vendors/jquery-ui/jquery-ui',  // to be removed
+        'ui': 'vendors/jquery-ui/ui',
+        'jqueryui-timepicker': 'vendors/jqueryui-timepicker-addon/dist',
+        'jquery-form': 'vendors/jquery-form/jquery.form',
+        hgn: 'vendors/requirejs-hogan-plugin/hgn',
+        hogan: 'vendors/hogan/web/builds/3.0.2/hogan-3.0.2.amd',
+        text: 'vendors/requirejs-hogan-plugin/text',
+        // CDS
+        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.11.0',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
-        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
-        text: 'vendors/requirejs-plugins/lib/text',
+        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.11.0',
         json: 'vendors/requirejs-plugins/src/json',
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
-        typeahead: 'js/typeahead',
-        'jquery.form': 'js/jquery.form',
-        'hogan': 'js/hogan.amd',
-        'hgn': 'js/hgn'
     },
     shim: {
-        react: { exports: 'React' },
+        // Invenio
         jquery: { exports: '$' },
+        'jqueryui-timepicker/jquery-ui-sliderAccess': {deps: ['jquery']},
+        'jqueryui-timepicker/jquery-ui-timepicker-addon': {deps: ['jquery', 'ui/slider']},
+        'jqueryui-timepicker/i18n/jquery-ui-timepicker-addon-i18n': {deps: ['jqueryui-timepicker/jquery-ui-timepicker-addon']},
+        // CDS
+        react: { exports: 'React' },
         'jquery.form': { deps: ['jquery'] },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
         'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },

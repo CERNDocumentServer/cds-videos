@@ -19,4 +19,4 @@
 
 """CDS version."""
 
-__version__ = "0.1.0a0.dev20140805"
+__version__ = "0.1.0a0.dev20140806"

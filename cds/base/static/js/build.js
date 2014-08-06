@@ -33,23 +33,32 @@
         mangle: false
     },
     paths: {
+        // Invenio
         jquery: 'empty:',
-        'jquery.form': 'empty:',
+        'jquery-ui': 'vendors/jquery-ui/jquery-ui',  // to be removed
+        'ui': 'vendors/jquery-ui/ui',
+        'jqueryui-timepicker': 'vendors/jqueryui-timepicker-addon/dist',
+        'jquery-form': 'vendors/jquery-form/jquery.form',
+        hgn: 'vendors/requirejs-hogan-plugin/hgn',
+        hogan: 'vendors/hogan/web/builds/3.0.2/hogan-3.0.2.amd',
+        text: 'vendors/requirejs-hogan-plugin/text'
+        // CDS
         react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
         JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
-        text: 'vendors/requirejs-plugins/lib/text',
         json: 'vendors/requirejs-plugins/src/json',
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
-        typeahead: 'js/typeahead',
-        'hogan': 'js/hogan.amd',
-        'hgn': 'js/hgn'
     },
     shim: {
-        react: { exports: 'React' },
+        // Invenio
         jquery: { exports: '$' },
+        'jqueryui-timepicker/jqueryui-sliderAccess': {deps: ['jquery']},
+        'jqueryui-timepicker/jqueryui-timepicker-addon': {deps: ['jquery', 'ui/slider']},
+        'jqueryui-timepicker/i18n/jquery-ui-timepicker-addon-i18n': {deps: ['jqueryui-timepicker/jquery-ui-timepicker-addon']},
+        // CDS
+        react: { exports: 'React' },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
         'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
         underscore: { exports: '_' }
