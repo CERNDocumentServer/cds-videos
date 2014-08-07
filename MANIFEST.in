@@ -26,3 +26,17 @@ recursive-include cds/base/static *
 recursive-include cds/base/templates *
 
 recursive-exclude * *.pyc *.pyo
+
+# Remove the big directories from vendors
+recursive-exclude cds/base/static/vendors/ bower.json Gruntfile.js composer.json package.json *.php *.html
+recursive-exclude cds/base/static/vendors/*/examples *
+recursive-exclude cds/base/static/vendors/*/grunt *
+recursive-exclude cds/base/static/vendors/*/scss *
+recursive-exclude cds/base/static/vendors/*/test *
+# MathJax
+recursive-exclude cds/base/static/vendors/MathJax/docs *
+recursive-exclude cds/base/static/vendors/MathJax/fonts *
+recursive-exclude cds/base/static/vendors/MathJax/unpacked *
+# less
+recursive-exclude cds/base/static/vendors/less/dist *rhino*
+recursive-exclude cds/base/static/vendors/less/gradle *
