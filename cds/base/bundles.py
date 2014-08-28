@@ -19,7 +19,22 @@
 
 """CDS bundles."""
 
+from invenio.ext.assets import Bundle
 from invenio.base.bundles import styles as _styles
+
 
 _styles.contents.remove("less/base.less")
 _styles.contents += ("less/cds.less",)
+
+collection_bundle = Bundle(
+    "js/collection_filter.js",
+    output="collection_filter.js",
+    filters="requirejs",
+    weight=90
+)
+
+demosite = Bundle(
+	'css/demosite-collection-filter.css',
+	output="collection_filter.css",
+	weight=90
+)

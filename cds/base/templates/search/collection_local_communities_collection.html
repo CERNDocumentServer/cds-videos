@@ -1,0 +1,212 @@
+{%- extends "search/collection_base.html" -%}
+
+{%- block global_bundles %}
+ {{super()}}
+  {%- bundles "collection_filter.js" -%}
+  {%- bundles "collection_filter.css" -%}
+{%- endblock %}
+
+
+
+{%- block index_right -%}
+  {% if collection.collection_children_r %}
+    <div class="col-md-{{ '4' if collection.collection_children_v else '8' }} collection clearfix">
+      <h4>{{ collection.get_collectionbox_name(box_type='r') }}</h4>
+      {{ collection_tree(collection.collection_children_r, limit=2, class="nav nav-list clearfix") }}
+    </div>
+  {% else %}
+      <div class="col-md-{{ '4' if collection.collection_children_v else '8' }}">
+      {% if collection.is_restricted %}
+        <strong>{{ _('This collection is restricted. If you are authorized to access it, please click on the Search button.') }}</strong>
+      {% else %}
+        {% if collection.reclist %}
+        <div class="page-header">
+          <h3>{{ collection.name + ":" }}</h3>
+        </div>
+         <div class="row">
+        {% for recid in collection.reclist[-10:]|reverse %}
+       
+          <div class="col-md-4">
+            {{ format_record(recid, of, ln=g.ln)|safe }}
+            {{ '<hr/>'|safe if not loop.last }}
+          </div>
+        
+        {% endfor %}
+        </div>
+        {% if collection.reclist|length > 10 %}
+          <a href="{{ url_for('search.search', cc=collection.name, ln=g.ln, jrec=11)|safe }}"
+             class="pull-right text-muted">[&gt;&gt; {{ _('more')}}]</a>
+        {% endif %}
+        {% endif %}
+      {% endif %}
+      </div>
+  {% endif %}
+  {%- endblock index_right -%}
+
+
+
+
+
+{%- block portalbox_rt -%}
+
+  <div class="col-md-3 ">
+  <h4>{{ _("Info") }}</h4> 
+  The Advanced Search Engine is devoted for a more intuitive, easier and faster browse through the CERN documents.
+  </div>
+
+  <div class="col-md-3">
+	
+   
+   <h4>{{ _("Search by") }}</h4> 
+        
+	 <h6>{{ _("Learning Topic") }}</h6>
+   
+   {{ form.topic(style="width:265px",class="filter-control form-control",id="topic-selector",**{'data-tag':'topic'}) }}
+
+   {#<select id="topic-selector" data-tag="topic" class="filter-control form-control">
+  	<option>Any</option>
+  	<option>Cosmicwave</option>
+  	<option>Dark Energy</option>
+    <option>Dark Matter</option>
+    <option>Multi Dimensions</option>
+	 <option>Forces</option>
+  	<option>Higgs Boson</option>
+  	<option>W' Z' Bosons</option>
+  	<option>Masse</option>
+  	<option>Matter / Antimatter</option>
+	 <option>Black Holes</option>
+  	<option>Neutrinos</option>
+  	<option>New Physics</option>
+  	<option>Particles</option>
+  	<option>Quark</option>
+	 <option>Gluon</option>
+  	<option>Plasma</option>
+  	<option>Standard Model</option>
+  	<option>SUSY</option>
+  	<option>Technology</option>
+	 <option>Accelerators</option>
+  	<option>Calorimetry</option>
+  	<option>Engineering</option>
+  	<option>Construction</option>
+  	<option>Computing</option>
+	 <option>Grid</option>
+  	<option>Detectors</option>
+  	<option>Technology</option>
+  	<option>Magnets</option>
+  	<option>Particle</option>
+	 <option>Collaboration</option>
+  	<option>History</option>
+  	<option>Life as a Physicist</option>
+  	<option>Maps</option>
+  	<option>Discovery</option>
+	 <option>Industry</option>
+  	<option>Cancer Treatment</option>
+  	<option>Culture</option>
+  	<option>Education</option>
+  	<option>Medical Applications</option>
+	 <option>Medical Screening</option>
+  	<option>Technology</option>
+	 <option>Other</option>
+  	</select>#}
+
+	 <h6>{{ _("Audience") }}</h6>
+	 
+    {{ form.audien(style="width:265px",class="filter-control form-control",id="audience-selector",**{'data-tag':'audience'}) }}
+
+   {#<select id="audience-selector" data-tag="audience" class="filter-control form-control">
+	 <option>Any</option>	
+	 <option>Families</option>
+  	<option>Journalists</option>
+  	<option>Visitors</option>
+  	<option>Children (6 to 12 years)</option>
+  	<option>Teenagers (12 to 15 years)</option>
+	 <option>Young adults (16 to 25 years)</option>
+  	<option>Physics Teachers</option>
+  	<option>Teachers</option>
+  	<option>Animators</option>
+	 <option>Other</option>
+	 </select>#}
+	
+	 <h6>{{ _("Item Type") }}</h6>
+
+   {{ form.item_type(style="width:265px",class="filter-control form-control",id="type-selector",**{'data-tag':'type'}) }}
+
+	 {#<select id="type-selector" data-tag="type" class="filter-control form-control">
+	 <option>Any</option>	
+	 <option>Document</option>
+  	<option>Poster</option>
+  	<option>Video</option>
+  	<option>Audio</option>
+   	<option>Programm</option>
+	 <option>Other</option>	
+	 </select>#}
+	
+	 <h6>{{ _("Availability") }}</h6>
+
+   {{ form.availability(style="width:265px",class="filter-control form-control",id="availability-selector",**{'data-tag':'availability'}) }}
+
+	 {#<select id="availability-selector" data-tag="availability" class="filter-control form-control">
+	 <option>Any</option>	
+	 <option></option>
+  	<option></option>
+  	<option></option>
+  	<option></option>
+  	<option></option>
+	 <option>Other</option>	
+	 </select>#}
+
+	 <h6>{{ _("Duration") }}</h6>
+
+   {{ form.duration(style="width:265px",class="filter-control form-control",id="duration-selector",**{'data-tag':'duration'}) }}
+
+	 {#<select id="duration-selector" data-tag="duration" class="filter-control form-control">
+	 <option>Any</option>	
+	 <option>0 - 5 min</option>
+  	<option>6 - 15 min</option>
+  	<option>16 - 30 min</option>
+  	<option>31 - 45 min</option>
+  	<option>46 - 60 min</option>
+	 <option>Other</option>	
+	 </select>#}
+	
+	 <h6>{{ _("Language") }}</h6>
+
+   {{ form.language(style="width:265px",class="filter-control form-control", id="language-selector",**{'data-tag':'041__a'}) }}
+
+	 {#<select id="language-selector" data-tag="041__a" class="filter-control form-control">
+	  <option>Any</option>	
+	  <option value="eng">English</option>
+  	<option value="fr">French</option>
+  	<option value="rus">Russian</option>
+  	<option value="ger">German</option>
+  	<option value="it">Italian</option>
+	  <option>Other</option>	
+	 </select>#}
+
+	
+     
+
+
+    <div class="form-group">
+       <h5>{{ ("Keywords") }}</h5>
+      
+       <form method="POST" action="/">
+        {{ form.csrf_token }}
+        {{ form.keywords(size=30,placeholder="Type the keywords here",class="filter-control",type="text", value="",**{'data-tag':'title'})}}
+       <button id="submit-button" class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-search"></i><span>&nbsp;{{ _("Filter") }}</span></button>
+       </form>
+       
+       {#<input class="filter-control" data-tag="title" placeholder="Type the keywords here" type="text" name="keywords" value=""  style="width:265px"/>
+       <button id="submit-button" class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-search"></i><span>&nbsp;{{ _("Filter") }}</span></button>#}
+    </div>
+
+
+      
+ 
+   </div>
+ 
+
+{%- endblock portalbox_rt -%}	
+
+
+
