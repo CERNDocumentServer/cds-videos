@@ -62,6 +62,7 @@ EXTENSIONS = [
     'invenio.ext.login',
     'invenio.ext.principal',
     'invenio.ext.email',
+    'invenio.ext.fixtures',
     'invenio.ext.mixer',
     'invenio.ext.legacy',
     'invenio.ext.assets',

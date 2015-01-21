@@ -15,7 +15,13 @@
 ## along with Invenio; if not, write to the Free Software Foundation, Inc.,
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS demosite repository."""
+"""
+CDS, Access articles, reports and multimedia content in HEP.
+Links
+-----
+* `website <http://cds.cern.ch/>`_
+* `development version <https://github.com/CERNDocumentServer/cds>`_
+"""
 
 from setuptools import setup, find_packages
 import os
@@ -28,26 +34,27 @@ with open(os.path.join("cds", "version.py"), "rt") as fp:
 version = g["__version__"]
 
 setup(
-    name='CDS Demosite',
+    name='CDS',
     version=version,
     url='http://cds.cern.ch/',
     license='GPLv3',
     author='CERN',
     author_email='info@invenio-software.org',
-    description='Digital library software',
+    description='Access articles, reports and multimedia content in HEP',
     long_description=__doc__,
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     platforms='any',
     install_requires=[
-        "Invenio>1.9999,<1.9999.2"
+        "Invenio>1.9999,<1.9999.2",
+        "mixer",
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GPLv2 License',
+        'License :: OSI Approved :: GPLv3 License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',

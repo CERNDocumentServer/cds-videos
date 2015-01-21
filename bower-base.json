@@ -1,5 +1,5 @@
 {
-    "name": "cds-demosite",
+    "name": "cds",
     "version": "0.1a0",
     "resolutions":{
       "jquery": "~1.11",
