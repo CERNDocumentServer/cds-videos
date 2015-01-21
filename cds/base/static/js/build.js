@@ -33,30 +33,144 @@
         mangle: false
     },
     paths: {
-        // Invenio
-        jquery: 'empty:',
-        'jquery-ui': 'vendors/jquery-ui/jquery-ui',  // to be removed
-        'ui': 'vendors/jquery-ui/ui',
-        'jqueryui-timepicker': 'vendors/jqueryui-timepicker-addon/dist',
-        'jquery-form': 'vendors/jquery-form/jquery.form',
-        hgn: 'vendors/requirejs-hogan-plugin/hgn',
-        hogan: 'vendors/hogan/web/builds/3.0.2/hogan-3.0.2.amd',
-        text: 'vendors/requirejs-hogan-plugin/text'
+        // INVENIO
+        jquery: "vendors/jquery/dist/jquery",
+        ui: "vendors/jquery-ui/ui",
+        "jqueryui-timepicker": "vendors/jqueryui-timepicker-addon/dist",
+        "jquery-form": "vendors/jquery-form/jquery.form",
+        hgn: "vendors/requirejs-hogan-plugin/hgn",
+        hogan: "vendors/hogan/web/builds/3.0.2/hogan-3.0.2.amd",
+        text: "vendors/requirejs-hogan-plugin/text",
+        flight: "vendors/flight",
+        typeahead: "vendors/typeahead.js/dist/typeahead.bundle",
+        "bootstrap-select": "js/bootstrap-select",
+        "jquery-caret": "vendors/jquery.caret/dist/jquery.caret-1.5.2",
+        "jquery-tokeninput": "vendors/jquery-tokeninput/src/jquery.tokeninput",
+        "jquery-jeditable": "vendors/jquery.jeditable/index",
+        "moment": "vendors/moment/moment",
+        "datatables": "vendors/datatables/media/js/jquery.datatables",
+        "datatables-plugins": "vendors/datatables-plugins/integration/bootstrap/3/datatables.bootstrap",
+        "datatables-tabletools": "vendors/datatables-tabletools/js/datatables.tabletools",
+        "bootstrap-datetimepicker": "vendors/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
+        "bootstrap-tagsinput": "vendors/bootstrap-tagsinput/src/bootstrap-tagsinput",
+        bootstrap: "vendors/bootstrap/dist/js/bootstrap",
+        prism: "vendors/prism/prism",
+        d3: "vendors/d3/d3.js",
+        "jasmine-jquery": "vendors/jasmine-jquery/lib/jasmine-jquery",
+        "jasmine-core": "vendors/jasmine/lib/jasmine-core/jasmine",
+        "jasmine-html": "vendors/jasmine/lib/jasmine-core/jasmine-html",
+        "jasmine-ajax": "vendors/jasmine-ajax/lib/mock-ajax",
+        "jasmine-flight": "vendors/jasmine-flight/lib/jasmine-flight",
+        "jasmine-boot": "js/jasmine/boot",
+        "searchtypeahead-configuration": "js/search/default_typeahead_configuration",
+        "jasmine-events": "js/jasmine/events_checker",
+        "jasmine-initialization": "js/jasmine/initialization_checker",
         // CDS
-        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.10.0',
+        react: 'vendors/react/react-with-addons',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
-        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.10.0',
+        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer',
         json: 'vendors/requirejs-plugins/src/json',
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
         underscore: 'vendors/underscore/underscore',
     },
     shim: {
-        // Invenio
-        jquery: { exports: '$' },
-        'jqueryui-timepicker/jqueryui-sliderAccess': {deps: ['jquery']},
-        'jqueryui-timepicker/jqueryui-timepicker-addon': {deps: ['jquery', 'ui/slider']},
-        'jqueryui-timepicker/i18n/jquery-ui-timepicker-addon-i18n': {deps: ['jqueryui-timepicker/jquery-ui-timepicker-addon']},
+        // INVENIO
+        jquery: {
+          exports: "$"
+        },
+        d3: {
+          exports: "d3"
+        },
+        "jqueryui-timepicker/jquery-ui-sliderAccess": {
+          deps: ["jquery"]
+        },
+        "jqueryui-timepicker/jquery-ui-timepicker-addon": {
+          deps: ["jquery",
+            "ui/slider"
+          ]
+        },
+        "jqueryui-timepicker/i18n/jquery-ui-timepicker-addon-i18n": {
+          deps: ["jqueryui-timepicker/jquery-ui-timepicker-addon"]
+        },
+        typeahead: {
+          deps: ["jquery"],
+          exports: "Bloodhound"
+        },
+        "bootstrap-select": {
+          deps: ["jquery"],
+          exports: "$.fn.buttonSelect"
+        },
+        "jquery-caret": {
+          deps: ["jquery"],
+          exports: "$.fn.caret"
+        },
+        "jquery-tokeninput": {
+          deps: ["jquery"],
+          exports: "$.fn.tokenInput"
+        },
+        "jquery-jeditable": {
+          deps: ["jquery"],
+          exports: "$.fn.editable"
+        },
+        "bootstrap-tagsinput": {
+          deps: ["jquery"],
+          exports: "$.fn.tagsinput"
+        },
+        "datatables": {
+          deps: ["jquery"],
+          exports: "$.fn.dataTable"
+        },
+        bootstrap: {
+          deps: ["jquery"]
+        },
+        "datatables-plugins": {
+          deps: ["jquery", "bootstrap", "datatables"]
+        },
+        "datatables-tabletools": {
+          deps: ["jquery", "datatables"],
+          exports: "$.fn.dataTable.TableTools"
+        },
+        "bootstrap-datetimepicker": {
+          deps: ["jquery", "bootstrap", "moment"],
+          exports: "$.fn.datetimepicker"
+        },
+        prism: {
+          exports: "Prism"
+        },
+        "jasmine-core": {
+          exports: "jasmineRequire"
+        },
+        "jasmine-boot": {
+          exports: "jasmine",
+        },
+        "jasmine-jquery": {
+          deps: ["jquery", "jasmine-boot"],
+          exports: "jasmine",
+        },
+        "jasmine-ajax": {
+          deps: ["jasmine-boot"],
+          exports: "jasmine",
+        },
+        "jasmine-html": {
+          deps: ["jasmine-core"],
+          exports: "jasmineRequire"
+        },
+        "jasmine-flight": {
+          deps: ["jasmine-boot", "jasmine-jquery"],
+          exports: "jasmine",
+        },
+        "vendors/jasmine/lib/jasmine-core/boot": {
+          deps: ["jasmine-html"],
+          exports: "window.onload",
+        },
+        "jasmine-events": {
+          deps: ["jasmine-jquery"],
+          exports: "jasmine.EventsChecker",
+        },
+        "jasmine-initialization": {
+          deps: ["jasmine-boot"],
+        },
         // CDS
         react: { exports: 'React' },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
