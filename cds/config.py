@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 ## This file is part of Invenio.
-## Copyright (C) 2014 CERN.
+## Copyright (C) 2014, 2015 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@ from invenio.base.config import PACKAGES as _PACKAGES
 
 PACKAGES = [
     "cds.base",
+    "cds.demosite",
     "cds.modules.*",
 ] + _PACKAGES
 
