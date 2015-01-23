@@ -4978,5 +4978,10 @@
         "dbquery": "collection:DELPHI_Papers",
         "id": 1143,
         "name": "DELPHI Papers"
+    },
+    {
+        "dbquery": "980__a:PHOTOARCIMAGES",
+        "id": 1144,
+        "name": "PhotoLab Archives Images"
     }
 ]

@@ -3914,5 +3914,9 @@
     {
         "id_collection": 672,
         "tabs": "files;comments;metadata"
+    },
+    {
+        "id_collection": 1144,
+        "tabs": "files;keywords;comments;reviews;usage;metadata"
     }
 ]
