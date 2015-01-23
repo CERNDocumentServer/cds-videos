@@ -5956,5 +5956,11 @@
         "id_son": 1142,
         "score": 1,
         "type": "r"
+    },
+    {
+        "id_dad": 565,
+        "id_son": 1144,
+        "score": 1,
+        "type": "v"
     }
 ]
