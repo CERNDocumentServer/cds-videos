@@ -1,0 +1,27 @@
+<header>
+  <div id="heading">
+    <div id="mainmenu">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h1><a href="{{ url_for("search.index") }}">
+                {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
+            </a></h1>
+            <p>
+              {{- config.CFG_SITE_MISSION_INTL.get(g.ln, config.CFG_SITE_MISSION) -}}
+            </p>
+          </div> <!-- .col-md-6 -->
+          <div class="col-md-6">
+            <nav>
+              <ul>
+                {%- for item in current_menu.submenu("main").children if item.visible -%}
+                  <li><a href="{{ item.url }}">{{ item.text | safe }}</a></li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+          </div> <!-- .col-md-6 -->
+        </div> <!-- .row -->
+      </div> <!-- .container -->
+    </div> <!-- #mainmenu -->
+  </div> <!-- #heading -->
+</header>
