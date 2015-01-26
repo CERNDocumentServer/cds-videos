@@ -1,1 +1,6 @@
+tag 980.a:
+PICTURE --- multimedia/pictures/base.tpl
+PHOTOLAB --- multimedia/pictures/photolab.tpl
+PUBLICVIDEOMOVIE --- multimedia/videos/base.tpl
+PUBLICVIDEORUSH --- multimedia/videos/rush.tpl
 default: Default_HTML_detailed.tpl

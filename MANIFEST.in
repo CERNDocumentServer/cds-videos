@@ -24,6 +24,15 @@ recursive-exclude docs/_build *
 
 recursive-include cds/base/static *
 recursive-include cds/base/templates *
+recursive-include cds/base/format_elements *
+recursive-include cds/base/format_templates *
+recursive-include cds/base/output_formats *
+
+recursive-include cds/modules/*/static *
+recursive-include cds/modules/*/templates *
+recursive-include cds/modules/*/format_elements *
+recursive-include cds/modules/*/format_templates *
+recursive-include cds/modules/*/output_formats *
 
 recursive-exclude * *.pyc *.pyo
 
