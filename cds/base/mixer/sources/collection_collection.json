@@ -1,32 +1,20 @@
 [
     {
         "id_dad": 1,
-        "id_son": 250,
-        "score": 4,
-        "type": "r"
-    },
-    {
-        "id_dad": 1,
         "id_son": 2,
-        "score": 7,
-        "type": "r"
-    },
-    {
-        "id_dad": 1,
-        "id_son": 3,
-        "score": 9,
-        "type": "r"
-    },
-    {
-        "id_dad": 1,
-        "id_son": 4,
         "score": 10,
         "type": "r"
     },
     {
         "id_dad": 1,
+        "id_son": 3,
+        "score": 12,
+        "type": "r"
+    },
+    {
+        "id_dad": 1,
         "id_son": 6,
-        "score": 11,
+        "score": 13,
         "type": "r"
     },
     {
@@ -36,44 +24,14 @@
         "type": "v"
     },
     {
-        "id_dad": 250,
-        "id_son": 10,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 250,
-        "id_son": 11,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 250,
-        "id_son": 12,
-        "score": 2,
-        "type": "r"
-    },
-    {
-        "id_dad": 496,
+        "id_dad": 1151,
         "id_son": 13,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 250,
-        "id_son": 14,
         "score": 3,
         "type": "r"
     },
     {
-        "id_dad": 250,
+        "id_dad": 491,
         "id_son": 5,
-        "score": 4,
-        "type": "r"
-    },
-    {
-        "id_dad": 250,
-        "id_son": 41,
         "score": 5,
         "type": "r"
     },
@@ -126,15 +84,15 @@
         "type": "r"
     },
     {
-        "id_dad": 4,
+        "id_dad": 1151,
         "id_son": 17,
-        "score": 0,
+        "score": 4,
         "type": "r"
     },
     {
-        "id_dad": 4,
+        "id_dad": 1151,
         "id_son": 18,
-        "score": 1,
+        "score": 5,
         "type": "r"
     },
     {
@@ -264,18 +222,6 @@
         "type": "r"
     },
     {
-        "id_dad": 41,
-        "id_son": 43,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 41,
-        "id_son": 44,
-        "score": 0,
-        "type": "r"
-    },
-    {
         "id_dad": 19,
         "id_son": 48,
         "score": 5,
@@ -375,198 +321,6 @@
         "id_dad": 262,
         "id_son": 688,
         "score": 3,
-        "type": "r"
-    },
-    {
-        "id_dad": 43,
-        "id_son": 65,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 43,
-        "id_son": 66,
-        "score": 2,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 67,
-        "score": 21,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 68,
-        "score": 11,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 69,
-        "score": 20,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 70,
-        "score": 19,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 71,
-        "score": 12,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 72,
-        "score": 13,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 73,
-        "score": 14,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 74,
-        "score": 15,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 75,
-        "score": 16,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 76,
-        "score": 10,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 77,
-        "score": 9,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 78,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 79,
-        "score": 2,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 95,
-        "score": 18,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 96,
-        "score": 17,
-        "type": "r"
-    },
-    {
-        "id_dad": 72,
-        "id_son": 80,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 67,
-        "id_son": 81,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 67,
-        "id_son": 82,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 71,
-        "id_son": 83,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 68,
-        "id_son": 84,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 69,
-        "id_son": 85,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 69,
-        "id_son": 86,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 95,
-        "id_son": 87,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 95,
-        "id_son": 88,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 75,
-        "id_son": 89,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 96,
-        "id_son": 90,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 96,
-        "id_son": 91,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 70,
-        "id_son": 92,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 70,
-        "id_son": 93,
-        "score": 1,
-        "type": "r"
-    },
-    {
-        "id_dad": 76,
-        "id_son": 94,
-        "score": 0,
         "type": "r"
     },
     {
@@ -2990,13 +2744,13 @@
     {
         "id_dad": 1,
         "id_son": 296,
-        "score": 2,
+        "score": 5,
         "type": "v"
     },
     {
         "id_dad": 1,
         "id_son": 269,
-        "score": 5,
+        "score": 2,
         "type": "v"
     },
     {
@@ -3036,18 +2790,6 @@
         "type": "r"
     },
     {
-        "id_dad": 73,
-        "id_son": 465,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 43,
-        "id_son": 466,
-        "score": 4,
-        "type": "r"
-    },
-    {
         "id_dad": 467,
         "id_son": 47,
         "score": 20,
@@ -3060,18 +2802,6 @@
         "type": "r"
     },
     {
-        "id_dad": 74,
-        "id_son": 468,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 77,
-        "id_son": 469,
-        "score": 0,
-        "type": "r"
-    },
-    {
         "id_dad": 5,
         "id_son": 471,
         "score": 42,
@@ -3081,60 +2811,6 @@
         "id_dad": 292,
         "id_son": 472,
         "score": 6,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 473,
-        "score": 3,
-        "type": "r"
-    },
-    {
-        "id_dad": 473,
-        "id_son": 474,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 475,
-        "score": 4,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 476,
-        "score": 5,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 477,
-        "score": 6,
-        "type": "r"
-    },
-    {
-        "id_dad": 475,
-        "id_son": 478,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 476,
-        "id_son": 479,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 477,
-        "id_son": 480,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 481,
-        "score": 7,
         "type": "r"
     },
     {
@@ -3192,9 +2868,9 @@
         "type": "r"
     },
     {
-        "id_dad": 491,
+        "id_dad": 1151,
         "id_son": 495,
-        "score": 3,
+        "score": 1,
         "type": "r"
     },
     {
@@ -3206,31 +2882,7 @@
     {
         "id_dad": 1,
         "id_son": 491,
-        "score": 0,
-        "type": "v"
-    },
-    {
-        "id_dad": 1,
-        "id_son": 496,
-        "score": 1,
-        "type": "v"
-    },
-    {
-        "id_dad": 496,
-        "id_son": 25,
-        "score": 3,
-        "type": "r"
-    },
-    {
-        "id_dad": 496,
-        "id_son": 26,
-        "score": 4,
-        "type": "r"
-    },
-    {
-        "id_dad": 496,
-        "id_son": 27,
-        "score": 5,
+        "score": 7,
         "type": "r"
     },
     {
@@ -3426,18 +3078,6 @@
         "type": "r"
     },
     {
-        "id_dad": 44,
-        "id_son": 577,
-        "score": 8,
-        "type": "r"
-    },
-    {
-        "id_dad": 577,
-        "id_son": 578,
-        "score": 0,
-        "type": "r"
-    },
-    {
         "id_dad": 5,
         "id_son": 579,
         "score": 13,
@@ -3514,12 +3154,6 @@
         "id_son": 562,
         "score": 3,
         "type": "v"
-    },
-    {
-        "id_dad": 41,
-        "id_son": 605,
-        "score": 2,
-        "type": "r"
     },
     {
         "id_dad": 608,
@@ -3714,9 +3348,9 @@
         "type": "v"
     },
     {
-        "id_dad": 496,
+        "id_dad": 296,
         "id_son": 662,
-        "score": 2,
+        "score": 11,
         "type": "r"
     },
     {
@@ -3774,30 +3408,6 @@
         "type": "v"
     },
     {
-        "id_dad": 43,
-        "id_son": 684,
-        "score": 0,
-        "type": "r"
-    },
-    {
-        "id_dad": 43,
-        "id_son": 685,
-        "score": 3,
-        "type": "r"
-    },
-    {
-        "id_dad": 684,
-        "id_son": 63,
-        "score": 1,
-        "type": "v"
-    },
-    {
-        "id_dad": 684,
-        "id_son": 64,
-        "score": 0,
-        "type": "v"
-    },
-    {
         "id_dad": 31,
         "id_son": 678,
         "score": 0,
@@ -3808,12 +3418,6 @@
         "id_son": 673,
         "score": 1,
         "type": "v"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 672,
-        "score": 0,
-        "type": "r"
     },
     {
         "id_dad": 693,
@@ -3990,9 +3594,9 @@
         "type": "v"
     },
     {
-        "id_dad": 496,
+        "id_dad": 1151,
         "id_son": 723,
-        "score": 0,
+        "score": 2,
         "type": "r"
     },
     {
@@ -4470,15 +4074,9 @@
         "type": "r"
     },
     {
-        "id_dad": 605,
-        "id_son": 826,
-        "score": 2,
-        "type": "r"
-    },
-    {
-        "id_dad": 605,
-        "id_son": 827,
-        "score": 1,
+        "id_dad": 1,
+        "id_son": 1151,
+        "score": 9,
         "type": "r"
     },
     {
@@ -4492,12 +4090,6 @@
         "id_son": 829,
         "score": 1,
         "type": "v"
-    },
-    {
-        "id_dad": 605,
-        "id_son": 843,
-        "score": 0,
-        "type": "r"
     },
     {
         "id_dad": 789,
@@ -5244,9 +4836,9 @@
         "type": "r"
     },
     {
-        "id_dad": 2,
+        "id_dad": 1151,
         "id_son": 981,
-        "score": 5,
+        "score": 6,
         "type": "r"
     },
     {
@@ -5451,12 +5043,6 @@
         "id_dad": 1024,
         "id_son": 1043,
         "score": 9,
-        "type": "r"
-    },
-    {
-        "id_dad": 44,
-        "id_son": 1046,
-        "score": 22,
         "type": "r"
     },
     {
@@ -5962,5 +5548,35 @@
         "id_son": 1144,
         "score": 1,
         "type": "v"
+    },
+    {
+        "id_dad": 1,
+        "id_son": 1145,
+        "score": 14,
+        "type": "r"
+    },
+    {
+        "id_dad": 1145,
+        "id_son": 1147,
+        "score": 4,
+        "type": "r"
+    },
+    {
+        "id_dad": 1145,
+        "id_son": 1148,
+        "score": 5,
+        "type": "r"
+    },
+    {
+        "id_dad": 1145,
+        "id_son": 1149,
+        "score": 3,
+        "type": "r"
+    },
+    {
+        "id_dad": 1145,
+        "id_son": 1150,
+        "score": 2,
+        "type": "r"
     }
 ]

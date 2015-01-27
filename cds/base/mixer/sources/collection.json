@@ -4983,5 +4983,33 @@
         "dbquery": "980__a:PHOTOARCIMAGES",
         "id": 1144,
         "name": "PhotoLab Archives Images"
+    },
+    {
+        "id": 1145,
+        "name": "Legacy Content"
+    },
+    {
+        "id": 1151,
+        "name": "Journals & Reports"
+    },
+    {
+        "dbquery": "980__a:\"thesis\" NOT 690C_a:CERN\" NOT 035__9:\"ArXiv\"",
+        "id": 1147,
+        "name": "Non CERN Thesis"
+    },
+    {
+        "dbquery": "980__a:\"REPORT\" OR 690C_a:\"REPORT\" NOT 690C_a:\"CERN\"",
+        "id": 1148,
+        "name": "Non CERN Reports"
+    },
+    {
+        "dbquery": "980__a:\"PREPRINT\" NOT 690C_a:\"CERN\"",
+        "id": 1149,
+        "name": "Non CERN Preprints"
+    },
+    {
+        "dbquery": "980__a:\"ARTICLE\" NOT 690C_a:\"CERN\"",
+        "id": 1150,
+        "name": "Non CERN Articles"
     }
 ]
