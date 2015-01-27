@@ -1,20 +1,14 @@
 [
     {
-        "id_dad": 1,
-        "id_son": 2,
-        "score": 10,
-        "type": "r"
-    },
-    {
-        "id_dad": 1,
-        "id_son": 3,
-        "score": 12,
+        "id_dad": 467,
+        "id_son": 982,
+        "score": 22,
         "type": "r"
     },
     {
         "id_dad": 1,
         "id_son": 6,
-        "score": 13,
+        "score": 16,
         "type": "r"
     },
     {
@@ -36,21 +30,15 @@
         "type": "r"
     },
     {
-        "id_dad": 2,
+        "id_dad": 1152,
         "id_son": 15,
-        "score": 2,
-        "type": "r"
-    },
-    {
-        "id_dad": 2,
-        "id_son": 16,
         "score": 3,
         "type": "r"
     },
     {
-        "id_dad": 2,
+        "id_dad": 1152,
         "id_son": 8,
-        "score": 4,
+        "score": 2,
         "type": "r"
     },
     {
@@ -60,21 +48,21 @@
         "type": "r"
     },
     {
-        "id_dad": 3,
+        "id_dad": 1153,
         "id_son": 25,
-        "score": 3,
+        "score": 1,
         "type": "r"
     },
     {
-        "id_dad": 3,
+        "id_dad": 1153,
         "id_son": 26,
-        "score": 4,
+        "score": 2,
         "type": "r"
     },
     {
-        "id_dad": 3,
+        "id_dad": 1153,
         "id_son": 27,
-        "score": 5,
+        "score": 3,
         "type": "r"
     },
     {
@@ -84,9 +72,9 @@
         "type": "r"
     },
     {
-        "id_dad": 1151,
+        "id_dad": 1152,
         "id_son": 17,
-        "score": 4,
+        "score": 1,
         "type": "r"
     },
     {
@@ -2886,6 +2874,18 @@
         "type": "r"
     },
     {
+        "id_dad": 1,
+        "id_son": 1153,
+        "score": 14,
+        "type": "r"
+    },
+    {
+        "id_dad": 1,
+        "id_son": 1152,
+        "score": 15,
+        "type": "r"
+    },
+    {
         "id_dad": 542,
         "id_son": 545,
         "score": 5,
@@ -3318,9 +3318,9 @@
         "type": "v"
     },
     {
-        "id_dad": 2,
+        "id_dad": 1152,
         "id_son": 361,
-        "score": 1,
+        "score": 5,
         "type": "v"
     },
     {
@@ -3348,9 +3348,9 @@
         "type": "v"
     },
     {
-        "id_dad": 296,
-        "id_son": 662,
-        "score": 11,
+        "id_dad": 1,
+        "id_son": 467,
+        "score": 12,
         "type": "r"
     },
     {
@@ -3512,7 +3512,7 @@
     {
         "id_dad": 296,
         "id_son": 704,
-        "score": 10,
+        "score": 11,
         "type": "r"
     },
     {
@@ -4074,21 +4074,21 @@
         "type": "r"
     },
     {
-        "id_dad": 1,
+        "id_dad": 491,
         "id_son": 1151,
-        "score": 9,
+        "score": 6,
         "type": "r"
     },
     {
-        "id_dad": 3,
+        "id_dad": 1153,
         "id_son": 830,
-        "score": 0,
+        "score": 4,
         "type": "v"
     },
     {
-        "id_dad": 3,
+        "id_dad": 1153,
         "id_son": 829,
-        "score": 1,
+        "score": 5,
         "type": "v"
     },
     {
@@ -4320,9 +4320,9 @@
         "type": "r"
     },
     {
-        "id_dad": 2,
+        "id_dad": 1152,
         "id_son": 871,
-        "score": 0,
+        "score": 4,
         "type": "v"
     },
     {
@@ -5552,7 +5552,7 @@
     {
         "id_dad": 1,
         "id_son": 1145,
-        "score": 14,
+        "score": 17,
         "type": "r"
     },
     {
