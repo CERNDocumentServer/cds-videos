@@ -13840,5 +13840,41 @@
         "ln": "en",
         "type": "ln",
         "value": "PhotoLab Archives Images"
+    },
+    {
+        "id_collection": 1145,
+        "ln": "en",
+        "type": "ln",
+        "value": "Legacy Content"
+    },
+    {
+        "id_collection": 1151,
+        "ln": "en",
+        "type": "ln",
+        "value": "Journals & Reports"
+    },
+    {
+        "id_collection": 1147,
+        "ln": "en",
+        "type": "ln",
+        "value": "Non CERN Thesis"
+    },
+    {
+        "id_collection": 1148,
+        "ln": "en",
+        "type": "ln",
+        "value": "Non CERN Reports"
+    },
+    {
+        "id_collection": 1149,
+        "ln": "en",
+        "type": "ln",
+        "value": "Non CERN Preprints"
+    },
+    {
+        "id_collection": 1150,
+        "ln": "en",
+        "type": "ln",
+        "value": "Non CERN Articles"
     }
 ]
