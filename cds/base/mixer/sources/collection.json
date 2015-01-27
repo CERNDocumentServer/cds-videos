@@ -4993,6 +4993,10 @@
         "name": "Journals & Reports"
     },
     {
+        "id": 1152,
+        "name": "Books & Journals"
+    },
+    {
         "dbquery": "980__a:\"thesis\" NOT 690C_a:CERN\" NOT 035__9:\"ArXiv\"",
         "id": 1147,
         "name": "Non CERN Thesis"
@@ -5011,5 +5015,9 @@
         "dbquery": "980__a:\"ARTICLE\" NOT 690C_a:\"CERN\"",
         "id": 1150,
         "name": "Non CERN Articles"
+    },
+    {
+        "id": 1153,
+        "name": "Lectures & Talks"
     }
 ]

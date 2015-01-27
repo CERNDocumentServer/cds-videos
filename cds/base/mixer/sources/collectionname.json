@@ -13851,7 +13851,7 @@
         "id_collection": 1151,
         "ln": "en",
         "type": "ln",
-        "value": "Journals & Reports"
+        "value": "Reports"
     },
     {
         "id_collection": 1147,
@@ -13876,5 +13876,17 @@
         "ln": "en",
         "type": "ln",
         "value": "Non CERN Articles"
+    },
+    {
+        "id_collection": 1152,
+        "ln": "en",
+        "type": "ln",
+        "value": "Books & Journals"
+    },
+    {
+        "id_collection": 1153,
+        "ln": "en",
+        "type": "ln",
+        "value": "Lectures & Talks"
     }
 ]
