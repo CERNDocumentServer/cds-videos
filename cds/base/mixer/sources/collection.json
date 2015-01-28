@@ -5019,5 +5019,13 @@
     {
         "id": 1153,
         "name": "Lectures & Talks"
+    },
+    {
+        "id": 1154,
+        "name": "CERN Notes"
+    },
+    {
+        "id": 1155,
+        "name": "CERN Public Notes"
     }
 ]

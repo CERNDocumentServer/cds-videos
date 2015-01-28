@@ -1491,7 +1491,7 @@
         "id_collection": 5,
         "ln": "en",
         "type": "ln",
-        "value": "CERN Notes"
+        "value": "CERN Internal Notes"
     },
     {
         "id_collection": 5,
@@ -1515,7 +1515,7 @@
         "id_collection": 5,
         "ln": "de",
         "type": "ln",
-        "value": "CERN Notes"
+        "value": "CERN Internal Notes"
     },
     {
         "id_collection": 5,
@@ -1533,7 +1533,7 @@
         "id_collection": 5,
         "ln": "fr",
         "type": "ln",
-        "value": "CERN Notes"
+        "value": "CERN Internal Notes"
     },
     {
         "id_collection": 5,
@@ -1545,7 +1545,7 @@
         "id_collection": 5,
         "ln": "it",
         "type": "ln",
-        "value": "CERN Notes"
+        "value": "CERN Internal Notes"
     },
     {
         "id_collection": 5,
@@ -13888,5 +13888,17 @@
         "ln": "en",
         "type": "ln",
         "value": "Lectures & Talks"
+    },
+    {
+        "id_collection": 1154,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Notes"
+    },
+    {
+        "id_collection": 1155,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Public Notes"
     }
 ]

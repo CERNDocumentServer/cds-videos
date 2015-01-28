@@ -1,5 +1,17 @@
 [
     {
+        "id_dad": 14,
+        "id_son": 723,
+        "score": 2,
+        "type": "v"
+    },
+    {
+        "id_dad": 491,
+        "id_son": 14,
+        "score": 7,
+        "type": "r"
+    },
+    {
         "id_dad": 467,
         "id_son": 982,
         "score": 22,
@@ -18,15 +30,15 @@
         "type": "v"
     },
     {
-        "id_dad": 1151,
-        "id_son": 13,
-        "score": 3,
+        "id_dad": 5,
+        "id_son": 951,
+        "score": 51,
         "type": "r"
     },
     {
-        "id_dad": 491,
+        "id_dad": 1154,
         "id_son": 5,
-        "score": 5,
+        "score": 2,
         "type": "r"
     },
     {
@@ -34,6 +46,12 @@
         "id_son": 15,
         "score": 3,
         "type": "r"
+    },
+    {
+        "id_dad": 14,
+        "id_son": 495,
+        "score": 1,
+        "type": "v"
     },
     {
         "id_dad": 1152,
@@ -66,9 +84,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 950,
-        "score": 4,
+        "score": 3,
         "type": "r"
     },
     {
@@ -78,9 +96,9 @@
         "type": "r"
     },
     {
-        "id_dad": 1151,
-        "id_son": 18,
-        "score": 5,
+        "id_dad": 1154,
+        "id_son": 1155,
+        "score": 1,
         "type": "r"
     },
     {
@@ -96,9 +114,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 31,
-        "score": 14,
+        "score": 7,
         "type": "r"
     },
     {
@@ -108,27 +126,27 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 33,
-        "score": 23,
+        "score": 14,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 34,
-        "score": 37,
+        "score": 22,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 35,
-        "score": 45,
+        "score": 27,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 36,
-        "score": 32,
+        "score": 20,
         "type": "r"
     },
     {
@@ -1050,9 +1068,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 595,
-        "score": 43,
+        "score": 26,
         "type": "r"
     },
     {
@@ -1764,9 +1782,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 288,
-        "score": 15,
+        "score": 8,
         "type": "r"
     },
     {
@@ -2358,9 +2376,9 @@
         "type": "r"
     },
     {
-        "id_dad": 723,
-        "id_son": 974,
-        "score": 0,
+        "id_dad": 286,
+        "id_son": 32,
+        "score": 13,
         "type": "v"
     },
     {
@@ -2760,9 +2778,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 299,
-        "score": 6,
+        "score": 4,
         "type": "r"
     },
     {
@@ -2790,9 +2808,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 471,
-        "score": 42,
+        "score": 25,
         "type": "r"
     },
     {
@@ -2856,12 +2874,6 @@
         "type": "r"
     },
     {
-        "id_dad": 1151,
-        "id_son": 495,
-        "score": 1,
-        "type": "r"
-    },
-    {
         "id_dad": 491,
         "id_son": 41,
         "score": 4,
@@ -2872,6 +2884,18 @@
         "id_son": 491,
         "score": 7,
         "type": "r"
+    },
+    {
+        "id_dad": 14,
+        "id_son": 18,
+        "score": 4,
+        "type": "v"
+    },
+    {
+        "id_dad": 14,
+        "id_son": 13,
+        "score": 3,
+        "type": "v"
     },
     {
         "id_dad": 1,
@@ -2970,9 +2994,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 559,
-        "score": 50,
+        "score": 32,
         "type": "r"
     },
     {
@@ -3108,9 +3132,9 @@
         "type": "v"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 601,
-        "score": 30,
+        "score": 19,
         "type": "r"
     },
     {
@@ -3204,9 +3228,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 309,
-        "score": 20,
+        "score": 12,
         "type": "v"
     },
     {
@@ -3276,9 +3300,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 612,
-        "score": 12,
+        "score": 6,
         "type": "r"
     },
     {
@@ -3450,9 +3474,9 @@
         "type": "v"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 697,
-        "score": 17,
+        "score": 10,
         "type": "r"
     },
     {
@@ -3516,9 +3540,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 710,
-        "score": 34,
+        "score": 21,
         "type": "r"
     },
     {
@@ -3594,9 +3618,9 @@
         "type": "v"
     },
     {
-        "id_dad": 1151,
-        "id_son": 723,
-        "score": 2,
+        "id_dad": 5,
+        "id_son": 1066,
+        "score": 52,
         "type": "r"
     },
     {
@@ -3624,9 +3648,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 734,
-        "score": 48,
+        "score": 30,
         "type": "r"
     },
     {
@@ -3828,9 +3852,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 781,
-        "score": 22,
+        "score": 13,
         "type": "r"
     },
     {
@@ -3918,9 +3942,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 793,
-        "score": 16,
+        "score": 9,
         "type": "r"
     },
     {
@@ -3930,9 +3954,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 796,
-        "score": 11,
+        "score": 5,
         "type": "r"
     },
     {
@@ -4044,9 +4068,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 689,
-        "score": 24,
+        "score": 15,
         "type": "r"
     },
     {
@@ -4074,10 +4098,10 @@
         "type": "r"
     },
     {
-        "id_dad": 491,
-        "id_son": 1151,
-        "score": 6,
-        "type": "r"
+        "id_dad": 14,
+        "id_son": 981,
+        "score": 5,
+        "type": "v"
     },
     {
         "id_dad": 1153,
@@ -4164,9 +4188,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 840,
-        "score": 39,
+        "score": 23,
         "type": "r"
     },
     {
@@ -4452,15 +4476,15 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 700,
-        "score": 28,
+        "score": 17,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 701,
-        "score": 29,
+        "score": 18,
         "type": "r"
     },
     {
@@ -4476,21 +4500,21 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 664,
-        "score": 49,
+        "score": 31,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 725,
-        "score": 25,
+        "score": 16,
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 712,
-        "score": 46,
+        "score": 28,
         "type": "r"
     },
     {
@@ -4500,9 +4524,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 776,
-        "score": 41,
+        "score": 24,
         "type": "r"
     },
     {
@@ -4836,9 +4860,9 @@
         "type": "r"
     },
     {
-        "id_dad": 1151,
-        "id_son": 981,
-        "score": 6,
+        "id_dad": 491,
+        "id_son": 1154,
+        "score": 8,
         "type": "r"
     },
     {
@@ -4890,9 +4914,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 939,
-        "score": 3,
+        "score": 2,
         "type": "r"
     },
     {
@@ -5046,9 +5070,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 1045,
-        "score": 47,
+        "score": 29,
         "type": "r"
     },
     {
@@ -5142,9 +5166,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 1065,
-        "score": 19,
+        "score": 11,
         "type": "r"
     },
     {
@@ -5424,9 +5448,9 @@
         "type": "r"
     },
     {
-        "id_dad": 5,
+        "id_dad": 1155,
         "id_son": 1051,
-        "score": 0,
+        "score": 1,
         "type": "r"
     },
     {
