@@ -1,0 +1,11 @@
+components:
+  - cli
+  - config
+  - docs
+  - global
+  - hooks
+  - installation
+  - kwalitee
+  - tests
+  - travis
+  - views
