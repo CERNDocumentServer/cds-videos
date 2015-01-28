@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">81</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">PHOTOLAB</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Life at CERN</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-GE-1311308</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Viriginie Blondeau</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Opendays photographers</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Open Days Volunteers thank you drink</subfield>
+  </datafield>
+  <datafield tag="246" ind1=" " ind2="1">
+    <subfield code="a">Pot de remerciements des volontaires des Portes Ouvertes</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="c">28 Nov 2013</subfield>
+  </datafield>
+  <datafield tag="340" ind1=" " ind2=" ">
+    <subfield code="a">DIGITAL</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="d">CERN</subfield>
+    <subfield code="g">2013</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">anna.pantelia@cern.ch</subfield>
+  </datafield>
+  <datafield tag="903" ind1=" " ind2=" ">
+    <subfield code="s">public</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2013</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Open Days</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">2013</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Volunteers</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Open Days</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">2013</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Volunteers</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Open Days</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">2013</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Volunteers</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Open Days</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">2013</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">Volunteers</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="2" ind2=" ">
+    <subfield code="a">opendays2013</subfield>
+    <subfield code="9">CERN</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_02/1311308_02-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_78/1311308_78-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_81/1311308_81-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_84/1311308_84-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_87/1311308_87-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_89/1311308_89-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_91/1311308_91-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_90/1311308_90-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_93/1311308_93-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_94/1311308_94-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_96/1311308_96-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_97/1311308_97-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_98/1311308_98-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_99/1311308_99-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_03/1311308_03-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_05/1311308_05-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_06/1311308_06-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_08/1311308_08-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_07/1311308_07-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_12/1311308_12-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_15/1311308_15-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_15/1311308_15-A5-at-72-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_17/1311308_17-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_20/1311308_20-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_19/1311308_19-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_23/1311308_23-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_25/1311308_25-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_27/1311308_27-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_26/1311308_26-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_28/1311308_28-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_30/1311308_30-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_33/1311308_33-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_36/1311308_36-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_37/1311308_37-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_38/1311308_38-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_39/1311308_39-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_41/1311308_41-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_40/1311308_40-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_43/1311308_43-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_42/1311308_42-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_44/1311308_44-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_45/1311308_45-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_48/1311308_48-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_49/1311308_49-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_51/1311308_51-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_53/1311308_53-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_55/1311308_55-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_59/1311308_59-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_60/1311308_60-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_65/1311308_65-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_68/1311308_68-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_70/1311308_70-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_73/1311308_73-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_75/1311308_75-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_77/1311308_77-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_100/1311308_100-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_105/1311308_105-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_113/1311308_113-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_109/1311308_109-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_121/1311308_121-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_116/1311308_116-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_115/1311308_115-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_101/1311308_101-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_125/1311308_125-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_124/1311308_124-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_82/1311308_82-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_83/1311308_83-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_86/1311308_86-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_117/1311308_117-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_85/1311308_85-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_123/1311308_123-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_79/1311308_79-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_01/1311308_01-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_131/1311308_131-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_129/1311308_129-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_88/1311308_88-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_92/1311308_92-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_95/1311308_95-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_74/1311308_74-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_110/1311308_110-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_108/1311308_108-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_112/1311308_112-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_114/1311308_114-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_120/1311308_120-A4-at-144-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="FFT" ind1=" " ind2=" ">
+    <subfield code="a">http://mediaarchive.cern.ch/MediaArchive/Photo/Public/2013/1311308/1311308_119/1311308_119-A5-at-72-dpi.jpg</subfield>
+  </datafield>
+  <datafield tag="923" ind1=" " ind2=" ">
+    <subfield code="r">Virginie Blondeau &lt;Virginie.Blondeau@cern.ch></subfield>
+  </datafield>
+</record>
+</collection>

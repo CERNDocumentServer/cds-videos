@@ -35,9 +35,25 @@ manager = Manager(usage=__doc__)
 option_yes_i_know = manager.option('--yes-i-know', action='store_true',
                                    dest='yes_i_know', help='use with care!')
 
+
+@option_yes_i_know
+def photos(yes_i_know=False):
+    """Load CDS photo demorecords."""
+    _make_upload('cds-photos.xml', 'Going to load demo photos.')
+
+
 @option_yes_i_know
 def populate(yes_i_know=False):
     """Load CDS general demorecords."""
+    _make_upload('cds-demobibdata.xml')
+
+
+def _make_upload(name, description="Going to load demo records"):
+    """Upload the demodata from the given file.
+
+    :param str name: the demodata file name
+    :param str description: the user message
+    """
     from invenio.utils.text import wrap_text_in_a_box, wait_for_user
     from invenio.config import CFG_PREFIX
     from invenio.modules.scheduler.models import SchTASK
@@ -46,10 +62,10 @@ def populate(yes_i_know=False):
         "WARNING: You are going to override data in tables!"
     ))
 
-    print(">>> Going to load demo records...")
+    print(">>> {0}".format(description))
     xml_data = pkg_resources.resource_filename(
         'cds',
-        os.path.join('demosite', 'data', 'cds-demobibdata.xml'))
+        os.path.join('demosite', 'data', name))
 
     job_id = SchTASK.query.count()
 
@@ -69,6 +85,7 @@ def populate(yes_i_know=False):
             print("ERROR: failed execution of", cmd)
             sys.exit(1)
     print(">>> CDS Demo records loaded successfully.")
+
 
 def main():
     """Execute manager."""
