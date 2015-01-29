@@ -1,5 +1,5 @@
 ## This file is part of Invenio.
-## Copyright (C) 2013, 2014 CERN.
+## Copyright (C) 2014, 2015 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -15,17 +15,16 @@
 ## along with Invenio; if not, write to the Free Software Foundation, Inc.,
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""
-CDS, Access articles, reports and multimedia content in HEP.
+"""CDS, Access articles, reports and multimedia content in HEP.
+
 Links
 -----
 * `website <http://cds.cern.ch/>`_
 * `development version <https://github.com/CERNDocumentServer/cds>`_
 """
 
-from setuptools import setup, find_packages
 import os
-
+from setuptools import find_packages, setup
 
 # loads __version__
 g = {}
@@ -50,7 +49,8 @@ setup(
         "mixer",
     ],
     extras_require={
-        'development':[
+        'development': [
+            "Invenio-Kwalitee",
             "Flask-DebugToolbar>=0.9",
             'setuptools-bower>=0.2'
         ],
