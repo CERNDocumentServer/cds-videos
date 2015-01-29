@@ -1,6 +1,6 @@
 {#
 ## This file is part of Invenio.
-## Copyright (C) 2014 CERN.
+## Copyright (C) 2014, 2015 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -50,20 +50,4 @@
       {% endif %}
     </div> <!-- .col-md-9 -->
   {% endif %}
-{%- endblock -%}
-{%- block index -%}
-  {%- block index_title %}
-    {%- if collection.collection_children_r %}
-      <div class="row">
-        <div class="col-md-12">
-          <div class="page-header">
-            <h3>
-              {{ collection.name  }}:
-            </h3>
-          </div>
-        </div>
-      </div>
-    {%- endif %}
-  {%- endblock %}
-  {{- super() }}
 {%- endblock -%}

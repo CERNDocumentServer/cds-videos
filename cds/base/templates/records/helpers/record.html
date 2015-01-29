@@ -1,0 +1,88 @@
+{#
+## This file is part of CDS.
+## Copyright (C) 2015 CERN.
+##
+## Invenio is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 2 of the
+## License, or (at your option) any later version.
+##
+## Invenio is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with Invenio; if not, write to the Free Software Foundation, Inc.,
+## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+
+{% macro copyright(resource_type='photo') %}
+  {% if resource_type == 'photo' %}
+    <div class="cds-copyright-notice text-center">
+      <a href="{{ record.coyright.get('url') | default('http://copyright.web.cern.ch/') | safe }}">{{ _('Conditions of Use') }}</a> &copy; {{ record.coyright.get('date') | safe }} {{ record.coyright.get('holder')| default('CERN') | safe}}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro author(type='list', with_link=False, separator=', ') %}
+    {% set authors = record.get('authors[:].full_name', []) %}
+    {{ _resolve_output_type(items=authors, with_link=with_link, separator=separator, type=type, query='author:%s') }}
+{% endmacro %}
+
+{% macro keywords(type='labels', with_link=False, separator=', ') %}
+    {% set keywords = record.get('keywords[:].term', []) %}
+    {{ _resolve_output_type(items=keywords, with_link=with_link, separator=separator, type=type, query='keyword:%s') }}
+{% endmacro %}
+
+{% macro date() %}
+  {{ record.creation_date | invenio_format_date() }}
+{% endmacro %}
+
+{# Output resovler #}
+{% macro _resolve_output_type(items, with_link, type, separator, query) %}
+  {% if type == 'list' %}
+    {{ _items_as_list(items, with_link=with_link, query=query) }}
+  {% elif type == 'labels' %}
+    {{ _items_as_labels(items, with_link=with_link, query=query) }}
+  {% else %}
+    {{ _items_with_separator(items, separator=separator, with_link=with_link, query=query) }}
+  {% endif %}
+{% endmacro %}
+
+
+{# Wrap an item inside a list #}
+{% macro _items_as_list(items, with_link=False, query="") %}
+  {% if with_link %}
+    {% set query = query | format(items[0]) %}
+    {% set items =  items | map('wrap_with_link', _create_search_url(query=query)) %}
+  {% endif %}
+  {% set items = items | map('prefix', "<li>") | map('suffix', "</li>") %}
+  <ul>
+    {{ items | join('') | safe }}
+  </ul>
+{% endmacro %}
+
+{# Just join the items with a separator #}
+{% macro _items_with_separator(items, separator=';', with_link=False, query="") %}
+  {% if with_link %}
+    {% set query = query | format(items[0]) %}
+    {% set items =  items | map('wrap_with_link', _create_search_url(query=query)) %}
+  {% endif %}
+  {{ items | join(separator) | safe}}
+{% endmacro %}
+
+{# Return items as bootstrap labels #}
+{% macro _items_as_labels(items, color='default', with_link=False, query="") %}
+  {% if with_link %}
+    {% set query = query | format(items[0]) %}
+    {% set items =  items | map('wrap_with_link', _create_search_url(query=query)) %}
+  {% endif %}
+  {% set class = "label label-%s" | format(color)  %}
+  {{ items | map('wrap', prefix="<span class='label label-default'>", suffix="</span>") | join('&nbsp; ') |safe}}
+{% endmacro %}
+
+{# Create a search link for the item #}
+{% macro _create_search_url(endpoint='search.search', query='') %}
+  {{ url_for(endpoint, p=query) }}
+{% endmacro %}

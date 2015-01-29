@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-##
+{#
 ## This file is part of CDS.
-## Copyright (C) 2013, 2014, 2015 CERN.
+## Copyright (C) 2015 CERN.
 ##
 ## CDS is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -16,25 +15,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with CDS; if not, write to the Free Software Foundation, Inc.,
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
 
-"""CDS Demosite interface."""
-
-from flask import Blueprint
-from jinja2 import Template
-
-blueprint = Blueprint(
-    'cds', __name__, url_prefix='/', template_folder='templates',
-    static_folder='static'
-)
-
-
-# CDS useful template filters
-# ===========================
-@blueprint.app_template_filter('wrap_with_link')
-def wrap_with_link(value, url="#"):
-    """Wrap a text with html link."""
-    template = Template(
-        "<a href='{{ url }}'>{{ value }}</a>"
-    )
-    data = dict(value=value, url=url)
-    return template.render(**data)
+{%- extends "format/record/multimedia/pictures/base.tpl" -%}
