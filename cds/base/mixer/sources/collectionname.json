@@ -9315,7 +9315,7 @@
         "id_collection": 6,
         "ln": "en",
         "type": "ln",
-        "value": "Multimedia & Outreach"
+        "value": "CERN Multimedia"
     },
     {
         "id_collection": 7,
@@ -12321,7 +12321,7 @@
         "id_collection": 596,
         "ln": "en",
         "type": "ln",
-        "value": "Press"
+        "value": "Bulletins"
     },
     {
         "id_collection": 593,
@@ -13881,7 +13881,7 @@
         "id_collection": 1152,
         "ln": "en",
         "type": "ln",
-        "value": "Books & Journals"
+        "value": "Library Books & Journals"
     },
     {
         "id_collection": 1153,
@@ -13900,5 +13900,47 @@
         "ln": "en",
         "type": "ln",
         "value": "CERN Public Notes"
+    },
+    {
+        "id_collection": 1156,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Scientific Output"
+    },
+    {
+        "id_collection": 1157,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Administrative Documents"
+    },
+    {
+        "id_collection": 1158,
+        "ln": "en",
+        "type": "ln",
+        "value": "Other Resources"
+    },
+    {
+        "id_collection": 1159,
+        "ln": "en",
+        "type": "ln",
+        "value": "HEP Institutes & Experiments"
+    },
+    {
+        "id_collection": 1160,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Proceedings"
+    },
+    {
+        "id_collection": 1161,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Slides"
+    },
+    {
+        "id_collection": 1162,
+        "ln": "en",
+        "type": "ln",
+        "value": "CERN Books"
     }
 ]

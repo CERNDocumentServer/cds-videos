@@ -5027,5 +5027,36 @@
     {
         "id": 1155,
         "name": "CERN Public Notes"
+    },
+    {
+        "id": 1156,
+        "name": "CERN Scientific Output"
+    },
+    {
+        "id": 1157,
+        "name": "CERN Administrative Documents"
+    },
+    {
+        "id": 1158,
+        "name": "Other Resources"
+    },
+    {
+        "id": 1159,
+        "name": "HEP Institutes & Experiments"
+    },
+    {
+        "dbquery": "980__a:\"PROCEEDINGS\" and 690C_a:\"CERN\"",
+        "id": 1160,
+        "name": "CERN Proceedings"
+    },
+    {
+        "dbquery": "980__a:\"SLIDES\" 690C_a:\"CERN\"",
+        "id": 1161,
+        "name": "CERN Slides"
+    },
+    {
+        "dbquery": "980__a:\"BOOK\" 690C_a:\"CERN\"",
+        "id": 1162,
+        "name": "CERN Books"
     }
 ]
