@@ -26,5 +26,5 @@
 -r requirements.txt
 
 ## Invenio and CDS
--e git+https://github.com/CERNDocumentServer/cds-ops.git@cdslabs#egg=Invenio
+-e git+https://github.com/CERNDocumentServer/invenio.git@cdslabs#egg=Invenio
 -e .
