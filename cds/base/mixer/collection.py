@@ -20,11 +20,10 @@
 from six import with_metaclass as meta
 
 from invenio.ext.mixer import MixerMeta
-from invenio.modules.search.models import Collection, CollectionCollection, \
-    CollectionExample, CollectionExternalcollection, \
-    CollectionFieldFieldvalue, CollectionFormat, CollectionPortalbox, \
+from invenio.modules.collections.models import Collection, CollectionCollection, \
+    CollectionFieldFieldvalue, CollectionFormat, \
     Collectionboxname, Collectiondetailedrecordpagetabs, Collectionname, \
-    Externalcollection, Portalbox
+    Externalcollection, FacetCollection
 
 
 class ExternalcollectionMixer(meta(MixerMeta)):
@@ -48,12 +47,9 @@ class CollectionFieldFieldvalueMixer(meta(MixerMeta)):
     __model__ = CollectionFieldFieldvalue
 
 
-class CollectionFormatMixer(meta(MixerMeta)):
-    __model__ = CollectionFormat
-
-
-class PortalboxMixer(meta(MixerMeta)):
-    __model__ = Portalbox
+# TODO:
+# class CollectionFormatMixer(meta(MixerMeta)):
+#     __model__ = CollectionFormat
 
 
 class CollectionnameMixer(meta(MixerMeta)):
@@ -64,7 +60,15 @@ class CollectionboxnameMixer(meta(MixerMeta)):
     __model__ = Collectionboxname
 
 
-__all__ = ('ExternalcollectionMixer', 'CollectiondetailedrecordpagetabsMixer',
-           'CollectionMixer', 'CollectionCollectionMixer',
-           'CollectionFormatMixer', 'CollectionFieldFieldvalueMixer',
-           'PortalboxMixer', 'CollectionnameMixer', 'CollectionboxnameMixer', )
+class FacetCollectionMixer(meta(MixerMeta)):
+    __model__ = FacetCollection
+
+
+__all__ = ('ExternalcollectionMixer',
+           'CollectiondetailedrecordpagetabsMixer',
+           'CollectionMixer',
+           'CollectionCollectionMixer',
+           'CollectionFieldFieldvalueMixer',
+           'CollectionnameMixer',
+           'CollectionboxnameMixer',
+           'FacetCollectionMixer', )

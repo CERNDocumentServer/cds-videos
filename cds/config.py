@@ -54,6 +54,7 @@ PACKAGES_EXCLUDE = [
 EXTENSIONS = [
     'invenio.ext.confighacks',
     'invenio.ext.jinja2hacks',
+    'invenio.ext.passlib:Passlib',
     'invenio.ext.debug_toolbar',
     'invenio.ext.babel',
     'invenio.ext.sqlalchemy',
@@ -77,6 +78,7 @@ EXTENSIONS = [
     'invenio.ext.collect',
     'invenio.ext.restful',
     'invenio.ext.menu',
+    'invenio.ext.jasmine',  # after assets
     'flask.ext.breadcrumbs:Breadcrumbs',
     'invenio.modules.deposit.url_converters',
 ]

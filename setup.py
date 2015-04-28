@@ -1,4 +1,5 @@
 ## This file is part of Invenio.
+
 ## Copyright (C) 2013, 2014 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
@@ -47,7 +48,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        "mixer",
+        "mixer==4.9.5",
     ],
     extras_require={
         'development':[
