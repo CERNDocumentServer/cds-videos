@@ -49,9 +49,10 @@ setup(
     platforms='any',
     install_requires=[
         "mixer==4.9.5",
+        "Flask-IIIF>=0.1.0",
     ],
     extras_require={
-        'development':[
+        'development': [
             "Flask-DebugToolbar>=0.9",
             'setuptools-bower>=0.2'
         ],
