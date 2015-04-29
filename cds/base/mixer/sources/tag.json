@@ -2,42 +2,50 @@
     {
         "id": 1,
         "name": "first author",
-        "value": "100__%"
+        "value": "100__%",
+        "recjson_value": "authors[0].full_name"
     },
     {
         "id": 2,
         "name": "additional author",
-        "value": "700__%"
+        "value": "700__%",
+        "recjson_value": "contributor.full_name"
     },
     {
         "id": 3,
         "name": "main title",
-        "value": "245__%"
+        "value": "245__%",
+        "recjson_value": "title"
     },
     {
         "id": 4,
         "name": "additional title",
-        "value": "246_%"
+        "value": "246_%",
+        "recjson_value": "title_additional"
     },
     {
         "id": 5,
         "name": "abstract",
-        "value": "520__%"
+        "value": "520__%",
+        "recjson_value": "abstract"
     },
     {
         "id": 6,
         "name": "keyword",
-        "value": "6531_a"
+        "value": "6531_a",
+        "recjson_value": "keywords.term"
     },
     {
         "id": 7,
         "name": "primary report number",
-        "value": "037__a"
+        "value": "037__a",
+        "recjson_value": "primary_report_number"
     },
     {
         "id": 8,
         "name": "additional report number",
-        "value": "088__a"
+        "value": "088__a",
+        "recjson_value": "report_number.report_number"
     },
     {
         "id": 9,
@@ -47,7 +55,8 @@
     {
         "id": 10,
         "name": "reference",
-        "value": "999C5%"
+        "value": "999C5%",
+        "recjson_value": "reference"
     },
     {
         "id": 11,
@@ -58,12 +67,14 @@
     {
         "id": 12,
         "name": "main subject",
-        "value": "65017a"
+        "value": "65017a",
+        "recjson_value": "subject.term"
     },
     {
         "id": 13,
         "name": "additional subject",
-        "value": "65027a"
+        "value": "65027a",
+        "recjson_value": "subject_additional.term"
     },
     {
         "id": 14,
