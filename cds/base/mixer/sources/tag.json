@@ -52,7 +52,8 @@
     {
         "id": 11,
         "name": "collection identifier",
-        "value": "980__%"
+        "value": "",
+        "recjson_value": "_collections"
     },
     {
         "id": 12,
