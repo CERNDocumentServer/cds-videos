@@ -40,7 +40,7 @@ setup(
     url='http://cds.cern.ch/',
     license='GPLv3',
     author='CERN',
-    author_email='info@invenio-software.org',
+    author_email='cds.support@cern.ch',
     description='Access articles, reports and multimedia content in HEP',
     long_description=__doc__,
     packages=find_packages(),
