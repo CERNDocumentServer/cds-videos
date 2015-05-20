@@ -1,0 +1,175 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2014 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+
+{%- extends "search/collection_base.html" -%}
+
+{%- block index_right -%}
+  {% if collection.collection_children_r %}
+    <div class="col-md-{{ '4' if collection.collection_children_v else '8' }} co
+llection clearfix">
+      <h4>{{ collection.get_collectionbox_name(box_type='r') }}</h4>
+      {{ collection_tree(collection.collection_children_r, limit=2, class="nav n
+av-list clearfix") }}
+    </div>
+  {% else %}
+
+  <div class="col-md-12">
+    <div class="image">
+      <img height="100px" width="100%" src="https://ojs-css.cern.ch/styles/css-images/header_YR2.jpg" alt="Yellow Reports" />
+      <h2>CERN PUBLISHING</h2>
+    </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      {% for recid in collection.reclist[-1:] %}
+          {{ format_record(recid, "hd", ln=g.ln) | safe }}
+          {%- if not loop.last %}
+            <hr />
+          {%- endif %}
+      {% endfor %}
+
+      <div class="row">
+        <div class="col-md-6">
+             <hr />
+             <h5> Browse by year: </h5>
+             <table>
+             <tr>
+             <td class="searchboxbody" valign="top">
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2015-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2015</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2014-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2014</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2013-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2013</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2012-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2012</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2011-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2011</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2010-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2010</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2009-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2009</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2008-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2008</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2007-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2007</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2006-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2006</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2005-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2005</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2004-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2004</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2003-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2003</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2002-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2002</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2001-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2001</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-2000-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">2000</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-99-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1999</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-98-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1998</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-97-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1997</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-96-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1996</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-95-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1995</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-94-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1994</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-93-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1993</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-92-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1992</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-91-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1991</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-90-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1990</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-89-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1989</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-88-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1988</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-87-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1987</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-86-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1986</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-85-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1985</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-84-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1984</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-83-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1983</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-82-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1982</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-81-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1981</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-80-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1980</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-79-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1979</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-78-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1978</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-77-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1977</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-76-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1976</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-75-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1975</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-74-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1974</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-73-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1973</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-72-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1972</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-71-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1971</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-70-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1970</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-69-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1969</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-68-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1968</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-67-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1967</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-66-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1966</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-65-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1965</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-64-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1964</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-63-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1963</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-62-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1962</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-61-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1961</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-60-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1960</a>
+<br/>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-59-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1959</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-58-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1958</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-57-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1957</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-56-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1956</a>
+             <a href="/search?cc=CERN+Yellow+Reports&p=%22CERN-55-*%22&f=reportnumber&sf=chronologicalorder&so=a&sp=CERN&rm=">1955</a>
+             </td>
+             </tr>
+             </table>
+             <hr />
+          </div> <!-- end col-md-6 -->
+
+          <div class="col-md-6">
+            <hr />
+            <h5> More popular reports: </h5> <br />
+            <!-- TODO: sort or rank according to popularity -->
+            {% for recid in collection.reclist[-5:]| reverse %}
+              {{ format_record(recid, of, ln=g.ln) | safe }}
+              {%- if not loop.last %}
+                <hr />
+              {%- endif %}
+            {% endfor %}
+          </div> 
+
+        </div> <!-- end div row -->
+      </div> <!-- end div col-md-8 -->
+
+      <div class="col-md-4">
+        <!-- TODO: altmetrics to point to the real altmetric service -->
+        <img width="100%" src="http://cern.ch/cds/img/altmetrics-example.png" alt="Almetrics reporting" class="img-thumbnail">
+
+        <a class="twitter-timeline"  href="https://twitter.com/CERN" data-widget-id="600562610375897088">Tweets by @CERN</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        <br />
+      </div>
+    </div> <!-- end div row -->
+
+  </div> <!-- end div md-12 -->
+
+  {% if collection.reclist|length > 10 %}
+    <a href="{{ url_for('search.search', cc=collection.name, ln=g.ln, jrec=11)|safe }}" class="pull-right">[&gt;&gt; {{ _('more')}}]</a>
+  {% endif %}
+{% endif %}
+{%- endblock -%}
+{%- block index -%}
+  {%- block index_title %}
+    {%- if collection.collection_children_r %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="page-header">
+            <h3> 
+              {{ collection.name }}:
+            </h3>
+          </div>
+        </div>
+      </div>
+    {%- endif %}
+  {%- endblock %}
+  {{- super() }}
+{%- endblock -%}
+
