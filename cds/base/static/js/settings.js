@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2014 CERN.
+ * Copyright (C) 2014, 2015 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -52,10 +52,13 @@ require.config({
         "searchtypeahead-configuration": "js/search/default_typeahead_configuration",
         "jasmine-events": "js/jasmine/events_checker",
         "jasmine-initialization": "js/jasmine/initialization_checker",
+        "select2": "vendor/select2/select2.min",
+        "ckeditor-core": "vendors/ckeditor/ckeditor",
+        "ckeditor-jquery": "vendors/ckeditor/adapters/jquery",
         // CDS
-        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons-0.11.0',
+        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
-        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer-0.11.0',
+        JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer',
         json: 'vendors/requirejs-plugins/src/json',
         backbone: 'vendors/backbone/backbone',
         'backbone.localStorage': 'vendors/backbone.localstorage/backbone.localStorage',
@@ -157,6 +160,13 @@ require.config({
         },
         "jasmine-initialization": {
           deps: ["jasmine-boot"],
+        },
+        select2: {
+          deps: ["jquery"],
+          exports: "select2"
+        },
+        "ckeditor-jquery": {
+          deps: ["jquery", "ckeditor-core"]
         },
         // CDS
         react: { exports: 'React' },

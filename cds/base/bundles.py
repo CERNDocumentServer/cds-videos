@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -19,10 +19,9 @@
 
 """CDS bundles."""
 
-from invenio.ext.assets import Bundle
-
 from invenio.base.bundles import styles as _styles
 
+from invenio.ext.assets import Bundle
 
 _styles.contents.remove("less/base.less")
 _styles.contents += ("less/cds.less",)
@@ -37,7 +36,8 @@ js = Bundle(
     bower={
         "backbone": "latest",
         "backbone.localstorage": "latest",
-        "jsx-requirejs-plugin": "latest",
+        "react": "0.11.2",
+        "jsx-requirejs-plugin": "0.4",
         "requirejs-plugins": "latest",
         "es5-shim": "latest"
     },
