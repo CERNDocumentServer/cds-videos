@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2014 CERN.
+ * Copyright (C) 2014, 2015 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@
         mangle: false
     },
     paths: {
-        // INVENIO
+        // Invenio
         jquery: "vendors/jquery/dist/jquery",
         ui: "vendors/jquery-ui/ui",
         "jqueryui-timepicker": "vendors/jqueryui-timepicker-addon/dist",
@@ -48,9 +48,9 @@
         "jquery-tokeninput": "vendors/jquery-tokeninput/src/jquery.tokeninput",
         "jquery-jeditable": "vendors/jquery.jeditable/index",
         "moment": "vendors/moment/moment",
-        "datatables": "vendors/datatables/media/js/jquery.datatables",
-        "datatables-plugins": "vendors/datatables-plugins/integration/bootstrap/3/datatables.bootstrap",
-        "datatables-tabletools": "vendors/datatables-tabletools/js/datatables.tabletools",
+        "datatables": "vendors/datatables/media/js/jquery.dataTables",
+        "datatables-plugins": "vendors/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap",
+        "datatables-tabletools": "vendors/datatables-tabletools/js/dataTables.tableTools",
         "bootstrap-datetimepicker": "vendors/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
         "bootstrap-tagsinput": "vendors/bootstrap-tagsinput/src/bootstrap-tagsinput",
         bootstrap: "vendors/bootstrap/dist/js/bootstrap",
@@ -65,8 +65,11 @@
         "searchtypeahead-configuration": "js/search/default_typeahead_configuration",
         "jasmine-events": "js/jasmine/events_checker",
         "jasmine-initialization": "js/jasmine/initialization_checker",
+        "select2": "vendor/select2/select2.min",
+        "ckeditor-core": "vendors/ckeditor/ckeditor",
+        "ckeditor-jquery": "vendors/ckeditor/adapters/jquery",
         // CDS
-        react: 'vendors/react/react-with-addons',
+        react: 'vendors/jsx-requirejs-plugin/js/react-with-addons',
         jsx: 'vendors/jsx-requirejs-plugin/js/jsx',
         JSXTransformer: 'vendors/jsx-requirejs-plugin/js/JSXTransformer',
         json: 'vendors/requirejs-plugins/src/json',
@@ -75,7 +78,7 @@
         underscore: 'vendors/underscore/underscore',
     },
     shim: {
-        // INVENIO
+        // Invenio
         jquery: {
           exports: "$"
         },
@@ -171,8 +174,16 @@
         "jasmine-initialization": {
           deps: ["jasmine-boot"],
         },
+        select2: {
+          deps: ["jquery"],
+          exports: "select2"
+        },
+        "ckeditor-jquery": {
+          deps: ["jquery", "ckeditor-core"]
+        },
         // CDS
         react: { exports: 'React' },
+        'jquery.form': { deps: ['jquery'] },
         backbone: { deps: ['underscore', 'jquery'], exports: 'Backbone'},
         'backbone.localstorage': { deps: ['backbone'], exports: 'Backbone.LocalStorage' },
         underscore: { exports: '_' }
