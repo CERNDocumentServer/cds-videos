@@ -1,0 +1,5 @@
+content_type: text/html
+default: output_formats/collection_featured_record/featured_yellow_report.tpl
+description: Collection Featured Record.
+name: Collection Featured Record
+visibility: 0

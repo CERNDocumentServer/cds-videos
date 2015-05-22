@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2014 CERN.
+ * Copyright (C) 2014, 2015 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,7 +21,10 @@
 @import "base.less";
 @import "base/cern-toolbar.less";
 @import "base/prototype.less";
-
+// Change bootstrap default
+@border-radius-base: 0px;
+@border-radius-large: 0px;
+@border-radius-small: 0px;
 body {
     font-family: 'PT Sans','Trebuchet MS',Tahoma,sans-serif;
     color: #626262;
@@ -140,4 +143,8 @@ footer, footer p {
     #searchform-input-group {
         width: @container-lg - 30 !important;
     }
+}
+
+#twitter-widget-0{
+  max-height: 370px!important;
 }
