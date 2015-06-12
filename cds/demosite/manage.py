@@ -75,8 +75,6 @@ def _make_upload(name, description="Going to load demo records"):
                 "bin/bibindex %d" % (job_id + 2,),
                 "bin/bibindex -u admin -w global",
                 "bin/bibindex %d" % (job_id + 3,),
-                "bin/bibreformat -u admin -o HB",
-                "bin/bibreformat %d" % (job_id + 4,),
                 ]:
         cmd = os.path.join(CFG_PREFIX, cmd)
         if os.system(cmd):
