@@ -18,13 +18,7 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-##############
-# Production #
-##############
+## Base requirements
 
-# Requirements
--r base.requirements.txt
-
-# Invenio and CDS
--e git+https://github.com/CERNDocumentServer/invenio.git@cdslabs#egg=Invenio
--e .
+## Pinned base requirements
+-r base-pinned.requirements.txt
