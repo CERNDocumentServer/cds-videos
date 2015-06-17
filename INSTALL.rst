@@ -215,10 +215,12 @@ environment ``$PATH`` already.
 
     or
     # Local installation
-    (invenio)$ inveniomanage config set LESS_BIN `find $PWD/node_modules -iname lessc | head -1`
-    (invenio)$ inveniomanage config set CLEANCSS_BIN `find $PWD/node_modules -iname cleancss | head -1`
-    (invenio)$ inveniomanage config set REQUIREJS_BIN `find $PWD/node_modules -iname r.js | head -1`
-    (invenio)$ inveniomanage config set UGLIFYJS_BIN `find $PWD/node_modules -iname uglifyjs | head -1`
+    $ workon cdslabs
+    (cdslabs)$ cdvirtualenv
+    (cdslabs)$ inveniomanage config set LESS_BIN `find $PWD/node_modules -iname lessc | head -1`
+    (cdslabs)$ inveniomanage config set CLEANCSS_BIN `find $PWD/node_modules -iname cleancss | head -1`
+    (cdslabs)$ inveniomanage config set REQUIREJS_BIN `find $PWD/node_modules -iname r.js | head -1`
+    (cdslabs)$ inveniomanage config set UGLIFYJS_BIN `find $PWD/node_modules -iname uglifyjs | head -1`
 
 
 Install the external JavaScript and CSS libraries:
