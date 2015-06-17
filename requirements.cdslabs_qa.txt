@@ -25,6 +25,7 @@
 # Requirements
 -r base.requirements.txt
 
+# TODO: update when the QA environment is in place, for now production
 # Invenio and CDS
--e git+https://github.com/CERNDocumentServer/invenio.git@cdslabs_qa#egg=Invenio
+-e git+https://github.com/CERNDocumentServer/invenio.git@cdslabs#egg=Invenio
 -e .
