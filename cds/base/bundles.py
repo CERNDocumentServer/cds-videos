@@ -29,12 +29,17 @@ _styles.contents += ("less/cds.less",)
 
 js = Bundle(
     "js/cds-settings.js",
-    "js/app.js",
     "js/main.js",
+    "js/personal/init.js",
     output="cds.js",
     weight=91,
     filters="requirejs",
     bower={
-        "es5-shim": "latest"
+        "es5-shim": "latest",
+        # Personal collections
+        "async": "~1.2.1",
+        "depot": "~0.1.6",
+        "lodash": "~3.9.3",
+        "sortable.js": "~1.2.0",
     }
 )
