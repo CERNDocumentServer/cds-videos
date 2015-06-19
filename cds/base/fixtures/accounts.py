@@ -19,15 +19,17 @@
 
 
 from fixture import DataSet
-from invenio.config import CFG_SITE_ADMIN_EMAIL
-from invenio.legacy.websession.websession_config import CFG_WEBSESSION_USERGROUP_STATUS, \
-    CFG_WEBSESSION_GROUP_JOIN_POLICY
+
+from invenio.base.globals import cfg
 
 
 class UserData(DataSet):
+
+    """Test user to use in the demosite and CI."""
+
     class admin:
         id = 1
-        email = CFG_SITE_ADMIN_EMAIL
+        email = cfg['CFG_SITE_ADMIN_EMAIL']
         password = ''
         note = '1'
         nickname = 'admin'
@@ -80,41 +82,3 @@ class UserData(DataSet):
         password = 'b123althasar'
         note = '1'
         nickname = 'balthasar'
-
-
-class UsergroupData(DataSet):
-
-    class thesesViewers:
-        id = 1
-        name = 'Theses viewers'
-        description = 'Theses viewers internal group'
-        join_policy = CFG_WEBSESSION_GROUP_JOIN_POLICY['VISIBLEOPEN']
-
-    class montagueFamily:
-        id = 2
-        name = 'montague-family'
-        description = 'The Montague family.'
-        join_policy = CFG_WEBSESSION_GROUP_JOIN_POLICY['VISIBLEMAIL']
-
-
-class UserUsergroupData(DataSet):
-
-    class jekyllThesesViewers:
-        user = UserData.jekyll
-        usergroup = UsergroupData.thesesViewers
-        user_status = CFG_WEBSESSION_USERGROUP_STATUS['MEMBER']
-
-    class romeoMontagueFamily:
-        user = UserData.romeo
-        usergroup = UsergroupData.montagueFamily
-        user_status = CFG_WEBSESSION_USERGROUP_STATUS['ADMIN']
-
-    class julietMontagueFamily:
-        user = UserData.juliet
-        usergroup = UsergroupData.montagueFamily
-        user_status = CFG_WEBSESSION_USERGROUP_STATUS['MEMBER']
-
-    class benvolioMontagueFamily:
-        user = UserData.benvolio
-        usergroup = UsergroupData.montagueFamily
-        user_status = CFG_WEBSESSION_USERGROUP_STATUS['MEMBER']
