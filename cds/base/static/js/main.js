@@ -20,5 +20,6 @@
 require(
   [
     "js/app",
+    "js/record_tools"
   ],
   function() {});

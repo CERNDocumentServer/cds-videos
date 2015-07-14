@@ -1,0 +1,102 @@
+{% macro get_author(author, is_link=false) %}
+    {% if is_link %}
+      <a href="http://cds.cern.ch/search?f=author&p={{ author.full_name }}&ln=en">
+    {% else %}
+      <span>
+    {% endif %}
+
+      {{ author.full_name }} 
+
+    {% if is_link %}
+      </a>
+    {% else %}
+      </span>
+    {% endif %}
+
+    {% if author.affiliation %}
+      ({{ author.affiliation }})
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_see_more_list(items_list, limit, title, delimiter=";") %}
+    {% if limit > items_list|length %}
+        {% for item in items_list %}
+            {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
+        {% endfor %}
+    {% else %}
+        {% for item in items_list[0:limit] %}
+            {{ item }}{{ delimiter }}
+        {% endfor %}
+
+        <a data-show-more data-title="{{ title }}" data-close-button="{{ _("Close") }}" data-items='{{ items_list|tojson }}'>{{ _("See all...") }}</a>
+
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_authors(record, limit, delimiter=";", is_link=false) %}
+    {% set authors_list = [] %}
+    {% for author in record.authors %}
+        {% do authors_list.append(get_author(author, is_link)) %}
+    {% endfor %}
+
+    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter) }}
+
+{% endmacro %}
+
+
+{% macro get_title(record) %}
+    {% if record.title_additional %}
+
+      {% if g.ln == "fr" %}
+        <h2 class="text-primary" id="record_detail_title">{{ record.title_additional.title }}</h2>
+        <h2 class="text-muted" id="record_detail_additional_title">{{ record.title.title }}</h2>
+      {% else %}
+        <h2 class="text-primary" id="record_detail_title">{{ record.title.title }}</h2>
+        <h2 class="text-muted" id="record_detail_additional_title">{{ record.title_additional.title }}</h2>
+      {% endif %}
+
+    {% else %}
+
+      <h2 class="text-primary" id="record_detail_title">{{ record.title.title }}</h2>
+      <h2 class="text-muted" id="record_detail_additional_title">{{ record.title.title }}</h2>
+
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_creation_date(record) %}
+    {{ record.creation_date.strftime('%Y-%m-%d %H:%M') }}
+{% endmacro %}
+
+
+{% macro get_modification_date(record) %}
+    {{ record.creation_date.strftime('%Y-%m-%d %H:%M') }}
+{% endmacro %}
+
+
+{% macro get_keywords(record, limit, delimiter=";") %}
+    {% set keyword_list = [] %}
+    {% for keyword in record.keywords %}
+        {% do keyword_list.append(keyword.term) %}
+    {% endfor %}
+
+    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter) }}
+
+{% endmacro %}
+
+
+{% macro get_subject(record) %}
+    {{ record.subject.term }}
+{% endmacro %}
+
+
+{% macro get_abstract(record) %}
+    {{ record.abstract.summary }}
+{% endmacro %}
+
+
+{% macro get_copyright(record) %}
+   {{ record.copyright }}
+{% endmacro %}
