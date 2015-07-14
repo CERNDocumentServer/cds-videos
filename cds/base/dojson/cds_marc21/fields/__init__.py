@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# This file is part of CERN Document Server.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,15 +17,6 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+"""CDS special/custom tags"""
 
-def get_number_of_reviews(recid):
-    """
-    Returns number of reviews for given record.
-
-    :param recid:
-
-    :return: Number of reviews
-    """
-    from invenio.legacy.webcomment.adminlib import get_nb_reviews
-    if recid:
-        return get_nb_reviews(recid)
+from __future__ import unicode_literals

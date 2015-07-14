@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
-# Copyright (C) 2013 CERN.
+# This file is part of CERN Document Server.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,19 +17,19 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-def get_bibdoc(recid):
-    """
-    Retrieves using BibDoc all the files related with a given record
 
-    @param recid
+from .fields import (
+    bd69x,
+)
+from .model import cds_marc21
 
-    @return BibDoc of the given record
-    """
-    if not recid or recid < 0:
-        return None
 
-    from invenio.legacy.bibdocfile.api import BibDoc, InvenioBibDocFileError
-    try:
-        return BibDoc(int(recid))
-    except InvenioBibDocFileError:
-        return None
+def convert_cdsmarcxml(source):
+    """Convert CDS MARC XML to JSON."""
+    from dojson.contrib.marc21.utils import create_record, split_blob
+
+    for data in split_blob(source.read()):
+        yield cds_marc21.do(create_record(data))
+
+
+__all__ = ('cds_marc21', 'convert_cdsmarcxml')

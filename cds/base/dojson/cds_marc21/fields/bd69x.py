@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# This file is part of CERN Document Server.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,15 +17,15 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+"""CDS special/custom tags"""
 
-def get_number_of_comments(recid):
-    """
-    Returns number of comments for given record.
+from dojson import utils
 
-    :param recid:
+from ..model import cds_marc21
 
-    :return: Number of comments
-    """
-    from invenio.legacy.webcomment.adminlib import get_nb_comments
-    if recid:
-        return get_nb_comments(recid)
+
+@cds_marc21.over('subject_indicator', '^690C_')
+@utils.for_each_value
+def subject_indicator(self, key, value):
+    """Subject Indicator."""
+    return value.get('a')

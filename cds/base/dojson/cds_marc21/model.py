@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
-# Copyright (C) 2013 CERN.
+# This file is part of CERN Document Server.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,29 +17,20 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-from six import with_metaclass as meta
+from dojson.overdo import Overdo
+from dojson.contrib.marc21 import marc21
 
-from invenio.ext.mixer import MixerMeta
-from invenio.modules.indexer.models import IdxINDEX, IdxINDEXNAME, \
-    IdxINDEXField, IdxINDEXIdxINDEX
-from invenio.modules.search.models import Field, Tag, FieldTag
+class CDSMarc21(Overdo):
 
+    """Translation Index for CDS specific MARC21."""
 
-class IdxINDEXMixer(meta(MixerMeta)):
-    __model__ = IdxINDEX
+    def __init__(self):
+        """Constructor.
 
-
-class IdxINDEXFieldMixer(meta(MixerMeta)):
-    __model__ = IdxINDEXField
-
-
-class IdxINDEXNAMEMixer(meta(MixerMeta)):
-    __model__ = IdxINDEXNAME
+        Initializes the list of rules with the default ones from doJSON.
+        """
+        super(CDSMarc21, self).__init__()
+        self.rules.extend(marc21.rules)
 
 
-class IdxINDEXIdxINDEXMixer(meta(MixerMeta)):
-    __model__ = IdxINDEXIdxINDEX
-
-
-__all__ = ('IdxINDEXMixer', 'IdxINDEXFieldMixer', 'IdxINDEXNAMEMixer',
-           'IdxINDEXIdxINDEXMixer', )
+cds_marc21 = CDSMarc21()
