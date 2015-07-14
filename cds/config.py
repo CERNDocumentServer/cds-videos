@@ -38,6 +38,10 @@ from __future__ import unicode_literals
 
 from invenio.base.config import PACKAGES as _PACKAGES
 
+from invenio.base.config import PACKAGES_EXCLUDE as _PACKAGES_EXCLUDE
+
+from invenio_records.config import RECORD_PROCESSORS as _RECORD_PROCESSORS
+
 
 PACKAGES = [
     "cds.base",
@@ -49,11 +53,10 @@ PACKAGES_EXCLUDE = [
     "invenio.modules.annotations",
     "invenio.modules.communities",
     "invenio.modules.pages",
-]
+] + _PACKAGES_EXCLUDE
 
 EXTENSIONS = [
     'invenio.ext.confighacks',
-    'invenio.ext.jinja2hacks',
     'invenio.ext.passlib:Passlib',
     'invenio.ext.debug_toolbar',
     'invenio.ext.babel',
@@ -81,6 +84,7 @@ EXTENSIONS = [
     'invenio.ext.jasmine',  # after assets
     'flask.ext.breadcrumbs:Breadcrumbs',
     'invenio.modules.deposit.url_converters',
+    'invenio.ext.es',
 ]
 
 
@@ -99,6 +103,11 @@ CFG_SITE_MISSION_INTL = {
 }
 
 CFG_SITE_LANGS = ["en", "fr", "de", "it"]
+
+
+RECORD_PROCESSORS = dict()
+RECORD_PROCESSORS.update(_RECORD_PROCESSORS)
+RECORD_PROCESSORS['marcxml'] = 'cds.base.cds_marc21.convert_cdsmarcxml'
 
 
 try:
