@@ -5,39 +5,9 @@
         "name": "CERN Document Server"
     },
     {
-        "dbquery": "collections:ARC011813",
-        "id": 650,
-        "name": "Scientific Committees (Archives)"
-    },
-    {
-        "dbquery": "856:'yellowarticle'",
-        "id": 651,
-        "name": "CERN Yellow Report Articles"
-    },
-    {
         "dbquery": "",
         "id": 2,
         "name": "Books & Proceedings"
-    },
-    {
-        "dbquery": "collections:\"CMSPUBDRAFT\"",
-        "id": 654,
-        "name": "CMS Publication Drafts"
-    },
-    {
-        "dbquery": "collections:\"CMSPUBDRAFTHISTORY\"",
-        "id": 655,
-        "name": "CMS Publication Drafts History"
-    },
-    {
-        "dbquery": "collections:\"CMSPUBDRAFTCOMM\"",
-        "id": 656,
-        "name": "CMS Publication Drafts Comments"
-    },
-    {
-        "dbquery": "collections:\"CMSPUBDRAFTPENDINGCOMM\"",
-        "id": 657,
-        "name": "CMS Publication Drafts Pending Comments"
     },
     {
         "id": 3,
@@ -48,18 +18,8 @@
         "name": "Periodicals & Progress Reports"
     },
     {
-        "dbquery": "reportnumber:EuCARD",
-        "id": 728,
-        "name": "EuCARD"
-    },
-    {
         "id": 5,
         "name": "CERN Internal Notes"
-    },
-    {
-        "dbquery": "collections:\"PROVISIONAL\"",
-        "id": 658,
-        "name": "Provisional Documents"
     },
     {
         "id": 6,
@@ -85,53 +45,14 @@
         "name": "Published Articles"
     },
     {
-        "dbquery": "collections:PHOTOTECY",
-        "id": 722,
-        "name": "TE CryoLab Photos"
-    },
-    {
-        "id": 663,
-        "name": "TOTEM"
-    },
-    {
-        "dbquery": "indicator:\"PUBLTOTEM\"",
-        "id": 664,
-        "name": "TOTEM Notes"
-    },
-    {
-        "dbquery": "collections:ARTICLE OR collections:PREPRINT NOT indicator:INTNOTE AND experiment:TOTEM",
-        "id": 665,
-        "name": "TOTEM Preprints"
-    },
-    {
-        "dbquery": "collections:THESIS AND experiment:TOTEM",
-        "id": 666,
-        "name": "TOTEM Theses"
-    },
-    {
-        "dbquery": "collections:\"PHOTO*\" AND keyword:TOTEM",
-        "id": 667,
-        "name": "TOTEM Photos"
-    },
-    {
         "dbquery": "collections:PREPRINT",
         "id": 11,
         "name": "Preprints"
     },
     {
-        "dbquery": "collections:peri AND media:Online",
-        "id": 648,
-        "name": "Electronic Journals"
-    },
-    {
         "dbquery": "collections:THESIS or indicator:THESIS",
         "id": 12,
         "name": "Theses"
-    },
-    {
-        "dbquery": "collections:INTNOTECMSPUBL reportnumber:CMS-CR-*",
-        "id": 661,
-        "name": "CMS Conference Reports"
     },
     {
         "dbquery": "indicator:\"YELLOWREPORT\" or indicator:\"CERN Yellow Report\" or indicator:\"YELLOW REPORT\"",
@@ -144,33 +65,9 @@
         "name": "Reports"
     },
     {
-        "id": 608,
-        "name": "CSG"
-    },
-    {
-        "dbquery": "collections:CSG indicator:CSGCOM",
-        "id": 609,
-        "name": "CSG Communications"
-    },
-    {
-        "dbquery": "collections:CSG indicator:CSGINT",
-        "id": 610,
-        "name": "CSG Internal Notes"
-    },
-    {
-        "dbquery": "collections:CSG indicator:CSGPUB",
-        "id": 611,
-        "name": "CSG Public Notes"
-    },
-    {
         "dbquery": "collections:BOOK indicator:BOOK -690C:BOOKSUGGESTION",
         "id": 15,
         "name": "Books"
-    },
-    {
-        "dbquery": "collections:OPERCIRCULAR",
-        "id": 636,
-        "name": "Operational Circulars"
     },
     {
         "dbquery": "collections:PROCEEDINGS",
@@ -186,16 +83,6 @@
         "dbquery": "collections:PROGRESSREP",
         "id": 18,
         "name": "Progress Reports"
-    },
-    {
-        "dbquery": "collections:INTNOTEHRPUBL and keyword:Program",
-        "id": 834,
-        "name": "HR Programs"
-    },
-    {
-        "dbquery": "collections:INTNOTEHRPUBL and keyword:Form",
-        "id": 833,
-        "name": "HR Forms"
     },
     {
         "dbquery": "collections:\"PHOTO*\" -collections:PHOTOSTAFFASSOCIATION -collections:PHOTOARC -collections:PHOTOLABDRAFT -reportnumber:\"ATL-PHO-PEOPLE-*\" -reportnumber:\"ATL-PHO-MISC-*\" and not 506:restricted and not 963__b:notvisible",
@@ -421,29 +308,14 @@
         "name": "Council"
     },
     {
-        "dbquery": "collections:SCICOMMPUBLEMC",
-        "id": 478,
-        "name": "EmC Public Documents"
-    },
-    {
         "dbquery": "collections:FINANCECOMM",
         "id": 65,
         "name": "FC - Finance Committee"
     },
     {
-        "dbquery": "collections:SCICOMMPUBLEEC",
-        "id": 480,
-        "name": "EEC Public Documents"
-    },
-    {
         "dbquery": "collections:SPC",
         "id": 66,
         "name": "SPC - Scientific Policy Committee"
-    },
-    {
-        "dbquery": "reportnumber:\"ATLAS-CONF-*\"",
-        "id": 796,
-        "name": "ATLAS Conference Notes"
     },
     {
         "id": 67,
@@ -585,11 +457,6 @@
     {
         "id": 97,
         "name": "CERN Council and its committees"
-    },
-    {
-        "dbquery": "collections:\"ARC010107\"",
-        "id": 938,
-        "name": "European Strategy Session of Council (Archives)"
     },
     {
         "dbquery": "collections:ARC010101",
@@ -1313,11 +1180,6 @@
         "name": "Video News"
     },
     {
-        "dbquery": "collections:INTNOTETEPUBL",
-        "id": 734,
-        "name": "TE Notes"
-    },
-    {
         "dbquery": "collections:ARC0204",
         "id": 249,
         "name": "Pauli Biographical Collection"
@@ -1327,12 +1189,12 @@
         "name": "Articles & Preprints"
     },
     {
-        "id": 262,
-        "name": "LHC Project"
-    },
-    {
         "id": 261,
         "name": "CERN R&D Projects"
+    },
+    {
+        "id": 262,
+        "name": "LHC Project"
     },
     {
         "dbquery": "reportnumber:\"lhc-project-report*\"",
@@ -1421,24 +1283,6 @@
         "name": "LHC Experiments"
     },
     {
-        "id": 862,
-        "name": "EU Projects"
-    },
-    {
-        "id": 863,
-        "name": "EU FP7 Projects"
-    },
-    {
-        "dbquery": "indicator:UNILHC",
-        "id": 864,
-        "name": "UNILHC"
-    },
-    {
-        "dbquery": "indicator:SUPERFIELDS",
-        "id": 865,
-        "name": "SUPERFIELDS"
-    },
-    {
         "id": 283,
         "name": "ALICE"
     },
@@ -1457,52 +1301,9 @@
         "name": "ATLAS"
     },
     {
-        "dbquery": "collections:CMS_Reports",
-        "id": 868,
-        "name": "CMS Reports"
-    },
-    {
-        "dbquery": "collections:ATLAS_Reports",
-        "id": 869,
-        "name": "ATLAS Reports"
-    },
-    {
         "dbquery": "collections:PREPRINT experiment:ATLAS",
         "id": 287,
         "name": "ATLAS Preprints"
-    },
-    {
-        "dbquery": "collections:LHCb_Reports OR reportnumber:\"CERN-LHCC-2013-022\"",
-        "id": 866,
-        "name": "LHCb Reports"
-    },
-    {
-        "id": 867,
-        "name": "LHCb Internal"
-    },
-    {
-        "dbquery": "collections:\"PHOTO*\" AND keyword:LHCf",
-        "id": 897,
-        "name": "LHCf Photos"
-    },
-    {
-        "dbquery": "collections:LHCf_Slides",
-        "id": 896,
-        "name": "LHCf Slides"
-    },
-    {
-        "dbquery": "collections:LHCf_Notes",
-        "id": 893,
-        "name": "LHCf Notes"
-    },
-    {
-        "dbquery": "collections:THESIS AND experiment:LHCf",
-        "id": 895,
-        "name": "LHCf Theses"
-    },
-    {
-        "id": 477,
-        "name": "EEC - Electronic Experiments Committee"
     },
     {
         "dbquery": "collections:SCINOTEATLAS",
@@ -1519,6 +1320,10 @@
         "name": "CMS Preprints"
     },
     {
+        "id": 292,
+        "name": "LHCb"
+    },
+    {
         "dbquery": "collections:INTNOTELHCBPRIV",
         "id": 293,
         "name": "LHCb Internal Notes"
@@ -1531,121 +1336,6 @@
     {
         "id": 296,
         "name": "CERN Departments"
-    },
-    {
-        "id": 501,
-        "name": "Accelerators & Beams Articles"
-    },
-    {
-        "id": 502,
-        "name": "Accelerators & Beams Preprints"
-    },
-    {
-        "id": 503,
-        "name": "Accelerators & Beams Notes"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:AB",
-        "id": 504,
-        "name": "AB Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:AC",
-        "id": 505,
-        "name": "AC Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:ISR",
-        "id": 506,
-        "name": "ISR Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:MSC",
-        "id": 507,
-        "name": "MSC Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:SI",
-        "id": 508,
-        "name": "SI Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:AR",
-        "id": 509,
-        "name": "AR Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:MPS",
-        "id": 510,
-        "name": "MPS Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:SC",
-        "id": 511,
-        "name": "SC Articles"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:AC",
-        "id": 512,
-        "name": "AC Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:ISR",
-        "id": 513,
-        "name": "ISR Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:MSC",
-        "id": 514,
-        "name": "MSC Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:SI",
-        "id": 515,
-        "name": "SI Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:AR",
-        "id": 516,
-        "name": "AR Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:MPS",
-        "id": 517,
-        "name": "MPS Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:SC",
-        "id": 518,
-        "name": "SC Preprints"
-    },
-    {
-        "id": 519,
-        "name": "Accelerator Technology Articles"
-    },
-    {
-        "id": 520,
-        "name": "Accelerator Technology Preprints"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:AT",
-        "id": 521,
-        "name": "AT Articles"
-    },
-    {
-        "dbquery": "collections:ARTICLE division:NPA",
-        "id": 522,
-        "name": "NPA Articles"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:AT",
-        "id": 523,
-        "name": "AT Preprints"
-    },
-    {
-        "dbquery": "collections:PREPRINT division:NPA",
-        "id": 524,
-        "name": "NPA Preprints"
     },
     {
         "id": 297,
@@ -1753,11 +1443,6 @@
     {
         "id": 319,
         "name": "SL & SPS & LEP Preprints"
-    },
-    {
-        "dbquery": "collections:\"CMSPUBDRAFTREJECTEDCOMM\"",
-        "id": 660,
-        "name": "CMS Publication Drafts Rejected Comments"
     },
     {
         "dbquery": "collections:PREPRINT division:LEP",
@@ -1905,11 +1590,6 @@
         "name": "Price Enquiries"
     },
     {
-        "dbquery": "collections:POSTER division:IT",
-        "id": 646,
-        "name": "IT Posters"
-    },
-    {
         "id": 351,
         "name": "Research Sector"
     },
@@ -1993,21 +1673,6 @@
         "name": "Theoretical Physics (TH)"
     },
     {
-        "dbquery": "indicator:\"English Book Club\"",
-        "id": 652,
-        "name": "English Book Club"
-    },
-    {
-        "dbquery": "collections:SCICOMMPUBLSCC",
-        "id": 469,
-        "name": "SCC Public Documents"
-    },
-    {
-        "dbquery": "collections:DGOFFICE",
-        "id": 470,
-        "name": "DG Office"
-    },
-    {
         "id": 369,
         "name": "hep-ph Archives"
     },
@@ -2082,14 +1747,6 @@
         "name": "ST Articles"
     },
     {
-        "id": 475,
-        "name": "EmC - Emulsion Committee"
-    },
-    {
-        "id": 476,
-        "name": "TCC - Track Chamber Committee"
-    },
-    {
         "dbquery": "collections:INTSTNOT",
         "id": 385,
         "name": "ST Notes"
@@ -2159,11 +1816,6 @@
         "dbquery": "collections:PREPRINT division:HS",
         "id": 399,
         "name": "HS Preprints"
-    },
-    {
-        "dbquery": "collections:THESIS experiment:LHCb",
-        "id": 472,
-        "name": "LHCb Theses"
     },
     {
         "dbquery": "collections:PREPRINT division:TIS",
@@ -2302,15 +1954,6 @@
         "name": "Conference Presentations"
     },
     {
-        "id": 473,
-        "name": "PH-III - Physics III Committee"
-    },
-    {
-        "dbquery": "collections:SCICOMMPUBLPHIII",
-        "id": 474,
-        "name": "PH-III Public Documents"
-    },
-    {
         "id": 453,
         "name": "Divisional Bulletins"
     },
@@ -2331,31 +1974,6 @@
         "dbquery": "SEMINAR",
         "id": 457,
         "name": "Seminars"
-    },
-    {
-        "dbquery": "595:\"CERN-TH\"",
-        "id": 662,
-        "name": "CERN-TH"
-    },
-    {
-        "dbquery": "collections:TOTEM_Papers",
-        "id": 847,
-        "name": "TOTEM Papers"
-    },
-    {
-        "dbquery": "collections:TOTEM_Reports",
-        "id": 848,
-        "name": "TOTEM Reports"
-    },
-    {
-        "dbquery": "collections:TOTEM_Slides",
-        "id": 849,
-        "name": "TOTEM Slides"
-    },
-    {
-        "dbquery": "collections:TOTEM_Proc",
-        "id": 850,
-        "name": "TOTEM Conference Proceedings"
     },
     {
         "dbquery": "collections:WRITEUP",
@@ -2386,10 +2004,6 @@
         "name": "CMS Contributions"
     },
     {
-        "id": 292,
-        "name": "LHCb"
-    },
-    {
         "dbquery": "collections:DEMSUPPLIERS",
         "id": 464,
         "name": "EST-DEM Suppliers"
@@ -2405,13 +2019,23 @@
         "name": "TREF"
     },
     {
-        "dbquery": "collections:SCICOMMPUBLNPRC",
-        "id": 481,
-        "name": "NPRC - Nuclear Physics Research Committee"
-    },
-    {
         "id": 467,
         "name": "Conferences"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLPSC",
+        "id": 468,
+        "name": "PSC Public Documents"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLSCC",
+        "id": 469,
+        "name": "SCC Public Documents"
+    },
+    {
+        "dbquery": "collections:DGOFFICE",
+        "id": 470,
+        "name": "DG Office"
     },
     {
         "dbquery": "reportnumber:\"CERN-NUFACT-NOTE-*\" -sysno:'arc'",
@@ -2419,14 +2043,50 @@
         "name": "NUFACT Notes"
     },
     {
+        "dbquery": "collections:THESIS experiment:LHCb",
+        "id": 472,
+        "name": "LHCb Theses"
+    },
+    {
+        "id": 473,
+        "name": "PH-III - Physics III Committee"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLPHIII",
+        "id": 474,
+        "name": "PH-III Public Documents"
+    },
+    {
+        "id": 475,
+        "name": "EmC - Emulsion Committee"
+    },
+    {
+        "id": 476,
+        "name": "TCC - Track Chamber Committee"
+    },
+    {
+        "id": 477,
+        "name": "EEC - Electronic Experiments Committee"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLEMC",
+        "id": 478,
+        "name": "EmC Public Documents"
+    },
+    {
         "dbquery": "collections:SCICOMMPUBLTCC",
         "id": 479,
         "name": "TCC Public Documents"
     },
     {
-        "dbquery": "collections:SCICOMMPUBLPSC",
-        "id": 468,
-        "name": "PSC Public Documents"
+        "dbquery": "collections:SCICOMMPUBLEEC",
+        "id": 480,
+        "name": "EEC Public Documents"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLNPRC",
+        "id": 481,
+        "name": "NPRC - Nuclear Physics Research Committee"
     },
     {
         "dbquery": "collections:CSOOFFICE",
@@ -2502,11 +2162,6 @@
         "name": "CERN Series"
     },
     {
-        "dbquery": "collections:ARC010314",
-        "id": 851,
-        "name": "Maximilian Metzger (Archives)"
-    },
-    {
         "id": 497,
         "name": "Accelerator Technology (AT)"
     },
@@ -2519,31 +2174,123 @@
         "name": "Secretariat-General (SG)"
     },
     {
-        "dbquery": "collections:INTNOTEHRPUBL and keyword:Recruitment",
-        "id": 954,
-        "name": "HR Recruitment"
-    },
-    {
-        "dbquery": "collections:\"ENLIB\" reportnumber:\"EN-DH-*\"",
-        "id": 702,
-        "name": "EN Department Head Documents"
-    },
-    {
-        "id": 703,
-        "name": "Engineering Department (EN)"
-    },
-    {
-        "id": 704,
-        "name": "Beams Department (BE)"
-    },
-    {
-        "dbquery": "collections:PRIVAUDIOARCHIVE",
-        "id": 647,
-        "name": "Restricted Audio Archives"
-    },
-    {
         "id": 500,
         "name": "Technical Support (TS)"
+    },
+    {
+        "id": 501,
+        "name": "Accelerators & Beams Articles"
+    },
+    {
+        "id": 502,
+        "name": "Accelerators & Beams Preprints"
+    },
+    {
+        "id": 503,
+        "name": "Accelerators & Beams Notes"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:AB",
+        "id": 504,
+        "name": "AB Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:AC",
+        "id": 505,
+        "name": "AC Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:ISR",
+        "id": 506,
+        "name": "ISR Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:MSC",
+        "id": 507,
+        "name": "MSC Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:SI",
+        "id": 508,
+        "name": "SI Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:AR",
+        "id": 509,
+        "name": "AR Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:MPS",
+        "id": 510,
+        "name": "MPS Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:SC",
+        "id": 511,
+        "name": "SC Articles"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:AC",
+        "id": 512,
+        "name": "AC Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:ISR",
+        "id": 513,
+        "name": "ISR Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:MSC",
+        "id": 514,
+        "name": "MSC Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:SI",
+        "id": 515,
+        "name": "SI Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:AR",
+        "id": 516,
+        "name": "AR Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:MPS",
+        "id": 517,
+        "name": "MPS Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:SC",
+        "id": 518,
+        "name": "SC Preprints"
+    },
+    {
+        "id": 519,
+        "name": "Accelerator Technology Articles"
+    },
+    {
+        "id": 520,
+        "name": "Accelerator Technology Preprints"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:AT",
+        "id": 521,
+        "name": "AT Articles"
+    },
+    {
+        "dbquery": "collections:ARTICLE division:NPA",
+        "id": 522,
+        "name": "NPA Articles"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:AT",
+        "id": 523,
+        "name": "AT Preprints"
+    },
+    {
+        "dbquery": "collections:PREPRINT division:NPA",
+        "id": 524,
+        "name": "NPA Preprints"
     },
     {
         "dbquery": "division:CN or division:DD or division:IT or division:AS or division:STS and collections:ARTICLE",
@@ -2635,11 +2382,6 @@
         "name": "Experimental Physics Preprints"
     },
     {
-        "dbquery": "collections:CERNPHEPDRAFT",
-        "id": 794,
-        "name": "Experiment Publication Drafts"
-    },
-    {
         "dbquery": "collections:ARTICLE division:EP",
         "id": 544,
         "name": "EP Articles"
@@ -2710,11 +2452,6 @@
         "name": "Video Rushes"
     },
     {
-        "dbquery": "collections:ARC011902",
-        "id": 591,
-        "name": "DELPHI (Archives)"
-    },
-    {
         "dbquery": "media:\"Streaming video\" or 300__a:\"Streaming video\" or 035__9:AgendaMaker and not collections:RESTRICTED_ATLAS_TALKS and not collections:RESTRICTED_CMS_TALKS ",
         "id": 558,
         "name": "Video Lectures"
@@ -2734,6 +2471,11 @@
         "name": "ARDA Public Documents"
     },
     {
+        "dbquery": "internalnote:\"Press Photos\"",
+        "id": 562,
+        "name": "Press Office Photo Selection"
+    },
+    {
         "id": 563,
         "name": "ARDA Internal Documentation"
     },
@@ -2748,14 +2490,14 @@
         "name": "PhotoLab Archives"
     },
     {
-        "dbquery": "collections:ARC010312",
-        "id": 567,
-        "name": "Directorate Services Unit - Strategic Planning Unit (Archives)"
-    },
-    {
         "dbquery": "collections:INTNOTEASPUBL or collections:INTNOTEMISPUBL and indicator:INTNOTE",
         "id": 566,
         "name": "MIS Notes"
+    },
+    {
+        "dbquery": "collections:ARC010312",
+        "id": 567,
+        "name": "Directorate Services Unit - Strategic Planning Unit (Archives)"
     },
     {
         "dbquery": "collections:ARC010311",
@@ -2776,11 +2518,6 @@
         "dbquery": "collections:ARC011812",
         "id": 571,
         "name": "NA31 Experiment (Archives)"
-    },
-    {
-        "dbquery": "collections:ARC012303",
-        "id": 592,
-        "name": "The World Wide Web (Archives)"
     },
     {
         "dbquery": "collections:ABTECHCOLL",
@@ -2812,9 +2549,9 @@
         "name": "PH-I - Physics I Committee"
     },
     {
-        "dbquery": "collections:ARC012502",
-        "id": 590,
-        "name": "Health Physics (Archives)"
+        "dbquery": "collections:SCICOMMPUBLPHI",
+        "id": 578,
+        "name": "PH-I Public Documents"
     },
     {
         "dbquery": "collections:INTNOTEATLASINT",
@@ -2822,23 +2559,23 @@
         "name": "ATLAS Internal Notes"
     },
     {
-        "dbquery": "collections:SCICOMMPUBLPHI",
-        "id": 578,
-        "name": "PH-I Public Documents"
+        "id": 580,
+        "name": "Recognized Experiments"
     },
     {
-        "dbquery": "internalnote:\"Press Photos\"",
-        "id": 562,
-        "name": "Press Office Photo Selection"
+        "dbquery": "collections:ARC012502",
+        "id": 590,
+        "name": "Health Physics (Archives)"
     },
     {
-        "dbquery": "collections:Press_Release",
-        "id": 597,
-        "name": "Press Releases"
+        "dbquery": "collections:ARC011902",
+        "id": 591,
+        "name": "DELPHI (Archives)"
     },
     {
-        "id": 596,
-        "name": "Press"
+        "dbquery": "collections:ARC012303",
+        "id": 592,
+        "name": "The World Wide Web (Archives)"
     },
     {
         "dbquery": "collections:\"AUDIOARCHIVE\"",
@@ -2846,9 +2583,23 @@
         "name": "Audio Archives"
     },
     {
+        "dbquery": "EuCARD or CARE or DIRAC or EURISOL or EURONS or EUROTEV and reportnumber:/^(EuCARD-|CARE-|CERN-AT-|CERN-AB-|CLIC-|CERN-LHC-|CERN-PS-|CERN-NEUTRINO-|EUROTEV-)/ not experiment:DIRAC not collaboration:DIRAC or collections:ARD",
+        "id": 594,
+        "name": "CERN Accelerator R&D Projects"
+    },
+    {
         "dbquery": "collections:INTNOTEPHEPTECHPUBL",
         "id": 595,
         "name": "PH-EP Technical Notes"
+    },
+    {
+        "id": 596,
+        "name": "Press"
+    },
+    {
+        "dbquery": "collections:Press_Release",
+        "id": 597,
+        "name": "Press Releases"
     },
     {
         "dbquery": "collections:ARC010207",
@@ -2861,23 +2612,9 @@
         "name": "IT-UDS-PUB Source Archive"
     },
     {
-        "dbquery": "EuCARD or CARE or DIRAC or EURISOL or EURONS or EUROTEV and reportnumber:/^(EuCARD-|CARE-|CERN-AT-|CERN-AB-|CLIC-|CERN-LHC-|CERN-PS-|CERN-NEUTRINO-|EUROTEV-)/ not experiment:DIRAC not collaboration:DIRAC or collections:ARD",
-        "id": 594,
-        "name": "CERN Accelerator R&D Projects"
-    },
-    {
         "dbquery": "indicator:BOOKSHOP",
         "id": 600,
         "name": "CERN Computing Bookshop"
-    },
-    {
-        "id": 605,
-        "name": "ECFA"
-    },
-    {
-        "dbquery": "media:ebook",
-        "id": 871,
-        "name": "eBooks"
     },
     {
         "dbquery": "collections:INTNOTEITPUBL",
@@ -2897,6 +2634,29 @@
         "dbquery": "collections:BROCHURE indicator:CERNOFFICIALPRESSBROCHURE",
         "id": 604,
         "name": "Official Press Brochures"
+    },
+    {
+        "id": 605,
+        "name": "ECFA"
+    },
+    {
+        "id": 608,
+        "name": "CSG"
+    },
+    {
+        "dbquery": "collections:CSG indicator:CSGCOM",
+        "id": 609,
+        "name": "CSG Communications"
+    },
+    {
+        "dbquery": "collections:CSG indicator:CSGINT",
+        "id": 610,
+        "name": "CSG Internal Notes"
+    },
+    {
+        "dbquery": "collections:CSG indicator:CSGPUB",
+        "id": 611,
+        "name": "CSG Public Notes"
     },
     {
         "dbquery": "collections:ATLASSLIDE or collections:PUBLATLASSLIDE",
@@ -2957,9 +2717,9 @@
         "name": "ATLAS Photo Competition"
     },
     {
-        "dbquery": "collections:ARC012305",
-        "id": 628,
-        "name": "Data Handling division (Archives)"
+        "dbquery": "collections:CNLARTICLE",
+        "id": 625,
+        "name": "CNL Articles"
     },
     {
         "dbquery": "collections:PRIVIMXGAM",
@@ -2967,18 +2727,9 @@
         "name": "imXgam"
     },
     {
-        "id": 580,
-        "name": "Recognized Experiments"
-    },
-    {
-        "dbquery": "collections:CNLARTICLE",
-        "id": 625,
-        "name": "CNL Articles"
-    },
-    {
-        "dbquery": "collections:ARC012306",
-        "id": 653,
-        "name": "David O. Williams (Archives)"
+        "dbquery": "collections:ARC012305",
+        "id": 628,
+        "name": "Data Handling division (Archives)"
     },
     {
         "dbquery": "collections:CNLISSUE",
@@ -2991,14 +2742,14 @@
         "name": "CERN Photolab Private"
     },
     {
-        "dbquery": "collections:\"CERNPHOTOSHOOT\" OR collections:\"CERNVIDEOSHOOT\" OR collections:\"CERNPHOTOVIDEOSHOOT\"",
-        "id": 632,
-        "name": "CERN Photo Shoot"
-    },
-    {
         "dbquery": "collections:PRIVANTARES",
         "id": 631,
         "name": "ANTARES Internal Notes"
+    },
+    {
+        "dbquery": "collections:\"CERNPHOTOSHOOT\" OR collections:\"CERNVIDEOSHOOT\" OR collections:\"CERNPHOTOVIDEOSHOOT\"",
+        "id": 632,
+        "name": "CERN Photo Shoot"
     },
     {
         "dbquery": "collections:PRIVANTARESPLOT",
@@ -3016,9 +2767,9 @@
         "name": "LHC Committees (Archives)"
     },
     {
-        "dbquery": "collections:ARC012403",
-        "id": 640,
-        "name": "Human Resources (Archives)"
+        "dbquery": "collections:OPERCIRCULAR",
+        "id": 636,
+        "name": "Operational Circulars"
     },
     {
         "dbquery": "collections:PRIVVIDEOMOVIE",
@@ -3026,14 +2777,14 @@
         "name": "Restricted Video Movies"
     },
     {
-        "dbquery": "collections:BULLETINBREAKING",
-        "id": 649,
-        "name": "Breaking News"
-    },
-    {
         "dbquery": "collections:PRIVVIDEORUSH",
         "id": 639,
         "name": "Restricted Video Rushes"
+    },
+    {
+        "dbquery": "collections:ARC012403",
+        "id": 640,
+        "name": "Human Resources (Archives)"
     },
     {
         "dbquery": "collections:ARC015000",
@@ -3061,6 +2812,110 @@
         "name": "CHIS Bulletin"
     },
     {
+        "dbquery": "collections:POSTER division:IT",
+        "id": 646,
+        "name": "IT Posters"
+    },
+    {
+        "dbquery": "collections:PRIVAUDIOARCHIVE",
+        "id": 647,
+        "name": "Restricted Audio Archives"
+    },
+    {
+        "dbquery": "collections:peri AND media:Online",
+        "id": 648,
+        "name": "Electronic Journals"
+    },
+    {
+        "dbquery": "collections:BULLETINBREAKING",
+        "id": 649,
+        "name": "Breaking News"
+    },
+    {
+        "dbquery": "collections:ARC011813",
+        "id": 650,
+        "name": "Scientific Committees (Archives)"
+    },
+    {
+        "dbquery": "856:'yellowarticle'",
+        "id": 651,
+        "name": "CERN Yellow Report Articles"
+    },
+    {
+        "dbquery": "indicator:\"English Book Club\"",
+        "id": 652,
+        "name": "English Book Club"
+    },
+    {
+        "dbquery": "collections:ARC012306",
+        "id": 653,
+        "name": "David O. Williams (Archives)"
+    },
+    {
+        "dbquery": "collections:\"CMSPUBDRAFT\"",
+        "id": 654,
+        "name": "CMS Publication Drafts"
+    },
+    {
+        "dbquery": "collections:\"CMSPUBDRAFTHISTORY\"",
+        "id": 655,
+        "name": "CMS Publication Drafts History"
+    },
+    {
+        "dbquery": "collections:\"CMSPUBDRAFTCOMM\"",
+        "id": 656,
+        "name": "CMS Publication Drafts Comments"
+    },
+    {
+        "dbquery": "collections:\"CMSPUBDRAFTPENDINGCOMM\"",
+        "id": 657,
+        "name": "CMS Publication Drafts Pending Comments"
+    },
+    {
+        "dbquery": "collections:\"PROVISIONAL\"",
+        "id": 658,
+        "name": "Provisional Documents"
+    },
+    {
+        "dbquery": "collections:\"CMSPUBDRAFTREJECTEDCOMM\"",
+        "id": 660,
+        "name": "CMS Publication Drafts Rejected Comments"
+    },
+    {
+        "dbquery": "collections:INTNOTECMSPUBL reportnumber:CMS-CR-*",
+        "id": 661,
+        "name": "CMS Conference Reports"
+    },
+    {
+        "dbquery": "595:\"CERN-TH\"",
+        "id": 662,
+        "name": "CERN-TH"
+    },
+    {
+        "id": 663,
+        "name": "TOTEM"
+    },
+    {
+        "dbquery": "indicator:\"PUBLTOTEM\"",
+        "id": 664,
+        "name": "TOTEM Notes"
+    },
+    {
+        "dbquery": "collections:ARTICLE OR collections:PREPRINT NOT indicator:INTNOTE AND experiment:TOTEM",
+        "id": 665,
+        "name": "TOTEM Preprints"
+    },
+    {
+        "dbquery": "collections:THESIS AND experiment:TOTEM",
+        "id": 666,
+        "name": "TOTEM Theses"
+    },
+    {
+        "dbquery": "collections:\"PHOTO*\" AND keyword:TOTEM",
+        "id": 667,
+        "name": "TOTEM Photos"
+    },
+    {
         "dbquery": "collections:INTNOTEHRPUBL and not keyword:security",
         "id": 668,
         "name": "HR Notes"
@@ -3069,6 +2924,46 @@
         "dbquery": "collections:LHCBPUBDRAFT",
         "id": 669,
         "name": "LHCb Publication Drafts"
+    },
+    {
+        "dbquery": "collections:LHCBPUBDRAFTCOMM",
+        "id": 670,
+        "name": "LHCb Publication Drafts Comments"
+    },
+    {
+        "dbquery": "collections:LHCBPUBDRAFTHISTORY",
+        "id": 671,
+        "name": "LHCb Publication Drafts History"
+    },
+    {
+        "dbquery": "collections:SCICOMMPUBLNSC",
+        "id": 672,
+        "name": "NSC - Nuclear Structure Committee"
+    },
+    {
+        "dbquery": "collections:INTNOTEATLASPUBL 594__a:PUB",
+        "id": 673,
+        "name": "ATLAS PUB Notes"
+    },
+    {
+        "dbquery": "collections:ATLASPUBDRAFT",
+        "id": 674,
+        "name": "ATLAS Publication Drafts"
+    },
+    {
+        "dbquery": "collections:ATLASPUBDRAFTHISTORY",
+        "id": 675,
+        "name": "ATLAS Publication Drafts History"
+    },
+    {
+        "dbquery": "collections:ATLASPUBDRAFTCOMM",
+        "id": 676,
+        "name": "ATLAS Publication Drafts Comments"
+    },
+    {
+        "dbquery": "collections:INTNOTEATLASPUBL 594__a:PROC",
+        "id": 678,
+        "name": "ATLAS Conference Contributions"
     },
     {
         "dbquery": "keyword:\"lhc first beam\"",
@@ -3091,14 +2986,14 @@
         "name": "LHC First Beam Audios"
     },
     {
-        "dbquery": "collections:EUROPEANSTRATEGYSESSIONCOUNCIL",
-        "id": 685,
-        "name": "European Strategy Session of Council"
-    },
-    {
         "dbquery": "collections:COUNCIL OR collections:COMMCOUNCIL",
         "id": 684,
         "name": "Council and Committee of Council"
+    },
+    {
+        "dbquery": "collections:EUROPEANSTRATEGYSESSIONCOUNCIL",
+        "id": 685,
+        "name": "European Strategy Session of Council"
     },
     {
         "dbquery": "collections:LHCPERFNOTE OR (subject:\"Accelerators and Storage Rings\" AND accelerator:\"CERN LHC\" AND collections:PERFNOTE AND 650172:SzGeCERN)",
@@ -3106,19 +3001,9 @@
         "name": "LHC Performance Notes"
     },
     {
-        "dbquery": "collections:INTNOTEATLASPUBL 594__a:PROC",
-        "id": 678,
-        "name": "ATLAS Conference Contributions"
-    },
-    {
-        "dbquery": "collections:INTNOTEATLASPUBL 594__a:PUB",
-        "id": 673,
-        "name": "ATLAS PUB Notes"
-    },
-    {
-        "dbquery": "collections:SCICOMMPUBLNSC",
-        "id": 672,
-        "name": "NSC - Nuclear Structure Committee"
+        "dbquery": "collections:CMS-PHYSICS-ANALYSIS-SUMMARIES",
+        "id": 689,
+        "name": "CMS Physics Analysis Summaries"
     },
     {
         "dbquery": "collections:\"BELIB\"",
@@ -3139,11 +3024,6 @@
         "name": "Fixed Target Experiments"
     },
     {
-        "dbquery": "collections:CMS-PHYSICS-ANALYSIS-SUMMARIES",
-        "id": 689,
-        "name": "CMS Physics Analysis Summaries"
-    },
-    {
         "dbquery": "keyword:openlab",
         "id": 694,
         "name": "CERN openlab"
@@ -3157,31 +3037,6 @@
         "dbquery": "keyword:openlab AND collections:PUBLVIDEO* AND NOT 970__a:FCS.project.*",
         "id": 696,
         "name": "CERN openlab Videos"
-    },
-    {
-        "dbquery": "collections:ATLASPUBDRAFT",
-        "id": 674,
-        "name": "ATLAS Publication Drafts"
-    },
-    {
-        "dbquery": "collections:LHCBPUBDRAFTCOMM",
-        "id": 670,
-        "name": "LHCb Publication Drafts Comments"
-    },
-    {
-        "dbquery": "collections:LHCBPUBDRAFTHISTORY",
-        "id": 671,
-        "name": "LHCb Publication Drafts History"
-    },
-    {
-        "dbquery": "collections:ATLASPUBDRAFTHISTORY",
-        "id": 675,
-        "name": "ATLAS Publication Drafts History"
-    },
-    {
-        "dbquery": "collections:ATLASPUBDRAFTCOMM",
-        "id": 676,
-        "name": "ATLAS Publication Drafts Comments"
     },
     {
         "dbquery": "collections:INTNOTEBEPUBL",
@@ -3209,9 +3064,17 @@
         "name": "ISR Running-in"
     },
     {
-        "dbquery": "collections:\"CMSPUBDRAFTFINAL\"",
-        "id": 708,
-        "name": "CMS Publication Drafts Final"
+        "dbquery": "collections:\"ENLIB\" reportnumber:\"EN-DH-*\"",
+        "id": 702,
+        "name": "EN Department Head Documents"
+    },
+    {
+        "id": 703,
+        "name": "Engineering Department (EN)"
+    },
+    {
+        "id": 704,
+        "name": "Beams Department (BE)"
     },
     {
         "dbquery": "collections:ATLASPUBDRAFTFINAL",
@@ -3219,9 +3082,9 @@
         "name": "ATLAS Publication Drafts Final"
     },
     {
-        "dbquery": "collections:LHCf_Papers",
-        "id": 891,
-        "name": "LHCf Papers"
+        "dbquery": "collections:\"CMSPUBDRAFTFINAL\"",
+        "id": 708,
+        "name": "CMS Publication Drafts Final"
     },
     {
         "dbquery": "collections:LHCBPUBDRAFTFINAL",
@@ -3234,19 +3097,9 @@
         "name": "LHCb Conference Contributions"
     },
     {
-        "dbquery": "collections:\"PRIVATLASPLOT\" subject:Physics",
-        "id": 721,
-        "name": "ATLAS Physics Plots"
-    },
-    {
         "dbquery": "(collections:PREPRINT or collections:ARTICLE) and division:ATS",
         "id": 711,
         "name": "ATS Reports"
-    },
-    {
-        "dbquery": "collections:PRIVATLASPLOT",
-        "id": 718,
-        "name": "ATLAS Plots"
     },
     {
         "dbquery": "collections:SLHCPROJNOTE",
@@ -3263,16 +3116,6 @@
         "name": "sLHC Project"
     },
     {
-        "dbquery": "collections:\"PRIVATLASPLOT\" subject:Cosmics",
-        "id": 719,
-        "name": "ATLAS Cosmics Plots"
-    },
-    {
-        "dbquery": "collections:\"PRIVATLASPLOT\" subject:\"DAQ and Trigger\"",
-        "id": 720,
-        "name": "ATLAS DAQ and Trigger Plots"
-    },
-    {
         "dbquery": "collections:PREPRINT OR collections:ARTICLE AND division:BE",
         "id": 715,
         "name": "BE Preprints"
@@ -3285,6 +3128,31 @@
     {
         "id": 717,
         "name": "Technology Department (TE)"
+    },
+    {
+        "dbquery": "collections:PRIVATLASPLOT",
+        "id": 718,
+        "name": "ATLAS Plots"
+    },
+    {
+        "dbquery": "collections:\"PRIVATLASPLOT\" subject:Cosmics",
+        "id": 719,
+        "name": "ATLAS Cosmics Plots"
+    },
+    {
+        "dbquery": "collections:\"PRIVATLASPLOT\" subject:\"DAQ and Trigger\"",
+        "id": 720,
+        "name": "ATLAS DAQ and Trigger Plots"
+    },
+    {
+        "dbquery": "collections:\"PRIVATLASPLOT\" subject:Physics",
+        "id": 721,
+        "name": "ATLAS Physics Plots"
+    },
+    {
+        "dbquery": "collections:PHOTOTECY",
+        "id": 722,
+        "name": "TE CryoLab Photos"
     },
     {
         "dbquery": "collections:CERN_Annual_Report_Issues",
@@ -3312,14 +3180,34 @@
         "name": "Staff Rules and Regulations"
     },
     {
-        "dbquery": "collections:\"PHOTO*\" and keyword:\"lhcfirstphysics\"",
-        "id": 772,
-        "name": "LHC First Physics Photos"
+        "dbquery": "reportnumber:EuCARD",
+        "id": 728,
+        "name": "EuCARD"
+    },
+    {
+        "dbquery": "collections:Photolab keyword:CMS OR collections:PHOTOCMS and 506__a:restricted",
+        "id": 729,
+        "name": "Restricted CMS Photos"
     },
     {
         "dbquery": "collections:ANNUALSTATS",
         "id": 730,
         "name": "CERN Annual Personnel Statistics"
+    },
+    {
+        "dbquery": "collections:INTNOTETEPUBL",
+        "id": 734,
+        "name": "TE Notes"
+    },
+    {
+        "dbquery": "037__a:\"ATL-COM-PHYS-*\" or 037__a:\"ATLAS-COM-CONF-*\" or 037__a:\"ATL-COM-CONF-*\" or 037__a:\"ATL-COM-SLIDE-*\"",
+        "id": 735,
+        "name": "ATLAS Communications Physics"
+    },
+    {
+        "dbquery": "037__a:\"ATL-COM-*\" not 037__a:\"ATL-COM-PHYS-*\" not 037__a:\"ATL-COM-CONF-*\" not 037__a:\"ATL-COM-SLIDE-*\"",
+        "id": 736,
+        "name": "ATLAS Communications General"
     },
     {
         "id": 737,
@@ -3361,16 +3249,6 @@
         "name": "ATLAS Inner Detector Plots"
     },
     {
-        "dbquery": "037__a:\"ATL-COM-PHYS-*\" or 037__a:\"ATLAS-COM-CONF-*\" or 037__a:\"ATL-COM-CONF-*\" or 037__a:\"ATL-COM-SLIDE-*\"",
-        "id": 735,
-        "name": "ATLAS Communications Physics"
-    },
-    {
-        "dbquery": "collections:INTNOTELHCBPROCPUBL",
-        "id": 769,
-        "name": "LHCb Conference Proceedings"
-    },
-    {
         "dbquery": "collections:\"PRIVATLASPLOT\" subject:General",
         "id": 748,
         "name": "ATLAS General Plots"
@@ -3406,19 +3284,14 @@
         "name": "ATLAS Upgrade Plots"
     },
     {
-        "dbquery": "037__a:\"ATL-PHYS-INT-*\"",
-        "id": 756,
-        "name": "ATLAS Internal Notes Physics"
-    },
-    {
         "dbquery": "037__a:\"ATL-*-INT-*\" not 037__a:\"ATL-PHYS-INT-*\"",
         "id": 755,
         "name": "ATLAS Internal Notes General"
     },
     {
-        "dbquery": "037__a:\"ATL-COM-*\" not 037__a:\"ATL-COM-PHYS-*\" not 037__a:\"ATL-COM-CONF-*\" not 037__a:\"ATL-COM-SLIDE-*\"",
-        "id": 736,
-        "name": "ATLAS Communications General"
+        "dbquery": "037__a:\"ATL-PHYS-INT-*\"",
+        "id": 756,
+        "name": "ATLAS Internal Notes Physics"
     },
     {
         "dbquery": "collections:\"CMS_Papers\" OR collections:\"CMSPUBDRAFTFINAL\"",
@@ -3426,14 +3299,9 @@
         "name": "CMS Papers"
     },
     {
-        "dbquery": "collections:ATLASPUBDRAFTFINAL OR collections:ATLAS_Papers",
-        "id": 786,
-        "name": "ATLAS Papers"
-    },
-    {
-        "dbquery": "collections:Photolab keyword:CMS OR collections:PHOTOCMS and 506__a:restricted",
-        "id": 729,
-        "name": "Restricted CMS Photos"
+        "dbquery": "collections:INTNOTELHCBPROCPUBL",
+        "id": 769,
+        "name": "LHCb Conference Proceedings"
     },
     {
         "dbquery": "collections:VIDEOCLIP or collections:VIDEOMOVIE or collections:PUBLVIDEOMOVIE or collections:VIDEONEWS or collections:VIDEORUSH or collections:PUBLVIDEORUSH or collections:\"PHOTO*\" and keyword:\"lhcfirstphysics\" ",
@@ -3444,6 +3312,11 @@
         "dbquery": "collections:VIDEOCLIP or collections:VIDEOMOVIE or collections:PUBLVIDEOMOVIE or collections:VIDEONEWS or collections:VIDEORUSH or collections:PUBLVIDEORUSH and keyword:\"lhcfirstphysics\"",
         "id": 771,
         "name": "LHC First Physics Videos"
+    },
+    {
+        "dbquery": "collections:\"PHOTO*\" and keyword:\"lhcfirstphysics\"",
+        "id": 772,
+        "name": "LHC First Physics Photos"
     },
     {
         "id": 773,
@@ -3510,13 +3383,18 @@
         "name": "ALICE Papers"
     },
     {
-        "dbquery": "collections:INTNOTEHRPUBL and not keyword:security",
-        "id": 789,
-        "name": "General HR Documents"
+        "dbquery": "collections:ATLASPUBDRAFTFINAL OR collections:ATLAS_Papers",
+        "id": 786,
+        "name": "ATLAS Papers"
     },
     {
         "id": 788,
         "name": "EMI JRA1"
+    },
+    {
+        "dbquery": "collections:INTNOTEHRPUBL and not keyword:security",
+        "id": 789,
+        "name": "General HR Documents"
     },
     {
         "dbquery": "collections:BBEAMNOTE",
@@ -3538,14 +3416,19 @@
         "name": "ATS Notes"
     },
     {
+        "dbquery": "collections:CERNPHEPDRAFT",
+        "id": 794,
+        "name": "Experiment Publication Drafts"
+    },
+    {
         "dbquery": "collections:INTNOTEHRPUBL and keyword:Presentation",
         "id": 795,
         "name": "HR Presentations"
     },
     {
-        "dbquery": "collections:PHOTONA62",
-        "id": 823,
-        "name": "NA62 Photos"
+        "dbquery": "reportnumber:\"ATLAS-CONF-*\"",
+        "id": 796,
+        "name": "ATLAS Conference Notes"
     },
     {
         "dbquery": "indicator:EMI-JRA1-Milestones",
@@ -3628,13 +3511,13 @@
         "name": "PH-EP Articles"
     },
     {
-        "dbquery": "internalnote:\"Press Videos\"",
-        "id": 831,
-        "name": "Press Office Video Selection"
-    },
-    {
         "id": 822,
         "name": "NA62"
+    },
+    {
+        "dbquery": "collections:PHOTONA62",
+        "id": 823,
+        "name": "NA62 Photos"
     },
     {
         "dbquery": "collections:LHCb_Papers OR collections:LHCBPUBDRAFTFINAL",
@@ -3647,11 +3530,6 @@
         "name": "LHCb Analysis Notes"
     },
     {
-        "dbquery": "collections:LHCb_Misc or indicator:LHCb_Misc",
-        "id": 828,
-        "name": "LHCb Miscellaneous"
-    },
-    {
         "dbquery": "collections:PECFA",
         "id": 826,
         "name": "Plenary ECFA"
@@ -3662,9 +3540,9 @@
         "name": "Restricted ECFA"
     },
     {
-        "dbquery": "collections:RESTRICTED_CMS_TALKS",
-        "id": 830,
-        "name": "Restricted CMS Talks"
+        "dbquery": "collections:LHCb_Misc or indicator:LHCb_Misc",
+        "id": 828,
+        "name": "LHCb Miscellaneous"
     },
     {
         "dbquery": "collections:RESTRICTED_ATLAS_TALKS",
@@ -3672,13 +3550,33 @@
         "name": "Restricted ATLAS Talks"
     },
     {
-        "dbquery": "collections:INTNOTEHRPUBL and keyword:Document",
-        "id": 836,
-        "name": "HR Documents"
+        "dbquery": "collections:RESTRICTED_CMS_TALKS",
+        "id": 830,
+        "name": "Restricted CMS Talks"
+    },
+    {
+        "dbquery": "internalnote:\"Press Videos\"",
+        "id": 831,
+        "name": "Press Office Video Selection"
+    },
+    {
+        "dbquery": "collections:INTNOTEHRPUBL and keyword:Form",
+        "id": 833,
+        "name": "HR Forms"
+    },
+    {
+        "dbquery": "collections:INTNOTEHRPUBL and keyword:Program",
+        "id": 834,
+        "name": "HR Programs"
     },
     {
         "id": 835,
         "name": "ATLAS Internal"
+    },
+    {
+        "dbquery": "collections:INTNOTEHRPUBL and keyword:Document",
+        "id": 836,
+        "name": "HR Documents"
     },
     {
         "dbquery": "collections:INTNOTEHRPUBL and keyword:Program and keyword:\"Project Associates\"",
@@ -3696,10 +3594,6 @@
         "name": "CERN Bulletin Printable Version"
     },
     {
-        "id": 842,
-        "name": "LHeC Project"
-    },
-    {
         "dbquery": "reportnumber:CERN-LHeC-Note-*",
         "id": 840,
         "name": "LHeC Project Notes"
@@ -3710,9 +3604,8 @@
         "name": "LHeC Project Reports"
     },
     {
-        "dbquery": "collections:ANNOUNCEMENT 111__9:19000101->today",
-        "id": 989,
-        "name": "Past Conferences"
+        "id": 842,
+        "name": "LHeC Project"
     },
     {
         "dbquery": "collections:\"ECFALEP\"",
@@ -3735,14 +3628,34 @@
         "name": "Bulletin Announcements"
     },
     {
+        "dbquery": "collections:TOTEM_Papers",
+        "id": 847,
+        "name": "TOTEM Papers"
+    },
+    {
+        "dbquery": "collections:TOTEM_Reports",
+        "id": 848,
+        "name": "TOTEM Reports"
+    },
+    {
+        "dbquery": "collections:TOTEM_Slides",
+        "id": 849,
+        "name": "TOTEM Slides"
+    },
+    {
+        "dbquery": "collections:TOTEM_Proc",
+        "id": 850,
+        "name": "TOTEM Conference Proceedings"
+    },
+    {
+        "dbquery": "collections:ARC010314",
+        "id": 851,
+        "name": "Maximilian Metzger (Archives)"
+    },
+    {
         "dbquery": "collections:NA62_Papers",
         "id": 852,
         "name": "NA62 Papers"
-    },
-    {
-        "dbquery": "collections:BULLETINSTAFFDRAFT or collections:BULLETINNEWSDRAFT or collections:BULLETINOFFICIALDRAFT or collections:BULLETINTRAININGDRAFT or collections:BULLETINANNOUNCEDRAFT or collections:BULLETINEVENTSDRAFT ",
-        "id": 855,
-        "name": "Weekly Bulletin Drafts"
     },
     {
         "dbquery": "collections:NA61_Papers",
@@ -3752,6 +3665,11 @@
     {
         "id": 854,
         "name": "NA61"
+    },
+    {
+        "dbquery": "collections:BULLETINSTAFFDRAFT or collections:BULLETINNEWSDRAFT or collections:BULLETINOFFICIALDRAFT or collections:BULLETINTRAININGDRAFT or collections:BULLETINANNOUNCEDRAFT or collections:BULLETINEVENTSDRAFT ",
+        "id": 855,
+        "name": "Weekly Bulletin Drafts"
     },
     {
         "dbquery": "collections:CMSBULLETINARTICLE or collections:CMSBULLETINEDITORIAL",
@@ -3784,9 +3702,41 @@
         "name": "HIE Isolde Documents"
     },
     {
-        "dbquery": "collections:LHCf_Proc",
-        "id": 892,
-        "name": "LHCf Conference Proceedings"
+        "id": 862,
+        "name": "EU Projects"
+    },
+    {
+        "id": 863,
+        "name": "EU FP7 Projects"
+    },
+    {
+        "dbquery": "indicator:UNILHC",
+        "id": 864,
+        "name": "UNILHC"
+    },
+    {
+        "dbquery": "indicator:SUPERFIELDS",
+        "id": 865,
+        "name": "SUPERFIELDS"
+    },
+    {
+        "dbquery": "collections:LHCb_Reports OR reportnumber:\"CERN-LHCC-2013-022\"",
+        "id": 866,
+        "name": "LHCb Reports"
+    },
+    {
+        "id": 867,
+        "name": "LHCb Internal"
+    },
+    {
+        "dbquery": "collections:CMS_Reports",
+        "id": 868,
+        "name": "CMS Reports"
+    },
+    {
+        "dbquery": "collections:ATLAS_Reports",
+        "id": 869,
+        "name": "ATLAS Reports"
     },
     {
         "dbquery": "indicator:MASSTEV",
@@ -3794,13 +3744,9 @@
         "name": "MassTeV"
     },
     {
-        "id": 890,
-        "name": "LHCf"
-    },
-    {
-        "dbquery": "collections:LHCf_Reports",
-        "id": 894,
-        "name": "LHCf Reports"
+        "dbquery": "media:ebook",
+        "id": 871,
+        "name": "eBooks"
     },
     {
         "id": 877,
@@ -3864,6 +3810,45 @@
         "name": "Procurement Supplies Templates (CERN)"
     },
     {
+        "id": 890,
+        "name": "LHCf"
+    },
+    {
+        "dbquery": "collections:LHCf_Papers",
+        "id": 891,
+        "name": "LHCf Papers"
+    },
+    {
+        "dbquery": "collections:LHCf_Proc",
+        "id": 892,
+        "name": "LHCf Conference Proceedings"
+    },
+    {
+        "dbquery": "collections:LHCf_Notes",
+        "id": 893,
+        "name": "LHCf Notes"
+    },
+    {
+        "dbquery": "collections:LHCf_Reports",
+        "id": 894,
+        "name": "LHCf Reports"
+    },
+    {
+        "dbquery": "collections:THESIS AND experiment:LHCf",
+        "id": 895,
+        "name": "LHCf Theses"
+    },
+    {
+        "dbquery": "collections:LHCf_Slides",
+        "id": 896,
+        "name": "LHCf Slides"
+    },
+    {
+        "dbquery": "collections:\"PHOTO*\" AND keyword:LHCf",
+        "id": 897,
+        "name": "LHCf Photos"
+    },
+    {
         "id": 898,
         "name": "Life Sciences"
     },
@@ -3903,6 +3888,11 @@
         "name": "EMI JRA1 Technical Documents"
     },
     {
+        "dbquery": "collections:EMI-NA1-Technical-Documents",
+        "id": 907,
+        "name": "EMI NA1 Technical Documents"
+    },
+    {
         "dbquery": "collections:EMI-NA2-Technical-Documents",
         "id": 908,
         "name": "EMI NA2 Technical Documents"
@@ -3916,11 +3906,6 @@
         "dbquery": "collections:EMI-SA2-Technical-Documents",
         "id": 910,
         "name": "EMI SA2 Technical Documents"
-    },
-    {
-        "dbquery": "collections:EMI-NA1-Technical-Documents",
-        "id": 907,
-        "name": "EMI NA1 Technical Documents"
     },
     {
         "dbquery": "collections:ARC010315",
@@ -3961,6 +3946,11 @@
         "name": "Forthcoming Events"
     },
     {
+        "dbquery": "collections:\"ARC011409\"",
+        "id": 919,
+        "name": "Georges Charpak (Archives)"
+    },
+    {
         "dbquery": "collections:ARC010602",
         "id": 920,
         "name": "CERN Theory Group, Copenhagen"
@@ -3976,16 +3966,6 @@
         "name": "AIDA"
     },
     {
-        "dbquery": "collections:\"ARC011409\"",
-        "id": 919,
-        "name": "Georges Charpak (Archives)"
-    },
-    {
-        "dbquery": "reportnumber:DIRAC-CONF*",
-        "id": 925,
-        "name": "DIRAC Conference Proceedings"
-    },
-    {
         "dbquery": "reportnumber:DIRAC-PUB*",
         "id": 923,
         "name": "DIRAC Papers"
@@ -3994,6 +3974,11 @@
         "dbquery": "reportnumber:DIRAC-DOC*",
         "id": 924,
         "name": "DIRAC Reports"
+    },
+    {
+        "dbquery": "reportnumber:DIRAC-CONF*",
+        "id": 925,
+        "name": "DIRAC Conference Proceedings"
     },
     {
         "dbquery": "reportnumber:DIRAC-NOTE*",
@@ -4012,11 +3997,6 @@
     {
         "id": 929,
         "name": "PS Experiments"
-    },
-    {
-        "dbquery": "division:IT and collections:THESIS",
-        "id": 935,
-        "name": "IT Theses"
     },
     {
         "id": 930,
@@ -4043,6 +4023,11 @@
         "name": "CDS Reports"
     },
     {
+        "dbquery": "division:IT and collections:THESIS",
+        "id": 935,
+        "name": "IT Theses"
+    },
+    {
         "dbquery": "collections:BULLETINNEWS or collections:CNLARTICLE or collections:POSTER or collections:PUBLVIDEOMOVIE invenio",
         "id": 936,
         "name": "CDS Outreach"
@@ -4053,9 +4038,9 @@
         "name": "CDS Internals"
     },
     {
-        "dbquery": "collections:\"ARC010208\"",
-        "id": 948,
-        "name": "Luciano Maiani (Archives)"
+        "dbquery": "collections:\"ARC010107\"",
+        "id": 938,
+        "name": "European Strategy Session of Council (Archives)"
     },
     {
         "id": 939,
@@ -4101,6 +4086,11 @@
         "name": "CERN Doctoral Student Program"
     },
     {
+        "dbquery": "collections:\"ARC010208\"",
+        "id": 948,
+        "name": "Luciano Maiani (Archives)"
+    },
+    {
         "dbquery": "collections:ATLASPUBDRAFTOBSOLETE",
         "id": 949,
         "name": "ATLAS Publication Drafts Obsolete"
@@ -4120,9 +4110,9 @@
         "name": "General Infrastructure Services (GS)"
     },
     {
-        "dbquery": "indicator:EMI-NA3-Deliverables",
-        "id": 967,
-        "name": "EMI NA3 Deliverables"
+        "dbquery": "collections:INTNOTEHRPUBL and keyword:Recruitment",
+        "id": 954,
+        "name": "HR Recruitment"
     },
     {
         "dbquery": "collections:CERN-Property-Release-Forms",
@@ -4154,24 +4144,14 @@
         "name": "Archived Bids"
     },
     {
-        "dbquery": "collections:EMI-NA3-Technical-Documents",
-        "id": 968,
-        "name": "EMI NA3 Technical Documents"
+        "dbquery": "collections:\"EPPCN\"",
+        "id": 962,
+        "name": "EPPCN Forum Documents"
     },
     {
         "dbquery": "collections:\"HR-SMC\"",
         "id": 963,
         "name": "HR-SMC"
-    },
-    {
-        "dbquery": "indicator:EMI-NA3-Milestones",
-        "id": 966,
-        "name": "EMI NA3 Milestones"
-    },
-    {
-        "dbquery": "collections:\"EPPCN\"",
-        "id": 962,
-        "name": "EPPCN Forum Documents"
     },
     {
         "id": 964,
@@ -4182,9 +4162,19 @@
         "name": "EMI-NA3-Technical-Documents"
     },
     {
-        "dbquery": "(keyword:computing OR keyword:\"IT\" OR keyword:openlab) and collections:PUBLVIDEOMOVIE AND NOT 970__a:FCS.project.*",
-        "id": 971,
-        "name": "Information Technology Videos"
+        "dbquery": "indicator:EMI-NA3-Milestones",
+        "id": 966,
+        "name": "EMI NA3 Milestones"
+    },
+    {
+        "dbquery": "indicator:EMI-NA3-Deliverables",
+        "id": 967,
+        "name": "EMI NA3 Deliverables"
+    },
+    {
+        "dbquery": "collections:EMI-NA3-Technical-Documents",
+        "id": 968,
+        "name": "EMI NA3 Technical Documents"
     },
     {
         "dbquery": "collections:\"ATLASPRIVATEPHOTOLAB\" OR (collections:\"PHOTOATLAS\" 506__a:restricted)",
@@ -4195,6 +4185,16 @@
         "dbquery": "collections:\"ATLASPRIVVIDEOMOVIE\" OR collections:\"ATLASPRIVVIDEORUSH\"",
         "id": 970,
         "name": "Restricted ATLAS Videos"
+    },
+    {
+        "dbquery": "(keyword:computing OR keyword:\"IT\" OR keyword:openlab) and collections:PUBLVIDEOMOVIE AND NOT 970__a:FCS.project.*",
+        "id": 971,
+        "name": "Information Technology Videos"
+    },
+    {
+        "dbquery": "collections:PUBLVIDEOMOVIE AND keyword:\"safety\" and keyword:\"IT\"",
+        "id": 972,
+        "name": "IT Safety"
     },
     {
         "dbquery": "collections:CERN_Annual_Report_Issues",
@@ -4212,24 +4212,19 @@
         "name": "Experiment Brochures"
     },
     {
-        "dbquery": "collections:PUBLVIDEOMOVIE AND keyword:\"safety\" and keyword:\"IT\"",
-        "id": 972,
-        "name": "IT Safety"
-    },
-    {
         "dbquery": "collections:INTNOTEHRPUBL and keyword:Safety",
         "id": 976,
         "name": "HR Safety"
     },
     {
-        "dbquery": "collections:\"CMSDOC\"",
-        "id": 978,
-        "name": "CMS Documents"
-    },
-    {
         "dbquery": "ISOLDE and collections:\"PHOTOLAB\" and not 506:restricted",
         "id": 977,
         "name": "ISOLDE Photos"
+    },
+    {
+        "dbquery": "collections:\"CMSDOC\"",
+        "id": 978,
+        "name": "CMS Documents"
     },
     {
         "dbquery": "collections:INTNOTEHRPUBL and keyword:diversity",
@@ -4240,11 +4235,6 @@
         "dbquery": "collections:\"HelixNebula\"",
         "id": 980,
         "name": "Helix Nebula"
-    },
-    {
-        "dbquery": "collections:\"HiLumiLHC\"",
-        "id": 997,
-        "name": "HiLumi LHC"
     },
     {
         "dbquery": "490__a:\"Technical Design Report*\" or 690C_a:\"Design Report\"",
@@ -4282,6 +4272,11 @@
         "name": "ALICE Reports"
     },
     {
+        "dbquery": "collections:ANNOUNCEMENT 111__9:19000101->today",
+        "id": 989,
+        "name": "Past Conferences"
+    },
+    {
         "id": 990,
         "name": "Legal Service"
     },
@@ -4312,8 +4307,9 @@
         "name": "CERN Legal Status"
     },
     {
-        "id": 999,
-        "name": "Experiments and Committees (CLIC, Compact Linear Collider)"
+        "dbquery": "collections:\"HiLumiLHC\"",
+        "id": 997,
+        "name": "HiLumi LHC"
     },
     {
         "dbquery": "collections:\"ARC010507\"",
@@ -4321,9 +4317,8 @@
         "name": "Lists of CERN department reports"
     },
     {
-        "dbquery": "reportnumber:\"CLICdp-Pub-*\" OR collections:\"CLIC-DP-Notes\" OR reportnumber:\"CLICdp-Conf-*\" OR (collections:THESIS AND 693__s:\"CLICdp\")",
-        "id": 1063,
-        "name": "CLIC Detector and Physics Study"
+        "id": 999,
+        "name": "Experiments and Committees (CLIC, Compact Linear Collider)"
     },
     {
         "id": 1000,
@@ -4335,13 +4330,13 @@
         "name": "ANTARES Talks"
     },
     {
-        "id": 1003,
-        "name": "ISOLDE"
-    },
-    {
         "dbquery": "collections:CERN_COURIER_DIGITAL",
         "id": 1002,
         "name": "CERN Courier digital edition"
+    },
+    {
+        "id": 1003,
+        "name": "ISOLDE"
     },
     {
         "dbquery": "693__a:\"cern isolde\" and collections:THESIS",
@@ -4379,6 +4374,10 @@
         "name": "Restricted ISOLDE Photos"
     },
     {
+        "id": 1011,
+        "name": "chis"
+    },
+    {
         "id": 1012,
         "name": "Photos by Peter Ginter"
     },
@@ -4391,10 +4390,6 @@
         "dbquery": "author:Ginter and collections:PRIVATEPHOTOLAB",
         "id": 1014,
         "name": "Private Photos by Peter Ginter"
-    },
-    {
-        "id": 1011,
-        "name": "chis"
     },
     {
         "dbquery": "collections:\"CERN-EGROUPS-ARCHIVE\"",
@@ -4425,11 +4420,6 @@
         "dbquery": "collections:\"KTT-PARTNERCERNTALK\"",
         "id": 1020,
         "name": "PARTNER Presentations"
-    },
-    {
-        "dbquery": "collections:\"PS_Coordination_Notes\"",
-        "id": 1034,
-        "name": "PS Coordination Notes"
     },
     {
         "id": 1024,
@@ -4476,14 +4466,9 @@
         "name": "Other Accelerators and Research Facilities"
     },
     {
-        "dbquery": "collections:\"SPS_TECHNOLOGY_NOTES\"",
-        "id": 1045,
-        "name": "SPS Technology Notes"
-    },
-    {
-        "dbquery": "collections:\"SC_and_PS_Advisory_Committee\"",
-        "id": 1046,
-        "name": "SC and PS Advisory Committee"
+        "dbquery": "collections:\"PS_Coordination_Notes\"",
+        "id": 1034,
+        "name": "PS Coordination Notes"
     },
     {
         "dbquery": "subject:\"Accelerators and Storage Rings\" AND (process:\"Beam-Beam Effects\" OR process:\"Beam Optics\" OR process:\"Technology Transfer\" OR process:\"Knowledge Transfer\" OR process:\"Project Management\" OR process:\"Operations Management\" OR process:\"Design and Engineering Processes\" OR process:\"MAD-X\" OR process:\"Computer-Aided Design\" OR process:\"Computer-Aided Engineering\" OR process:\"Product Data Management\" OR process:\"Product Lifecycle Management\" OR process:\"Systems Engineering\" OR process:\"Maintenance Management\" OR process:\"Risk Management\" OR process:\"Quality Management\" OR process:\"Configuration Management\") AND 650172:SzGeCERN",
@@ -4501,10 +4486,6 @@
         "name": "OPEN Photos"
     },
     {
-        "id": 1043,
-        "name": "Technologies, Systems, Accelerator Physics and Processes"
-    },
-    {
         "dbquery": "subject:\"Accelerators and Storage Rings\" AND (accelerator:\"CNAO\" OR accelerator:\"INFN DAPHNE\" OR facility:ESS OR facility:FAIR OR accelerator:\"DESY HERA\" OR facility:ITER OR accelerator:MedAustron OR accelerator:\"BNL RHIC\" OR accelerator:SSC OR accelerator:SESAME OR accelerator:\"HEIDELBERG TSR\" OR accelerator:\"FNAL Tevatron\" OR accelerator:\"DESY XFEL\") AND 650172:SzGeCERN",
         "id": 1038,
         "name": "Accelerators and Facilities outside CERN"
@@ -4520,9 +4501,23 @@
         "name": "Technologies and Systems"
     },
     {
+        "id": 1043,
+        "name": "Technologies, Systems, Accelerator Physics and Processes"
+    },
+    {
         "dbquery": "keyword:opendays2013  and 690C_a:PHOTO and not collections:PRIV* and not 506:restricted",
         "id": 1044,
         "name": "Open Days 2013 Photos"
+    },
+    {
+        "dbquery": "collections:\"SPS_TECHNOLOGY_NOTES\"",
+        "id": 1045,
+        "name": "SPS Technology Notes"
+    },
+    {
+        "dbquery": "collections:\"SC_and_PS_Advisory_Committee\"",
+        "id": 1046,
+        "name": "SC and PS Advisory Committee"
     },
     {
         "dbquery": "internalnote:\"WWW History\"",
@@ -4545,18 +4540,9 @@
         "name": "Computing Source Code"
     },
     {
-        "id": 1057,
-        "name": "Information Technology Meetings"
-    },
-    {
         "dbquery": "collections:\"NOTEALICEPUBL\"",
         "id": 1051,
         "name": "ALICE Public Notes"
-    },
-    {
-        "dbquery": "collections:\"PHOTOBULL\"",
-        "id": 1054,
-        "name": "Bulletin Photos"
     },
     {
         "dbquery": "collections:\"PHOTOHSE\" OR collections:\"PHOTOFRS\" OR keyword:\"firebrigade\" -506__a:\"restricted\"",
@@ -4569,9 +4555,9 @@
         "name": "HSE Unit Photos"
     },
     {
-        "dbquery": "collections:CONTRIBUTIONSFROMINDICO AND collections:\"INDICO_IT-DEP\"",
-        "id": 1059,
-        "name": "Contributions to IT Meetings"
+        "dbquery": "collections:\"PHOTOBULL\"",
+        "id": 1054,
+        "name": "Bulletin Photos"
     },
     {
         "dbquery": "037__a:CERN-STUDENTS-Note*",
@@ -4579,9 +4565,18 @@
         "name": "CERN Students Projects"
     },
     {
+        "id": 1057,
+        "name": "Information Technology Meetings"
+    },
+    {
         "dbquery": "collections:EVENTSFROMINDICO AND collections:\"INDICO_IT-DEP\"",
         "id": 1058,
         "name": "Announcements of IT Meetings"
+    },
+    {
+        "dbquery": "collections:CONTRIBUTIONSFROMINDICO AND collections:\"INDICO_IT-DEP\"",
+        "id": 1059,
+        "name": "Contributions to IT Meetings"
     },
     {
         "dbquery": "year:2013 and (keyword:opendays2013 or subject:\"Open Days\") and not collections:PRIV* and not 506:restricted",
@@ -4589,14 +4584,14 @@
         "name": "Open Days 2013"
     },
     {
-        "dbquery": "year:2013 AND (collections:PUBLVIDEOMOVIE OR 300__a:\"streaming video\") AND (6531_a:opendays2013 or subject:\"Open Days\")",
-        "id": 1067,
-        "name": "Open Days 2013 Videos"
-    },
-    {
         "dbquery": "keyword:opendays2013  AND 595__a:\"Web Site images\" and not collections:PRIV*",
         "id": 1062,
         "name": "Open Days 2013 Web Site Images"
+    },
+    {
+        "dbquery": "reportnumber:\"CLICdp-Pub-*\" OR collections:\"CLIC-DP-Notes\" OR reportnumber:\"CLICdp-Conf-*\" OR (collections:THESIS AND 693__s:\"CLICdp\")",
+        "id": 1063,
+        "name": "CLIC Detector and Physics Study"
     },
     {
         "dbquery": "collections:\"CLIC-DP-Drafts\"",
@@ -4612,6 +4607,11 @@
         "dbquery": "collections:\"CLIC-DP-Internal-Notes\"",
         "id": 1066,
         "name": "CLIC Detector and Physics Study Internal Notes"
+    },
+    {
+        "dbquery": "year:2013 AND (collections:PUBLVIDEOMOVIE OR 300__a:\"streaming video\") AND (6531_a:opendays2013 or subject:\"Open Days\")",
+        "id": 1067,
+        "name": "Open Days 2013 Videos"
     },
     {
         "dbquery": "collections:BULLETINNEWS AND 6531_a:opendays2013",
@@ -4634,13 +4634,13 @@
         "name": "Open Days 2013 Stands"
     },
     {
+        "id": 1072,
+        "name": "Creative Commons Material from CERN"
+    },
+    {
         "dbquery": "collections:\"PHOTO*\" AND 540__a:'CC-BY'",
         "id": 1073,
         "name": "Creative Commons Images from CERN"
-    },
-    {
-        "id": 1072,
-        "name": "Creative Commons Material from CERN"
     },
     {
         "dbquery": "collections:POSTER and keyword:opendays2013",
@@ -4710,11 +4710,6 @@
         "name": "Restricted ATLAS Event Displays"
     },
     {
-        "dbquery": "595__z:CLAS1",
-        "id": 1091,
-        "name": "ATS CLASSIFIED LEVEL 1"
-    },
-    {
         "id": 1088,
         "name": "ATS Internals"
     },
@@ -4727,6 +4722,11 @@
         "dbquery": "595__z:UNCL",
         "id": 1090,
         "name": "ATS UNCLASSIFIED"
+    },
+    {
+        "dbquery": "595__z:CLAS1",
+        "id": 1091,
+        "name": "ATS CLASSIFIED LEVEL 1"
     },
     {
         "dbquery": "595__z:CLAS2",
@@ -4836,16 +4836,6 @@
         "name": "ENVISION"
     },
     {
-        "dbquery": "collections:CERN_BULLETIN_ISSUE",
-        "id": 1121,
-        "name": "CERN Bulletin Issues"
-    },
-    {
-        "dbquery": "collections:CERN_BULLETIN_ARTICLE",
-        "id": 1122,
-        "name": "CERN Bulletin Articles"
-    },
-    {
         "dbquery": "collections:\"PHOTORP\"",
         "id": 1114,
         "name": "Radiation Protection Training Images"
@@ -4873,6 +4863,16 @@
         "dbquery": "collections:RALPHOTO",
         "id": 1120,
         "name": "RAL Photos"
+    },
+    {
+        "dbquery": "collections:CERN_BULLETIN_ISSUE",
+        "id": 1121,
+        "name": "CERN Bulletin Issues"
+    },
+    {
+        "dbquery": "collections:CERN_BULLETIN_ARTICLE",
+        "id": 1122,
+        "name": "CERN Bulletin Articles"
     },
     {
         "dbquery": "collections:CERN_COURIER_ARTICLE",
@@ -4989,14 +4989,6 @@
         "name": "Legacy Content"
     },
     {
-        "id": 1151,
-        "name": "Journals & Reports"
-    },
-    {
-        "id": 1152,
-        "name": "Books & Journals"
-    },
-    {
         "dbquery": "collections:\"thesis\" NOT 690C_a:CERN\" NOT 035__9:\"ArXiv\"",
         "id": 1147,
         "name": "Non CERN Thesis"
@@ -5015,6 +5007,14 @@
         "dbquery": "collections:\"ARTICLE\" NOT 690C_a:\"CERN\"",
         "id": 1150,
         "name": "Non CERN Articles"
+    },
+    {
+        "id": 1151,
+        "name": "Journals & Reports"
+    },
+    {
+        "id": 1152,
+        "name": "Books & Journals"
     },
     {
         "id": 1153,
