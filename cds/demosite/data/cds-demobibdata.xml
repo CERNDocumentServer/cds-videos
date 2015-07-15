@@ -196,7 +196,7 @@
     <subfield code="w">200407</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1997-01-00</subfield>
+    <subfield code="a">1997-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-NOMAD-062</subfield>
@@ -1309,8 +1309,8 @@
     <subfield code="w">200623</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1978-00-00</subfield>
-    <subfield code="b">1995-00-00</subfield>
+    <subfield code="a">1978-01-01</subfield>
+    <subfield code="b">1995-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-EXHIBITION-01-147</subfield>
@@ -4828,7 +4828,7 @@
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">GP Files</subfield>
-    <subfield code="d">1986-01-00</subfield>
+    <subfield code="d">1986-01-01</subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -4846,7 +4846,7 @@
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
     <subfield code="a">1954-09-30</subfield>
-    <subfield code="b">1972-04-00</subfield>
+    <subfield code="b">1972-04-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-GP-78</subfield>
@@ -7164,8 +7164,6 @@
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Test for empty</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="b">1324</subfield>
   </datafield>
   <datafield tag="506" ind1=" " ind2=" ">
@@ -7216,13 +7214,13 @@
   <datafield tag="037" ind1=" " ind2=" ">
     <subfield code="a">KTT-PHO-MISC-2012-001</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Alvarez, Paul</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Feofilov, Grigory</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">CNAO, CNAO</subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
@@ -7528,7 +7526,7 @@
     <subfield code="w">200434</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1957-00-00</subfield>
+    <subfield code="a">1957-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-PLEC-007</subfield>
@@ -7605,7 +7603,7 @@
     <subfield code="a">CERN, Geneva</subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
-    <subfield code="d">2008-01-00</subfield>
+    <subfield code="d">2008-01-01</subfield>
     <subfield code="f">Charpak, G</subfield>
   </datafield>
   <datafield tag="720" ind1=" " ind2=" ">
@@ -7624,8 +7622,8 @@
     <subfield code="w">28</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1981-00-00</subfield>
-    <subfield code="b">1984-00-00</subfield>
+    <subfield code="a">1981-01-01</subfield>
+    <subfield code="b">1984-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-GC-02-007</subfield>
@@ -8893,7 +8891,7 @@
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">Council Secretariat</subfield>
-    <subfield code="d">1998-12-00</subfield>
+    <subfield code="d">1998-12-01</subfield>
     <subfield code="f">Beauseroy, B</subfield>
   </datafield>
   <datafield tag="340" ind1=" " ind2=" ">
@@ -24270,7 +24268,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
     <subfield code="a">PUBLIC</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1965-00-00</subfield>
+    <subfield code="a">1965-01-01</subfield>
     <subfield code="b">Present</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
@@ -24311,7 +24309,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">EP Division</subfield>
-    <subfield code="d">1992-11-00</subfield>
+    <subfield code="d">1992-11-01</subfield>
     <subfield code="f">Peyrou, Charles</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -25795,7 +25793,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">Accelerator Sector</subfield>
-    <subfield code="d">1996-03-00</subfield>
+    <subfield code="d">1996-03-01</subfield>
     <subfield code="f">Rufer, Charles E</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -25891,8 +25889,8 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
     <subfield code="w">200425</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1978-08-00</subfield>
-    <subfield code="b">1981-12-00</subfield>
+    <subfield code="a">1978-08-01</subfield>
+    <subfield code="b">1981-12-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-AFS-0006</subfield>
@@ -26615,7 +26613,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
     <subfield code="a">Restricted</subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
-    <subfield code="d">2000-11-00</subfield>
+    <subfield code="d">2000-11-01</subfield>
     <subfield code="f">Winter, Klaus</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -26887,8 +26885,8 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1973-00-00</subfield>
-    <subfield code="b">1983-00-00</subfield>
+    <subfield code="a">1973-01-01</subfield>
+    <subfield code="b">1983-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-MUSSET-61</subfield>
@@ -27091,7 +27089,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
     <subfield code="a">1986-09-08</subfield>
-    <subfield code="b">1988-00-00</subfield>
+    <subfield code="b">1988-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-CRC-55</subfield>
@@ -29029,7 +29027,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">DSU-MS Division</subfield>
-    <subfield code="d">2003-02-00</subfield>
+    <subfield code="d">2003-02-01</subfield>
     <subfield code="f">Molinari Stéphanie</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -29175,8 +29173,8 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
     <subfield code="w">201149</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1989-03-00</subfield>
-    <subfield code="b">1989-03-00</subfield>
+    <subfield code="a">1989-03-01</subfield>
+    <subfield code="b">1989-03-01</subfield>
   </datafield>
   <datafield tag="041" ind1=" " ind2=" ">
     <subfield code="a">eng</subfield>
@@ -29289,8 +29287,6 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
    </datafield>
    <datafield tag="245" ind1="" ind2="">
       <subfield code="k">email</subfield>
-   </datafield>
-   <datafield tag="245" ind1="" ind2="">
       <subfield code="a">PRAC</subfield>
    </datafield>
    <datafield tag="260" ind1="" ind2="">
@@ -30440,7 +30436,7 @@ http://www.bnl.gov/cad/accelerator/docs/pdf/RHICPPCMan.pdf
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">PS-ISOLDE Group</subfield>
-    <subfield code="d">1993-04-00</subfield>
+    <subfield code="d">1993-04-01</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
     <subfield code="a">1.15.04</subfield>
@@ -33027,7 +33023,7 @@ Documentation available at
     <subfield code="a">Permanent</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1959-00-00</subfield>
+    <subfield code="a">1959-01-01</subfield>
     <subfield code="b">Present</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
@@ -33609,7 +33605,7 @@ Documentation available at
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">NPA</subfield>
-    <subfield code="d">1992-07-00</subfield>
+    <subfield code="d">1992-07-01</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
     <subfield code="a">1.16.06</subfield>
@@ -33907,7 +33903,7 @@ Documentation available at
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">WOL Files</subfield>
-    <subfield code="d">1987-07-00</subfield>
+    <subfield code="d">1987-07-01</subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -34392,8 +34388,6 @@ Documentation available at
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Casques d'ecoutes 60-6-002</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="k">email</subfield>
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
@@ -36897,7 +36891,7 @@ Documentation available at
     <subfield code="a">Permanent</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1955-00-00</subfield>
+    <subfield code="a">1955-01-01</subfield>
     <subfield code="b">Present</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
@@ -36982,7 +36976,7 @@ Documentation available at
     <subfield code="a">Permanent</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1953-00-00</subfield>
+    <subfield code="a">1953-01-01</subfield>
     <subfield code="b">date</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
@@ -39527,8 +39521,8 @@ Documentation available at
     <subfield code="w">201001</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1998-12-00</subfield>
-    <subfield code="b">2003-12-00</subfield>
+    <subfield code="a">1998-12-01</subfield>
+    <subfield code="b">2003-12-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-CNL-04</subfield>
@@ -41645,8 +41639,8 @@ Documentation available at
     <subfield code="w">200033</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1993-01-00</subfield>
-    <subfield code="b">1993-12-00</subfield>
+    <subfield code="a">1993-01-01</subfield>
+    <subfield code="b">1993-12-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-DG-CR-4-257</subfield>
@@ -42611,7 +42605,7 @@ Documentation available at
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1990-00-00</subfield>
+    <subfield code="a">1990-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-MT-005</subfield>
@@ -43475,16 +43469,16 @@ Documentation available at
     <subfield code="s">n</subfield>
     <subfield code="w">201125</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Fiorini, M</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Nuessle, G</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Kluge, A</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Marchetto, F</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
@@ -43519,7 +43513,7 @@ Documentation available at
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">YGC Files</subfield>
-    <subfield code="d">1988-11-00</subfield>
+    <subfield code="d">1988-11-01</subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -43536,8 +43530,8 @@ Documentation available at
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1974-00-00</subfield>
-    <subfield code="b">1981-00-00</subfield>
+    <subfield code="a">1974-01-01</subfield>
+    <subfield code="b">1981-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-YGC-099</subfield>
@@ -48339,7 +48333,7 @@ Documentation available at
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">DG files</subfield>
-    <subfield code="d">1984-01-00</subfield>
+    <subfield code="d">1984-01-01</subfield>
     <subfield code="f">Schmal, Helga</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -48359,8 +48353,8 @@ Documentation available at
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1971-01-00</subfield>
-    <subfield code="b">1975-12-00</subfield>
+    <subfield code="a">1971-01-01</subfield>
+    <subfield code="b">1975-12-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-DG-FILES-580</subfield>
@@ -49393,7 +49387,7 @@ Documentation available at
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1975-00-00</subfield>
+    <subfield code="a">1975-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-BWP-44</subfield>
@@ -50738,7 +50732,7 @@ Documentation available at
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">GU Files</subfield>
-    <subfield code="d">1988-12-00</subfield>
+    <subfield code="d">1988-12-01</subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -50755,8 +50749,8 @@ Documentation available at
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1979-10-00</subfield>
-    <subfield code="b">1979-12-00</subfield>
+    <subfield code="a">1979-10-01</subfield>
+    <subfield code="b">1979-12-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-GU-215</subfield>
@@ -50994,8 +50988,8 @@ Documentation available at
     <subfield code="w">200508</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1950-00-00</subfield>
-    <subfield code="b">1987-00-00</subfield>
+    <subfield code="a">1950-01-01</subfield>
+    <subfield code="b">1987-01-01</subfield>
   </datafield>
   <datafield tag="041" ind1=" " ind2=" ">
     <subfield code="a">fre</subfield>
@@ -51445,8 +51439,6 @@ Documentation available at
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Angel Monera's work on the RF_Rx and RF_Tx modules for the TTC transmission</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="k">presentation</subfield>
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
@@ -54694,19 +54686,19 @@ Documentation available at
   <datafield tag="037" ind1=" " ind2=" ">
     <subfield code="a">CMS-PHO-GEN-2012-004</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Hoch, M</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Lapka, M</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Collaboration, CMS</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Taylor, L</subfield>
   </datafield>
-  <datafield tag="100" ind1=" " ind2=" ">
+  <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">McCauley, T</subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
@@ -57386,7 +57378,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">CHS-Files, Special Collection</subfield>
-    <subfield code="d">1984-02-00</subfield>
+    <subfield code="d">1984-02-01</subfield>
     <subfield code="f">Archives de France</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -57427,8 +57419,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1950-10-00</subfield>
-    <subfield code="b">1950-10-00</subfield>
+    <subfield code="a">1950-10-01</subfield>
+    <subfield code="b">1950-10-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-CHS-10-2</subfield>
@@ -57925,8 +57917,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">201209</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1958-00-00</subfield>
-    <subfield code="b">1965-00-00</subfield>
+    <subfield code="a">1958-01-01</subfield>
+    <subfield code="b">1965-01-01</subfield>
   </datafield>
   <datafield tag="041" ind1=" " ind2=" ">
     <subfield code="a">eng</subfield>
@@ -57999,8 +57991,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">201130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1955-00-00</subfield>
-    <subfield code="b">1956-00-00</subfield>
+    <subfield code="a">1955-01-01</subfield>
+    <subfield code="b">1956-01-01</subfield>
   </datafield>
   <datafield tag="041" ind1=" " ind2=" ">
     <subfield code="a">eng</subfield>
@@ -59027,8 +59019,6 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">PH-ESS Annual Report 2005</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="k">report</subfield>
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
@@ -59897,8 +59887,6 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Service IT</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="b">666</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -60176,8 +60164,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: Hans W. Isch</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1969-00-00</subfield>
-    <subfield code="b">1989-00-00</subfield>
+    <subfield code="a">1969-01-01</subfield>
+    <subfield code="b">1989-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -60592,8 +60580,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: High Energy Analysis group, HERA</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1969-00-00</subfield>
-    <subfield code="b">1989-00-00</subfield>
+    <subfield code="a">1969-01-01</subfield>
+    <subfield code="b">1989-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -60736,7 +60724,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">DSU</subfield>
-    <subfield code="d">1999-08-00</subfield>
+    <subfield code="d">1999-08-01</subfield>
     <subfield code="f">Buhlmann, Elisabeth</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -60908,7 +60896,7 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: Experiment at CERN</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1975-00-00</subfield>
+    <subfield code="a">1975-01-01</subfield>
     <subfield code="b">date</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
@@ -60967,8 +60955,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: CERN Annual Accounts</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1955-00-00</subfield>
-    <subfield code="b">1994-00-00</subfield>
+    <subfield code="a">1955-01-01</subfield>
+    <subfield code="b">1994-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -61702,8 +61690,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1979-00-00</subfield>
-    <subfield code="b">1988-00-00</subfield>
+    <subfield code="a">1979-01-01</subfield>
+    <subfield code="b">1988-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -62050,8 +62038,6 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Extension of the nomination of Dr Andreani as EFDA Associate Leader for Technology until 31 December 2004.</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="k">memo</subfield>
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
@@ -62212,8 +62198,6 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="a">Notes for RA from JE for information</subfield>
-  </datafield>
-  <datafield tag="245" ind1=" " ind2=" ">
     <subfield code="k">note</subfield>
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
@@ -62760,7 +62744,7 @@ From: Document 6233-v2  </subfield>
     <subfield code="a">Restricted</subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
-    <subfield code="d">1991-06-00</subfield>
+    <subfield code="d">1991-06-01</subfield>
     <subfield code="f">Montanet, L</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -63370,8 +63354,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: ISR Discussion meetings</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1972-00-00</subfield>
-    <subfield code="b">1974-00-00</subfield>
+    <subfield code="a">1972-01-01</subfield>
+    <subfield code="b">1974-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -63564,8 +63548,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1972-00-00</subfield>
-    <subfield code="b">1975-00-00</subfield>
+    <subfield code="a">1972-01-01</subfield>
+    <subfield code="b">1975-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-ERASME</subfield>
@@ -63623,8 +63607,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: Library Committee</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1981-00-00</subfield>
-    <subfield code="b">1983-00-00</subfield>
+    <subfield code="a">1981-01-01</subfield>
+    <subfield code="b">1983-01-01</subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -63657,7 +63641,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">NP Division</subfield>
-    <subfield code="d">1992-09-00</subfield>
+    <subfield code="d">1992-09-01</subfield>
     <subfield code="f">Emilio Picasso</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -63677,8 +63661,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200425</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1965-00-00</subfield>
-    <subfield code="b">1971-00-00</subfield>
+    <subfield code="a">1965-01-01</subfield>
+    <subfield code="b">1971-01-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-MUONg-2-12</subfield>
@@ -64102,8 +64086,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1977-00-00</subfield>
-    <subfield code="b">1994-00-00</subfield>
+    <subfield code="a">1977-01-01/subfield>
+    <subfield code="b">1994-01-01/subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -64829,8 +64813,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: Emulsion Experiments Committee, EmC</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1963-00-00</subfield>
-    <subfield code="b">1966-00-00</subfield>
+    <subfield code="a">1963-01-01/subfield>
+    <subfield code="b">1966-01-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-EMC-02</subfield>
@@ -64949,8 +64933,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1979-00-00</subfield>
-    <subfield code="b">1981-00-00</subfield>
+    <subfield code="a">1979-01-01/subfield>
+    <subfield code="b">1981-01-01/subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -65004,8 +64988,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: Robert Lévy-Mandel</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1967-00-00</subfield>
-    <subfield code="b">1983-00-00</subfield>
+    <subfield code="a">1967-01-01/subfield>
+    <subfield code="b">1983-01-01/subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -65108,8 +65092,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1974-00-00</subfield>
-    <subfield code="b">1985-00-00</subfield>
+    <subfield code="a">1974-01-01/subfield>
+    <subfield code="b">1985-01-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-PCT</subfield>
@@ -65164,7 +65148,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">MGNH Files</subfield>
-    <subfield code="d">1985-01-00</subfield>
+    <subfield code="d">1985-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -66844,7 +66828,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">KHR Files</subfield>
-    <subfield code="d">1985-00-00</subfield>
+    <subfield code="d">1985-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -67431,7 +67415,7 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200130</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1987-00-00</subfield>
+    <subfield code="a">1987-01-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-LEP-EXP</subfield>
@@ -67855,7 +67839,7 @@ From: Document 6233-v2  </subfield>
     <subfield code="a">Notes (logbook) about CERN's Ferranti Mercury computer</subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
-    <subfield code="d">2007-07-00</subfield>
+    <subfield code="d">2007-07-01/subfield>
     <subfield code="f">Kölbig, Siegfried</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -68552,9 +68536,6 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="110" ind1=" " ind2=" ">
     <subfield code="a">Members of the EMI collaboration</subfield>
-  </datafield>
-  <datafield tag="110" ind1=" " ind2=" ">
-    <subfield code="a">Members of EMI collaboration</subfield>
   </datafield>
   <datafield tag="690" ind1="C" ind2=" ">
     <subfield code="a">EMI</subfield>
@@ -69510,8 +69491,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="v">Collection: PS and MPS Divisions</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1974-00-00</subfield>
-    <subfield code="b">1993-00-00</subfield>
+    <subfield code="a">1974-01-01/subfield>
+    <subfield code="b">1993-01-01/subfield>
   </datafield>
   <datafield tag="500" ind1=" " ind2=" ">
     <subfield code="a">This is a temporary description, the material is not fully catalogued</subfield>
@@ -69823,7 +69804,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">DGR Files</subfield>
-    <subfield code="d">1988-07-00</subfield>
+    <subfield code="d">1988-07-01/subfield>
     <subfield code="f">Schmal, Helga</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -70250,7 +70231,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">TH Files</subfield>
-    <subfield code="d">1986-01-00</subfield>
+    <subfield code="d">1986-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -73064,7 +73045,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">SC Files</subfield>
-    <subfield code="d">1984-00-00</subfield>
+    <subfield code="d">1984-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -73081,8 +73062,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1955-06-00</subfield>
-    <subfield code="b">1958-06-00</subfield>
+    <subfield code="a">1955-06-01/subfield>
+    <subfield code="b">1958-06-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-SC-033</subfield>
@@ -73298,7 +73279,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">NP Files</subfield>
-    <subfield code="d">1984-00-00</subfield>
+    <subfield code="d">1984-11-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -73315,8 +73296,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1962-01-00</subfield>
-    <subfield code="b">1963-02-00</subfield>
+    <subfield code="a">1962-01-01/subfield>
+    <subfield code="b">1963-02-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-NP-075</subfield>
@@ -74793,7 +74774,7 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200434</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1977-00-00</subfield>
+    <subfield code="a">1977-01-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-POC-076</subfield>
@@ -75940,7 +75921,7 @@ From: Document 6233-v2  </subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">PPE</subfield>
-    <subfield code="d">1995-12-00</subfield>
+    <subfield code="d">1995-12-01/subfield>
     <subfield code="f">Winter, Klaus</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -76035,8 +76016,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200805</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1991-00-00</subfield>
-    <subfield code="b">1991-00-00</subfield>
+    <subfield code="a">1991-01-01/subfield>
+    <subfield code="b">1991-01-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-PER-LISTS-005</subfield>
@@ -76248,8 +76229,8 @@ From: Document 6233-v2  </subfield>
     <subfield code="w">200540</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1964-00-00</subfield>
-    <subfield code="b">1986-00-00</subfield>
+    <subfield code="a">1964-01-01/subfield>
+    <subfield code="b">1986-01-01/subfield>
   </datafield>
   <datafield tag="041" ind1=" " ind2=" ">
     <subfield code="a">eng</subfield>
@@ -78256,7 +78237,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">DELPHI Collaboration</subfield>
-    <subfield code="d">2001-06-00</subfield>
+    <subfield code="d">2001-06-01/subfield>
     <subfield code="f">Amaldi, Ugo</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -78379,7 +78360,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
     <subfield code="a">Permanent</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1984-10-00</subfield>
+    <subfield code="a">1984-10-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-ESRP-3</subfield>
@@ -78415,7 +78396,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
     <subfield code="a">000034135ARC</subfield>
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
-    <subfield code="d">2000-11-00</subfield>
+    <subfield code="d">2000-11-01/subfield>
     <subfield code="f">Steinberger, Jack</subfield>
   </datafield>
   <datafield tag="340" ind1=" " ind2=" ">
@@ -78574,7 +78555,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">EWDS Files</subfield>
-    <subfield code="d">1986-00-00</subfield>
+    <subfield code="d">1986-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -79139,7 +79120,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">CHIP-Files, Special Collection, received from Mussard J A</subfield>
-    <subfield code="d">1990-00-00</subfield>
+    <subfield code="d">1990-01-01/subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -79159,8 +79140,8 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
     <subfield code="w">200842</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1952-11-00</subfield>
-    <subfield code="b">1953-07-00</subfield>
+    <subfield code="a">1952-11-01/subfield>
+    <subfield code="b">1953-07-01/subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CHIP-36</subfield>
@@ -79950,7 +79931,7 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
   </datafield>
   <datafield tag="541" ind1=" " ind2=" ">
     <subfield code="a">LK Files</subfield>
-    <subfield code="d">1982-01-00</subfield>
+    <subfield code="d">1982-01-01</subfield>
     <subfield code="f">CERN Archive</subfield>
   </datafield>
   <datafield tag="595" ind1=" " ind2=" ">
@@ -79967,8 +79948,8 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
     <subfield code="w">200319</subfield>
   </datafield>
   <datafield tag="925" ind1=" " ind2=" ">
-    <subfield code="a">1964-11-00</subfield>
-    <subfield code="b">1975-09-00</subfield>
+    <subfield code="a">1964-11-01</subfield>
+    <subfield code="b">1975-09-01</subfield>
   </datafield>
   <datafield tag="927" ind1=" " ind2=" ">
     <subfield code="a">CERN-ARCH-LK-137</subfield>
