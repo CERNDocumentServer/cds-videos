@@ -49,3 +49,6 @@ docs/_build/
 **/static/vendors
 **/static/gen
 bower.json
+
+# Redis database
+dump.rdb
