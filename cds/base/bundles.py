@@ -28,22 +28,13 @@ _styles.contents += ("less/cds.less",)
 
 
 js = Bundle(
+    "js/cds-settings.js",
     "js/app.js",
     "js/main.js",
     output="cds.js",
     weight=91,
     filters="requirejs",
     bower={
-        "backbone": "latest",
-        "backbone.localstorage": "latest",
-        "react": "0.11.2",
-        "jsx-requirejs-plugin": "0.4",
-        "requirejs-plugins": "latest",
         "es5-shim": "latest"
-    },
-    depends=[
-        "js/app.js",
-        "js/main.js",
-        "js/prototype/**/*.js"
-    ]
+    }
 )
