@@ -37,7 +37,7 @@ point specified in the setup.py::
 from __future__ import unicode_literals
 
 from invenio.base.config import PACKAGES as _PACKAGES
-
+from invenio.base.config import PACKAGES_EXCLUDE as _PACKAGES_EXCLUDE
 
 PACKAGES = [
     "cds.base",
@@ -49,11 +49,10 @@ PACKAGES_EXCLUDE = [
     "invenio.modules.annotations",
     "invenio.modules.communities",
     "invenio.modules.pages",
-]
+] + _PACKAGES_EXCLUDE
 
 EXTENSIONS = [
     'invenio.ext.confighacks',
-    'invenio.ext.jinja2hacks',
     'invenio.ext.passlib:Passlib',
     'invenio.ext.debug_toolbar',
     'invenio.ext.babel',
@@ -81,6 +80,7 @@ EXTENSIONS = [
     'invenio.ext.jasmine',  # after assets
     'flask.ext.breadcrumbs:Breadcrumbs',
     'invenio.modules.deposit.url_converters',
+    'invenio.ext.es',
 ]
 
 
