@@ -47,11 +47,6 @@ class CollectionFieldFieldvalueMixer(meta(MixerMeta)):
     __model__ = CollectionFieldFieldvalue
 
 
-# TODO:
-# class CollectionFormatMixer(meta(MixerMeta)):
-#     __model__ = CollectionFormat
-
-
 class CollectionnameMixer(meta(MixerMeta)):
     __model__ = Collectionname
 
