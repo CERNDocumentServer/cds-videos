@@ -1,3 +1,22 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+
 {% macro get_author(author, is_link=false) %}
     {% if is_link %}
       <a href="http://cds.cern.ch/search?f=author&p={{ author.full_name }}&ln=en">
@@ -19,7 +38,7 @@
 {% endmacro %}
 
 
-{% macro get_see_more_list(items_list, limit, title, delimiter=";") %}
+{% macro get_see_more_list(items_list, limit, title, delimiter=";", page_size=20) %}
     {% if limit > items_list|length %}
         {% for item in items_list %}
             {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
@@ -29,19 +48,24 @@
             {{ item }}{{ delimiter }}
         {% endfor %}
 
-        <a data-show-more data-title="{{ title }}" data-close-button="{{ _("Close") }}" data-items='{{ items_list|tojson }}'>{{ _("See all...") }}</a>
+        <a data-show-more data-title="{{ title }}"
+           data-close-button="{{ _("Close") }}"
+           data-items='{{ items_list|tojson }}'
+           data-page-size="{{ page_size }}">
+            {{ _("See all...") }}
+        </a>
 
     {% endif %}
 {% endmacro %}
 
 
-{% macro get_authors(record, limit, delimiter=";", is_link=false) %}
+{% macro get_authors(record, limit, delimiter=";", is_link=false, page_size=10) %}
     {% set authors_list = [] %}
     {% for author in record.authors %}
         {% do authors_list.append(get_author(author, is_link)) %}
     {% endfor %}
 
-    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter) }}
+    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter, page_size) }}
 
 {% endmacro %}
 
@@ -76,13 +100,13 @@
 {% endmacro %}
 
 
-{% macro get_keywords(record, limit, delimiter=";") %}
+{% macro get_keywords(record, limit, delimiter=";", page_size=10) %}
     {% set keyword_list = [] %}
     {% for keyword in record.keywords %}
         {% do keyword_list.append(keyword.term) %}
     {% endfor %}
 
-    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter) }}
+    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter, page_size) }}
 
 {% endmacro %}
 

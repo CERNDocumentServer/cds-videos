@@ -37,11 +37,11 @@
             {% endif %}
 
             <dt class="record_key"><i class="glyphicon glyphicon-user"></i> {{ _("Authors") }}:</dt>
-            <dd>{{ macros.get_authors(record, is_link=true, limit=3) }}</dd>
+            <dd>{{ macros.get_authors(record, is_link=true, limit=3, page_size=5) }}</dd>
 
             {% if record.keywords %}
                 <dt class="record_key"><i class="glyphicon glyphicon-comment"></i> {{ _("Keywords") }}:</dt>
-	            <dd>{{ macros.get_keywords(record, 3) }}</dd>
+	            <dd>{{ macros.get_keywords(record, limit=3, page_size=5) }}</dd>
             {% endif %}
 
 	        {% if record.subject %}
