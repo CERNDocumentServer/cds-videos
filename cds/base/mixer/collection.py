@@ -20,10 +20,13 @@
 from six import with_metaclass as meta
 
 from invenio.ext.mixer import MixerMeta
-from invenio.modules.collections.models import Collection, CollectionCollection, \
-    CollectionFieldFieldvalue, CollectionFormat, \
-    Collectionboxname, Collectiondetailedrecordpagetabs, Collectionname, \
-    Externalcollection, FacetCollection
+from invenio.modules.collections.models import (
+    Collection,
+    CollectionCollection,
+    Collectiondetailedrecordpagetabs,
+    Collectionname,
+    Externalcollection
+)
 
 
 class ExternalcollectionMixer(meta(MixerMeta)):
@@ -43,27 +46,14 @@ class CollectionCollectionMixer(meta(MixerMeta)):
     __model__ = CollectionCollection
 
 
-class CollectionFieldFieldvalueMixer(meta(MixerMeta)):
-    __model__ = CollectionFieldFieldvalue
-
-
 class CollectionnameMixer(meta(MixerMeta)):
     __model__ = Collectionname
 
-
-class CollectionboxnameMixer(meta(MixerMeta)):
-    __model__ = Collectionboxname
-
-
-class FacetCollectionMixer(meta(MixerMeta)):
-    __model__ = FacetCollection
 
 
 __all__ = ('ExternalcollectionMixer',
            'CollectiondetailedrecordpagetabsMixer',
            'CollectionMixer',
            'CollectionCollectionMixer',
-           'CollectionFieldFieldvalueMixer',
            'CollectionnameMixer',
-           'CollectionboxnameMixer',
-           'FacetCollectionMixer', )
+           )
