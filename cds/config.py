@@ -100,6 +100,9 @@ CFG_SITE_MISSION_INTL = {
 
 CFG_SITE_LANGS = ["en", "fr", "de", "it"]
 
+DEPOSIT_TYPES = [
+    'cds.modules.deposit.workflows.talk.talk',
+]
 
 try:
     from cds.instance_config import *  # noqa
