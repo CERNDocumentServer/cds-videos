@@ -22,7 +22,7 @@ define(function(require, exports, module) {
     bootstrap = require('bootstrap'),
     tpl_list_modal = require('hgn!./templates/modal_list');
 
-  $("a[data-show-more]").on('click', function() {
+  $("body").on("click", "a[data-show-more]", function() {
 
     // get json from data-items attribute
     var raw_data_items = $(this).data('items');
