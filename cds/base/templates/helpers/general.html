@@ -19,7 +19,7 @@
 
 {% macro get_author(author, is_link=false) %}
     {% if is_link %}
-      <a href="http://cds.cern.ch/search?f=author&p={{ author.full_name }}&ln=en">
+      <a href="{{ url_for("search.search", f='author', p=author.full_name) }}">
     {% else %}
       <span>
     {% endif %}

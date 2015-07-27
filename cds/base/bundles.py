@@ -41,9 +41,5 @@ js = Bundle(
         "depot": "~0.1.6",
         "lodash": "~3.9.3",
         "sortable.js": "~1.2.0",
-    },
-    depends=[
-        'js/cds-settings.js',
-        'js/main.js'
-    ]
+    }
 )

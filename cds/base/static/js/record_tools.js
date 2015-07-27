@@ -58,19 +58,20 @@ define(function(require, exports, module) {
 
       listElement
         .children().css('display', 'none')
-        .slice(0, page_size).css('display','list-item');
+        .slice(0, page_size).css('display', 'list-item');
 
       $('#cds-modal-expand-btn').on('click', function() {
         if (last_index + page_size >= data_items.length) {
           last_index = data_items.length;
           $('#cds-modal-expand-btn').attr('disabled', true);
         }
-        else
+        else {
           last_index = last_index + page_size;
+        }
 
         listElement
           .children().css('display', 'none')
-          .slice(0, last_index).css('display','list-item');
+          .slice(0, last_index).css('display', 'list-item');
 
       });
 
