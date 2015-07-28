@@ -24,6 +24,17 @@ from dojson import utils
 from ..model import cds_marc21
 
 
+@cds_marc21.over('french_summary_note', '^590__')
+@utils.for_each_value
+@utils.filter_values
+def french_summary_note(self, key, value):
+    """French summary note"""
+    return {
+        'smuary': value.get('a'),
+        'expansion_of_summary_note': value.get('b')
+    }
+
+
 @cds_marc21.over('field_591', '^591__')
 @utils.for_each_value
 @utils.filter_values

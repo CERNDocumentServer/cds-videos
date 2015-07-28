@@ -24,6 +24,21 @@ from dojson import utils
 from ..model import cds_marc21
 
 
+@cds_marc21.over('status_week', '^916__')
+@utils.for_each_value
+@utils.filter_values
+def status_week(self, key, value):
+    """Status week."""
+    return {
+        'acquisition_of_proceedings_code': value.get('a'),
+        'display_period_for_books': value.get('d'),
+        'number_of_copies_bought_by_cern': value.get('e'),
+        'status_of_record': value.get('s'),
+        'status_week': value.get('w'),
+        'year_for_annual_list': value.get('y'),
+    }
+
+
 @cds_marc21.over('dates', '^925__')
 @utils.for_each_value
 @utils.filter_values
@@ -57,6 +72,21 @@ def peri_internal_note(self, key, value):
         'internal_note': value.get('a'),
         'modification_date': value.get('c'),
         'responsible_of_the_modification': value.get('s'),
+    }
+
+
+@cds_marc21.over('cat', '^961__')
+@utils.for_each_value
+@utils.filter_values
+def cat(self, key, value):
+    """CAT."""
+    return {
+        'cataloger': value.get('a'),
+        'cataloger_level': value.get('b'),
+        'modification_date': value.get('c'),
+        'library': value.get('l'),
+        'hour': value.get('h'),
+        'creation_date': value.get('x'),
     }
 
 

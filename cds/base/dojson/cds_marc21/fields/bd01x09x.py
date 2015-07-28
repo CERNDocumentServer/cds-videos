@@ -23,6 +23,14 @@ from dojson import utils
 
 from ..model import cds_marc21
 
+
+@marc21.over('international_standard_number', '^021..')
+@utils.for_each_value
+def international_standard_number(self, key, value):
+    """Report Number."""
+    return value.get('a')
+
+
 @cds_marc21.over('system_control_number', '^035..')
 @utils.for_each_value
 @utils.filter_values
@@ -38,4 +46,22 @@ def system_control_number(self, key, value):
         ),
         'linkage': value.get('6'),
         'inst': value.get('9'),
+    }
+
+
+@marc21.over('report_number', '^088..')
+@utils.for_each_value
+@utils.filter_values
+def report_number(self, key, value):
+    """Report Number."""
+    return {
+        'report_number': value.get('a'),
+        'field_link_and_sequence_number': utils.force_list(
+            value.get('8')
+        ),
+        'canceled_invalid_report_number': utils.force_list(
+            value.get('z')
+        ),
+        'linkage': value.get('6'),
+        '_report_number': value.get('9'), # not displayed but searchable
     }
