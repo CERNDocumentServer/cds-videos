@@ -17,7 +17,7 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS special/custom tags"""
+"""CDS special/custom tags."""
 
 from dojson import utils
 
@@ -53,8 +53,9 @@ def dates(self, key, value):
 @cds_marc21.over('file_number', '^927__')
 @utils.for_each_value
 def file_number(self, key, value):
-    """File Number"""
+    """File Number."""
     return value.get('a')
+
 
 @cds_marc21.over('base', '^960__')
 @utils.for_each_value
@@ -67,7 +68,7 @@ def base(self, key, value):
 @utils.for_each_value
 @utils.filter_values
 def peri_internal_note(self, key, value):
-    """Peri: internal note"""
+    """Peri: internal note."""
     return {
         'internal_note': value.get('a'),
         'modification_date': value.get('c'),

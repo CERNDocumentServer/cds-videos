@@ -20,6 +20,7 @@
 from dojson.overdo import Overdo
 from dojson.contrib.marc21 import marc21
 
+
 class CDSMarc21(Overdo):
 
     """Translation Index for CDS specific MARC21."""
@@ -31,6 +32,27 @@ class CDSMarc21(Overdo):
         """
         super(CDSMarc21, self).__init__()
         self.rules.extend(marc21.rules)
+
+    def over(self, name, *source_tags, **kwargs):
+        """Register creator rule.
+
+        :param kwargs:
+            * override: boolean, overrides the rule if either the `name` or the
+              regular expression in `source_tags` are equal to the current
+              ones.
+        """
+        def override(rule):
+            if name == rule[1][0]:
+                return True
+            for field in source_tags:
+                if field == rule[0]:
+                    return True
+            return False
+
+        if kwargs.get('override', False):
+            self.rules[:] = [rule for rule in self.rules if not override(rule)]
+
+        return super(CDSMarc21, self).over(name, *source_tags)
 
 
 cds_marc21 = CDSMarc21()
