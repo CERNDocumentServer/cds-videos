@@ -19,7 +19,12 @@
 
 
 from .fields import (
+    bd01x09x,
+    bd2xx,
+    bd5xx,
     bd69x,
+    bd7xx,
+    bd9xx,
 )
 from .model import cds_marc21
 

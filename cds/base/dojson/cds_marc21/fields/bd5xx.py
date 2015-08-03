@@ -17,7 +17,7 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS special/custom tags"""
+"""CDS special/custom tags."""
 
 from dojson import utils
 
@@ -28,7 +28,7 @@ from ..model import cds_marc21
 @utils.for_each_value
 @utils.filter_values
 def french_summary_note(self, key, value):
-    """French summary note"""
+    """French summary note."""
     return {
         'smuary': value.get('a'),
         'expansion_of_summary_note': value.get('b')
@@ -39,17 +39,18 @@ def french_summary_note(self, key, value):
 @utils.for_each_value
 @utils.filter_values
 def field_591(self, key, value):
-    """Type of Document"""
+    """Type of Document."""
     return {
         'subfield_a': value.get('a'),
         'subfield_b': value.get('b')
     }
 
+
 @cds_marc21.over('type_of_document', '^594__')
 @utils.for_each_value
 def type_of_document(self, key, value):
-    """Type of Document"""
-    return 'type_of_document': value.get('a')
+    """Type of Document."""
+    return value.get('a')
 
 
 @cds_marc21.over('internal_note', '^595__')

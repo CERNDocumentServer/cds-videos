@@ -17,13 +17,14 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS special/custom tags"""
+"""CDS special/custom tags."""
 
 from dojson import utils
 
 from ..model import cds_marc21
 
-@marc21.over('added_entry_corporate_name', '^710[10_2][_2]')
+
+@cds_marc21.over('added_entry_corporate_name', '^710[10_2][_2]', override=True)
 @utils.for_each_value
 @utils.filter_values
 def added_entry_corporate_name(self, key, value):
