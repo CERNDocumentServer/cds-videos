@@ -20,10 +20,10 @@
 """Album MARC 21 field definitions."""
 from dojson import utils
 
-from model import album_marc21, album_tomarc21
+from model import album_to_json, album_to_marc21
 
 
-@album_marc21.over('photos', '^774..')
+@album_to_json.over('photos', '^774..')
 @utils.for_each_value
 @utils.filter_values
 def photos(self, key, value):
@@ -35,21 +35,7 @@ def photos(self, key, value):
     }  # TODO
 
 
-@album_marc21.over('dump_cat', '^961..')
-@utils.filter_values
-def cat(self, key, value):
-    """Dump cat"""
-    return {
-        'cataloguer': value.get('a'),
-        'cataloguer_level': value.get('b'),
-        'modification_date': value.get('c'),
-        'library': value.get('l'),
-        'hour': value.get('h'),
-        'creation_date': value.get('x')
-    }
-
-
-@album_tomarc21.over('^774..', 'photos')
+@album_to_marc21.over('^774..', 'photos')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_photos(self, key, value):
@@ -58,18 +44,4 @@ def reverse_photos(self, key, value):
         'r': value.get('$ref').split('/')[-1],
         'a': value.get('record_type'),
         'n': value.get('cover')
-    }
-
-
-@album_tomarc21.over('^961..', 'dump_cat')
-@utils.filter_values
-def reverse_cat(self, key, value):
-    """Reverse - Dump cat"""
-    return {
-        'a': value.get('cataloguer'),
-        'b': value.get('cataloguer_level'),
-        'c': value.get('modification_date'),
-        'l': value.get('library'),
-        'h': value.get('hour'),
-        'x': value.get('creation_date'),
     }

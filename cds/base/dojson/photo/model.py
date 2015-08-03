@@ -18,53 +18,21 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Photo MARC 21 model definition."""
-from dojson.overdo import Overdo
-from dojson.contrib.marc21 import marc21 as generic_marc21
-from dojson.contrib.marc21 import tomarc21 as generic_tomarc21
+from cds.base.dojson.cds_marc21 import to_cds_json, to_cds_marc21
+from cds.base.dojson.cds_marc21.model import ToCDSMarc21, ToCDSJson
 
 
-class CDSPhotoMarc21(Overdo):
-    overwrite_rules = [
-        '^856.[10_28]',
-        'constituent_unit_entry'
-    ]
-
+class PhotoToMarc21(ToCDSMarc21):
     def __init__(self):
-        super(CDSPhotoMarc21, self).__init__()
-        self.rules.extend(self.filter_unecessary_rules(generic_marc21.rules, self.overwrite_rules))
-
-    @staticmethod
-    def filter_unecessary_rules(rules, overwrite_rules):
-        """Filters out rules definied in overwrite_rules
-
-        Function returns the rules list from parameter with
-        overwrite_rules removed - overwrite_rules is the list
-        of regexps or field names
-        """
-        return [rule for rule in rules if rule[0] not in overwrite_rules and rule[1][0] not in overwrite_rules]
+        super(PhotoToMarc21, self).__init__()
+        self.rules.extend(to_cds_marc21.rules)
 
 
-
-class CDSPhotoToMarc21(Overdo):
-    overwrite_rules = [
-        '^856.[10_28]',
-        'constituent_unit_entry'
-    ]
-
+class PhotoToJson(ToCDSJson):
     def __init__(self):
-        super(CDSPhotoToMarc21, self).__init__()
-        self.rules.extend(self.filter_unecessary_rules(generic_tomarc21.rules, self.overwrite_rules))
-
-    @staticmethod
-    def filter_unecessary_rules(rules, overwrite_rules):
-        """Filters out rules definied in overwrite_rules
-
-        Function returns the rules list from parameter with
-        overwrite_rules removed - overwrite_rules is the list
-        of regexps or field names
-        """
-        return [rule for rule in rules if rule[0] not in overwrite_rules and rule[1][0] not in overwrite_rules]
+        super(PhotoToJson, self).__init__()
+        self.rules.extend(to_cds_json.rules)
 
 
-tomarc21 = CDSPhotoToMarc21()
-marc21 = CDSPhotoMarc21()
+photo_to_marc21 = PhotoToMarc21()
+photo_to_json = PhotoToJson()

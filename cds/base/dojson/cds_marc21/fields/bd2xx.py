@@ -21,10 +21,9 @@
 
 from dojson import utils
 
-from ..model import cds_marc21
+from ..model import to_cds_json, to_cds_marc21
 
-
-@cds_marc21.over('imprint', '^269__')
+@to_cds_json.over('imprint', '^269__')
 @utils.for_each_value
 @utils.filter_values
 def imprint(self, key, value):
@@ -37,4 +36,20 @@ def imprint(self, key, value):
         'place_of_publication': value.get('a'),
         'name_of_publication': value.get('b'),
         'complete_date': value.get('c'),
+    }
+
+
+@to_cds_marc21.over( '^269__', 'imprint')
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_imprint(self, key, value):
+    """Reverse - Pre-publication, distribution, etc.
+
+    NOTE: Don't use the following lines for CER base=14,2n,41-45
+    NOTE: Don't use for THESES
+    """
+    return {
+        'a': value.get('place_of_publication'),
+        'b': value.get('name_of_publication'),
+        'c': value.get('complete_date'),
     }

@@ -18,37 +18,21 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Photo MARC 21 model definition."""
-from dojson.overdo import Overdo
-from cds.base.dojson.photo import marc21, tomarc21
-from cds.base.dojson.photo.model import CDSPhotoMarc21
+from cds.base.dojson.cds_marc21.model import ToCDSJson, ToCDSMarc21
+from cds.base.dojson.cds_marc21 import to_cds_json, to_cds_marc21
 
 
-class CDSAlbumMarc21(Overdo):
-    """Adds new fields specific for albums to photo overdo"""
-    overwrite_rules = [
-        '^774..'
-    ]
-
+class AlbumToMarc21(ToCDSMarc21):
     def __init__(self):
-        super(CDSAlbumMarc21, self).__init__()
-        self.rules.extend(
-            CDSPhotoMarc21.filter_unecessary_rules(marc21.rules,
-                                                   self.overwrite_rules)
-        )
+        super(AlbumToMarc21, self).__init__()
+        self.rules.extend(to_cds_marc21.rules)
 
 
-class CDSAlbumToMarc21(Overdo):
-    """Adds new fields specific for albums to photo overdo"""
-    overwrite_rules = [
-        '^774..'
-    ]
-
+class AlbumFromMarc21(ToCDSJson):
     def __init__(self):
-        super(CDSAlbumToMarc21, self).__init__()
-        self.rules.extend(
-            CDSPhotoMarc21.filter_unecessary_rules(tomarc21.rules,
-                                                   self.overwrite_rules)
-        )
+        super(AlbumFromMarc21, self).__init__()
+        self.rules.extend(to_cds_json.rules)
 
-album_marc21 = CDSAlbumMarc21()
-album_tomarc21 = CDSAlbumToMarc21()
+
+album_to_json = AlbumFromMarc21()
+album_to_marc21 = AlbumToMarc21()

@@ -18,12 +18,10 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 from .fields import (
-    cat,
     photos,
-    reverse_cat,
     reverse_photos,
 )
 
-from model import album_marc21, album_tomarc21
+from model import album_to_json, album_to_marc21
 
-__all__ = ('album_marc21', 'album_tomarc21')
+__all__ = ('album_to_json', 'album_to_marc21')

@@ -21,17 +21,26 @@
 
 from dojson import utils
 
-from ..model import cds_marc21
+from ..model import to_cds_json, to_cds_marc21
 
 
-@cds_marc21.over('international_standard_number', '^021..')
+@to_cds_json.over('international_standard_number', '^021..')
 @utils.for_each_value
 def international_standard_number(self, key, value):
     """Report Number."""
     return value.get('a')
 
 
-@cds_marc21.over('system_control_number', '^035..', override=True)
+@to_cds_marc21.over('^021..', 'international_standard_number')
+@utils.for_each_value
+def reverse_international_standard_number(self, key, value):
+    """Report Number."""
+    return {
+        'a': value['international_standard_number']
+    }
+
+
+@to_cds_json.over('system_control_number', '^035..', override=True)
 @utils.for_each_value
 @utils.filter_values
 def system_control_number(self, key, value):
@@ -49,10 +58,42 @@ def system_control_number(self, key, value):
     }
 
 
-@cds_marc21.over('report_number', '^088..', override=True)
+@to_cds_marc21.over('^035..', 'system_control_number', override=True)
+@utils.for_each_value
+@utils.filter_values
+def reverse_system_control_number(self, key, value):
+    """System Control Number."""
+    return {
+        'a': value.get('system_control_number'),
+        '8': utils.reverse_force_list(value.get('field_link_and_sequence_number')),
+        'z': utils.reverse_force_list(value.get('canceled_invalid_control_number')),
+        '6': value.get('linkage'),
+        '9': value.get('inst')
+    }
+
+
+@to_cds_json.over('report_number', '^088..', override=True)
 @utils.for_each_value
 @utils.filter_values
 def report_number(self, key, value):
+    """Report Number."""
+    return {
+        'report_number': value.get('a'),
+        'field_link_and_sequence_number': utils.force_list(
+            value.get('8')
+        ),
+        'canceled_invalid_report_number': utils.force_list(
+            value.get('z')
+        ),
+        'linkage': value.get('6'),
+        '_report_number': value.get('9'), # not displayed but searchable
+    }
+
+
+@to_cds_marc21.over('^088..', 'report_number', override=True)
+@utils.for_each_value
+@utils.filter_values
+def reverse_report_number(self, key, value):
     """Report Number."""
     return {
         'report_number': value.get('a'),

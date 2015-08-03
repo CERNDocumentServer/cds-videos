@@ -7,16 +7,16 @@ import traceback
 import re
 from dojson.contrib.marc21.utils import create_record, split_blob
 
-from cds.base.dojson.photo import marc21, tomarc21
-from cds.base.dojson.album import album_marc21, album_tomarc21
+from cds.base.dojson.photo import photo_to_json, photo_to_marc21
+from cds.base.dojson.album import album_to_json, album_to_marc21
 
 def translate_marc_to_json(marc_file, album=False, test=False):
     blob = [create_record(data) for data in split_blob(marc_file)]
 
     if album:
-        parsed_record = [album_marc21.do(data) for data in blob]
+        parsed_record = [album_to_json.do(data) for data in blob]
     else:
-        parsed_record = [marc21.do(data) for data in blob]
+        parsed_record = [photo_to_json.do(data) for data in blob]
 
     if test:
         for xml_input, json_output in zip(blob, parsed_record):
@@ -50,7 +50,8 @@ def translate_marc_to_json(marc_file, album=False, test=False):
             print "Missed keys: " + str(missed_keys + list(set(xml_input.keys()) - similar_keys))
             print "Different keys:\n" + '\n'.join([str(key_pair) for key_pair in different_keys])
             print "="*40
-
+            import pdb
+            pdb.set_trace()
     return parsed_record
 
 
@@ -59,9 +60,9 @@ def translate_json_to_marc(json_file, album=False, test=False):
     if isinstance(loaded_json, dict):
         loaded_json = [loaded_json]
     if album:
-        parsed_record = [album_tomarc21.undo(data) for data in loaded_json]
+        parsed_record = [album_to_marc21.undo(data) for data in loaded_json]
     else:
-        parsed_record = [tomarc21.undo(data) for data in loaded_json]
+        parsed_record = [photo_to_marc21.undo(data) for data in loaded_json]
     return parsed_record
 
 

@@ -26,7 +26,7 @@ from .fields import (
     bd7xx,
     bd9xx,
 )
-from .model import cds_marc21
+from .model import to_cds_json, to_cds_marc21
 
 
 def convert_cdsmarcxml(source):
@@ -34,7 +34,7 @@ def convert_cdsmarcxml(source):
     from dojson.contrib.marc21.utils import create_record, split_blob
 
     for data in split_blob(source.read()):
-        yield cds_marc21.do(create_record(data))
+        yield to_cds_json.do(create_record(data))
 
 
-__all__ = ('cds_marc21', 'convert_cdsmarcxml')
+__all__ = ('to_cds_json', 'to_cds_marc21', 'convert_cdsmarcxml')

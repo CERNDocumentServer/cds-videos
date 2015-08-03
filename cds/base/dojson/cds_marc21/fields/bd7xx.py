@@ -21,10 +21,10 @@
 
 from dojson import utils
 
-from ..model import cds_marc21
+from ..model import to_cds_json, to_cds_marc21
 
 
-@cds_marc21.over('added_entry_corporate_name', '^710[10_2][_2]', override=True)
+@to_cds_json.over('added_entry_corporate_name', '^710[10_2][_2]', override=True)
 @utils.for_each_value
 @utils.filter_values
 def added_entry_corporate_name(self, key, value):
@@ -89,7 +89,75 @@ def added_entry_corporate_name(self, key, value):
     }
 
 
-@cds_marc21.over('translator', '^721__')
+@to_cds_marc21.over('^710[10_2][_2]', 'added_entry_corporate_name', override=True)
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_added_entry_corporate_name(self, key, value):
+    """Added Entry-Corporate Name."""
+    indicator_map1 = {
+        "Inverted name": "0",
+        "Jurisdiction name": "1",
+        "Name in direct order": "2",
+    }
+    indicator_map2 = {
+        "No information provided": "#",
+        "Analytical entry": "2",
+    }
+    return {
+        '0': utils.reverse_force_list(
+            value.get('authority_record_control_number')
+        ),
+        '3': value.get('materials_specified'),
+        '5': value.get('institution_to_which_field_applies'),
+        '4': utils.reverse_force_list(
+            value.get('relator_code')
+        ),
+        '6': value.get('linkage'),
+        '8': utils.reverse_force_list(
+            value.get('field_link_and_sequence_number')
+        ),
+        'a': value.get('corporate_name_or_jurisdiction_name_as_entry_element'),
+        'c': value.get('location_of_meeting'),
+        'b': utils.reverse_force_list(
+            value.get('subordinate_unit')
+        ),
+        'e': utils.reverse_force_list(
+            value.get('relator_term')
+        ),
+        'd': utils.reverse_force_list(
+            value.get('date_of_meeting_or_treaty_signing')
+        ),
+        'g': value.get('miscellaneous_information'),
+        'f': value.get('date_of_a_work'),
+        'i': utils.reverse_force_list(
+            value.get('relationship_information')
+        ),
+        'h': value.get('medium'),
+        'k': utils.reverse_force_list(
+            value.get('form_subheading')
+        ),
+        'm': utils.reverse_force_list(
+            value.get('medium_of_performance_for_music')
+        ),
+        'l': value.get('language_of_a_work'),
+        'o': value.get('arranged_statement_for_music'),
+        'n': utils.reverse_force_list(
+            value.get('number_of_part_section_meeting')
+        ),
+        'p': utils.reverse_force_list(
+            value.get('name_of_part_section_of_a_work')
+        ),
+        's': value.get('version'),
+        'r': value.get('key_for_music'),
+        'u': value.get('affiliation'),
+        't': value.get('title_of_a_work'),
+        '9': value.get('cern_work'),
+        'x': value.get('international_standard_serial_number'),
+        '_indicator1': indicator_map1.get('type_of_corporate_name_entry_element'),
+        '_indicator2': indicator_map2.get('type_of_added_entry'),
+    }
+
+@to_cds_json.over('translator', '^721__')
 @utils.for_each_value
 @utils.filter_values
 def translator(self, key, value):
@@ -97,4 +165,15 @@ def translator(self, key, value):
     return {
         'personal_name': value.get('a'),
         'words_translated': value.get('1'),
+    }
+
+
+@to_cds_marc21.over('^721__', 'translator')
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_translator(self, key, value):
+    """Translator."""
+    return {
+        'a': value.get('personal_name'),
+        '1': value.get('words_translated'),
     }
