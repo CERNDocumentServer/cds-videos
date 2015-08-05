@@ -246,43 +246,6 @@ assets using the once that have been copied to the static folder.
 3.6. Initial data
 ~~~~~~~~~~~~~~~~~
 
-Once you have everything installed you can create the database and populate it
-with initial data.
-
-.. code-block:: console
-
-    (cdslabs)$ inveniomanage database init --user=root --password=$MYSQL_ROOT --yes-i-know
-    (cdslabs)$ inveniomanage database create
-
-3.7. Background processes
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Now you should be able to run the development server. Invenio uses
-`Celery <http://www.celeryproject.org/>`_ and `Redis <http://redis.io/>`_
-which must be running alongside with the web server.
-
-.. code-block:: console
-
-    $ # make sure that redis is running
-    $ sudo service redis-server status
-    redis-server is running
-    $ # or start it with start
-    $ sudo service redis-start start
-
-    $ # launch celery
-    $ workon cdslabs
-    (cdslabs)$ celeryd -E -A invenio.celery.celery --workdir=$VIRTUAL_ENV
-
-    $ # launch bibsched
-    (cdslabs)$ bibsched start
-
-    $ # in a new terminal
-    $ workon cdslabs
-    (cdslabs)$ inveniomanage runserver
-     * Running on http://0.0.0.0:4000/
-     * Restarting with reloader
-
-
 **Troubleshooting:** As a developer, you may want to use the provided
 ``Procfile`` with `honcho <https://pypi.python.org/pypi/honcho>`_. It
 starts all the services at once with nice colors. Be default, it also runs
@@ -291,18 +254,61 @@ to monitor the *Celery* tasks.
 
 .. code-block:: console
 
-    (cdslabs)$ pip install flower
     (cdslabs)$ cdvirtualenv src/cds
     (cdslabs)$ honcho start
 
-When you have the servers running, it is possible to upload the demo records.
+Once you have everything installed and the __services running__ you can create
+the database and populate it with initial data.
+
+.. note::
+    It is important to have all serices running as database init and database
+    create will insert information already in Elasticseach anr will use celery
+    as well to run tasks inside the redis queue.
 
 .. code-block:: console
 
     $ # in a new terminal
     $ workon cdslabs
+    (cdslabs)$ inveniomanage database init --user=root --password=$MYSQL_ROOT --yes-i-know
+    (cdslabs)$ inveniomanage database create
+
+.. 3.7. Background processes
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~
+..
+.. Now you should be able to run the development server. Invenio uses
+.. `Celery <http://www.celeryproject.org/>`_ and `Redis <http://redis.io/>`_
+.. which must be running alongside with the web server.
+..
+.. .. code-block:: console
+..
+..     $ # make sure that redis is running
+..     $ sudo service redis-server status
+..     redis-server is running
+..     $ # or start it with start
+..     $ sudo service redis-start start
+..
+..     $ # launch celery
+..     $ workon cdslabs
+..     (cdslabs)$ celeryd -E -A invenio.celery.celery --workdir=$VIRTUAL_ENV
+..
+..     $ # launch bibsched
+..     (cdslabs)$ bibsched start
+..
+..     $ # in a new terminal
+..     $ workon cdslabs
+..     (cdslabs)$ inveniomanage runserver
+..      * Running on http://0.0.0.0:4000/
+..      * Restarting with reloader
+..
+
+
+When you have the servers running, it is possible to upload the demo records.
+
+.. code-block:: console
+
+    $ workon cdslabs
     (cdslabs)$ cdvirtualenv src/cds
-    (cdslabs)$ inveniomanage demosite populate
+    (cdslabs)$ inveniomanage records create -t marcxml < cds/demosite/data/cds-demobibdata.xml
 
 .. NOTE::
     Sometimes the changes doesn't appear inmediatly when running the
