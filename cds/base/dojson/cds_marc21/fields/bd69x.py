@@ -31,14 +31,14 @@ def subject_indicator(self, key, value):
     return value.get('a')
 
 
-@to_cds_marc21.over('^690C_', 'subject_indicator')
+@to_cds_marc21.over('690', 'subject_indicator')
 @utils.reverse_for_each_value
 def reverse_indicator(self, key, value):
     """Reverse - Record type"""
     return {
         'a': value,
-        '_indicator1': 'C',
-        '_indicator2': '_'
+        '$ind1': 'C',
+        '$ind2': '_'
     }
 
 
@@ -55,7 +55,7 @@ def accelerator_experiment(self, key, value):
     }
 
 
-@to_cds_marc21.over('^693__', 'accelerator_experiment')
+@to_cds_marc21.over('693', 'accelerator_experiment')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_accelerator_experiment(self, key, value):
@@ -79,7 +79,7 @@ def thesaurus_terms(self, key, value):
     }
 
 
-@to_cds_marc21.over('^695__', 'thesaurus_terms')
+@to_cds_marc21.over('695', 'thesaurus_terms')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_thesaurus_terms(self, key, value):
@@ -87,4 +87,6 @@ def reverse_thesaurus_terms(self, key, value):
     return {
         'a': value.get('uncontrolled_term'),
         '9': value.get('institute'),
+        '$ind1': '_',
+        '$ind2': '_',
     }

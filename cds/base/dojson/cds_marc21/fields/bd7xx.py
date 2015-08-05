@@ -89,7 +89,7 @@ def added_entry_corporate_name(self, key, value):
     }
 
 
-@to_cds_marc21.over('^710[10_2][_2]', 'added_entry_corporate_name', override=True)
+@to_cds_marc21.over('710', 'added_entry_corporate_name', override=True)
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_added_entry_corporate_name(self, key, value):
@@ -153,8 +153,8 @@ def reverse_added_entry_corporate_name(self, key, value):
         't': value.get('title_of_a_work'),
         '9': value.get('cern_work'),
         'x': value.get('international_standard_serial_number'),
-        '_indicator1': indicator_map1.get('type_of_corporate_name_entry_element'),
-        '_indicator2': indicator_map2.get('type_of_added_entry'),
+        '$ind1': indicator_map1.get('type_of_corporate_name_entry_element'),
+        '$ind2': indicator_map2.get('type_of_added_entry'),
     }
 
 @to_cds_json.over('translator', '^721__')
@@ -168,7 +168,7 @@ def translator(self, key, value):
     }
 
 
-@to_cds_marc21.over('^721__', 'translator')
+@to_cds_marc21.over('721', 'translator')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_translator(self, key, value):
@@ -176,4 +176,6 @@ def reverse_translator(self, key, value):
     return {
         'a': value.get('personal_name'),
         '1': value.get('words_translated'),
+        '$ind1': '_',
+        '$ind2': '_',
     }

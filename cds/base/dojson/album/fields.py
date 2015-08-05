@@ -35,7 +35,7 @@ def photos(self, key, value):
     }  # TODO
 
 
-@album_to_marc21.over('^774..', 'photos')
+@album_to_marc21.over('774', 'photos')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_photos(self, key, value):

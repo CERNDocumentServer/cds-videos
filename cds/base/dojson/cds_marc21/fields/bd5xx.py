@@ -35,14 +35,16 @@ def french_summary_note(self, key, value):
     }
 
 
-@to_cds_marc21.over('^590__', 'french_summary_note')
+@to_cds_marc21.over('590', 'french_summary_note')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_french_summary_note(self, key, value):
     """French summary note."""
     return {
         'a': value.get('smuary'),
-        'b': value.get('expansion_of_summary_note')
+        'b': value.get('expansion_of_summary_note'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -57,7 +59,7 @@ def field_591(self, key, value):
     }
 
 
-@to_cds_marc21.over('^591__', 'field_591')
+@to_cds_marc21.over('591', 'field_591')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_field_591(self, key, value):
@@ -65,6 +67,8 @@ def reverse_field_591(self, key, value):
     return {
         'a': value.get('subfield_a'),
         'b': value.get('subfield_b'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -75,11 +79,15 @@ def type_of_document(self, key, value):
     return value.get('a')
 
 
-@to_cds_marc21.over('^594__', 'type_of_document')
+@to_cds_marc21.over('594', 'type_of_document')
 @utils.reverse_for_each_value
 def reverse_type_of_document(self, key, value):
     """Type of Document."""
-    return {'a': value.get('type_of_document')}
+    return {
+        'a': value.get('type_of_document'),
+        '$ind1': '_',
+        '$ind2': '_',
+    }
 
 
 @to_cds_json.over('internal_note', '^595__')
@@ -96,7 +104,7 @@ def internal_note(self, key, value):
     }
 
 
-@to_cds_marc21.over('^595__', 'internal_note')
+@to_cds_marc21.over('595', 'internal_note')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_internal_note(self, key, value):
@@ -106,7 +114,9 @@ def reverse_internal_note(self, key, value):
         'd': value.get('control_field'),
         'i': value.get('inspect_number'),
         's': value.get('subject_note'),
-        '9': value.get('dump')
+        '9': value.get('dump'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -120,11 +130,13 @@ def slac_note(self, key, value):
     }
 
 
-@to_cds_marc21.over('^596.', 'slac_note')
+@to_cds_marc21.over('596', 'slac_note')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_slac_note(self, key, value):
     """Reverse - Slac note - some kind of internal note"""
     return {
-        'a': value.get('slac_note')
+        'a': value.get('slac_note'),
+        '$ind1': '_',
+        '$ind2': '_',
     }

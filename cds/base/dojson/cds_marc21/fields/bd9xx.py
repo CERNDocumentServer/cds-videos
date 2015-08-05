@@ -38,7 +38,7 @@ def status_week(self, key, value):
         'year_for_annual_list': value.get('y'),
     }
 
-@to_cds_marc21.over('^916__', 'status_week')
+@to_cds_marc21.over('916', 'status_week')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_status_week(self, key, value):
@@ -50,6 +50,8 @@ def reverse_status_week(self, key, value):
         's': value.get('status_of_record'),
         'w': value.get('status_week'),
         'y': value.get('year_for_annual_list'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -63,7 +65,7 @@ def place_of_photo(self, key, value):
         'requester': value.get('r')
     }
 
-@to_cds_marc21.over('^923..', 'place_of_photo')
+@to_cds_marc21.over('923', 'place_of_photo')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_place_of_photo(self, key, value):
@@ -71,6 +73,8 @@ def reverse_place_of_photo(self, key, value):
     return {
         'p': value.get('place'),
         'r': value.get('requester'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -86,7 +90,7 @@ def dates(self, key, value):
     }
 
 
-@to_cds_marc21.over('^925__', 'dates')
+@to_cds_marc21.over('925', 'dates')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_dates(self, key, value):
@@ -94,6 +98,8 @@ def reverse_dates(self, key, value):
     return {
         'a': value.get('opening'),
         'b': value.get('closing'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -104,12 +110,14 @@ def file_number(self, key, value):
     return value.get('a')
 
 
-@to_cds_marc21.over('^927__' 'file_number')
+@to_cds_marc21.over('927' 'file_number')
 @utils.reverse_for_each_value
 def reverse_file_number(self, key, value):
     """File Number."""
     return {
-        'a': value.get('file_number')
+        'a': value.get('file_number'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -120,12 +128,14 @@ def base(self, key, value):
     return value.get('a')
 
 
-@to_cds_marc21.over('^960..', 'base')
+@to_cds_marc21.over('960', 'base')
 @utils.reverse_for_each_value
 def base(self, key, value):
     """Base."""
     return {
-        'a': value
+        'a': value,
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -141,7 +151,7 @@ def peri_internal_note(self, key, value):
     }
 
 
-@to_cds_marc21.over('^937__', 'peri_internal_note')
+@to_cds_marc21.over('937', 'peri_internal_note')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_peri_internal_note(self, key, value):
@@ -150,6 +160,8 @@ def reverse_peri_internal_note(self, key, value):
         'a': value.get('internal_note'),
         'c': value.get('modification_date'),
         's': value.get('responsible_of_the_modification'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -168,7 +180,7 @@ def cat(self, key, value):
     }
 
 
-@to_cds_marc21.over('^961__', 'cat')
+@to_cds_marc21.over('961', 'cat')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_cat(self, key, value):
@@ -180,6 +192,8 @@ def reverse_cat(self, key, value):
         'l': value.get('library'),
         'h': value.get('hour'),
         'x': value.get('creation_date'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -194,7 +208,7 @@ def owner(self, key, value):
     }
 
 
-@to_cds_marc21.over('^963..', 'visibility')
+@to_cds_marc21.over('963', 'visibility')
 @for_each_squash
 @utils.filter_values
 def reverse_owner(self, key, value):
@@ -202,6 +216,8 @@ def reverse_owner(self, key, value):
     return {
         'a': value.get('owner'),
         'b': value.get('status'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -216,7 +232,7 @@ def sysno(self, key, value):
     }
 
 
-@to_cds_marc21.over('^970..', 'sysno')
+@to_cds_marc21.over('970', 'sysno')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_system_number(self, key, value):
@@ -224,6 +240,8 @@ def reverse_system_number(self, key, value):
     return {
         'a': value.get('sysno'),
         'd': value.get('surviver'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 @to_cds_json.over('collection', '^980..')
@@ -237,7 +255,7 @@ def collection(self, key, value):
     }
 
 
-@to_cds_marc21.over('^980..', 'collection')
+@to_cds_marc21.over('980', 'collection')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_collection(self, key, value):
@@ -245,6 +263,8 @@ def reverse_collection(self, key, value):
     return {
         'a': value.get('primary'),
         'b': value.get('secondary'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
@@ -253,7 +273,11 @@ def record_type(self, key, value):
     """Record type - mostly IMAGE"""
     return value.get('a')
 
-@to_cds_marc21.over('^999..', 'record_type')
+@to_cds_marc21.over('999', 'record_type')
 def reverse_record_type(self, key, value):
     """Reverse - Record type - mostly IMAGE"""
-    return {'a': value}
+    return {
+        'a': value,
+        '$ind1': '_',
+        '$ind2': '_',
+    }

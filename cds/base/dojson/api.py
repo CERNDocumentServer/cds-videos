@@ -18,6 +18,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 
 from collections import defaultdict, namedtuple
+import re
 
 from dojson.contrib.marc21.utils import create_record, split_blob
 
@@ -39,63 +40,119 @@ record_type_map.update({
 
 
 class Translator():
+    def __init__(self, translate_method):
+        self.translate_method = translate_method
+
     @staticmethod
     def get_translator_to_json(marc21_object):
-        return record_type_map[marc21_object['999__']['a']].to_json
+        if marc21_object['999__']['a']:
+            return record_type_map[marc21_object['999__']['a']].to_json
+        raise KeyError
 
     @staticmethod
     def get_translator_to_marc21(json_object):
-        return record_type_map[json_object['record_type']].to_marc21
+        if json_object['record_type']:
+            return record_type_map[json_object['record_type']].to_marc21
+        raise KeyError
 
-    def _translate(self, translate_method, record):
-        translated_record = translate_method(record)
-        return translated_record
+    @staticmethod
+    def get_translator(obj):
+        """Returns new translator object
 
-    def to_json(self, record):
+        :param obj: dictionary of object to be translated
+        :return: Translator object set up for translating given object
+        """
+        if isinstance(obj, list):
+            obj = obj[0]
+        try:
+            translator = Translator.get_translator_to_marc21(obj)
+        except KeyError:
+            translator = Translator.get_translator_to_json(obj)
+
+        return Translator(translator.do)
+
+    def _translate(self, record):
+        return self.translate_method(record)
+
+    def translate(self, record):
         if isinstance(record, list):
-            return map(self.to_json, record)
-        translator = Translator.get_translator_to_json(record)
-        return self._translate(translator.do, record)
+            return map(self.translate, record)
+        # translator = Translator.get_translator(record)
+        return self._translate(record)
 
-    def to_marc21(self, json_object):
-        if isinstance(json_object, list):
-            return map(self.to_marc21, json_object)
-        translator = Translator.get_translator_to_marc21(json_object)
-        return self._translate(translator.undo, json_object)
+    @staticmethod
+    def test_correctness(input_marc21, output_json):
+        restored_input = translate(output_json)
+
+        missed_keys_number = 0
+        different_keys_number = 0
+        restored_keys_number = len(restored_input)
+
+        missed_keys = []
+        different_keys = []
+        similar_keys = set()
+
+        def extract_indicators(key, obj):
+            return key + obj.pop('$ind1', '_') + obj.pop('$ind2', '_')
+
+        altered_restored_object = {}
+        for key, value in restored_input.iteritems():
+            if isinstance(value, dict):
+                ind_key = extract_indicators(key, value)
+
+            if isinstance(value, list):
+                try:
+                    ind_key = extract_indicators(key, value[0])
+                    for val in value[1:]:
+                        val.pop('$ind1', None)
+                        val.pop('$ind2', None)
+                except AttributeError:
+                    ind_key = key
+
+            altered_restored_object[ind_key] = value
+
+            found_key = False
+            for original_key in input_marc21.keys():
+                if re.match(original_key, ind_key):
+                    found_key = original_key
+                    break
+
+            if not found_key:
+                missed_keys_number += 1
+                missed_keys.append(ind_key)
+                continue
+
+            similar_keys.add(found_key)
+            if altered_restored_object[ind_key] != input_marc21[found_key]:
+                different_keys_number += 1
+                different_keys.append((altered_restored_object[ind_key], input_marc21[found_key]))
+
+        return {
+            'input_keys_number': len(input_marc21.items()),
+            'restored_keys_number': restored_keys_number,
+            'missed_keys_number': missed_keys_number +
+                                  len(input_marc21.items()) -
+                                  restored_keys_number,
+            'different_keys_number': different_keys_number,
+            'missed_keys': missed_keys +
+                           list(set(input_marc21.keys()) - similar_keys),
+            'different_keys': different_keys,
+            'correct': (missed_keys_number + different_keys_number) == 0
+        }
 
 
-def to_json(marc21_object):
-    """Translates marc21 object (parsed, dict) to json"""
-    translator = Translator()
-    return translator.to_json(marc21_object)
+def translate(obj):
+    return Translator.get_translator(obj).translate(obj)
 
 
-def to_marc21(json_object):
-    """Translates json (dict) to marc21"""
-    translator = Translator()
-    return translator.to_marc21(json_object)
+def translate_file(filepath):
+    with open(filepath, 'r') as fd:
+        return translate(fd.read())
 
 
-def blob_to_json(blob):
-    """Returns blob translated to json
-
-    :param blob: string containg marc21 records
-    :return: list of records
-    """
-    records = [create_record(data) for data in split_blob(blob)]
-    for record in records:
-        yield to_json(record)
-
-
-def file_to_json(marc21_file):
-    """Reads a marc21 records from file and returns them in json
-
-    :param marc21_file: filepath to file containing marc21 records
-    :return: list of json records
-    """
-    with open(marc21_file, 'r') as fd:
-        blob = [create_record(data) for data in split_blob(fd.read())]
-        return [to_json(single_record) for single_record in blob]
+def get_marc21_from_file(filepath):
+    with open(filepath, 'r') as fd:
+        return create_records_from_blob(fd.read())
 
 
 def create_records_from_blob(blob):
@@ -113,47 +170,6 @@ def check_translation_from_file(marc21_filepath):
 
 
 def check_translation(marc21_object):
-    """Checks the translation process on marc21 objects
-
-    :param marc21_object: string of marc21 objects
-    :return:
-    """
-    records = create_records_from_blob(marc21_object)
-    json_records = to_json(records)
-
-    result = []
-    for input_record, output_record in zip(records, json_records):
-        restored_input = to_marc21(output_record)
-
-        missed_keys_number = 0
-        different_keys_number = 0
-        restored_keys_number = len(restored_input)
-
-        missed_keys = []
-        different_keys = []
-        similar_keys = set()
-        for key, value in restored_input.iteritems():
-            if key not in input_record.keys():
-                missed_keys_number += 1
-                missed_keys.append(key)
-                continue
-
-            similar_keys.add(key)
-            if restored_input[key] != input_record[key]:
-                different_keys_number += 1
-                different_keys.append((restored_input[key], input_record[key]))
-
-        result.append({
-            'input_keys_number': len(input_record.items()),
-            'restored_keys_number': restored_keys_number,
-            'missed_keys_number': missed_keys_number +
-                                  len(input_record.items()) -
-                                  restored_keys_number,
-            'different_keys_number': different_keys_number,
-            'missed_keys': missed_keys +
-                           list(set(input_record.keys()) - similar_keys),
-            'different_keys': different_keys,
-            'correct': (missed_keys_number + different_keys_number) == 0
-        })
-
-    return result
+    record = create_records_from_blob(marc21_object)[0]
+    result = Translator.get_translator(record).translate(record)
+    return Translator.test_correctness(record, result)

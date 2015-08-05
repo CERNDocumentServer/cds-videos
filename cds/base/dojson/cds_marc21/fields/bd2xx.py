@@ -39,7 +39,7 @@ def imprint(self, key, value):
     }
 
 
-@to_cds_marc21.over( '^269__', 'imprint')
+@to_cds_marc21.over('269', 'imprint')
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_imprint(self, key, value):
@@ -52,4 +52,6 @@ def reverse_imprint(self, key, value):
         'a': value.get('place_of_publication'),
         'b': value.get('name_of_publication'),
         'c': value.get('complete_date'),
+        '$ind1': '_',
+        '$ind2': '_',
     }

@@ -21,6 +21,17 @@ def album(self, key, value):
     }
 
 
+@photo_to_marc21.over('774', 'album')
+def reverse_album(self, key, value):
+    """Reverse - Album ID which contains this photo"""
+    return {
+        'a': value.get('dump_album'),
+        'r': value.get('album_id'),
+        '$ind1': '_',
+        '$ind2': '_',
+    }
+
+
 @photo_to_json.over('image', '^856.[10_28]', override=True)
 @utils.for_each_value
 @utils.filter_values
@@ -39,7 +50,7 @@ def image(self, key, value):
     }
 
 
-@photo_to_marc21.over('^856.[10_28]', 'image', override=True)
+@photo_to_marc21.over('856', 'image', override=True)
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_image(self, key, value):
@@ -54,8 +65,8 @@ def reverse_image(self, key, value):
         'y': value.get('link_text'),
         'z': value.get('public_note'),
         'x': value.get('subformat'),
-        '_indicator1': '4',
-        '_indicator2': '_'
+        '$ind1': '4',
+        '$ind2': '_'
     }
 
 
@@ -72,16 +83,8 @@ def owner(self, key, value):
 
 
 
-@photo_to_marc21.over('^774..', 'album')
-def reverse_album(self, key, value):
-    """Reverse - Album ID which contains this photo"""
-    return {
-        'a': value.get('dump_album'),
-        'r': value.get('album_id'),
-    }
 
-
-@photo_to_marc21.over('^859..', 'owner', override=True)
+@photo_to_marc21.over('859', 'owner', override=True)
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_owner(self, key, value):
@@ -92,16 +95,20 @@ def reverse_owner(self, key, value):
         'a': value.get('contact'),
         'f': value.get('e-mail'),
         'x': value.get('date'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
-@photo_to_marc21.over('^970..', 'dump_system_number')
+@photo_to_marc21.over('^970', 'dump_system_number')
 @utils.filter_values
 def reverse_system_number(self, key, value):
     """Reverse - System number"""
     return {
         'a': value.get('system_number'),
         'd': value.get('recid_of_surviving_record'),
+        '$ind1': '_',
+        '$ind2': '_',
     }
 
 
