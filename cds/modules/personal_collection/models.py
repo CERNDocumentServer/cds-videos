@@ -28,7 +28,7 @@ from sqlalchemy.ext.mutable import MutableDict
 
 
 from invenio.ext.sqlalchemy import db
-from invenio.modules.accounts.models import User
+from invenio_accounts.models import User
 
 
 from .config import DEFAULT_SETTINGS
