@@ -4,7 +4,6 @@ define(function (require) {
   var async = require('vendors/async/lib/async');
   var boxStorage = require('js/personal/helpers/boxStorage');
   var settingsStorage = require('js/personal/helpers/settingsStorage');
-  var gridStorage = require('js/personal/helpers/gridStorage');
   var defineComponent = require('flight/lib/component');
 
   function Box() {
