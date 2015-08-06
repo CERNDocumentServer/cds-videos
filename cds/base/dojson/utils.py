@@ -19,24 +19,23 @@
 
 import functools
 
+from collections import defaultdict
+
 
 def for_each_squash(f):
     @functools.wraps(f)
     def wrapper(self, key, values, **kwargs):
-        if isinstance(values, list):
-            unmerged_list = [f(self, key, value, **kwargs) for value in values]
-            merged_dict = {}
-            for unmerged_dict in unmerged_list:
-                for key, element in unmerged_dict.iteritems():
-                    if key in merged_dict:
-                        if isinstance(merged_dict[key], list):
-                            # already a list - append
-                            merged_dict[key] += element
-                        else:
-                            # not a list - create one
-                            merged_dict[key] = [merged_dict[key], element]
-                    else:  # new key
-                        merged_dict[key] = element
-            return merged_dict
-        return f(self, key, values, **kwargs)
+        if not isinstance(values, list):
+            return f(self, key, values, **kwargs)
+
+        unmerged_list = [f(self, key, value, **kwargs) for value in values]
+        merge_dict = defaultdict(list)
+
+        for unmerged_dict in unmerged_list:
+            for key, element in unmerged_dict.iteritems():
+                merge_dict[key].append(element)
+
+        merge_dict = {key: (value if len(value) > 1 else value[0])
+                      for key, value in merge_dict.iteritems()}
+        return merge_dict
     return wrapper
