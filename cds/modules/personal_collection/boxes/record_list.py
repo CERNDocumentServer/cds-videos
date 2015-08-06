@@ -19,10 +19,10 @@
 
 """Record list box."""
 
+import itertools
 from flask import url_for
 from six import add_metaclass
 
-from invenio.modules.records.api import Record
 from invenio.modules.search.api import Query
 
 from .base import BoxBase
@@ -60,19 +60,18 @@ class RecordListBox(object):
 
     def build(self):
         """Generate the content of the box."""
-        recids = self.query.search(
-            collection=self._settings['collection'])[:self.__class__.limit]
+        result = self.query.search(
+            collection=self._settings['collection'])
         res = dict(
             header={'title': self.title},
             items=[],
             footer={'label': 'Show more'},
             _settings=self._settings
         )
-        for recid in recids:
-            record = Record.get_record(recid)
+        for record in itertools.islice(result.records(), self.__class__.limit):
             res['items'].append(
-                {'title': record.get('title', {}).get('title', ''),
-                 'link': url_for('record.metadata', recid=recid,
+                {'title': record.get('title_statement', {}).get('title', ''),
+                 'link': url_for('record.metadata', recid=record.get('recid'),
                                  _external=True, _scheme='https')}
             )
         return res

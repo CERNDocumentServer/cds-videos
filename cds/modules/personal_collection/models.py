@@ -84,7 +84,7 @@ class PersonalCollectionSettings(db.Model):
         :returns: Returns empty `dict` if not settings were found.
 
         """
-        if user_id is None:
+        if user_id is None or user_id in [-1, 0]:
             return DEFAULT_SETTINGS.get(collection, {})
 
         obj = cls.query.get(user_id)
