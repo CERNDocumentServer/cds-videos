@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('vendors/lodash/lodash');
   var defineComponent = require('flight/lib/component');
   var errorMessage = require('hgn!./../templates/error');
-  var sortable = require('vendors/sortable.js/sortable');
+  var sortable = require('vendors/sortable.js/Sortable');
 
   function Grid() {
     this.defaultAttrs({
