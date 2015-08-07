@@ -31,11 +31,17 @@ def subject_indicator(self, key, value):
     return value.get('a')
 
 
+@cds_marc21.over('observation', '^691__')
+def observation(self, key, value):
+    """Observation."""
+    return value.get('a')
+
+
 @cds_marc21.over('accelerator_experiment', '^693__')
 @utils.for_each_value
 @utils.filter_values
 def accelerator_experiment(self, key, value):
-    """Expriment."""
+    """Experiment."""
     return {
         'acelerator': value.get('a'),
         'experiment': value.get('e'),
@@ -44,11 +50,22 @@ def accelerator_experiment(self, key, value):
     }
 
 
+@cds_marc21.over('classification_terms', '^694__')
+@utils.for_each_value
+@utils.filter_values
+def classification_terms(self, key, value):
+    """Classification terms."""
+    return {
+        'uncontrolled_term': value.get('a'),
+        'institute': value.get('9'),
+    }
+
+
 @cds_marc21.over('thesaurus_terms', '^695__')
 @utils.for_each_value
 @utils.filter_values
 def thesaurus_terms(self, key, value):
-    """Expriment."""
+    """Thesaurus term."""
     return {
         'uncontrolled_term': value.get('a'),
         'institute': value.get('9'),

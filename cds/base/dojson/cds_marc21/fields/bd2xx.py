@@ -19,10 +19,53 @@
 
 """CDS special/custom tags."""
 
+from cds.base.dojson import utils as cds_utils
 from dojson import utils
 
 from ..model import cds_marc21
 
+
+@cds_marc21.over('title_statement', '^245[10_][_1032547698]', override=True)
+@cds_utils.for_each_squash
+@utils.filter_values
+def title_statement(self, key, value):
+    """Title Statement."""
+    indicator_map1 = {"0": "No added entry", "1": "Added entry"}
+    indicator_map2 = {
+        "0": "No nonfiling characters",
+        "1": "Number of nonfiling characters",
+        "2": "Number of nonfiling characters",
+        "3": "Number of nonfiling characters",
+        "4": "Number of nonfiling characters",
+        "5": "Number of nonfiling characters",
+        "6": "Number of nonfiling characters",
+        "7": "Number of nonfiling characters",
+        "8": "Number of nonfiling characters",
+        "9": "Number of nonfiling characters"}
+    return {
+        'title': value.get('a'),
+        'statement_of_responsibility': value.get('c'),
+        'remainder_of_title': value.get('b'),
+        'bulk_dates': value.get('g'),
+        'inclusive_dates': value.get('f'),
+        'medium': value.get('h'),
+        'form': utils.force_list(
+            value.get('k')
+        ),
+        'number_of_part_section_of_a_work': utils.force_list(
+            value.get('n')
+        ),
+        'name_of_part_section_of_a_work': utils.force_list(
+            value.get('p')
+        ),
+        'version': value.get('s'),
+        'linkage': value.get('6'),
+        'field_link_and_sequence_number': utils.force_list(
+            value.get('8')
+        ),
+        'title_added_entry': indicator_map1.get(key[3]),
+        'nonfiling_characters': indicator_map2.get(key[4]),
+    }
 
 @cds_marc21.over('imprint', '^269__')
 @utils.for_each_value

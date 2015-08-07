@@ -17,25 +17,20 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+"""CDS special/custom tags."""
 
-from .fields import (
-    bd01x09x,
-    bd2xx,
-    bd5xx,
-    bd69x,
-    bd7xx,
-    bd8xx,
-    bd9xx,
-)
-from .model import cds_marc21
+from dojson import utils
+
+from ..model import cds_marc21
 
 
-def convert_cdsmarcxml(source):
-    """Convert CDS MARC XML to JSON."""
-    from dojson.contrib.marc21.utils import create_record, split_blob
-
-    for data in split_blob(source.read()):
-        yield cds_marc21.do(create_record(data))
-
-
-__all__ = ('cds_marc21', 'convert_cdsmarcxml')
+@cds_marc21.over('electronic_mail_message', '^859__')
+@utils.for_each_value
+@utils.filter_values
+def electronic_mail_message(self, key, value):
+    """Electronic mail message"""
+    return {
+        'contact': value.get('a'),
+        'e-mail_address': value.get('f'),
+        'date': value.get('x'),
+    }
