@@ -28,7 +28,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <div id="grid" data-guest="{{ current_user.is_guest }}">
+        <div id="grid" data-guest="{{ current_user.is_guest | lower}}">
           <div class="row">
             <div class="col-md-12">
               <div class="personal-grid-error-message"></div>

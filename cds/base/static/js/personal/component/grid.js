@@ -1,3 +1,22 @@
+/*
+ * This file is part of Invenio.
+ * Copyright (C) 2015 CERN.
+ *
+ * Invenio is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * Invenio is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Invenio; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 define(function (require) {
 
   var _ = require('vendors/lodash/lodash');
@@ -7,40 +26,46 @@ define(function (require) {
 
   function Grid() {
     this.defaultAttrs({
-      ID: 'personal-grid-handler',
+      isGuest: null,
       collection: null,
+      ID: 'personal-grid-handler',
       maxBoxesOnGrid: 9,
       addBoxSelector: '.personal-boxes-add-more',
       dragHandle: '.personal-box',
       errorMessage: '.personal-grid-error-message',
       gridLoader: '.personal-grid-loader',
+      namespace: null,
     });
 
     // Init
     this.init = function (ev, args) {
       var that = this;
-      var el = document.getElementById(that.attr.ID);
-      localStorage.setItem('grid-'+this.attr.collection, localStorage.getItem('boxes'));
-      // delete localStorage
-      sortable.create(el, {
-        animation: 250,
-        dataIdAttr: 'data-id',
-        handle: that.attr.dragHandle,
-        group: 'grid-' + this.attr.collection,
-        onUpdate: function(evt) {
-          that.trigger(document, 'personal.boxes.data.order');
-        },
-        store: {
-          get: function(sortable) {
-            var order = localStorage.getItem(sortable.options.group.name);
-            return order ? order.split(',') : [];
+      if (!that.attr.isGuest) {
+        var el = document.getElementById(that.attr.ID);
+        localStorage.setItem(that.attr.namespace, localStorage.getItem('boxes'));
+        // delete localStorage
+        sortable.create(el, {
+          animation: 250,
+          dataIdAttr: 'data-id',
+          handle: that.attr.dragHandle,
+          group: that.attr.namespace,
+          onUpdate: function(evt) {
+            setTimeout(function() {
+              that.trigger(document, 'personal.boxes.data.order');
+            }, 0);
           },
-          set: function(sortable) {
-            var order = sortable.toArray();
-            localStorage.setItem(sortable.options.group.name, order.join(','));
+          store: {
+            get: function(sortable) {
+              var order = localStorage.getItem(sortable.options.group.name);
+              return order ? order.split(',') : [];
+            },
+            set: function(sortable) {
+              var order = sortable.toArray();
+              localStorage.setItem(sortable.options.group.name, order.join(','));
+            }
           }
-        }
-      });
+        });
+      }
     };
 
     this.checkLimits = function(ev, args) {

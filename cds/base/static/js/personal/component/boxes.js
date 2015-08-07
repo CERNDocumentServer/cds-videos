@@ -1,3 +1,22 @@
+/*
+ * This file is part of Invenio.
+ * Copyright (C) 2015 CERN.
+ *
+ * Invenio is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * Invenio is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Invenio; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 define(function (require) {
 
   var _ = require('vendors/lodash/lodash');
@@ -9,8 +28,10 @@ define(function (require) {
   function Box() {
     this.defaultAttrs({
       boxStorage: boxStorage,
-      settingsStorage: settingsStorage,
       collection: null,
+      isGuest: null,
+      namespace: null,
+      settingsStorage: settingsStorage,
       api: {
         boxes: null,
         settings: null
@@ -77,7 +98,9 @@ define(function (require) {
         sendingData.index = id - 1;
         sendingData.data = [data];
       } else {
-        sendingData.data = _.pluck(this.attr.boxStorage.all(), '_settings');
+        delete box.dummy;
+        that.attr.boxStorage.save(box);
+        sendingData.data = that._prepareSettings();
       }
       $.when(
         that._request({
@@ -143,6 +166,7 @@ define(function (require) {
       var that = this;
       async.forEachOf(items.data, function(item, index, callback) {
         item.id = index + 1;
+        item.isGuest = that.attr.isGuest;
         that.attr.boxStorage.save(item);
         callback();
       }, function(error){
@@ -163,12 +187,14 @@ define(function (require) {
     };
 
     this._prepareOrder = function() {
-      var currentOrder = localStorage.getItem('grid-' + this.attr.collection) || localStorage.getItem('boxes');
+      var currentOrder = localStorage.getItem(this.attr.namespace) || localStorage.getItem('boxes');
       return currentOrder.split(',');
     }
 
     this._prepareSettings = function() {
-      var boxes = this.attr.boxStorage.all();
+      var boxes = this.attr.boxStorage.find(function(box){
+        return (_.isUndefined(box.dummy) || !box.dummy) && box._settings.title;
+      });
       var settings = _.pluck(boxes, '_settings');
       return settings;
     }
@@ -179,7 +205,6 @@ define(function (require) {
       var ordered = _.map(order, function(id) {
         return settings[id - 1];
       });
-      console.log(settings, ordered, order);
       return ordered;
     };
 
