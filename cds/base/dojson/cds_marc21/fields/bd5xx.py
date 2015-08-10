@@ -126,7 +126,8 @@ def reverse_internal_note(self, key, value):
 def slac_note(self, key, value):
     """Slac note - some kind of internal note"""
     return {
-        'slac_note': value.get('a')
+        'slac_note': value.get('a'),
+        'dump': value.get('b'),
     }
 
 
@@ -137,6 +138,7 @@ def reverse_slac_note(self, key, value):
     """Reverse - Slac note - some kind of internal note"""
     return {
         'a': value.get('slac_note'),
+        'b': value.get('dump'),
         '$ind1': '_',
         '$ind2': '_',
     }

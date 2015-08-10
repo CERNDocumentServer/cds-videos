@@ -95,7 +95,7 @@ def report_number(self, key, value):
 
 
 @to_cds_marc21.over('088', 'report_number', override=True)
-@utils.for_each_value
+@utils.reverse_for_each_value
 @utils.filter_values
 def reverse_report_number(self, key, value):
     """Report Number."""

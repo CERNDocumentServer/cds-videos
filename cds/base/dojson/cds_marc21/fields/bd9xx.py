@@ -78,6 +78,31 @@ def reverse_place_of_photo(self, key, value):
     }
 
 
+@to_cds_json.over('photolab', '^924..')
+@utils.for_each_value
+@utils.filter_values
+def photolab(self, key, value):
+    """Photolab"""
+    return {
+        'tirage': value.get('a'),
+        'photolab_1': value.get('b'),
+        'photolab_2': value.get('t'),
+    }
+
+
+@to_cds_marc21.over('924', 'photolab')
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_photolab(self, key, value):
+    """Photolab"""
+    return {
+        'a': value.get('tirage'),
+        'b': value.get('photolab_1'),
+        't': value.get('photolab_2'),
+        '$ind1': '_',
+        '$ind2': '_',
+    }
+
 
 @to_cds_json.over('dates', '^925__')
 @utils.for_each_value
@@ -252,6 +277,7 @@ def collection(self, key, value):
     return {
         'primary': value.get('a'),
         'secondary': value.get('b'),
+        'deleted': value.get('c'),
     }
 
 
@@ -263,21 +289,31 @@ def reverse_collection(self, key, value):
     return {
         'a': value.get('primary'),
         'b': value.get('secondary'),
+        'c': value.get('deleted'),
         '$ind1': '_',
         '$ind2': '_',
     }
 
 
 @to_cds_json.over('record_type', '^999..')
+@utils.for_each_value
+@utils.filter_values
 def record_type(self, key, value):
     """Record type - mostly IMAGE"""
-    return value.get('a')
+    return {
+        'record_type': value.get('a'),
+        'dump': value.get('9'),
+    }
+
 
 @to_cds_marc21.over('999', 'record_type')
+@for_each_squash
+@utils.filter_values
 def reverse_record_type(self, key, value):
     """Reverse - Record type - mostly IMAGE"""
     return {
-        'a': value,
+        'a': value.get('record_type'),
+        '9': value.get('dump'),
         '$ind1': '_',
         '$ind2': '_',
     }

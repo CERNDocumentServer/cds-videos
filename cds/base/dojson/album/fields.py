@@ -28,8 +28,11 @@ from model import album_to_json, album_to_marc21
 @utils.filter_values
 def photos(self, key, value):
     """Photos in this album"""
+    reference = None
+    if value.get('r'):
+        reference = 'http://cds'r'.cern.ch/record/' + value['r']
     return {
-        '$ref': 'http://cds.cern.ch/record/' + value.get('r'),
+        '$ref': reference,
         'record_type': value.get('a'),
         'cover': value.get('n')
     }  # TODO
@@ -40,8 +43,11 @@ def photos(self, key, value):
 @utils.filter_values
 def reverse_photos(self, key, value):
     """Reverse - Photos in this album"""
+    reference = None
+    if value.get('$ref'):
+        reference = value.get('$ref').split('/')[-1]
     return {
-        'r': value.get('$ref').split('/')[-1],
+        'r': reference,
         'a': value.get('record_type'),
         'n': value.get('cover')
     }
