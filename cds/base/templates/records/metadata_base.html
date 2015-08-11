@@ -36,10 +36,12 @@
                 <dd>{{ macros.get_abstract(record) }}</dd>
             {% endif %}
 
-            <dt class="record_key"><i class="glyphicon glyphicon-user"></i> {{ _("Authors") }}:</dt>
-            <dd>{{ macros.get_authors(record, is_link=true, limit=3, page_size=5) }}</dd>
+            {% if record.main_entry_personal_name %}
+                <dt class="record_key"><i class="glyphicon glyphicon-user"></i> {{ _("Authors") }}:</dt>
+                <dd>{{ macros.get_authors(record, is_link=true, limit=3, page_size=5) }}</dd>
+            {% endif %}
 
-            {% if record.keywords %}
+            {% if record.index_term_uncontrolled %}
                 <dt class="record_key"><i class="glyphicon glyphicon-comment"></i> {{ _("Keywords") }}:</dt>
 	            <dd>{{ macros.get_keywords(record, limit=3, page_size=5) }}</dd>
             {% endif %}
@@ -54,11 +56,15 @@
 	            <dd>{{ macros.get_copyright(record) }}</dd>
 	        {% endif %}
 
-	        <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Creation date") }}</dt>
-            <dd>{{ macros.get_creation_date(record) }}</dd>
+            {% if record.cat %}
+	            <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Creation date") }}</dt>
+                <dd>{{ macros.get_creation_date(record) }}</dd>
+            {% endif %}
 
-            <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Modification date") }}:</dt>
-  	        <dd>{{ macros.get_modification_date(record) }}</dd>
+            {% if record.cat %}
+                <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Modification date") }}:</dt>
+  	            <dd>{{ macros.get_modification_date(record) }}</dd>
+            {% endif %}
 
         </dl>
     </div>
