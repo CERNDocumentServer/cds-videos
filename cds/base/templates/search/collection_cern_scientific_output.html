@@ -16,31 +16,42 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
-{%- import 'helpers/format/record/general/yellow_reports_macros.html' as _helpers -%}
+{%- import 'helpers/format/record/general/scientific_output_macros.html' as _helpers -%}
 {%- extends "search/collection_base.html" -%}
 
 {%- block index_right -%}
   <!-- Header Image -->
   <div class="row">
     <div class="col-md-12">
-      <img class="img-responsive" height="100px" src="{{ url_for('static', filename='img/header_YR2.jpg') }}" alt="Yellow Reports" />
-      <h2>CERN Yellow Reports</h2>
-      <p>
-      The CERN Yellow Report series was started in 1955. It provided a medium for communicating the work done at CERN where publication in a journal was not appropriate.
-      The yellow report series includes the proceedings of schools and of workshops having a large impact on the future of CERN, the series also includes reports on detectors and technical papers from individual CERN divisions, again the criteria being that the audience should be large and the duration of interest long.
-      The Yellow Reports have to be approved by the CERN Report Editorial Board (CREB), who calls for the advice of referees when judged necessary. Click here if you want to know more about the Yellow Reports and how to submit a request for publication.
+      <div class="overlay-image">
+        <img class="image" src="/img/header_CSOutput.jpg" alt="CERN Scientific Output" />
+        <h2 >CERN Institutional Repository </h2>
+      </div>
+      <br />
+The CERN Institutional Repository covers the comprehensive scientific output produced at CERN. The various collections are managed, maintained and enriched by the <a href="http://library.cern.ch">Scientific Information Service</a> (currently the GS-SIS group). 
       </p>
     </div>
   </div>
   <!-- Header Image -->
-  <br />
   <hr />
   <br />
   <!-- Featured record -->
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-8">
      {% set featured_record = collection.reclist[-1] %}
      {#{ format_record(featured_record, 'collection_featured_record', ln=g.ln) | safe }#}
+    </div>
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Quick Links') }}</div>
+          <div class="panel-body">
+            <a href="mailto:library.desk@cern.ch">Ask a Librarian</a> <br />
+            <a href="http://library.cern.ch">Library</a> <br />
+            <a href="/collection/Books">Books</a> <br />
+            <a href="/collection/Multimedia">Multimedia</a> <br />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <!-- Featured record -->
@@ -55,18 +66,18 @@
         <!-- 1st column -->
         <div class="col-md-4">
           <div class="panel panel-default">
-            <div class="panel-heading">{{ _('Trending') }}</div>
+            <div class="panel-heading">{{ _('Recommended') }}</div>
               <div class="panel-body">
                 {% for recid in collection.reclist[0:4] %}
                   {% set _record = get_record(recid) %}
                   <div class="media">
                     <div class="media-left media-middle">
                       <a href="#">
-                      <img class="media-object" width="80" height="100" src="{{_helpers.yellow_reports_cover(_record.url, 'icon-180') }}"/>
+                      <img class="media-object" width="80" height="100" src="{{_helpers.scientific_output_cover(_record.url, 'icon-180') }}"/>
                       </a>
                     </div>
                     <div class="media-body">
-                      <h4 class="media-heading"><a href="">{{ _helpers.yellow_reports_title(_record.meeting_names) }}</a></h4>
+                      <h4 class="media-heading"><a href="">{{ _helpers.scientific_output_title(_record.meeting_names) }}</a></h4>
                     </div>
                   </div>
                   {%- if not loop.last %}
@@ -89,11 +100,11 @@
                   <div class="media">
                     <div class="media-left media-middle">
                       <a href="#">
-                        <img class="media-object" width="80" height="100" src="{{_helpers.yellow_reports_cover(_record.url, 'icon-180') }}"/>
+                        <img class="media-object" width="80" height="100" src="{{_helpers.scientific_output_cover(_record.url, 'icon-180') }}"/>
                       </a>
                     </div>
                     <div class="media-body">
-                      <h4 class="media-heading"><a href="">{{ _helpers.yellow_reports_title(_record.meeting_names) }}</a></h4>
+                      <h4 class="media-heading"><a href="">{{ _helpers.scientific_output_title(_record.meeting_names) }}</a></h4>
                     </div>
                   </div>
                   {%- if not loop.last %}
@@ -108,10 +119,19 @@
         <!-- 2nd column -->
         <!-- 3rd column -->
         <div class="col-md-4">
-          <img width="100%" src="{{ url_for('static', filename='img/altmetrics-example.png') }}" alt="Almetrics reporting" class="img-thumbnail" />
-          <div class="clear"></div>
+          <h5 class="media-heading">Browse by year: </h5>
+          <table>
+          <tr>
+            <td class="searchboxbody" valign="top">
+              {{ _helpers.scientific_output_archive_dates() }}
+            </td>
+          </tr>
+          </table>
           <br />
           <a class="twitter-timeline"  href="https://twitter.com/CERN" data-widget-id="600562610375897088">Tweets by @CERN</a>
+          <div class="clear"></div>
+          <br />
+          <img width="100%" src="{{ url_for('static', filename='img/altmetrics-example.png') }}" alt="Almetrics reporting" class="img-thumbnail" />
           <br />
         </div>
         <!-- 3rd column -->
@@ -123,27 +143,17 @@
   <hr />
   <br />
   <!-- Main -->
-    <div class="row">
-      <div class="col-md-4">
-        <h5 class="media-heading">Browse by year: </h5>
-        <table>
-        <tr>
-          <td class="searchboxbody" valign="top">
-            {{ _helpers.yellow_reports_archive_dates() }}
-          </td>
-        </tr>
-        </table>
-      </div> <!-- end col-md-4 -->
-    <div class="col-md-8">
-      <!-- TODO: sort or rank according to popularity -->
+  <div class="row">
+    <div class="col-md-12">
+    <!-- TODO: sort or rank according to popularity -->
       {% for recid in collection.reclist[-5:]| reverse %}
-        {{ format_record(recid, 'hb', ln=g.ln) | safe }}
+        {#{ format_record(recid, 'hb', ln=g.ln) | safe }#}
         {%- if not loop.last %}
           <hr />
         {%- endif %}
       {% endfor %}
     </div>
-  </div> <!-- end div md-8 -->
+  </div> <!-- end div row -->
   <!-- Main -->
 {%- endblock -%}
 {%- block javascript %}
