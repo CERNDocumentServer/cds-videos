@@ -17,5 +17,8 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// Extend invenio config
-require.config({});
+define(function (require) {
+  var depot = require('vendors/depot/depot');
+
+  return depot('boxes', {idAttribute: 'id'});
+});

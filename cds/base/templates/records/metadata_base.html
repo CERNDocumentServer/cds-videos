@@ -1,0 +1,78 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+
+{%- if not request.is_xhr -%}
+  {% extends "records/base.html" %}
+{%- endif -%}
+
+{% block record_content %}
+
+{# This should probably go somewhere else #}
+{% import "helpers/general.html" as macros %}
+
+{{ macros.get_title(record) }}
+<div class="row">
+
+    <div class="col-md-12" id="record_dates">
+        <dl>
+            {% if record.abstract %}
+                <dt class="record_key">{{ _("Abstract") }}:</dt>
+                <dd>{{ macros.get_abstract(record) }}</dd>
+            {% endif %}
+
+            {% if record.main_entry_personal_name %}
+                <dt class="record_key"><i class="glyphicon glyphicon-user"></i> {{ _("Authors") }}:</dt>
+                <dd>{{ macros.get_authors(record, is_link=true, limit=3, page_size=5) }}</dd>
+            {% endif %}
+
+            {% if record.index_term_uncontrolled %}
+                <dt class="record_key"><i class="glyphicon glyphicon-comment"></i> {{ _("Keywords") }}:</dt>
+	            <dd>{{ macros.get_keywords(record, limit=3, page_size=5) }}</dd>
+            {% endif %}
+
+	        {% if record.subject %}
+	            <dt class="record_key"><i class="glyphicon glyphicon-book"></i> {{ _("Subject") }}</dt>
+	            <dd>{{ macros.get_subject(record) }}</dd>
+	        {% endif %}
+
+	        {% if record.copyright %}
+	            <dt class="record_key"><i class="glyphicon glyphicon-copyright-mark"></i> {{ _("Copyright") }}</dt>
+	            <dd>{{ macros.get_copyright(record) }}</dd>
+	        {% endif %}
+
+            {% if record.cat %}
+	            <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Creation date") }}</dt>
+                <dd>{{ macros.get_creation_date(record) }}</dd>
+            {% endif %}
+
+            {% if record.cat %}
+                <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Modification date") }}:</dt>
+  	            <dd>{{ macros.get_modification_date(record) }}</dd>
+            {% endif %}
+
+        </dl>
+    </div>
+</div>
+
+{% endblock %}
+
+{%- block global_bundles -%}
+  {{- super() -}}
+  {%- bundle "cds.js" -%}
+{%- endblock -%}

@@ -63,7 +63,7 @@ def _concat_fields_into_list(*args):
 PACKAGES = [
     "cds.base",
     "cds.demosite",
-    "cds.modules.*",
+    "cds.modules.personal_collection",
 ] + _PACKAGES
 
 PACKAGES_EXCLUDE = [

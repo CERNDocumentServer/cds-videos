@@ -22,21 +22,27 @@
   <nav>
     <ul>
       <li>
-{%- if current_user.is_guest -%}
-        <a href="{{ url_for("oauth.login.cern", referer=request.url) }}">
-          {{- _("Sign in") -}}
-        </a>
-{%- else -%}
-        Signed in as:
-        <a href="{{ url_for("webaccount.index") }}">
-          {{- current_user.nickname | default(current_user.email) -}}
-        </a>
-      </li>
-      <li>
-        <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
-          {{- _("Sign out") -}}
-        </a>
-{%- endif -%}
+        {%- if current_user.is_guest -%}
+          {%- if config.DEBUG -%}
+            <a href="{{url_for('webaccount.login')}}" title="{{ _('Login') }}">
+              {{ _('Login') }}
+            </a>
+          {%- else -%}
+            <a href="{{ url_for("oauth.login.cern", referer=request.url) }}">
+              {{ _('Login') }}
+            </a>
+          {%- endif -%}
+        {%- else -%}
+          Signed in as:
+          <a href="{{ url_for("webaccount.index") }}">
+            {{- current_user.nickname | default(current_user.email) -}}
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
+            {{- _("Logout") -}}
+          </a>
+        {%- endif -%}
       </li>
       <li><a href="//cern.ch/directory">Directory</a></li>
     </ul>

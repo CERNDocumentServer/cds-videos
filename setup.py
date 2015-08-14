@@ -71,5 +71,6 @@ setup(
         'invenio.config': [
             "cds = cds.config"
         ]
-    }
+    },
+    test_suite='invenio.testsuite.suite',
 )

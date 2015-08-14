@@ -20,13 +20,14 @@
 @charset "utf-8";
 @import "base.less";
 @import "base/cern-toolbar.less";
-@import "base/prototype.less";
+@import "personal/main.less";
+
 // Change bootstrap default
 @border-radius-base: 0px;
 @border-radius-large: 0px;
 @border-radius-small: 0px;
 body {
-    font-family: 'PT Sans','Trebuchet MS',Tahoma,sans-serif;
+    font-family: 'PT Sans','Trebuchet MS', Tahoma, sans-serif;
     color: #626262;
     padding-top: 0; /* hot fix */
 }
@@ -148,3 +149,9 @@ footer, footer p {
 #twitter-widget-0{
   max-height: 370px!important;
 }
+
+.cds-modal .modal-body {
+  max-height: calc(50vh);
+  overflow-y: auto;
+}
+

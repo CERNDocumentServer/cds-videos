@@ -1,0 +1,126 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+
+{% macro get_author(author, is_link=false) %}
+    {% if is_link %}
+      <a href="{{ url_for("search.search", f='author', p=author.personal_name) }}">
+    {% else %}
+      <span>
+    {% endif %}
+
+      {{ author.personal_name }}
+
+    {% if is_link %}
+      </a>
+    {% else %}
+      </span>
+    {% endif %}
+
+    {% if author.affiliation %}
+      ({{ author.affiliation }})
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_see_more_list(items_list, limit, title, delimiter=";", page_size=20) %}
+    {% if limit > items_list|length %}
+        {% for item in items_list %}
+            {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
+        {% endfor %}
+    {% else %}
+        {% for item in items_list[0:limit] %}
+            {{ item }}{{ delimiter }}
+        {% endfor %}
+
+        <a data-show-more data-title="{{ title }}"
+           data-close-button="{{ _("Close") }}"
+           data-items='{{ items_list|tojson }}'
+           data-page-size="{{ page_size }}">
+            {{ _("See all...") }}
+        </a>
+
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_authors(record, limit, delimiter=";", is_link=false, page_size=10) %}
+    {% set authors_list = [get_author(record.main_entry_personal_name, is_link)] %}
+    {% for author in record.added_entry_personal_name %}
+        {% do authors_list.append(get_author(author, is_link)) %}
+    {% endfor %}
+
+    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter, page_size) }}
+
+{% endmacro %}
+
+
+{% macro get_title(record) %}
+    {% if record.varying_form_of_title %}
+
+        {% if g.ln == "fr" %}
+            <h2 class="text-primary" id="record_detail_title">{{ record.varying_form_of_title[0].get('title_proper_short_title') }}</h2>
+            <h2 class="text-muted" id="record_detail_additional_title">{{ record.title_statement.get('title') }}</h2>
+        {% else %}
+            <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
+            <h2 class="text-muted" id="record_detail_additional_title">{{ record.varying_form_of_title[0].get('title_proper_short_title') }}</h2>
+        {% endif %}
+
+    {% else %}
+
+      <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
+
+    {% endif %}
+{% endmacro %}
+
+
+{% macro get_creation_date(record) %}
+    {{ record.get('cat')[0].get('creation_date') }}
+{% endmacro %}
+
+
+{% macro get_modification_date(record) %}
+    {{ record.get('cat')[0].get('modification_date') }}
+{% endmacro %}
+
+
+{% macro get_keywords(record, limit, delimiter=";", page_size=10) %}
+    {% set keyword_list = [] %}
+    {% for keyword in record.index_term_uncontrolled %}
+        {% do keyword_list.append(keyword.uncontrolled_term[0]) %}
+    {% endfor %}
+
+    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter, page_size) }}
+
+{% endmacro %}
+
+
+{% macro get_subject(record) %}
+    {{ record.get('subject_added_entry_topical_term')[0].get('topical_term_or_geographic_name_entry_element') }}
+{% endmacro %}
+
+
+{% macro get_abstract(record) %}
+    {{ record.get('summary')[0].get('summary') }}
+{% endmacro %}
+
+
+{% macro get_copyright(record) %}
+    {{ record.get('information_relating_to_copyright_status').get('copyright_date') }},
+    {{ record.get('information_relating_to_copyright_status').get('copyright_holder') }}
+{% endmacro %}

@@ -19,3 +19,5 @@
 # or submit itself to any jurisdiction.
 
 ## Pinned base requirements
+
+urllib3<2.0,>=1.8
