@@ -48,8 +48,8 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
+        "invenio-previewer>=0.1.0",
         "mixer==4.9.5",
-        "Flask-IIIF>=0.1.0",
         "raven==5.1.1",
     ],
     extras_require={

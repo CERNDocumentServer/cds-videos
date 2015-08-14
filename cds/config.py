@@ -64,12 +64,14 @@ PACKAGES = [
     "cds.base",
     "cds.demosite",
     "cds.modules.personal_collection",
+    'invenio_previewer',
 ] + _PACKAGES
 
 PACKAGES_EXCLUDE = [
     "invenio.modules.annotations",
     "invenio.modules.communities",
     "invenio.modules.pages",
+    "invenio.modules.previewer",
 ] + _PACKAGES_EXCLUDE
 
 EXTENSIONS = [
