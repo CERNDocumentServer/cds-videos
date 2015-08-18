@@ -1,0 +1,69 @@
+<!--
+This file is part of Invenio.
+Copyright (C) 2015 CERN.
+
+Invenio is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+
+Invenio is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Invenio; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Read More</title>
+		<script>
+			function createRandomWord(length) 
+			{
+			  var consonants = 'bcdfghjklmnpqrstvwxyz',
+			    vowels = 'aeiou',
+			    rand = function(limit) 
+			    {
+			       return Math.floor(Math.random()*limit);
+			    },
+			    i, word='', length = parseInt(length,10),
+			    consonants = consonants.split(''),
+			    vowels = vowels.split('');
+			  for (i=0;i<length/2;i++) 
+			  {
+			    var randConsonant = consonants[rand(consonants.length)],
+			        randVowel = vowels[rand(vowels.length)];
+			    word += (i===0) ? randConsonant.toUpperCase() : randConsonant;
+			    word += i*2<length-1 ? randVowel : '';
+			  }
+			  return word;
+			}
+
+			      
+			function random(num)
+			{
+			  var text = [];
+			  for (var i = 0; i < num; i++) 
+			  {
+			    text.push(createRandomWord(5));
+			  }
+			    
+			  document.getElementById("textArea").innerHTML=text.join(separator=" "); 
+			}
+		</script>
+	</head>
+	<body>
+	  <p id="textArea" class = "record-brief-view-show-more">
+	  	<script>
+	  		random(10000);
+	  	</script>
+	  </p>
+		 
+		<br>
+		<br>
+	</body>
+</html>

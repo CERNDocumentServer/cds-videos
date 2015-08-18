@@ -17,9 +17,11 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
 
+
 {%- if not request.is_xhr -%}
   {% extends "records/base.html" %}
 {%- endif -%}
+
 
 {% block record_content %}
 
@@ -27,6 +29,7 @@
 {% import "helpers/general.html" as macros %}
 
 {{ macros.get_title(record) }}
+
 <div class="row">
 
     <div class="col-md-12" id="record_dates">
@@ -43,27 +46,27 @@
 
             {% if record.index_term_uncontrolled %}
                 <dt class="record_key"><i class="glyphicon glyphicon-comment"></i> {{ _("Keywords") }}:</dt>
-	            <dd>{{ macros.get_keywords(record, limit=3, page_size=5) }}</dd>
+                <dd>{{ macros.get_keywords(record, limit=3, page_size=5) }}</dd>
             {% endif %}
 
-	        {% if record.subject %}
-	            <dt class="record_key"><i class="glyphicon glyphicon-book"></i> {{ _("Subject") }}</dt>
-	            <dd>{{ macros.get_subject(record) }}</dd>
-	        {% endif %}
+            {% if record.subject %}
+                <dt class="record_key"><i class="glyphicon glyphicon-book"></i> {{ _("Subject") }}</dt>
+                <dd>{{ macros.get_subject(record) }}</dd>
+            {% endif %}
 
-	        {% if record.copyright %}
-	            <dt class="record_key"><i class="glyphicon glyphicon-copyright-mark"></i> {{ _("Copyright") }}</dt>
-	            <dd>{{ macros.get_copyright(record) }}</dd>
-	        {% endif %}
+            {% if record.copyright %}
+                <dt class="record_key"><i class="glyphicon glyphicon-copyright-mark"></i> {{ _("Copyright") }}</dt>
+                <dd>{{ macros.get_copyright(record) }}</dd>
+            {% endif %}
 
             {% if record.cat %}
-	            <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Creation date") }}</dt>
+                <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Creation date") }}</dt>
                 <dd>{{ macros.get_creation_date(record) }}</dd>
             {% endif %}
 
             {% if record.cat %}
                 <dt class="record_key"><i class="glyphicon glyphicon-calendar"></i> {{ _("Modification date") }}:</dt>
-  	            <dd>{{ macros.get_modification_date(record) }}</dd>
+                <dd>{{ macros.get_modification_date(record) }}</dd>
             {% endif %}
 
         </dl>

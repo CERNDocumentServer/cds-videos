@@ -17,56 +17,326 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
 
-{% macro get_author(author, is_link=false) %}
-    {% if is_link %}
-      <a href="{{ url_for("search.search", f='author', p=author.personal_name) }}">
+
+{% macro record_brief_view(record, recid, recordloop, pagination, rg) %}
+  <div class="container-fluid"> 
+    <div class="row">  {# External row #}
+      <div class="col-xs-1 col-sm-1">
+        <div class="cds-margin-top-20"
+          <label class="checkbox">
+          <input name="recid" type="checkbox" value="{{ recid }}" />
+          <abbr class="unapi-id" title="{{ recid }}"></abbr>
+          {{ recordloop.index+(pagination.page-1)*rg }}
+        </label> 
+        </div> 
+      </div>
+
+      {% set thumb = get_thumbnail(record) %}
+     
+      {% if thumb|trim != "" %}
+      {# If there is a thumbnail #}
+        <div class="col-xs-2 col-sm-2">
+          <div class="cds-margin-top-20"> 
+            {{ thumb }}
+            <span class="brief-view-copyright">{{ get_copyright(record) }}</span> 
+          </div>
+        </div>
+        {% set columns = 9 %}
+      {% else %}
+        {% set columns = 11 %}
+      {% endif %}
+
+      <div class="col-xs-{{columns}} col-sm-{{columns}}"> {# Rest #} 
+        <div class="row"> {# Internal row 1 #}
+          <div class="col-xs-12 col-sm-12">
+            <a href="{{ url_for("record.metadata", recid=get_control_number(record)) }}">
+              <h3>{{ get_single_title(record) }}</h3>
+            </a>
+          </div>
+        </div>
+          <div class="row"> {# Internal row 2 #}
+            <div class="col-xs-12 col-sm-12">
+              <div class="brief-view-metadata">
+                <ul class="brief-view-inline-list"> 
+                {% set date = get_creation_date(record) %}
+                {% if date|trim != "" %}
+                   <li><i class="glyphicon glyphicon-calendar"></i> {{ date }}</li>
+                {% endif %}
+                  <li>
+                    {{ get_system_control_number(record) }}
+                  </li>
+                  <li>
+                    {{ get_number_of_files(record) }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        {% set description = get_description(record) %} 
+        {% if description|trim != "" %} 
+        {# If there is a description or abstract #}
+          <div class="row"> {# Internal row 3 #}
+            <div class="col-xs-12 col-sm-12">
+              <div class="cds-margin-bottom-10">
+                {{ description }}
+              </div>
+            </div>
+          </div>
+        {% endif %} 
+        <div class="row">  {# Internal row 4 #}
+          <div class="col-xs-12 col-sm-12">
+            <div class="brief-view-metadata">
+              <ul class="brief-view-inline-list">
+
+                <li>{{ get_collections(record, limit = 2, delimiter = " ", is_link=true) }}</li>
+
+                {% set keywords = get_keywords(record, 2, delimiter=" ", is_link=true) %}
+
+                {% if keywords|trim != "" %}
+                  <li>
+                    <i class="glyphicon glyphicon-tag"></i>
+                    {{ get_keywords(record, 2, delimiter=" ", is_link=true) }}
+                  </li>
+                {% endif %}
+                
+                {% set auth = get_authors(record, 2, delimiter=",", is_link=true) %}
+                {% if auth|trim != "" %}
+                  <li>  
+                    <i class="glyphicon glyphicon-user"></i>
+                    <span class="brief-view-by-author">
+                      {{'by '}}
+                    </span>
+                    {{ auth }}  
+                 </li>
+                {% endif %}
+
+                {% if record.get('files') and record.get('files') !=  [] %}
+                <li>{{ get_files(record, limit = 0, is_link=true) }}</li>  
+              {% endif %}
+              
+                <li>{{ get_external_links(record, limit = 0, is_link=true) }} </li> 
+              
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>  
+  </div>
+{% endmacro %}
+
+{% macro get_number_of_files(record) %}
+  {% if record.get('files') %}
+    <i class="fa fa-file"></i>
+    {% if record.get('files') is not mapping and record.get('files') is iterable %}              
+      {% set files = record.get('files')|length %}
+      {% if files == 1 %} 
+        {{ '1 file' }}
+      {% else %}
+        {{ files }}
+        {{ 'files' }}
+      {% endif %}   
     {% else %}
-      <span>
+      {{ '1 file' }}
     {% endif %}
-
-      {{ author.personal_name }}
-
-    {% if is_link %}
-      </a>
-    {% else %}
-      </span>
-    {% endif %}
-
-    {% if author.affiliation %}
-      ({{ author.affiliation }})
-    {% endif %}
+  {% endif %}
 {% endmacro %}
 
 
-{% macro get_see_more_list(items_list, limit, title, delimiter=";", page_size=20) %}
-    {% if limit > items_list|length %}
-        {% for item in items_list %}
-            {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
-        {% endfor %}
-    {% else %}
-        {% for item in items_list[0:limit] %}
-            {{ item }}{{ delimiter }}
-        {% endfor %}
-
-        <a data-show-more data-title="{{ title }}"
-           data-close-button="{{ _("Close") }}"
-           data-items='{{ items_list|tojson }}'
-           data-page-size="{{ page_size }}">
-            {{ _("See all...") }}
-        </a>
-
-    {% endif %}
+{% macro get_keyword(keyword, is_link=false) %}
+  {% if is_link %}
+   <a href="{{ url_for("search.search", p=keyword) }}"><span class="label label-default">{{ keyword }}</span></a>
+  {% else %}
+    <span class="label label-default">{{ keyword }}</span>
+  {% endif %}
 {% endmacro %}
 
 
-{% macro get_authors(record, limit, delimiter=";", is_link=false, page_size=10) %}
-    {% set authors_list = [get_author(record.main_entry_personal_name, is_link)] %}
-    {% for author in record.added_entry_personal_name %}
-        {% do authors_list.append(get_author(author, is_link)) %}
+{% macro get_keywords(record, limit, delimiter=";", page_size=10, is_link=false) %}
+  {% if record.get('index_term_uncontrolled') %}
+    {% set keyword_list = [] %}
+    {% for keyword in record.get('index_term_uncontrolled') %}
+      {% do keyword_list.append(get_keyword(keyword.get('uncontrolled_term')[0], is_link)) %}
     {% endfor %}
 
-    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter, page_size) }}
+    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter, page_size) }}
+  {% endif %}
+{% endmacro %}
+ 
 
+{% macro get_file(file, is_link=false) %}
+  {% if is_link %}
+    <a href="{{ file.get('url') }}">
+      {{ file.get('full_name') }}
+    </a>
+    <small>
+      {{ "(%.3f %s)"|format(file.get('size')/1024, "KB") }} 
+    </small>
+  {% else %}
+    {{ file.get('full_name') }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_files(record, limit, delimiter=";", page_size=10, is_link=false) %}
+  {% set file_list = [] %}
+
+  {% if record.get('files') is not mapping and record.get('files') is iterable %}
+    {% for file in record.get('files') %}
+      {% do file_list.append(get_file(file, is_link)) %}
+    {% endfor %}
+  {% else %}
+    {% do file_list.append(get_file(record.get('files'), is_link)) %}
+  {% endif %}
+
+  {% if file_list != [] %}
+     <i class="glyphicon glyphicon-save-file"></i>
+  {% endif %}
+
+  {{ get_see_more_list(file_list, limit, _("Download Files"), delimiter, page_size, more_link_label = "Download Files") }}
+{% endmacro %}  
+
+
+{% macro get_external_link(link, is_link=false) %}
+  {% if link.get('link_text') is not mapping %} {# If the attribute contains a list #}
+    {% set link_text = link.get('link_text')[0] %}
+  {% else %}
+    {% set link_text = link.get('link_text') %}
+  {% endif %}
+
+  {% if is_link %}
+    {% if link.get('uniform_resource_identifier') is not mapping %} {# If the attribute contains a list #}
+      {% set link_address = link.get('uniform_resource_identifier')[0] %}
+    {% else %}
+      {% set link_address = link.get('uniform_resource_identifier') %}
+    {% endif %}
+    <a href="{{ link_address }}">
+      {{ link_text }}
+    </a>
+  {% else %}
+    {{ link_text }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_external_links(record, limit, delimiter=";", page_size=10, is_link=false) %}
+  {% set external_list = [] %}
+
+  {% if record.get('electronic_location_and_access') %}
+    {% if record.get('electronic_location_and_access') is not mapping %} {# If the attribute contains a list #}
+      {% for link in record.get('electronic_location_and_access') %}
+        {% do external_list.append(get_external_link(link, is_link)) %}
+      {% endfor %}
+    {% else %}
+      {% do external_list.append(get_external_link(record.get('electronic_location_and_access'), is_link)) %}
+    {% endif %}
+    
+    {% if external_list != [] %}
+       <i class="glyphicon glyphicon-link"></i>
+
+       {{ get_see_more_list(external_list, limit, _("External Links"), delimiter, page_size,  more_link_label = "External Links") }}
+    {% endif %}
+  {%endif%} 
+{% endmacro %}
+
+
+{% macro get_system_control_number(record) %}
+  {% if record.get('system_control_number') %}
+    <i class="glyphicon glyphicon-qrcode"></i>
+    {% if record.get('system_control_number') is not mapping  %} {# If the attribute contains a list #}
+      {% set system_control_number = record.get('system_control_number')[0]  %}
+    {% else %}
+      {% set system_control_number = record.get('system_control_number')  %}
+    {% endif %}
+
+    {% if system_control_number.get('inst') == "arXiv" %}
+      {{ get_archive_link(system_control_number.get('system_control_number')) }}
+    {% else %}
+      {{ system_control_number.get('system_control_number') }}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro get_archive_link(system_control_number_link) %}
+  {% set system_control_number_link_clean =  system_control_number_link|replace("oai:arXiv.org:", "")  %}
+  <a target="_blank" href="//arxiv.org/abs/{{ system_control_number_link_clean }}">
+    {{ "arXiv:%s"|format(system_control_number_link|replace("oai:arXiv.org:", "")) }}
+  </a>
+{% endmacro %}
+
+{% macro get_collection(col, is_link=false) %} 
+  {% if is_link %}
+    <a href="{{ url_for("search.search", p=col) }}">{{ col }}</a>
+  {% else %}
+    {{ col }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_collections(record, limit, delimiter=";", page_size=10, is_link=false) %}
+  {% if record.get('collections') %}
+    {% set collection_list = [] %}
+    {% for col in record.get('collections') %}
+      {% if col.get('primary') %}
+        {% do collection_list.append(get_collection(col.get('primary'), is_link)) %}
+      {% endif %}
+
+      {% if col.get('secondary') %}
+        {% do collection_list.append(get_collection(col.get('secondary'), is_link)) %}
+      {% endif %}
+
+    {% endfor %}
+
+    {% if collection_list != [] %}
+      <i class="fa fa-folder-open"></i>
+    {% endif %}
+
+    {{ get_see_more_list(collection_list, limit, _("Collections"), delimiter, page_size) }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_thumbnail(record) %}
+  {% if record.get('files') %}
+    {% if record.get('files') is not mapping and record.get('files') is iterable %}
+    {# If there are several files #}
+      {% set file = (record.get('files')|selectattr("magic", "contains", "image")|first) %}
+      <a href={{file.get('url')}} class="thumbnail">
+        <img src={{file.get('url')}} alt={{file.get('full_name')}} >
+      </a>
+    {% else %}
+    {# If there is only one file #}
+      {% if record.get('files').get('magic') is contains 'image' %}
+        <a href={{record.get('files').get('url')}} class="thumbnail">
+          <img src={{record.get('files').get('url')}} alt={{record.get('files').get('full_name')}}>
+        </a>  
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_control_number(record) %}
+  {% if record.get('control_number') %}
+    {{ record.get('control_number') }}
+  {% endif %}
+{% endmacro %}
+ 
+
+{% macro get_single_title(record) %}
+  {% if record.varying_form_of_title %}
+    {% if record.get('varying_form_of_title')[0].get('title_proper_short_title') %}
+      {{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}
+      {% endif %}
+  {% else %}
+    {% if record.get('title_statement') %}
+      {% if record.get('title_statement').get('title') %}
+        {{ record.get('title_statement').get('title') }}
+      {% endif %}
+    {% endif %} 
+  {% endif %}
 {% endmacro %}
 
 
@@ -74,11 +344,11 @@
     {% if record.varying_form_of_title %}
 
         {% if g.ln == "fr" %}
-            <h2 class="text-primary" id="record_detail_title">{{ record.varying_form_of_title[0].get('title_proper_short_title') }}</h2>
-            <h2 class="text-muted" id="record_detail_additional_title">{{ record.title_statement.get('title') }}</h2>
+            <h2 class="text-primary" id="record_detail_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
+            <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('title_statement').get('title') }}</h2>
         {% else %}
             <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
-            <h2 class="text-muted" id="record_detail_additional_title">{{ record.varying_form_of_title[0].get('title_proper_short_title') }}</h2>
+            <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
         {% endif %}
 
     {% else %}
@@ -88,39 +358,123 @@
     {% endif %}
 {% endmacro %}
 
+{% macro get_description(record) %}
+  {% if record.get('description') %}
+    {% set text = record.get('description') %}
+  {% else %}
+    {% set text = get_abstract(record) %}
+  {% endif %}
 
-{% macro get_creation_date(record) %}
-    {{ record.get('cat')[0].get('creation_date') }}
-{% endmacro %}
+  <div data-words="60" class="record-brief-view-show-more">
+    {{ text | safe }}
+  </div>
 
-
-{% macro get_modification_date(record) %}
-    {{ record.get('cat')[0].get('modification_date') }}
-{% endmacro %}
-
-
-{% macro get_keywords(record, limit, delimiter=";", page_size=10) %}
-    {% set keyword_list = [] %}
-    {% for keyword in record.index_term_uncontrolled %}
-        {% do keyword_list.append(keyword.uncontrolled_term[0]) %}
-    {% endfor %}
-
-    {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter, page_size) }}
-
-{% endmacro %}
-
-
-{% macro get_subject(record) %}
-    {{ record.get('subject_added_entry_topical_term')[0].get('topical_term_or_geographic_name_entry_element') }}
 {% endmacro %}
 
 
 {% macro get_abstract(record) %}
+  {% if record.get('summary') %} 
     {{ record.get('summary')[0].get('summary') }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_author(author, is_link=false) %}
+  {% if is_link %}
+    <a href="{{ url_for("search.search", p=author.get('personal_name')) }}">
+
+  {% else %}
+    <span>
+  {% endif %}
+
+  {{ author.get('personal_name')|replace(",", " ") }} 
+  {% if author.get('affiliation') %}
+    {{ "(%s)"| format(author.get('affiliation')) }}
+  {% endif %}
+
+  {% if is_link %}
+    </a>
+  {% else %}
+    </span>
+  {% endif %}  
+{% endmacro %}
+
+
+{% macro get_authors(record, limit, delimiter=";", is_link=false, page_size=10) %}
+  {% if record.get('main_entry_personal_name') %}
+    {% set authors_list = [get_author(record.get('main_entry_personal_name'), is_link)] %}
+    
+    {% if record.get('added_entry_personal_name') %}
+      {% if record.get('added_entry_personal_name') is not mapping %}  {# If the attribute contains a list of names #}
+        {% for author in record.get('added_entry_personal_name') %}
+          {% do authors_list.append(get_author(author, is_link)) %}
+        {% endfor %}
+      {% else %}
+        {% do authors_list.append(get_author(record.get('added_entry_personal_name'), is_link)) %}
+      {% endif %}
+    {% endif %}
+    
+
+    {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter, page_size) }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_see_more_list(items_list, limit, title, delimiter=";", page_size=20, more_link_label = "(see all)") %}
+  {% if limit > items_list|length %}
+    {% for item in items_list %}
+      {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
+    {% endfor %}
+  {% else %}
+    {% for item in items_list[0:limit] %}
+      {% if loop.index0 != limit-1 %}
+        {{ item }}{{ delimiter }} 
+      {% else %}
+        {{ item }}
+      {% endif %}
+    {% endfor %}
+
+    <a data-show-more data-title="{{ title }}"
+       data-close-button="{{ _("Close") }}"
+       data-items='{{ items_list|tojson }}'
+       data-page-size="{{ page_size }}">
+      {{ _(more_link_label) }}
+    </a>
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_creation_date(record) %}
+  {% if record.get('cat') %}
+    {% if record.get('cat')[0].get('creation_date') %}
+      {% set date = record.get('cat')[0].get('creation_date') %}
+    {% endif %}
+    {{ date }}
+  {% endif %}
 {% endmacro %}
 
 
 {% macro get_copyright(record) %}
-    {{ record.get('information_relating_to_copyright_status').get('copyright_date') }},
+  {% if record.get('information_relating_to_copyright_status') %}
+    {{ 'Copyright' }}
+    {{ record.get('information_relating_to_copyright_status').get('copyright_date') }}
     {{ record.get('information_relating_to_copyright_status').get('copyright_holder') }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_modification_date(record) %}
+  {% if record.get('cat') %}
+    {% if record.get('cat')[0].get('modification_date') %}
+      {% set date = record.get('cat')[0].get('modification_date') %}
+    {% endif %}
+    {{ date }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro get_subject(record) %}
+  {% if record.get('subject_added_entry_topical_term') %}
+    {{ record.get('subject_added_entry_topical_term')[0].get('topical_term_or_geographic_name_entry_element') }}
+  {% endif %}  
 {% endmacro %}
