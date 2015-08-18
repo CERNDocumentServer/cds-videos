@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2013 CERN.
+# Copyright (C) 2013, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -19,7 +19,19 @@
 
 """CDS Demosite interface."""
 
-from flask import Blueprint
+from flask import Blueprint, current_app
+from invenio.ext.template.context_processor import (
+	register_template_context_processor
+)
 
 blueprint = Blueprint('cds', __name__, url_prefix='/',
                       template_folder='templates', static_folder='static')
+
+@blueprint.before_app_first_request
+def _contains():
+
+	def contains(text, value):
+	    return value in text[1]
+
+	with current_app.app_context():
+		current_app.jinja_env.tests['contains'] = contains

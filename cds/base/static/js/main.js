@@ -17,9 +17,13 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require(
-  [
-    "js/app",
-    "js/record_tools"
-  ],
-  function() {});
+require([
+	"jquery",
+	"js/app",
+    "js/record_tools"],
+function($, app, main) {
+	$(document).ready(function() {
+		main.modalList();
+		main.expandContent();
+	});
+});
