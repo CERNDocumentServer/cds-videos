@@ -191,6 +191,8 @@ RECORD_KEY_ALIASES['funding_project_number'] = 'funding_information_note.project
 
 CFG_ACCESS_CONTROL_NOTIFY_USER_ABOUT_NEW_ACCOUNT = 0
 
+BLOCK_GOOGLE_TRANSLATE = False
+
 try:
     from cds.instance_config import *  # noqa
 except ImportError:

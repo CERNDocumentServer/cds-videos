@@ -25,5 +25,6 @@ function($, app, main) {
 	$(document).ready(function() {
 		main.modalList();
 		main.expandContent();
+		main.translationListener();
 	});
 });

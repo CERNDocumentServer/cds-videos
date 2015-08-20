@@ -23,6 +23,13 @@
   {% bundles "cds.js" %}
 {% endblock %}
 
+{%- block head_meta %}
+  {{ super() }}
+  {% if config.get("BLOCK_GOOGLE_TRANSLATE", False) %}
+      <meta name="google" value="notranslate" />
+  {% endif %}
+{% endblock %}
+
 {%- block page_header -%}
   <div id="wrap"> {# get closed into page_footer #}
   {#

@@ -17,21 +17,17 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
 
-
 {%- if not request.is_xhr -%}
   {% extends "records/base.html" %}
 {%- endif -%}
 
-
-{% block record_content %}
-
 {# This should probably go somewhere else #}
 {% import "helpers/general.html" as macros %}
 
+{% block record_content %}
+
 {{ macros.get_title(record) }}
-
 <div class="row">
-
     <div class="col-md-12" id="record_dates">
         <dl>
             {% if record.abstract %}
@@ -72,6 +68,7 @@
         </dl>
     </div>
 </div>
+
 
 {% endblock %}
 

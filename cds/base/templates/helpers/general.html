@@ -127,6 +127,22 @@
   </div>
 {% endmacro %}
 
+{% macro translation_warning(record) %}
+  {% if record.is_restricted %}
+    <div id="translationAlert" class="alert alert-warning alert-dismissible fade in notranslate" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">
+            &times;
+          </span>
+      </button>
+      <strong>Warning!</strong> 
+      <div class="cds-margin-top-5">
+        {{_("You seem to be using Google Translate. For this service to work, the content of this restricted page had to be sent to an external company. This can be a violation of conditions. It is your responsibility to not send restricted content to unauthorized individuals and services.")}}
+      </div>
+    </div> 
+  {% endif %} 
+{% endmacro %}
+
 {% macro get_number_of_files(record) %}
   {% if record.get('files') %}
     <i class="fa fa-file"></i>

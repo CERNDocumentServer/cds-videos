@@ -123,9 +123,25 @@ define(function(require, exports, module) {
       $text.data("state", getState);
     });
   };
+  
+  function translationHandler()
+  {
+    $("#translationAlert").show();
+  };
+
+  function translationListener(){
+     document.addEventListener('DOMSubtreeModified', function (e)
+    {
+      if(e.target.className.match('translated')) 
+      {
+       translationHandler();
+      } 
+    }, true);
+  }
  
  return {
     modalList: modalList,
-    expandContent: expandContent
+    expandContent: expandContent,
+    translationListener: translationListener
  }
 });
