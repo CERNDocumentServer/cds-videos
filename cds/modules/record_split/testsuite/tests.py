@@ -54,9 +54,6 @@ class TestAlbumSplit(InvenioTestCase):
 
         album, photos = album_splitter.split_records_string(self.real_album)
 
-        import pprint
-        pprint.pprint(photos)
-        pprint.pprint(album)
         # should be 5 photos - 3 from 8564_, 2 from 8567_
         self.assertEqual(len(photos), 5)
 
@@ -69,6 +66,23 @@ class TestAlbumSplit(InvenioTestCase):
         self.assertEqual(photos[2]['001'][0], '5000002')
         self.assertEqual(photos[3]['001'][0], '5000003')
         self.assertEqual(photos[4]['001'][0], '5000004')
+
+        # check references
+        self.assertEqual(photos[0]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
+        self.assertEqual(photos[1]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
+        self.assertEqual(photos[2]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
+        self.assertEqual(photos[3]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
+        self.assertEqual(photos[4]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
+
+        import pprint
+        pprint.pprint(album['774__'])
+        self.assertEqual(album['774__'], [
+            {'a': 'IMAGE', 'r': '5000000'},
+            {'a': 'IMAGE', 'r': '5000001'},
+            {'a': 'IMAGE', 'r': '5000002'},
+            {'a': 'IMAGE', 'r': '5000003'},
+            {'a': 'IMAGE', 'r': '5000004'},
+        ])
 
         # check copied 8564_
         self.assertEqual(photos[2]['8564_'], {
@@ -138,7 +152,7 @@ class TestAlbumSplit(InvenioTestCase):
             self.assertEqual(photo['542__'], expected_fields_8564['542__'])
 
         expected_fields_8567_1 = {
-            '037__': {'a': 'CERN-AC-98010232'},
+            '037__': {'a': 'CERN-AC-9801023-2'},
             '100__': {'a': 'Laurent Guiraud'},
             '260__': {'c': '1998'},
             '269__': {'c': 'Jan 1998'},
@@ -146,7 +160,7 @@ class TestAlbumSplit(InvenioTestCase):
         }
 
         expected_fields_8567_2 = {
-            '037__': {'a': 'CERN-AC-98010231'},
+            '037__': {'a': 'CERN-AC-9801023-1'},
             '100__': {'a': 'Laurent Guiraud'},
             '260__': {'c': '1998'},
             '269__': {'c': 'Jan 1998'},
@@ -170,9 +184,7 @@ class TestAlbumSplit(InvenioTestCase):
         # self.assertEqual(len(splitted_album[0]['8564_']), 0)
 
         # does it remove the icons
-        for media in album['8564_']:
-            if media.get('u') and media.get('x'):
-                self.assertFalse(media.get('x').startswith('icon'))
+        self.assertIsNone(album.get('8564_'))
 
     def test_exception_when_record_malformed(self):
         album_splitter = AlbumSplitter()
