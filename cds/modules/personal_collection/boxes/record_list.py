@@ -23,7 +23,7 @@ import itertools
 from flask import url_for
 from six import add_metaclass
 
-from invenio.modules.search.api import Query
+from invenio_search.api import Query
 
 from .base import BoxBase
 
