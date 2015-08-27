@@ -136,7 +136,7 @@ class TestAlbumSplit(InvenioTestCase):
         )
 
         expected_fields_8564 = {
-            '037__': {'a': 'CERN-AC-9801023'},
+            '037__': {'a': 'CERN-AC-9801023-01'},
             '100__': {'a': 'Laurent Guiraud'},
             '260__': {'c': '1998'},
             '269__': {'c': 'Jan 1998'},

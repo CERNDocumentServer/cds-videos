@@ -228,7 +228,16 @@ class AlbumSplitter(RecordSplitter):
 
     @classmethod
     def allowed_hostname(cls, url):
-        return urlparse.urlsplit(url).hostname.lower() in cls.q_allowed_hostnames
+        check_fun = partial(lambda hostname, url: url.startswith(hostname), url=url)
+        return any(map(check_fun, cls.q_allowed_hostnames))
+        # return urlparse.urlsplit(url).hostname.lower() in cls.q_allowed_hostnames
+
+    @classmethod
+    def banned_hostname(cls, url):
+        check_fun = partial(lambda hostname, url: url.startswith(hostname), url=url)
+        return any(map(check_fun, cls.q_banned_hostnames))
+        # return urlparse.urlsplit(url).hostname.lower() in cls.q_banned_hostnames
+
 
     @classmethod
     def predicate(cls, field):
@@ -274,8 +283,13 @@ class AlbumSplitter(RecordSplitter):
             if field.get('x'):
                 if field['x'].startswith('icon'):
                     continue
-            if not self.predicate(field) and (not field.get('q') or not AlbumSplitter.allowed_hostname(field.get('q'))):
-                cleared_field.append(field)
+            if not self.predicate(field):
+                record_url = field.get('q')
+                if not record_url or not (
+                        AlbumSplitter.allowed_hostname(record_url) or
+                        AlbumSplitter.banned_hostname(record_url)
+                ):
+                    cleared_field.append(field)
 
         RecordSplitter.common_remove(record, field_tag, cleared_field)
 
@@ -291,9 +305,9 @@ class AlbumSplitter(RecordSplitter):
         counter = None
 
         if new_record.get(u'8564_'):
-            counter = new_record.get(u'8564_')[0].get('c', '')
+            counter = new_record.get(u'8564_')[0].get('c', '01')
         elif new_record.get(u'8567_'):
-            counter = new_record.get(u'8567_')[0].get('8', '')
+            counter = new_record.get(u'8567_')[0].get('8', '01')
 
         if not counter:
             warnings.warn("Counter isn't specified")
@@ -366,3 +380,13 @@ def test_batch():
                 traceback.print_exc()
                 pprint.pprint(e.args)
                 print '!' * 35
+
+
+def test_integration():
+    filepath = '/home/theer/Documents/CERN/split-one-8564.xml'
+    # filepath = '/home/theer/Documents/CERN/.xml'
+    with open(filepath, 'r') as fd:
+        a = AlbumSplitter()
+        album, record = a.split_records_string(fd.read())
+
+
