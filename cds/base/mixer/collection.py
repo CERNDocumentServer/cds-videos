@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2013 CERN.
+# Copyright (C) 2013,  2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -20,7 +20,7 @@
 from six import with_metaclass as meta
 
 from invenio.ext.mixer import MixerMeta
-from invenio.modules.collections.models import (
+from invenio_collections.models import (
     Collection,
     CollectionCollection,
     Collectiondetailedrecordpagetabs,
@@ -48,7 +48,6 @@ class CollectionCollectionMixer(meta(MixerMeta)):
 
 class CollectionnameMixer(meta(MixerMeta)):
     __model__ = Collectionname
-
 
 
 __all__ = ('ExternalcollectionMixer',
