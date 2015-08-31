@@ -89,20 +89,22 @@ define(function (require) {
     };
 
     this.normalBoxView = function(ev, args) {
-      // Check if the request came from DOM or from Flight
+      ev.preventDefault();
       this.processView(ev.target, args, 'normal');
     };
 
     this.selectBoxView = function(ev, args) {
-      // Check if the request came from DOM or from Flight
+      ev.preventDefault();
       this.processView(ev.target, args, 'select');
     };
 
     this.editBoxView = function(ev, args) {
+      ev.preventDefault();
       this.processView(ev.target, args, 'edit');
     };
 
     this.newBoxAction = function(ev, args) {
+      ev.preventDefault();
       var id = this._addBoxSkeleton();
       this.trigger(document, 'personal.boxes.ui.select', {
         ids: [id]
@@ -111,6 +113,7 @@ define(function (require) {
     };
 
     this.selectBoxAction = function(ev, args) {
+      ev.preventDefault();
       var id = this._getIDFromTarget(ev.target);
       var data = this._getFormData(id);
       var box = this.attr.storage.get(id);
@@ -122,6 +125,7 @@ define(function (require) {
     };
 
     this.deleteBoxAction = function(ev, args) {
+      ev.preventDefault();
       // Get box ID from event.target element
       var id = args.id || this._getIDFromTarget(ev.target);
       // Get box jQuery element by id
@@ -141,6 +145,7 @@ define(function (require) {
     };
 
     this.saveBoxAction = function (ev, args) {
+      ev.preventDefault();
       var id = args.id || this._getIDFromTarget(ev.target);
       var data = this._getFormData(id);
       this._boxLoadingShow(id);
