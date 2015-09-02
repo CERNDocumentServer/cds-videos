@@ -19,6 +19,7 @@
 
 from collections import OrderedDict, namedtuple
 from functools import partial
+import json
 import pprint
 import traceback
 import urlparse
@@ -26,7 +27,9 @@ import os
 from collections import Sequence
 import warnings
 from six import with_metaclass
+from cds.base.dojson.main import translate_json_to_marc
 from dojson.contrib.marc21.utils import split_blob, create_record
+from cds.base.dojson.api import translate, Translator
 
 
 class SplitWarning(Warning):
@@ -174,6 +177,10 @@ class RecordSplitter(with_metaclass(RecordSplitterMetaclass, object)):
         [rec[type_tag].append({'a': main_type, 'r': main_recid}) for rec in new_records]
         [main_record[type_tag].append({'a': new_type, 'r': rec['001'][0]}) for rec in new_records]
 
+        main_record[type_tag] = self.__class__._reverse_force_list(main_record[type_tag])
+        for record in new_records:
+            record[type_tag] = self.__class__._reverse_force_list(record[type_tag])
+
     def _copy_fields(self, main_record, new_records):
         for field in self.__class__._copy_fields_list:
             if field in main_record:
@@ -223,7 +230,7 @@ class AlbumSplitter(RecordSplitter):
         u'700__',
     ]
 
-    q_allowed_hostnames = ['http://doc.cern.ch', 'http://cds.cern.ch', 'http://cdsweb.cern.ch']
+    q_allowed_hostnames = ['http://doc.cern.ch', 'http://cds.cern.ch', 'http://cdsweb.cern.ch', 'https://cds.cern.ch']
     q_banned_hostnames = ['http://preprints.cern.ch', 'http://documents.cern.ch']
 
     @classmethod
@@ -289,7 +296,8 @@ class AlbumSplitter(RecordSplitter):
                         AlbumSplitter.allowed_hostname(record_url) or
                         AlbumSplitter.banned_hostname(record_url)
                 ):
-                    cleared_field.append(field)
+                    assert False, "Uncovered case in album %s for field 8564_: %s" % (record['001'][0], str(field))
+                    # cleared_field.append(field)
 
         RecordSplitter.common_remove(record, field_tag, cleared_field)
 
@@ -305,7 +313,7 @@ class AlbumSplitter(RecordSplitter):
         counter = None
 
         if new_record.get(u'8564_'):
-            counter = new_record.get(u'8564_')[0].get('c', '01')
+            counter = new_record.get(u'8564_')[0].get('c', '')
         elif new_record.get(u'8567_'):
             counter = new_record.get(u'8567_')[0].get('8', '01')
 
@@ -382,11 +390,98 @@ def test_batch():
                 print '!' * 35
 
 
-def test_integration():
-    filepath = '/home/theer/Documents/CERN/split-one-8564.xml'
-    # filepath = '/home/theer/Documents/CERN/.xml'
+def test_integration_batch():
+    # filepath = '/home/theer/Documents/CERN/photos_to_split.xml'
+    # filepath = '/home/theer/Documents/CERN/split/tiny-photos-to-split.xml'
+    filepath = '/home/theer/Documents/CERN/photos_to_split.xml'
+    ok_results = []
+    errors = []
+    exceptions = []
     with open(filepath, 'r') as fd:
-        a = AlbumSplitter()
-        album, record = a.split_records_string(fd.read())
+        records = [create_record(data) for data in split_blob(fd.read())]
+        for album in records:
+            try:
+                album_result, photo_results = test_integration(album)
+                translation_results = [album_result] + photo_results
+                for result in translation_results:
+                    if not result['correct']:
+                        print 'Error for album: %s' % album['001'][0]
+                        errors.append(result)
+                    else:
+                        ok_results.append(result)
+
+            except Exception:
+                print 'Exception for album: %s' % album['001'][0]
+                traceback.print_exc()
+                exceptions.append(traceback.format_exc())
+
+    print 'OK albums: %s' % len(ok_results)
+    print 'Error albums: %s' % len(errors)
+    print 'Critical albums: %s' % len(exceptions)
+    return ok_results, errors, exceptions
+
+def test_integration_file(filepath=None):
+    if not filepath:
+        filepath = '/home/theer/Documents/CERN/split-one-8564.xml'
+    with open(filepath, 'r') as fd:
+        return test_integration(fd.read())
+
+def test_integration(input_string):
+    # filepath = '/home/theer/Documents/CERN/.xml'
+    a = AlbumSplitter()
+    if isinstance(input_string, basestring):
+        album, photos = a.split_records_string(input_string)
+    else:
+        album, photos = a.split_records(input_string)
+
+    translated_album = translate(album)
+    translated_photos = map(translate, photos)
+
+    album_result = test_translation(album, translated_album, True)
+    photo_results = map(lambda (x, y): test_translation(x, y), zip(photos, translated_photos))
+
+    return album_result, photo_results
+    # return translated_album, translated_photos
 
 
+def test_translation(xml_input, json_output, album=False):
+    json_string = json.dumps(json_output)
+
+    reverted_translation = translate_json_to_marc(json_string, album)[0]
+    result = Translator.test_correctness(xml_input, json_output)
+
+    return result
+    # missed_keys_number = 0
+    # different_keys_number = 0
+    # reverted_keys_number = len(reverted_translation)
+    #
+    # missed_keys = []
+    # different_keys = []
+    # similar_keys = set()
+    # for key, value in reverted_translation.iteritems():
+    #     key_with_ind = key
+    #     if isinstance(value, dict) and (value.get('$ind1') or value.get('$ind2')):
+    #         key_with_ind = key + value.pop('$ind1', '_') + value.pop('$ind2', '_')
+    #     if key_with_ind not in xml_input.keys():
+    #         missed_keys_number += 1
+    #         missed_keys.append(key_with_ind)
+    #         import pdb
+    #         pdb.set_trace()
+    #         continue
+    #
+    #     similar_keys.add(key)
+    #     if reverted_translation[key] != xml_input[key_with_ind]:
+    #         different_keys_number += 1
+    #         different_keys.append((reverted_translation[key], xml_input[key_with_ind]))
+    # print "="*20, "Album:", album, "Id:", xml_input['001'], "="*20
+    # print "Original number of entries: {0}".format(len(xml_input.items()))
+    # print "Reverted number of entries: {0}".format(reverted_keys_number)
+    # print "Missed keys: {0}".format(missed_keys_number + len(xml_input.items()) - reverted_keys_number)
+    # print "Different keys: {0}".format(different_keys_number)
+    # print "="*40
+    # print "Missed keys: " + str(missed_keys + list(set(xml_input.keys()) - similar_keys))
+    # print "Different keys:\n" + '\n'.join([str(key_pair) for key_pair in different_keys])
+    # print "="*40
+    #
+    # import pdb
+    # pdb.set_trace()
