@@ -50,8 +50,6 @@ def translate_marc_to_json(marc_file, album=False, test=False):
             print "Missed keys: " + str(missed_keys + list(set(xml_input.keys()) - similar_keys))
             print "Different keys:\n" + '\n'.join([str(key_pair) for key_pair in different_keys])
             print "="*40
-            import pdb
-            pdb.set_trace()
     return parsed_record
 
 
@@ -60,9 +58,9 @@ def translate_json_to_marc(json_file, album=False, test=False):
     if isinstance(loaded_json, dict):
         loaded_json = [loaded_json]
     if album:
-        parsed_record = [album_to_marc21.undo(data) for data in loaded_json]
+        parsed_record = [album_to_marc21.do(data) for data in loaded_json]
     else:
-        parsed_record = [photo_to_marc21.undo(data) for data in loaded_json]
+        parsed_record = [photo_to_marc21.do(data) for data in loaded_json]
     return parsed_record
 
 

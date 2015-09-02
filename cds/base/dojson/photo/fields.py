@@ -12,7 +12,8 @@ from dojson import utils
 from cds.base.dojson.photo.model import photo_to_json, photo_to_marc21
 
 
-@photo_to_json.over('album', '^774..')
+@photo_to_json.over('album', '^774..', override=True)
+@utils.for_each_value
 def album(self, key, value):
     """Album ID which contains this photo"""
     return {
@@ -21,7 +22,8 @@ def album(self, key, value):
     }
 
 
-@photo_to_marc21.over('774', 'album')
+@photo_to_marc21.over('774', 'album', override=True)
+@utils.reverse_for_each_value
 def reverse_album(self, key, value):
     """Reverse - Album ID which contains this photo"""
     return {
@@ -39,6 +41,7 @@ def image(self, key, value):
     """Image. Contains url to the concrete image file
     and information about the format
     """
+    indicator_map1 = {"4": "http", "7": "method_in_subfield"}
     return {
         'photo_id': value.get('s'),
         'path': value.get('d'),
@@ -46,7 +49,10 @@ def image(self, key, value):
         'uri': value.get('u'),
         'link_text': value.get('y'),
         'public_note': value.get('z'),
-        'subformat': value.get('x')
+        'subformat': value.get('x'),
+        'sequence_number': value.get('8'),
+        'access_method_subfield': value.get('2'),
+        'access_method': indicator_map1.get(key[3]),
     }
 
 
@@ -57,6 +63,10 @@ def reverse_image(self, key, value):
     """Reverse - Image. Contains url to the concrete
     image file and information about the format
     """
+    indicator_map1 = {
+        "http": "4",
+        "method_in_subfield": "7",
+    }
     return {
         's': value.get('photo_id'),
         'd': value.get('path'),
@@ -65,7 +75,9 @@ def reverse_image(self, key, value):
         'y': value.get('link_text'),
         'z': value.get('public_note'),
         'x': value.get('subformat'),
-        '$ind1': '4',
+        '8': value.get('sequence_number'),
+        '2': value.get('access_method_subfield'),
+        '$ind1': indicator_map1.get(value.get('access_method')),
         '$ind2': '_'
     }
 

@@ -23,7 +23,7 @@ from dojson import utils
 from model import album_to_json, album_to_marc21
 
 
-@album_to_json.over('photos', '^774..')
+@album_to_json.over('photos', '^774..', override=True)
 @utils.for_each_value
 @utils.filter_values
 def photos(self, key, value):
@@ -38,7 +38,7 @@ def photos(self, key, value):
     }  # TODO
 
 
-@album_to_marc21.over('774', 'photos')
+@album_to_marc21.over('774', 'photos', override=True)
 @utils.reverse_for_each_value
 @utils.filter_values
 def reverse_photos(self, key, value):

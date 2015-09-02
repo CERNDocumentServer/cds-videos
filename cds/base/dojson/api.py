@@ -178,7 +178,9 @@ class Translator():
                 list(set(input_marc21.keys()) - similar_keys),
             'different_keys': different_keys,
             'record_id': input_marc21['001'],
-            'correct': (missed_keys_number + different_keys_number) == 0
+            'correct': (missed_keys_number + different_keys_number) == 0,
+            'input': input_marc21,
+            'reverted_input': altered_restored_object
         }
 
 

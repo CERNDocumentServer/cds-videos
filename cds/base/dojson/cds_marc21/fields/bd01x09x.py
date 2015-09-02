@@ -61,7 +61,7 @@ def system_control_number(self, key, value):
 
 
 @to_cds_marc21.over('035', 'system_control_number', override=True)
-@utils.for_each_value
+@utils.reverse_for_each_value
 @utils.filter_values
 def reverse_system_control_number(self, key, value):
     """System Control Number."""
