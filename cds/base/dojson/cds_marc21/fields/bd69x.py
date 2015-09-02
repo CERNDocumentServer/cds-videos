@@ -21,17 +21,28 @@
 
 from dojson import utils
 
-from ..model import cds_marc21
+from ..model import to_cds_json, to_cds_marc21
 
 
-@cds_marc21.over('subject_indicator', '^69[07]C_')
+@to_cds_json.over('subject_indicator', '^690C_')
 @utils.for_each_value
 def subject_indicator(self, key, value):
     """Subject Indicator."""
     return value.get('a')
 
 
-@cds_marc21.over('accelerator_experiment', '^693__')
+@to_cds_marc21.over('690', 'subject_indicator')
+@utils.reverse_for_each_value
+def reverse_indicator(self, key, value):
+    """Reverse - Record type"""
+    return {
+        'a': value,
+        '$ind1': 'C',
+        '$ind2': '_'
+    }
+
+
+@to_cds_json.over('accelerator_experiment', '^693__')
 @utils.for_each_value
 @utils.filter_values
 def accelerator_experiment(self, key, value):
@@ -44,7 +55,20 @@ def accelerator_experiment(self, key, value):
     }
 
 
-@cds_marc21.over('thesaurus_terms', '^695__')
+@to_cds_marc21.over('693', 'accelerator_experiment')
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_accelerator_experiment(self, key, value):
+    """Expriment."""
+    return {
+        'a': value.get('acelerator'),
+        'e': value.get('experiment'),
+        'f': value.get('facility'),
+        's': value.get('subfield_s'),
+    }
+
+
+@to_cds_json.over('thesaurus_terms', '^695__')
 @utils.for_each_value
 @utils.filter_values
 def thesaurus_terms(self, key, value):
@@ -52,4 +76,17 @@ def thesaurus_terms(self, key, value):
     return {
         'uncontrolled_term': value.get('a'),
         'institute': value.get('9'),
+    }
+
+
+@to_cds_marc21.over('695', 'thesaurus_terms')
+@utils.reverse_for_each_value
+@utils.filter_values
+def reverse_thesaurus_terms(self, key, value):
+    """Expriment."""
+    return {
+        'a': value.get('uncontrolled_term'),
+        '9': value.get('institute'),
+        '$ind1': '_',
+        '$ind2': '_',
     }

@@ -18,20 +18,13 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 from dojson.overdo import Overdo
-from dojson.contrib.marc21 import marc21
+from dojson.contrib.marc21 import marc21, tomarc21
 
 
 class CDSMarc21(Overdo):
 
-    """Translation Index for CDS specific MARC21."""
-
     def __init__(self):
-        """Constructor.
-
-        Initializes the list of rules with the default ones from doJSON.
-        """
         super(CDSMarc21, self).__init__()
-        self.rules.extend(marc21.rules)
 
     def over(self, name, *source_tags, **kwargs):
         """Register creator rule.
@@ -41,6 +34,7 @@ class CDSMarc21(Overdo):
               regular expression in `source_tags` are equal to the current
               ones.
         """
+
         def override(rule):
             if name == rule[1][0]:
                 return True
@@ -55,4 +49,28 @@ class CDSMarc21(Overdo):
         return super(CDSMarc21, self).over(name, *source_tags)
 
 
-cds_marc21 = CDSMarc21()
+class ToCDSJson(CDSMarc21):
+    """Translation Index for CDS specific MARC21."""
+
+    def __init__(self):
+        """Constructor.
+
+        Initializes the list of rules with the default ones from doJSON.
+        """
+        super(ToCDSJson, self).__init__()
+        self.rules.extend(marc21.rules)
+
+
+class ToCDSMarc21(CDSMarc21):
+    """Translation from json to marc index for CDS specific MARC21."""
+    def __init__(self):
+        """Constructor.
+
+        Initializes the list of reverse rules with the default ones from doJSON.
+        """
+        super(ToCDSMarc21, self).__init__()
+        self.rules.extend(tomarc21.rules)
+
+
+to_cds_marc21 = ToCDSMarc21()
+to_cds_json = ToCDSJson()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of CERN Document Server.
+# This file is part of Invenio.
 # Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
@@ -17,24 +17,22 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-
-from .fields import (
-    bd01x09x,
-    bd2xx,
-    bd5xx,
-    bd69x,
-    bd7xx,
-    bd9xx,
-)
-from .model import to_cds_json, to_cds_marc21
+"""Photo MARC 21 model definition."""
+from cds.base.dojson.cds_marc21.model import ToCDSJson, ToCDSMarc21
+from cds.base.dojson.cds_marc21 import to_cds_json, to_cds_marc21
 
 
-def convert_cdsmarcxml(source):
-    """Convert CDS MARC XML to JSON."""
-    from dojson.contrib.marc21.utils import create_record, split_blob
-
-    for data in split_blob(source.read()):
-        yield to_cds_json.do(create_record(data))
+class AlbumToMarc21(ToCDSMarc21):
+    def __init__(self):
+        super(AlbumToMarc21, self).__init__()
+        self.rules.extend(to_cds_marc21.rules)
 
 
-__all__ = ('to_cds_json', 'to_cds_marc21', 'convert_cdsmarcxml')
+class AlbumFromMarc21(ToCDSJson):
+    def __init__(self):
+        super(AlbumFromMarc21, self).__init__()
+        self.rules.extend(to_cds_json.rules)
+
+
+album_to_json = AlbumFromMarc21()
+album_to_marc21 = AlbumToMarc21()
