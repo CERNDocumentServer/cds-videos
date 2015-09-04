@@ -290,6 +290,17 @@ class AlbumSplitter(RecordSplitter):
             if field.get('x'):
                 if field['x'].startswith('icon'):
                     continue
+
+            # remove all field without url
+            has_url = False
+            for key, value in field.iteritems():
+                url_pieces = urlparse.urlparse(value)
+                if url_pieces.scheme and url_pieces.netloc:
+                    has_url = True
+                    break
+            if not has_url:
+                continue
+
             if not self.predicate(field):
                 record_url = field.get('q')
                 if not record_url or not (
@@ -397,24 +408,31 @@ def test_integration_batch():
     ok_results = []
     errors = []
     exceptions = []
+    number_of_records = 0
     with open(filepath, 'r') as fd:
         records = [create_record(data) for data in split_blob(fd.read())]
+        number_of_records = len(records)
+        print 'Number of albums: %s' % number_of_records
         for album in records:
             try:
                 album_result, photo_results = test_integration(album)
+
                 translation_results = [album_result] + photo_results
+                number_of_records += len(translation_results)
+
                 for result in translation_results:
                     if not result['correct']:
-                        print 'Error for album: %s' % album['001'][0]
+                        # print 'Error for album: %s' % album['001'][0]
                         errors.append(result)
                     else:
                         ok_results.append(result)
 
             except Exception:
-                print 'Exception for album: %s' % album['001'][0]
+                # print 'Exception for album: %s' % album['001'][0]
                 traceback.print_exc()
                 exceptions.append(traceback.format_exc())
 
+    print 'Number of records: %s' % number_of_records
     print 'OK albums: %s' % len(ok_results)
     print 'Error albums: %s' % len(errors)
     print 'Critical albums: %s' % len(exceptions)
