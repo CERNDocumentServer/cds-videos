@@ -66,12 +66,6 @@ PACKAGES = [
     "cds.modules.personal_collection",
 ] + _PACKAGES
 
-PACKAGES_EXCLUDE = [
-    "invenio.modules.annotations",
-    "invenio.modules.communities",
-    "invenio.modules.pages",
-] + _PACKAGES_EXCLUDE
-
 EXTENSIONS = [
     'invenio.ext.confighacks',
     'invenio.ext.passlib:Passlib',
