@@ -62,7 +62,6 @@ def _concat_fields_into_list(*args):
 
 PACKAGES = [
     "cds.base",
-    "cds.demosite",
     "cds.modules.personal_collection",
 ] + _PACKAGES
 
