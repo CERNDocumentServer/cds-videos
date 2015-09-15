@@ -36,8 +36,8 @@ point specified in the setup.py::
 
 from __future__ import unicode_literals
 
-from invenio.base.config import PACKAGES as _PACKAGES
-from invenio.base.config import PACKAGES_EXCLUDE as _PACKAGES_EXCLUDE
+from invenio_base.config import PACKAGES as _PACKAGES
+from invenio_base.config import PACKAGES_EXCLUDE as _PACKAGES_EXCLUDE
 from invenio_records.config import (
     RECORD_PROCESSORS as _RECORD_PROCESSORS,
     RECORD_KEY_ALIASES as _RECORD_KEY_ALIASES
