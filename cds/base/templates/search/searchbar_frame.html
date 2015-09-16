@@ -1,6 +1,6 @@
 {#
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -18,14 +18,6 @@
 #}
 
 {% extends "search/searchbar_frame_base.html" %}
-
-{%- block page_body_before -%}
-<div id="search-form">
-  <div class="container">
-    {% include "search/form/index.html" -%}
-  </div>
-</div>
-{%- endblock -%}
 
 {%- block body -%}
   {%- block inner_content -%}{{ super() }}{%- endblock -%}

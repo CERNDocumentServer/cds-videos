@@ -24,6 +24,10 @@ require(
   ],
   function($, initializePersonal) {
     // Init personal
-    initializePersonal();
+    try{
+      initializePersonal();
+    } catch(error){
+      console.error('Error loading personal collections', error);
+    }
   }
 );

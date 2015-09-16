@@ -1,6 +1,6 @@
 {#
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -20,19 +20,27 @@
 {%- extends "footer_base.html" -%}
 
 {%- block footer %}
-<div class="pagefooter">
-  <div class="pagefooterstripeleft">
-    {%- block footer_credits -%}{{ super() }}{%- endblock %}
+<footer class="cds-footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        {%- block footer_credits -%}{{ super() }}{%- endblock %}
+      </div>
+      <div class="col-md-6">
+        <div class="text-right">
+          <a href="/" title="CERN">
+            <img
+                src="{{ url_for("base.static", filename="img/cern-logo-large.png")}}"
+                width=129px height=126px
+                alt="CERN" />
+          </a>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <hr />
+        {%- block footer_languages -%}{{ super() }}{%- endblock %}
+      </div>
+    </div>
   </div>
-  <div class="pagefooterstriperight">
-    <p class="cern-logo">
-      <a href="/" title="CERN">
-        <img src="{{ url_for("base.static", filename="img/cern-logo-large.png")}}"
-             width=129px height=126px
-             alt="CERN">
-      </a>
-    </p>
-    {%- block footer_languages -%}{{ super() }}{%- endblock %}
-  </div>
-<div>
+</footer>
 {%- endblock footer %}

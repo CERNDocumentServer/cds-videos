@@ -17,30 +17,88 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
 
-<header>
-  <div id="heading">
-    <div id="mainmenu">
-      <div class="container">
+<nav class="navbar navbar-default navbar-static-top cds-nav-bar">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#cds-navbar-main-collapsable" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ url_for("collections.index") }}">
+        {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
+      </a>
+    </div>
+      <div class="collapse navbar-collapse" id="cds-navbar-main-collapsable">
         <div class="row">
-          <div class="col-md-6">
-            <h1><a href="{{ url_for("collections.index") }}">
-                {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
-            </a></h1>
-            <p>
-              {{- config.CFG_SITE_MISSION_INTL.get(g.ln, config.CFG_SITE_MISSION) -}}
-            </p>
-          </div> <!-- .col-md-6 -->
-          <div class="col-md-6">
-            <nav>
-              <ul>
-                {%- for item in current_menu.submenu("main").children if item.visible -%}
-                  <li><a href="{{ item.url }}">{{ item.text | safe }}</a></li>
-                {%- endfor -%}
-              </ul>
-            </nav>
-          </div> <!-- .col-md-6 -->
-        </div> <!-- .row -->
-      </div> <!-- .container -->
-    </div> <!-- #mainmenu -->
-  </div> <!-- #heading -->
-</header>
+          <div class="col-md-8 col-sm-12">
+            <form class="navbar-form cds-navbar-search" name="search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
+              <div class="form-group">
+                <div class="cds-input-inner-icon">
+                  <i class="fa fa-search"></i>
+                  {%- if not collection -%}
+                    {%- set collection = {} -%}
+                  {%- endif %}
+                  <input
+                    data-mathingTypes="{{ config.CFG_WEBSEACH_MATCHING_TYPES}}"
+                    data-keywords="{{ collection.get('search_within', [])[1:] or {} | tojson | safe }}"
+                    data-keywordsExtra="{{collection.get('search_options', {}) | groupby('id_field') | tojson | safe}}"
+                    data-hintsUrl="/list/%TYPE?q=%QUERY"
+                    data-defaultSet="invenio"
+                    autocomplete="off"
+                    data-items="4"
+                    name="p"
+                    class="form-control cds-main-search-input"
+                    id="cds-main-search-input"
+                    type="text"
+                    tabindex="1"
+                    value="{{ request.args.get('p', '') }}"
+                    placeholder="{{_('Type to search')}}"
+                  />
+                </div>
+              </div>
+              <input type="hidden" name="ln" value="{{g.ln}}">
+              <input type="hidden" name="post_filter" value="{{request.args.get('post_filter', '')}}">
+              {%- if collection -%}
+                {%- if collection.id > 1 %}
+                  <input type="hidden" name="cc" value="{{collection.name}}">
+                {%- endif %}
+              {%- endif %}
+            </form>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <ul class="nav navbar-nav navbar-right">
+              {%- for item in current_menu.submenu("main").children if item.visible -%}
+                <li{% if item.active %} class="active"{% endif %}>
+                  <a href="{{ item.url }}">{{ item.text | safe }}</a>
+                </li>
+              {%- endfor -%}
+              {%- if current_user.is_guest -%}
+                <li>
+                  <a href='{{ url_for("webaccount.login") if config.DEBUG else url_for("oauth.login.cern", referer=request.url)}}'>
+                    {{ _('Login') }}
+                  </a>
+                </li>
+              {%- else -%}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                      {{- current_user.nickname | default(current_user.email) -}}
+                      <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li>
+                          <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
+                            {{- _("Logout") -}}
+                          </a>
+                      </li>
+                    </ul>
+                </li>
+              {%- endif -%}
+            </ul>
+          </div>
+      </div>
+    </div>
+  </div><!-- /.container-fluid -->
+</nav>

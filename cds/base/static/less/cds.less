@@ -26,24 +26,73 @@
 @border-radius-base: 0px;
 @border-radius-large: 0px;
 @border-radius-small: 0px;
+
+// Break point
+@grid-float-breakpoint: @screen-desktop;
+
+// CDS font size
+@font-size-base: 16px;
+
+// CDS Colors
+@brand-primary: #2980b9;
+@navbar-default-bg: @brand-primary;
+@navbar-default-color: #fff;
+@navbar-default-link-color: @navbar-default-color;
+@navbar-default-link-active-color: #ffffff;
+
+@navbar-default-link-active-color: darken(@navbar-default-bg, 10%);
+@navbar-default-link-hover-color: darken(@navbar-default-bg, 15%);
+
+@cds-light-gray: lighten(@gray-light, 50%);
+@cds-gray: lighten(@gray-light, 40%);
+
 body {
-    font-family: 'PT Sans','Trebuchet MS', Tahoma, sans-serif;
-    color: #626262;
-    padding-top: 0; /* hot fix */
+  font-family: 'PT Sans','Trebuchet MS', Tahoma, sans-serif;
 }
 
-footer, footer p {
-    font-size: inherit; /* hot fix */
+/* Navbar */
+.cds-nav-bar {
+  .cds-navbar-search {
+    .form-group{
+      width: 100%;
+    }
+    .cds-main-search-input{
+      border: 0!important;
+      width: 100%;
+    }
+    .cds-input-inner-icon{
+      position: relative;
+      width: 100%;
+      input{
+        width: 100%;
+        padding-left: 35px!important;
+      }
+      i {
+        z-index: 10;
+        position: absolute;
+        padding: 10px 12px;
+        pointer-events: none;
+        color: #555555;
+      }
+    }
+  }
+  li.active a{
+    color: #fff!important;
+  }
+  .navbar-nav > .open > a:focus {
+    color: #fff!important;
+  }
 }
+/* Navbar */
 
-#footer {
-    height: auto; /* hot fix */
+/* Footer */
+.cds-footer {
+  padding: 20px 0;
+  background-color: @cds-light-gray;
+  border-top: 1px solid @cds-gray;
 }
+/* Footer */
 
-#wrap {
-    padding-bottom: 275px;
-    margin-bottom: -275px;
-}
 
 /* ------------------------------------------------------------------------- */
 
@@ -58,10 +107,6 @@ footer, footer p {
     height: auto; /* hot fix */
 }
 
-#body {
-    padding: 2em 0 4em;
-    border-top: 1px solid #eee;
-}
 
 #mainmenu {
     h1 {
@@ -95,37 +140,6 @@ footer, footer p {
                 line-height: normal;
             }
         }
-    }
-}
-
-#footer {
-    .clearfix;
-
-    color: #666666;
-    background: none #EEEEEE;
-    font-size: 13px;
-    padding: 5em 0;
-
-    .langs {
-        text-align: right;
-    }
-}
-
-.pagefooter {
-    padding: 0 42px;
-    .pagefooterstripeleft {
-        float: left;
-        width: 35%;
-    }
-    .pagefooterstriperight {
-        float: right;
-        width: 60%;
-        text-align: right;
-    }
-    .cern-logo {
-        float:right;
-        margin: 0 0 32px 32px;
-        vertical-align: bottom;
     }
 }
 
@@ -179,7 +193,7 @@ footer, footer p {
         font-size: 12px;
     }
 }
-    
+
 .brief-view-by-author{
     color:#7AA3CC;
 }

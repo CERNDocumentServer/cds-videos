@@ -18,13 +18,14 @@
  */
 
 require([
-	"jquery",
-	"js/app",
-    "js/record_tools"],
-function($, app, main) {
-	$(document).ready(function() {
-		main.modalList();
-		main.expandContent();
-		main.translationListener();
-	});
+    "jquery",
+    "js/app",
+    "js/record_tools",
+  ],
+  function($, app, record_tools, search) {
+    $(document).ready(function() {
+      record_tools.modalList();
+      record_tools.expandContent();
+      record_tools.translationListener();
+    });
 });

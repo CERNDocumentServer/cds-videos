@@ -19,19 +19,46 @@
 
 """CDS Demosite interface."""
 
-from flask import Blueprint, current_app
-from invenio.ext.template.context_processor import (
-	register_template_context_processor
+from flask import Blueprint, current_app, render_template
+
+from flask_menu import current_menu
+
+from invenio.base.i18n import _
+
+blueprint = Blueprint(
+    'cds', __name__, url_prefix='/', template_folder='templates',
+    static_folder='static'
 )
 
-blueprint = Blueprint('cds', __name__, url_prefix='/',
-                      template_folder='templates', static_folder='static')
 
 @blueprint.before_app_first_request
 def _contains():
 
-	def contains(text, value):
-	    return value in text[1]
+    def contains(text, value):
+        return value in text[1]
 
-	with current_app.app_context():
-		current_app.jinja_env.tests['contains'] = contains
+    with current_app.app_context():
+        current_app.jinja_env.tests['contains'] = contains
+
+
+@blueprint.before_app_first_request
+def register_menu_items():
+    """Register menu for CDS."""
+    menu_item = current_menu.submenu('main.collections')
+
+    menu_item.register(
+        'collections.collection', _('Collections'), order=1
+    )
+
+    def remove_unused_menu_items():
+        """Remove unused items."""
+        menu = current_menu.submenu('main')
+        menu._child_entries.pop('collection', None)
+
+    current_app.before_first_request_funcs.append(remove_unused_menu_items)
+
+
+@blueprint.route('')
+def home():
+    """CDS Home page."""
+    return render_template('home.html')
