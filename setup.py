@@ -50,7 +50,6 @@ setup(
     install_requires=[
         "mixer==4.9.5",
         "Flask-IIIF>=0.1.0",
-        "raven==5.1.1",
     ],
     extras_require={
         'development': [
