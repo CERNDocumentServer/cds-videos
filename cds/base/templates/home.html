@@ -21,7 +21,7 @@
 
 {%- block global_bundles -%}
   {{- super() -}}
-  {%- bundle "cds.js" -%}
+  {%- bundle "personal-collections.js" -%}
 {%- endblock -%}
 
 {%- block body -%}
@@ -48,7 +48,7 @@
           </div>
           <div class="text-center">
             {%- if not current_user.is_guest -%}
-            <a href="#" class="btn btn-link personal-boxes-add-more">+</a>
+            <a href="#" class="btn btn-primary personal-boxes-add-more">+</a>
             {%- endif -%}
           </div>
         </div>

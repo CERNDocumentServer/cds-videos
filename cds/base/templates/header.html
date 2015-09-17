@@ -33,31 +33,27 @@
     </div>
       <div class="collapse navbar-collapse" id="cds-navbar-main-collapsable">
         <div class="row">
-          <div class="col-md-8 col-sm-12">
-            <form class="navbar-form cds-navbar-search" name="search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
+          <div class="{{ 'col-md-8' if current_user.is_guest else 'col-md-7'}} col-sm-12">
+            <form class="navbar-form cds-navbar-search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
               <div class="form-group">
-                <div class="cds-input-inner-icon">
-                  <i class="fa fa-search"></i>
+                <label class="cds-input-inner-icon format-control">
+                  <i class="fa fa-search cds-main-search-icon"></i>
                   {%- if not collection -%}
                     {%- set collection = {} -%}
                   {%- endif %}
+                  {{ '<span class="cds-main-search-collection-label">%s <a href="#" class="cds-remove-search-to-collection"><i class="fa fa-times"></i></span></a>'|
+                      format(collection.name|truncate(25)) | safe if collection.name else ''}}
                   <input
-                    data-mathingTypes="{{ config.CFG_WEBSEACH_MATCHING_TYPES}}"
-                    data-keywords="{{ collection.get('search_within', [])[1:] or {} | tojson | safe }}"
-                    data-keywordsExtra="{{collection.get('search_options', {}) | groupby('id_field') | tojson | safe}}"
-                    data-hintsUrl="/list/%TYPE?q=%QUERY"
-                    data-defaultSet="invenio"
                     autocomplete="off"
-                    data-items="4"
                     name="p"
-                    class="form-control cds-main-search-input"
+                    class="cds-main-search-input"
                     id="cds-main-search-input"
                     type="text"
                     tabindex="1"
                     value="{{ request.args.get('p', '') }}"
                     placeholder="{{_('Type to search')}}"
                   />
-                </div>
+                </label>
               </div>
               <input type="hidden" name="ln" value="{{g.ln}}">
               <input type="hidden" name="post_filter" value="{{request.args.get('post_filter', '')}}">
@@ -68,7 +64,7 @@
               {%- endif %}
             </form>
           </div>
-          <div class="col-md-3 col-sm-12">
+          <div class="{{ 'col-md-3' if current_user.is_guest else 'col-md-4'}} col-sm-12">
             <ul class="nav navbar-nav navbar-right">
               {%- for item in current_menu.submenu("main").children if item.visible -%}
                 <li{% if item.active %} class="active"{% endif %}>
@@ -84,7 +80,7 @@
               {%- else -%}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                      {{- current_user.nickname | default(current_user.email) -}}
+                      {{- current_user.nickname | default(current_user.email) | truncate(15) -}}
                       <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">

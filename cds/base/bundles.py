@@ -19,9 +19,9 @@
 
 """CDS bundles."""
 
-from invenio_base.bundles import styles as _styles
-
 from invenio.ext.assets import Bundle
+
+from invenio_base.bundles import styles as _styles
 
 _styles.contents.remove("less/base.less")
 _styles.contents += ("less/cds.less",)
@@ -30,12 +30,20 @@ _styles.contents += ("less/cds.less",)
 js = Bundle(
     "js/cds-settings.js",
     "js/main.js",
-    "js/personal/init.js",
     output="cds.js",
     weight=91,
     filters="requirejs",
     bower={
         "es5-shim": "latest",
+    }
+)
+
+personal_collections_js = Bundle(
+    "js/personal/init.js",
+    output="personal-collections.js",
+    weight=92,
+    filters="requirejs",
+    bower={
         # Personal collections
         "async": "~1.2.1",
         "depot": "~0.1.6",
