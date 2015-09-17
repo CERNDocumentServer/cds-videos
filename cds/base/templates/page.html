@@ -42,7 +42,7 @@
 
 {%- block page_body -%}
   {%- block page_body_before -%}{%- endblock -%}
-  <div id="body">
+  <div id="body" class="{{ 'cds-logged-out' if current_user.is_guest else 'cds-logged-in'}}">
     <div class="container">
       {%- block title %}{{ body }}{% endblock -%}
       {{ flashed_messages() }}
