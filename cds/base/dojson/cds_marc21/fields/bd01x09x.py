@@ -63,5 +63,5 @@ def report_number(self, key, value):
             value.get('z')
         ),
         'linkage': value.get('6'),
-        '_report_number': value.get('9'), # not displayed but searchable
+        '_report_number': value.get('9'),  # not displayed but searchable
     }

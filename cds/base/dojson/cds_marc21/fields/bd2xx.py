@@ -20,6 +20,7 @@
 """CDS special/custom tags."""
 
 from cds.base.dojson import utils as cds_utils
+
 from dojson import utils
 
 from ..model import cds_marc21
@@ -66,6 +67,7 @@ def title_statement(self, key, value):
         'title_added_entry': indicator_map1.get(key[3]),
         'nonfiling_characters': indicator_map2.get(key[4]),
     }
+
 
 @cds_marc21.over('imprint', '^269__')
 @utils.for_each_value

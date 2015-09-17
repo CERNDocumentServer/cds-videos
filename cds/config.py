@@ -36,13 +36,13 @@ point specified in the setup.py::
 
 from __future__ import unicode_literals
 
-from invenio_base.config import PACKAGES as _PACKAGES
-from invenio_base.config import PACKAGES_EXCLUDE as _PACKAGES_EXCLUDE
-from invenio_records.config import (
-    RECORD_PROCESSORS as _RECORD_PROCESSORS,
-    RECORD_KEY_ALIASES as _RECORD_KEY_ALIASES
-)
 from collections import MutableSequence
+
+from invenio_base.config import PACKAGES as _PACKAGES
+from invenio_records.config import (
+    RECORD_KEY_ALIASES as _RECORD_KEY_ALIASES,
+    RECORD_PROCESSORS as _RECORD_PROCESSORS
+)
 
 
 def _concat_fields_into_list(*args):
@@ -141,7 +141,7 @@ RECORD_KEY_ALIASES['author'] = _concat_fields_into_list(
 )
 RECORD_KEY_ALIASES['abstract'] = _concat_fields_into_list(
     'summary',
-   'french_summary_note',
+    'french_summary_note',
 )
 RECORD_KEY_ALIASES['keywords'] = _concat_fields_into_list(
     'index_term_uncontrolled',
@@ -156,7 +156,7 @@ RECORD_KEY_ALIASES['reportnumber'] = _concat_fields_into_list(
     'immediate_source_of_acquisition_note.accession_number',
 )
 RECORD_KEY_ALIASES['subject'] = 'subject_added_entry_topical_term'
-#TODO: References 999C5 $* [many subfields]
+# TODO: References 999C5 $* [many subfields]
 RECORD_KEY_ALIASES['division'] = _concat_fields_into_list(
     'added_entry_corporate_name.cern_work',
     'added_entry_corporate_name.institution_to_which_field_applies',
@@ -168,7 +168,7 @@ RECORD_KEY_ALIASES['year'] = _concat_fields_into_list(
 )
 RECORD_KEY_ALIASES['series'] = 'series_statement'
 RECORD_KEY_ALIASES['experiment'] = 'accelerator_experiment.experiment'
-RECORD_KEY_ALIASES['indicator'] = 'subject_indicator' #TODO: 697C_a
+RECORD_KEY_ALIASES['indicator'] = 'subject_indicator'  # TODO: 697C_a
 RECORD_KEY_ALIASES['accelerator'] = 'accelerator_experiment.accelerator'
 RECORD_KEY_ALIASES['sysno'] = 'sysno.sysno'
 RECORD_KEY_ALIASES['disp'] = 'status_week.display_period_for_books'
