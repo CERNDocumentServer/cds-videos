@@ -1,6 +1,6 @@
 # This file is part of Invenio.
-
-# Copyright (C) 2013, 2014 CERN.
+#
+# Copyright (C) 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -25,8 +25,53 @@ Links
 """
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 import os
+import sys
 
+test_requirements = [
+    'unittest2>=1.1.0',
+    'Flask_Testing>=0.4.1',
+    'pytest>=2.6.0',
+    'pytest-cov>=1.8.0',
+    'pytest-pep8>=1.0.6',
+    'coverage>=3.7.1',
+]
+
+
+class PyTest(TestCommand):
+
+    """PyTest Test."""
+
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+
+    def initialize_options(self):
+        """Init pytest."""
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+        try:
+            from ConfigParser import ConfigParser
+        except ImportError:
+            from configparser import ConfigParser
+        config = ConfigParser()
+        config.read('pytest.ini')
+        self.pytest_args = config.get('pytest', 'addopts').split(' ')
+
+    def finalize_options(self):
+        """Finalize pytest."""
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        """Run tests."""
+        # import here, cause outside the eggs aren't loaded
+        import pytest
+        import _pytest.config
+        pm = _pytest.config.get_plugin_manager()
+        pm.consider_setuptools_entrypoints()
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 # loads __version__
 g = {}
@@ -56,6 +101,7 @@ setup(
             "Flask-DebugToolbar>=0.9",
             'setuptools-bower>=0.2'
         ],
+        'tests': test_requirements
     },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -66,10 +112,12 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
+    tests_require=test_requirements,
     entry_points={
         'invenio.config': [
             "cds = cds.config"
         ]
     },
     test_suite='invenio.testsuite.suite',
+    cmdclass={'test': PyTest},
 )

@@ -17,6 +17,13 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+    - $HOME/.cache/pip
+
 notifications:
   email: false
 
@@ -44,7 +51,6 @@ env:
   - REQUIREMENTS=cdslabs_qa
 
 before_install:
-  - "sudo apt-get update"
   - "travis_retry pip install mock"
 
 install:
@@ -70,7 +76,7 @@ before_script:
   - "inveniomanage apache create-config"
   - "inveniomanage database init --yes-i-know || echo ':('"
   - "inveniomanage database create --quite || echo ':('"
-  - "inveniomanage demosite populate --yes-i-know || echo ':('"
+  # - "inveniomanage records create -t marcxml < cds/demosite/data/cds-demobibdata.xml"
 
 script:
   - "python setup.py test"
