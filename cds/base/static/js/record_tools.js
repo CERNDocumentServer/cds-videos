@@ -53,9 +53,7 @@ define(function(require, exports, module) {
 
       // pagination
       if (data_items.length > page_size) {
-
         var listElement = $('#pages');
-
         var last_index = page_size;
 
         listElement
@@ -67,25 +65,22 @@ define(function(require, exports, module) {
             last_index = data_items.length;
             $('#cds-modal-expand-btn').attr('disabled', true);
           }
-          else
+          else {
             last_index = last_index + page_size;
-
+          }
           listElement
             .children().css('display', 'none')
             .slice(0, last_index).css('display','list-item');
-
         });
-
       }
-
     });
-  };
+  }
 
-  function expandContent() {      
+  function expandContent() {
     var ellipsesText = "...";
     var moreText = "(read more)";
     var lessText = "(read less)";
-    
+
     $('.record-brief-view-show-more').each(function() {
       var $this = $(this);
       var words = $this.data('words') || 60;
@@ -106,9 +101,9 @@ define(function(require, exports, module) {
           text: moreText,
           href: '#'
        }).appendTo($this);
-      } 
+      }
     });
- 
+
     $(".record-brief-view-more-link").on('click', function(ev) {
       ev.preventDefault();
       var $link = $(this);
@@ -123,25 +118,22 @@ define(function(require, exports, module) {
       $text.data("state", getState);
     });
   };
-  
-  function translationHandler()
-  {
+
+  function translationHandler(){
     $("#translationAlert").show();
   };
 
   function translationListener(){
-     document.addEventListener('DOMSubtreeModified', function (e)
-    {
-      if(e.target.className.match('translated')) 
-      {
-       translationHandler();
-      } 
+    document.addEventListener('DOMSubtreeModified', function (e){
+      if(e.target.className.match('translated')){
+        translationHandler();
+      }
     }, true);
   }
- 
- return {
+
+  return {
     modalList: modalList,
     expandContent: expandContent,
     translationListener: translationListener
- }
+  }
 });

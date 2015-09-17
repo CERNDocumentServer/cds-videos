@@ -19,7 +19,7 @@
 
 
 {% macro record_brief_view(record, recid, recordloop, pagination, rg) %}
-  <div class="container-fluid"> 
+  <div class="container-fluid">
     <div class="row">  {# External row #}
       <div class="col-xs-1 col-sm-1">
         <div class="cds-margin-top-20"
@@ -27,18 +27,18 @@
           <input name="recid" type="checkbox" value="{{ recid }}" />
           <abbr class="unapi-id" title="{{ recid }}"></abbr>
           {{ recordloop.index+(pagination.page-1)*rg }}
-        </label> 
-        </div> 
+        </label>
+        </div>
       </div>
 
       {% set thumb = get_thumbnail(record) %}
-     
+
       {% if thumb|trim != "" %}
       {# If there is a thumbnail #}
         <div class="col-xs-2 col-sm-2">
-          <div class="cds-margin-top-20"> 
+          <div class="cds-margin-top-20">
             {{ thumb }}
-            <span class="brief-view-copyright">{{ get_copyright(record) }}</span> 
+            <span class="brief-view-copyright">{{ get_copyright(record) }}</span>
           </div>
         </div>
         {% set columns = 9 %}
@@ -46,7 +46,7 @@
         {% set columns = 11 %}
       {% endif %}
 
-      <div class="col-xs-{{columns}} col-sm-{{columns}}"> {# Rest #} 
+      <div class="col-xs-{{columns}} col-sm-{{columns}}"> {# Rest #}
         <div class="row"> {# Internal row 1 #}
           <div class="col-xs-12 col-sm-12">
             <a href="{{ url_for("record.metadata", recid=get_control_number(record)) }}">
@@ -57,7 +57,7 @@
           <div class="row"> {# Internal row 2 #}
             <div class="col-xs-12 col-sm-12">
               <div class="brief-view-metadata">
-                <ul class="brief-view-inline-list"> 
+                <ul class="brief-view-inline-list">
                 {% set date = get_creation_date(record) %}
                 {% if date|trim != "" %}
                    <li><i class="glyphicon glyphicon-calendar"></i> {{ date }}</li>
@@ -72,8 +72,8 @@
               </div>
             </div>
           </div>
-        {% set description = get_description(record) %} 
-        {% if description|trim != "" %} 
+        {% set description = get_description(record) %}
+        {% if description|trim != "" %}
         {# If there is a description or abstract #}
           <div class="row"> {# Internal row 3 #}
             <div class="col-xs-12 col-sm-12">
@@ -82,7 +82,7 @@
               </div>
             </div>
           </div>
-        {% endif %} 
+        {% endif %}
         <div class="row">  {# Internal row 4 #}
           <div class="col-xs-12 col-sm-12">
             <div class="brief-view-metadata">
@@ -98,24 +98,24 @@
                     {{ get_keywords(record, 2, delimiter=" ", is_link=true) }}
                   </li>
                 {% endif %}
-                
+
                 {% set auth = get_authors(record, 2, delimiter=",", is_link=true) %}
                 {% if auth|trim != "" %}
-                  <li>  
+                  <li>
                     <i class="glyphicon glyphicon-user"></i>
                     <span class="brief-view-by-author">
                       {{'by '}}
                     </span>
-                    {{ auth }}  
+                    {{ auth }}
                  </li>
                 {% endif %}
 
                 {% if record.get('files') and record.get('files') !=  [] %}
-                <li>{{ get_files(record, limit = 0, is_link=true) }}</li>  
+                <li>{{ get_files(record, limit = 0, is_link=true) }}</li>
               {% endif %}
-              
-                <li>{{ get_external_links(record, limit = 0, is_link=true) }} </li> 
-              
+
+                <li>{{ get_external_links(record, limit = 0, is_link=true) }} </li>
+
               </ul>
             </div>
 
@@ -123,7 +123,7 @@
 
         </div>
       </div>
-    </div>  
+    </div>
   </div>
 {% endmacro %}
 
@@ -135,25 +135,25 @@
             &times;
           </span>
       </button>
-      <strong>Warning!</strong> 
+      <strong>Warning!</strong>
       <div class="cds-margin-top-5">
         {{_("You seem to be using Google Translate. For this service to work, the content of this restricted page had to be sent to an external company. This can be a violation of conditions. It is your responsibility to not send restricted content to unauthorized individuals and services.")}}
       </div>
-    </div> 
-  {% endif %} 
+    </div>
+  {% endif %}
 {% endmacro %}
 
 {% macro get_number_of_files(record) %}
   {% if record.get('files') %}
     <i class="fa fa-file"></i>
-    {% if record.get('files') is not mapping and record.get('files') is iterable %}              
+    {% if record.get('files') is not mapping and record.get('files') is iterable %}
       {% set files = record.get('files')|length %}
-      {% if files == 1 %} 
+      {% if files == 1 %}
         {{ '1 file' }}
       {% else %}
         {{ files }}
         {{ 'files' }}
-      {% endif %}   
+      {% endif %}
     {% else %}
       {{ '1 file' }}
     {% endif %}
@@ -180,7 +180,7 @@
     {{ get_see_more_list(keyword_list, limit, _("Keywords"), delimiter, page_size) }}
   {% endif %}
 {% endmacro %}
- 
+
 
 {% macro get_file(file, is_link=false) %}
   {% if is_link %}
@@ -188,7 +188,7 @@
       {{ file.get('full_name') }}
     </a>
     <small>
-      {{ "(%.3f %s)"|format(file.get('size')/1024, "KB") }} 
+      {{ "(%.3f %s)"|format(file.get('size')/1024, "KB") }}
     </small>
   {% else %}
     {{ file.get('full_name') }}
@@ -212,7 +212,7 @@
   {% endif %}
 
   {{ get_see_more_list(file_list, limit, _("Download Files"), delimiter, page_size, more_link_label = "Download Files") }}
-{% endmacro %}  
+{% endmacro %}
 
 
 {% macro get_external_link(link, is_link=false) %}
@@ -248,13 +248,11 @@
     {% else %}
       {% do external_list.append(get_external_link(record.get('electronic_location_and_access'), is_link)) %}
     {% endif %}
-    
     {% if external_list != [] %}
        <i class="glyphicon glyphicon-link"></i>
-
        {{ get_see_more_list(external_list, limit, _("External Links"), delimiter, page_size,  more_link_label = "External Links") }}
     {% endif %}
-  {%endif%} 
+  {%endif%}
 {% endmacro %}
 
 
@@ -282,7 +280,7 @@
   </a>
 {% endmacro %}
 
-{% macro get_collection(col, is_link=false) %} 
+{% macro get_collection(col, is_link=false) %}
   {% if is_link %}
     <a href="{{ url_for("search.search", p=col) }}">{{ col }}</a>
   {% else %}
@@ -327,7 +325,7 @@
       {% if record.get('files').get('magic') is contains 'image' %}
         <a href={{record.get('files').get('url')}} class="thumbnail">
           <img src={{record.get('files').get('url')}} alt={{record.get('files').get('full_name')}}>
-        </a>  
+        </a>
       {% endif %}
     {% endif %}
   {% endif %}
@@ -339,7 +337,7 @@
     {{ record.get('control_number') }}
   {% endif %}
 {% endmacro %}
- 
+
 
 {% macro get_single_title(record) %}
   {% if record.varying_form_of_title %}
@@ -351,27 +349,23 @@
       {% if record.get('title_statement').get('title') %}
         {{ record.get('title_statement').get('title') }}
       {% endif %}
-    {% endif %} 
+    {% endif %}
   {% endif %}
 {% endmacro %}
 
 
 {% macro get_title(record) %}
-    {% if record.varying_form_of_title %}
-
-        {% if g.ln == "fr" %}
-            <h2 class="text-primary" id="record_detail_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
-            <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('title_statement').get('title') }}</h2>
-        {% else %}
-            <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
-            <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
-        {% endif %}
-
+  {% if record.varying_form_of_title %}
+    {% if g.ln == "fr" %}
+        <h2 class="text-primary" id="record_detail_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
+        <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('title_statement').get('title') }}</h2>
     {% else %}
-
-      <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
-
+        <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
+        <h2 class="text-muted" id="record_detail_additional_title">{{ record.get('varying_form_of_title')[0].get('title_proper_short_title') }}</h2>
     {% endif %}
+  {% else %}
+    <h2 class="text-primary" id="record_detail_title">{{ record.get('title_statement').get('title') }}</h2>
+  {% endif %}
 {% endmacro %}
 
 {% macro get_description(record) %}
@@ -389,7 +383,7 @@
 
 
 {% macro get_abstract(record) %}
-  {% if record.get('summary') %} 
+  {% if record.get('summary') %}
     {{ record.get('summary')[0].get('summary') }}
   {% endif %}
 {% endmacro %}
@@ -403,7 +397,7 @@
     <span>
   {% endif %}
 
-  {{ author.get('personal_name')|replace(",", " ") }} 
+  {{ author.get('personal_name')|replace(",", " ") }}
   {% if author.get('affiliation') %}
     {{ "(%s)"| format(author.get('affiliation')) }}
   {% endif %}
@@ -412,14 +406,14 @@
     </a>
   {% else %}
     </span>
-  {% endif %}  
+  {% endif %}
 {% endmacro %}
 
 
 {% macro get_authors(record, limit, delimiter=";", is_link=false, page_size=10) %}
   {% if record.get('main_entry_personal_name') %}
     {% set authors_list = [get_author(record.get('main_entry_personal_name'), is_link)] %}
-    
+
     {% if record.get('added_entry_personal_name') %}
       {% if record.get('added_entry_personal_name') is not mapping %}  {# If the attribute contains a list of names #}
         {% for author in record.get('added_entry_personal_name') %}
@@ -429,7 +423,7 @@
         {% do authors_list.append(get_author(record.get('added_entry_personal_name'), is_link)) %}
       {% endif %}
     {% endif %}
-    
+
 
     {{ get_see_more_list(authors_list, limit, _("Authors"), delimiter, page_size) }}
   {% endif %}
@@ -437,14 +431,14 @@
 
 
 {% macro get_see_more_list(items_list, limit, title, delimiter=";", page_size=20, more_link_label = "(see all)") %}
-  {% if limit > items_list|length %}
+  {% if limit >= items_list|length %}
     {% for item in items_list %}
       {{ item }}{% if not loop.last %}{{ delimiter }}{% endif %}
     {% endfor %}
   {% else %}
     {% for item in items_list[0:limit] %}
       {% if loop.index0 != limit-1 %}
-        {{ item }}{{ delimiter }} 
+        {{ item }}{{ delimiter }}
       {% else %}
         {{ item }}
       {% endif %}
@@ -492,5 +486,5 @@
 {% macro get_subject(record) %}
   {% if record.get('subject_added_entry_topical_term') %}
     {{ record.get('subject_added_entry_topical_term')[0].get('topical_term_or_geographic_name_entry_element') }}
-  {% endif %}  
+  {% endif %}
 {% endmacro %}
