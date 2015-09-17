@@ -25,32 +25,30 @@
 {%- endblock -%}
 
 {%- block body -%}
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div id="grid" data-guest="{{ current_user.is_guest | lower}}">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="personal-grid-error-message"></div>
-            </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div id="grid" data-guest="{{ current_user.is_guest | lower}}">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="personal-grid-error-message"></div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="text-right">
-                <div class="personal-grid-loader">
-                  <i class="fa fa-refresh fa-spin"></i>
-                </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="text-right">
+              <div class="personal-grid-loader">
+                <i class="fa fa-refresh fa-spin"></i>
               </div>
             </div>
           </div>
-          <div class="row">
-            <div id="personal-grid-handler" class="personal-boxes" ></div>
-          </div>
-          <div class="text-center">
-            {%- if not current_user.is_guest -%}
-            <a href="#" class="btn btn-primary personal-boxes-add-more">+</a>
-            {%- endif -%}
-          </div>
+        </div>
+        <div class="row">
+          <div id="personal-grid-handler" class="personal-boxes" ></div>
+        </div>
+        <div class="text-center">
+          {%- if not current_user.is_guest -%}
+          <a href="#" class="btn btn-primary personal-boxes-add-more">+</a>
+          {%- endif -%}
         </div>
       </div>
     </div>
