@@ -1,0 +1,13 @@
+<div class="personal-box-body-normal" data-show="normal">
+    <h4>{{header.title}}</h4>
+    {{#items}}
+        <img src="{{cover}}" alt="Issue cover" />
+        <a href="{{link}}">View issue</a>
+    {{/items}}
+    {{^items}}
+    <div class="alert alert-warning">
+    No results. If this seems wrong please double check the box query.
+        </div>
+    {{/items}}
+    <a href="#" class="btn btn-block btn-link">{{footer.title}}</a>
+</div>
