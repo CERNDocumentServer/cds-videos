@@ -27,6 +27,9 @@ recursive-exclude docs/_build *
 recursive-include cds/base/static *
 recursive-include cds/base/templates *
 
+recursive-include cds/modules/*/static *
+recursive-include cds/modules/*/templates *
+
 recursive-include cds/base/dojson/testsuite *
 
 recursive-exclude * *.pyc *.pyo
