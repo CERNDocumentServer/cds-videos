@@ -27,13 +27,20 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{{ url_for("collections.index") }}">
+      <a class="navbar-brand visible-xs-block" href="{{ url_for("collections.index") }}">
         {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
       </a>
     </div>
       <div class="collapse navbar-collapse" id="cds-navbar-main-collapsable">
         <div class="row">
-          <div class="{{ 'col-md-8' if current_user.is_guest else 'col-md-7'}} col-sm-12">
+          <div class="col-md-1">
+            <center>
+            <a class="navbar-brand visible-md-block" href="{{ url_for("collections.index") }}">
+              {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
+            </a>
+            </center>
+          </div>
+          <div class="col-md-8 col-sm-12">
             <form class="navbar-form cds-navbar-search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
               <div class="form-group">
                 <label class="cds-input-inner-icon format-control">
@@ -64,34 +71,13 @@
               {%- endif %}
             </form>
           </div>
-          <div class="{{ 'col-md-3' if current_user.is_guest else 'col-md-4'}} col-sm-12">
+          <div class="col-md-3 col-sm-12">
             <ul class="nav navbar-nav navbar-right">
               {%- for item in current_menu.submenu("main").children if item.visible -%}
                 <li{% if item.active %} class="active"{% endif %}>
                   <a href="{{ item.url }}">{{ item.text | safe }}</a>
                 </li>
               {%- endfor -%}
-              {%- if current_user.is_guest -%}
-                <li>
-                  <a href='{{ url_for("webaccount.login") if config.DEBUG else url_for("oauth.login.cern", referer=request.url)}}'>
-                    {{ _('Login') }}
-                  </a>
-                </li>
-              {%- else -%}
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                      {{- current_user.nickname | default(current_user.email) | truncate(15) -}}
-                      <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                      <li>
-                          <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
-                            {{- _("Logout") -}}
-                          </a>
-                      </li>
-                    </ul>
-                </li>
-              {%- endif -%}
             </ul>
           </div>
       </div>
