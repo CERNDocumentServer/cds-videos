@@ -17,9 +17,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #}
 
-  
-
 {% import "helpers/general.html" as macros %}
+
 {% macro render_search_pagination(pagination) %}{%- block render_search_pagination scoped -%}
   {%- set args = request.args.copy().to_dict() -%}
   {%- set form_args = request.form.copy().to_dict() -%}
@@ -101,7 +100,7 @@
 
 
 {% macro render_search_results(recids, collection, pagination, format_record) %}{%- block render_search_results scoped -%}
- 
+
   <form class="form-inline" name="" action="{{ url_for('search.dispatch') }}" method="post">
     {%- block search_results_header scoped %}
       {{ results_actions() }}
@@ -186,7 +185,7 @@
         <hr/>
         {%- endblock search_results_header %}
         {%- block search_results scoped -%}
-        
+
         {%- for recid in recids -%}{% set recordloop = loop %}{%- block search_result scoped -%}
           {%- if of[0] == 'h' -%}
 
@@ -197,9 +196,9 @@
           {% set record = get_record(control_number) %}
             {% if record %}
               {{ macros.record_brief_view(record, recid, recordloop, pagination, rg) }} <!--** -->
-            {% endif %}            
+            {% endif %}
           {%- endblock search_result_record -%}
-          
+
           {%- else -%}
           {%- block search_result_record_nohtml scoped %}
           {{ format_record(recid, of, ln=g.ln, extra_context=dict(collection=collection)) }}
@@ -241,7 +240,7 @@
             {%- endblock search_results_pagination -%}
           </div>
         </div>
-        {%- endblock search_results_footer %} 
+        {%- endblock search_results_footer %}
       </form>
 
   {% for category, msg in get_flashed_messages(with_categories=True, category_filter=['search-results-after']) %}

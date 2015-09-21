@@ -21,6 +21,39 @@
 {% extends "records/base_base.html" %}
 
 {% import "helpers/general.html" as macros %}
+
+{% block page_body_before %}
+  <div class="cds-top-helper">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="cds-top-helper-nav nav nav-pills navbar-right">
+            {%- for tab in current_menu.submenu('record').children -%}
+            {%- if tab.visible -%}
+              <li class="{{ 'active' if tab.active else '' }}">
+                <a href="{{ tab.url }}">
+                  {{ tab.text }}
+                  {% if tab.count %}
+                    {% set tab_count = tab.count() %}
+                    {% if tab_count > -1 %}
+                      &nbsp;<small class="text-muted">({{ tab_count }})</small>
+                    {% endif %}
+                  {% endif %}
+                </a>
+              </li>
+            {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block record_tabs %}
+  {# move them outiside of .container #}
+{% endblock %}
+
 {% block body %}
   {{ macros.translation_warning(record) }}
   {{ super() }}
