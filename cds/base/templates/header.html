@@ -27,60 +27,58 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand visible-xs-block" href="{{ url_for("collections.index") }}">
-        {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
+      <a class="navbar-brand visible-sm-block visible-xs-block" href="{{ url_for("collections.index") }}">
+        {{ config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) }}
       </a>
     </div>
       <div class="collapse navbar-collapse" id="cds-navbar-main-collapsable">
-        <div class="row">
-          <div class="col-md-1">
-            <center>
-            <a class="navbar-brand visible-md-block visible-lg-block" href="{{ url_for("collections.index") }}">
-              {{- config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) -}}
-            </a>
-            </center>
-          </div>
-          <div class="col-md-8 col-sm-12">
-            <form class="navbar-form cds-navbar-search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
-              <div class="form-group">
-                <label class="cds-input-inner-icon format-control">
-                  <i class="fa fa-search cds-main-search-icon"></i>
-                  {%- if not collection -%}
-                    {%- set collection = {} -%}
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <a class="cds-navbar-brand-inside navbar-brand visible-md-block visible-lg-block" href="{{ url_for("collections.index") }}">
+                {{ config.CFG_SITE_NAME_INTL.get(g.ln, config.CFG_SITE_NAME) }}
+              </a>
+            </div>
+            <div class="col-lg-9 col-md-9">
+              <ul class="nav navbar-nav navbar-right">
+                {%- for item in current_menu.submenu("main").children if item.visible -%}
+                  <li{% if item.active %} class="active"{% endif %}>
+                    <a href="{{ item.url }}">{{ item.text | safe }}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12">
+              <form class="cds-navbar-search-center navbar-form cds-navbar-search" action="{{ url_for('search.search') }}" method="get" role="search" id="cds-main-search">
+                <div class="form-group">
+                  <label class="cds-input-inner-icon format-control">
+                    <i class="fa fa-search cds-main-search-icon"></i>
+                    {%- if not collection -%}
+                      {%- set collection = {} -%}
+                    {%- endif %}
+                    {{ '<span class="cds-main-search-collection-label">%s <a href="#" class="cds-remove-search-to-collection"><i class="fa fa-times"></i></span></a>'|
+                        format(collection.name|truncate(25)) | safe if collection.name else ''}}
+                    <input
+                      autocomplete="off"
+                      name="p"
+                      class="cds-main-search-input"
+                      id="cds-main-search-input"
+                      type="text"
+                      tabindex="1"
+                      value="{{ request.args.get('p', '') }}"
+                      placeholder="{{_('Type to search')}}"
+                    />
+                  </label>
+                </div>
+                <input type="hidden" name="ln" value="{{g.ln}}">
+                <input type="hidden" name="post_filter" value="{{request.args.get('post_filter', '')}}">
+                {%- if collection -%}
+                  {%- if collection.id > 1 %}
+                    <input type="hidden" name="cc" value="{{collection.name}}">
                   {%- endif %}
-                  {{ '<span class="cds-main-search-collection-label">%s <a href="#" class="cds-remove-search-to-collection"><i class="fa fa-times"></i></span></a>'|
-                      format(collection.name|truncate(25)) | safe if collection.name else ''}}
-                  <input
-                    autocomplete="off"
-                    name="p"
-                    class="cds-main-search-input"
-                    id="cds-main-search-input"
-                    type="text"
-                    tabindex="1"
-                    value="{{ request.args.get('p', '') }}"
-                    placeholder="{{_('Type to search')}}"
-                  />
-                </label>
-              </div>
-              <input type="hidden" name="ln" value="{{g.ln}}">
-              <input type="hidden" name="post_filter" value="{{request.args.get('post_filter', '')}}">
-              {%- if collection -%}
-                {%- if collection.id > 1 %}
-                  <input type="hidden" name="cc" value="{{collection.name}}">
                 {%- endif %}
-              {%- endif %}
-            </form>
-          </div>
-          <div class="col-md-3 col-sm-12">
-            <ul class="nav navbar-nav navbar-right">
-              {%- for item in current_menu.submenu("main").children if item.visible -%}
-                <li{% if item.active %} class="active"{% endif %}>
-                  <a href="{{ item.url }}">{{ item.text | safe }}</a>
-                </li>
-              {%- endfor -%}
-            </ul>
-          </div>
-      </div>
+              </form>
+            </div>
+        </div>
     </div>
   </div><!-- /.container-fluid -->
 </nav>

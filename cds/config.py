@@ -100,10 +100,10 @@ EXTENSIONS = [
 
 CFG_SITE_NAME = "CERN Document Server"
 CFG_SITE_NAME_INTL = {
-    "en": "CDS",  # Shouldn't be required.
-    "fr": "CDS",
-    "de": "CDS",
-    "it": "CDS"
+    "en": "Document Server",  # Shouldn't be required.
+    "fr": "Document Server",
+    "de": "Document Server",
+    "it": "Document Server"
 }
 
 CFG_SITE_MISSION = "Access articles, reports and multimedia content in HEP"

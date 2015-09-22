@@ -19,33 +19,33 @@
 
 <header id="cern-toolbar" class="clearfix">
   <div class="container">
-  <div class="row">
-    <div class="col-md-12">
-      <h1><a href="//cern.ch/">CERN <span>Accelerating science</span></a></h1>
-      <nav>
-        <ul>
-          {%- if current_user.is_guest -%}
-            <li>
-              <a href='{{ url_for("webaccount.login") if config.DEBUG else url_for("oauth.login.cern", referer=request.url)}}'>
-                {{ _('Login') }}
-              </a>
-            </li>
-          {%- else -%}
+    <div class="row">
+      <div class="col-md-12">
+        <h1><a href="//cern.ch/">CERN <span>Accelerating science</span></a></h1>
+        <nav>
+          <ul>
+            {%- if current_user.is_guest -%}
               <li>
-                <a href="{{ url_for("webaccount.index") }}">
-                  {{- current_user.nickname | default(current_user.email) -}}
+                <a href='{{ url_for("webaccount.login") if config.DEBUG else url_for("oauth.login.cern", referer=request.url)}}'>
+                  {{ _('Login') }}
                 </a>
-            </li>
-            <li>
-                <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
-                  {{- _("Logout") -}}
-                </a>
-            </li>
-          {%- endif -%}
-        <li><a href="//cern.ch/directory">Directory</a></li>
-        </ul>
-      </nav>
+              </li>
+            {%- else -%}
+                <li>
+                  <a href="{{ url_for("webaccount.index") }}">
+                    {{- current_user.nickname | default(current_user.email) -}}
+                  </a>
+              </li>
+              <li>
+                  <a href="{{ url_for("webaccount.logout", referer=request.url) }}">
+                    {{- _("Logout") -}}
+                  </a>
+              </li>
+            {%- endif -%}
+          <li><a href="//cern.ch/directory">Directory</a></li>
+          </ul>
+        </nav>
+        </div>
       </div>
-    </div>
   </div>
 </header>
