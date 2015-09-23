@@ -69144,12 +69144,12 @@ From: Document 6233-v2  </subfield>
   <datafield tag="691" ind1=" " ind2=" ">
     <subfield code="a">RAL = Rutherton Appleton Laboratory, Chilton, UK</subfield>
   </datafield>
-  <datafield tag="691" ind1=" " ind2=" ">
-    <subfield code="a">PS = Proton Synchrotron, CERN, Geneva</subfield>
-  </datafield>
-  <datafield tag="691" ind1=" " ind2=" ">
-    <subfield code="a">Harwell = Harwell Laboratory, Didcot, UK</subfield>
-  </datafield>
+  <!-- <datafield tag="691" ind1=" " ind2=" "> -->
+  <!--   <subfield code="a">PS = Proton Synchrotron, CERN, Geneva</subfield> -->
+  <!-- </datafield> -->
+  <!-- <datafield tag="691" ind1=" " ind2=" "> -->
+  <!--   <subfield code="a">Harwell = Harwell Laboratory, Didcot, UK</subfield> -->
+  <!-- </datafield> -->
   <datafield tag="852" ind1=" " ind2=" ">
     <subfield code="a">CERN Archives. Bldg. 61-S-001</subfield>
     <subfield code="c">I1013</subfield>
@@ -78385,9 +78385,9 @@ A total of 14456 $B_s\rightarrow J/\psi \phi$ decay signal candidates is reconst
   <datafield tag="691" ind1=" " ind2=" ">
     <subfield code="a">The CDHS neutrino experiment at CERN was a collaboration of CERN, Dortmund, Heidelberg and Saclay (later joined by Warsaw) led by Jack Steinberger</subfield>
   </datafield>
-  <datafield tag="691" ind1=" " ind2=" ">
-    <subfield code="a">The experiment was desigend to study deep inelastic neutrino interactions in iron. The experiment took data in the CERN neutrino beams from December 1976 until 1984</subfield>
-  </datafield>
+  <!-- <datafield tag="691" ind1=" " ind2=" "> -->
+  <!--   <subfield code="a">The experiment was desigend to study deep inelastic neutrino interactions in iron. The experiment took data in the CERN neutrino beams from December 1976 until 1984</subfield> -->
+  <!-- </datafield> -->
   <datafield tag="852" ind1=" " ind2=" ">
     <subfield code="a">CERN Archives. Bldg. 61-S-001</subfield>
     <subfield code="c">V0451</subfield>
