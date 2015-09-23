@@ -1,11 +1,9 @@
 [
     {
-        "dbquery": "",
         "id": 1,
         "name": "CERN Document Server"
     },
     {
-        "dbquery": "",
         "id": 2,
         "name": "Books & Proceedings"
     },
