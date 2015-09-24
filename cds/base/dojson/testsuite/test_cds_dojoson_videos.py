@@ -232,13 +232,14 @@ class TestCDSDoJSONVideos(InvenioTestCase):
     def test_video_clip(self):
         """Test video clip loading from XML."""
         from dojson.contrib.marc21.utils import create_record
-        from cds.base.dojson.cds_marc21 import cds_marc21
+        from cds.base.dojson.marc21.fields import *
+        from cds.base.dojson.marc21.translations.videos import (
+            translation as marc21
+        )
 
         blob = create_record(CDS_VIDEO_CLIP)
-        data = cds_marc21.do(blob)
+        data = marc21.do(blob)
 
-        # Check if the video file is present
-        self.assertEqual(data.get('subject_indicator'), ['publvideomovie'])
         # Check if credits are correct
         self.assertEqual(len(data.get('creation_production_credits_note')), 3)
         # Check if the host entry is correct
@@ -263,18 +264,19 @@ class TestCDSDoJSONVideos(InvenioTestCase):
     def test_video_project(self):
         """Test video project from XML."""
         from dojson.contrib.marc21.utils import create_record
-        from cds.base.dojson.cds_marc21 import cds_marc21
+        from cds.base.dojson.marc21.fields import *
+        from cds.base.dojson.marc21.translations.default import (
+            translation as marc21
+        )
 
         blob = create_record(CDS_VIDEO_PROJECT)
-        data = cds_marc21.do(blob)
+        data = marc21.do(blob)
 
         # Check if the video file is present
         self.assertEqual(
             data['constituent_unit_entry'][0]['report_number'],
             ['CERN-MOVIE-2015-038-001']
         )
-        # Chekc the subject indicator
-        self.assertEqual(data.get('subject_indicator'), ['publvideomovie'])
         # Check the control number
         self.assertEqual(data.get('control_number'), '2053119')
 

@@ -20,12 +20,12 @@
 """CDS special/custom tags."""
 
 from cds.base.dojson import utils as cds_utils
+from cds.base.dojson.marc21.translations.default import translation as marc21
+
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('affiliation_at_conversion', '^901__')
+@marc21.over('affiliation_at_conversion', '^901__')
 @utils.for_each_value
 def affiliation_at_conversion(self, key, value):
     """Affiliation at conversion."""
@@ -34,7 +34,7 @@ def affiliation_at_conversion(self, key, value):
     }
 
 
-@cds_marc21.over('grey_book', '^903__')
+@marc21.over('grey_book', '^903__')
 @utils.for_each_value
 @utils.filter_values
 def grey_book(self, key, value):
@@ -47,7 +47,7 @@ def grey_book(self, key, value):
     }
 
 
-@cds_marc21.over('approval_status_history', '^9031_')
+@marc21.over('approval_status_history', '^9031_')
 @utils.for_each_value
 @utils.filter_values
 def approval_status_history(self, key, value):
@@ -63,7 +63,7 @@ def approval_status_history(self, key, value):
     }
 
 
-@cds_marc21.over('spokesman', '^905__')
+@marc21.over('spokesman', '^905__')
 @utils.for_each_value
 @utils.filter_values
 def spokesman(self, key, value):
@@ -78,7 +78,7 @@ def spokesman(self, key, value):
     }
 
 
-@cds_marc21.over('referee', '^906__')
+@marc21.over('referee', '^906__')
 @utils.for_each_value
 @utils.filter_values
 def referee(self, key, value):
@@ -94,7 +94,7 @@ def referee(self, key, value):
     }
 
 
-@cds_marc21.over('fsgo', '^910__')
+@marc21.over('fsgo', '^910__')
 @utils.for_each_value
 @utils.filter_values
 def fsgo(self, key, value):
@@ -105,7 +105,7 @@ def fsgo(self, key, value):
     }
 
 
-@cds_marc21.over('citation', '^913__')
+@marc21.over('citation', '^913__')
 @utils.for_each_value
 @utils.filter_values
 def citation(self, key, value):
@@ -120,7 +120,7 @@ def citation(self, key, value):
     }
 
 
-@cds_marc21.over('status_week', '^916__')
+@marc21.over('status_week', '^916__')
 @utils.for_each_value
 @utils.filter_values
 def status_week(self, key, value):
@@ -135,7 +135,7 @@ def status_week(self, key, value):
     }
 
 
-@cds_marc21.over('dates', '^925__')
+@marc21.over('dates', '^925__')
 @utils.for_each_value
 @utils.filter_values
 def dates(self, key, value):
@@ -146,14 +146,14 @@ def dates(self, key, value):
     }
 
 
-@cds_marc21.over('file_number', '^927__')
+@marc21.over('file_number', '^927__')
 @utils.for_each_value
 def file_number(self, key, value):
     """File Number."""
     return value.get('a')
 
 
-@cds_marc21.over('peri_internal_note', '^937__')
+@marc21.over('peri_internal_note', '^937__')
 @utils.for_each_value
 @utils.filter_values
 def peri_internal_note(self, key, value):
@@ -165,14 +165,14 @@ def peri_internal_note(self, key, value):
     }
 
 
-@cds_marc21.over('base', '^960__')
+@marc21.over('base', '^960__')
 @utils.for_each_value
 def base(self, key, value):
     """Base."""
     return value.get('a')
 
 
-@cds_marc21.over('cat', '^961__')
+@marc21.over('cat', '^961__')
 @utils.for_each_value
 @utils.filter_values
 def cat(self, key, value):
@@ -187,7 +187,7 @@ def cat(self, key, value):
     }
 
 
-@cds_marc21.over('aleph_linking_field', '^962__')
+@marc21.over('aleph_linking_field', '^962__')
 @utils.for_each_value
 @utils.filter_values
 def aleph_linking_field(self, key, value):
@@ -209,7 +209,7 @@ def aleph_linking_field(self, key, value):
 
 # We are squashing this field, because it might contain duplicates
 # (even though it shouldn't) and we don't want to lose data
-@cds_marc21.over('owner', '^963__')
+@marc21.over('owner', '^963__')
 @cds_utils.for_each_squash
 @utils.filter_values
 def owner(self, key, value):
@@ -220,7 +220,7 @@ def owner(self, key, value):
     }
 
 
-@cds_marc21.over('item', '^964__')
+@marc21.over('item', '^964__')
 def item(self, key, value):
     """Item."""
     return {
@@ -230,7 +230,7 @@ def item(self, key, value):
 
 # We are squashing this field, because it might contain duplicates
 # (even though it shouldn't) and we don't want to lose data
-@cds_marc21.over('sysno', '^970__')
+@marc21.over('sysno', '^970__')
 @cds_utils.for_each_squash
 @utils.filter_values
 def sysno(self, key, value):
@@ -241,14 +241,14 @@ def sysno(self, key, value):
     }
 
 
-@cds_marc21.over('system_number_of_deleted_double_records', '^981__')
+@marc21.over('system_number_of_deleted_double_records', '^981__')
 @utils.for_each_value
 def system_number_of_deleted_double_records(self, key, value):
     """System number of deleted double records."""
     return value.get('a')
 
 
-@cds_marc21.over('additional_subject_added_entry_topical_term', '^993__')
+@marc21.over('additional_subject_added_entry_topical_term', '^993__')
 @utils.for_each_value
 @utils.filter_values
 def additional_subject_added_entry_topical_term(self, key, value):
@@ -260,7 +260,7 @@ def additional_subject_added_entry_topical_term(self, key, value):
     }
 
 
-@cds_marc21.over('references', '^999C5')
+@marc21.over('references', '^999C5')
 @utils.for_each_value
 @utils.filter_values
 def references(self, key, value):
@@ -283,7 +283,7 @@ def references(self, key, value):
     }
 
 
-@cds_marc21.over('refextract_references', '^999C6')
+@marc21.over('refextract_references', '^999C6')
 @utils.for_each_value
 def refexctract_references(self, key, value):
     """Refextract references."""

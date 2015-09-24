@@ -17,13 +17,15 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-from dojson.overdo import Overdo
 from dojson.contrib.marc21 import marc21
+from dojson.overdo import Overdo
 
 
 class CDSMarc21(Overdo):
 
     """Translation Index for CDS specific MARC21."""
+
+    __query__ = '690C_.a:CERN'
 
     def __init__(self):
         """Constructor.
@@ -55,4 +57,4 @@ class CDSMarc21(Overdo):
         return super(CDSMarc21, self).over(name, *source_tags)
 
 
-cds_marc21 = CDSMarc21()
+translation = CDSMarc21()

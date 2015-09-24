@@ -62,6 +62,7 @@ def _concat_fields_into_list(*args):
 
 PACKAGES = [
     "cds.base",
+    "cds.base.dojson.marc21",
     "cds.modules.personal_collection",
 ] + _PACKAGES
 
@@ -97,7 +98,6 @@ EXTENSIONS = [
     'invenio.ext.es',
 ]
 
-
 CFG_SITE_NAME = "CERN Document Server"
 CFG_SITE_NAME_INTL = {
     "en": "Document Server",  # Shouldn't be required.
@@ -117,7 +117,7 @@ CFG_SITE_LANGS = ["en", "fr", "de", "it"]
 # Invenio Records configuration
 RECORD_PROCESSORS = dict()
 RECORD_PROCESSORS.update(_RECORD_PROCESSORS)
-RECORD_PROCESSORS['marcxml'] = 'cds.base.dojson.cds_marc21.convert_cdsmarcxml'
+RECORD_PROCESSORS['marcxml'] = 'cds.base.dojson.marc21.convert_cdsmarcxml'
 
 # Records aliases
 RECORD_KEY_ALIASES = dict()

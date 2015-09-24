@@ -19,12 +19,12 @@
 
 """CDS special/custom tags."""
 
+from cds.base.dojson.marc21.translations.default import translation as marc21
+
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('french_summary_note', '^590__')
+@marc21.over('french_summary_note', '^590__')
 @utils.for_each_value
 @utils.filter_values
 def french_summary_note(self, key, value):
@@ -35,7 +35,7 @@ def french_summary_note(self, key, value):
     }
 
 
-@cds_marc21.over('field_591', '^591__')
+@marc21.over('field_591', '^591__')
 @utils.for_each_value
 @utils.filter_values
 def field_591(self, key, value):
@@ -46,14 +46,14 @@ def field_591(self, key, value):
     }
 
 
-@cds_marc21.over('type_of_document', '^594__')
+@marc21.over('type_of_document', '^594__')
 @utils.for_each_value
 def type_of_document(self, key, value):
     """Type of Document."""
     return value.get('a')
 
 
-@cds_marc21.over('internal_note', '^595__')
+@marc21.over('internal_note', '^595__')
 @utils.for_each_value
 @utils.filter_values
 def internal_note(self, key, value):

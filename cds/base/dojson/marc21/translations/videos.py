@@ -17,6 +17,13 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS special/custom tags"""
+from .default import CDSMarc21
 
-from __future__ import unicode_literals
+
+class CDSVideos(CDSMarc21):
+
+    """Translation Index for CDS Videos."""
+
+    __query__ = '980__.a:PUBLVIDEOMOVIE'
+
+translation = CDSVideos()

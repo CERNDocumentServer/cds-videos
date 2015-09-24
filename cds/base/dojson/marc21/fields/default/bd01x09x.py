@@ -19,19 +19,19 @@
 
 """CDS special/custom tags."""
 
+from cds.base.dojson.marc21.translations.default import translation as marc21
+
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('international_standard_number', '^021..')
+@marc21.over('international_standard_number', '^021..')
 @utils.for_each_value
 def international_standard_number(self, key, value):
     """Report Number."""
     return value.get('a')
 
 
-@cds_marc21.over('system_control_number', '^035..', override=True)
+@marc21.over('system_control_number', '^035..', override=True)
 @utils.for_each_value
 @utils.filter_values
 def system_control_number(self, key, value):
@@ -49,7 +49,7 @@ def system_control_number(self, key, value):
     }
 
 
-@cds_marc21.over('report_number', '^088..', override=True)
+@marc21.over('report_number', '^088..', override=True)
 @utils.for_each_value
 @utils.filter_values
 def report_number(self, key, value):

@@ -16,3 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+"""CDS special/custom tags"""
+
+from . import(
+    bd01x09x,
+    bd2xx,
+    bd5xx,
+    bd69x,
+    bd7xx,
+    bd8xx,
+    bd9xx,
+)

@@ -19,25 +19,25 @@
 
 """CDS special/custom tags."""
 
+from cds.base.dojson.marc21.translations.default import translation as marc21
+
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('subject_indicator', '^69[07]C_')
+@marc21.over('subject_indicator', '^69[07]C_')
 @utils.for_each_value
 def subject_indicator(self, key, value):
     """Subject Indicator."""
     return value.get('a')
 
 
-@cds_marc21.over('observation', '^691__')
+@marc21.over('observation', '^691__')
 def observation(self, key, value):
     """Observation."""
     return value.get('a')
 
 
-@cds_marc21.over('accelerator_experiment', '^693__')
+@marc21.over('accelerator_experiment', '^693__')
 @utils.for_each_value
 @utils.filter_values
 def accelerator_experiment(self, key, value):
@@ -50,7 +50,7 @@ def accelerator_experiment(self, key, value):
     }
 
 
-@cds_marc21.over('classification_terms', '^694__')
+@marc21.over('classification_terms', '^694__')
 @utils.for_each_value
 @utils.filter_values
 def classification_terms(self, key, value):
@@ -61,7 +61,7 @@ def classification_terms(self, key, value):
     }
 
 
-@cds_marc21.over('thesaurus_terms', '^695__')
+@marc21.over('thesaurus_terms', '^695__')
 @utils.for_each_value
 @utils.filter_values
 def thesaurus_terms(self, key, value):

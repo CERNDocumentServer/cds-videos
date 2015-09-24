@@ -19,12 +19,12 @@
 
 """CDS special/custom tags."""
 
+from cds.base.dojson.marc21.translations.default import translation as marc21
+
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('added_entry_corporate_name', '^710[10_2][_2]', override=True)
+@marc21.over('added_entry_corporate_name', '^710[10_2][_2]', override=True)
 @utils.for_each_value
 @utils.filter_values
 def added_entry_corporate_name(self, key, value):
@@ -89,7 +89,7 @@ def added_entry_corporate_name(self, key, value):
     }
 
 
-@cds_marc21.over('translator', '^721__')
+@marc21.over('translator', '^721__')
 @utils.for_each_value
 @utils.filter_values
 def translator(self, key, value):

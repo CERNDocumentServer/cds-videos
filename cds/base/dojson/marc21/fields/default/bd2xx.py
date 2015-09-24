@@ -20,13 +20,12 @@
 """CDS special/custom tags."""
 
 from cds.base.dojson import utils as cds_utils
+from cds.base.dojson.marc21.translations.default import translation as marc21
 
 from dojson import utils
 
-from ..model import cds_marc21
 
-
-@cds_marc21.over('title_statement', '^245[10_][_1032547698]', override=True)
+@marc21.over('title_statement', '^245[10_][_1032547698]', override=True)
 @cds_utils.for_each_squash
 @utils.filter_values
 def title_statement(self, key, value):
@@ -69,7 +68,7 @@ def title_statement(self, key, value):
     }
 
 
-@cds_marc21.over('imprint', '^269__')
+@marc21.over('imprint', '^269__')
 @utils.for_each_value
 @utils.filter_values
 def imprint(self, key, value):
