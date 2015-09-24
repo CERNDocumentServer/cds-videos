@@ -20,3 +20,13 @@
 """CDS special/custom tags"""
 
 from __future__ import unicode_literals
+
+from . import(
+    bd01x09x,
+    bd2xx,
+    bd5xx,
+    bd69x,
+    bd7xx,
+    bd8xx,
+    bd9xx,
+)

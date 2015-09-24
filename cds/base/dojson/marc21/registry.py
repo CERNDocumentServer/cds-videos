@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of CERN Document Server.
+# This file is part of Invenio.
 # Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
@@ -15,22 +15,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+# 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 
-"""CDS special/custom tags."""
+"""Registry for personal collections."""
 
-from dojson import utils
+from flask_registry import RegistryProxy
 
-from ..model import cds_marc21
+from invenio.ext.registry import ModuleAutoDiscoverySubRegistry
+from invenio.utils.datastructures import LazyDict
 
 
-@cds_marc21.over('electronic_mail_message', '^859__')
-@utils.for_each_value
-@utils.filter_values
-def electronic_mail_message(self, key, value):
-    """Electronic mail message"""
-    return {
-        'contact': value.get('a'),
-        'e-mail_address': value.get('f'),
-        'date': value.get('x'),
-    }
+translations_proxy = RegistryProxy(
+    'translations', ModuleAutoDiscoverySubRegistry, 'translations'
+)
+
+translations = LazyDict(
+    lambda: dict((module.__name__.split('.')[-1], (module.model))
+                 for module in translations_proxy if hasattr(module, 'model'))
+)

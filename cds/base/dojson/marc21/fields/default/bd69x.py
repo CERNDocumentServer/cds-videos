@@ -21,8 +21,7 @@
 
 from dojson import utils
 
-from ..model import cds_marc21
-
+from cds.base.dojson.marc21.translations.default import model as cds_marc21
 
 @cds_marc21.over('subject_indicator', '^69[07]C_')
 @utils.for_each_value

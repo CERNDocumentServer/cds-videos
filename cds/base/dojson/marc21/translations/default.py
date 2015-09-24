@@ -25,6 +25,8 @@ class CDSMarc21(Overdo):
 
     """Translation Index for CDS specific MARC21."""
 
+    __query__ = ''
+
     def __init__(self):
         """Constructor.
 
@@ -55,4 +57,4 @@ class CDSMarc21(Overdo):
         return super(CDSMarc21, self).over(name, *source_tags)
 
 
-cds_marc21 = CDSMarc21()
+model = CDSMarc21()
