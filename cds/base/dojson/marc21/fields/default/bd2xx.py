@@ -23,7 +23,7 @@ from cds.base.dojson import utils as cds_utils
 
 from dojson import utils
 
-from ..model import cds_marc21
+from cds.base.dojson.marc21.translations.default import model as cds_marc21
 
 
 @cds_marc21.over('title_statement', '^245[10_][_1032547698]', override=True)

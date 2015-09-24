@@ -22,7 +22,7 @@
 from cds.base.dojson import utils as cds_utils
 from dojson import utils
 
-from ..model import cds_marc21
+from cds.base.dojson.marc21.translations.default import model as cds_marc21
 
 
 @cds_marc21.over('affiliation_at_conversion', '^901__')

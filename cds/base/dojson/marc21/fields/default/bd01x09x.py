@@ -19,9 +19,9 @@
 
 """CDS special/custom tags."""
 
-from dojson import utils
+from cds.base.dojson.marc21.translations.default import model as cds_marc21
 
-from ..model import cds_marc21
+from dojson import utils
 
 
 @cds_marc21.over('international_standard_number', '^021..')
