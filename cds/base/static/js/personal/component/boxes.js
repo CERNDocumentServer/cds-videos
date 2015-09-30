@@ -40,12 +40,12 @@ define(function (require) {
 
     this._requestOptions = function(args) {
       return {
-          url: args.url,
-          type: args.method || 'GET',
-          cache: false,
-          data: JSON.stringify(args.data || {}),
-          contentType: "application/json; charset=utf-8",
-          dataType: 'json'
+        url: args.url,
+        type: args.method || 'GET',
+        cache: false,
+        data: JSON.stringify(args.data || {}),
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json'
       };
     };
 

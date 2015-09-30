@@ -1,0 +1,26 @@
+<div class="personal-box-body-edit" data-show="edit">
+    <form id="personal-box-admin-form" data-id="{{id}}">
+        <div class="form-group">
+            <label>Box title</label>
+            <input type="text" class="form-control" name="title" value="{{ _settings.title }}" />
+        </div>
+        <div class="form-group">
+            <label>Search query</label>
+            <input type="text" class="form-control" name="query" value="{{ _settings.query }}" />
+        </div>
+        <div class="form-group">
+            <label>Collection Name</label>
+            <input type="text" class="form-control" name="collection" value="{{ _settings.collection}}" />
+        </div>
+        <input type="hidden" name="type" value="{{_settings.type}}" />
+    </form>
+    <div class="personal-box-body-edit-footer">
+        <div class="text-right">
+            <a href="#" class="btn btn-small btn-success btn-block personal-box-ui-save">Save</a>
+            <a href="#" class="btn btn-small btn-danger btn-block personal-box-ui-delete personal-box-delete">Delete</a>
+            {{#_settings.title}}
+                <a href="#" data-state="normal" class="btn btn-small btn-block btn-default personal-box-ui-normal personal-box-ui-state">Cancel</a>
+            {{/_settings.title}}
+        </div>
+    </div>
+</div>
