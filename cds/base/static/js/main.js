@@ -19,13 +19,14 @@
 
 require([
     "jquery",
-    "js/app",
     "js/record_tools",
   ],
-  function($, app, record_tools) {
+  function($, record_tools) {
+
     $(document).ready(function() {
       record_tools.modalList();
       record_tools.expandContent();
       record_tools.translationListener();
     });
+
 });

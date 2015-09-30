@@ -19,10 +19,12 @@
 
 
 require([
+    'jquery',
     'typeahead',
     'hogan'
   ],
-  function(Bloodhound, Hogan) {
+  function($, Bloodhound, Hogan) {
+
     $(document).ready(function() {
 
       var $searchForm = $('#cds-main-search');
