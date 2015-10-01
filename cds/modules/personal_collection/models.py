@@ -27,7 +27,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.mutable import MutableDict
 
 
-from invenio.ext.sqlalchemy import db
+from invenio_ext.sqlalchemy import db
 from invenio_accounts.models import User
 
 
@@ -78,7 +78,7 @@ class PersonalCollectionSettings(db.Model):
     def get(cls, user_id, collection='home'):
         """Get settings.
 
-        :param user_id: User ID as in `invenio.modules.accounts.models:User`
+        :param user_id: User ID as in `invenio_accounts.models:User`
         :param collection: Name of the collection to get the settings from, by
             default it fetches for the `home` collection
         :returns: Returns empty `dict` if not settings were found.
@@ -110,7 +110,7 @@ class PersonalCollectionSettings(db.Model):
         If the settings for the given `user_id` does not exist, sets the
         default ones and the updates them with the given `settings`.
 
-        :param user_id: User ID as in `invenio.modules.accounts.models:User`
+        :param user_id: User ID as in `invenio_accounts.models:User`
         :param settings: `dict` with the collection settings
         :param collection: Collection name, home collection by default
         :returns: TODO

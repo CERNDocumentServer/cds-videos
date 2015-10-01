@@ -38,7 +38,6 @@ from __future__ import unicode_literals
 
 from collections import MutableSequence
 
-from invenio_base.config import PACKAGES as _PACKAGES
 from invenio_records.config import (
     RECORD_KEY_ALIASES as _RECORD_KEY_ALIASES,
     RECORD_PROCESSORS as _RECORD_PROCESSORS
@@ -64,38 +63,60 @@ PACKAGES = [
     "cds.base",
     "cds.base.dojson.marc21",
     "cds.modules.personal_collection",
-] + _PACKAGES
+    # Invenio packages
+    'invenio_records',
+    'invenio_search',
+    # 'invenio_comments',
+    'invenio_collections',
+    'invenio_documents',
+    'invenio_pidstore',
+    'invenio_formatter',
+    'invenio_unapi',
+    'invenio_webhooks',
+    'invenio_deposit',
+    'invenio_workflows',
+    'invenio_knowledge',
+    'invenio_oauthclient',
+    'invenio_oauth2server',
+    'invenio_previewer',
+    # 'invenio_messages',
+    'invenio_groups',
+    'invenio_access',
+    'invenio_accounts',
+    'invenio_upgrader',
+    'invenio_base',
+]
 
 EXTENSIONS = [
-    'invenio.ext.confighacks',
-    'invenio.ext.passlib:Passlib',
-    'invenio.ext.debug_toolbar',
-    'invenio.ext.babel',
-    'invenio.ext.sqlalchemy',
-    'invenio.ext.sslify',
-    'invenio.ext.cache',
-    'invenio.ext.session',
-    'invenio.ext.login',
-    'invenio.ext.principal',
-    'invenio.ext.email',
-    'invenio.ext.fixtures',
-    'invenio.ext.mixer',
-    'invenio.ext.legacy',
-    'invenio.ext.assets',
-    'invenio.ext.template',
-    'invenio.ext.admin',
-    'invenio.ext.logging',
-    'invenio.ext.logging.backends.fs',
-    'invenio.ext.logging.backends.legacy',
-    'invenio.ext.logging.backends.sentry',
-    'invenio.ext.gravatar',
-    'invenio.ext.collect',
-    'invenio.ext.restful',
-    'invenio.ext.menu',
-    'invenio.ext.jasmine',  # after assets
-    'flask.ext.breadcrumbs:Breadcrumbs',
+    'invenio_ext.confighacks',
+    'invenio_ext.passlib:Passlib',
+    'invenio_ext.debug_toolbar',
+    'invenio_ext.babel',
+    'invenio_ext.sqlalchemy',
+    'invenio_ext.sslify',
+    'invenio_ext.cache',
+    'invenio_ext.session',
+    'invenio_ext.login',
+    'invenio_ext.principal',
+    'invenio_ext.email',
+    'invenio_ext.fixtures',  # before legacy
+    'invenio_ext.mixer',
+    'invenio_ext.legacy',
+    'invenio_ext.assets',
+    'invenio_ext.template',
+    'invenio_ext.admin',
+    'invenio_ext.logging',
+    'invenio_ext.logging.backends.fs',
+    'invenio_ext.logging.backends.legacy',
+    'invenio_ext.logging.backends.sentry',
+    'invenio_ext.gravatar',
+    'invenio_ext.collect',
+    'invenio_ext.restful',
+    'invenio_ext.menu',
+    'invenio_ext.jasmine',  # after assets
+    'flask_breadcrumbs:Breadcrumbs',
     'invenio_deposit.url_converters',
-    'invenio.ext.es',
+    'invenio_ext.es',
 ]
 
 CFG_SITE_NAME = "CERN Document Server"

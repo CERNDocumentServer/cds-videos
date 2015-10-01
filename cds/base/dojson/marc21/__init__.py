@@ -19,7 +19,7 @@
 
 from flask import current_app
 
-from invenio.utils.datastructures import SmartDict
+from invenio_utils.datastructures import SmartDict
 
 from invenio_search.api import Query
 

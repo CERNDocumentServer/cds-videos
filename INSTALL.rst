@@ -239,7 +239,7 @@ assets using the once that have been copied to the static folder.
 
 .. code-block:: console
 
-    (cdslabs)$ inveniomanage config set COLLECT_STORAGE invenio.ext.collect.storage.link
+    (cdslabs)$ inveniomanage config set COLLECT_STORAGE invenio_ext.collect.storage.link
     (cdslabs)$ inveniomanage collect
     (cdslabs)$ inveniomanage assets build
 

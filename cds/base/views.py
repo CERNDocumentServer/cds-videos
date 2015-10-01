@@ -23,7 +23,7 @@ from flask import Blueprint, current_app, render_template
 
 from flask_menu import current_menu
 
-from invenio.base.i18n import _
+from invenio_base.i18n import _
 
 blueprint = Blueprint(
     'cds', __name__, url_prefix='/', template_folder='templates',

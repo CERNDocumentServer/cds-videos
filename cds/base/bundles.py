@@ -19,7 +19,7 @@
 
 """CDS bundles."""
 
-from invenio.ext.assets import Bundle
+from invenio_ext.assets import Bundle
 
 from invenio_base.bundles import styles as _styles
 

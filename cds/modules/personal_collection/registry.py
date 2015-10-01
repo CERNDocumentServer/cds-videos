@@ -21,8 +21,8 @@
 
 from flask_registry import RegistryProxy
 
-from invenio.ext.registry import ModuleAutoDiscoverySubRegistry
-from invenio.utils.datastructures import LazyDict
+from invenio_ext.registry import ModuleAutoDiscoverySubRegistry
+from invenio_utils.datastructures import LazyDict
 
 
 boxes_proxy = RegistryProxy('boxes', ModuleAutoDiscoverySubRegistry, 'boxes')

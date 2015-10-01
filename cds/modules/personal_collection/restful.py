@@ -29,7 +29,7 @@ from flask_login import current_user
 from flask_restful import abort, Resource
 
 
-from invenio.ext.restful import require_header
+from invenio_ext.restful import require_header
 
 
 from .api import (

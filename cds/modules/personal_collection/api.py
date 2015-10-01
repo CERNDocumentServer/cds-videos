@@ -19,7 +19,7 @@
 
 """Personal collections API."""
 
-from invenio.ext.cache import cache
+from invenio_ext.cache import cache
 
 from .models import PersonalCollectionSettings
 from .registry import boxes

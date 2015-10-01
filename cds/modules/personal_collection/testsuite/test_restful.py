@@ -19,7 +19,7 @@
 
 """Test Personal Collection REST API."""
 
-from invenio.ext.restful.utils import APITestCase
+from invenio_ext.restful.utils import APITestCase
 from invenio.testsuite import make_test_suite, run_test_suite
 
 
