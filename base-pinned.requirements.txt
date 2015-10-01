@@ -21,3 +21,20 @@
 ## Pinned base requirements
 
 urllib3<2.0,>=1.8
+
+# CDS forked Invenio packages
+-e git+git://github.com/CERNDocumentServer/invenio-ext.git#egg=invenio-ext@cdslabs
+
+# Invenio packages
+-e git+git://github.com/inveniosoftware/invenio-base.git#egg=invenio-base@6867e97e9e757b8913c10123622be991ea6365d5
+-e git+git://github.com/inveniosoftware/invenio-celery.git#egg=invenio-celery@47f42c8210758cb8c5c46ff806c564f922180c8e
+
+-e git+git://github.com/inveniosoftware/invenio-records.git#egg=invenio-records
+-e git+git://github.com/inveniosoftware/invenio-access.git#egg=invenio-access@fe06a949531995f42d4d310539dccdb4461f5fc2
+-e git+git://github.com/inveniosoftware/invenio-accounts.git#egg=invenio-accounts@2f314736dcf6d20627302d366736f7bdd4e7b97d
+-e git+git://github.com/inveniosoftware/invenio-accounts.git#egg=invenio-accounts@2f314736dcf6d20627302d366736f7bdd4e7b97d
+-e git+git://github.com/inveniosoftware/invenio-collection.git#egg=invenio-collection@56018300b685b68ae61218c63294fa02a337de75
+-e git+git://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore@1fc290dfcaa5b4cae4d1a24a5132d28b8c0484e9
+-e git+git://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient@d5762480fedffb21c10989b6013a67384e9bb632
+-e git+git://github.com/inveniosoftware/invenio-search.git#egg=invenio-search@84be273a859faf8401c714bd2aecfc810863e9fe
+
