@@ -17,10 +17,19 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// Extend invenio config
-require.config({
-  paths: {
-    d3: "vendors/d3/d3",
-    elasticsearch: "vendors/elasticsearch/elasticsearch"
-});
+// TODO wyjebac zbedne rzeczy
 
+require(
+  [
+    'jquery',
+    'js/statistics/main',
+  ],
+  function($, initializeStatistics) {
+    // Init personal
+    try{
+      initializeStatistics();
+    } catch(error){
+      console.error('Error loading statistics', error);
+    }
+  }
+);

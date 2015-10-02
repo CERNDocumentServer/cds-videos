@@ -63,6 +63,7 @@ PACKAGES = [
     "cds.base",
     "cds.base.dojson.marc21",
     "cds.modules.personal_collection",
+    "cds.modules.statistics",
     # Invenio packages
     'invenio_records',
     'invenio_search',

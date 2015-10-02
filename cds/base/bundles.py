@@ -52,3 +52,15 @@ personal_collections_js = Bundle(
         "sortable.js": "~1.2.0",
     }
 )
+
+statistics_js = Bundle(
+    "js/statistics/init.js",
+    output="statistics.js",
+    weight=93,
+    filters="requirejs",
+    bower={
+        # Statistics
+        # "d3": "~3.5.6",
+        # "elasticsearch": "~8.2.0",
+    }
+)
