@@ -17,13 +17,22 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-from .default import CDSMarc21
+from .default import (CDSMarc21, translation as marc21)
 
 
-class CDSVideos(CDSMarc21):
+class CDSAlbum(CDSMarc21):
 
-    """Translation Index for CDS Videos."""
+    """Translation Index for CDS Albums."""
 
-    __query__ = '980__.a:PUBLVIDEOMOVIE'
+    __query__ = '999__.a:ALBUM'
 
-translation = CDSVideos()
+    def __init__(self):
+        """Constructor.
+
+        Initializes the list of rules with the default ones
+        from doJSON + CDSMarc21.
+        """
+        super(CDSAlbum, self).__init__()
+        self.rules.extend(marc21.rules)
+
+translation = CDSAlbum()

@@ -232,8 +232,7 @@ class TestCDSDoJSONVideos(InvenioTestCase):
     def test_video_clip(self):
         """Test video clip loading from XML."""
         from dojson.contrib.marc21.utils import create_record
-        from cds.base.dojson.marc21.fields import *
-        from cds.base.dojson.marc21.translations.videos import (
+        from cds.base.dojson.marc21.translations.video import (
             translation as marc21
         )
 
@@ -261,10 +260,12 @@ class TestCDSDoJSONVideos(InvenioTestCase):
             expected_physical_description
         )
 
+        # Check that no fields are missing their translation
+        self.assertEqual(marc21.missing(blob), [])
+
     def test_video_project(self):
         """Test video project from XML."""
         from dojson.contrib.marc21.utils import create_record
-        from cds.base.dojson.marc21.fields import *
         from cds.base.dojson.marc21.translations.default import (
             translation as marc21
         )
@@ -279,6 +280,9 @@ class TestCDSDoJSONVideos(InvenioTestCase):
         )
         # Check the control number
         self.assertEqual(data.get('control_number'), '2053119')
+
+        # Check that no fields are missing their translation
+        self.assertEqual(marc21.missing(blob), [])
 
 TEST_SUITE = make_test_suite(TestCDSDoJSONVideos)
 

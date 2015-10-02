@@ -17,6 +17,9 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+
+from cds.base.dojson.marc21.fields import *
+
 from flask import current_app
 
 from invenio_utils.datastructures import SmartDict
@@ -71,9 +74,9 @@ def query_matcher(record):
             )
         return _matches[0][1]
     except IndexError:
-        current_app.logger.error(
-            "Model *not* found fallback to default {0}".format(
-                _smart_dict_record
+        current_app.logger.warning(
+            "Model *not* found, fallback to default {0} for record {1}".format(
+                marc21_default_translation, _smart_dict_record
             )
         )
         return marc21_default_translation
