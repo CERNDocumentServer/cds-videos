@@ -73,7 +73,7 @@ PACKAGES = [
     'invenio_formatter',
     'invenio_unapi',
     'invenio_webhooks',
-    'invenio_deposit',
+    # 'invenio_deposit',
     'invenio_workflows',
     'invenio_knowledge',
     'invenio_oauthclient',
@@ -115,7 +115,7 @@ EXTENSIONS = [
     'invenio_ext.menu',
     'invenio_ext.jasmine',  # after assets
     'flask_breadcrumbs:Breadcrumbs',
-    'invenio_deposit.url_converters',
+    # 'invenio_deposit.url_converters',
     'invenio_ext.es',
 ]
 
