@@ -19,4 +19,9 @@
 
 """Import all fields."""
 
+
+from album import *
+
 from default import *
+
+from image import *

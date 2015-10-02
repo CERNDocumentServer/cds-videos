@@ -290,3 +290,14 @@ def refexctract_references(self, key, value):
     return {
         'refextract_info': value.get('a'),
     }
+
+
+@marc21.over('record_type', '^999..')
+@utils.for_each_value
+@utils.filter_values
+def record_type(self, key, value):
+    """Record type - mostly IMAGE"""
+    return {
+        'record_type': value.get('a'),
+        'dump': value.get('9'),
+    }

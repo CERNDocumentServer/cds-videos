@@ -62,5 +62,17 @@ def internal_note(self, key, value):
         'internal_note': value.get('a'),
         'control_field': value.get('d'),
         'inspec_number': value.get('i'),
-        'subject_note': value.get('s')
+        'subject_note': value.get('s'),
+        'additional_note': value.get('9')
+    }
+
+
+@marc21.over('slac_note', '^596.')
+@utils.for_each_value
+@utils.filter_values
+def slac_note(self, key, value):
+    """Slac note - some kind of internal note"""
+    return {
+        'slac_note': value.get('a'),
+        'dump': value.get('b'),
     }
