@@ -22,6 +22,9 @@
 ## Development ##
 #################
 
+## Base requirements
+-r base.requirements.txt
+
 ## Requirements
 -r dev.requirements.txt
 

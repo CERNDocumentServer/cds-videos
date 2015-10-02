@@ -67,9 +67,6 @@ class PyTest(TestCommand):
         """Run tests."""
         # import here, cause outside the eggs aren't loaded
         import pytest
-        import _pytest.config
-        pm = _pytest.config.get_plugin_manager()
-        pm.consider_setuptools_entrypoints()
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
