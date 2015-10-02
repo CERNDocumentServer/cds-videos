@@ -51,7 +51,7 @@ env:
   - REQUIREMENTS=cdslabs_qa
 
 before_install:
-  - "travis_retry pip install mock --quiet"
+  - "travis_retry pip install check-manifest mock twine wheel coveralls --quiet"
   - "travis_retry pip install --upgrade pip --quiet"
 
 install:
@@ -85,4 +85,5 @@ before_script:
   - "inveniomanage records create -t marcxml < cds/demosite/data/cds-demobibdata.xml"
 
 script:
+  # - "check-manifest --ignore .travis-\\*-requirements.txt"
   - "python setup.py test"
