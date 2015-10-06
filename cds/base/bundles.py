@@ -60,7 +60,7 @@ statistics_js = Bundle(
     filters="requirejs",
     bower={
         # Statistics
-        # "d3": "~3.5.6",
-        # "elasticsearch": "~8.2.0",
+        "d3": "~3.5.6",
+        "elasticsearch": "~8.2.0",
     }
 )

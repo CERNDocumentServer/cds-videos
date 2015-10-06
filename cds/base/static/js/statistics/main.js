@@ -42,15 +42,56 @@ define(function (require) {
    * Module function
    */
 
+  var client = new elasticsearch.Client({
+    host: 'localhost: 9200',
+    log: 'trace'
+  });
+
+  function getRecordID() {
+    // Get the record ID from the URL
+    url = window.location.href;
+    recordID = url.match(/\d+$/);
+    if(recordID) {
+      // There should be only one match
+      recordID = recordID[0];
+    }
+    return recordID;
+  }
+
   function initialize() {
+    recordID = getRecordID()
+    if (!recordID) {
+      // If there is no record ID, return without creating graphs
+      return;
+    }
     // Get some stats from elasticsearch
+    client.search({
+      body: {
+        // Begin query
+        query: "_type:events.pageviews AND bot:True and id_bibrec:" + recordID,
+        aggs: {
+          pageviews: {
+            date_histogram: {
+              field: "@timestamp",
+              interval: "1d",
+              format: "yyyy-MM-dd"
+            }
+          }
+        }
+      }
+    }).then(function(response){
+      console.log(response);
+    })
     // TODO get real stats
-    console.log('I\'m running');
     var days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
-    var frequency = function({
+    var frequencyGenerator = function(){
       // Return random value from 1-15, for fun now
       return Math.floor(Math.random() * 15);
-    })
+    }
+    var frequency = []
+    for(var i=1; i <= 18; i++) {
+      frequency.push(frequencyGenerator())
+    }
 
     // Display stats using d3
     var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -77,7 +118,6 @@ define(function (require) {
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
     x.domain(days);
     y.domain([0, d3.max(frequency)]);
 
@@ -89,18 +129,12 @@ define(function (require) {
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis)
-      .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Frequency");
 
     svg.selectAll(".bar")
         .data(frequency)
       .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function(d, i) { return x(i); })
+        .attr("x", function(d, i) { return x(i + 1); })
         .attr("width", x.rangeBand())
         .attr("y", function(d) { return y(d); })
         .attr("height", function(d) { return height - y(d); });

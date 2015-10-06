@@ -31,7 +31,8 @@ from invenio_records.views import request_record
 always = lambda: True
 
 blueprint = Blueprint(
-    'statistics', __name__, template_folder='templates', static_folder='static'
+    'statistics', __name__, url_prefix="/record", template_folder='templates',
+    static_folder='static'
 )
 
 

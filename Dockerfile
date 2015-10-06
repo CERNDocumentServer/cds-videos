@@ -56,7 +56,6 @@ RUN cd / && \
     pip install -r /src/$INVENIO_MODULE/dev.requirements.txt --exists-action i --upgrade && \
     rm -rf /tmp/* /var/tmp/* /var/lib/{cache,log}/ /root/.cache/*
 
-
 ###############################################################################
 ## 3. Build (changing)                                                       ##
 ###############################################################################

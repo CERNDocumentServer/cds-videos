@@ -21,6 +21,6 @@
 require.config({
   paths: {
     d3: "vendors/d3/d3",
-    elasticsearch: "vendors/elasticsearch/elasticsearch"
+    elasticsearch: "vendors/elasticsearch/elasticsearch" }
 });
 

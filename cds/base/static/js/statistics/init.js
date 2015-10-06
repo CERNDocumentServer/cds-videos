@@ -25,7 +25,7 @@ require(
     'js/statistics/main',
   ],
   function($, initializeStatistics) {
-    // Init personal
+    // Init statistics
     try{
       initializeStatistics();
     } catch(error){
