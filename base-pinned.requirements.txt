@@ -24,6 +24,7 @@ urllib3<2.0,>=1.8
 
 # CDS forked Invenio packages
 -e git+git://github.com/CERNDocumentServer/invenio-ext.git@cdslabs#egg=invenio-ext
+-e git+git://github.com/CERNDocumentServer/dojson.git@cdslabs#egg=dojson
 
 # Invenio packages
 -e git+git://github.com/inveniosoftware/invenio-base.git@6867e97e9e757b8913c10123622be991ea6365d5#egg=invenio-base

@@ -199,8 +199,9 @@ class TESTCDSDoJSONAlbum(InvenioTestCase):
         data = marc21.do(blob)
 
         # Check the control number (doJSON)
-        self.assertEqual(data['material_base_and_configuration'],
-                         ['Neg NB 6 x 6'])
+        self.assertEqual(
+            data['physical_medium'][1]['material_base_and_configuration'],
+            ['Neg NB 6 x 6'])
 
         # Check the parent album (CDSImage)
         self.assertEqual(data['images'][3]['$ref'],

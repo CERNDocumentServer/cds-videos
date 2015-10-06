@@ -18,7 +18,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
-from .default import (CDSMarc21, translation as marc21)
+from .default import CDSMarc21, translation as cds_marc21
 
 
 class CDSImage(CDSMarc21):
@@ -27,13 +27,5 @@ class CDSImage(CDSMarc21):
 
     __query__ = '999__.a:IMAGE'
 
-    def __init__(self):
-        """Constructor.
-
-        Initializes the list of rules with the default ones
-        from doJSON + CDSMarc21.
-        """
-        super(CDSImage, self).__init__()
-        self.rules.extend(marc21.rules)
-
-translation = CDSImage()
+translation = CDSImage(bases=(cds_marc21, ),
+                       entry_point_group='dojson.contrib.cds.marc21.image')

@@ -17,6 +17,8 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+from pkg_resources import iter_entry_points
+
 from dojson.contrib.marc21 import marc21
 from dojson.overdo import Overdo
 
@@ -26,14 +28,6 @@ class CDSMarc21(Overdo):
     """Translation Index for CDS specific MARC21."""
 
     __query__ = '690C_.a:CERN'
-
-    def __init__(self):
-        """Constructor.
-
-        Initializes the list of rules with the default ones from doJSON.
-        """
-        super(CDSMarc21, self).__init__()
-        self.rules.extend(marc21.rules)
 
     def over(self, name, *source_tags, **kwargs):
         """Register creator rule.
@@ -57,4 +51,5 @@ class CDSMarc21(Overdo):
         return super(CDSMarc21, self).over(name, *source_tags)
 
 
-translation = CDSMarc21()
+translation = CDSMarc21(bases=(marc21, ),
+                        entry_point_group='dojson.contrib.cds.marc21')

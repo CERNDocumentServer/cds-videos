@@ -113,7 +113,22 @@ setup(
     entry_points={
         'invenio.config': [
             "cds = cds.config"
-        ]
+        ],
+        'dojson.contrib.cds.marc21': [
+            'bd01x09x = cds.base.dojson.marc21.fields.default.bd01x09x',
+            'bd2xx = cds.base.dojson.marc21.fields.default.bd2xx',
+            'bd5xx = cds.base.dojson.marc21.fields.default.bd5xx',
+            'bd69x = cds.base.dojson.marc21.fields.default.bd69x',
+            'bd7xx = cds.base.dojson.marc21.fields.default.bd7xx',
+            'bd8xx = cds.base.dojson.marc21.fields.default.bd8xx',
+            'bd9xx = cds.base.dojson.marc21.fields.default.bd9xx',
+        ],
+        'dojson.contrib.cds.marc21.album': [
+            'album = cds.base.dojson.marc21.fields.album'
+        ],
+        'dojson.contrib.cds.marc21.image': [
+            'image = cds.base.dojson.marc21.fields.image'
+        ],
     },
     test_suite='invenio.testsuite.suite',
     cmdclass={'test': PyTest},
