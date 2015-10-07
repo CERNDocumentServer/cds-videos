@@ -1,0 +1,62 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+{%- if not request.is_xhr -%}
+{% extends "records/base.html" %}
+{%- endif -%}
+
+{% block global_bundles %}
+{{ super() }}
+{% bundles "records_statistics.js" %}
+{% endblock %}
+
+{% block record_content %}
+<div class="page-header">
+  {{ format_record(recid, 'hs', ln=g.ln)|safe }}
+</div>
+
+<h2>Timeline</h2>
+<div class="row">
+  <div class="col-md-4 col-md-push-8">
+    <h4>Time filter</h4>
+    <div class="form-group">
+      <input type="text" class="form-control" id="time_from" placeholder="Time from" />
+    </div>
+    <div class="form-group">
+      <input type="text" class="form-control" id="time_to" placeholder="Time to" />
+    </div>
+    <div class="form-group">
+      <button type="button" class="btn btn-primary" id="refresh_button">Refresh</button>
+    </div>
+  </div>
+  <div class="col-md-8 col-md-pull-4">
+    <h4>{{ data['title'] }} over time.</h4>
+    <div id="placeholder" style="height:600px">Loading...</div>
+  </div>
+
+</div>
+
+{% endblock %}
+{% block javascript %}
+{{ super() }}
+<script>
+  require(['js/records/statistics/timeline'], function(timeline) {
+    timeline.draw('{{ data['doc_type'] }}', {{ data['recid'] }});
+  });
+</script>
+{% endblock %}

@@ -27,10 +27,9 @@ define(function (require) {
    * Module dependencies
    */
 
-  // TODO change it back when d3 is fixed in invenio-base
-  // var d3 = require('d3');
-  var d3 = require('vendors/d3/d3');
-  var elasticsearch = require('vendors/elasticsearch/elasticsearch');
+  var _ = require('vendors/lodash/lodash');
+  var d3 = require('d3');
+  var elasticsearch = require('elasticsearch');
 
   /**
    * Module exports
@@ -47,41 +46,8 @@ define(function (require) {
     log: 'trace'
   });
 
-  function getRecordID() {
-    // Get the record ID from the URL
-    url = window.location.href;
-    recordID = url.match(/\d+$/);
-    if(recordID) {
-      // There should be only one match
-      recordID = recordID[0];
-    }
-    return recordID;
-  }
 
   function initialize() {
-    recordID = getRecordID()
-    if (!recordID) {
-      // If there is no record ID, return without creating graphs
-      return;
-    }
-    // Get some stats from elasticsearch
-    client.search({
-      body: {
-        // Begin query
-        query: "_type:events.pageviews AND bot:True and id_bibrec:" + recordID,
-        aggs: {
-          pageviews: {
-            date_histogram: {
-              field: "@timestamp",
-              interval: "1d",
-              format: "yyyy-MM-dd"
-            }
-          }
-        }
-      }
-    }).then(function(response){
-      console.log(response);
-    })
     // TODO get real stats
     var days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
     var frequencyGenerator = function(){

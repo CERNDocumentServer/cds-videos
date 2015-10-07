@@ -27,8 +27,10 @@ from invenio_base.i18n import _
 
 from invenio_records.views import request_record
 
+from invenio_records.utils import visible_collection_tabs
 
-always = lambda: True
+from .config import STATS_CFG
+
 
 blueprint = Blueprint(
     'statistics', __name__, url_prefix="/record", template_folder='templates',
@@ -36,12 +38,52 @@ blueprint = Blueprint(
 )
 
 
-@blueprint.route('/<int:recid>/statistics', methods=['GET'])
+@blueprint.route('/<int:recid>/statistics', methods=['GET', 'POST'])
 @request_record
 @register_menu(blueprint, 'record.statistics', _('Statistics'), order=9,
                endpoint_arguments_constructor=lambda:
                dict(recid=request.view_args.get('recid')),
-               visible_when=always)
-def files(recid):
-    """Return overview of attached files."""
-    return render_template('statistics/page_views.html')
+               visible_when=visible_collection_tabs('statistics'))
+@viewstatistics_only
+def statistics(recid):
+    statistics = []
+    for (event_name, event) in STATS_CFG['events'].items():
+        event_statistics = STATS_CFG['events'][event_name]['statistics']
+        for (statistic_name, statistic) in event_statistics.items():
+            statistics.append({
+                'name': event['title'] + ' ' + statistic_name,
+                'path': blueprint.url_prefix + '/' + str(recid) +
+                '/statistics/' + event_name + '/' + statistic_name
+            })
+
+    return render_template('statistics/index.html',
+                           statistics=statistics)
+
+
+@blueprint.route('/<int:recid>/statistics/<event_name>/<statistic>',
+                 methods=['GET'])
+@request_record
+@viewstatistics_only
+def view_statistic(recid, event_name=None, statistic=None):
+    if event_name not in STATS_CFG['events']:
+        # 404
+        return 'no such event', 404
+    if 'statistics' not in STATS_CFG['events'][event_name]:
+        # 404
+        return 'no statistics associated with this event', 404
+    if statistic not in STATS_CFG['events'][event_name]['statistics']:
+        # 404
+        return 'no such statistic for this event', 404
+    event = STATS_CFG['events'][event_name]
+    display = event['statistics'][statistic]['display']
+    query_type = event['statistics'][statistic]['query_type']
+
+    data = {
+        'recid': recid,
+        'doc_type': event_name,
+        'statistic_data': event['statistics'][statistic],
+        'title': event['title'],
+        'query_type': query_type,
+    }
+    return render_template('statistics/%s.html' % display,
+                           data=data)
