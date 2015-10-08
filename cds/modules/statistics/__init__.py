@@ -19,4 +19,4 @@
 
 from __future__ import absolute_import
 from .api import endpoints
-from . import logging
+# from . import logging # Not needed anymore ?

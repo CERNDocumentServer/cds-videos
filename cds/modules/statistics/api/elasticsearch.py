@@ -27,10 +27,8 @@ from flask import Response
 from functools import wraps
 
 from invenio.base.decorators import wash_arguments
-from invenio.config import CFG_ES_SEARCH_HOSTS, \
-    CFG_ES_SEARCH_INDEX_PREFIX
-
-from ..config import STATS_CFG
+from ..config import CFG_ES_SEARCH_HOSTS, \
+    CFG_ES_SEARCH_INDEX_PREFIX, STATS_CFG
 
 elasticsearch = Elasticsearch(hosts=CFG_ES_SEARCH_HOSTS)
 ES_INDEX = CFG_ES_SEARCH_INDEX_PREFIX + '*'
