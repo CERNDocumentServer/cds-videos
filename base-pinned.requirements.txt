@@ -28,7 +28,6 @@ urllib3<2.0,>=1.8
 
 # Invenio packages
 -e git+git://github.com/inveniosoftware/dojson.git@v0.2.0#egg=dojson
--e git+git://github.com/inveniosoftware/invenio-celery.git@47f42c8210758cb8c5c46ff806c564f922180c8e#egg=invenio-celery
 -e git+git://github.com/inveniosoftware/invenio-records.git@e05701766fb55fbacfa7a42e2223db17f422d216#egg=invenio-records
 -e git+git://github.com/inveniosoftware/invenio-access.git@fe06a949531995f42d4d310539dccdb4461f5fc2#egg=invenio-access
 -e git+git://github.com/inveniosoftware/invenio-accounts.git@2f314736dcf6d20627302d366736f7bdd4e7b97d#egg=invenio-accounts
@@ -36,7 +35,9 @@ urllib3<2.0,>=1.8
 -e git+git://github.com/inveniosoftware/invenio-oauthclient.git@d5762480fedffb21c10989b6013a67384e9bb632#egg=invenio-oauthclient
 -e git+git://github.com/inveniosoftware/invenio-search.git@84be273a859faf8401c714bd2aecfc810863e9fe#egg=invenio-search
 -e git+git://github.com/inveniosoftware/invenio-oauth2server.git@1a7c8e75905c8360c85be7542e570d5667815f9b#egg=invenio-oauth2server
+-e git+git://github.com/inveniosoftware/invenio-knowledge.git@600ae5aa8bd81fae9a9cba9cc17c3cabb414d7fa#egg=invenio-knowledge
 
+invenio-celery==0.1.1
 invenio-base==0.3.1
 invenio-client==0.1.0
 invenio-documents==0.1.0.post2
