@@ -25,13 +25,13 @@ urllib3<2.0,>=1.8
 # CDS forked Invenio packages
 -e git+git://github.com/CERNDocumentServer/invenio-ext.git@cdslabs#egg=invenio-ext
 -e git+git://github.com/CERNDocumentServer/invenio-collections.git@cdslabs#egg=invenio-collections
+-e git+git://github.com/CERNDocumentServer/invenio-pidstore.git@cdslabs#egg=invenio-pidstore
 
 # Invenio packages
 -e git+git://github.com/inveniosoftware/dojson.git@v0.2.0#egg=dojson
--e git+git://github.com/inveniosoftware/invenio-records.git@e05701766fb55fbacfa7a42e2223db17f422d216#egg=invenio-records
+-e git+git://github.com/inveniosoftware/invenio-records.git@34310a19ed6b7e6ba897d8cbbf6113dcfe704fee#egg=invenio-records
 -e git+git://github.com/inveniosoftware/invenio-access.git@fe06a949531995f42d4d310539dccdb4461f5fc2#egg=invenio-access
 -e git+git://github.com/inveniosoftware/invenio-accounts.git@2f314736dcf6d20627302d366736f7bdd4e7b97d#egg=invenio-accounts
--e git+git://github.com/inveniosoftware/invenio-pidstore.git@1fc290dfcaa5b4cae4d1a24a5132d28b8c0484e9#egg=invenio-pidstore
 -e git+git://github.com/inveniosoftware/invenio-oauthclient.git@d5762480fedffb21c10989b6013a67384e9bb632#egg=invenio-oauthclient
 -e git+git://github.com/inveniosoftware/invenio-search.git@84be273a859faf8401c714bd2aecfc810863e9fe#egg=invenio-search
 -e git+git://github.com/inveniosoftware/invenio-oauth2server.git@1a7c8e75905c8360c85be7542e570d5667815f9b#egg=invenio-oauth2server
