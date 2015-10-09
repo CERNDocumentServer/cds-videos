@@ -481,7 +481,7 @@ the following commands.
 
 .. code-block:: console
 
-    (cdslabs)$ inveniomanage config set CFG_EMAIL_BACKEND flask.ext.email.backends.console.Mail
+    (cdslabs)$ inveniomanage config set CFG_EMAIL_BACKEND flask_email.backends.console.Mail
     (cdslabs)$ inveniomanage config set CFG_BIBSCHED_PROCESS_USER $USER
 
 By default the database name and username is set to `cds`. You mau want to
