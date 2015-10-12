@@ -81,10 +81,11 @@ PACKAGES = [
     'invenio_accounts',
     'invenio_upgrader',
     'invenio_base',
+    'invenio_knowledge',
+    'invenio_oaiharvester'
     # 'invenio_comments',
     # 'invenio_messages',
     # 'invenio_deposit',
-    # 'invenio_knowledge',
 ]
 
 EXTENSIONS = [
