@@ -63,6 +63,7 @@ PACKAGES = [
     "cds.base",
     "cds.base.dojson.marc21",
     "cds.modules.personal_collection",
+    "cds.modules.record_split",
     # Invenio packages
     'invenio_records',
     'invenio_search',
@@ -199,14 +200,14 @@ RECORD_KEY_ALIASES['sysnos'] = _concat_fields_into_list(
     'system_control_number.system_control_number',
 )
 RECORD_KEY_ALIASES['collaboration'] = \
-        'added_entry_corporate_name.miscellaneous_information'
+    'added_entry_corporate_name.miscellaneous_information'
 RECORD_KEY_ALIASES['global_base'] = 'cata.library'
 RECORD_KEY_ALIASES['product'] = 'subject_indicator'
 RECORD_KEY_ALIASES['use'] = 'internal_note'
 RECORD_KEY_ALIASES['media'] = 'physical_medium.material_base_and_configuration'
 RECORD_KEY_ALIASES['restrictions'] = 'restrictions_on_access_note'
 RECORD_KEY_ALIASES['funding_project_number'] = \
-        'funding_information_note.project_number'
+    'funding_information_note.project_number'
 
 CFG_ACCESS_CONTROL_NOTIFY_USER_ABOUT_NEW_ACCOUNT = 0
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# This file is part of CERN Document Server.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,13 +17,19 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 
-from cds.modules.record_split.utils import AlbumSplitter, SplitException, Double037Field
-from invenio.testsuite import InvenioTestCase
+from __future__ import absolute_import
+
+from cds.modules.record_split.errors import Double037FieldException
+
+from cds.modules.record_split.photo import PhotoSplitter
+
+from invenio.testsuite import InvenioTestCase, make_test_suite, run_test_suite
 
 
-class TestAlbumSplit(InvenioTestCase):
+class TestPhotoSplit(InvenioTestCase):
+
     def test_set_record_types(self):
-        album_splitter = AlbumSplitter()
+        album_splitter = PhotoSplitter()
 
         records = [{}, {}, {}]
 
@@ -34,8 +40,8 @@ class TestAlbumSplit(InvenioTestCase):
         self.assertEqual(records[2]['999__']['a'], 'IMAGE')
 
     def test_same_filename_same_record(self):
-        album_splitter = AlbumSplitter()
-        album, photos = album_splitter.split_records_string(self.xml_same_filename)
+        album_splitter = PhotoSplitter()
+        album, photos = album_splitter.split(self.xml_same_filename)
 
         self.assertEqual(len(photos), 1)
         self.assertEqual(len(photos[0]['8564_']), 2)
@@ -50,9 +56,9 @@ class TestAlbumSplit(InvenioTestCase):
         self.assertEqual(photos[0]['8564_'], expected)
 
     def test_split_album(self):
-        album_splitter = AlbumSplitter()
+        album_splitter = PhotoSplitter()
 
-        album, photos = album_splitter.split_records_string(self.real_album)
+        album, photos = album_splitter.split(self.real_album)
 
         # should be 5 photos - 3 from 8564_, 2 from 8567_
         self.assertEqual(len(photos), 5)
@@ -74,8 +80,6 @@ class TestAlbumSplit(InvenioTestCase):
         self.assertEqual(photos[3]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
         self.assertEqual(photos[4]['774__'][0], {'a': 'ALBUM', 'r': '39020'})
 
-        import pprint
-        pprint.pprint(album['774__'])
         self.assertEqual(album['774__'], [
             {'a': 'IMAGE', 'r': '5000000'},
             {'a': 'IMAGE', 'r': '5000001'},
@@ -187,16 +191,20 @@ class TestAlbumSplit(InvenioTestCase):
         self.assertIsNone(album.get('8564_'))
 
     def test_exception_when_record_malformed(self):
-        album_splitter = AlbumSplitter()
-        self.assertRaises(AssertionError, album_splitter.split_records_string, self.real_album_exc)
+        album_splitter = PhotoSplitter()
+        self.assertRaises(AssertionError,
+                          album_splitter.split_records_string,
+                          self.real_album_exc)
 
     def test_no_exception_when_record_legacy(self):
-        album_splitter = AlbumSplitter()
+        album_splitter = PhotoSplitter()
         album_splitter.split_records_string(self.real_album_legacy)
 
     def test_malformed_037_field(self):
-        album_splitter = AlbumSplitter()
-        self.assertRaises(Double037Field, album_splitter.split_records_string, self.xml_037_malformed)
+        album_splitter = PhotoSplitter()
+        self.assertRaises(Double037FieldException,
+                          album_splitter.split_records_string,
+                          self.xml_037_malformed)
 
     xml_037_malformed = """
         <record>
@@ -466,7 +474,7 @@ class TestAlbumSplit(InvenioTestCase):
         </record>
     """
 
-    real_album_exc = """
+    real_album_exc = r"""
         <record>
           <controlfield tag="001">39020</controlfield>
           <controlfield tag="003">SzGeCERN</controlfield>
@@ -515,7 +523,7 @@ class TestAlbumSplit(InvenioTestCase):
         </record>
     """
 
-    real_album_legacy = """
+    real_album_legacy = r"""
         <record>
           <controlfield tag="001">39020</controlfield>
           <controlfield tag="003">SzGeCERN</controlfield>
@@ -563,3 +571,8 @@ class TestAlbumSplit(InvenioTestCase):
           </datafield>
         </record>
     """
+
+TEST_SUITE = make_test_suite(TestPhotoSplit)
+
+if __name__ == "__main__":
+    run_test_suite(TEST_SUITE)
