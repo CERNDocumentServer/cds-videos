@@ -22,13 +22,10 @@
 
 {% block global_bundles %}
 {{ super() }}
-{% bundles "records_statistics.js" %}
+{% bundles "statistics.js" %}
 {% endblock %}
 
 {% block record_content %}
-<div class="page-header">
-  {{ format_record(recid, 'hs', ln=g.ln)|safe }}
-</div>
 
 <h2>Timeline</h2>
 

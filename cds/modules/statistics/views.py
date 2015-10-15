@@ -30,7 +30,7 @@ from functools import wraps
 # TODO:
 # invenio_access is broken, replace it back later
 # from invenio_access.engine import acc_authorize_action
-acc_authorize_action = lambda x,y: 0, ''
+acc_authorize_action = lambda x, y: (0, '')
 
 from invenio_base.i18n import _
 from invenio_records.utils import visible_collection_tabs
@@ -67,7 +67,6 @@ def viewstatistics_only(f):
 @viewstatistics_only
 def statistics(recid):
     """This function will render the list of available statistics"""
-
     statistics = []
     for (event_name, event) in STATS_CFG['events'].items():
         event_statistics = STATS_CFG['events'][event_name]['statistics']

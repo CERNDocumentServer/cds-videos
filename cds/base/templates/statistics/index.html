@@ -21,9 +21,6 @@
 {%- endif -%}
 
 {% block record_content %}
-<div class="page-header">
-  {{ format_record(recid, 'hs', ln=g.ln)|safe }}
-</div>
 
   <ul>
     {% for statistic in statistics %}
