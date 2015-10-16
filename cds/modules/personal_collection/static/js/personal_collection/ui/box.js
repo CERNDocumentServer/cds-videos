@@ -23,7 +23,7 @@ define(function (require) {
   // Components
   var _ = require('vendors/lodash/lodash');
   var async = require('vendors/async/lib/async');
-  var boxStorage = require('js/personal/helpers/boxStorage');
+  var boxStorage = require('js/personal_collection/helpers/boxStorage');
   var defineComponent = require('flight/lib/component');
 
   // Templates

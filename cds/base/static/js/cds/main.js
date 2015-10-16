@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015 CERN.
+ * Copyright (C) 2014, 2015 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -17,17 +17,14 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require(
-  [
-    'jquery',
-    'js/personal/main',
+require([
+    "jquery",
+    "js/cds/record_tools",
   ],
-  function($, initializePersonal) {
-    // Init personal
-    try{
-      initializePersonal();
-    } catch(error){
-      console.error('Error loading personal collections', error);
-    }
-  }
-);
+  function($, record_tools) {
+    $(document).ready(function() {
+      record_tools.modalList();
+      record_tools.expandContent();
+      record_tools.translationListener();
+    });
+});

@@ -17,25 +17,18 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS bundles."""
-
-from invenio_base.bundles import styles as _styles
-
 from invenio_ext.assets import Bundle
 
-_styles.contents.remove("less/base.less")
-_styles.contents += ("less/cds.less",)
-
-
 js = Bundle(
-    "js/cds-settings.js",
-    "js/cds/main.js",
-    "js/cds/search.js",
-    output="cds.js",
-    weight=91,
+    "js/personal_collection/init.js",
+    output="personal-collections.js",
+    weight=92,
     filters="requirejs",
     bower={
-        "es5-shim": "latest",
-        "angular": "~1.4.7"
+        # Personal collections
+        "async": "~1.2.1",
+        "depot": "~0.1.6",
+        "lodash": "~3.9.3",
+        "sortable.js": "~1.2.0",
     }
 )

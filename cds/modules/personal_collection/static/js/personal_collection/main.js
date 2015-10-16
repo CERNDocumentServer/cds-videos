@@ -25,9 +25,9 @@ define(function (require) {
    * Module dependencies
    */
 
-  var Grid = require('js/personal/component/grid');
-  var Boxes = require('js/personal/component/boxes');
-  var Box = require('js/personal/ui/box');
+  var Grid = require('js/personal_collection/component/grid');
+  var Boxes = require('js/personal_collection/component/boxes');
+  var Box = require('js/personal_collection/ui/box');
 
   /**
    * Module exports

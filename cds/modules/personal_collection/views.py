@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# Copyright (C) 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,25 +17,13 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS bundles."""
+"""Personal collection blueprint."""
 
-from invenio_base.bundles import styles as _styles
+from flask import Blueprint
 
-from invenio_ext.assets import Bundle
-
-_styles.contents.remove("less/base.less")
-_styles.contents += ("less/cds.less",)
-
-
-js = Bundle(
-    "js/cds-settings.js",
-    "js/cds/main.js",
-    "js/cds/search.js",
-    output="cds.js",
-    weight=91,
-    filters="requirejs",
-    bower={
-        "es5-shim": "latest",
-        "angular": "~1.4.7"
-    }
+blueprint = Blueprint(
+    'cds_personal_collection',
+    __name__,
+    template_folder='templates',
+    static_folder='static'
 )

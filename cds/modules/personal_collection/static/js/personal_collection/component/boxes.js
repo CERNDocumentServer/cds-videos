@@ -21,8 +21,8 @@ define(function (require) {
 
   var _ = require('vendors/lodash/lodash');
   var async = require('vendors/async/lib/async');
-  var boxStorage = require('js/personal/helpers/boxStorage');
-  var settingsStorage = require('js/personal/helpers/settingsStorage');
+  var boxStorage = require('js/personal_collection/helpers/boxStorage');
+  var settingsStorage = require('js/personal_collection/helpers/settingsStorage');
   var defineComponent = require('flight/lib/component');
 
   function Box() {
