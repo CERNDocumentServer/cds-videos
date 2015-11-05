@@ -1,5 +1,3 @@
-web: inveniomanage runserver
 cache: redis-server
-worker: celery worker --purge -E -A invenio_celery.celery --loglevel=INFO --workdir=$VIRTUAL_ENV
-workermon: flower --broker=redis://localhost:6379/1
-indexer: elasticsearch --config=elasticsearch.yml --path.data="$VIRTUAL_ENV/var/data/elasticsearch"  --path.logs="$VIRTUAL_ENV/var/log/elasticsearch"
+web: cds --debug run
+worker: celery worker -A cds.celery -l INFO

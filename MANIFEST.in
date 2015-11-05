@@ -1,49 +1,39 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# Copyright (C) 2015 CERN.
 #
-# Invenio is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
+# Invenio is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
+# Invenio is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
+# along with Invenio; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-include requirements*.txt AUTHORS COPYING README.md bower.json setup.cfg
+# added by check_manifest.py
+include *.json
+include *.rst
+include *.sh
+include *.txt
+include *.yml
+include COPYING
+include Dockerfile
+include Procfile
+include babel.cfg
+include pytest.ini
 
-recursive-include cds/base/testsuite *
-
-recursive-include docs *
-recursive-exclude docs/_build *
-
-recursive-include cds/base/static *
-recursive-include cds/base/templates *
-
-recursive-include cds/modules/*/static *
-recursive-include cds/modules/*/templates *
-
-recursive-include cds/base/dojson/testsuite *
-
-recursive-exclude * *.pyc *.pyo
-
-# Remove the big directories from vendors
-recursive-exclude cds/base/static/vendors/ bower.json Gruntfile.js composer.json package.json *.php *.html
-recursive-exclude cds/base/static/vendors/*/examples *
-recursive-exclude cds/base/static/vendors/*/grunt *
-recursive-exclude cds/base/static/vendors/*/scss *
-recursive-exclude cds/base/static/vendors/*/test *
-# MathJax
-recursive-exclude cds/base/static/vendors/MathJax/docs *
-recursive-exclude cds/base/static/vendors/MathJax/fonts *
-recursive-exclude cds/base/static/vendors/MathJax/unpacked *
-# less
-recursive-exclude cds/base/static/vendors/less/dist *rhino*
-recursive-exclude cds/base/static/vendors/less/gradle *
+recursive-include cds *.html
+recursive-include cds *.less
+recursive-include tests *.py

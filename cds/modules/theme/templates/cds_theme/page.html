@@ -1,0 +1,16 @@
+{# -*- coding: utf-8 -*- -#}
+{%- extends "invenio_theme/page.html" %}
+
+{%- block css %}
+{% include "cds_theme/styles.html" %}
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+{%- endblock css %}
+
+{%- block page_header %}{% include "cds_theme/header.html" %}{% endblock page_header %}
+{%- block page_body %}{{ super() }}{% endblock page_body %}
+{%- block page_footer %}{% include "cds_theme/footer.html" %}{%- endblock page_footer %}
+{%- block javascript %}{% include "cds_theme/scripts.html" %}{% endblock javascript %}
