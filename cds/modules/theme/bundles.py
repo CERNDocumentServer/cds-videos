@@ -21,47 +21,49 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#
-language: python
 
-sudo: false
+"""CDS bundles."""
 
-cache:
-  - pip
+from __future__ import absolute_import, print_function
 
-notifications:
-  email: false
+from flask_assets import Bundle
+from invenio_assets import BowerBundle
 
-env:
-  - REQUIREMENTS=base
-  - REQUIREMENTS=development
+css = BowerBundle(
+    'scss/cds.scss',
+    filters='scss, cleancss',
+    output='gen/cds.%(version)s.css',
+    bower={
+        "almond": "~0.3.1",
+        "bootstrap-sass": "~3.3.5",
+        "font-awesome": "~4.4.0"
+    }
+)
 
-services:
-  - redis
+js = BowerBundle(
+    Bundle(
+        'bower_components/almond/almond.js',
+        'js/settings.js',
+        filters='uglifyjs',
+    ),
+    Bundle(
+        'js/main.js',
+        filters='requirejs',
+    ),
+    filters='jsmin',
+    output="gen/cds.%(version)s.js",
+    bower={
+        "almond": "~0.3.1",
+        "angular": "~1.4.7",
+    }
+)
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-
-before_install:
-  - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "cat base.requirements.txt > .travis-base-requirements.txt"
-  - "requirements-builder --level=dev --req development.requirements.txt setup.py > .travis-development-requirements.txt"
-
-install:
-  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
-
-before_script:
-  - "cds db init"
-  - "cds db create"
-  - "cds users create -e test@test.ch -a --password test.test"
-  - "echo '{\"title\":\"Invenio 3 Rocks\", \"recid\": 1}'  | cds records create"
-
-script:
-  - "./run-tests.sh"
-
-after_success:
-  - coveralls
+home = BowerBundle(
+    'js/home/main.js',
+    filters='requirejs',
+    output="gen/cds.home.%(version)s.js",
+    bower={
+        "almond": "~0.3.1",
+        "angular": "~1.4.7",
+    }
+)

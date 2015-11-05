@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -21,47 +21,13 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#
-language: python
 
-sudo: false
+"""CDS base Invenio configuration."""
 
-cache:
-  - pip
+from __future__ import absolute_import, print_function
 
-notifications:
-  email: false
+from invenio_base.app import create_cli
 
-env:
-  - REQUIREMENTS=base
-  - REQUIREMENTS=development
+from .factory import create_app
 
-services:
-  - redis
-
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-
-before_install:
-  - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "cat base.requirements.txt > .travis-base-requirements.txt"
-  - "requirements-builder --level=dev --req development.requirements.txt setup.py > .travis-development-requirements.txt"
-
-install:
-  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
-
-before_script:
-  - "cds db init"
-  - "cds db create"
-  - "cds users create -e test@test.ch -a --password test.test"
-  - "echo '{\"title\":\"Invenio 3 Rocks\", \"recid\": 1}'  | cds records create"
-
-script:
-  - "./run-tests.sh"
-
-after_success:
-  - coveralls
+cli = create_cli(create_app=create_app)

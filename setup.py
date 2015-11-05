@@ -1,23 +1,29 @@
+# -*- coding: utf-8 -*-
+#
 # This file is part of Invenio.
+# Copyright (C) 2015 CERN.
 #
-# Copyright (C) 2013, 2014, 2015 CERN.
-#
-# Invenio is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
+# Invenio is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
+# Invenio is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+# along with Invenio; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""
-CDS, Access articles, reports and multimedia content in HEP.
+"""CDS, Access articles, reports and multimedia content in HEP.
+
 Links
 -----
 * `website <http://cds.cern.ch/>`_
@@ -29,18 +35,61 @@ from setuptools.command.test import test as TestCommand
 import os
 import sys
 
-test_requirements = [
-    'unittest2>=1.1.0',
-    'Flask_Testing>=0.4.1',
-    'pytest>=2.6.0',
+tests_require = [
+    'check-manifest>=0.25',
+    'coverage>=4.0',
+    'isort>=4.2.2',
+    'pep257>=0.7.0',
+    'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
-    'coverage>=3.7.1',
+    'pytest>=2.8.0',
 ]
+
+extras_require = {
+    'docs': [
+        'Sphinx>=1.3',
+    ],
+    'development': [
+        "Flask-DebugToolbar>=0.9",
+        'setuptools-bower>=0.2'
+    ],
+    'tests': tests_require,
+}
+
+extras_require['all'] = []
+for reqs in extras_require.values():
+    extras_require['all'].extend(reqs)
+
+setup_requires = [
+    'Babel>=1.3',
+]
+
+install_requires = [
+    'Flask-BabelEx>=0.9.2',
+    'Flask-IIIF>=0.1.0',
+    'invenio-accounts>=1.0.0.dev20150000',
+    'invenio-assets>=0.1.0.dev20150000',
+    'invenio-base>1.0.0a1,<=1.0.0a2',
+    'invenio-celery>=0.1.0.dev20150000',
+    'invenio-config>=0.1.0.dev20150000',
+    'invenio-db>=1.0.0a2',
+    'invenio-i18n>=0.1.0.dev20150000',
+    'invenio-mail>=1.0.0.dev20150000',
+    'invenio-pidstore>=1.0.0a1',
+    'invenio-records-rest>=1.0.0a2',
+    'invenio-records-ui>=1.0.0a1',
+    'invenio-records>=1.0.0a3',
+    'invenio-theme>=0.1.0.dev20150000',
+    'invenio[full]==3.0.0a1',
+    'mixer>=4.9.5,<4.9.6',
+    'six>=1.10',
+]
+
+packages = find_packages()
 
 
 class PyTest(TestCommand):
-
     """PyTest Test."""
 
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -85,21 +134,14 @@ setup(
     author_email='cds.support@cern.ch',
     description='Access articles, reports and multimedia content in HEP',
     long_description=__doc__,
-    packages=find_packages(),
+    packages=packages,
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        "mixer==4.9.5",
-        "Flask-IIIF>=0.1.0",
-    ],
-    extras_require={
-        'development': [
-            "Flask-DebugToolbar>=0.9",
-            'setuptools-bower>=0.2'
-        ],
-        'tests': test_requirements
-    },
+    extras_require=extras_require,
+    install_requires=install_requires,
+    setup_requires=setup_requires,
+    tests_require=tests_require,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
@@ -109,27 +151,21 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    tests_require=test_requirements,
     entry_points={
-        'invenio.config': [
-            "cds = cds.config"
+        'console_scripts': [
+            'cds = cds.cli:cli',
         ],
-        'dojson.contrib.cds.marc21': [
-            'bd01x09x = cds.base.dojson.marc21.fields.default.bd01x09x',
-            'bd2xx = cds.base.dojson.marc21.fields.default.bd2xx',
-            'bd5xx = cds.base.dojson.marc21.fields.default.bd5xx',
-            'bd69x = cds.base.dojson.marc21.fields.default.bd69x',
-            'bd7xx = cds.base.dojson.marc21.fields.default.bd7xx',
-            'bd8xx = cds.base.dojson.marc21.fields.default.bd8xx',
-            'bd9xx = cds.base.dojson.marc21.fields.default.bd9xx',
+        'invenio_assets.bundles': [
+            'cds_theme_css = cds.modules.theme.bundles:css',
+            'cds_theme_js = cds.modules.theme.bundles:js',
+            'cds_theme_home_js = cds.modules.theme.bundles:home',
         ],
-        'dojson.contrib.cds.marc21.album': [
-            'album = cds.base.dojson.marc21.fields.album'
+        'invenio_base.blueprints': [
+            'cds_theme = cds.modules.theme.views:blueprint',
         ],
-        'dojson.contrib.cds.marc21.image': [
-            'image = cds.base.dojson.marc21.fields.image'
+        'invenio_i18n.translations': [
+            'messages = cds',
         ],
     },
-    test_suite='invenio.testsuite.suite',
     cmdclass={'test': PyTest},
 )

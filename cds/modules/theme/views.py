@@ -21,47 +21,23 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#
-language: python
 
-sudo: false
+"""CDS interface."""
 
-cache:
-  - pip
+from __future__ import absolute_import, print_function
 
-notifications:
-  email: false
+from flask import Blueprint, render_template
 
-env:
-  - REQUIREMENTS=base
-  - REQUIREMENTS=development
 
-services:
-  - redis
+blueprint = Blueprint(
+    'cds',
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
 
-before_install:
-  - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "cat base.requirements.txt > .travis-base-requirements.txt"
-  - "requirements-builder --level=dev --req development.requirements.txt setup.py > .travis-development-requirements.txt"
-
-install:
-  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
-
-before_script:
-  - "cds db init"
-  - "cds db create"
-  - "cds users create -e test@test.ch -a --password test.test"
-  - "echo '{\"title\":\"Invenio 3 Rocks\", \"recid\": 1}'  | cds records create"
-
-script:
-  - "./run-tests.sh"
-
-after_success:
-  - coveralls
+@blueprint.route('/')
+def home():
+    """CDS Home page."""
+    return render_template('cds_theme/home.html')
