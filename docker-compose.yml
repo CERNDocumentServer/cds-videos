@@ -97,4 +97,3 @@ elasticsearch:
       - ./elasticsearch-docker.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
   ports:
     - "127.0.0.1:29200:9200"
-  read_only: true
