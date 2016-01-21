@@ -21,15 +21,26 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-require([
-    'js/home/controller',
-  ], function(app) {
-
-  // Initialize the app
-  angular.element(document).ready(function() {
-    angular.bootstrap(document, ['myApp']);
-  });
-
-  // Emit info
-  console.info('Hello world from CDS static files.');
-});
+({
+  preserveLicenseComments: false,
+  optimize: 'uglify2',
+  uglify2: {
+    output: {
+      beautify: false,
+      comments: false
+    },
+    compress: {
+      drop_console: true,
+      sequences: true,
+      dead_code: true,
+      conditionals: true,
+      booleans: true,
+      unused: true,
+      if_return: true,
+      join_vars: true
+    },
+    warnings: true,
+    mangle: true
+  },
+  mainConfigFile: ['./cds-settings.js']
+})

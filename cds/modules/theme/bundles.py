@@ -27,22 +27,22 @@
 from __future__ import absolute_import, print_function
 
 from flask_assets import Bundle
-from invenio_assets import BowerBundle
+from invenio_assets import NpmBundle
 
-css = BowerBundle(
+css = NpmBundle(
     'scss/cds.scss',
     filters='scss, cleancss',
     output='gen/cds.%(version)s.css',
-    bower={
+    npm={
         "almond": "~0.3.1",
         "bootstrap-sass": "~3.3.5",
-        "font-awesome": "~4.4.0"
+        "font-awesome": "~4.4.0",
     }
 )
 
-js = BowerBundle(
+js = NpmBundle(
     Bundle(
-        'bower_components/almond/almond.js',
+        'node_modules/almond/almond.js',
         'js/settings.js',
         filters='uglifyjs',
     ),
@@ -52,17 +52,7 @@ js = BowerBundle(
     ),
     filters='jsmin',
     output="gen/cds.%(version)s.js",
-    bower={
-        "almond": "~0.3.1",
-        "angular": "~1.4.7",
-    }
-)
-
-home = BowerBundle(
-    'js/home/main.js',
-    filters='requirejs',
-    output="gen/cds.home.%(version)s.js",
-    bower={
+    npm={
         "almond": "~0.3.1",
         "angular": "~1.4.7",
     }

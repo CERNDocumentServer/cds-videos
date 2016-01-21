@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
+# This file is part of CDS.
 # Copyright (C) 2015 CERN.
 #
-# Invenio is free software; you can redistribute it
+# CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be
+# CDS is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the
+# along with CDS; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307, USA.
 #
@@ -22,22 +22,27 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #
-language: python
-
-sudo: false
-
-cache:
-  - pip
+addon:
+  postgresql: 9.4
 
 notifications:
   email: false
 
-env:
-  - REQUIREMENTS=base
-  - REQUIREMENTS=development
+sudo: false
+
+language: python
+
+cache:
+  - pip
 
 services:
+  - posgresql
   - redis
+
+env:
+  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
+  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
+  - REQUIREMENTS=devel SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
 
 python:
   - "2.7"
@@ -46,9 +51,11 @@ python:
   - "3.5"
 
 before_install:
+  - "travis_retry pip install --upgrade pip setuptools py"
   - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "cat base.requirements.txt > .travis-base-requirements.txt"
-  - "requirements-builder --level=dev --req development.requirements.txt setup.py > .travis-development-requirements.txt"
+  - "cat requirements.baseline.txt > .travis-baseline-requirements.txt"
+  - "requirements-builder --level=pypi setup.py > .travis-release-requirements.txt"
+  - "requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt"
 
 install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
@@ -57,8 +64,7 @@ install:
 before_script:
   - "cds db init"
   - "cds db create"
-  - "cds users create -e test@test.ch -a --password test.test"
-  - "echo '{\"title\":\"Invenio 3 Rocks\", \"recid\": 1}'  | cds records create"
+  # - "cds users create -e test@test.ch -a --password test.test"
 
 script:
   - "./run-tests.sh"

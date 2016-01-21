@@ -1,8 +1,14 @@
 {# -*- coding: utf-8 -*- -#}
-<div class="cds-searchbar-wrapper cds-bg-primary">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12"></div>
-    </div>
-  </div>
-</div>
+<div invenio-search-bar
+  invenio-search-query="search.invenioSearchQuery"
+  invenio-search-args="search.invenioSearchArgs"
+  invenio-search-do="search.invenioDoSearch(query)"
+  search-doctype=""
+  search-method="GET"
+  search-endpoint="{{ url_for(config.SEARCH_UI_SEARCH_API) }}"
+  search-extra-params='{}'
+  search-page="1"
+  search-size="5"
+  search-bar-template="{{ url_for('static', filename='node_modules/invenio-search-js/dist/templates/invenioSearchBar.html') }}"
+  search-bar-input-placeholder="{{ _('Type something') }}"
+></div>

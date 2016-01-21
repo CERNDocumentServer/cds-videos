@@ -48,5 +48,7 @@ THEME_SITENAME = _("CDS")
 # just remove it from here.
 SASS_BIN = 'node-sass'
 
-# REQUIREJS
-REQUIREJS_CONFIG = "js/build.js"
+REQUIREJS_CONFIG = "js/cds-build.js"
+
+# Search UI
+SEARCH_UI_SEARCH_API = 'cds.elastic'
