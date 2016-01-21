@@ -24,17 +24,40 @@
 // any variable we need to override
 @import "variables";
 
-@import "../bower_components/bootstrap-sass/assets/stylesheets/_bootstrap";
-@import "../bower_components/font-awesome/scss/font-awesome";
+@import "../node_modules/bootstrap-sass/assets/stylesheets/_bootstrap";
+@import "../node_modules/font-awesome/scss/font-awesome";
 
 .cds-bg-primary {
-  background: $brand-primary;
 }
 
 .cds-navbar {
-  margin-bottom: 0px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid $brand-primary;
+  .flex {
+    display: flex;
+    flex-direction: row;
+  }
+  .item-1 {
+    flex-grow: 1;
+  }
+  .item-2 {
+    flex-grow: 30;
+  }
+  .invenio-search-navbar{
+    width: 100%;
+  }
+  .invenio-search-navbar .form-group {
+    width: 100%!important;
+  }
+  .invenio-search-navbar .form-control {
+    width: 100%!important;
+  }
 }
 
 .cds-searchbar-wrapper {
+  padding: $cds-large-spacing;
   margin-bottom: $cds-enormus-spacing;
+  .form-group {
+    margin: 0;
+  }
 }

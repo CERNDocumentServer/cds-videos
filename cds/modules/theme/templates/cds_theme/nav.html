@@ -1,34 +1,56 @@
 {# -*- coding: utf-8 -*- -#}
-<nav class="navbar navbar-default navbar-static-top cds-navbar">
+<nav class="cds-navbar navbar navbar-static-top navbar-default">
   <div class="container">
-    {%- block navbar_header %}
+    <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">{{_('Toggle navigation')}}</span>
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      {% block brand %}<a class="navbar-brand" href="/">{{_(config.THEME_SITENAME)}}</a>{% endblock %}
+      <a class="navbar-brand" href="{{ url_for('cds.home') }} ">{{ _(config.THEME_SITENAME) }}</a>
     </div>
-    {%- endblock navbar_header %}
-    {%- block navbar_inner %}
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <div class="flex hidden-xs"> <!-- .flex -->
+        <div class="item item-2 small">
+          <form class="navbar-form navbar-left invenio-search-navbar" role="search">
+            <div class="form-group">
+              {%- include "cds_theme/searchbar.html" %}
+            </div>
+          </form>
+        </div>
+        <div class="item item-1">
+          <ul class="nav navbar-nav navbar-right">
+            {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}
+              {%- if item.children -%}
+                <li class="dropdown{{ ' active' if item.active else ''}}">
+                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" href="{{ item.url }}">{{ item.text|safe }} <b class="caret"></b></a>
+                  <ul class="dropdown-menu">{{ loop(item.children|sort(attribute='order')) }}</ul>
+                </li>
+              {%- else -%}
+                <li{{ ' class="active"'|safe if item.active and loop.depth == 1 else '' }}><a href="{{ item.url }}">{{ item.text|safe }}</a></li>
+              {%- endif %}
+            {%- endfor %}
+              </ul>
+            </li>
+          </ul>
+        </div> <!-- /.flex-box-1 -->
+     </div> <!-- /.flex -->
+      <ul class="hidden-sm hidden-md hidden-lg nav navbar-right navbar-nav"> <!-- .small screens -->
         {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}
-        {%- if item.children -%}
-        <li class="dropdown{{ ' active' if item.active else ''}}">
-          <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" href="{{ item.url }}">{{ item.text|safe }} <b class="caret"></b></a>
-          <ul class="dropdown-menu">{{ loop(item.children|sort(attribute='order')) }}</ul>
-        </li>
-        {%- else -%}
-          <li{{ ' class="active"'|safe if item.active and loop.depth == 1 else '' }}><a href="{{ item.url }}">{{ item.text|safe }}</a></li>
-        {%- endif %}
+          {%- if item.children -%}
+            <li class="dropdown{{ ' active' if item.active else ''}}">
+              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" href="{{ item.url }}">{{ item.text|safe }} <b class="caret"></b></a>
+              <ul class="dropdown-menu">{{ loop(item.children|sort(attribute='order')) }}</ul>
+            </li>
+          {%- else -%}
+            <li{{ ' class="active"'|safe if item.active and loop.depth == 1 else '' }}><a href="{{ item.url }}">{{ item.text|safe }}</a></li>
+          {%- endif %}
         {%- endfor %}
-      </ul>
-      {%- block navbar_right %}
-      {%- endblock navbar_right %}
-    </div>
-    {%- endblock navbar_inner %}
-  </div>
+      </ul> <!-- /.small screens -->
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
 </nav>

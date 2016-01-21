@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
+# This file is part of CDS.
 # Copyright (C) 2015 CERN.
 #
-# Invenio is free software; you can redistribute it
+# CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be
+# CDS is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the
+# along with CDS; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307, USA.
 #
@@ -35,6 +35,9 @@ from setuptools.command.test import test as TestCommand
 import os
 import sys
 
+readme = open('README.rst').read()
+history = open('CHANGES.rst').read()
+
 tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
@@ -50,9 +53,17 @@ extras_require = {
     'docs': [
         'Sphinx>=1.3',
     ],
-    'development': [
+    'devel': [
         "Flask-DebugToolbar>=0.9",
-        'setuptools-bower>=0.2'
+    ],
+    'postgresql': [
+        'invenio-db[postgresql]>=1.0.0a6',
+    ],
+    'mysql': [
+        'invenio-db[mysql]>=1.0.0a6',
+    ],
+    'sqlite': [
+        'invenio-db>=1.0.0a6',
     ],
     'tests': tests_require,
 }
@@ -68,22 +79,28 @@ setup_requires = [
 install_requires = [
     'Flask-BabelEx>=0.9.2',
     'Flask-IIIF>=0.1.0',
-    'invenio-accounts>=1.0.0.dev20150000',
-    'invenio-assets>=0.1.0.dev20150000',
-    'invenio-base>1.0.0a1,<=1.0.0a2',
-    'invenio-celery>=0.1.0.dev20150000',
-    'invenio-config>=0.1.0.dev20150000',
-    'invenio-db>=1.0.0a2',
-    'invenio-i18n>=0.1.0.dev20150000',
-    'invenio-mail>=1.0.0.dev20150000',
-    'invenio-pidstore>=1.0.0a1',
-    'invenio-records-rest>=1.0.0a2',
-    'invenio-records-ui>=1.0.0a1',
-    'invenio-records>=1.0.0a3',
-    'invenio-theme>=0.1.0.dev20150000',
-    'invenio[full]==3.0.0a1',
-    'mixer>=4.9.5,<4.9.6',
-    'six>=1.10',
+    'idutils>=0.1.1',
+    'invenio-access>=1.0.0a3',
+    'invenio-accounts>=1.0.0a6',
+    'invenio-admin',
+    'invenio-assets',
+    'invenio-base>=1.0.0a4',
+    'invenio-celery>=1.0.0a3',
+    'invenio-config',
+    'invenio-db[postgresql,versioning]>=1.0.0a6',
+    'invenio-i18n',
+    'invenio-logging',
+    'invenio-mail',
+    'invenio-pidstore>=1.0.0a2',
+    'invenio-records>=1.0.0a7',
+    'invenio-records-rest',
+    'invenio-records-ui',
+    'invenio-rest',
+    'invenio-search>=1.0.0a1',
+    'invenio-search-ui',
+    'invenio-theme',
+    'invenio-userprofiles',
+    'invenio>=3.0.0a1,<3.1.0',
 ]
 
 packages = find_packages()
@@ -158,7 +175,9 @@ setup(
         'invenio_assets.bundles': [
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
-            'cds_theme_home_js = cds.modules.theme.bundles:home',
+        ],
+        'invenio_base.apps': [
+            'invenio_search = invenio_search:InvenioSearch',
         ],
         'invenio_base.blueprints': [
             'cds_theme = cds.modules.theme.views:blueprint',
