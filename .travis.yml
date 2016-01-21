@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -40,9 +40,8 @@ services:
   - redis
 
 env:
-  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
-  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
-  - REQUIREMENTS=devel SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
+  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="sqlite:///tmp/cds.db"
 
 python:
   - "2.7"
@@ -61,10 +60,10 @@ install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
   - "travis_retry pip install -e .[all]"
 
-before_script:
-  - "cds db init"
-  - "cds db create"
-  # - "cds users create -e test@test.ch -a --password test.test"
+# before_script:
+#   - "cds db init"
+#   - "cds db create"
+#   # - "cds users create -e test@test.ch -a --password test.test"
 
 script:
   - "./run-tests.sh"
