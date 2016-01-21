@@ -26,7 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, render_template
+from flask import Blueprint, jsonify, render_template, request
+
+from invenio_search import Query, current_search_client
 
 
 blueprint = Blueprint(
@@ -41,3 +43,30 @@ blueprint = Blueprint(
 def home():
     """CDS Home page."""
     return render_template('cds_theme/home.html')
+
+
+@blueprint.route('/elastic', methods=['GET', 'POST'])
+def elastic():
+    """Search temporary API."""
+    page = request.values.get('page', 1, type=int)
+    size = request.values.get('size', 1, type=int)
+    query = Query(request.values.get('q', ''))[(page-1)*size:page*size]
+    # dummy facets
+    query.body["aggs"] = {
+        "by_body": {
+            "terms": {
+                "field": "summary.summary"
+            }
+        },
+        "by_title": {
+            "terms": {
+                "field": "title_statement.title"
+            }
+        }
+    }
+    response = current_search_client.search(
+        index=request.values.get('index', 'records'),
+        doc_type='record',
+        body=query.body,
+    )
+    return jsonify(**response)
