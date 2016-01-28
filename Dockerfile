@@ -33,7 +33,7 @@ RUN npm update && npm install --silent -g node-sass clean-css uglify-js requirej
 RUN mkdir -p /usr/local/src/
 
 # Create instance/static folder
-ENV APP_INSTANCE_PATH /usr/local/var/invenio-instance/static/
+ENV APP_INSTANCE_PATH /usr/local/var/invenio-instance
 RUN mkdir -p ${APP_INSTANCE_PATH}
 
 # Copy source code
@@ -41,7 +41,7 @@ COPY . /code
 WORKDIR /code
 
 # Install CDS
-#RUN pip install -r requirements.txt --src /usr/local/src
+RUN pip install -r requirements.txt --src /usr/local/src
 RUN pip install -e .
 RUN python -O -m compileall .
 

@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""CDS bundles."""
+"""JS/CSS bundles for CDS Theme."""
 
 from __future__ import absolute_import, print_function
 
@@ -39,11 +39,12 @@ css = NpmBundle(
         "font-awesome": "~4.4.0",
     }
 )
+"""Default CSS bundle."""
 
 js = NpmBundle(
     Bundle(
         'node_modules/almond/almond.js',
-        'js/settings.js',
+        'js/cds-settings.js',
         filters='uglifyjs',
     ),
     Bundle(
@@ -57,3 +58,4 @@ js = NpmBundle(
         "angular": "~1.4.7",
     }
 )
+"""Default JavaScript bundle."""

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2016 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-# added by check_manifest.py
 include *.json
 include *.rst
 include *.sh
@@ -33,7 +32,13 @@ include Dockerfile
 include Procfile
 include babel.cfg
 include pytest.ini
+include .dockerignore
+include .jshintignore
+include .jshintrc
 
 recursive-include cds *.html
+recursive-include cds *.js
 recursive-include cds *.less
+recursive-include cds *.scss
 recursive-include tests *.py
+recursive-include docker *
