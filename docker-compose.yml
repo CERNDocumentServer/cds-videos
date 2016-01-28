@@ -1,6 +1,6 @@
 web:
   build: .
-  command: cds --debug run -h 0.0.0.0 -p 5000 --debugger --reload
+  command: cds --debug run -h 0.0.0.0 -p 5000
   ports:
     - "5000:5000"
   environment:

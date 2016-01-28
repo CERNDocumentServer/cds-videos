@@ -8,6 +8,8 @@
 *.swo
 *.~
 
+CDS.egg-info
+
 .dockerignore
 Dockerfile
 docker-compose.yml
