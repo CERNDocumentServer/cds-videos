@@ -19,4 +19,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 pep257 cds && \
+isort -rc -c -df **/*.py && \
+check-manifest --ignore ".travis-*" && \
 python setup.py test

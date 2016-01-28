@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,22 +26,62 @@
 
 from __future__ import absolute_import, print_function
 
+import os
+
 
 # Identity function for string extraction
 def _(x):
     """Indentity function."""
     return x
 
+# Database
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "SQLALCHEMY_DATABASE_URI",
+    "postgresql+psycopg2://localhost/cds")
+SQLALCHEMY_ECHO = False
+
 # Default language and timezone
 BABEL_DEFAULT_LANGUAGE = 'en'
 BABEL_DEFAULT_TIMEZONE = 'Europe/Zurich'
-I18N_LANGUAGES = [
-]
+I18N_LANGUAGES = []
+
+# Distributed task queue
+BROKER_URL = os.environ.get(
+    "APP_BROKER_URL",
+    "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get(
+    "APP_CACHE_REDIS_URL",
+    "redis://localhost:6379/1")
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+
+# Cache
+CACHE_KEY_PREFIX = "cache::"
+CACHE_REDIS_URL = os.environ.get(
+    "APP_CACHE_REDIS_URL",
+    "redis://localhost:6379/0")
+CACHE_TYPE = "redis"
 
 BASE_TEMPLATE = "cds_theme/page.html"
 
 # Theme
 THEME_SITENAME = _("CDS")
+
+# Search
+SEARCH_AUTOINDEX = []
+
+# Doesn't work
+# RECORDS_REST_ENDPOINTS = dict(
+#     recid=dict(
+#         pid_type='recid',
+#         pid_minter='recid_minter',
+#         list_route='/records/',
+#         item_route='/records/<pid_value>',
+#     ), )
+
+# DebugToolbar
+DEBUG_TB_ENABLED = True
+DEBUG_TB_INTERCEPT_REDIRECTS = False
+
 
 # SASS
 # FIXME: ADD npm install node-sass -g to documentation or when invenio-theme
@@ -51,4 +91,5 @@ SASS_BIN = 'node-sass'
 REQUIREJS_CONFIG = "js/cds-build.js"
 
 # Search UI
-SEARCH_UI_SEARCH_API = 'cds.elastic'
+# SEARCH_UI_SEARCH_API = 'cds.elastic'
+SEARCH_UI_SEARCH_API = 'http://192.168.99.100/api/records/'
