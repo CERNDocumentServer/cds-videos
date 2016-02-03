@@ -69,14 +69,12 @@ THEME_SITENAME = _("CDS")
 # Search
 SEARCH_AUTOINDEX = []
 
-# Doesn't work
-# RECORDS_REST_ENDPOINTS = dict(
-#     recid=dict(
-#         pid_type='recid',
-#         pid_minter='recid_minter',
-#         list_route='/records/',
-#         item_route='/records/<pid_value>',
-#     ), )
+RECORDS_UI_ENDPOINTS = dict(
+    recid=dict(
+        pid_type='recid',
+        route='/record/<pid_value>',
+        template='invenio_records_ui/detail.html',
+    ), )
 
 # DebugToolbar
 DEBUG_TB_ENABLED = True
@@ -92,4 +90,4 @@ REQUIREJS_CONFIG = "js/cds-build.js"
 
 # Search UI
 # SEARCH_UI_SEARCH_API = 'cds.elastic'
-SEARCH_UI_SEARCH_API = 'http://192.168.99.100/api/records/'
+SEARCH_UI_SEARCH_API = '/api/records/'
