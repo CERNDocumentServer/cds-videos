@@ -42,3 +42,6 @@ recursive-include cds *.less
 recursive-include cds *.scss
 recursive-include tests *.py
 recursive-include docker *
+
+# added by check_manifest.py
+recursive-include cds *.json
