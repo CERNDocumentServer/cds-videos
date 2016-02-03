@@ -171,6 +171,9 @@ setup(
         'invenio_base.blueprints': [
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
+        'invenio_search.mappings': [
+            'records = cds.modules.records.data',
+        ],
         'invenio_i18n.translations': [
             'messages = cds',
         ],
