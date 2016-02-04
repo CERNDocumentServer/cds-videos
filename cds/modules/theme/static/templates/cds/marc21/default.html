@@ -1,29 +1,31 @@
-<li>
-  <h4><a href="/record/{{ record._id }}">{{ record._source.title_statement.title }}</a></h4>
-  <p>{{ record._source.summary[0].summary }}</p>
-  <div class="text-right">
-    <ul class="list-inline">
-      <li ng-show="record._source.added_entry_personal_name.length > 0">
-        <a href="#" ng-click="showAuthors=!showAuthors">
-          {{ showAuthors ? 'Hide authors' : 'Show authors' }}
-        </a>
-      </li>
-      <li>
-        <a href="#" ng-click="showSource=!showSource">
-          {{ showSource ? 'Hide source' : 'Show source' }}
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div ng-hide="!showAuthors">
-    <ul>
-      <div ng-repeat='author in record._source.added_entry_personal_name'>
-        <li>{{ author.personal_name }}</li>
-      </div>
-    </ul>
-  </div>
-  <div ng-hide="!showSource">
-    <pre>{{ record._source | json }}</pre>
-  </div>
-  <hr />
-</li>
+<ul>
+  <li ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
+    <h4><a ng-href="{{ record.links.self }}">{{ record.metadata.title_statement.title }}</a></h4>
+    <p>{{ record.metadata.summary[0].summary }}</p>
+    <div class="text-right">
+      <ul class="list-inline">
+        <li ng-show="record.metadata.added_entry_personal_name.length > 0">
+          <a href="#" ng-click="showAuthors=!showAuthors">
+            {{ showAuthors ? 'Hide authors' : 'Show authors' }}
+          </a>
+        </li>
+        <li>
+          <a href="#" ng-click="showSource=!showSource">
+            {{ showSource ? 'Hide source' : 'Show source' }}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div ng-hide="!showAuthors">
+      <ul>
+        <div ng-repeat='author in record.metadata.added_entry_personal_name'>
+          <li>{{ author.personal_name }}</li>
+        </div>
+      </ul>
+    </div>
+    <div ng-hide="!showSource">
+      <pre>{{ record.metadata | json }}</pre>
+    </div>
+    <hr />
+  </li>
+</ul>
