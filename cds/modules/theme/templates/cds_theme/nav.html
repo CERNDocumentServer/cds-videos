@@ -15,13 +15,6 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <div class="flex hidden-xs"> <!-- .flex -->
-        <div class="item item-2 small">
-          <form class="navbar-form navbar-left invenio-search-navbar" role="search">
-            <div class="form-group">
-              {%- include "cds_theme/searchbar.html" %}
-            </div>
-          </form>
-        </div>
         <div class="item item-1">
           <ul class="nav navbar-nav navbar-right">
             {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}

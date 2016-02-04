@@ -165,7 +165,6 @@ setup(
             'cds_theme_js = cds.modules.theme.bundles:js',
         ],
         'invenio_base.apps': [
-            'invenio_search = invenio_search:InvenioSearch',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
         ],
         'invenio_base.blueprints': [
