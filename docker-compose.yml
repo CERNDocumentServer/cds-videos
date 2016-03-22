@@ -20,7 +20,7 @@ web:
     - mq
     - db
   volumes:
-    - ".:/code"
+    - ".:/code/cds"
 worker:
   build: .
   command: "celery worker -A cds.celery --loglevel=INFO"
