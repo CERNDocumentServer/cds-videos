@@ -24,6 +24,3 @@
 
 # requirements base
 -r requirements.baseline.txt
-
-
--e .
