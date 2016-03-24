@@ -80,6 +80,7 @@ install_requires = [
     'Flask-BabelEx>=0.9.2',
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
+    'cds-dojson>=0.2.0',
     'idutils>=0.1.1',
     'invenio-access>=1.0.0a3',
     'invenio-accounts>=1.0.0a6',
