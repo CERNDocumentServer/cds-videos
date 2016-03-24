@@ -126,6 +126,10 @@ RECORDS_UI_ENDPOINTS = dict(
     ),
 )
 
+# OAI Server.
+OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
+OAISERVER_RECORD_INDEX = 'records'
+
 # 404 template.
 RECORDS_UI_TOMBSTONE_TEMPLATE = "invenio_records_ui/tombstone.html"
 
