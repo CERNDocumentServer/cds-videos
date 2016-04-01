@@ -37,7 +37,6 @@ Create database & user
 .. code-block:: console
 
     (cds3)$ cdvirtualenv src/cds
-    (cds3)$ honcho start
     (cds3)$ cds db init
     (cds3)$ cds db create
     (cds3)$ cds users create -e test@test.ch -a
