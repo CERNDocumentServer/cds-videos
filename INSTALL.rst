@@ -13,17 +13,24 @@ Prepare the environment
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
     (cds3)$ git clone -b cdslabs_qa git@github.com:CERNDocumentServer/cds.git
     (cds3)$ cd cds
-    (cds3)$ pip install -e .[all]
+    (cds3)$ pip install -r requirements.txt
 
 Build the assets
 
 .. code-block:: console
 
-    (cds3)$ cds bower
-    (cds3)$ cdvirtualenv var/cds-instance
-    (cds3)$ bower install
+    (cds3)$ cds npm
+    (cds3)$ cdvirtualenv var/cds-instance/static
+    (cds3)$ npm install
     (cds3)$ cds collect -v
     (cds3)$ cds assets build
+
+Make sure that ``elasticsearch`` server is running:
+
+.. code-block:: console
+
+    $ elasticsearch
+    ... version[2.0.0] ...
 
 Create database & user
 
@@ -34,29 +41,28 @@ Create database & user
     (cds3)$ cds db init
     (cds3)$ cds db create
     (cds3)$ cds users create -e test@test.ch -a
+    (cds3)$ cds index init
+
 
 Create a record
 
 .. code-block:: console
 
-    (cds3)$ echo '{"title":"Invenio 3 Rocks", "recid": 1}'  | cds records create
+    (cds3)$ cds fixtures invenio
 
-Create a PID for the record
+Or you can create the entire CDS Theses collection ~ 10 mins
 
 .. code-block:: console
 
-    (cds3)$ python manage.py shell
+    (cds3)$ cds fixtures cds
 
-.. code-block:: python
+Run example development server:
 
-    from invenio_db import db
-    from invenio_pidstore.models import PersistentIdentifier
-    pid = PersistentIdentifier.create('recid', '1', 'recid')
-    pid.assign('rec', '1')
-    pid.register()
-    db.session.commit()
+.. code-block:: console
 
-Now you can visit http://localhost:5000/records/1 and see your record :)
+    $ flask -a app.py --debug run
+
+Now you can visit http://localhost:5000/ :)
 
 Docker
 ------

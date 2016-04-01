@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,10 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, jsonify, render_template, request
-
-from invenio_search import Query, current_search_client
-
+from flask import Blueprint
 
 blueprint = Blueprint(
     'cds',
@@ -37,10 +34,3 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static'
 )
-"""Theme blueprint used to define template and static folders."""
-
-
-@blueprint.route('/')
-def home():
-    """CDS Home page."""
-    return render_template('cds_theme/home.html')

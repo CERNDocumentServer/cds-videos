@@ -22,9 +22,11 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""cds base Invenio configuration."""
+"""CDS base Invenio configuration."""
 
 from __future__ import absolute_import, print_function
+
+from invenio_records_rest.facets import terms_filter
 
 import os
 
@@ -34,60 +36,195 @@ def _(x):
     """Indentity function."""
     return x
 
-# Database
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    "SQLALCHEMY_DATABASE_URI",
-    "postgresql+psycopg2://localhost/cds")
-SQLALCHEMY_ECHO = False
+###############################################################################
+# Translations & Time
+###############################################################################
 
-# Default language and timezone
+# Default language.
 BABEL_DEFAULT_LANGUAGE = 'en'
+# Default timezone.
 BABEL_DEFAULT_TIMEZONE = 'Europe/Zurich'
+# Supported languages.
 I18N_LANGUAGES = []
 
-# Distributed task queue
+###############################################################################
+# Celery
+###############################################################################
+
+# RabbitMQ.
 BROKER_URL = os.environ.get(
     "APP_BROKER_URL",
     "redis://localhost:6379/0")
+# Celery results.
 CELERY_RESULT_BACKEND = os.environ.get(
     "APP_CACHE_REDIS_URL",
     "redis://localhost:6379/1")
+# Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 
+###############################################################################
 # Cache
+###############################################################################
+
 CACHE_KEY_PREFIX = "cache::"
 CACHE_REDIS_URL = os.environ.get(
     "APP_CACHE_REDIS_URL",
     "redis://localhost:6379/0")
 CACHE_TYPE = "redis"
 
-BASE_TEMPLATE = "cds_theme/page.html"
+###############################################################################
+# Database
+###############################################################################
 
-# Theme
-THEME_SITENAME = _("CDS")
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "SQLALCHEMY_DATABASE_URI",
+    "postgresql+psycopg2://localhost/cds")
+SQLALCHEMY_ECHO = False
 
-# Search
-SEARCH_AUTOINDEX = []
+###############################################################################
+# Debugbar
+###############################################################################
 
-RECORDS_UI_ENDPOINTS = dict(
-    recid=dict(
-        pid_type='recid',
-        route='/record/<pid_value>',
-        template='invenio_records_ui/detail.html',
-    ), )
-
-# DebugToolbar
 DEBUG_TB_ENABLED = True
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
+###############################################################################
+# Search
+###############################################################################
 
-# SASS
-# FIXME: ADD npm install node-sass -g to documentation or when invenio-theme
-# just remove it from here.
-SASS_BIN = 'node-sass'
+# Search API endpoint.
+SEARCH_UI_SEARCH_API = "/api/records/"
+# Default template for search UI.
+SEARCH_UI_SEARCH_TEMPLATE = "cds_search_ui/search.html"
+# Default Elasticsearch document type.
+SEARCH_DOC_TYPE_DEFAULT = None
+# Do not map any keywords.
+SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 
+###############################################################################
+# REST API
+###############################################################################
+
+# FIXME: Enable CORS for now.
+REST_ENABLE_CORS = True
+
+###############################################################################
+# Records
+###############################################################################
+
+# Endpoints for records.
+RECORDS_UI_ENDPOINTS = dict(
+    recid=dict(
+        pid_type='recid',
+        route='/records/<pid_value>',
+        template='invenio_records_ui/detail.html',
+    ),
+)
+
+# 404 template.
+RECORDS_UI_TOMBSTONE_TEMPLATE = "invenio_records_ui/tombstone.html"
+
+# Endpoints for record API.
+RECORDS_REST_ENDPOINTS = dict(
+    recid=dict(
+        pid_type='recid',
+        pid_minter='recid',
+        pid_fetcher='recid',
+        search_index='records',
+        search_type=None,
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/records/',
+        item_route='/records/<pid_value>',
+        default_media_type='application/json',
+        max_result_window=10000,
+    ),
+)
+
+# Sort options records REST API.
+RECORDS_REST_SORT_OPTIONS = dict(
+    records=dict(
+        bestmatch=dict(
+            title='Best match',
+            fields=['-_score'],
+            default_order='asc',
+            order=1,
+        ),
+        controlnumber=dict(
+            title='Control number',
+            fields=['control_number'],
+            default_order='desc',
+            order=2,
+        )
+    )
+)
+
+# Default sort for records REST API.
+RECORDS_REST_DEFAULT_SORT = dict(
+    records=dict(query='bestmatch', noquery='-controlnumber'),
+)
+
+# Defined facets for records REST API.
+RECORDS_REST_FACETS = dict(
+    records=dict(
+        aggs=dict(
+            authors=dict(terms=dict(
+                field='added_entry_personal_name.personal_name')),
+            languages=dict(terms=dict(
+                field='language_code.language_code_of_text_'
+                      'sound_track_or_separate_title')),
+            topic=dict(terms=dict(
+                field='subject_added_entry_topical_term.'
+                      'topical_term_or_geographic_name_entry_element')),
+        ),
+        post_filters=dict(
+            authors=terms_filter(
+                'added_entry_personal_name.personal_name'),
+            languages=terms_filter(
+                'language_code.language_code_of_text_'
+                'sound_track_or_separate_title'),
+            topic=terms_filter(
+                'subject_added_entry_topical_term.'
+                'topical_term_or_geographic_name_entry_element'),
+        )
+    )
+)
+# FIXME: Disable permissions for now.
+RECORDS_UI_DEFAULT_PERMISSION_FACTORY = None
+
+###############################################################################
+# Home page
+###############################################################################
+
+# Display a homepage.
+FRONTPAGE_ENDPOINT = "cds_home.index"
+
+###############################################################################
+# Security
+###############################################################################
+
+# Disable registrations.
+SECURITY_REGISTERABLE = False
+# Security login salt.
+SECURITY_LOGIN_SALT = 'CHANGE_ME'
+
+###############################################################################
+# Theme
+###############################################################################
+
+# The site name
+THEME_SITENAME = _("CDS")
+# The theme logo.
+THEME_LOGO = 'img/cds.svg'
+# The base template.
+BASE_TEMPLATE = "cds_theme/page.html"
+# Header template for entire site.
+HEADER_TEMPLATE = "cds_theme/header.html"
+# RequireJS configuration.
 REQUIREJS_CONFIG = "js/cds-build.js"
-
-# Search UI
-# SEARCH_UI_SEARCH_API = 'cds.elastic'
-SEARCH_UI_SEARCH_API = '/api/records/'
