@@ -90,7 +90,7 @@ def cds(temp, source):
     """CDS demo records (From Theses Collection)."""
     click.echo('Loading data it may take several minutes.')
     # pkg resources the demodata
-    if not source or source.contains('tar'):
+    if not source:
         tar_path = pkg_resources.resource_filename(
             'cds.modules.fixtures', 'data/records.tar.gz'
         )
