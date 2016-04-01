@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015 CERN.
+ * Copyright (C) 2015, 2016 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,38 +26,3 @@
 
 @import "../node_modules/bootstrap-sass/assets/stylesheets/_bootstrap";
 @import "../node_modules/font-awesome/scss/font-awesome";
-
-.cds-bg-primary {
-}
-
-.cds-navbar {
-  margin-bottom: 20px;
-  border-bottom: 1px solid $brand-primary;
-  .flex {
-    display: flex;
-    flex-direction: row;
-  }
-  .item-1 {
-    flex-grow: 1;
-  }
-  .item-2 {
-    flex-grow: 30;
-  }
-  .invenio-search-navbar{
-    width: 100%;
-  }
-  .invenio-search-navbar .form-group {
-    width: 100%!important;
-  }
-  .invenio-search-navbar .form-control {
-    width: 100%!important;
-  }
-}
-
-.cds-searchbar-wrapper {
-  padding: $cds-large-spacing;
-  margin-bottom: $cds-enormus-spacing;
-  .form-group {
-    margin: 0;
-  }
-}

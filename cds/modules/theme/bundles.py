@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -34,9 +34,9 @@ css = NpmBundle(
     filters='scss, cleancss',
     output='gen/cds.%(version)s.css',
     npm={
-        "almond": "~0.3.1",
-        "bootstrap-sass": "~3.3.5",
-        "font-awesome": "~4.4.0",
+        'almond': '~0.3.1',
+        'bootstrap-sass': '~3.3.5',
+        'font-awesome': '~4.4.0',
     }
 )
 """Default CSS bundle."""
@@ -51,11 +51,16 @@ js = NpmBundle(
         'js/main.js',
         filters='requirejs',
     ),
+    depends=(
+        'js/*.js',
+        'js/cds/*.js',
+        'node_modules/invenio-search-js/dist/*.js',
+    ),
     filters='jsmin',
-    output="gen/cds.%(version)s.js",
+    output='gen/cds.%(version)s.js',
     npm={
-        "almond": "~0.3.1",
-        "angular": "~1.4.7",
+        'almond': '~0.3.1',
+        'angular': '~1.4.7',
     }
 )
 """Default JavaScript bundle."""

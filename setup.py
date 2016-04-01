@@ -51,8 +51,6 @@ tests_require = [
     'pytest>=2.8.0',
     'selenium>=2.48.0,<2.53.0',
     'six>=1.10.0',
-    # OMG & 3 LOLs \_(ツ)_/¯
-    'setuptools==20.4',
 ]
 
 extras_require = {
@@ -79,9 +77,13 @@ for name, reqs in extras_require.items():
 
 setup_requires = [
     'Babel>=1.3',
+    # OMG & 3 LOLs \_(ツ)_/¯
+    'setuptools==20.4',
+    'psycopg2',
 ]
 
 install_requires = [
+    'dojson>=1.0.0',
     'Flask-BabelEx>=0.9.2',
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
@@ -96,18 +98,19 @@ install_requires = [
     'invenio-files-rest',
     'invenio-formatter',
     'invenio-i18n',
+    'invenio-indexer',
     'invenio-logging',
     'invenio-mail',
     'invenio-pages',
     'invenio-pidstore==1.0.0a7',
     'invenio-previewer',
-    'invenio-records==1.0.0a9',
+    'invenio-records==1.0.0a12',
     'invenio-records-rest',
     'invenio-records-ui',
     'invenio-rest[cors]',
     'invenio-search==1.0.0a5',
     'invenio-search-ui',
-    'invenio-theme',
+    'invenio-theme==1.0.0a10',
     'invenio-userprofiles',
     'invenio>=3.0.0a1,<3.1.0',
 ]
@@ -173,9 +176,13 @@ setup(
             'cds_theme_js = cds.modules.theme.bundles:js',
         ],
         'invenio_base.apps': [
+            'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
         ],
         'invenio_base.blueprints': [
+            'cds_home = cds.modules.home.views:blueprint',
+            'cds_records = cds.modules.records.views:blueprint',
+            'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
         'invenio_search.mappings': [

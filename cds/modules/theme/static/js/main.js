@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015 CERN.
+ * Copyright (C) 2015, 2016 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,9 +23,15 @@
 
 require([
     'jquery',
-  ], function($) {
-    $(document).ready(function() {
-      // Emit info
-      console.info('Hello world from CDS static files.');
+    'bootstrap',
+    'node_modules/angular/angular',
+    'js/cds/module',
+    'node_modules/invenio-search-js/dist/invenio-search-js',
+  ], function() {
+    // Bootstrap modules
+    angular.element(document).ready(function() {
+      angular.bootstrap(
+        document.getElementById("invenio-search"), ['cds', 'invenioSearch']
+      );
     });
 });
