@@ -141,7 +141,7 @@ RECORDS_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/records/',
-        item_route='/records/<pid_value>',
+        item_route='/record/<pid_value>',
         default_media_type='application/json',
         max_result_window=10000,
     ),
