@@ -116,7 +116,7 @@ REST_ENABLE_CORS = True
 RECORDS_UI_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',
-        route='/records/<pid_value>',
+        route='/record/<pid_value>',
         template='invenio_records_ui/detail.html',
     ),
 )
