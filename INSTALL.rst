@@ -14,6 +14,8 @@ Prepare the environment
     (cds3)$ git clone -b cdslabs_qa git@github.com:CERNDocumentServer/cds.git
     (cds3)$ cd cds
     (cds3)$ pip install -r requirements.txt
+    (cds3)$ pip install -e .[postgresql]
+    (cds3)$ python -O -m compileall .
 
 Build the assets
 
@@ -39,7 +41,7 @@ Create database & user
     (cds3)$ cdvirtualenv src/cds
     (cds3)$ cds db init
     (cds3)$ cds db create
-    (cds3)$ cds users create -e test@test.ch -a
+    (cds3)$ cds users create test@test.ch -a
     (cds3)$ cds index init
 
 
@@ -59,7 +61,7 @@ Run example development server:
 
 .. code-block:: console
 
-    $ flask -a app.py --debug run
+    $ cds --debug run
 
 Now you can visit http://localhost:5000/ :)
 
