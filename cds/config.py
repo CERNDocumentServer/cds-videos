@@ -119,6 +119,11 @@ RECORDS_UI_ENDPOINTS = dict(
         route='/record/<pid_value>',
         template='invenio_records_ui/detail.html',
     ),
+    record_preview=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/preview/<filename>',
+        view_imp='invenio_previewer.views.preview',
+    ),
 )
 
 # 404 template.
@@ -228,3 +233,12 @@ BASE_TEMPLATE = "cds_theme/page.html"
 HEADER_TEMPLATE = "cds_theme/header.html"
 # RequireJS configuration.
 REQUIREJS_CONFIG = "js/cds-build.js"
+
+###############################################################################
+# Previewer
+###############################################################################
+
+# Base CSS bundle to include in all previewers
+PREVIEWER_BASE_CSS_BUNDLES = ['cds_theme_css']
+# Base JS bundle to include in all previewers
+PREVIEWER_BASE_JS_BUNDLES = ['cds_theme_js']

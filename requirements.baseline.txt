@@ -28,3 +28,4 @@
 Flask==0.10.1
 six>=1.10
 -e git+https://github.com/inveniosoftware/invenio-search-ui.git#egg=invenio-search-ui
+-e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
