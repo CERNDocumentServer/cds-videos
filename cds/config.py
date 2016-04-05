@@ -124,6 +124,11 @@ RECORDS_UI_ENDPOINTS = dict(
         route='/record/<pid_value>/preview/<filename>',
         view_imp='invenio_previewer.views.preview',
     ),
+    record_files=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/files/<filename>',
+        view_imp='invenio_files_rest.views.file_download_ui',
+    ),
 )
 
 # OAI Server.
@@ -246,3 +251,10 @@ REQUIREJS_CONFIG = "js/cds-build.js"
 PREVIEWER_BASE_CSS_BUNDLES = ['cds_theme_css']
 # Base JS bundle to include in all previewers
 PREVIEWER_BASE_JS_BUNDLES = ['cds_theme_js']
+
+###############################################################################
+# Storage
+###############################################################################
+
+# FIXME: Add proper data location
+DATADIR = '/tmp'

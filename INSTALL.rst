@@ -57,6 +57,12 @@ Or you can create the entire CDS Theses collection ~ 10 mins
 
     (cds3)$ cds fixtures cds
 
+Create some demo files
+
+.. code-block:: console
+
+    (cds3)$ cds fixtures files
+
 Run example development server:
 
 .. code-block:: console
