@@ -103,7 +103,6 @@ def cds(temp, source):
                 rec_uuid = uuid.uuid4()
                 # do translate
                 record = marc21.do(create_record(data))
-                del record['control_number']
                 # create PID
                 current_pidstore.minters['recid'](
                     rec_uuid, record
