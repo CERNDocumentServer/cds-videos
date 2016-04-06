@@ -36,12 +36,12 @@ include .dockerignore
 include .jshintignore
 include .jshintrc
 
+recursive-include cds *.gz
 recursive-include cds *.html
 recursive-include cds *.js
+recursive-include cds *.json
 recursive-include cds *.less
 recursive-include cds *.scss
-recursive-include tests *.py
+recursive-include cds *.svg
 recursive-include docker *
-
-# added by check_manifest.py
-recursive-include cds *.json
+recursive-include tests *.py
