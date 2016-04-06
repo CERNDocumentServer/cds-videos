@@ -21,17 +21,15 @@
 
 from __future__ import absolute_import, print_function
 
-import click
-import pkg_resources
 import tarfile
 import uuid
 from os.path import join
 
-from flask_cli import with_appcontext
-
+import click
+import pkg_resources
 from dojson.contrib.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
-
+from flask_cli import with_appcontext
 from invenio_db import db
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
