@@ -48,6 +48,7 @@ tests_require = [
     'pytest-cov>=1.8.0',
     'pytest-flask>=0.10.0',
     'pytest-pep8>=1.0.6',
+    'pytest-runner>=2.7.0',
     'pytest>=2.8.0',
     'selenium>=2.48.0,<2.53.0',
     'six>=1.10.0',
@@ -77,7 +78,7 @@ for name, reqs in extras_require.items():
 
 setup_requires = [
     'Babel>=1.3',
-    'setuptools>=20.5',
+    'setuptools>=20.6.7',
     'psycopg2',
 ]
 
@@ -87,67 +88,36 @@ install_requires = [
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
     'idutils>=0.1.1',
-    'invenio-access',
+    'invenio-access>=1.0.0a0',
     'invenio-accounts==1.0.0a9',
-    'invenio-admin',
-    'invenio-assets',
+    'invenio-admin>=1.0.0a0',
+    'invenio-assets>=1.0.0a0',
     'invenio-base==1.0.0a6',
     'invenio-celery==1.0.0a4',
-    'invenio-config',
-    'invenio-files-rest',
-    'invenio-formatter',
-    'invenio-i18n',
-    'invenio-indexer',
-    'invenio-logging',
-    'invenio-mail',
-    'invenio-pages',
+    'invenio-config>=1.0.0a0',
+    'invenio-files-rest>=1.0.0a0',
+    # FIXME 'invenio-formatter>=1.0.0a0',
+    'invenio-i18n>=1.0.0a0',
+    'invenio-indexer>=1.0.0a0',
+    'invenio-logging>=1.0.0a0',
+    'invenio-mail>=1.0.0a0',
+    'invenio-pages>=1.0.0a0',
     'invenio-oaiserver>=1.0.0a2',
     'invenio-pidstore==1.0.0a7',
-    'invenio-previewer',
-    'invenio-records-rest',
+    # FIXME 'invenio-previewer>=1.0.0a0',
+    'invenio-records-rest>=1.0.0a0',
     'invenio-records-rest>=1.0.0a4',
     'invenio-records==1.0.0a12',
-    'invenio-records-ui',
-    'invenio-rest[cors]',
+    'invenio-records-ui>=1.0.0a0',
+    'invenio-rest[cors]>=1.0.0a0',
     'invenio-search==1.0.0a5',
-    'invenio-search-ui',
+    'invenio-search-ui>=1.0.0a0',
     'invenio-theme==1.0.0a10',
-    'invenio-userprofiles',
+    'invenio-userprofiles>=1.0.0a0',
     'invenio>=3.0.0a1,<3.1.0',
 ]
 
 packages = find_packages()
-
-
-class PyTest(TestCommand):
-    """PyTest Test."""
-
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        """Init pytest."""
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-        try:
-            from ConfigParser import ConfigParser
-        except ImportError:
-            from configparser import ConfigParser
-        config = ConfigParser()
-        config.read('pytest.ini')
-        self.pytest_args = config.get('pytest', 'addopts').split(' ')
-
-    def finalize_options(self):
-        """Finalize pytest."""
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        """Run tests."""
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
 
 # Get the version string. Cannot be done with import!
 g = {}
@@ -206,5 +176,4 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    cmdclass={'test': PyTest},
 )
