@@ -77,8 +77,7 @@ for name, reqs in extras_require.items():
 
 setup_requires = [
     'Babel>=1.3',
-    # OMG & 3 LOLs \_(ツ)_/¯
-    'setuptools==20.4',
+    'setuptools>=20.5',
     'psycopg2',
 ]
 
