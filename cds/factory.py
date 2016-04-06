@@ -38,7 +38,7 @@ env_prefix = 'APP'
 conf_loader = create_conf_loader(config=config, env_prefix=env_prefix)
 
 instance_path = os.getenv(env_prefix + '_INSTANCE_PATH') or \
-    os.path.join(sys.prefix, 'var', 'cds-instance')
+    os.path.join(sys.prefix, 'var', 'instance')
 
 static_folder = os.getenv(env_prefix + '_STATIC_FOLDER') or \
     os.path.join(instance_path, 'static')
