@@ -26,9 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_records_rest.facets import terms_filter
-
 import os
+
+from invenio_records_rest.facets import terms_filter
 
 
 # Identity function for string extraction
