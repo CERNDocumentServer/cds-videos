@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of CDS.
+# This file is part of CERN Document Server.
 # Copyright (C) 2015, 2016 CERN.
 #
-# CDS is free software; you can redistribute it
+# CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# CDS is distributed in the hope that it will be
+# CERN Document Server is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with CDS; if not, write to the
+# along with CERN Document Server; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307, USA.
 #
@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #
-addon:
+addons:
   postgresql: 9.4
   apt:
     packages:
@@ -41,13 +41,19 @@ cache:
     - $HOME/.nvm
 
 services:
-  - posgresql
+  - postgresql
   - redis
   - rabbitmq
 
 env:
+  # - REQUIREMENTS=base E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  # - REQUIREMENTS=base E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  # - REQUIREMENTS=release E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  # - REQUIREMENTS=release E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
   - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  # - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  # - REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
 
 python:
   - "2.7"
