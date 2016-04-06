@@ -22,7 +22,7 @@ Build the assets
 .. code-block:: console
 
     (cds3)$ cds npm
-    (cds3)$ cdvirtualenv var/cds-instance/static
+    (cds3)$ cdvirtualenv var/instance/static
     (cds3)$ npm install
     (cds3)$ cds collect -v
     (cds3)$ cds assets build

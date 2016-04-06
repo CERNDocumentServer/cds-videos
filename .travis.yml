@@ -24,6 +24,9 @@
 #
 addon:
   postgresql: 9.4
+  apt:
+    packages:
+      - nodejs
 
 notifications:
   email: false
@@ -33,40 +36,46 @@ sudo: false
 language: python
 
 cache:
-  - pip
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.nvm
 
 services:
   - posgresql
   - redis
+  - rabbitmq
 
 env:
-  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
-  - REQUIREMENTS=baseline SQLALCHEMY_DATABASE_URI="sqlite:///tmp/cds.db"
+  - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
 
 python:
   - "2.7"
-  - "3.3"
-  - "3.4"
   - "3.5"
 
 before_install:
+  - "mkdir /tmp/elasticsearch"
+  - "wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz | tar xz --directory=/tmp/elasticsearch --strip-components=1"
+  - "/tmp/elasticsearch/bin/elasticsearch &"
   - "travis_retry pip install --upgrade pip setuptools py"
   - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "cat requirements.baseline.txt > .travis-baseline-requirements.txt"
+  - "./scripts/setup-npm.sh"
+  - "cat requirements.txt > .travis-base-requirements.txt"
   - "requirements-builder --level=pypi setup.py > .travis-release-requirements.txt"
   - "requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt"
 
 install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
+  - "travis_retry pip install -e .[all,postgresql]"
+  - "./scripts/setup-assets.sh"
 
-# before_script:
-#   - "cds db init"
-#   - "cds db create"
-#   # - "cds users create -e test@test.ch -a --password test.test"
+before_script:
+  - "if [ ${E2E} == 'yes' ]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; export E2E_WEBDRIVER_BROWSERS='Firefox'; fi"
+  # Allow ES to start
+  - sleep 10
 
 script:
-  - "./run-tests.sh"
+  - "if [ ${E2E} == 'yes' ]; then py.test tests/e2e/; else ./run-tests.sh; fi"
 
 after_success:
   - coveralls
