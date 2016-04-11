@@ -31,13 +31,24 @@ the ``script scripts/setup-assets.sh``.
 from __future__ import absolute_import, print_function
 
 import os
-
+import pkg_resources
 import pytest
+import shutil
+import subprocess
+import tempfile
+import uuid
+
+from dojson.contrib.marc21 import marc21
+from dojson.contrib.marc21.utils import create_record, split_blob
 from elasticsearch.exceptions import RequestError
-from invenio_db import db
-from invenio_search import current_search
 from selenium import webdriver
 from sqlalchemy_utils.functions import create_database, database_exists
+
+from invenio_db import db as _db
+from invenio_indexer.api import RecordIndexer
+from invenio_pidstore import current_pidstore
+from invenio_records.api import Record
+from invenio_search import current_search
 
 from cds.factory import create_app
 
@@ -45,6 +56,12 @@ from cds.factory import create_app
 @pytest.yield_fixture(scope='session', autouse=True)
 def app(request):
     """Flask application fixture."""
+    instance_path = tempfile.mkdtemp()
+
+    os.environ.update(
+        APP_INSTANCE_PATH=instance_path
+    )
+
     app = create_app(
         CELERY_ALWAYS_EAGER=True,
         CELERY_CACHE_BACKEND="memory",
@@ -54,29 +71,15 @@ def app(request):
         SECRET_KEY="CHANGE_ME",
         SECURITY_PASSWORD_SALT="CHANGE_ME",
         MAIL_SUPPRESS_SEND=True,
-        SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
+        SQLALCHEMY_DATABASE_URI='sqlite:///test.db',
         TESTING=True,
     )
 
     with app.app_context():
-        # Init
-        if not database_exists(str(db.engine.url)):
-            create_database(str(db.engine.url))
-        db.create_all()
-
-        try:
-            list(current_search.create())
-        except RequestError:
-            list(current_search.delete())
-            list(current_search.create())
-
         yield app
 
-        # Teardown
-        list(current_search.delete(ignore=[404]))
-        db.session.remove()
-        db.drop_all()
+    # Teardown
+    shutil.rmtree(instance_path)
 
 
 def pytest_generate_tests(metafunc):
@@ -84,7 +87,8 @@ def pytest_generate_tests(metafunc):
 
     For each test in this directory which uses the `env_browser` fixture,
     the given test is called once for each value found in the
-    `E2E_WEBDRIVER_BROWSERS` environment variable."""
+    `E2E_WEBDRIVER_BROWSERS` environment variable.
+    """
     if 'env_browser' in metafunc.fixturenames:
         # In Python 2.7 the fallback kwarg of os.environ.get is `failobj`,
         # in 3.x it's `default`.
@@ -106,3 +110,49 @@ def env_browser(request):
 
     # Quit the webdriver instance
     browser.quit()
+
+
+@pytest.yield_fixture()
+def db(app):
+    """Initialize database."""
+    # Init
+    if not database_exists(str(_db.engine.url)):
+        create_database(str(_db.engine.url))
+    _db.create_all()
+
+    try:
+        list(current_search.create())
+    except RequestError:
+        list(current_search.delete())
+        list(current_search.create())
+
+    yield _db
+
+    # Teardown
+    _db.session.remove()
+    _db.drop_all()
+
+
+@pytest.fixture()
+def demo_records(db):
+    """Create demo records."""
+    data_path = pkg_resources.resource_filename(
+        'invenio_records', 'data/marc21/bibliographic.xml'
+    )
+
+    with open(data_path) as source:
+        indexer = RecordIndexer()
+        with db.session.begin_nested():
+            for index, data in enumerate(split_blob(source.read()), start=1):
+                # create uuid
+                rec_uuid = uuid.uuid4()
+                # do translate
+                record = marc21.do(create_record(data))
+                # create PID
+                current_pidstore.minters['recid'](
+                    rec_uuid, record
+                )
+                # create record
+                indexer.index(Record.create(record, id_=rec_uuid))
+        db.session.commit()
+    return data_path
