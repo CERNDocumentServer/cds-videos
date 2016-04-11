@@ -255,7 +255,7 @@ def files(temp, source):
                 'dummy': True,
                 'files': [
                     {
-                        'uri': '/files/{0}/{1}'.format(
+                        'uri': '/api/files/{0}/{1}'.format(
                                                     str(bucket.id), file_name),
                         'filename': file_name,
                         'bucket': str(bucket.id),
