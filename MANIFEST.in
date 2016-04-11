@@ -32,6 +32,7 @@ include Dockerfile
 include Procfile
 include babel.cfg
 include pytest.ini
+include .checkignore
 include .dockerignore
 include .jshintignore
 include .jshintrc

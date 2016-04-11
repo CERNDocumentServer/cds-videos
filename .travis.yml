@@ -77,8 +77,9 @@ install:
 
 before_script:
   - "if [ ${E2E} == 'yes' ]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; export E2E_WEBDRIVER_BROWSERS='Firefox'; fi"
+  - "if [ ${E2E} == 'yes' ]; then cds index init; fi"
   # Allow ES to start
-  - sleep 10
+  - sleep 15
 
 script:
   - "if [ ${E2E} == 'yes' ]; then py.test tests/e2e/; else ./run-tests.sh; fi"

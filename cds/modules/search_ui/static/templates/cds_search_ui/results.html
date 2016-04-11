@@ -1,10 +1,15 @@
 <ul>
   <li ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <!-- FIXME find a better way to set the record url -->
-    <h4><a target="_self" ng-href="/record/{{ record.id }}">{{ record.metadata.title_statement.title }}</a></h4>
-    <p>{{ record.metadata.summary[0].summary }}</p>
+    <h4><a target="_self" ng-href="/record/{{ record.id }}">{{ record.metadata.title_statement.title || 'No title :(' }}</a></h4>
+    <p>{{ record.metadata.summary[0].summary || 'No summary' }}</p>
     <div class="text-right">
       <ul class="list-inline">
+        <li ng-show="record.metadata.files.length > 0">
+          <a ng-click="showFiles=!showFiles">
+            {{ showFiles ? 'Hide files' : 'Show files' }}
+          </a>
+        </li>
         <li ng-show="record.metadata.added_entry_personal_name.length > 0">
           <a ng-click="showAuthors=!showAuthors">
             {{ showAuthors ? 'Hide authors' : 'Show authors' }}
@@ -15,6 +20,13 @@
             {{ showSource ? 'Hide source' : 'Show source' }}
           </a>
         </li>
+      </ul>
+    </div>
+    <div ng-hide="!showFiles">
+      <ul>
+        <div ng-repeat='file in record.metadata.files'>
+          <li><a target="_self" ng-href="/record/{{ record.id }}/preview/{{ file.filename }}">{{ file.filename }}</a></li>
+        </div>
       </ul>
     </div>
     <div ng-hide="!showAuthors">
