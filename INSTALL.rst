@@ -74,4 +74,49 @@ Now you can visit http://localhost:5000/ :)
 Docker
 ------
 
-Soon ...
+First clone the repository, if you haven't done it already, build all docker
+images and boot them up using Docker Compose:
+
+.. code-block:: console
+
+    $ git clone https://github.com/CERNDocumentServer/cds.git
+    $ git checkout master
+    $ docker-compose build
+    $ docker-compose up
+
+Next, create the database, indexes, fixtures and an admin user:
+
+.. code-block:: console
+
+    $ docker-compose run web cds db create
+    $ docker-compose run web cds index init
+    $ docker-compose run web cds users create cds@cern.ch -a
+    $ docker-compose run web cds access allow admin-access -e cds@cern.ch
+    $ docker-compose run web cds fixtures cds
+
+Now visit the following URL in your browser:
+
+.. code-block:: console
+
+    https://<docker ip>
+
+You can use the following web interface to inspect Elasticsearch and RabbitMQ:
+
+- Elasticsearch: http://<docker ip>:9200/_plugin/hq/
+- RabbitMQ: http://<docker ip>:15672/ (guest/guest)
+
+Also the following ports are exposed on the Docker host:
+
+- ``80``: Nginx
+- ``443``: Nginx
+- ``5000``: CDS
+- ``5432``: PostgreSQL
+- ``5672``: RabbitMQ
+- ``6379``: Redis
+- ``9200``: Elasticsearch
+- ``9300``: Elasticsearch
+- ``15672``: RabbitMQ management console
+
+**Dependencies**
+
+CDS depends on PostgreSQL, Elasticsearch, Redis and RabbitMQ.
