@@ -18,7 +18,7 @@
 # along with CDS; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-pydocstyle cds && \
+pydocstyle --match-dir='[^\.|(cds\/modules\/record_split)].*' cds && \
 isort -rc -c -df **/*.py && \
 check-manifest --ignore ".travis-*" && \
 py.test tests/unit/

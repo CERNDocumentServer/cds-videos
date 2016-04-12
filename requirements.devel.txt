@@ -22,6 +22,8 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+# FIX ME ESTEBAN
+Flask-Cors>=2.1.2
 
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
@@ -52,7 +54,7 @@
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
 -e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records
--e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest[cors]
+-e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest
 -e git+https://github.com/inveniosoftware/invenio-search-ui.git#egg=invenio-search-ui
 -e git+https://github.com/inveniosoftware/invenio-search.git#egg=invenio-search
 -e git+https://github.com/inveniosoftware/invenio-theme.git#egg=invenio-theme
