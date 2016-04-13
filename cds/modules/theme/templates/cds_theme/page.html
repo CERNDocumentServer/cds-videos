@@ -1,5 +1,7 @@
 {%- extends "invenio_theme/page.html" %}
 
+{%- set title = '%s | %s'|format(_(title), config.THEME_SITENAME) or 'CDS' -%}
+
 {%- block css %}
   {% include "cds_theme/styles.html" %}
 {%- endblock css %}

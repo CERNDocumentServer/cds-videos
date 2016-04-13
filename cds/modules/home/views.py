@@ -36,5 +36,5 @@ def index():
     """CDS home page."""
     return render_template(
         'cds_home/home.html',
-        title='CDS Home'
+        title='Home'
     )
