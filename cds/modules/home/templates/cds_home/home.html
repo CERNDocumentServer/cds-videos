@@ -1,10 +1,20 @@
 {%- extends "cds_theme/page.html" %}
 
+{%- block page_header %}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
 {%- block page_body %}
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <h1>Hello world!</h1>
+  <div class="cds-home">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <form action="{{ url_for('invenio_search_ui.search') }}" class="cds-home-search">
+            <div class="form-group">
+              <input type="text" name="q" class="input-lg form-control" placeholder="{{ _('Type and press enter to search') }}">
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

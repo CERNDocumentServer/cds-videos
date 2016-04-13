@@ -233,7 +233,7 @@ SECURITY_LOGIN_SALT = 'CHANGE_ME'
 ###############################################################################
 
 # The site name
-THEME_SITENAME = _("CDS")
+THEME_SITENAME = _("CERN Document Server")
 # The theme logo.
 THEME_LOGO = 'img/cds.svg'
 # The base template.
