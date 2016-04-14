@@ -38,3 +38,9 @@ def index():
         'cds_home/home.html',
         title='Home'
     )
+
+
+@blueprint.route('/ping', methods=['HEAD', 'GET'])
+def ping():
+    """Ping blueprint used by loadbalancer."""
+    return 'You Know, the CERN Document Server'
