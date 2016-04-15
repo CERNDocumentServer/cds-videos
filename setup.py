@@ -59,7 +59,7 @@ extras_require = {
         'Sphinx>=1.3',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0a9',
+        'invenio-db[postgresql,versioning]>=1.0.0a9',
     ],
     'mysql': [
         'invenio-db[mysql,versioning]>=1.0.0a9',

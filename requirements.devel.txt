@@ -25,6 +25,7 @@
 # FIX ME
 Flask-Cors>=2.1.2 # dependency of invenio-rest
 psycopg2 >= 2.6.1 # dependency of invenio-db
+SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
