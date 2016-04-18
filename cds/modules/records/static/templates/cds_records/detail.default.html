@@ -1,0 +1,79 @@
+<div class="row" ng-init="vm.preview=false; vm.activePreview=false; files=[]">
+  <div class="col-md-12">
+    <div class="cds-record-detail">
+      <div class="cds-record-detail-top">
+        <ul class="list-inline">
+          <li><a href="#">Metadata</a></li>
+          <li><a ng-show="record.files.length > 0" href="#files">Files</a></li>
+          <li><a href="#export">Export</a></li>
+        </ul>
+      </div>
+      <div class="cds-record-detail-bottom">
+        <h1>{{ record.title_statement.title || 'No title :(' }}</h1>
+        <ul class="list-inline record-detail-metadata-collection">
+          <li ng-show="record.collections.length >0" >
+            <i class="text-primary fa fa-tags"></i>
+            <span ng-repeat="col in record.collections">
+              <span class="label label-warning">{{ col.primary }}</span>
+            </span>
+          </li>
+          <li ng-show="record.main_entry_personal_name.length > 0">
+            <i class="fa text-primary" ng-class="{'fa-user': record.main_entry_personal_name.length === 1, 'fa-users': record.main_entry_personal_name.length > 1}" ></i>
+            <span ng-repeat="user in record.main_entry_personal_name">
+              {{ user.personal_name }}
+            </span>
+          </li>
+          <li ng-show="record.subject_added_entry_topical_term.length > 0">
+            <i class="fa text-primary fa-archive"></i>
+            <span ng-repeat="term in record.subject_added_entry_topical_term">
+              <span class="label label-primary">{{ term.topical_term_or_geographic_name_entry_element }}</span>
+            </span>
+          </li>
+        </ul>
+        <p>{{ record.summary[0].summary || 'No summary' }}</p>
+        <hr />
+        <div id="files" ng-init="showFiles=true" ng-show="record.files.length > 0" class="panel panel-info cds-record-detail-files">
+          <div class="panel-heading">
+            <div class="btn-group pull-right">
+              <a class="btn btn-default btn-xs" ng-click="showFiles=!showFiles">
+                <i class="fa" ng-class="{'fa-caret-square-o-up': showFiles, 'fa-caret-square-o-down': !showFiles}"></i>
+              </a>
+            </div>
+            <h3 class="panel-title">Files</h3>
+          </div>
+          <ul ng-show="showFiles" class="list-group" ng-repeat="file in record.files track by $index">
+            <li class="list-group-item" ng-class="{'active': file.filename === vm.activePreview}">
+              <a 
+                 ng-init="vm.preloadPreview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename)"
+                 class="cds-record-detail-files-filename"
+                 ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename);vm.activePreview=file.filename">
+                {{ file.filename }}
+              </a>
+              <span class="badge cds-record-detail-preview-close" ng-show="file.filename === vm.activePreview">
+                <a ng-click="vm.preview=false;vm.activePreview=false"><i class="fa fa-times"></i></a>
+              </span>
+            </li>
+          </ul>
+          <div ng-show="vm.preview && showFiles" class="panel-body cds-record-detail-preview">
+            <iframe ng-show="vm.preview && showFiles" src="{{ (vm.preview === false) ? vm.preloadPreview : vm.preview }}" width="100%" height="100%" style="min-height:900px" frameBorder="0"></iframe>
+          </div>
+        </div>
+        <div id="export" ng-init="showSource=false" class="panel panel-default cds-record-detail-source">
+          <div class="panel-heading">
+            <div class="btn-group pull-right">
+              <a class="btn btn-default btn-xs" ng-click="showSource=!showSource">
+                <i class="fa" ng-class="{'fa-caret-square-o-up': showSource, 'fa-caret-square-o-down': !showSource}"></i>
+              </a>
+            </div>
+            <h3 class="panel-title">Source</h3>
+          </div>
+          <div class="panel-body" ng-show="showSource">
+            <pre>
+              {{ record | json }}
+            </pre>
+          </div>
+        </div>
+      </div> <!-- detail-bottom -->
+    </div> <!-- record-dertail -->
+  </div> <!-- col-md-12 -->
+</div>  <!-- row -->

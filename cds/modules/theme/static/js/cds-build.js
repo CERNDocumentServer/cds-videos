@@ -30,7 +30,7 @@
       comments: false
     },
     compress: {
-      drop_console: true,
+      drop_console: false,
       sequences: true,
       dead_code: true,
       conditionals: true,

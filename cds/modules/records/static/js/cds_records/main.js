@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015 CERN.
+ * Copyright (C) 2016 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,32 +21,13 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-// Setting the path to fonts files.
-$icon-font-path: "/static/node_modules/bootstrap-sass/assets/fonts/";
-$fa-font-path: "/static/node_modules/font-awesome/fonts";
-
-// CDS Custom vars
-$cds-small-spacing: 5px;
-$cds-medium-spacing: 10px;
-$cds-large-spacing: 15px;
-$cds-enormus-spacing: 20px;
-
-// Brand colors CDS
-$primary-color-dark: #F57C00;
-$primary-color: #FF9800;
-$primary-color-light: #FFE0B2;
-$primary-color-text: #212121;
-$accent-color: #03A9F4;
-$primary-text-color: #212121;
-$secondary-text-color: #727272;
-$divider-color: #B6B6B6;
-
-$cds-base: #01579B;
-$cds-contrast: #4CAF50;
-$cds-light: #E1F5FE;
-$cds-medium: #039be5;
-
-// Bliax, remove border radius
-$border-radius-small: 0;
-$border-radius-base: 0;
-$border-radius-large: 0;
+require([
+    'node_modules/cds/dist/cds',
+  ], function() {
+    // Bootstrap modules
+    angular.element(document).ready(function() {
+      angular.bootstrap(
+        document.getElementById("cds-record"), ['cdsRecord']
+      );
+    });
+});

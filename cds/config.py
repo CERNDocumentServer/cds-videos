@@ -100,6 +100,8 @@ SEARCH_UI_SEARCH_TEMPLATE = "cds_search_ui/search.html"
 SEARCH_DOC_TYPE_DEFAULT = None
 # Do not map any keywords.
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
+# SEARCH UI JS TEMPLATES
+# SEARCH_UI_JSTEMPLATE_RESULTS = 'templates/cds_search_ui/results.html'
 
 ###############################################################################
 # REST API
@@ -117,7 +119,7 @@ RECORDS_UI_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',
         route='/record/<pid_value>',
-        template='invenio_records_ui/detail.html',
+        template='cds_records/record_detail.html',
     ),
     record_preview=dict(
         pid_type='recid',
@@ -242,6 +244,8 @@ BASE_TEMPLATE = "cds_theme/page.html"
 HEADER_TEMPLATE = "cds_theme/header.html"
 # RequireJS configuration.
 REQUIREJS_CONFIG = "js/cds-build.js"
+# Endpoint for breadcrumb root.
+THEME_BREADCRUMB_ROOT_ENDPOINT = 'cds_home.index'
 
 ###############################################################################
 # Previewer

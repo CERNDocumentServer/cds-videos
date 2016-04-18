@@ -35,14 +35,29 @@ body {
   height: 100%;
 }
 
+a[ng-click]{
+  cursor: pointer;
+}
+
 // /home
 
 .cds-home {
   margin-top: -50px;
   background-color: #fafafa;
   height: 100%;
-  .cds-home-search {
-    margin-top: 20%;
+}
+
+/////////
+
+// /record/{recid}
+
+.cds-record-detail {
+  .cds-record-detail-files {
+    .list-group-item.active {
+      a.cds-record-detail-files-filename {
+        color: #fff;
+      }
+    }
   }
 }
 

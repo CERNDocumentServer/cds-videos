@@ -31,7 +31,6 @@ Links
 """
 
 import os
-import sys
 
 from setuptools import find_packages, setup
 
@@ -151,6 +150,7 @@ setup(
         'invenio_assets.bundles': [
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
+            'cds_record_js = cds.modules.records.bundles:js',
         ],
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',

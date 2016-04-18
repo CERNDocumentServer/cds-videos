@@ -34,4 +34,8 @@ require([
         document.getElementById("invenio-search"), ['cds', 'invenioSearch']
       );
     });
+    $(document).ready(function() {
+      // Focus on home's search input
+      $('.cds-home-input').focus();
+    });
 });

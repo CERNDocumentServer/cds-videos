@@ -1,0 +1,21 @@
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{%- block javascript %}
+  {{ super() }}
+  {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+{%- endblock javascript %}
+
+{%- block page_body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+          <div id="cds-record">
+            <cds-record-view
+              template="{{ url_for('static', filename='templates/cds_records/detail.default.html') }}"
+              record='{{ record | tojson }}'
+            ></cds-record-view>
+          </div>
+      </div>
+    </div>
+  </div>
+{%- endblock page_body %}
