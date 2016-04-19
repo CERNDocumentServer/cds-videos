@@ -9,6 +9,22 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12">
+          <!-- START OF: Temporary chubby-corn -->
+          <div class="row">
+            <div class="col-md-12">
+              <img src="{{ url_for('static', filename='img/unicorn.png') }}"
+                alt="Chubby unicorn" title="Chubby unicorn"
+                style="display: block; margin: 0 auto;" >
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <small style="display: block; margin-bottom: 20px; text-align: center;">
+                Image from: <a href='http://dorkydino.com'>dorkydino.com</a>
+              </small>
+            </div>
+          </div>
+          <!-- END OF: Temporary chubby-corn -->
           <form action="{{ url_for('invenio_search_ui.search') }}" class="cds-home-search">
             <div class="form-group">
               <input type="text" name="q" class="input-lg form-control" placeholder="{{ _('Type and press enter to search') }}">
