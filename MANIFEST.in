@@ -47,3 +47,4 @@ recursive-include cds *.svg
 recursive-include docker *
 recursive-include tests *.py
 recursive-include scripts *.sh
+recursive-include cds *.png
