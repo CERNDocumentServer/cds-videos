@@ -258,3 +258,10 @@ PREVIEWER_BASE_JS_BUNDLES = ['cds_theme_js']
 
 # FIXME: Add proper data location
 DATADIR = '/tmp'
+
+###############################################################################
+# Logging
+###############################################################################
+
+#: Overwrite default Sentry extension class to support Sentry 6.
+LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
