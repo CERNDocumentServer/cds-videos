@@ -100,6 +100,7 @@ install_requires = [
     # FIXME 'invenio-formatter>=1.0.0a0',
     'invenio-i18n>=1.0.0a0',
     'invenio-indexer>=1.0.0a0',
+    'invenio-jsonschemas>=1.0.0a2',
     'invenio-logging>=1.0.0a0',
     'invenio-mail>=1.0.0a0',
     'invenio-marc21>=1.0.0a1',
@@ -162,12 +163,17 @@ setup(
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
-        'invenio_search.mappings': [
-            'records = cds.modules.records.data',
-        ],
         'invenio_i18n.translations': [
             'messages = cds',
         ],
+        'invenio_search.mappings': [
+            'records = cds.modules.records.data',
+        ],
+        'invenio_jsonschemas.schemas': [
+            # Already included by invenio-marc21
+            # 'marc21 = dojson.contrib.marc21.schemas',
+            'cds_marc21 = cds_dojson.marc21.schemas',
+        ]
     },
     extras_require=extras_require,
     install_requires=install_requires,

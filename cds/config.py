@@ -269,3 +269,10 @@ DATADIR = '/tmp'
 
 #: Overwrite default Sentry extension class to support Sentry 6.
 LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
+
+
+###############################################################################
+# JSON Schemas
+###############################################################################
+
+JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "localhost:5000")
