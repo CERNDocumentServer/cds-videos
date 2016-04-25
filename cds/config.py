@@ -191,7 +191,7 @@ RECORDS_REST_FACETS = dict(
     records=dict(
         aggs=dict(
             authors=dict(terms=dict(
-                field='added_entry_personal_name.personal_name')),
+                field='main_entry_personal_name.personal_name.untouched')),
             languages=dict(terms=dict(
                 field='language_code.language_code_of_text_'
                       'sound_track_or_separate_title')),
@@ -201,7 +201,7 @@ RECORDS_REST_FACETS = dict(
         ),
         post_filters=dict(
             authors=terms_filter(
-                'added_entry_personal_name.personal_name'),
+                'main_entry_personal_name.personal_name.untouched'),
             languages=terms_filter(
                 'language_code.language_code_of_text_'
                 'sound_track_or_separate_title'),

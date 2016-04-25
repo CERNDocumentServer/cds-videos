@@ -109,7 +109,7 @@ install_requires = [
     'invenio-oauthclient>=1.0.0a1',
     'invenio-pages>=1.0.0a0',
     'invenio-pidstore>=1.0.0a7',
-    # FIXME 'invenio-previewer>=1.0.0a0',
+    'invenio-previewer>=1.0.0a0',
     'invenio-records-rest>=1.0.0a0',
     'invenio-records-ui>=1.0.0a0',
     'invenio-records>=1.0.0a12',
@@ -167,7 +167,7 @@ setup(
             'messages = cds',
         ],
         'invenio_search.mappings': [
-            'records = cds.modules.records.data',
+            'records = cds.modules.records.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             # Already included by invenio-marc21
