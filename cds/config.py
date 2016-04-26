@@ -213,6 +213,13 @@ RECORDS_REST_FACETS = dict(
         )
     )
 )
+
+# Add tuple as array type on record validation
+# http://python-jsonschema.readthedocs.org/en/latest/validate/#validating-types
+RECORDS_VALIDATION_TYPES = dict(
+    array=(list, tuple),
+)
+
 # FIXME: Disable permissions for now.
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = None
 
