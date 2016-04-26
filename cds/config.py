@@ -149,6 +149,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher='recid',
         search_index='records',
         search_type=None,
+        search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_response'),
