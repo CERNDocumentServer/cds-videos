@@ -32,7 +32,7 @@ from os.path import basename, exists, join, isdir, splitext
 from flask import current_app
 from flask_cli import with_appcontext
 
-from dojson.contrib.marc21 import marc21
+from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
 from invenio_db import db
 from invenio_files_rest.models import Bucket, FileInstance, Location, \
