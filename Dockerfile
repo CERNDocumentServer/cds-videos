@@ -63,7 +63,7 @@ RUN pip install -r requirements.devel.txt --src /code/
 COPY . /code/cds/
 
 # Install CDS
-RUN pip install -e .[postgresql] \
+RUN pip install -e .[all]\
     && python -O -m compileall .
 
 # Install bower dependencies and build assets.

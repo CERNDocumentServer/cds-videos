@@ -24,6 +24,3 @@
 
 # Pinned base requirements
 -r requirements.pinned.txt
-
-# Base requirements
-Flask==0.10.1

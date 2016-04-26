@@ -12,15 +12,38 @@ Prepare the environment
     $ mkvirtualenv cds3
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
     (cds3)$ git clone -b cdslabs_qa git@github.com:CERNDocumentServer/cds.git
+
+Install production like setup
+
+.. code-block:: console
+
+    $ workon cds3
     (cds3)$ cd cds
     (cds3)$ pip install -r requirements.txt
-    (cds3)$ pip install -e .[postgresql]
-    (cds3)$ python -O -m compileall .
+    (cds3)$ pip install -e .
+
+If you want to install a developer setup and use the latest versions of the
+Invenio packages
+
+.. code-block:: console
+
+    $ workon cds3
+    (cds3)$ cd cds
+    (cds3)$ pip install -r requirements.developer.txt
+
+Or to install the latest released versions of all the dependencies
+
+.. code-block:: console
+
+    $ workon cds3
+    (cds3)$ cd cds
+    (cds3)$ pip install -e .
 
 Build the assets
 
 .. code-block:: console
 
+    (cds3)$ python -O -m compileall .
     (cds3)$ cds npm
     (cds3)$ cdvirtualenv var/instance/static
     (cds3)$ npm install

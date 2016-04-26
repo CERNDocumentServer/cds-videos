@@ -46,14 +46,12 @@ services:
   - rabbitmq
 
 env:
-  # - REQUIREMENTS=base E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  # - REQUIREMENTS=base E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  # - REQUIREMENTS=release E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  # - REQUIREMENTS=release E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=production E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=production E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=release E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+  - REQUIREMENTS=release E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
   - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
   - REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  # - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  # - REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="sqlite:///cds.db" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
 
 python:
   - "2.7"
@@ -66,13 +64,13 @@ before_install:
   - "travis_retry pip install --upgrade pip setuptools py"
   - "travis_retry pip install twine wheel coveralls requirements-builder"
   - "./scripts/setup-npm.sh"
-  - "cat requirements.txt > .travis-base-requirements.txt"
+  - "cat requirements.pinned.txt > .travis-production-requirements.txt"
   - "requirements-builder --level=pypi setup.py > .travis-release-requirements.txt"
   - "requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt"
 
 install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all,postgresql]"
+  - "travis_retry pip install -e .[all]"
   - "./scripts/setup-assets.sh"
 
 before_script:

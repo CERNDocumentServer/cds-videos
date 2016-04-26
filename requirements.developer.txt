@@ -26,4 +26,4 @@
 -r requirements.txt
 -r requirements.devel.txt
 
--e .[all,postgresql]
+-e .[all]

@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-# FIX ME
+# When installing from github the requirements extras doesn't seem to work
 Flask-Cors>=2.1.2 # dependency of invenio-rest
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
@@ -46,7 +46,6 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
 -e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
--e git+https://github.com/inveniosoftware/invenio-marc21.git#egg=invenio-marc21
 -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oaiserver.git#egg=invenio-oaiserver
 -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
