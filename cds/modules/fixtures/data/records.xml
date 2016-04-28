@@ -1,0 +1,3654 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
+  <controlfield tag="003">SzGeCERN</controlfield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2148402</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2016-0026</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Arpaia, Pasquale</subfield>
+    <subfield code="u">University of Naples Federico II</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Rotating-coil calibration in a reference quadrupole, considering roll-angle misalignment and higher-order harmonics</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2016</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">2016-03-04</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">A method is proposed for calibrating the radius of a rotating coil sensor by relaxing the metrological constraints on alignment and field errors of the reference quadrupole. A coil radius calibration considering a roll-angle misalignment of the measurement bench, the magnet, and the motor-drive unit is analyzed. Then, the error arising from higher-order harmonic field imperfections in the reference quadrupole is assessed. The method is validated by numerical field computation for both the higher-order harmonic errors and the roll-angle misalignment. Finally, an experimental proof-of-principle demonstration is car-ried out in a calibration magnet with sextupole harmonic.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">FP7</subfield>
+    <subfield code="c">606839</subfield>
+    <subfield code="f">PACMAN</subfield>
+    <subfield code="r">openAccess</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN Invenio WebSubmit</subfield>
+    <subfield code="b">GENEU</subfield>
+    <subfield code="c">0.1</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+    <subfield code="2">SzGeCERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">PACMAN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">PACMANPUB</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Buzio, Marco</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Köster, Oliver</subfield>
+    <subfield code="u">CERN; Technical University of Darmstadt</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Russenschuck, Stephan</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Severino, Giordana</subfield>
+    <subfield code="u">CERN; University of Sannio</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">Measurement</subfield>
+    <subfield code="v">87</subfield>
+    <subfield code="y">2016</subfield>
+    <subfield code="c">74-82</subfield>
+    <subfield code="a">10.1016/j.measurement.2016.02.061</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1189567</subfield>
+    <subfield code="s">1559351</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2148402/files/CERN-ACC-2016-0026.pdf</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1189567</subfield>
+    <subfield code="s">2152314</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2148402/files/CERN-ACC-2016-0026.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1189567</subfield>
+    <subfield code="s">3131</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2148402/files/CERN-ACC-2016-0026.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1189567</subfield>
+    <subfield code="s">5505</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2148402/files/CERN-ACC-2016-0026.jpg?subformat=icon-</subfield>
+    <subfield code="x">icon-</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">tommaso.portaluri@cern.ch</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+    <subfield code="b">PACMAN</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="003">SzGeCERN</controlfield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2132785</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="2">DOI</subfield>
+    <subfield code="a">10.1016/j.phpro.2015.11.008</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1407064</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0207</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Shi, Liangliang</subfield>
+    <subfield code="u">DESY - U. Manchester (main)</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Stability and Resolution Studies of HOMBPMs for the 1.3 GHz Superconducting Accelerating Cavities at FLASH</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">2015-03-25</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">HOMBPMs (HOM based Beam Position Monitors) are installed at the FLASH facility at DESY, Hamburg. These are aimed at aligning the beam and monitoring the beam position. Over time, the accuracy of beam position prediction is degraded. This is due to instability issues in the 1.3 GHz and 3.9 GHz superconducting cavities and associated electronics. In this paper, we demonstrate for the first time a measurement technique which is stable and can be relied upon over a period of three months with unprecedented resolution (below 4 μm horizontally and 2 μm vertically). We attribute this improvement in stability to a focused campaign on various signal processing and analysis techniques. These techniques include SVD (Singular Value Decomposition), ANN (Artificial Neural Network) and PLS (Partial Least Square). We found the best resolution and computational power using the latter method, PLS. These techniques are directly applicable to the HOMBPM system at the European XFEL that is currently under construction. However, they are in many ways generic and hence applicable to other measurement methods.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">FP7</subfield>
+    <subfield code="c">312453</subfield>
+    <subfield code="f">EuCARD2</subfield>
+    <subfield code="r">openAccess</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-NC-ND-4.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN Invenio WebSubmit</subfield>
+    <subfield code="b">GENEU</subfield>
+    <subfield code="c">0.1</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12: Innovative Radio Frequency Technologies (RF)</subfield>
+    <subfield code="b">WP</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12.4: SRF HOM Beam Diagnostics</subfield>
+    <subfield code="b">Task</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">BPM</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">HOM</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">HOMBPM</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">PLS</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">SVD</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">ANN</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">RMS error</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Resolution</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Superconducting accelerating cavity</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2PUB</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Baboi, Nicoleta</subfield>
+    <subfield code="u">DESY</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Jones, Roger</subfield>
+    <subfield code="u">U. Manchester (main)</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="c">42-49</subfield>
+    <subfield code="p">Phys. Procedia</subfield>
+    <subfield code="v">77</subfield>
+    <subfield code="y">2015</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180104</subfield>
+    <subfield code="s">58494</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/CERN-ACC-2015-0207.pdf</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180104</subfield>
+    <subfield code="s">1411612</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/CERN-ACC-2015-0207.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180104</subfield>
+    <subfield code="s">345</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/CERN-ACC-2015-0207.jpg?subformat=icon-</subfield>
+    <subfield code="x">icon-</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180104</subfield>
+    <subfield code="s">467</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/CERN-ACC-2015-0207.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1187973</subfield>
+    <subfield code="s">914067</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/phys-proc-77-42.pdf</subfield>
+    <subfield code="y">Elsevier Open Access article</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1187973</subfield>
+    <subfield code="s">2792437</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132785/files/phys-proc-77-42.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+    <subfield code="y">Elsevier Open Access article</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">julia.double@cern.ch</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">International Conference on Laser Applications at Accelerators, LA3NET 2015, 25-27 March 2015, Mallorca, Spain</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2146027</subfield>
+    <subfield code="k">42-49</subfield>
+    <subfield code="n">mallorca20150325</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+    <subfield code="b">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ConferencePaper</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="003">SzGeCERN</controlfield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2132783</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0206</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Heller, Johann</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Computational Benefits Using an Advanced Concatenation Scheme Based on Reduced Order Models for RF Structures</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">2015-11-01</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The computation of electromagnetic fields and parameters derived thereof for lossless radio frequency (RF) structures filled with isotropic media is an important task for the design and operation of particle accelerators. Unfortunately, these computations are often highly demanding with regard to computational effort. The entire computational demand of the problem can be reduced using decomposition schemes in order to solve the field problems on standard workstations. This paper presents one of the first detailed comparisons between the recently proposed state-space concatenation approach (SSC) and a direct computation for an accelerator cavity with coupler-elements that break the rotational symmetry.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">FP7</subfield>
+    <subfield code="c">312453</subfield>
+    <subfield code="f">EuCARD2</subfield>
+    <subfield code="r">openAccess</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN Invenio WebSubmit</subfield>
+    <subfield code="b">GENEU</subfield>
+    <subfield code="c">0.1</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12: Innovative Radio Frequency Technologies (RF)</subfield>
+    <subfield code="b">WP</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12.4: SRF HOM Beam Diagnostics</subfield>
+    <subfield code="b">Task</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Numerical techniques</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Model order reduction</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Eigenvalue problems</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Wideband equivalent model</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="2">author</subfield>
+    <subfield code="a">Accelerator physics</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2PUB</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Flisgen, Thomas</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Van Rienen, Ursula</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="a">10.1016/j.phpro.2015.11.060</subfield>
+    <subfield code="c">38-45</subfield>
+    <subfield code="p">Physics Procedia</subfield>
+    <subfield code="v">79</subfield>
+    <subfield code="y">2015</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180105</subfield>
+    <subfield code="s">158366</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132783/files/CERN-ACC-2015-0206.pdf</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180105</subfield>
+    <subfield code="s">1445250</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132783/files/CERN-ACC-2015-0206.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180105</subfield>
+    <subfield code="s">2706</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132783/files/CERN-ACC-2015-0206.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180105</subfield>
+    <subfield code="s">3766</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132783/files/CERN-ACC-2015-0206.jpg?subformat=icon-</subfield>
+    <subfield code="x">icon-</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">julia.double@cern.ch</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+    <subfield code="b">EuCARD2</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="003">SzGeCERN</controlfield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2132777</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="2">DOI</subfield>
+    <subfield code="a">10.1109/ICEAA.2015.7297111</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0205</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Galek, Tomasz</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Analysis of Higher Order Modes in Large Superconducting Radio Frequency Accelerating Structures</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">2015-09-07</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Superconducting radio frequency cavities used for accelerating charged particle beams are commonly used in accelerator facilities around the world. The design and optimization of modern superconducting RF cavities requires intensive numerical simulations. Vast number of operational parameters must be calculated to ensure appropriate functioning of the accelerating structures. In this study, we primarily focus on estimation and behavior of higher order modes in superconducting RF cavities connected in chains. To calculate large RF models the state-space concatenation scheme, an efficient hybrid method, is employed.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">FP7</subfield>
+    <subfield code="c">312453</subfield>
+    <subfield code="f">EuCARD2</subfield>
+    <subfield code="r">openAccess</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN Invenio WebSubmit</subfield>
+    <subfield code="b">GENEU</subfield>
+    <subfield code="c">0.1</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12: Innovative Radio Frequency Technologies (RF)</subfield>
+    <subfield code="b">WP</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12.4: SRF HOM Beam Diagnostics</subfield>
+    <subfield code="b">Task</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2PUB</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Heller, Johann</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Brackebusch, Korinna</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Van Rienen, Ursula</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180094</subfield>
+    <subfield code="s">105191</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132777/files/CERN-ACC-2015-0205.pdf</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180094</subfield>
+    <subfield code="s">1420655</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132777/files/CERN-ACC-2015-0205.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180094</subfield>
+    <subfield code="s">2676</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132777/files/CERN-ACC-2015-0205.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180094</subfield>
+    <subfield code="s">3818</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132777/files/CERN-ACC-2015-0205.jpg?subformat=icon-</subfield>
+    <subfield code="x">icon-</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">julia.double@cern.ch</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2140901</subfield>
+    <subfield code="k">239-242</subfield>
+    <subfield code="n">turin20150907</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+    <subfield code="b">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ConferencePaper</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="003">SzGeCERN</controlfield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2132775</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0204</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Heller, Johann</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Uncertainty Quantification for Complex RF-structures Using the State-space Concatenation Approach</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">2015-07-06</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In various applications of computational engineering and accelerator physics, the computation of the electromagnetic behavior of a structure is of crucial importance for the design and operation. The electromagnetic properties of the structure depend on its geometry, which, for real-life radio-frequency (RF) structures, generally deviates from their design values due to fabrication tolerances and operation. To make assessments about the effects of such deviations
+as well as to employ robust optimizations, a so-called uncertainty quantification (UQ) is applied. For large and complex structures such computations are heavily demanding and cannot be carried out using standard brute-force approaches. In this paper, we propose a combination of established techniques to perform UQ for long and complex structures, where the uncertainty is located only in parts of the structure. As exemplary structure, we investigate the third-harmonic cavity, which is being used at the FLASH accelerator at DESY, assuming an uncertain geometry of the left higher order mode coupler. The investigation is carried out using the so-called polynomial chaos expansion (gPC). For that, the repeated numerical solution of Maxwell’s equations is necessary. Usually, such investigations are carried out on supercomputers or small computer clusters with heavily parallelized code. Due to the fact that maximum-performance computational infrastructure is scarce and expensive, the electromagnetic properties are being computed on standard workstation computers using a newly proposed non-overlapping domain decomposition scheme named State-Space Concatenation (SSC) which is based on model-order reduction of the decomposed segments. Using the SSC scheme has the most important advantage that only the uncertain part of the structure, in our case the left coupler, needs to be recomputed when using a non-intrusive scheme like gPC. In comparison to the huge computational demand of a straightforward simulation, the combination of uncertainty quantification and model-order reduction allows for a reasonable improvement of the computational efficiency. Both schemes can be separately applied to structures related to accelerator physics. Yet, just their combination will enable the investigation of long and complex structures beyond the scope of standard approaches.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">FP7</subfield>
+    <subfield code="c">312453</subfield>
+    <subfield code="f">EuCARD2</subfield>
+    <subfield code="r">openAccess</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN Invenio WebSubmit</subfield>
+    <subfield code="b">GENEU</subfield>
+    <subfield code="c">0.1</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12: Innovative Radio Frequency Technologies (RF)</subfield>
+    <subfield code="b">WP</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">EuCARD2</subfield>
+    <subfield code="a">12.4: SRF HOM Beam Diagnostics</subfield>
+    <subfield code="b">Task</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">EuCARD2PUB</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Flisgen, Thomas</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Schmidt, Christian</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Van Rienen, Ursula</subfield>
+    <subfield code="u">U. Rostock</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="c">374-378</subfield>
+    <subfield code="p">PIERS 2015 Prague Proceedings</subfield>
+    <subfield code="y">2015</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180093</subfield>
+    <subfield code="s">141266</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132775/files/CERN-ACC-2015-0204.pdf</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180093</subfield>
+    <subfield code="s">1444644</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132775/files/CERN-ACC-2015-0204.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180093</subfield>
+    <subfield code="s">2654</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132775/files/CERN-ACC-2015-0204.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1180093</subfield>
+    <subfield code="s">3827</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2132775/files/CERN-ACC-2015-0204.jpg?subformat=icon-</subfield>
+    <subfield code="x">icon-</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">julia.double@cern.ch</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+    <subfield code="b">EuCARD2</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2119904</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="2">DOI</subfield>
+    <subfield code="a">10.1103/PhysRevLett.115.264804</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1412301</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="9">CERN-ACC-2016-003</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2016-0003</subfield>
+  </datafield>
+  <datafield tag="088" ind1=" " ind2=" ">
+    <subfield code="9">FCC-DRAFT-TECH-2016-001</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2084568</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)479819</subfield>
+    <subfield code="a">Cimino, Roberto</subfield>
+    <subfield code="m">roberto.cimino@cern.ch</subfield>
+    <subfield code="u">Frascati - CERN</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Potential Remedies for the High Synchrotron-Radiation-Induced Heat Load for Future Highest-Energy-Proton Circular Colliders</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">08 Jan 2016</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">6 p</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">This paper follows the presentation made during the FCC Week 2015 in Washington and has been published in the December 2015 issue of the Physical Review Letters.</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">We propose a new method for handling the high synchrotron radiation (SR) induced heat load of future circular hadron colliders (like FCC-hh). FCC-hh are dominated by the production of SR, which causes a significant heat load on the accelerator walls. Removal of such a heat load in the cold part of the machine, as done in the Large Hadron Collider, will require more than 100 MW of electrical power and a major cooling system. We studied a totally different approach, identifying an accelerator beam screen whose illuminated surface is able to forward reflect most of the photons impinging onto it. Such a reflecting beam screen will transport a significant part of this heat load outside the cold dipoles. Then, in room temperature sections, it could be more efficiently dissipated. Here we will analyze the proposed solution and address its full compatibility with all other aspects an accelerator beam screen must fulfill to keep under control beam instabilities as caused by electron cloud formation, impedance, dynamic vacuum issues, etc. If experimentally fully validated, a highly reflecting beam screen surface will provide a viable and solid solution to be eligible as a baseline design in FCC-hh projects to come, rendering them more cost effective and sustainable.</subfield>
+  </datafield>
+  <datafield tag="536" ind1=" " ind2=" ">
+    <subfield code="a">H2020</subfield>
+    <subfield code="c">654305</subfield>
+    <subfield code="f">EuroCirCol</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="c">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">PUblication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN CDS-Invenio WebSubmit</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="650" ind1="2" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">TECH</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">FCC</subfield>
+    <subfield code="a">Beam transfer</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">FCC</subfield>
+    <subfield code="a">Accelerator controls</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">FCC</subfield>
+    <subfield code="a">Vacuum</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">FCC</subfield>
+    <subfield code="a">Cryogenics</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">FCC</subfield>
+    <subfield code="a">EuroCirCol</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">PUBLATS</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">FCC TECH</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="s">CERN FCC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2051226</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)371997</subfield>
+    <subfield code="a">Baglin, Vincent</subfield>
+    <subfield code="m">Vincent.Baglin@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Schaefers, Franz</subfield>
+    <subfield code="u">Helmholtz-Zentrum, Berlin</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="c">264804</subfield>
+    <subfield code="p">Phys. Rev. Lett.</subfield>
+    <subfield code="v">115</subfield>
+    <subfield code="y">2015</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1174797</subfield>
+    <subfield code="s">839007</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2119904/files/CERN-ACC-2016-003.pdf</subfield>
+    <subfield code="y">APS Open Access article</subfield>
+    <subfield code="z">Stamped by WebSubmit: 11/01/2016</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">julie.hadre@cern.ch</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">Panagiotis.Charitos@cern.ch</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">Roberto.Cimino@cern.ch</subfield>
+  </datafield>
+  <datafield tag="903" ind1=" " ind2=" ">
+    <subfield code="d">11 Jan 2016</subfield>
+    <subfield code="s">Approval Request as a Note</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201670</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">1970425</subfield>
+    <subfield code="k">264804</subfield>
+    <subfield code="n">washington20150323</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ConferencePaper</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114417</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417965</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0198</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2092158</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)750050</subfield>
+    <subfield code="a">Bignami, Andrea</subfield>
+    <subfield code="m">anbignam@cern.ch</subfield>
+    <subfield code="u">LASA, Segrate - Milan Polytechnic</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Energy Deposition and DPA in the Superconducting Links for the HILUMI LHC Project at the LHC Interaction Points</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In the framework of the upgrade of the LHC machine, the powering of the LHC magnets foresees the removal of the power converters and distribution feedboxes from the tunnel and its location at the surface[1]. The Magnesium Diboride (MgB2) connecting lines in the tunnel will be exposed to the debris from 7+7 TeV p-p interaction. The Superconducting (SC) Links will arrive from the surface to the tunnel near the separation dipole, at about 80 m from the Interaction Point at IP1 and IP5. The Connection Box (where the cables of the SC Links are connected to the NbTi bus bar) will be close to the beam pipe.  The debris and its effect on the MgB2 SC links in the connection box (energy deposition and displacement per atom) are presented. The effect of thermal neutrons on the Boron consumption and the contribution of the lithium nucleus and the alpha particle on the DPA are evaluated. The results are normalized to an integrated luminosity of 3000 fb-1, value that represents the LHC High Luminosity lifetime. The dose delivered to the SC Links is found to be below the damage limit. Further studies are necessary to correlate the induced displacement per atom to the superconducting properties.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HL-LHC</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00229469</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)502762</subfield>
+    <subfield code="0">AUTHOR|(CDS)2068385</subfield>
+    <subfield code="a">Broggi, Francesco</subfield>
+    <subfield code="m">Francesco.Broggi@cern.ch</subfield>
+    <subfield code="u">LASA, Segrate - Milan Polytechnic</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Santini, C</subfield>
+    <subfield code="u">LASA, Segrate - Milan Polytechnic</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108754</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)372277</subfield>
+    <subfield code="a">Ballarino, Amalia</subfield>
+    <subfield code="m">Amalia.Ballarino@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2071252</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)609400</subfield>
+    <subfield code="a">Cerutti, Francesco</subfield>
+    <subfield code="m">Francesco.Cerutti@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079212</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)555839</subfield>
+    <subfield code="a">Esposito, Luigi Salvatore</subfield>
+    <subfield code="m">luigi.salvatore.esposito@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171771</subfield>
+    <subfield code="s">1442819</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114417/files/CERN-ACC-2015-0198.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171771</subfield>
+    <subfield code="s">2064085</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114417/files/CERN-ACC-2015-0198.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPMA045</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114414</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417796</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0197</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00218654</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)644361</subfield>
+    <subfield code="0">AUTHOR|(CDS)2073071</subfield>
+    <subfield code="a">Kwee-Hinzmann, Regina</subfield>
+    <subfield code="m">regina.kwee@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Beam Induced Background Simulation Studies at IR1 with New High Luminosity LHC Layout</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In the High Luminosity LHC (HL-LHC), the collimation system will be upgraded in the high-luminosity experimental regions. Additional protection is planned for the Q4 and Q5 magnets that are located further upstream of the tertiary collimators that protect the inner triplet magnets. We evaluate the effect of this proposed collimation layout for the incoming beam 1 on machine-induced background in the experimental area of IR1 (ATLAS). The main scenario is the round optics with β$^∗$ of 15 cm, but a flat scenario is also briefly discussed</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High Luminosity LHC upgrade</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00214737</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)525625</subfield>
+    <subfield code="0">AUTHOR|(CDS)2072480</subfield>
+    <subfield code="a">Gibson, Stephen</subfield>
+    <subfield code="m">Stephen.Gibson@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2071252</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)609400</subfield>
+    <subfield code="a">Cerutti, Francesco</subfield>
+    <subfield code="m">Francesco.Cerutti@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079212</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)555839</subfield>
+    <subfield code="a">Esposito, Luigi Salvatore</subfield>
+    <subfield code="m">luigi.salvatore.esposito@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2072767</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)663552</subfield>
+    <subfield code="a">Lechner, Anton</subfield>
+    <subfield code="m">Anton.Lechner@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171768</subfield>
+    <subfield code="s">233290</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114414/files/CERN-ACC-2015-0197.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171768</subfield>
+    <subfield code="s">1531877</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114414/files/CERN-ACC-2015-0197.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY067</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114409</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417797</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0196</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2100784</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)741850</subfield>
+    <subfield code="a">Rafique, Haroon</subfield>
+    <subfield code="m">haroon.rafique@cern.ch</subfield>
+    <subfield code="u">Huddersfield U.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Simulation of Hollow Electron Lenses as LHC Beam Halo Reducers using Merlin</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The Large Hadron Collider (LHC) and its High Luminosity (HL) upgrade foresee unprecedented stored beam energies of up to 700 MJ. The collimation system is responsible for cleaning the beam halo and is vital for successful machine operation. Hollow electron lenses (HELs) are being considered for the LHC, based on Tevatron designs and operational experience [1], for active halo control. HELs can be used as soft scraper devices, and may operate close to the beam core without undergoing damage [2]. We use the Merlin C++ accelerator libraries [3] to implement a HEL and examine the effect on the beam halo for various test scenarios.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HL-LHC</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2073232</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)372703</subfield>
+    <subfield code="a">Barlow, Roger</subfield>
+    <subfield code="m">Roger.Barlow@cern.ch</subfield>
+    <subfield code="u">Huddersfield U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108501</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)621936</subfield>
+    <subfield code="a">Appleby, Robert Barrie</subfield>
+    <subfield code="m">Robert.Appleby@cern.ch</subfield>
+    <subfield code="u">Manchester U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Tygier, S</subfield>
+    <subfield code="u">Manchester U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171767</subfield>
+    <subfield code="s">1613936</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114409/files/CERN-ACC-2015-0196.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171767</subfield>
+    <subfield code="s">2167772</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114409/files/CERN-ACC-2015-0196.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY069</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114397</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417772</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0195</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2085459</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)739367</subfield>
+    <subfield code="a">Quaranta, Elena</subfield>
+    <subfield code="m">elena.quaranta@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Collimation Cleaning at the LHC with Advanced Secondary Collimator Materials</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The LHC collimation system must ensure efficient beam halo cleaning in all machine conditions. The first run in 2010-2013 showed that the LHC performance may be limited by collimator material-related concerns, such as the contribution from the present carbon-based secondary collimators to the machine impedance and, consequently, to the beam instability. Novel materials based on composites are currently under development for the next generation of LHC collimators to address these limitations. Particle tracking simulations of collimation efficiency were performed using the Sixtrack code and a material database updated to model these composites. In this paper, the simulation results will be presented with the aim of studying the effect of the advanced collimators on the LHC beam cleaning.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High Luminosity upgrade</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">R&amp;D program</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068307</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)659273</subfield>
+    <subfield code="a">Mereghetti, Alessio</subfield>
+    <subfield code="m">Alessio.Mereghetti@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Rossi, A</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171706</subfield>
+    <subfield code="s">342532</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114397/files/CERN-ACC-2015-0195.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171706</subfield>
+    <subfield code="s">2502018</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114397/files/CERN-ACC-2015-0195.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1186486</subfield>
+    <subfield code="s">283705</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114397/files/tupty029.pdf</subfield>
+    <subfield code="y">Published version from JACoW</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://accelconf.web.cern.ch/AccelConf/IPAC2015/papers/tupty029.pdf</subfield>
+    <subfield code="y">JACOW</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY029</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114387</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417768</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0194</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2085459</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)739367</subfield>
+    <subfield code="a">Quaranta, Elena</subfield>
+    <subfield code="m">elena.quaranta@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Updated Simulation Studies of Damage Limit of LHC Tertiary Collimators</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The tertiary collimators (TCTs) in the LHC, installed in front of the experiments, in standard operation intercept fractions of 10−3 halo particles. However, they risk to be hit by high-intensity primary beams in case of asynchronous beam dump. TCT damage thresholds were initially inferred from results of destructive tests on a TCT jaw, supported by numerical simulations, assuming simplified impact scenarios with one single bunch hitting the jaw with a given impact parameter. In this paper, more realistic failure conditions, including a train of bunches and taking into account the full collimation hierarchy, are used to derive updated damage limits. The results are used to update the margins in the collimation hierarchy and could thus potentially have an influence on the LHC performance.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High-Luminosity LHC project</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108536</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)531259</subfield>
+    <subfield code="a">Bertarelli, Alessandro</subfield>
+    <subfield code="m">Alessandro.Bertarelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079710</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)698840</subfield>
+    <subfield code="a">Carra, Federico</subfield>
+    <subfield code="m">Federico.Carra@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2071252</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)609400</subfield>
+    <subfield code="a">Cerutti, Francesco</subfield>
+    <subfield code="m">Francesco.Cerutti@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2090516</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)754612</subfield>
+    <subfield code="a">Gradassi, Paolo</subfield>
+    <subfield code="m">paolo.gradassi@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2072767</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)663552</subfield>
+    <subfield code="a">Lechner, Anton</subfield>
+    <subfield code="m">Anton.Lechner@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2085706</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)740218</subfield>
+    <subfield code="a">Skordis, Eleftherios</subfield>
+    <subfield code="m">eleftherios.skordis@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171700</subfield>
+    <subfield code="s">833857</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114387/files/CERN-ACC-2015-0194.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171700</subfield>
+    <subfield code="s">1722459</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114387/files/CERN-ACC-2015-0194.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY024</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114380</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417769</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0193</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2083002</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)719450</subfield>
+    <subfield code="a">Hermes, Pascal Dominik</subfield>
+    <subfield code="m">pascal.dominik.hermes@cern.ch</subfield>
+    <subfield code="u">CERN - U. Munster</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Betatron Cleaning for Heavy Ion Beams with IR7 Dispersion Suppressor Collimators</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The betatron collimators in IR7 constitute the backbone of the collimation system of the LHC. A fraction of the secondary halo protons or heavy-ion fragments, scattered out of the primary collimator, is not captured by the secondary collimators but hits cold magnets in the IR7 dispersion suppressor (DS) where the dispersion starts to increase. A possible approach to reduce these losses is based on the installation of additional collimators in the DS region. In this paper, simulations of the cleaning efficiency for Pb82+ ions are used to evaluate the effect of the additional collimators. The results indicate a significant improvement of the heavyion cleaning efficiency.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High Luminosity LHC upgrade</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2067735</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)403607</subfield>
+    <subfield code="a">Jowett, John</subfield>
+    <subfield code="m">John.Jowett@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171695</subfield>
+    <subfield code="s">572615</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114380/files/CERN-ACC-2015-0193.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171695</subfield>
+    <subfield code="s">1925343</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114380/files/CERN-ACC-2015-0193.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY025</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114202</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417771</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0192</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Bruce, R</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Collimator Layouts for HL-LHC in the Experimental Insertions</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">This paper presents the layout of collimators for HL-LHC in the experimental insertions. On the incoming beam, we propose to install additional tertiary collimators to protect potential new aperture bottlenecks in cells 4 and 5, which in addition reduce the experimental background. For the outgoing beam, the layout of the present LHC with three physics debris absorbers gives sufficient protection for highluminosity proton operation. However, collisional processes for heavy ions cause localized beam losses with the potential to quench magnets. To alleviate these losses, an installation of dispersion suppressor collimators is proposed.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High-Luminosity LHC</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN HL-LHC</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Cerutti, F</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079212</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)555839</subfield>
+    <subfield code="a">Esposito, Luigi Salvatore</subfield>
+    <subfield code="m">luigi.salvatore.esposito@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2067735</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)403607</subfield>
+    <subfield code="a">Jowett, John</subfield>
+    <subfield code="m">John.Jowett@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2072767</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)663552</subfield>
+    <subfield code="a">Lechner, Anton</subfield>
+    <subfield code="m">Anton.Lechner@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2085459</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)739367</subfield>
+    <subfield code="a">Quaranta, Elena</subfield>
+    <subfield code="m">elena.quaranta@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2078840</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)696614</subfield>
+    <subfield code="a">Schaumann, Michaela</subfield>
+    <subfield code="m">michaela.schaumann@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2085706</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)740218</subfield>
+    <subfield code="a">Skordis, Eleftherios</subfield>
+    <subfield code="m">eleftherios.skordis@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Eleanor Steele, G</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Garcia Morales, H</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00218654</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)644361</subfield>
+    <subfield code="0">AUTHOR|(CDS)2073071</subfield>
+    <subfield code="a">Kwee-Hinzmann, Regina</subfield>
+    <subfield code="m">regina.kwee@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171693</subfield>
+    <subfield code="s">498250</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114202/files/CERN-ACC-2015-0192.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY028</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114114</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417316</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0191</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00232566</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)629489</subfield>
+    <subfield code="0">AUTHOR|(CDS)2072587</subfield>
+    <subfield code="a">Snuverink, Jochem</subfield>
+    <subfield code="m">Jochem.Snuverink@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Beam Delivery Simulation - Recent Developments and Optimization</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Beam Delivery Simulation (BDSIM) is a particle tracking code that simulates the passage of particles through both the magnetic accelerator lattice as well as their interaction with the material of the accelerator itself. The Geant4 toolkit is used to give a full range of physics processes needed to simulate both the interaction of primary particles and the production and subsequent propagation of secondaries. BDSIM has already been used to simulate linear accelerators such as the International Linear Collider (ILC) and the Compact Linear Collider (CLIC), but it has recently been adapted to simulate circular accelerators as well, producing loss maps for the Large Hadron Collider (LHC). In this paper the most recent developments, which extend BDSIM’s functionality as well as improve its efficiency are presented. Improvement and refactorisation of the tracking algorithms are presented alongside improved automatic geometry construction for increased particle tracking speed.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2091750</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)485459</subfield>
+    <subfield code="a">Boogert, Stewart Takashi</subfield>
+    <subfield code="m">stewart.boogert@rhul.ac.uk</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Garcia-Morales, H</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00214737</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)525625</subfield>
+    <subfield code="0">AUTHOR|(CDS)2072480</subfield>
+    <subfield code="a">Gibson, Stephen</subfield>
+    <subfield code="m">Stephen.Gibson@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(INSPIRE)INSPIRE-00218654</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)644361</subfield>
+    <subfield code="0">AUTHOR|(CDS)2073071</subfield>
+    <subfield code="a">Kwee-Hinzmann, Regina</subfield>
+    <subfield code="m">regina.kwee@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2094288</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)744381</subfield>
+    <subfield code="a">Nevay, Laurence James</subfield>
+    <subfield code="m">laurence.james.nevay@cern.ch</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2096491</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)711798</subfield>
+    <subfield code="a">Deacon, Lawrence Charles</subfield>
+    <subfield code="m">lawrence.charles.deacon@cern.ch</subfield>
+    <subfield code="u">University Coll. London</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171668</subfield>
+    <subfield code="s">398776</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114114/files/CERN-ACC-2015-0191.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171668</subfield>
+    <subfield code="s">2231768</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114114/files/CERN-ACC-2015-0191.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">MOPJE078</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114111</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417795</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0190</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Garcia-Morales, H</subfield>
+    <subfield code="u">Royal Holloway, U. of London</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Beam Cleaning in Experimental IRs in HL-LHC for the Incoming Beam</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The HL-LHC will store 675 MJ of energy per beam, about 300 MJ more than the nominal LHC. Due to the increase in stored energy and a different interaction region (IR) optics layout, the collimation system for the incoming beam must be revisited in order to avoid dangerous losses that could cause quenches or machine damage. This paper studies the effectiveness of the current LHC collimation system in intercepting cleaning losses close to the experiments in the HL-LHC. The study reveals that additional tertiary collimators would be beneficial in order to protect not only the final focusing triplets but also the two quadrupoles further upstream.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HL-LHC</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN HL-LHC</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2068843</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)631653</subfield>
+    <subfield code="a">Bruce, Roderik</subfield>
+    <subfield code="m">Roderik.Bruce@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108500</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)542465</subfield>
+    <subfield code="a">Redaelli, Stefano</subfield>
+    <subfield code="m">Stefano.Redaelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171663</subfield>
+    <subfield code="s">269665</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114111/files/CERN-ACC-2015-0190.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171663</subfield>
+    <subfield code="s">1556577</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114111/files/CERN-ACC-2015-0190.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY066</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114108</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1402250</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0189</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Wu, Q</subfield>
+    <subfield code="u">Brookhaven</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Crab Cavities: Past, Present, and Future of a Challenging Device</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">6 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In two-ring facilities operating with a crossing-angle collision scheme, luminosity can be limited due to an incomplete overlapping of the colliding bunches. Crab cavities then are introduced to restore head-on collisions by providing the destined opposite deflection to the head and tail of the bunch. An increase in luminosity was demonstrated at KEKB with global crab- crossing, while the Large Hardron Collider (LHC) at CERN currently is designing local crab crossing for the Hi-Lumi upgrade. Future colliders may investigate both approaches. In this paper, we review the challenges in the technology, and the implementation of crab cavities, while discussing experience in earlier colliders, ongoing R&amp;D, and proposed implementations for future facilities, such as HiLumi-LHC, CERN’s compact linear collider (CLIC), the international linear collider (ILC), and the electronion collider under design at BNL (eRHIC).</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High luminosity LHC (HL-LHC)</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Crab Cavities</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171662</subfield>
+    <subfield code="s">1492325</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114108/files/CERN-ACC-2015-0189.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171662</subfield>
+    <subfield code="s">2073941</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114108/files/CERN-ACC-2015-0189.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">THXB2</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114107</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1418614</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0188</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Xiao, B</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Cryogenic Test of Double Quarter Wave Crab Cavity for the LHC High Luminosity Upgrade</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">A Proof-of-Principle (PoP) Double Quarter Wave Crab Cavity (DQWCC) was designed and fabricated for the Large Hadron Collider (LHC) luminosity upgrade. A vertical cryogenic test has been done at Brookhaven National Lab (BNL). The cavity achieved 4.5 MV deflecting voltage with a quality factor above 3×109 . We report the test results of this design.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High Luminosity upgrade</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Alberty, L</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Belomestnykh, S</subfield>
+    <subfield code="u">Brookhaven Natl. Lab. - SUNY, Stony Brook</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Ben-Zvi, I</subfield>
+    <subfield code="u">Brookhaven Natl. Lab. - SUNY, Stony Brook</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2069253</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)652572</subfield>
+    <subfield code="a">Calaga, Rama</subfield>
+    <subfield code="m">rama.calaga@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Cullen, C</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2067652</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)561361</subfield>
+    <subfield code="a">Capatina, Ofelia</subfield>
+    <subfield code="m">Ofelia.Capatina@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Hammons, L</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Li, Z</subfield>
+    <subfield code="u">SLAC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Marques, C</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Skaritka, J</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Verdú-Andres, S</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Wu, Q</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171660</subfield>
+    <subfield code="s">1997298</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114107/files/CERN-ACC-2015-0188.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171660</subfield>
+    <subfield code="s">2526757</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114107/files/CERN-ACC-2015-0188.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPWI060</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114098</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1402242</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0187</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Xiao, B P</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Higher Order Mode Filter Design for Double Quarter Wave Crab Cavity for the LHC High Luminosity Upgrade</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">A Double Quarter Wave Crab Cavity (DQWCC) was designed for the Large Hadron Collider (LHC) luminosity upgrade. A compact Higher Order Mode (HOM) filter with wide stop band at the deflecting mode is developed for this cavity. Multi-physics finite element simulation results are presented. The integration of this design to the cavity cryomodule is described.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">LHC High Luminosity upgrade (HL-LHC)</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Belomestnykh, S</subfield>
+    <subfield code="u">Brookhaven Natl. Lab. - SUNY, Stony Brook</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Ben-Zv, I</subfield>
+    <subfield code="u">Brookhaven Natl. Lab. - SUNY, Stony Brook</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2083886</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)670530</subfield>
+    <subfield code="a">Burt, Graeme Campbell</subfield>
+    <subfield code="m">graeme.burt@cern.ch</subfield>
+    <subfield code="u">Lancaster U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2069253</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)652572</subfield>
+    <subfield code="a">Calaga, Rama</subfield>
+    <subfield code="m">rama.calaga@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2067652</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)561361</subfield>
+    <subfield code="a">Capatina, Ofelia</subfield>
+    <subfield code="m">Ofelia.Capatina@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Hall, B</subfield>
+    <subfield code="u">Lancaster U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Jones, T</subfield>
+    <subfield code="u">Daresbury</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Skaritka, J</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Verdú-Andrés, S</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Wu, Q</subfield>
+    <subfield code="u">Brookhaven Natl. Lab.</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171654</subfield>
+    <subfield code="s">991413</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114098/files/CERN-ACC-2015-0187.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171654</subfield>
+    <subfield code="s">1891557</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114098/files/CERN-ACC-2015-0187.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPWI059</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114092</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0186</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Park, Hyekyung</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Engineering Study of Crab Cavity HOM Couplers for LHC High Luminosity Upgrade</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The LHC is planning to employ crab cavities for the high luminosity upgrade. Old Dominion University and SLAC National Laboratory are developing a crab cavity completed with the HOM damping couplers [1]. The HOM couplers are coaxial type and perform over broadband up to 2 GHz. The amount of extracted power requires active cooling using liquid helium. The electromagnetic study has provided expected power dissipation on the coupler. Correlations between the fabrication tolerance and its damping performance have been studied and the results are providing guidelines on how to manufacture the HOM couplers. This paper summarizes the engineering studies; mechanical strength as a part of pressure system, thermal stability, and fabrication method to ensure the required tolerance.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">High luminosity upgrade</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Crab cavity</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Olave, R G</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2090476</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)755384</subfield>
+    <subfield code="a">Delayen, Jean Roger</subfield>
+    <subfield code="m">jean.roger.delayen@cern.ch</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">De Silva, S U</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Li, Z</subfield>
+    <subfield code="u">SLAC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Nicol, T H</subfield>
+    <subfield code="u">Fermilab</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2083887</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)734982</subfield>
+    <subfield code="a">Capelli, Teddy</subfield>
+    <subfield code="m">teddy.capelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2089283</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)751988</subfield>
+    <subfield code="a">Templeton, Niklas John</subfield>
+    <subfield code="m">niklas.john.templeton@cern.ch</subfield>
+    <subfield code="u">Daresbury</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171643</subfield>
+    <subfield code="s">818884</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114092/files/CERN-ACC-2015-0186.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171643</subfield>
+    <subfield code="s">1859130</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114092/files/CERN-ACC-2015-0186.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPWI039</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114083</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0185</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">De Silva, S U</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Design and Prototyping of a 400 MHz RF-dipole Crabbing Cavity for the LHC High-Luminosity Upgrade</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">LHC High Luminosity Upgrade is in need of two crabbing systems that deflects the beam in both horizontal and vertical planes. The 400 MHz rf-dipole crabbing cavity system is capable of crabbing the proton beam in both planes. At present we are focusing our efforts on a complete crabbing system in the horizontal plane. Prior to LHC installation the crabbing system will be installed for beam test at SPS. The crabbing system consists of two rfdipole cavities in the cryomodule. This paper discusses the electromagnetic design and mechanical properties of the rf-dipole crabbing system for SPS beam test.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Crabbing cavity</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">LHC High Luminosity Upgrade</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Park, H</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Delayen, J R</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Li, Z</subfield>
+    <subfield code="u">SLAC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Nicol, T H</subfield>
+    <subfield code="u">Fermilab</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171629</subfield>
+    <subfield code="s">1828305</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114083/files/CERN-ACC-2015-0185.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171629</subfield>
+    <subfield code="s">1845235</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114083/files/CERN-ACC-2015-0185.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPWI036</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2114082</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="q">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="q">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1418591</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0184</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Li, Z</subfield>
+    <subfield code="u">SLAC</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">FPC and Hi-Pass Filter HOM Coupler Design for the RF Dipole Crab Cavity for the LHC HiLumi Upgrade</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">A 400-MHz compact RF dipole (RFD) crab cavity design was jointly developed by Old Dominion University and SLAC under the support of US LARP program for the LHC HiLumi upgrade. The RFD cavity design is consisted of a rounded-square tank and two ridged deflecting poles, operating with a TE11-like dipole mode, which is the lowest mode of the cavity. A prototype RFD cavity is being manufactured and will be tested on the SPS beam line at CERN. The coaxial fundamental Power Coupler (FPC) of the prototype cavity was re-optimized to minimizing the power heating on the coupler internal antenna. A hi-pass filter HOM damping coupler was developed to achieve the required wakefield damping while maintaining a compact size to fit into the beam line space. In this paper, we will discuss the details of the RF optimization and tolerance analyses of the FPC and HOM couplers.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CDS</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HiLumi upgrade</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">superconducting deflecting cavities</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2090476</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)755384</subfield>
+    <subfield code="a">Delayen, Jean Roger</subfield>
+    <subfield code="m">jean.roger.delayen@cern.ch</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">De Silva, S U</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Park, HyeKyoung</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Olave, R G</subfield>
+    <subfield code="u">Old Dominion U.</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="g">SLAC, ODU Collaboration</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171628</subfield>
+    <subfield code="s">1166268</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114082/files/CERN-ACC-2015-0184.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171628</subfield>
+    <subfield code="s">1796562</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2114082/files/CERN-ACC-2015-0184.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">WEPWI004</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2113440</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417194</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0183</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Verdú-Andrés, S</subfield>
+    <subfield code="u">Brookhaven</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Design and Prototyping of HL-LHC Double Quarter Wave Crab Cavities for SPS Test</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171622</subfield>
+    <subfield code="s">1417020</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113440/files/CERN-ACC-2015-0183.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171622</subfield>
+    <subfield code="s">1917327</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113440/files/CERN-ACC-2015-0183.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">3 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The LHC high luminosity project envisages the use of the crabbing technique for increasing and levelling the LHC luminosity. Double Quarter Wave (DQW) resonators are compact cavities especially designed to meet the technical and performance requirements for LHC beam crabbing. Two DQW crab cavities are under fabrication and will be tested with beam in the Super Proton Synchrotron (SPS) at CERN by 2017. This paper describes the design and prototyping of the DQW crab cavities for the SPS test.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">LHC luminosity upgrade</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Crab cavity</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Skaritka, J</subfield>
+    <subfield code="u">Brookhaven</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Wu, Q</subfield>
+    <subfield code="u">Brookhaven</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Xiao, B P</subfield>
+    <subfield code="u">Brookhaven</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Belomestnykh, S</subfield>
+    <subfield code="u">Brookhaven - Stony Brook U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Ben-Zv, I</subfield>
+    <subfield code="u">Brookhaven - Stony Brook U.</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Alberty, L</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2070539</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)371231</subfield>
+    <subfield code="a">Artoos, Kurt</subfield>
+    <subfield code="m">Kurt.Artoos@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2069253</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)652572</subfield>
+    <subfield code="a">Calaga, Rama</subfield>
+    <subfield code="m">rama.calaga@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2067652</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)561361</subfield>
+    <subfield code="a">Capatina, Ofelia</subfield>
+    <subfield code="m">Ofelia.Capatina@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2083887</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)734982</subfield>
+    <subfield code="a">Capelli, Teddy</subfield>
+    <subfield code="m">teddy.capelli@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079710</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)698840</subfield>
+    <subfield code="a">Carra, Federico</subfield>
+    <subfield code="m">Federico.Carra@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2071333</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)640456</subfield>
+    <subfield code="a">Leuxe, Raphael</subfield>
+    <subfield code="m">Raphael.Leuxe@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2089777</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)749959</subfield>
+    <subfield code="a">Kuder, Norbert</subfield>
+    <subfield code="m">norbert.kuder@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2092761</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)759374</subfield>
+    <subfield code="a">Zanoni, Carlo</subfield>
+    <subfield code="m">carlo.zanoni@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Li, Z</subfield>
+    <subfield code="u">SLAC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Ratti, A</subfield>
+    <subfield code="u">LBNL, Berkeley</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">MOBD2</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2113435</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417798</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0182</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2090622</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)755717</subfield>
+    <subfield code="a">Crouch, Matthew</subfield>
+    <subfield code="m">Matthew.Crouch@cern.ch</subfield>
+    <subfield code="u">Cockcroft Inst. Accel. Sci. Tech. - Manchester U.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Strong-Strong Simulations of β$^∗$-Levelling  for Flat and Round Beams</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171620</subfield>
+    <subfield code="s">304563</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113435/files/CERN-ACC-2015-0182.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171620</subfield>
+    <subfield code="s">1698372</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113435/files/CERN-ACC-2015-0182.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY070</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Simulations of β$^∗$ luminosity levelling using the strongstrong beam-beam code COMBI are undertaken. Simulations for both flat and round beam profiles are discussed and analysed with respect to the coherent spectra. It is shown that bunches with a round beam profile will have a beambeam parameter that is independent of β$^∗$ over the levelling steps. Flat bunches however will have a beam-beam parameter that is dependent on β$^∗$ over the levelling steps since the beam aspect ratio will change. This will change the tune of the π-mode as the β$^∗$ is levelled, which could lead to a resonance crossing.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Large Hadron Collider (HL-LHC) upgrade</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Muratori, B D</subfield>
+    <subfield code="u">Cockcroft Inst. Accel. Sci. Tech. - Daresbury</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108501</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)621936</subfield>
+    <subfield code="a">Appleby, Robert Barrie</subfield>
+    <subfield code="m">Robert.Appleby@cern.ch</subfield>
+    <subfield code="u">Cockcroft Inst. Accel. Sci. Tech. - Manchester U.</subfield>
+  </datafield>
+  <datafield tag="993" ind1=" " ind2=" ">
+    <subfield code="q">Beam-Beam Effects</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2113428</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1417319</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0181</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2090622</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)755717</subfield>
+    <subfield code="a">Crouch, Matthew</subfield>
+    <subfield code="m">Matthew.Crouch@cern.ch</subfield>
+    <subfield code="u">Manchester U. - Cockcroft Inst. Accel. Sci. Tech.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Analytical Approach to the Beam-Beam Interaction with the Hourglass Effect</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">08 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">The hourglass effect arises due to a coupling between the longitudinal and transverse bunch planes. This coupling will result in a charge density distribution that will vary parabolically through the Interaction Point (IP). Here a method of analytically determining the electric field a particle receives from a charge density distribution which varies parabolically when centred at the IP, is derived for a 2D transverse model of a Gaussian bunch.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HL-LHC</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Crab cavities</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">Not applicable</subfield>
+    <subfield code="e">Not applicable</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Muratori, B D</subfield>
+    <subfield code="u">Cockcroft Inst. Accel. Sci. Tech. - Daresbury</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2108501</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)621936</subfield>
+    <subfield code="a">Appleby, Robert Barrie</subfield>
+    <subfield code="m">Robert.Appleby@cern.ch</subfield>
+    <subfield code="u">Manchester U. - Cockcroft Inst. Accel. Sci. Tech.</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171615</subfield>
+    <subfield code="s">574772</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113428/files/CERN-ACC-2015-0181.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">MOPJE082</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+<record>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">oai:cds.cern.ch:2113269</subfield>
+    <subfield code="p">cerncds:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN:FULLTEXT</subfield>
+    <subfield code="p">cerncds:CERN</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">Inspire</subfield>
+    <subfield code="a">1406062</subfield>
+  </datafield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-ACC-2015-0180</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2070952</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)390904</subfield>
+    <subfield code="a">Fartoukh, Stephane</subfield>
+    <subfield code="m">Stephane.Fartoukh@cern.ch</subfield>
+    <subfield code="u">CERN</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">An Alternative High Luminosity LHC with Flat Optics and Long-Range Beam-Beam Compensation</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2015</subfield>
+  </datafield>
+  <datafield tag="269" ind1=" " ind2=" ">
+    <subfield code="a">Geneva</subfield>
+    <subfield code="b">CERN</subfield>
+    <subfield code="c">03 May 2015</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">4 p</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In the baseline scenario of the High-Luminosity LHC (HL-LHC), the geometric loss of luminosity in the two high luminosity experiments due to collisions with a large crossing angle is recovered by tilting the bunches in the interaction region with the use of crab cavities. A possible backup scenario would rely on a reduced crossing angle together with flat optics (with different horizontal and vertical β∗ values) for the preservation of luminosity performance. However, the reduction of crossing angle coupled with the flat optics significantly enhances the strength of long-range beam-beam interactions. This paper discusses the possibility to mitigate the long-range beam-beam effects by current bearing wire compensators (or e-lens). We develop a new HL-LHC parameter list and analyze it in terms of integrated luminosity performance as compared to the baseline. Further, we evaluate the operational scenarios using numerical simulations of single-particle dynamics with beam-beam effects.</subfield>
+  </datafield>
+  <datafield tag="540" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="a">CC-BY-3.0</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="3">Publication</subfield>
+    <subfield code="d">The Author(s)</subfield>
+    <subfield code="g">2015</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="z">UNCL</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Accelerators and Storage Rings</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">HL-LHC</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="9">CERN</subfield>
+    <subfield code="a">Beam-beam effects</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">CERN</subfield>
+  </datafield>
+  <datafield tag="690" ind1="C" ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="a">CERN LHC</subfield>
+  </datafield>
+  <datafield tag="693" ind1=" " ind2=" ">
+    <subfield code="p">CERN HL-LHC</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2079881</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)705936</subfield>
+    <subfield code="a">Valishev, Aleksander</subfield>
+    <subfield code="m">Aleksander.Valishev@cern.ch</subfield>
+    <subfield code="u">Fermilab</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="0">AUTHOR|(CDS)2092410</subfield>
+    <subfield code="0">AUTHOR|(SzGeCERN)759841</subfield>
+    <subfield code="a">Shatilov, Dmitry</subfield>
+    <subfield code="m">dimitry.shatilov@cern.ch</subfield>
+    <subfield code="u">Novosibirsk, IYF</subfield>
+  </datafield>
+  <datafield tag="710" ind1=" " ind2=" ">
+    <subfield code="5">ATS</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171612</subfield>
+    <subfield code="s">1104507</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113269/files/CERN-ACC-2015-0180.pdf</subfield>
+    <subfield code="y">Fulltext</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="8">1171612</subfield>
+    <subfield code="s">1862886</subfield>
+    <subfield code="u">http://cds.cern.ch/record/2113269/files/CERN-ACC-2015-0180.pdf?subformat=pdfa</subfield>
+    <subfield code="x">pdfa</subfield>
+  </datafield>
+  <datafield tag="859" ind1=" " ind2=" ">
+    <subfield code="f">lali.glonti@cern.ch</subfield>
+  </datafield>
+  <datafield tag="916" ind1=" " ind2=" ">
+    <subfield code="s">n</subfield>
+    <subfield code="w">201551</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">13</subfield>
+  </datafield>
+  <datafield tag="962" ind1=" " ind2=" ">
+    <subfield code="b">2024999</subfield>
+    <subfield code="k">TUPTY073</subfield>
+    <subfield code="n">richmond20150503</subfield>
+  </datafield>
+  <datafield tag="963" ind1=" " ind2=" ">
+    <subfield code="a">PUBLIC</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ARTICLE</subfield>
+  </datafield>
+</record>
+</collection>

@@ -37,23 +37,22 @@ import shutil
 import tempfile
 import uuid
 
-from dojson.contrib.marc21 import marc21
+from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
 from elasticsearch.exceptions import RequestError
-from selenium import webdriver
-from sqlalchemy_utils.functions import create_database, database_exists
-
 from invenio_db import db as _db
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
-from invenio_search import current_search
+from invenio_search import current_search, current_search_client
+from selenium import webdriver
+from sqlalchemy_utils.functions import create_database, database_exists
 
 from cds.factory import create_app
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
-def app(request):
+def base_app(request):
     """Flask application fixture."""
     instance_path = tempfile.mkdtemp()
 
@@ -70,7 +69,8 @@ def app(request):
         SECRET_KEY="CHANGE_ME",
         SECURITY_PASSWORD_SALT="CHANGE_ME",
         MAIL_SUPPRESS_SEND=True,
-        SQLALCHEMY_DATABASE_URI='sqlite:///test.db',
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
         TESTING=True,
     )
 
@@ -79,6 +79,42 @@ def app(request):
 
     # Teardown
     shutil.rmtree(instance_path)
+
+
+@pytest.yield_fixture(scope='session')
+def db(base_app):
+    """Initialize database."""
+    # Init
+    if not database_exists(str(_db.engine.url)):
+        create_database(str(_db.engine.url))
+    _db.create_all()
+
+    yield _db
+
+    # Teardown
+    _db.session.remove()
+    _db.drop_all()
+
+
+@pytest.yield_fixture(scope='session')
+def es(base_app):
+    """Provide elasticsearch access."""
+    try:
+        list(current_search.create())
+    except RequestError:
+        list(current_search.delete())
+        list(current_search.create())
+    current_search_client.indices.refresh()
+
+    yield current_search_client
+
+    list(current_search.delete(ignore=[404]))
+
+
+@pytest.yield_fixture(scope='session', autouse=True)
+def app(base_app, es, db):
+    """Application with ES and DB."""
+    yield base_app
 
 
 def pytest_generate_tests(metafunc):
@@ -111,37 +147,16 @@ def env_browser(request):
     browser.quit()
 
 
-@pytest.yield_fixture()
-def db(app):
-    """Initialize database."""
-    # Init
-    if not database_exists(str(_db.engine.url)):
-        create_database(str(_db.engine.url))
-    _db.create_all()
-
-    try:
-        list(current_search.create())
-    except RequestError:
-        list(current_search.delete())
-        list(current_search.create())
-
-    yield _db
-
-    # Teardown
-    _db.session.remove()
-    _db.drop_all()
-
-
 @pytest.fixture()
-def demo_records(db):
+def demo_records(app):
     """Create demo records."""
     data_path = pkg_resources.resource_filename(
-        'invenio_records', 'data/marc21/bibliographic.xml'
+        'cds.modules.fixtures', 'data/records.xml'
     )
 
     with open(data_path) as source:
         indexer = RecordIndexer()
-        with db.session.begin_nested():
+        with _db.session.begin_nested():
             for index, data in enumerate(split_blob(source.read()), start=1):
                 # create uuid
                 rec_uuid = uuid.uuid4()
@@ -153,5 +168,5 @@ def demo_records(db):
                 )
                 # create record
                 indexer.index(Record.create(record, id_=rec_uuid))
-        db.session.commit()
+        _db.session.commit()
     return data_path

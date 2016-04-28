@@ -140,46 +140,16 @@ def fixtures():
 
 
 @fixtures.command()
-@with_appcontext
-def invenio():
-    """Invenio demo records."""
-    click.echo('Loading data...')
-    # pkg resources the demodata
-    data_path = pkg_resources.resource_filename(
-        'invenio_records', 'data/marc21/bibliographic.xml'
-    )
-
-    with open(data_path) as source:
-        indexer = RecordIndexer()
-        # FIXME: Add some progress
-        # with click.progressbar(data) as records:
-        with db.session.begin_nested():
-            for index, data in enumerate(split_blob(source.read()), start=1):
-                # create uuid
-                rec_uuid = uuid.uuid4()
-                # do translate
-                record = marc21.do(create_record(data))
-                # create PID
-                current_pidstore.minters['recid'](
-                    rec_uuid, record
-                )
-                # create record
-                indexer.index(Record.create(record, id_=rec_uuid))
-        db.session.commit()
-    click.echo('DONE :)')
-
-
-@fixtures.command()
 @click.option('--temp', '-t', default='/tmp')
 @click.option('--source', '-s', default=False)
 @with_appcontext
 def cds(temp, source):
-    """CDS demo records (From Theses Collection)."""
+    """CDS demo records."""
     click.echo('Loading data it may take several minutes.')
     # pkg resources the demodata
     if not source:
         source = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/records.tar.gz'
+            'cds.modules.fixtures', 'data/records.xml'
         )
     files = _handle_source(source, temp)
     # Record indexer
