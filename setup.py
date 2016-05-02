@@ -71,6 +71,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'CairoSVG>=1.0.20',
     'Flask-BabelEx>=0.9.2',
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
@@ -87,6 +88,7 @@ install_requires = [
     'invenio-celery>=1.0.0a4',
     'invenio-config>=1.0.0a1',
     'invenio-files-rest>=1.0.0a1',
+    'invenio-formatter>=1.0.0a2',
     'invenio-i18n>=1.0.0a4',
     'invenio-indexer>=1.0.0a3',
     'invenio-jsonschemas>=1.0.0a3',
@@ -110,6 +112,7 @@ install_requires = [
     'invenio-userprofiles>=1.0.0a5',
     'jsonref>=0.1',
     'marshmallow>=2.5.0',
+    'Pillow>=3.2.0',
     'python-slugify>=1.2.0',
 ]
 

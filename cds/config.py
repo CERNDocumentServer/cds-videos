@@ -224,6 +224,15 @@ RECORDS_VALIDATION_TYPES = dict(
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = None
 
 ###############################################################################
+# Formatter
+###############################################################################
+#: List of allowed titles in badges.
+FORMATTER_BADGES_ALLOWED_TITLES = ['DOI', 'doi']
+
+#: Mapping of titles.
+FORMATTER_BADGES_TITLE_MAPPING = {'doi': 'DOI'}
+
+###############################################################################
 # Home page
 ###############################################################################
 
