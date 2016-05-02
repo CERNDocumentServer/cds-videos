@@ -22,12 +22,15 @@
 */
 
 require([
+    'node_modules/angular-loading-bar/build/loading-bar',
     'node_modules/cds/dist/cds',
   ], function() {
     // Bootstrap modules
     angular.element(document).ready(function() {
       angular.bootstrap(
-        document.getElementById("cds-record"), ['cdsRecord']
+        document.getElementById("cds-record"), [
+         'angular-loading-bar', 'cdsRecord'
+        ]
       );
     });
 });

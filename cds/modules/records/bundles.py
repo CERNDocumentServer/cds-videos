@@ -35,7 +35,8 @@ js = NpmBundle(
     filters='jsmin',
     output='gen/cds.record.%(version)s.js',
     npm={
-        'angular': '~1.4.9',
+        'angular': '~1.4.10',
+        'angular-loading-bar': '~0.9.0',
         'cds': '^0.1.2'
     }
 )
