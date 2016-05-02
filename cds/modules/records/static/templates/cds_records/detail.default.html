@@ -2,52 +2,47 @@
   <div class="col-md-12">
     <div class="cds-record-detail">
       <div class="cds-record-detail-top">
-        <ul class="list-inline">
-          <li><a href="#">Metadata</a></li>
-          <li><a ng-show="record.files.length > 0" href="#files">Files</a></li>
-          <li><a href="#export">Export</a></li>
-        </ul>
       </div>
       <div class="cds-record-detail-bottom">
         <!-- Title -->
-        <h1>{{ record.title_statement.title || 'No title :(' }}</h1>
-        <!-- Authors -->
-        <div class="row" ng-show="record.main_entry_personal_name || record.added_entry_personal_name.length > 0" >
-          <div class="col-xs-3 col-sm-2">
-            <p>Authors:</p>
-          </div>
-          <div class="col-xs-9 col-sm-10">
+        <h3 class="cds-record-detail-title">{{ record.title_statement.title || 'No title :(' }}</h3>
+        <hr>
+        <!-- Metadata fields -->
+        <dl class="dl-horizontal">
+          <!-- Authors -->
+          <dt ng-show="record.main_entry_personal_name || record.added_entry_personal_name.length > 0">
+            Authors:
+          </dt>
+          <dd ng-show="record.main_entry_personal_name || record.added_entry_personal_name.length > 0">
             <span ng-show="record.main_entry_personal_name">
-              <a href="/search?authors={{record.main_entry_personal_name.personal_name}}"> {{ record.main_entry_personal_name.personal_name }}</a>
+              <a ng-href="/search?authors={{record.main_entry_personal_name.personal_name}}"> {{ record.main_entry_personal_name.personal_name }}</a>
             </span>
             <span ng-repeat="user in record.added_entry_personal_name">
-              , <a href="/search?authors={{record.main_entry_personal_name.personal_name}}">
+              , <a ng-href="/search?authors={{record.main_entry_personal_name.personal_name}}">
                 {{ user.personal_name}}
               </a>
             </span>
-          </div>
-        </div>
-        <!-- Imprint -->
-        <div class="row" ng-show="record.imprint.length > 0" >
-          <div class="col-xs-3 col-sm-2">
-            <p>Imprint:</p>
-          </div>
-          <div class="col-xs-9 col-sm-10">
-            <span ng-repeat="imprint_info in record.imprint">
+          </dd>
+          <!-- Imprint -->
+          <dt ng-show="record.imprint.length > 0">
+            Imprint:
+          </dt>
+          <dd ng-show="record.imprint.length > 0">
+            <span ng-show="record.imprint.length > 0" ng-repeat="imprint_info in record.imprint">
               {{imprint_info.complete_date}}, {{imprint_info.name_of_publication}}, {{imprint_info.place_of_publication}}
             </span>
-          </div>
-        </div>
-        <!-- DOI -->
-        <div class="row" ng-show="record.other_standard_identifier.length > 0" >
-          <div class="col-xs-3 col-sm-2">
-            <p>Identifier:</p>
-          </div>
-          <div class="col-xs-9 col-sm-10">
+          </dd>
+          <!-- DOI -->
+          <dt ng-show="record.other_standard_identifier.length > 0">
+            Identifier:
+          </dt>
+          <dd ng-show="record.other_standard_identifier.length > 0">
             <ul class="list-unstyled" ng-show="record.other_standard_identifier.length > 1">
               <li ng-repeat="identifier in record.other_standard_identifier">
                 <!-- If the identifier is from DOI, display it as a link ... -->
-                <a ng-if="identifier.source_of_number_or_code == 'DOI'" href="http://dx.doi.org/{{identifier.standard_number_or_code}}">{{identifier.standard_number_or_code}}</a>
+                <a class="get-badge" ng-if="identifier.source_of_number_or_code == 'DOI'" ng-href="http://dx.doi.org/{{identifier.standard_number_or_code}}" target="_blank">
+                  <img ng-src="/badge/doi/{{identifier.standard_number_or_code}}.svg" alt="{{ identifier.standard_number_or_code }}">
+                </a>
                 <!-- ... otherwise, display just a span -->
                 <span ng-if="identifier.source_of_number_or_code != 'DOI'">
                   {{identifier.standard_number_or_code}}
@@ -56,20 +51,18 @@
             </ul>
             <span ng-show="record.other_standard_identifier.length === 1">
               <!-- If the link is from DOI, display it as a link ... -->
-              <a ng-if="record.other_standard_identifier[0].source_of_number_or_code == 'DOI'" href="http://dx.doi.org/{{identifier.standard_number_or_code}}">{{record.other_standard_identifier[0].standard_number_or_code}}</a>
+              <a ng-if="record.other_standard_identifier[0].source_of_number_or_code == 'DOI'" ng-href="http://dx.doi.org/{{identifier.standard_number_or_code}}">{{record.other_standard_identifier[0].standard_number_or_code}}</a>
               <!-- ... otherwise, display just a span -->
               <span ng-if="record.other_standard_identifier[0].source_of_number_or_code != 'DOI'">
                 {{record.other_standard_identifier[0].standard_number_or_code}}
               </span>
             </span>
-          </div>
-        </div>
-        <!-- Subjects -->
-        <div class="row" ng-show="record.subject_added_entry_topical_term.length > 0" >
-          <div class="col-xs-3 col-sm-2">
-            <p>Subject:</p>
-          </div>
-          <div class="col-xs-9 col-sm-10">
+          </dd>
+          <!-- Subjects -->
+          <dt ng-show="record.subject_added_entry_topical_term.length > 0">
+            Subject:
+          </dt>
+          <dd ng-show="record.subject_added_entry_topical_term.length > 0">
             <ul class="list-unstyled" ng-show="record.subject_added_entry_topical_term.length > 1">
               <li ng-repeat="subject in record.subject_added_entry_topical_term">
                 {{subject.topical_term_or_geographic_name_entry_element}}
@@ -78,14 +71,12 @@
             <span ng-show="record.subject_added_entry_topical_term.length === 1">
               {{record.subject_added_entry_topical_term[0].topical_term_or_geographic_name_entry_element}}
             </span>
-          </div>
-        </div>
-        <!-- Collections -->
-        <div class="row" ng-show="record.collections.length > 0" >
-          <div class="col-xs-3 col-sm-2">
-            <p>Collections:</p>
-          </div>
-          <div class="col-xs-9 col-sm-10">
+          </dd>
+          <!-- Collections -->
+          <dt ng-show="record.collections.length > 0">
+            Collections:
+          </dt>
+          <dd ng-show="record.collections.length > 0">
             <ul class="list-unstyled" ng-show="record.collections.length > 1">
               <li ng-repeat="collection in record.collections">
                 {{collection.primary}}
@@ -94,10 +85,15 @@
             <span ng-show="record.collections.length === 1">
               {{record.collections[0].primary}}
             </span>
-          </div>
-        </div>
+          </dd>
+          <dt ng-show="record.summary.length === 1">
+            Summary:
+          </dt>
+          <dd ng-show="record.summary.length === 1">
+            {{ record.summary[0].summary }}
+          </dd>
+        </dl>
         <!-- Summary -->
-        <p>{{ record.summary[0].summary || 'No summary' }}</p>
         <hr />
         <div id="files" ng-init="showFiles=true" ng-show="record.files.length > 0" class="panel panel-info cds-record-detail-files">
           <div class="panel-heading">

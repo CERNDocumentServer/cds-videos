@@ -51,6 +51,19 @@ a[ng-click]{
 
 // /record/{recid}
 
+.cds-record-detail-bottom {
+  dd, dt, dd li {
+    line-height: 1.6; // A bit more space between elements
+  }
+}
+
+@media(min-width: 768px) {
+  .cds-record-detail-title {
+    // Add some margin on bigger screens screen
+    margin-left: 90px; // half of the default bootstrap dd element margin
+  }
+}
+
 .cds-record-detail {
   .cds-record-detail-files {
     .list-group-item.active {

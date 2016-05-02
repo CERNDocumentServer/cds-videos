@@ -23,7 +23,9 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 # When installing from github the requirements extras doesn't seem to work
+CairoSVG >= 1.0.20 # dependency of invenio-formatter[badges]
 Flask-Cors>=2.1.2 # dependency of invenio-rest
+Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
