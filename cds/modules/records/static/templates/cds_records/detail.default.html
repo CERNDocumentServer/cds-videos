@@ -9,27 +9,94 @@
         </ul>
       </div>
       <div class="cds-record-detail-bottom">
+        <!-- Title -->
         <h1>{{ record.title_statement.title || 'No title :(' }}</h1>
-        <ul class="list-inline record-detail-metadata-collection">
-          <li ng-show="record.collections.length >0" >
-            <i class="text-primary fa fa-tags"></i>
-            <span ng-repeat="col in record.collections">
-              <span class="label label-warning">{{ col.primary }}</span>
+        <!-- Authors -->
+        <div class="row" ng-show="record.main_entry_personal_name || record.added_entry_personal_name.length > 0" >
+          <div class="col-xs-3 col-sm-2">
+            <p>Authors:</p>
+          </div>
+          <div class="col-xs-9 col-sm-10">
+            <span ng-show="record.main_entry_personal_name">
+              <a href="/search?authors={{record.main_entry_personal_name.personal_name}}"> {{ record.main_entry_personal_name.personal_name }}</a>
             </span>
-          </li>
-          <li ng-show="record.main_entry_personal_name.length > 0">
-            <i class="fa text-primary" ng-class="{'fa-user': record.main_entry_personal_name.length === 1, 'fa-users': record.main_entry_personal_name.length > 1}" ></i>
-            <span ng-repeat="user in record.main_entry_personal_name">
-              {{ user.personal_name }}
+            <span ng-repeat="user in record.added_entry_personal_name">
+              , <a href="/search?authors={{record.main_entry_personal_name.personal_name}}">
+                {{ user.personal_name}}
+              </a>
             </span>
-          </li>
-          <li ng-show="record.subject_added_entry_topical_term.length > 0">
-            <i class="fa text-primary fa-archive"></i>
-            <span ng-repeat="term in record.subject_added_entry_topical_term">
-              <span class="label label-primary">{{ term.topical_term_or_geographic_name_entry_element }}</span>
+          </div>
+        </div>
+        <!-- Imprint -->
+        <div class="row" ng-show="record.imprint.length > 0" >
+          <div class="col-xs-3 col-sm-2">
+            <p>Imprint:</p>
+          </div>
+          <div class="col-xs-9 col-sm-10">
+            <span ng-repeat="imprint_info in record.imprint">
+              {{imprint_info.complete_date}}, {{imprint_info.name_of_publication}}, {{imprint_info.place_of_publication}}
             </span>
-          </li>
-        </ul>
+          </div>
+        </div>
+        <!-- DOI -->
+        <div class="row" ng-show="record.other_standard_identifier.length > 0" >
+          <div class="col-xs-3 col-sm-2">
+            <p>Identifier:</p>
+          </div>
+          <div class="col-xs-9 col-sm-10">
+            <ul class="list-unstyled" ng-show="record.other_standard_identifier.length > 1">
+              <li ng-repeat="identifier in record.other_standard_identifier">
+                <!-- If the identifier is from DOI, display it as a link ... -->
+                <a ng-if="identifier.source_of_number_or_code == 'DOI'" href="http://dx.doi.org/{{identifier.standard_number_or_code}}">{{identifier.standard_number_or_code}}</a>
+                <!-- ... otherwise, display just a span -->
+                <span ng-if="identifier.source_of_number_or_code != 'DOI'">
+                  {{identifier.standard_number_or_code}}
+                </span>
+              </li>
+            </ul>
+            <span ng-show="record.other_standard_identifier.length === 1">
+              <!-- If the link is from DOI, display it as a link ... -->
+              <a ng-if="record.other_standard_identifier[0].source_of_number_or_code == 'DOI'" href="http://dx.doi.org/{{identifier.standard_number_or_code}}">{{record.other_standard_identifier[0].standard_number_or_code}}</a>
+              <!-- ... otherwise, display just a span -->
+              <span ng-if="record.other_standard_identifier[0].source_of_number_or_code != 'DOI'">
+                {{record.other_standard_identifier[0].standard_number_or_code}}
+              </span>
+            </span>
+          </div>
+        </div>
+        <!-- Subjects -->
+        <div class="row" ng-show="record.subject_added_entry_topical_term.length > 0" >
+          <div class="col-xs-3 col-sm-2">
+            <p>Subject:</p>
+          </div>
+          <div class="col-xs-9 col-sm-10">
+            <ul class="list-unstyled" ng-show="record.subject_added_entry_topical_term.length > 1">
+              <li ng-repeat="subject in record.subject_added_entry_topical_term">
+                {{subject.topical_term_or_geographic_name_entry_element}}
+              </li>
+            </ul>
+            <span ng-show="record.subject_added_entry_topical_term.length === 1">
+              {{record.subject_added_entry_topical_term[0].topical_term_or_geographic_name_entry_element}}
+            </span>
+          </div>
+        </div>
+        <!-- Collections -->
+        <div class="row" ng-show="record.collections.length > 0" >
+          <div class="col-xs-3 col-sm-2">
+            <p>Collections:</p>
+          </div>
+          <div class="col-xs-9 col-sm-10">
+            <ul class="list-unstyled" ng-show="record.collections.length > 1">
+              <li ng-repeat="collection in record.collections">
+                {{collection.primary}}
+              </li>
+            </ul>
+            <span ng-show="record.collections.length === 1">
+              {{record.collections[0].primary}}
+            </span>
+          </div>
+        </div>
+        <!-- Summary -->
         <p>{{ record.summary[0].summary || 'No summary' }}</p>
         <hr />
         <div id="files" ng-init="showFiles=true" ng-show="record.files.length > 0" class="panel panel-info cds-record-detail-files">
@@ -43,7 +110,7 @@
           </div>
           <ul ng-show="showFiles" class="list-group" ng-repeat="file in record.files track by $index">
             <li class="list-group-item" ng-class="{'active': file.filename === vm.activePreview}">
-              <a 
+              <a
                  ng-init="vm.preloadPreview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename)"
                  class="cds-record-detail-files-filename"
                  ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename);vm.activePreview=file.filename">
