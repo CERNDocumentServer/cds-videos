@@ -13,6 +13,16 @@ Prepare the environment
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
     (cds3)$ git clone -b cdslabs_qa git@github.com:CERNDocumentServer/cds.git
 
+Be sure to have the following installed
+
+.. code-block:: console
+
+    $ sudo apt-get install libpq-dev python-dev
+    
+    or, if you use Python3
+    
+    $ sudo apt-get install libpq-dev python3-dev
+
 Install production like setup
 
 .. code-block:: console
