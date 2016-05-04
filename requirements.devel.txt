@@ -27,8 +27,8 @@ Flask-Cors>=2.1.2 # dependency of invenio-rest
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
--e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+-e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
 -e git+https://github.com/inveniosoftware/invenio-access.git#egg=invenio-access
 -e git+https://github.com/inveniosoftware/invenio-accounts.git#egg=invenio-accounts
@@ -52,6 +52,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
 -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
+-e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
 -e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records
