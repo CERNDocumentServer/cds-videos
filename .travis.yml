@@ -1,86 +1,67 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016 CERN.
-#
-# CERN Document Server is free software; you can redistribute it
-# and/or modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 2 of the
-# License, or (at your option) any later version.
-#
-# CERN Document Server is distributed in the hope that it will be
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with CERN Document Server; if not, write to the
-# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-# MA 02111-1307, USA.
-#
-# In applying this license, CERN does not
-# waive the privileges and immunities granted to it by virtue of its status
-# as an Intergovernmental Organization or submit itself to any jurisdiction.
-#
 addons:
   postgresql: 9.4
   apt:
     packages:
-      - nodejs
-
+    - nodejs
 notifications:
   email: false
-
 sudo: false
-
 language: python
-
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $HOME/.nvm
-
+  - "$HOME/.cache/pip"
+  - "$HOME/.nvm"
 services:
-  - postgresql
-  - redis
-  - rabbitmq
-
+- postgresql
+- redis
+- rabbitmq
 env:
-  - REQUIREMENTS=production E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=production E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=release E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=release E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-  - REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds" ES_VERSION=2.2.0 ES_HOST=127.0.0.1
-
+- REQUIREMENTS=production E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+- REQUIREMENTS=production E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+- REQUIREMENTS=release E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+- REQUIREMENTS=release E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+- REQUIREMENTS=devel E2E="no" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
+- REQUIREMENTS=devel E2E="yes" SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/cds"
+  ES_VERSION=2.2.0 ES_HOST=127.0.0.1
 python:
-  - "2.7"
-  - "3.5"
-
+- '2.7'
+- '3.5'
 before_install:
-  - "mkdir /tmp/elasticsearch"
-  - "wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz | tar xz --directory=/tmp/elasticsearch --strip-components=1"
-  - "/tmp/elasticsearch/bin/elasticsearch &"
-  - "travis_retry pip install --upgrade pip setuptools py"
-  - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "./scripts/setup-npm.sh"
-  - "cat requirements.pinned.txt > .travis-production-requirements.txt"
-  - "requirements-builder --level=pypi setup.py > .travis-release-requirements.txt"
-  - "requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt"
-
+- mkdir /tmp/elasticsearch
+- wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz
+  | tar xz --directory=/tmp/elasticsearch --strip-components=1
+- "/tmp/elasticsearch/bin/elasticsearch &"
+- travis_retry pip install --upgrade pip setuptools py
+- travis_retry pip install twine wheel coveralls requirements-builder
+- "./scripts/setup-npm.sh"
+- cat requirements.pinned.txt > .travis-production-requirements.txt
+- requirements-builder --level=pypi setup.py > .travis-release-requirements.txt
+- requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt
 install:
-  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
-  - "./scripts/setup-assets.sh"
-
+- travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt
+- travis_retry pip install -e .[all]
+- "./scripts/setup-assets.sh"
 before_script:
-  - "if [ ${E2E} == 'yes' ]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; export E2E_WEBDRIVER_BROWSERS='Firefox'; fi"
-  - "if [ ${E2E} == 'yes' ]; then cds index init; fi"
-  # Allow ES to start
-  - sleep 15
-
+- if [ ${E2E} == 'yes' ]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start;
+  export E2E_WEBDRIVER_BROWSERS='Firefox'; fi
+- if [ ${E2E} == 'yes' ]; then cds index init; fi
+- sleep 15
 script:
-  - "if [ ${E2E} == 'yes' ]; then py.test tests/e2e/; else ./run-tests.sh; fi"
-
+- if [ ${E2E} == 'yes' ]; then py.test tests/e2e/; else ./run-tests.sh; fi
 after_success:
-  - coveralls
+- coveralls
+deploy:
+  provider: pypi
+  user: egabancho
+  password:
+    secure: b7/R6MCzZGQXbJq0si2epfaYmKMDnYRgbAQtkxNa1rcjqAh1coFVFomgZ25A2HFQyKmqClLfTfmbkb0oa4O+veLkS+W26d4awsYBcZeLt5YS4kdQAsuNtMiVCOlmCNLpnpfFSY4hisgIPi6WIiUNLAOamK607F6MElgriKLPPDo=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: CERNDocumentServer/cds
+    branch: cdslabs
