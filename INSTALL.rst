@@ -50,6 +50,12 @@ Build the assets
     (cds3)$ cds collect -v
     (cds3)$ cds assets build
 
+#fixme: missing requirements/provisions see
+# provision-elasticsearch.sh
+# provision-postgresql.sh
+# provision-redis.sh
+# in https://github.com/inveniosoftware/invenio/tree/master/scripts
+
 Make sure that ``elasticsearch`` server is running:
 
 .. code-block:: console
