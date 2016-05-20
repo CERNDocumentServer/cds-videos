@@ -4125,7 +4125,8 @@
                 "imprint": {
                     "properties": {
                         "complete_date": {
-                            "type": "string"
+                            "type": "date",
+                            "format": "MMMM yyyy.||yyyy||yyyyMM||yyyyMMdd||yyyy-MM-dd||yyyyMMddHHmmss||yyyyMMddHHmmss.S||dd MM yyyy||dd MMM yyyy||MMM yyyy||MMM yyyy?||yyyy ('repr'.1964.)||dd/MM/yy"
                         },
                         "name_of_publication": {
                             "type": "string"
