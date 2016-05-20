@@ -25,6 +25,7 @@ require([
     'jquery',
     'bootstrap',
     'node_modules/angular/angular',
+    'node_modules/d3/d3',
     'js/cds/module',
     'node_modules/invenio-search-js/dist/invenio-search-js',
   ], function() {
