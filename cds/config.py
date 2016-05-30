@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
+# This file is part of CERN Document Server.
 # Copyright (C) 2015, 2016 CERN.
 #
-# Invenio is free software; you can redistribute it
+# CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be
+# CERN Document Server is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the
+# along with CERN Document Server; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307, USA.
 #
@@ -296,9 +296,22 @@ DATADIR = '/tmp'
 #: Overwrite default Sentry extension class to support Sentry 6.
 LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
 
-
 ###############################################################################
 # JSON Schemas
 ###############################################################################
 
 JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "localhost:5000")
+
+###############################################################################
+# Migration
+###############################################################################
+
+MIGRATOR_RECORDS_DUMP_CLS = 'cds.modules.migrator.records:CDSRecordDump'
+
+###############################################################################
+# Indexr
+###############################################################################
+
+INDEXER_DEFAULT_INDEX = 'records-default-v1.0.0'
+INDEXER_DEFAULT_DOC_TYPE = 'default-v1.0.0'
+INDEXER_BULK_REQUEST_TIMEOUT = 60
