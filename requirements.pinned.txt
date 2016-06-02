@@ -70,7 +70,7 @@ invenio-indexer==1.0.0a4
 invenio-jsonschemas==1.0.0a3
 invenio-logging==1.0.0a2
 invenio-mail==1.0.0a3
-invenio-migrator[loader]==1.0.0a3
+invenio-migrator[loader]==1.0.0a5
 invenio-oaiserver==1.0.0a4
 invenio-oauthclient==1.0.0a3
 invenio-pages==1.0.0a2
