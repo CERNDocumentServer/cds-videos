@@ -109,17 +109,14 @@
               <a
                  ng-init="vm.preloadPreview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename)"
                  class="cds-record-detail-files-filename"
-                 ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename);vm.activePreview=file.filename">
+                 ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename);vm.activePreview=file.filename"
+                 ng-dialog="/static/templates/cds_records/popup_template.html"
+                 ng-dialog-class="ngdialog-theme-default ngdialog-file-preview"
+                 ng-dialog-close-previous>
                 {{ file.filename }}
               </a>
-              <span class="badge cds-record-detail-preview-close" ng-show="file.filename === vm.activePreview">
-                <a ng-click="vm.preview=false;vm.activePreview=false"><i class="fa fa-times"></i></a>
-              </span>
             </li>
           </ul>
-          <div ng-show="vm.preview && showFiles" class="panel-body cds-record-detail-preview">
-            <iframe ng-show="vm.preview && showFiles" src="{{ (vm.preview === false) ? vm.preloadPreview : vm.preview }}" width="100%" height="100%" style="min-height:900px" frameBorder="0"></iframe>
-          </div>
         </div>
         <div id="export" ng-init="showSource=false" class="panel panel-default cds-record-detail-source">
           <div class="panel-heading">

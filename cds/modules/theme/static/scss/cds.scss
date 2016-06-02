@@ -74,4 +74,12 @@ a[ng-click]{
   }
 }
 
+// ngdialog rules are very specific, so we need to be even more specific to
+// overwrite them
+.ngdialog.ngdialog-file-preview {
+  .ngdialog-content {
+    width: 60%;
+  }
+}
+
 /////////

@@ -37,6 +37,7 @@ js = NpmBundle(
     npm={
         'angular': '~1.4.10',
         'angular-loading-bar': '~0.9.0',
-        'cds': '^0.1.2'
+        'cds': '^0.1.2',
+        'ng-dialog': '~0.6.0'
     }
 )

@@ -24,12 +24,13 @@
 require([
     'node_modules/angular-loading-bar/build/loading-bar',
     'node_modules/cds/dist/cds',
+    'node_modules/ng-dialog/js/ngDialog',
   ], function() {
     // Bootstrap modules
     angular.element(document).ready(function() {
       angular.bootstrap(
         document.getElementById("cds-record"), [
-         'angular-loading-bar', 'cdsRecord'
+         'angular-loading-bar', 'cdsRecord', 'ngDialog'
         ]
       );
     });

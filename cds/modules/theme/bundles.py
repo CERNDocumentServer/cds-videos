@@ -29,16 +29,24 @@ from __future__ import absolute_import, print_function
 from flask_assets import Bundle
 from invenio_assets import NpmBundle
 
-css = NpmBundle(
-    'scss/cds.scss',
-    filters='scss, cleancss',
+css = Bundle(
+    Bundle(
+        'node_modules/ng-dialog/css/ngDialog.css',
+        'node_modules/ng-dialog/css/ngDialog-theme-default.css',
+        filters='cleancss',
+    ),
+    NpmBundle(
+        'scss/cds.scss',
+        filters='scss, cleancss',
+        npm={
+            'almond': '~0.3.1',
+            'bootstrap-sass': '~3.3.5',
+            'font-awesome': '~4.4.0',
+        }
+    ),
     output='gen/cds.%(version)s.css',
-    npm={
-        'almond': '~0.3.1',
-        'bootstrap-sass': '~3.3.5',
-        'font-awesome': '~4.4.0',
-    }
 )
+
 """Default CSS bundle."""
 
 js = NpmBundle(
