@@ -1,0 +1,5 @@
+<ul class="list-group">
+  <li class="list-group-item" ng-repeat="record in vm.invenioSearchResults.hits.hits.slice(0, 5) track by $index">
+    <a target="_self" ng-href="/record/{{ ::record.id }}">{{ ::record.metadata.title_statement.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title_statement.title.length > 120 ? ' [...]' : '' }}</a>
+  </li>
+</ul>

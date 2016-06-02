@@ -97,6 +97,8 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 SEARCH_UI_SEARCH_API = "/api/records/"
 # Default template for search UI.
 SEARCH_UI_SEARCH_TEMPLATE = "cds_search_ui/search.html"
+# Default base template for search UI
+SEARCH_UI_BASE_TEMPLATE = "cds_theme/page.html"
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
 # Do not map any keywords.
@@ -249,6 +251,14 @@ FORMATTER_BADGES_ENABLE = True
 
 # Display a homepage.
 FRONTPAGE_ENDPOINT = "cds_home.index"
+# Queries for the boxes
+FRONTPAGE_QUERIES = [
+    {"size": 5, "page": 1},
+    {"size": 5, "page": 1},
+    {"size": 5, "page": 1},
+]
+# Quote before search box
+FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
 
 ###############################################################################
 # Security
@@ -266,7 +276,7 @@ SECURITY_LOGIN_SALT = 'CHANGE_ME'
 # The site name
 THEME_SITENAME = _("CERN Document Server")
 # The theme logo.
-THEME_LOGO = 'img/cds.svg'
+THEME_LOGO = None
 # The base template.
 BASE_TEMPLATE = "cds_theme/page.html"
 # Header template for entire site.

@@ -25,6 +25,7 @@
 $icon-font-path: "/static/node_modules/bootstrap-sass/assets/fonts/bootstrap/";
 $fa-font-path: "/static/node_modules/font-awesome/fonts/";
 
+
 // CDS Custom vars
 $cds-small-spacing: 5px;
 $cds-medium-spacing: 10px;
@@ -32,14 +33,47 @@ $cds-large-spacing: 15px;
 $cds-enormus-spacing: 20px;
 
 // Brand colors CDS
-$primary-color-dark: #F57C00;
-$primary-color: #FF9800;
-$primary-color-light: #FFE0B2;
+$light-color: #ffffff;
+$primary-color-dark: #448aff;
+$primary-color: #0c63aa;
+$primary-color-light: #3498db;
 $primary-color-text: #212121;
 $accent-color: #03A9F4;
 $primary-text-color: #212121;
 $secondary-text-color: #727272;
 $divider-color: #B6B6B6;
+
+// Bootstrap
+$brand-primary: $primary-color;
+
+$font-size-base: 16px;
+
+// Navbar colors
+$navbar-height: 60px;
+$navbar-collapse-max-height: 340px;
+
+$navbar-default-bg: $primary-color;
+$navbar-default-border: transparent;
+$navbar-default-color: $primary-color;
+
+// Navbar links
+$navbar-default-link-color: $light-color;
+$navbar-default-link-hover-color: #ddd;
+$navbar-default-link-hover-bg: transparent;
+$navbar-default-link-active-color: $light-color;
+//$navbar-default-link-active-bg:            darken($navbar-default-bg, 6.5%);
+$navbar-default-link-disabled-color: #ccc;
+$navbar-default-link-disabled-bg: transparent;
+
+// Navbar brand label
+//$navbar-default-brand-color:               $navbar-default-link-color;
+//$navbar-default-brand-hover-color:         darken($navbar-default-brand-color, 10%);
+//$navbar-default-brand-hover-bg:            transparent;
+
+// Navbar toggle
+$navbar-default-toggle-hover-bg: #ddd;
+$navbar-default-toggle-icon-bar-bg: #888;
+$navbar-default-toggle-border-color: #ddd;
 
 $cds-base: #01579B;
 $cds-contrast: #4CAF50;

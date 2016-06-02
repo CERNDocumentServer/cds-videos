@@ -1,10 +1,16 @@
 {# -*- coding: utf-8 -*- -#}
 
-<footer class="cds-footer">
+<footer class="cds-footer cds-content-section">
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        {{ _('powered by Invenio') }}
+        <div class="text-center">
+          <div class="cds-footer-brand">
+          <img src="{{ url_for('static', filename='img/cern-logo-large.png') }}" />
+          <p><strong>CERN Document Server</strong></p>
+          </div>
+          <small>{{ _('powered by') }} <a href="//invenio-software.org/" target="_blank">Invnenio</a></small>
+        </div>
       </div>
     </div>
   </div>

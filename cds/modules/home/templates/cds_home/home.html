@@ -9,22 +9,8 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          <!-- START OF: Temporary chubby-corn -->
-          <div class="row">
-            <div class="col-md-12">
-              <img width="360px" src="{{ url_for('static', filename='img/unicorn.png') }}"
-                alt="Chubby unicorn" title="Chubby unicorn"
-                style="display: block; margin: 20px auto 0 auto;" >
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <small style="display: block; margin-bottom: 20px; text-align: center;">
-                Image from: <a href='http://dorkydino.com'>dorkydino.com</a>
-              </small>
-            </div>
-          </div>
-          <!-- END OF: Temporary chubby-corn -->
+          <h2 class="cds-home-title text-white text-center">CERN Document Server</h2>
+          <p class="text-center text-white cds-home-headline">  {{ config.FRONTPAGE_SLOGAN }}</p>
           <form action="{{ url_for('invenio_search_ui.search') }}" class="cds-home-search">
             <div class="form-group">
               <input type="text" name="q" class="cds-home-input input-lg form-control" placeholder="{{ _('Type and press enter to search') }}">
@@ -32,6 +18,87 @@
           </form>
         </div>
       </div>
+    </div>
+  </div>
+  <div id="cds-cards" class="cds-cards cds-content-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <div id="cds-card-1" class="panel panel-default">
+            <div class="panel-body">
+              <h4> {{ _('Articles & Preprints') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right" aria-hidden="true"><i class="fa fa-angle-right"></i></a></h4>
+            </div>
+            <!-- List group -->
+            <invenio-search
+                search-hidden-params='{{ config.FRONTPAGE_QUERIES[0] | tojson }}'
+              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
+              <div class="text-center">
+                <invenio-search-loading
+                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                  message="">
+                </invenio-search-loading>
+              </div>
+              <invenio-search-results
+                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
+              </invenio-search-results>
+            </invenio-search>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="cds-card-2" class="panel panel-default">
+            <div class="panel-body">
+              <h4>{{ _('Books') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></a></h4>
+            </div>
+            <!-- List group -->
+            <invenio-search
+              search-hidden-params='{{ config.FRONTPAGE_QUERIES[1] | tojson }}'
+              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
+              <div class="text-center">
+                <invenio-search-loading
+                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                  message="">
+                </invenio-search-loading>
+              </div>
+              <invenio-search-results
+                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
+              </invenio-search-results>
+            </invenio-search>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="cds-card-3" class="panel panel-default cds-card-popular">
+            <div class="panel-body text-white">
+             <h4>{{ _('Popular') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right text-white"><i class="fa fa-angle-right" aria-hidden="true"></i></a></h4>
+            </div>
+            <!-- List group -->
+            <invenio-search
+              search-hidden-params='{{ config.FRONTPAGE_QUERIES[2] | tojson }}'
+              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
+              <div class="text-center">
+                <invenio-search-loading
+                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                  message="">
+                </invenio-search-loading>
+              </div>
+              <invenio-search-results
+                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
+              </invenio-search-results>
+            </invenio-search>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cds-event cds-content-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="cds-home-title text-white">{{ _('Images') }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="cds-event-description text-center">
+      <span class="label label-primary">A Higgs candidate decays into two photons</span>
     </div>
   </div>
 {%- endblock page_body %}

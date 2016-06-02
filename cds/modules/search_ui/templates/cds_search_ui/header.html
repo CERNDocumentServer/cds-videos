@@ -1,0 +1,8 @@
+{%- extends "cds_theme/header.html" %}
+
+{%- block navbar_search %}
+  <invenio-search-bar
+    template="{{ url_for('static', filename='templates/cds_search_ui/searchbar.html') }}"
+    placeholder="{{ search_input_placeholder|default(_('Search')) }}">
+  </invenio-search-bar>
+  {%- endblock navbar_search %}

@@ -24,15 +24,26 @@
 require([
     'jquery',
     'bootstrap',
+    'node_modules/angular/angular',
     'node_modules/ng-dialog/js/ngDialog',
     'node_modules/d3/d3',
+    'node_modules/angular-loading-bar/build/loading-bar',
     'js/cds/module',
     'node_modules/invenio-search-js/dist/invenio-search-js',
   ], function() {
     // Bootstrap modules
     angular.element(document).ready(function() {
       angular.bootstrap(
-        document.getElementById("invenio-search"), ['cds', 'invenioSearch', 'ngDialog']
+        document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch']
+      );
+      angular.bootstrap(
+        document.getElementById("cds-card-1"), [ 'invenioSearch']
+      );
+      angular.bootstrap(
+        document.getElementById("cds-card-2"), ['invenioSearch']
+      );
+      angular.bootstrap(
+        document.getElementById("cds-card-3"), ['invenioSearch']
       );
     });
     $(document).ready(function() {

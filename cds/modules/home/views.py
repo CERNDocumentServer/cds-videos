@@ -22,6 +22,8 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, render_template
+from flask_babelex import lazy_gettext as _
+from flask_menu import current_menu
 
 blueprint = Blueprint(
     'cds_home',
@@ -31,12 +33,38 @@ blueprint = Blueprint(
 )
 
 
+@blueprint.before_app_first_request
+def init_menu():
+    """Initialize menu before first request."""
+    item = current_menu.submenu('main.search')
+    item.register(
+        'invenio_search_ui.search',
+        _('Search'),
+        order=1,
+    )
+    item = current_menu.submenu('main.about')
+    item.register(
+        'cds_home.about',
+        _('About'),
+        order=2,
+    )
+
+
 @blueprint.route('/')
 def index():
     """CDS home page."""
     return render_template(
         'cds_home/home.html',
         title='Home'
+    )
+
+
+@blueprint.route('/about')
+def about():
+    """CDS about page."""
+    return render_template(
+        'cds_home/about.html',
+        title='About'
     )
 
 
