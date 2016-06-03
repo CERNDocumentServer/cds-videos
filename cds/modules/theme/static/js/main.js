@@ -24,7 +24,7 @@
 require([
     'jquery',
     'bootstrap',
-    'node_modules/angular/angular',
+    'node_modules/ng-dialog/js/ngDialog',
     'node_modules/d3/d3',
     'js/cds/module',
     'node_modules/invenio-search-js/dist/invenio-search-js',
@@ -32,7 +32,7 @@ require([
     // Bootstrap modules
     angular.element(document).ready(function() {
       angular.bootstrap(
-        document.getElementById("invenio-search"), ['cds', 'invenioSearch']
+        document.getElementById("invenio-search"), ['cds', 'invenioSearch', 'ngDialog']
       );
     });
     $(document).ready(function() {

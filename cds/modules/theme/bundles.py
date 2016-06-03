@@ -69,6 +69,7 @@ js = NpmBundle(
     npm={
         'almond': '~0.3.1',
         'angular': '~1.4.7',
+        'ng-dialog': '~0.6.0'
     }
 )
 """Default JavaScript bundle."""
