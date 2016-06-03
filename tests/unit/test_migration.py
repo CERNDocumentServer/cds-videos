@@ -63,5 +63,5 @@ def test_record_files_migration(app, location, script_info, datadir):
     assert record['source_of_acquisition'][0]['stock_number'] == \
         'CERN-THESIS-2009-057'
 
-    assert 'files' in record
-    assert record['files'][0]['filename'] == 'CERN-THESIS-2009-057.pdf'
+    assert '_files' in record
+    assert record['_files'][0]['key'] == 'CERN-THESIS-2009-057.pdf'
