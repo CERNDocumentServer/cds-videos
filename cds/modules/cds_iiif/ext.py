@@ -17,17 +17,31 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""CDS Search UI."""
+"""CDS IIIF extension initialization."""
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint
-
 from flask_iiif import IIIF
+from flask_iiif.cache import simple
+from flask_restful import Api
 
-blueprint = Blueprint(
-    'cds_search_ui',
-    __name__,
-    template_folder='templates',
-    static_folder='static',
-)
+from .utils import image_opener
+
+
+class CDSIIIF(object):
+    """CDS IIIF extension."""
+
+    def __init__(self, app=None):
+        """Extension initialization."""
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        """Flask application initialization."""
+        api = Api(app=app)
+        app.config['IIIF_CACHE_HANDLER'] = simple.ImageSimpleCache()
+        ext = IIIF()
+        ext.init_app(app)
+        ext.uuid_to_image_opener_handler(image_opener)
+        ext.init_restful(api, prefix='/iiif/')
+        return app

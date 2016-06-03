@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
+# This file is part of CERN Document Server.
 # Copyright (C) 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
@@ -15,19 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+# 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 
-"""CDS Search UI."""
+from __future__ import absolute_import
 
-from __future__ import absolute_import, print_function
+from .ext import CDSIIIF
 
-from flask import Blueprint
-
-from flask_iiif import IIIF
-
-blueprint = Blueprint(
-    'cds_search_ui',
-    __name__,
-    template_folder='templates',
-    static_folder='static',
-)
+__all__ = ('CDSIIIF', )

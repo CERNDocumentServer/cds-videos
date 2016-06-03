@@ -115,6 +115,7 @@ install_requires = [
     'marshmallow>=2.5.0',
     'Pillow>=3.2.0',
     'python-slugify>=1.2.0',
+    'Wand>=0.4.2',
 ]
 
 packages = find_packages()
@@ -146,6 +147,9 @@ setup(
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
             'cds_record_js = cds.modules.records.bundles:js',
+        ],
+        'invenio_base.api_apps': [
+            'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
         ],
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
