@@ -199,7 +199,7 @@ RECORDS_REST_FACETS = dict(
                       'sound_track_or_separate_title')),
             topic=dict(terms=dict(
                 field='subject_added_entry_topical_term.'
-                      'topical_term_or_geographic_name_entry_element')),
+                      'topical_term_or_geographic_name_entry_element.untouched')),
             years=dict(date_histogram=dict(
                 field='imprint.complete_date',
                 interval='year',
@@ -213,7 +213,7 @@ RECORDS_REST_FACETS = dict(
                 'sound_track_or_separate_title'),
             topic=terms_filter(
                 'subject_added_entry_topical_term.'
-                'topical_term_or_geographic_name_entry_element'),
+                'topical_term_or_geographic_name_entry_element.untouched'),
             years=range_filter(
                 'imprint.complete_date',
                 format='yyyy',
