@@ -39,6 +39,7 @@ include .jshintrc
 
 recursive-include cds *.gz
 recursive-include cds *.html
+recursive-include cds *.jpg
 recursive-include cds *.js
 recursive-include cds *.json
 recursive-include cds *.less
