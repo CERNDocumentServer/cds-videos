@@ -9,3 +9,9 @@
     template="{{ url_for('static', filename='templates/cds_search_ui/results.html') }}">
     </invenio-search-results>
 {%- endblock search_results %}
+
+{%- block search_facets %}
+    <invenio-search-facets
+    template="{{ url_for('static', filename='templates/cds_search_ui/facets.html') }}">
+    </invenio-search-facets>
+{%- endblock search_facets %}

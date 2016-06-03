@@ -39,3 +39,4 @@ CDS - Access articles, reports and multimedia content in HEP
 * Sebastian Witowski
 * Yoan Blanc
 * Łukasz Chrząszcz
+* Nikos Filippakis

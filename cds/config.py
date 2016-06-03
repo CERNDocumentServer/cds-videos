@@ -240,6 +240,9 @@ FORMATTER_BADGES_ALLOWED_TITLES = ['DOI', 'doi']
 #: Mapping of titles.
 FORMATTER_BADGES_TITLE_MAPPING = {'doi': 'DOI'}
 
+# Enable badges
+FORMATTER_BADGES_ENABLE = True
+
 ###############################################################################
 # Home page
 ###############################################################################

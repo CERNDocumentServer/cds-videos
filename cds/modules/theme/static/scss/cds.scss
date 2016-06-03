@@ -83,3 +83,67 @@ a[ng-click]{
 }
 
 /////////
+
+// /search
+
+.cds-media {
+  margin-bottom: 40px;
+  overflow: visible;
+}
+
+.cds-media-title {
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  & > a {
+    white-space: nowrap;
+  }
+  max-width: 600px;
+}
+
+.cds-media-subject {
+  margin-bottom: -2px;
+  font-size: 12px;
+  color: #888;
+}
+
+.cds-media-body {
+  width: auto;
+}
+
+.cds-media-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  & > p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.carousel-indicators {
+  position: relative;
+  bottom: auto;
+  margin: 0;
+  left: auto;
+  width: auto;
+
+  & > li {
+    background-color: black;
+    opacity: 0.3;
+    &.active {
+      background-color: black;
+      opacity: 0.5;
+      width: 11px;
+      height: 11px;
+    }
+  }
+}
+
+.cds-media-object {
+  border: 1px solid #999;
+}
