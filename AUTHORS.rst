@@ -36,6 +36,7 @@ CDS - Access articles, reports and multimedia content in HEP
 * Letreguilly
 * Ludmila Marian
 * Nikos Filippakis
+* Orestis Melkonian
 * Radoslav Pantic
 * Sebastian Witowski
 * Yoan Blanc

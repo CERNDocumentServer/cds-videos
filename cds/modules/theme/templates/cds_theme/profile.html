@@ -1,0 +1,50 @@
+{# -*- coding: utf-8 -*-
+#
+# This file is part of Invenio.
+# Copyright (C) 2015, 2016 CERN.
+#
+# Invenio is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
+#}
+{%- extends config.USERPROFILES_SETTINGS_TEMPLATE %}
+
+{% from "invenio_userprofiles/settings/_macros.html" import render_field, form_errors %}
+
+{% set panel_title = _("Profile") %}
+{% set panel_icon = "fa fa-user" %}
+
+{%- block settings_form %}
+
+    <h3 class="text-center panel-free-title">{{_('Profile') }}</h3>
+
+    {% if current_userprofile %}
+        <div> <strong> Username </strong> {{ current_userprofile._username }} </div>
+        <div> <strong> Full name </strong> {{ current_userprofile.full_name }} </div>
+        <div> <strong> Groups </strong>
+            <ul>
+            {% for group in g.identity.provides %}
+                <li> {{ group.value }} </li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+
+{%- endblock settings_form %}
