@@ -187,6 +187,19 @@ a[ng-click]{
 .cds-media {
   margin-bottom: 40px;
   overflow: visible;
+
+  .carousel {
+    min-width: 120px;
+
+    .cds-media-object img {
+      width:100%;
+      margin: auto;
+    }
+
+    .carousel-indicators li {
+      margin-bottom: -10px;
+    }
+  }
 }
 
 .cds-media-title {
@@ -214,12 +227,38 @@ a[ng-click]{
   margin-right: 0;
   margin-top: 5px;
   margin-bottom: 5px;
+}
 
-  & > p {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+
+  position: relative;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 !important;
+
+  -webkit-line-clamp : 4;
+  height: calc(1em * 1.2 * 4);
+}
+.line-clamp:after {
+  content: '';
+  text-align: right;
+  bottom: 0;
+  right: 0;
+  width: 25%;
+  display: block;
+  position: absolute;
+  height: calc(1em * 1.2);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 75%);
+}
+@supports (-webkit-line-clamp: 1) {
+  .line-clamp {
+    height: auto;
+  }
+  .line-clamp:after {
+    display: none !important;
   }
 }
 

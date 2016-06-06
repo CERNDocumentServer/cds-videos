@@ -29,7 +29,7 @@
           </ul>
         </div>
         <div class="cds-media-summary">
-          <p>
+          <p class="line-clamp">
             {{ record.metadata.summary[0].summary || 'No summary' }}</p>
         </div>
 
@@ -50,33 +50,30 @@
           </ul>
         </div>
       </div>
-      <div ng-show="record.metadata._files.length > 0"
+      <div ng-show="(record.metadata._files | filter:{type: 'pdf'}).length > 0"
            id="carousel{{ record.id }}" class="carousel slide media-right hidden-xs"
-           data-ride="carousel" data-interval="false"
-           style="width: 100%">
+           data-ride="carousel" data-interval="false">
         <!-- Wrapper for slides -->
         <div style="float: right; max-width: 105px">
           <div class="carousel-inner media-object cds-media-object" role="listbox">
-            <div ng-repeat="file in record.metadata._files" class="item"
+            <div ng-repeat="file in record.metadata._files | filter:{type: 'pdf'}" class="item"
                  ng-class="{ active:$first}">
               <a
                  class="cds-record-detail-files-filename"
-                 ng-click="vm.preview='/record/' + record.metadata.control_number + '/preview/a' + file.filename"
+                 ng-click="vm.preview='/record/' + record.metadata.control_number + '/preview/' + file.key"
                  ng-dialog="/static/templates/cds_records/popup_template.html"
                  ng-dialog-class="ngdialog-theme-default ngdialog-file-preview"
                  ng-dialog-close-previous>
                 <img
-                    ng-src="/api/iiif/v2/{{ file.bucket }}:{{ file.key }}/full/300,400/0/default.png"
-                    style="width:100%; margin: auto">
+                    ng-src="/api/iiif/v2/{{ file.bucket }}:{{ file.key }}/full/300,400/0/default.png" />
               </a>
             </div>
           </div>
 
           <!-- Indicators -->
           <ol class="carousel-indicators">
-            <li ng-repeat="file in record.metadata._files track by $index"
+            <li ng-repeat="file in record.metadata._files | filter:{type: 'pdf'} track by $index"
                 data-target="#carousel{{ record.id }}"
-                style="margin-bottom: -10px;"
                 data-slide-to="{{ $index }}" ng-class="{'active':$first}"></li>
           </ol>
         </div>
