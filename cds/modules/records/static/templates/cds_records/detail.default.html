@@ -17,11 +17,16 @@
             <span ng-show="record.main_entry_personal_name">
               <a ng-href="/search?authors={{record.main_entry_personal_name.personal_name}}"> {{ record.main_entry_personal_name.personal_name }}</a>
             </span>
-            <span ng-repeat="user in record.added_entry_personal_name">
-              , <a ng-href="/search?authors={{record.main_entry_personal_name.personal_name}}">
+            <!-- Show only main author and first 9 additional authors -->
+            <span ng-repeat="user in record.added_entry_personal_name | limitTo : showMore ? record.added_entry_personal_name.length : 9">
+              ; <a ng-href="/search?authors={{record.main_entry_personal_name.personal_name}}">
                 {{ user.personal_name}}
               </a>
             </span>
+            <button class="btn btn-primary btn-xs" ng-show=" record.added_entry_personal_name.length > 9" ng-click="showMore =  !showMore">
+              <span ng-hide="showMore">Show more</span>
+              <span ng-show="showMore">Show less</span>
+            </button>
           </dd>
           <!-- Imprint -->
           <dt ng-show="record.imprint.length > 0">
