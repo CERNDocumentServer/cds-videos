@@ -24,7 +24,7 @@
 require([
     'jquery',
     'bootstrap',
-    'node_modules/angular/angular',
+    'angular',
     'node_modules/ng-dialog/js/ngDialog',
     'node_modules/d3/d3',
     'node_modules/angular-loading-bar/build/loading-bar',

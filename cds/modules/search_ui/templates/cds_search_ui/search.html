@@ -40,3 +40,10 @@
     template="{{ url_for('static', filename='templates/cds_search_ui/facets.html') }}">
     </invenio-search-facets>
 {%- endblock search_facets %}
+
+{%- block search_range %}
+    <invenio-search-range
+    options='{{ config.SEARCH_UI_JSTEMPLATE_RANGE_OPTIONS | tojson }}'
+    template="{{ url_for('static', filename='templates/cds_search_ui/range.html') }}">
+    </invenio-search-range>
+{%- endblock search_range %}

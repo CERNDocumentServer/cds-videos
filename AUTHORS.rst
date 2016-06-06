@@ -35,8 +35,8 @@ CDS - Access articles, reports and multimedia content in HEP
 * Leonardo Rossi
 * Letreguilly
 * Ludmila Marian
+* Nikos Filippakis
 * Radoslav Pantic
 * Sebastian Witowski
 * Yoan Blanc
 * Łukasz Chrząszcz
-* Nikos Filippakis
