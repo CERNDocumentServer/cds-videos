@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import os
 
+from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
 
@@ -264,10 +265,32 @@ FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
 # Security
 ###############################################################################
 
-# Disable registrations.
+# Disable advanced features.
 SECURITY_REGISTERABLE = False
+SECURITY_RECOVERABLE = False
+SECURITY_CONFIRMABLE = False
+# SECURITY_CHANGEABLE = False # uncomment when related PR is merged (-accounts)
+
+# Override login template.
+SECURITY_LOGIN_USER_TEMPLATE = "cds_theme/login_user.html"
+
 # Security login salt.
 SECURITY_LOGIN_SALT = 'CHANGE_ME'
+
+###############################################################################
+# User Profiles
+###############################################################################
+
+# Override profile template.
+USERPROFILES_PROFILE_TEMPLATE = "cds_theme/profile.html"
+USERPROFILES_EMAIL_ENABLED = False
+
+###############################################################################
+# OAuth
+###############################################################################
+OAUTHCLIENT_REMOTE_APPS = dict(
+    cern=cern.REMOTE_APP,
+)
 
 ###############################################################################
 # Theme
@@ -276,7 +299,7 @@ SECURITY_LOGIN_SALT = 'CHANGE_ME'
 # The site name
 THEME_SITENAME = _("CERN Document Server")
 # The theme logo.
-THEME_LOGO = None
+THEME_LOGO = 'img/cds.svg'
 # The base template.
 BASE_TEMPLATE = "cds_theme/page.html"
 # Header template for entire site.
