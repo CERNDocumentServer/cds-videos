@@ -100,7 +100,7 @@
         </dl>
         <!-- Summary -->
         <hr />
-        <div id="files" ng-init="showFiles=true" ng-show="record.files.length > 0" class="panel panel-info cds-record-detail-files">
+        <div id="files" ng-init="showFiles=true" ng-show="record._files.length > 0" class="panel panel-info cds-record-detail-files">
           <div class="panel-heading">
             <div class="btn-group pull-right">
               <a class="btn btn-default btn-xs" ng-click="showFiles=!showFiles">
@@ -109,16 +109,16 @@
             </div>
             <h3 class="panel-title">Files</h3>
           </div>
-          <ul ng-show="showFiles" class="list-group" ng-repeat="file in record.files track by $index">
-            <li class="list-group-item" ng-class="{'active': file.filename === vm.activePreview}">
+          <ul ng-show="showFiles" class="list-group" ng-repeat="file in record._files track by $index">
+            <li class="list-group-item" ng-class="{'active': file.key === vm.activePreview}">
               <a
-                 ng-init="vm.preloadPreview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename)"
+                 ng-init="vm.preloadPreview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.key)"
                  class="cds-record-detail-files-filename"
-                 ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.filename);vm.activePreview=file.filename"
+                 ng-click="vm.preview=vm.iframeSrc('/record/' + record.control_number + '/preview/' + file.key);vm.activePreview=file.key"
                  ng-dialog="/static/templates/cds_records/popup_template.html"
                  ng-dialog-class="ngdialog-theme-default ngdialog-file-preview"
                  ng-dialog-close-previous>
-                {{ file.filename }}
+                {{ file.key }}
               </a>
             </li>
           </ul>
