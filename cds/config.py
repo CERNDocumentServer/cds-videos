@@ -345,6 +345,8 @@ JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "localhost:5000")
 # Migration
 ###############################################################################
 
+MIGRATOR_RECORDS_DUMPLOADER_CLS = 'cds.modules.migrator.records:' \
+                                  'CDSRecordDumpLoader'
 MIGRATOR_RECORDS_DUMP_CLS = 'cds.modules.migrator.records:CDSRecordDump'
 
 ###############################################################################

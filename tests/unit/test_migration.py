@@ -65,3 +65,4 @@ def test_record_files_migration(app, location, script_info, datadir):
 
     assert '_files' in record
     assert record['_files'][0]['key'] == 'CERN-THESIS-2009-057.pdf'
+    assert record['_files'][0]['doctype'] == 'CTH_FILE'
