@@ -11,7 +11,7 @@ Prepare the environment
     $ npm install -g node-sass clean-css requirejs uglify-js
     $ mkvirtualenv cds3
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
-    (cds3)$ git clone -b cdslabs_qa git@github.com:CERNDocumentServer/cds.git
+    (cds3)$ git clone -b cdslabs https://github.com/CERNDocumentServer/cds.git
 
 Install production like setup
 
