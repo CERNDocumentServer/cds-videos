@@ -26,12 +26,18 @@
 
 from __future__ import absolute_import, print_function
 
+from os.path import splitext
+
 import arrow
+from flask import current_app
+
 from cds_dojson.marc21 import marc21
 from cds_dojson.to_marc21 import to_marc21
 from dojson.contrib.marc21.utils import create_record
-from flask import current_app
-from invenio_migrator.records import RecordDump
+from invenio_db import db
+from invenio_files_rest.models import Bucket, BucketTag
+from invenio_migrator.records import RecordDump, RecordDumpLoader
+from invenio_records_files.models import RecordsBuckets
 
 
 class CDSRecordDump(RecordDump):
@@ -125,3 +131,56 @@ class CDSRecordDump(RecordDump):
             self.revisions.append(self._prepare_intermediate_revision(i))
 
         self.revisions.append(self._prepare_final_revision(it[-1]))
+
+
+class CDSRecordDumpLoader(RecordDumpLoader):
+    """Migrate a CDS record."""
+
+    @classmethod
+    def create_files(cls, record, files, existing_files):
+        """Create files.
+
+        This method is currently limited to a single bucket per record.
+        """
+        default_bucket = None
+        # Look for bucket id in existing files.
+        for f in existing_files:
+            if 'bucket' in f:
+                default_bucket = f['bucket']
+                break
+
+        # Create a bucket in default location if none is found.
+        if default_bucket is None:
+            b = Bucket.create()
+            BucketTag.create(b, 'record', str(record.id))
+            default_bucket = str(b.id)
+            db.session.commit()
+        else:
+            b = Bucket.get(default_bucket)
+
+        record['_files'] = []
+        for key, meta in files.items():
+            obj = cls.create_file(b, key, meta)
+            ext = splitext(obj.key)[1].lower()
+            if ext.startswith('.'):
+                ext = ext[1:]
+            last_ver = meta[-1]
+            rec_docs = [rec_doc[1] for rec_doc in last_ver['recids_doctype']
+                        if rec_doc[0] == last_ver['recid']]
+
+            record['_files'].append(dict(
+                bucket=str(obj.bucket.id),
+                key=obj.key,
+                version_id=str(obj.version_id),
+                size=obj.file.size,
+                checksum=obj.file.checksum,
+                type=ext,
+                doctype=rec_docs[0] if rec_docs else ''
+            ))
+        db.session.add(
+            RecordsBuckets(record_id=record.id, bucket_id=b.id)
+        )
+        record.commit()
+        db.session.commit()
+
+        return [b]
