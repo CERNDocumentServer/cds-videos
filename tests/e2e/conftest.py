@@ -31,24 +31,24 @@ the ``script scripts/setup-assets.sh``.
 from __future__ import absolute_import, print_function
 
 import os
-import pkg_resources
-import pytest
 import shutil
 import tempfile
 import uuid
 
+import pkg_resources
+import pytest
 from cds_dojson.marc21 import marc21
-from dojson.contrib.marc21.utils import create_record, split_blob
 from elasticsearch.exceptions import RequestError
+from selenium import webdriver
+from sqlalchemy_utils.functions import create_database, database_exists
+
+from cds.factory import create_app
+from dojson.contrib.marc21.utils import create_record, split_blob
 from invenio_db import db as _db
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
 from invenio_search import current_search, current_search_client
-from selenium import webdriver
-from sqlalchemy_utils.functions import create_database, database_exists
-
-from cds.factory import create_app
 
 
 @pytest.yield_fixture(scope='session', autouse=True)

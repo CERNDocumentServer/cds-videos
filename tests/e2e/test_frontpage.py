@@ -27,63 +27,14 @@
 from __future__ import absolute_import, print_function
 
 from flask import url_for
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
-def test_cds(live_server, env_browser, demo_records):
+def test_home(live_server, env_browser, demo_records):
     """Test the search page and results."""
     env_browser.get(
         url_for('cds_home.index', _external=True)
     )
-
-    # Search bar
-    search_input = env_browser.find_element_by_name('q')
-    search_input.send_keys('')
-    search_input.send_keys(Keys.RETURN)
-
-    WebDriverWait(env_browser, 120).until(
-        EC.presence_of_element_located(
-            (By.CLASS_NAME, 'panel-heading')
-        )
-    )
-
-    # It should have three diferrent facets
-    facets = env_browser.find_elements_by_class_name('panel-heading')
-    assert len(facets) == 3
-    # Excpect the follwing facets
-    expected_titles = ['authors', 'languages', 'topic']
-    for index, title in enumerate(expected_titles):
-        assert title == facets[index].text
-
-    # It should have the sorting option `Control number` selected
-    sort_by = Select(
-        env_browser.find_element_by_name('select-')
-    )
-    assert sort_by.first_selected_option.text == 'Control number'
-
-    # The first page should be selected
-    pagination = env_browser.find_element_by_class_name('pagination')
-    pagination_items = pagination.find_elements_by_tag_name('li')
-    pagination_first_page = pagination_items[2]
-    assert 'active' in pagination_first_page.get_attribute('class')
-
-    # Lets change page
-    pagination_second_page = pagination_items[3]
-    pagination_second_page.find_element_by_tag_name('a').click()
-
-    # Wait a bit
-    env_browser.implicitly_wait(10)
-
-    # Refresh the items
-    pagination = env_browser.find_element_by_class_name('pagination')
-    pagination_items = pagination.find_elements_by_tag_name('li')
-    pagination_first_page = pagination_items[2]
-    pagination_second_page = pagination_items[3]
-
-    # Check the pagination status
-    assert 'active' not in pagination_first_page.get_attribute('class')
-    assert 'active' in pagination_second_page.get_attribute('class')
