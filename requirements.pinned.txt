@@ -9,32 +9,35 @@ amqp==1.4.9               # via kombu
 aniso8601==1.1.0          # via flask-restful
 anyjson==0.3.3            # via kombu
 appnope==0.1.0            # via ipython
-arrow==0.7.0              # via invenio-migrator, jinja2-time
+arrow==0.8.0              # via invenio-formatter, invenio-migrator, jinja2-time
 Babel==2.3.4              # via flask-babelex
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 billiard==3.3.0.23        # via celery
 binaryornot==0.4.0        # via cookiecutter
-blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flask-principal, invenio-oauthclient, invenio-records
+blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flask-principal, invenio-oauthclient, invenio-records, raven
+cairocffi==0.7.2          # via cairosvg
+CairoSVG==1.0.21
 cds-dojson==0.3.1
-celery==3.1.23            # via flask-celeryext, invenio-files-rest, invenio-indexer
-cffi==1.6.0               # via cryptography
+celery==3.1.23            # via flask-celeryext, invenio-files-rest, invenio-indexer, invenio-logging
+cffi==1.6.0               # via cairocffi, cryptography
 chardet==2.3.0            # via binaryornot, invenio-previewer
-click==6.6                # via cookiecutter, dojson, flask-cli, invenio-migrator
+Click==6.6                # via cookiecutter, dojson, flask-cli, invenio-migrator
+contextlib2==0.5.3        # via raven
 cookiecutter==1.4.0       # via invenio-base
-cryptography==1.3.2       # via invenio-oauthclient
+cryptography==1.4         # via invenio-accounts, invenio-oauthclient
 datacite==0.2.1
 dcxml==0.1.0
-decorator==4.0.9          # via ipython, traitlets
+decorator==4.0.10         # via ipython, traitlets
 dojson==1.2.1             # via cds-dojson, invenio-migrator, invenio-oaiserver
 elasticsearch-dsl==2.0.0  # via invenio-oaiserver, invenio-records-rest, invenio-search
 elasticsearch==2.3.0      # via elasticsearch-dsl, invenio-search
-entrypoints==0.2.1        # via nbconvert
-Flask-Admin==1.4.0        # via invenio-admin
+entrypoints==0.2.2        # via nbconvert
+Flask-Admin==1.4.2        # via invenio-admin
 Flask-Assets==0.11        # via invenio-assets
-Flask-BabelEx==0.9.3      # via invenio-accounts, invenio-i18n, invenio-oaiserver, invenio-oauthclient, invenio-pages, invenio-pidstore, invenio-previewer, invenio-records-ui, invenio-search, invenio-search-ui, invenio-theme, invenio-userprofiles
+Flask-BabelEx==0.9.3      # via invenio-accounts, invenio-formatter, invenio-i18n, invenio-oaiserver, invenio-oauthclient, invenio-pages, invenio-pidstore, invenio-previewer, invenio-records-rest, invenio-records-ui, invenio-search, invenio-search-ui, invenio-sipstore, invenio-theme, invenio-userprofiles
 Flask-Breadcrumbs==0.3.0  # via invenio-oauthclient, invenio-theme, invenio-userprofiles
 Flask-CeleryExt==0.2.0    # via invenio-celery, invenio-migrator, invenio-records
-Flask-CLI==0.2.1          # via invenio-access, invenio-assets, invenio-base, invenio-db, invenio-files-rest, invenio-migrator, invenio-records-rest, invenio-search
+Flask-CLI==0.3.0          # via invenio-access, invenio-assets, invenio-base, invenio-db, invenio-files-rest, invenio-migrator, invenio-oauthclient, invenio-records-rest, invenio-search
 Flask-Collect==1.2.2      # via invenio-assets
 Flask-CORS==2.1.2         # via invenio-rest
 Flask-Debugtoolbar==0.10.0
@@ -50,54 +53,56 @@ Flask-RESTful==0.3.5      # via flask-iiif
 Flask-Security==1.7.5     # via invenio-accounts, invenio-oauthclient
 Flask-SQLAlchemy==2.1     # via invenio-db
 Flask-WTF==0.12           # via flask-security, invenio-files-rest, invenio-userprofiles
-Flask==0.10.1             # via flask-admin, flask-assets, flask-babelex, flask-breadcrumbs, flask-celeryext, flask-cli, flask-collect, flask-cors, flask-debugtoolbar, flask-iiif, flask-kvsession, flask-limiter, flask-login, flask-mail, flask-menu, flask-oauthlib, flask-principal, flask-restful, flask-security, flask-sqlalchemy, flask-wtf, invenio-base, invenio-config, invenio-files-rest, invenio-jsonschemas, invenio-logging, invenio-migrator, invenio-oauthclient
+Flask==0.10.1             # via flask-admin, flask-assets, flask-babelex, flask-breadcrumbs, flask-celeryext, flask-cli, flask-collect, flask-cors, flask-debugtoolbar, flask-iiif, flask-kvsession, flask-limiter, flask-login, flask-mail, flask-menu, flask-oauthlib, flask-principal, flask-restful, flask-security, flask-sqlalchemy, flask-wtf, invenio-base, invenio-config, invenio-files-rest, invenio-formatter, invenio-jsonschemas, invenio-logging, invenio-migrator, invenio-oauthclient, invenio-pages, raven
 fs==0.5.4                 # via invenio-files-rest
 future==0.15.2            # via cookiecutter
 gnureadline==6.3.3        # via ipython
 idna==2.1                 # via cryptography
 idutils==0.2.0
-invenio-access==1.0.0a5
-invenio-accounts==1.0.0a10
+invenio-access==1.0.0a7
+invenio-accounts==1.0.0a12
 invenio-admin==1.0.0a3
 invenio-assets==1.0.0a4
-invenio-base==1.0.0a9
+invenio-base==1.0.0a11
 invenio-celery==1.0.0a4
 invenio-config==1.0.0a1
 invenio-db[postgresql,versioning]==1.0.0a9
-invenio-files-rest==1.0.0a1
+invenio-files-rest==1.0.0a3
+invenio-formatter==1.0.0a2
 invenio-i18n==1.0.0a4
-invenio-indexer==1.0.0a4
+invenio-indexer==1.0.0a6
 invenio-jsonschemas==1.0.0a3
-invenio-logging==1.0.0a2
-invenio-mail==1.0.0a3
-invenio-migrator[loader]==1.0.0a5
-invenio-oaiserver==1.0.0a4
-invenio-oauthclient==1.0.0a3
-invenio-pages==1.0.0a2
+invenio-logging[sentry]==1.0.0a2
+invenio-mail==1.0.0a4
+invenio-migrator[loader]==1.0.0a6
+invenio-oaiserver==1.0.0a5
+invenio-oauthclient==1.0.0a6
+invenio-pages==1.0.0a3
 invenio-pidstore==1.0.0a7
-invenio-previewer==1.0.0a2
+invenio-previewer==1.0.0a4
 invenio-query-parser==0.6.0
-invenio-records-files==1.0.0a1  # via invenio-migrator
-invenio-records-rest==1.0.0a13
-invenio-records-ui==1.0.0a6
-invenio-records[postgresql]==1.0.0a15
-invenio-rest[cors]==1.0.0a7
-invenio-search-ui==1.0.0a4
+invenio-records-files==1.0.0a6  # via invenio-migrator
+invenio-records-rest==1.0.0a15
+invenio-records-ui==1.0.0a7
+invenio-records[postgresql]==1.0.0a16
+invenio-rest[cors]==1.0.0a9
+invenio-search-ui==1.0.0a5
 invenio-search==1.0.0a7
-invenio-theme==1.0.0a11
-invenio-userprofiles==1.0.0a5
+invenio-sipstore==1.0.0a2  # via invenio-migrator
+invenio-theme==1.0.0a13
+invenio-userprofiles==1.0.0a7
 ipython-genutils==0.1.0   # via nbformat, traitlets
 ipython==4.2.0            # via invenio-previewer
 isbnlib==3.5.8            # via idutils
 itsdangerous==0.24        # via flask, flask-debugtoolbar, flask-kvsession, flask-security
-jinja2-time==0.1.0        # via cookiecutter
-Jinja2==2.8               # via cookiecutter, flask, flask-babelex, jinja2-time, nbconvert
+jinja2-time==0.2.0        # via cookiecutter
+jinja2==2.8               # via cookiecutter, flask, flask-babelex, invenio-formatter, jinja2-time, nbconvert
 jsmin==2.2.1              # via invenio-theme
-jsonpatch==1.13           # via invenio-records
+jsonpatch==1.14           # via invenio-records
 jsonpointer==1.10         # via jsonpatch
 jsonref==0.1
 jsonresolver==0.2.1       # via invenio-records
-jsonschema==2.5.1         # via datacite, invenio-records, nbformat
+jsonschema==2.5.1         # via datacite, invenio-records, invenio-sipstore, nbformat
 jupyter-core==4.1.0       # via nbconvert, nbformat
 kombu==3.0.35             # via celery
 limits==1.1.1             # via flask-limiter
@@ -112,20 +117,21 @@ node-semver==0.1.1        # via invenio-assets
 oauthlib==0.7.2           # via flask-oauthlib, invenio-oauthclient
 ordereddict==1.1          # via invenio-query-parser
 passlib==1.6.5            # via flask-security
-pexpect==4.0.1            # via ipython
+pexpect==4.1.0            # via ipython
 pickleshare==0.7.2        # via ipython
-pillow==3.2.0             # via flask-iiif
+Pillow==3.2.0             # via flask-iiif
 pluggy==0.3.1             # via jsonresolver
-poyo==0.2.0               # via cookiecutter
+poyo==0.4.0               # via cookiecutter
 psycopg2==2.6.1           # via invenio-db
 ptyprocess==0.5.1         # via pexpect
 pyasn1==0.1.9             # via cryptography
 pycparser==2.14           # via cffi
 pygments==2.1.3           # via nbconvert
-pyPEG2==2.15.2            # via invenio-query-parser, invenio-search
+pypeg2==2.15.2            # via invenio-query-parser, invenio-search
 python-dateutil==2.5.3    # via aniso8601, arrow, elasticsearch-dsl, invenio-records-rest
 python-slugify==1.2.0
-pytz==2016.4              # via babel, celery, flask-restful
+pytz==2016.4              # via babel, celery, flask-restful, invenio-indexer
+raven[flask]==5.20.0      # via invenio-logging
 redis==2.10.5             # via invenio-accounts, invenio-celery
 requests==2.10.0          # via datacite, invenio-search
 simplegeneric==0.8.1      # via ipython
@@ -134,16 +140,17 @@ simplekv==0.10.0          # via flask-kvsession
 six==1.10.0               # via cryptography, dojson, elasticsearch-dsl, flask-breadcrumbs, flask-cors, flask-iiif, flask-kvsession, flask-limiter, flask-menu, flask-restful, fs, idutils, invenio-i18n, invenio-logging, invenio-migrator, invenio-oauthclient, invenio-query-parser, invenio-records-rest, jsonresolver, limits, python-dateutil, sqlalchemy-utils
 speaklater==1.3           # via flask-babelex
 SQLAlchemy-Continuum==1.2.4  # via invenio-db
-SQLAlchemy-Utils[ipaddress]==0.32.5  # via invenio-accounts, invenio-db, invenio-files-rest, invenio-oauthclient, invenio-records, sqlalchemy-continuum
-SQLAlchemy==1.0.12        # via flask-sqlalchemy, invenio-db, sqlalchemy-continuum, sqlalchemy-utils
+SQLAlchemy-Utils[ipaddress]==0.32.7  # via invenio-accounts, invenio-db, invenio-files-rest, invenio-oauthclient, invenio-records, sqlalchemy-continuum
+SQLAlchemy==1.0.13        # via flask-sqlalchemy, invenio-db, sqlalchemy-continuum, sqlalchemy-utils
 traitlets==4.2.1          # via ipython, jupyter-core, nbconvert, nbformat
 Unidecode==0.4.19         # via python-slugify
 uritools==1.0.2           # via invenio-oauthclient
-urllib3==1.15.1           # via elasticsearch
-webargs==1.3.2            # via invenio-files-rest, invenio-oaiserver
+urllib3==1.16             # via elasticsearch
+Wand==0.4.3
+webargs==1.3.4            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
 webassets==0.11.1         # via flask-assets, invenio-assets
-werkzeug==0.11.9          # via flask, flask-debugtoolbar, flask-kvsession, flask-wtf, invenio-migrator, jsonresolver
-whichcraft==0.3.1         # via cookiecutter
+werkzeug==0.11.10         # via flask, flask-debugtoolbar, flask-kvsession, flask-wtf, invenio-migrator, jsonresolver
+whichcraft==0.4.0         # via cookiecutter
 WTForms==2.1              # via flask-admin, flask-wtf, invenio-files-rest, invenio-userprofiles
 
 # The following packages are commented out because they are
