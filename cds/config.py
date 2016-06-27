@@ -242,6 +242,13 @@ RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
     'cds.modules.search.access_control:cern_read_factory'
 
 ###############################################################################
+# Files
+###############################################################################
+FILES_REST_PERMISSION_FACTORY = \
+    'cds.modules.search.access_control:cern_file_read_factory'
+
+
+###############################################################################
 # Formatter
 ###############################################################################
 #: List of allowed titles in badges.
@@ -301,8 +308,8 @@ OAUTHCLIENT_REMOTE_APPS = dict(
 )
 #: Credentials for CERN OAuth (must be changed to work).
 CERN_APP_CREDENTIALS = dict(
-    consumer_key="CHANGE ME",
-    consumer_secret="CHANGE ME",
+    consumer_key='CHANGE_ME',
+    consumer_secret='CHANGE_ME',
 )
 
 ###############################################################################

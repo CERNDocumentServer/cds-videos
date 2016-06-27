@@ -31,7 +31,6 @@ import uuid
 from cds.modules.search.access_control import cern_read_factory
 from flask import g
 from flask_principal import RoleNeed, UserNeed
-from invenio_indexer.api import RecordIndexer
 from invenio_records.api import Record
 from cds.modules.search.access_control import CERNRecordsSearch
 
@@ -42,25 +41,21 @@ def mock_provides(needs):
     g.identity.provides = needs
 
 
-def test_search_access():
+def test_record_access(db):
     """Test access control for search."""
     mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
-    indexer = RecordIndexer()
 
     def check_record(json, allowed=True):
         # Create uuid
         id = uuid.uuid4()
-        rec = type('obj', (object,), {'id': id})
 
-        # Index record
-        indexer.index(Record.create(json, id_=id))
+        # Create record
+        rec = type('obj', (object,), {'id': id})
+        Record.create(json, id_=id)
 
         # Check permission factory
         factory = cern_read_factory(rec)
         assert factory.can() if allowed else not factory.can()
-
-        # Cleanup ElasticSearch
-        indexer.delete_by_id(id)
 
     # Check test records
     check_record({'_access': {'read': ['test@test.ch', 'groupA', 'groupB']}})
@@ -81,4 +76,3 @@ def test_es_filter():
             ]
         }}]}}
     ]
-

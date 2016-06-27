@@ -22,55 +22,72 @@
 from elasticsearch_dsl.query import Q
 from flask import g
 from invenio_records.api import Record
+from invenio_records_files.models import RecordsBuckets
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 
 
+def _get_user_provides():
+    """Extracts the user's provides from g."""
+    return [str(need.value) for need in sorted(g.identity.provides)]
+
+
+def _has_access(data, action='read'):
+    """Check if current user is allowed access to some data."""
+
+    if '_access' not in data:
+        return True
+
+    # Get user's provides
+    user_groups = _get_user_provides()
+
+    # Get bucket's access rights
+    data_groups = data['_access'][action]
+
+    if not data_groups:
+        return True
+
+    return not set(user_groups).isdisjoint(set(data_groups))
+
+
+# FIXME consider all actions
 def cern_read_factory(record, *args, **kwargs):
-    """Restrict search results based on CERN groups and user e-mail.
-
-     Records should have an '_access' field containing three nested fields,
-     namely 'read', 'write' and 'admin', each having zero or more groups/emails
-     that are given the enclosing access right.
-
-     JSON example:
-
-      "_access": [
-         {
-          "read": ["it-dep-cda", "it-dep", "reader@cern.ch"],
-          "write": [], # ANYONE can write!!
-          "admin": ["orestis.melkon@cern.ch"]
-         }
-      ]
-    """
+    """Restrict search results based on CERN groups and user e-mail."""
 
     def can(self):
         """Cross-check user's CERN groups with the record's '_access' field."""
 
-        user_groups = [str(need.value) for need in sorted(g.identity.provides)]
-
+        # Get record
         rec = Record.get_record(record.id)
-
-        # Records with no `_access` field are public
-        if '_access' not in rec:
-            return True
-
-        rec_groups = rec['_access']['read']
-
-        # Records with empty lists are public
-        if not rec_groups:
-            return True
-
-        return not set(user_groups).isdisjoint(set(rec_groups))
+        # Check access
+        return _has_access(rec)
 
     return type('CERNRead', (), {'can': can})()
+
+
+# FIXME consider all actions
+def cern_file_factory(bucket, action):
+    """Restrict file access based on CERN groups and user e-mail."""
+
+    def can(self):
+        """Cross-check user's provides with the bucket's '_access' field."""
+
+        # Get record bucket
+        rb = RecordsBuckets.query.filter_by(bucket_id=bucket.id).one()
+        # Get record
+        rec = rb.record.json
+        # Check access
+        # FIXME consider all actions
+        return _has_access(rec)
+
+    return type('CERNFileAccess', (), {'can': can})()
 
 
 def cern_filter():
     """Filter list of results."""
 
     # Get CERN user's provides
-    provides = [str(need.value) for need in sorted(g.identity.provides)]
+    provides = _get_user_provides()
 
     # Filter for public records
     public = Q('missing', field='_access.read')

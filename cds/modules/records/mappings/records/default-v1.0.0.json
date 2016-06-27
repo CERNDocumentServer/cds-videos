@@ -13,14 +13,6 @@
                             "type": "string",
                             "index": "not_analyzed"
                         },
-                        "write": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "admin": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        }
                     }
                 },
                 "location": {
