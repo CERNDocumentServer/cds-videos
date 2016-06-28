@@ -23,23 +23,23 @@ from __future__ import absolute_import, print_function
 
 import tarfile
 import uuid
+from os import listdir, makedirs
+from os.path import basename, exists, isdir, join, splitext
 
 import click
 import pkg_resources
-from os import makedirs, listdir
-from os.path import basename, exists, join, isdir, splitext
-
-from flask import current_app
-from flask_cli import with_appcontext
-
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
+from flask import current_app
+from flask_cli import with_appcontext
 from invenio_db import db
-from invenio_files_rest.models import Bucket, FileInstance, Location, \
-    ObjectVersion
+from invenio_files_rest.models import (Bucket, FileInstance, Location,
+                                       ObjectVersion)
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
+from invenio_records_files.api import Record as FileRecord
+from invenio_records_files.models import RecordsBuckets
 
 
 def _handle_source(source, temp):
@@ -209,18 +209,25 @@ def files(temp, source):
     loc = Location(name='local', uri=d, default=True)
     db.session.commit()
 
-    bucket = Bucket.create(loc)
-
     # Record indexer
     indexer = RecordIndexer()
     for f in files:
         with open(join(source, f), 'rb') as fp:
+            # Create bucket
+            bucket = Bucket.create(loc)
+
             # The filename
             file_name = basename(f)
+
+            # Create object version
             ObjectVersion.create(bucket, file_name, stream=fp)
+
             # Attach to dummy records
             rec_uuid = uuid.uuid4()
             record = {
+                '_access': {
+                    'read': ['orestis.melkonian@cern.ch', 'it-dep']
+                },
                 'dummy': True,
                 'files': [
                     {
@@ -232,11 +239,19 @@ def files(temp, source):
                     }
                 ]
             }
-            # create PID
+
+            # Create PID
             current_pidstore.minters['recid'](
                 rec_uuid, record
             )
-            # create record
-            indexer.index(Record.create(record, id_=rec_uuid))
+
+            # Create record
+            record = FileRecord.create(record, id_=rec_uuid)
+
+            # Index record
+            indexer.index(record)
+
+            # Create records' bucket
+            RecordsBuckets.create(record=record.model, bucket=bucket)
     db.session.commit()
     click.echo('DONE :)')
