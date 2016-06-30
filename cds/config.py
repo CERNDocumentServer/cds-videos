@@ -31,10 +31,12 @@ import os
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
+from .modules.access.access_control import CERNRecordsSearch
+
 
 # Identity function for string extraction
 def _(x):
-    """Indentity function."""
+    """Identity function."""
     return x
 
 ###############################################################################
@@ -155,6 +157,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher='recid',
         search_index='records',
         search_type=None,
+        search_class=CERNRecordsSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
@@ -205,7 +208,8 @@ RECORDS_REST_FACETS = dict(
                       'sound_track_or_separate_title')),
             topic=dict(terms=dict(
                 field='subject_added_entry_topical_term.'
-                      'topical_term_or_geographic_name_entry_element.untouched')),
+                      'topical_term_or_geographic_name_entry_element.untouched'
+            )),
             years=dict(date_histogram=dict(
                 field='imprint.complete_date',
                 interval='year',
@@ -234,8 +238,15 @@ RECORDS_VALIDATION_TYPES = dict(
     array=(list, tuple),
 )
 
-# FIXME: Disable permissions for now.
-RECORDS_UI_DEFAULT_PERMISSION_FACTORY = None
+RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
+    'cds.modules.access.access_control:cern_read_factory'
+
+###############################################################################
+# Files
+###############################################################################
+FILES_REST_PERMISSION_FACTORY = \
+    'cds.modules.access.access_control:cern_file_read_factory'
+
 
 ###############################################################################
 # Formatter
@@ -291,8 +302,14 @@ USERPROFILES_EMAIL_ENABLED = False
 ###############################################################################
 # OAuth
 ###############################################################################
+
 OAUTHCLIENT_REMOTE_APPS = dict(
     cern=cern.REMOTE_APP,
+)
+#: Credentials for CERN OAuth (must be changed to work).
+CERN_APP_CREDENTIALS = dict(
+    consumer_key='CHANGE_ME',
+    consumer_secret='CHANGE_ME',
 )
 
 ###############################################################################

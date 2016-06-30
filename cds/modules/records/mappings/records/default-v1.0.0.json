@@ -7,6 +7,14 @@
             "date_detection": true,
             "numeric_detection": true,
             "properties": {
+                "_access": {
+                    "properties": {
+                        "read": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        },
+                    }
+                },
                 "location": {
                     "properties": {
                         "location": {
