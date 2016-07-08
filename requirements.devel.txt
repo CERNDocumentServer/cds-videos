@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-Flask==0.10.1
 # When installing from github the requirements extras doesn't seem to work
 CairoSVG >= 1.0.20 # dependency of invenio-formatter[badges]
 Flask-Cors>=2.1.2 # dependency of invenio-rest
