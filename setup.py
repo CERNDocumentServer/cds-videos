@@ -122,6 +122,7 @@ install_requires = [
     'Pillow>=3.2.0',
     'python-slugify>=1.2.0',
     'raven<=5.1.0',
+    'requests>=2.10.0',
     'Wand>=0.4.2',
 ]
 
@@ -167,6 +168,9 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
+        ],
+        'invenio_pidstore.minters': [
+            'cds_recid = cds.modules.records.minters:recid_minter',
         ],
         'invenio_i18n.translations': [
             'messages = cds',

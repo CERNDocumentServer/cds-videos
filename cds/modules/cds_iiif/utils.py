@@ -22,7 +22,6 @@
 import tempfile
 
 import wand.image
-
 from invenio_records_files.api import ObjectVersion
 
 

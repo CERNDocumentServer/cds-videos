@@ -153,7 +153,7 @@ RECORDS_UI_TOMBSTONE_TEMPLATE = "invenio_records_ui/tombstone.html"
 RECORDS_REST_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',
-        pid_minter='recid',
+        pid_minter='cds_recid',
         pid_fetcher='recid',
         search_index='records',
         search_type=None,
@@ -240,6 +240,10 @@ RECORDS_VALIDATION_TYPES = dict(
 
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
     'cds.modules.access.access_control:cern_read_factory'
+
+# Endpoint and user agent for the cds_recid provider
+RECORDS_ID_PROVIDER_ENDPOINT = \
+    'http://cds-test.cern.ch/batchuploader/allocaterecord'
 
 ###############################################################################
 # Files
