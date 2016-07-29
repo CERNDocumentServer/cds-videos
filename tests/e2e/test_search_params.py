@@ -44,6 +44,11 @@ def test_search_params(live_server, env_browser, demo_records):
     # Search bar
     search_val = 'a'
 
+    WebDriverWait(env_browser, 120).until(
+        EC.presence_of_all_elements_located(
+            (By.CLASS_NAME, 'cds-home-input'))
+    )
+
     search_input = env_browser.find_element_by_name('q')
     search_input.send_keys(search_val)
     search_input.send_keys(Keys.RETURN)

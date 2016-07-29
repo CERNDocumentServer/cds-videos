@@ -39,6 +39,10 @@ def test_search(live_server, env_browser, demo_records):
         url_for('cds_home.index', _external=True)
     )
 
+    WebDriverWait(env_browser, 120).until(
+        EC.presence_of_all_elements_located(
+            (By.CLASS_NAME, 'cds-home-input'))
+    )
     # Search bar
     search_input = env_browser.find_element_by_name('q')
     search_input.send_keys('')

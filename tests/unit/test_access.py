@@ -58,6 +58,7 @@ def test_record_access(db):
         assert factory.can() if allowed else not factory.can()
 
     # Check test records
+    check_record({'foo': 'bar'})
     check_record({'_access': {'read': ['test@test.ch', 'groupA', 'groupB']}})
     check_record({'_access': {'read': ['test2@test2.ch', 'groupC']}}, False)
     check_record({'_access': {'read': ['groupX']}})

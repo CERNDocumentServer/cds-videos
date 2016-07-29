@@ -61,11 +61,10 @@ def base_app(request):
     )
 
     app = create_app(
-        CELERY_ALWAYS_EAGER=True,
-        CELERY_CACHE_BACKEND="memory",
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-        CELERY_RESULT_BACKEND="cache",
-        DEBUG_TB_ENABLED=False,
+        # CELERY_ALWAYS_EAGER=True,
+        # CELERY_CACHE_BACKEND="memory",
+        # CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        # CELERY_RESULT_BACKEND="cache",
         SECRET_KEY="CHANGE_ME",
         SECURITY_PASSWORD_SALT="CHANGE_ME",
         MAIL_SUPPRESS_SEND=True,

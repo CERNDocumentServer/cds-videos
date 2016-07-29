@@ -49,7 +49,7 @@ tests_require = [
     'pytest-pep8>=1.0.6',
     'pytest-runner>=2.7.0',
     'pytest>=2.8.0',
-    'selenium>=2.48.0,<2.53.0',
+    'selenium>=2.53.6',
     'six>=1.10.0',
 ]
 
