@@ -67,6 +67,10 @@ a[ng-click]{
   }
 }
 
+.site-wrapper {
+  height: 100%;
+}
+
 // /home
 
 .cds-home {
@@ -103,7 +107,7 @@ a[ng-click]{
 
 .cds-card-popular {
   .panel-body {
-    background-color: $primary-color-light;
+    background-color: $primary-color;
   }
 }
 
@@ -129,20 +133,6 @@ a[ng-click]{
   right:0;
   margin: 0 auto;
   position: absolute;
-}
-
-/////////
-
-// /search
-
-.cds-navbar-form {
-  width: 60%;
-  .form-group, .input-group {
-    width: 100%;
-  }
-  input {
-    width: 80%;
-  }
 }
 
 /////////
@@ -183,6 +173,16 @@ a[ng-click]{
 /////////
 
 // /search
+
+.cds-navbar-form {
+  width: 50%;
+  .form-group, .input-group {
+    width: 100%;
+  }
+  input {
+    width: 50%;
+  }
+}
 
 .cds-media {
   margin-bottom: 40px;
@@ -283,4 +283,17 @@ a[ng-click]{
 
 .cds-media-object {
   border: 1px solid #999;
+}
+
+// login
+
+.cds-login {
+  height: 100%;
+  background: #003973;
+  background: -webkit-linear-gradient(to left, #003973 , #E5E5BE);
+  background: linear-gradient(to left, #003973 , #E5E5BE);
+}
+
+.cds-login .panel {
+  margin-top: 25vh;
 }
