@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "allOf": [
+        {"$ref": "../marc21/bibliographic/bd-v1.0.0.json"},
+        {"$ref": "bd01x09x.json"},
+        {"$ref": "bd2xx.json"},
+        {"$ref": "bd5xx.json"},
+        {"$ref": "bd6xx.json"},
+        {"$ref": "bd7xx.json"},
+        {"$ref": "bd8xx.json"},
+        {"$ref": "bd9xx.json"}
+    ]
+}

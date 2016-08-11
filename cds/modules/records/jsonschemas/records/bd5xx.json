@@ -1,0 +1,62 @@
+{
+    "type": "object",
+    "properties": {
+        "french_summary_note": {
+            "description": "Library of Congress Control Number",
+            "properties": {
+                "sumary": {
+                    "type": "string"
+                },
+                "expansion_of_summary_note": {
+                    "type": "string"
+                }
+            }
+        },
+        "field_591": {
+            "description": "Type of Document",
+            "properties": {
+                "subfield_a": {
+                    "type": "string"
+                },
+                "subfield_b": {
+                    "type": "string"
+                }
+            }
+        },
+        "type_of_document": {
+            "description": "Type of Document",
+            "type": "string"
+        },
+        "internal_note": {
+            "description": "Internal NOTE",
+            "properties": {
+                "internal_note": {
+                    "type": "string"
+                },
+                "control_field": {
+                    "type": "string"
+                },
+                "inspec_number": {
+                    "type": "string"
+                },
+                "subject_note": {
+                    "type": "string"
+                },
+                "additional_note": {
+                    "type": "string"
+                }
+            }
+        },
+        "slac_note": {
+            "description": "Slac note - some kind of internal note",
+            "properties": {
+                "slac_note": {
+                    "type": "string"
+                },
+                "dump": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

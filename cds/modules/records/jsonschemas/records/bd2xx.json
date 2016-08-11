@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "imprint": {
+            "description": "Pre-publication, distribution, etc.",
+            "properties": {
+                "place_of_publication": {
+                    "type": "string"
+                },
+                "name_of_publication": {
+                    "type": "string"
+                },
+                "complete_date": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "type": "object",
+    "properties": {
+        "album_parent": {
+            "description": "Album ID which contains this photo",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "dump_album": {
+                        "type": "string"
+                    },
+                    "album_id": {
+                        "type": "string"
+                    },
+                }
+            }
+        },
+        "image_url": {
+            "description": "Image URL",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "size": {
+                        "type": "string"
+                    },
+                    "path": {
+                        "type": "string"
+                    },
+                    "electronic_format_type": {
+                        "type": "string"
+                    },
+                    "uri": {
+                        "type": "string"
+                    },
+                    "link_text": {
+                        "type": "string"
+                    },
+                    "subformat": {
+                        "type": "string"
+                    },
+                    "photo_id": {
+                        "type": "string"
+                    },
+                    "relationship": {
+                        "type": "string"
+                    },
+                    "public_note": {
+                        "type": "string"
+                    },
+                    "access_method": {
+                        "type": "string"
+                    },
+                }
+            }
+        }
+    }
+}

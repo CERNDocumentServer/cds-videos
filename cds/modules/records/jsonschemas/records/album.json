@@ -1,0 +1,44 @@
+{
+    "type": "object",
+    "properties": {
+        "images": {
+            "description": "Images contained in the album",
+            "properties": {
+                "record_type": {
+                    "type": "string"
+                },
+                "relation": {
+                    "type": "string"
+                },
+                "$ref": {
+                    "type": "string"
+                }
+            }
+        },
+        "place_of_photo": {
+            "description": "Place of photo where it was taken and requester info",
+            "properties": {
+                "place": {
+                    "type": "string"
+                },
+                "requester": {
+                    "type": "string"
+                }
+            }
+        },
+        "photolab": {
+            "description": "PhotoLab",
+            "properties": {
+                "tirage":{
+                    "type": "string"
+                },
+                "photolab_1": {
+                    "type": "string"
+                },
+                "photolab_2": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

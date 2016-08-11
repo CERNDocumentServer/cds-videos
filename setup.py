@@ -180,7 +180,7 @@ setup(
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
-            'cds_marc21 = cds_dojson.marc21.schemas',
+            'cds = cds.modules.records.jsonschemas',
         ]
     },
     extras_require=extras_require,

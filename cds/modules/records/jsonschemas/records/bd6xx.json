@@ -1,0 +1,88 @@
+{
+    "type": "object",
+    "properties": {
+        "index_term_uncontrolled": {
+            "description": "Index Term-Uncontrolled",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "level_of_index_term": {
+                        "enum": ["No level specified", "Primary", "No information provided", "Secondary"]
+                    },
+                    "type_of_term_or_name": {
+                        "enum": ["Topical term", "No information provided", "Meeting name", "Geographic name", "Personal name", "Genre/form term", "Chronological term", "Corporate name"]
+                    },
+                    "uncontrolled_term": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "field_link_and_sequence_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "linkage": {
+                        "type": "string"
+                    },
+                    "institute_of_the_uncontrolled_term": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "subject_indicator": {
+            "description": "Subject Indicator",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "observation": {
+            "description": "Observation",
+            "type": "string"
+        },
+        "accelerator_experiment": {
+            "description": "Experiment",
+            "properties": {
+                "accelerator": {
+                    "type": "string"
+                },
+                "experiment": {
+                    "type": "string"
+                },
+                "facility": {
+                    "type": "string"
+                },
+                "subfield_s": {
+                    "type": "string"
+                }
+            }
+        },
+        "classification_terms": {
+            "description": "Classification terms",
+            "properties": {
+                "uncontrolled_term": {
+                    "type": "string"
+                },
+                "institute": {
+                    "type": "string"
+                }
+            }
+        },
+        "thesaurus_terms": {
+            "description": "Classification terms",
+            "properties": {
+                "uncontrolled_term": {
+                    "type": "string"
+                },
+                "institute": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
