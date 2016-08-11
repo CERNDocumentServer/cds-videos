@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "electronic_mail_message": {
+            "description": "",
+            "properties": {
+                "contact": {
+                    "type": "string"
+                },
+                "e-mail_address": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

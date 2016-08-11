@@ -1,0 +1,364 @@
+{
+    "type": "object",
+    "properties": {
+        "affiliation_at_conversion": {
+            "description": "Affiliation at conversion",
+            "properties":{
+                "name_of_institute": {
+                    "type": "string"
+                }
+            }
+        },
+        "grey_book": {
+            "description": "Grey book",
+            "properties": {
+                "approval": {
+                    "type": "string"
+                },
+                "beam": {
+                    "type": "string"
+                },
+                "status_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "spokesman": {
+            "description": "Spokesman",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "telephone": {
+                    "type": "string"
+                },
+                "fax": {
+                    "type": "string"
+                },
+                "e-mail": {
+                    "type": "string"
+                },
+                "personal_name": {
+                    "type": "string"
+                },
+                "private_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "referee": {
+            "description": "Referee",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "telephone": {
+                    "type": "string"
+                },
+                "fax": {
+                    "type": "string"
+                },
+                "e-mail": {
+                    "type": "string"
+                },
+                "personal_name": {
+                    "type": "string"
+                },
+                "private_address": {
+                    "type": "string"
+                },
+                "affiliation": {
+                    "type": "string"
+                }
+            }
+        },
+        "fsgo": {
+            "description": "FGSO",
+            "properties": {
+                "personal_name": {
+                    "type": "string"
+                },
+                "alternate_abbreviated_title": {
+                    "type": "string"
+                }
+            }
+        },
+        "citation": {
+            "description": "Citation",
+            "properties": {
+                "citation": {
+                    "type": "string"
+                },
+                "unformatted_reference": {
+                    "type": "string"
+                },
+                "title_abbreviation": {
+                    "type": "string"
+                },
+                "uniform_resource_identifier": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+            }
+        },
+        "status_week": {
+            "description": "The status week",
+            "properties": {
+                "subfacquisition_of_proceedings_codeield_a": {
+                    "type": "string"
+                },
+                "display_period_for_books": {
+                    "type": "string"
+                },
+                "number_of_copies_bought_by_cern": {
+                    "type": "string"
+                },
+                "status_of_record": {
+                    "type": "string"
+                },
+                "status_week": {
+                    "type": "string"
+                },
+                "year_for_annual_list": {
+                    "type": "string"
+                }
+            }
+        },
+        "dates": {
+            "description": "Type of Document",
+            "properties": {
+                "opening": {
+                    "type": "string"
+                },
+                "closing": {
+                    "type": "string"
+                }
+            }
+        },
+        "file_number": {
+            "description": "File number",
+            "type": "string"
+        },
+        "peri_internal_note": {
+            "description": "Peri: internal note",
+            "properties": {
+                "internal_note": {
+                    "type": "string"
+                },
+                "modification_date": {
+                    "type": "string"
+                },
+                "responsible_of_the_modification": {
+                    "type": "string"
+                }
+            }
+        },
+        "base": {
+            "description": "Base",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cat": {
+            "description": "CAT.",
+            "properties": {
+                "cataloger": {
+                    "type": "string"
+                },
+                "cataloger_level": {
+                    "type": "string"
+                },
+                "modification_date": {
+                    "type": "string"
+                },
+                "library": {
+                    "type": "string"
+                },
+                "hour": {
+                    "type": "string"
+                },
+                "creation_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "aleph_linking_field": {
+            "description": "ALEPH linking field.",
+            "properties": {
+                "link_type": {
+                    "type": "string"
+                },
+                "sysno": {
+                    "type": "string"
+                },
+                "library": {
+                    "type": "string"
+                },
+                "down_record_link_note": {
+                    "type": "string"
+                },
+                "up_record_link_note": {
+                    "type": "string"
+                },
+                "year_link": {
+                    "type": "string"
+                },
+                "volume_link": {
+                    "type": "string"
+                },
+                "part_link": {
+                    "type": "string"
+                },
+                "issue_link": {
+                    "type": "string"
+                },
+                "pages_link": {
+                    "type": "string"
+                },
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        "owner": {
+            "description": "Owner",
+            "properties": {
+                "owner": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "item": {
+            "description": "Item",
+            "properties": {
+                "owner": {
+                    "type": "string"
+                }
+            }
+        },
+        "sysno": {
+            "description": "sysno",
+            "properties": {
+                "sysno": {
+                    "type": "string"
+                },
+                "surviver": {
+                    "type": "string"
+                }
+            }
+        },
+        "collections": {
+            "description": "Collections",
+            "properties": {
+                "primary": {
+                    "type": "string"
+                },
+                "secondary": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "string"
+                }
+
+            }
+        },
+        "system_number_of_deleted_double_records": {
+            "description": "System number of deleted double records",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "additional_subject_added_entry_topical_term": {
+            "description": "Additional subject added entry- topical term",
+            "properties": {
+                "processes": {
+                    "type": "string"
+                },
+                "accelerator_physics": {
+                    "type": "string"
+                },
+                "technology": {
+                    "type": "string"
+                }
+
+            }
+        },
+        "references": {
+            "description": "References",
+            "properties": {
+                "doi": {
+                    "type": "string"
+                },
+                "authors": {
+                    "type": "string"
+                },
+                "miscellaneous": {
+                    "type": "string"
+                },
+                "issue_number": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "string"
+                },
+                "report_number": {
+                    "type": "string"
+                },
+                "issue_number": {
+                    "type": "string"
+                },
+                "journal_publication_note": {
+                    "type": "string"
+                },
+                "journal_title_abbreviation": {
+                    "type": "string"
+                },
+                "uniform_resource_identifier": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+
+            }
+        },
+        "refexctract_references": {
+            "description": "Refexctract references",
+            "properties": {
+                "refextract_info": {
+                    "type": "string"
+                }
+            }
+        },
+        "record_type": {
+            "description": "Record type - mostly IMAGE",
+            "properties": {
+                "record_type": {
+                    "type": "string"
+                },
+                "dump": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

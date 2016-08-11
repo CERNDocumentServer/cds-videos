@@ -1,0 +1,72 @@
+{
+    "type": "object",
+    "properties": {
+        "international_standard_number": {
+            "description": "System Control Number",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "system_control_number": {
+            "description": "System Control Number",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "system_control_number": {
+                        "type": "string"
+                    },
+                    "field_link_and_sequence_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "canceled_invalid_control_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "linkage": {
+                        "type": "string"
+                    },
+                    "inst": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "report_number": {
+            "description": "Report Number",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "report_number": {
+                        "type": "string"
+                    },
+                    "field_link_and_sequence_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "canceled_invalid_report_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "linkage": {
+                        "type": "string"
+                    },
+                    "_report_number": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

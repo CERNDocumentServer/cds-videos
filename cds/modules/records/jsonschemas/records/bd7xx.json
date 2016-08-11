@@ -1,0 +1,145 @@
+{
+    "type": "object",
+    "properties": {
+        "added_entry_corporate_name": {
+            "description": "Added Entry-Corporate Name",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type_of_corporate_name_entry_element": {
+                        "enum": ["Inverted name", "Jurisdiction name", "Name in direct order"]
+                    },
+                    "type_of_added_entry": {
+                        "enum": ["No information provided", "Analytical entry"]
+                    },
+                    "authority_record_control_number_or_standard_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "materials_specified": {
+                        "type": "string"
+                    },
+                    "institution_to_which_field_applies": {
+                        "type": "string"
+                    },
+                    "relator_code": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "linkage": {
+                        "type": "string"
+                    },
+                    "field_link_and_sequence_number": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "corporate_name_or_jurisdiction_name_as_entry_element": {
+                        "type": "string"
+                    },
+                    "location_of_meeting": {
+                        "type": "string"
+                    },
+                    "subordinate_unit": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "relator_term": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "date_of_meeting_or_treaty_signing": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "miscellaneous_information": {
+                        "type": "string"
+                    },
+                    "date_of_a_work": {
+                        "type": "string"
+                    },
+                    "relationship_information": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "medium": {
+                        "type": "string"
+                    },
+                    "form_subheading": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "medium_of_performance_for_music": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "language_of_a_work": {
+                        "type": "string"
+                    },
+                    "arranged_statement_for_music": {
+                        "type": "string"
+                    },
+                    "number_of_part_section_meeting": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "name_of_part_section_of_a_work": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "version": {
+                        "type": "string"
+                    },
+                    "key_for_music": {
+                        "type": "string"
+                    },
+                    "affiliation": {
+                        "type": "string"
+                    },
+                    "title_of_a_work": {
+                        "type": "string"
+                    },
+                    "cern_work": {
+                        "type": "string"
+                    },
+                    "international_standard_serial_number": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "translator": {
+            "description": "Translator",
+            "properties": {
+                "personal_name": {
+                    "type": "string"
+                },
+                "words_translated": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

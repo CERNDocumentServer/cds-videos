@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CDS Video Record Schema v1.0.0",
+  "allOf": [
+    { "$ref": "base-v1.0.0.json" },
+    {
+      "properties": {
+        "title": { "$ref": "base-v1.0.0.json/definitions/title" },
+        "title_translations": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              { "$ref": "base-v1.0.0.json/definitions/title" },
+              {
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "keywords": { "$ref": "base-v1.0.0.json/definitions/keywords" },
+        "description": { "$ref": "base-v1.0.0.json/definitions/description" },
+        "description_translations": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              { "$ref": "base-v1.0.0.json/definitions/description" },
+              {
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "creator": { "$ref": "base-v1.0.0.json/definitions/creator" },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "allOff": [
+              {"$ref": "base-v1.0.0.json/definitions/contributor"},
+              {
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "Director",
+                      "Camera operator",
+                      "Producer",
+                      "Music by",
+                      "Editor",
+                      "Provider",
+                      "Translator",
+                      "Other"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "date": { "$ref": "base-v1.0.0.json/definitions/date" },
+        "copyright": { "$ref": "base-v1.0.0.json/definitions/copyright" },
+        "license": { "$ref": "base-v1.0.0.json/definitions/license" },
+        "_files": {
+          "description": ".",
+          "type": "array",
+          "items":{
+            "anyOf": [
+              {
+                "allOf": [
+                  { "$ref": "base-v1.0.0.json/definitions/file" },
+                  {
+                    "properties": {
+                      "category": {
+                        "enum": [
+                          "Master",
+                          "Slave"
+                        ]
+                      },
+                      "bitrate": {"type": "string"},
+                      "quality": {"type": "string"},
+                      "height": {"type": "string"},
+                      "width": {"type": "string"},
+                      "thumbnail": {"type": "string"}
+                    }
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  { "$ref": "base-v1.0.0.json/definitions/file" },
+                  {
+                    "properties": {
+                      "category": {
+                        "enum": [
+                          "Subtitle",
+                          "Other"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "allOf": [
+        {"$ref": "default-v1.0.0.json"}
+        {"$ref": "image.json"}
+    ]
+}
