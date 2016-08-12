@@ -78,7 +78,7 @@ install_requires = [
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
     'Flask>=0.11.1',
-    'cds-dojson>=0.3.1',
+    'cds-dojson>=0.3.2',
     'datacite>=0.2.1',
     'dcxml>=0.1.0',
     'idutils>=0.1.1',
@@ -180,7 +180,7 @@ setup(
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
-            'cds_marc21 = cds_dojson.marc21.schemas',
+            'cds = cds_dojson.schemas',
         ]
     },
     extras_require=extras_require,
