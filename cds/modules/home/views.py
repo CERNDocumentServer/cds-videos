@@ -48,6 +48,12 @@ def init_menu():
         _('About'),
         order=2,
     )
+    item = current_menu.submenu('main.deposit')
+    item.register(
+        'invenio_deposit_ui.index',
+        _('Deposit'),
+        order=3,
+    )
 
 
 @blueprint.route('/')
