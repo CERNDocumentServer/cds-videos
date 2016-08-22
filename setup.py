@@ -121,6 +121,7 @@ install_requires = [
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
     'Pillow>=3.2.0',
+    'pexpect>=4.2.1',
     'python-slugify>=1.2.0',
     'raven<=5.1.0',
     'requests>=2.10.0',
@@ -171,6 +172,9 @@ setup(
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
+        'invenio_base.api_blueprints': [
+            'cds_webhooks = cds.modules.webhooks.views:blueprint',
+        ],
         'invenio_pidstore.minters': [
             'cds_recid = cds.modules.records.minters:recid_minter',
         ],
@@ -184,6 +188,12 @@ setup(
             'marc21 = dojson.contrib.marc21.schemas',
             'cds = cds_dojson.schemas',
             'cds_deposit = cds.modules.deposit.jsonschemas',
+        ],
+        'invenio_celery.tasks': [
+            'cds = cds.modules.webhooks.tasks',
+        ],
+        'invenio_webhooks.receivers': [
+            'av = cds.modules.webhooks.receivers:AVWorkflow',
         ],
     },
     extras_require=extras_require,
