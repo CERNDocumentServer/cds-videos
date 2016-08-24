@@ -28,10 +28,13 @@ from __future__ import absolute_import, print_function
 
 import os
 
+from invenio_deposit.scopes import write_scope
+from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
 from .modules.access.access_control import CERNRecordsSearch
+from .modules.deposit.permissions import DepositPermission, can_edit_deposit
 
 
 # Identity function for string extraction
@@ -394,3 +397,42 @@ DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/form.json'
 DEPOSIT_DEFAULT_JSONSCHEMA = 'marc21/bibliographic/bd1xx.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
+DEPOSIT_SEARCH_API = '/api/deposits/'
+_PID = 'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
+DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{pid_value}'
+DEPOSIT_REST_ENDPOINTS = dict(
+    depid=dict(
+        pid_type='depid',
+        pid_minter='deposit',
+        pid_fetcher='deposit',
+        record_class='cds.modules.deposit.api:CDSDeposit',
+        files_serializers={
+            'application/json': ('invenio_deposit.serializers'
+                                 ':json_v1_files_response'),
+        },
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_class='invenio_deposit.search:DepositSearch',
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/deposits/',
+        item_route='/deposits/<{0}:pid_value>'.format(_PID),
+        file_list_route='/deposits/<{0}:pid_value>/files'.format(_PID),
+        file_item_route='/deposits/<{0}:pid_value>/files/<path:key>'.format(
+            _PID),
+        default_media_type='application/json',
+        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        create_permission_factory_imp=check_oauth2_scope(
+            lambda x: True, write_scope.id),
+        read_permission_factory_imp=DepositPermission,
+        update_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        max_result_window=10000,
+    ),
+)

@@ -36,6 +36,7 @@ import pytest
 from flask_cli import FlaskCLI, ScriptInfo
 from invenio_db import db as db_
 from invenio_files_rest.models import Location
+from invenio_files_rest.views import blueprint as files_rest_blueprint
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from cds.factory import create_app
@@ -61,6 +62,7 @@ def app():
         CELERY_CACHE_BACKEND="memory",
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
     )
+    app.register_blueprint(files_rest_blueprint)
 
     with app.app_context():
         yield app
