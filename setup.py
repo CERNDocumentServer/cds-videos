@@ -71,6 +71,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'av==0.3.1',
     'arrow>=0.7.0',
     'CairoSVG>=1.0.20',
     'Flask-BabelEx>=0.9.2',
