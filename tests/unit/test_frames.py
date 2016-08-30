@@ -25,46 +25,58 @@
 """Test frame extraction."""
 
 from __future__ import absolute_import, print_function
-from itertools import islice
 
+from subprocess import check_output
 from math import ceil, sqrt
-
-import av
 from PIL import Image
 
 
 def test_av():
     """Test frame extraction."""
 
+    #
+    # FFmpeg wrappers
+    #
+    def get_duration(input):
+        return float(check_output([
+            'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+            '-show_entries', 'stream=duration',
+            '-of', 'default=noprint_wrappers=1:nokey=1',
+            '{}'.format(input)
+        ]))
+
+    def extract_frames(input, time_step, output):
+        return check_output([
+            'ffmpeg',
+            '-i', '{}'.format(input),
+            '-vf', 'fps=1/{}'.format(time_step),
+            '{}'.format(output)
+        ], stderr=None)
+
+    #
     # Settings
+    #
     percentage = 0.01
     step = 100
-    sub_size = (step, step)
 
-    # Extract frames
-    container = av.open('/home/orestis/Downloads/test.mp4')
-    video_stream = next(s for s in container.streams if s.type == 'video')
-    frame_step = video_stream.frames * percentage
-    frame_iterator = islice(container.decode(video=0), 0, None, frame_step)
-    images = [frame.to_image() for frame in frame_iterator]
-    map(lambda im: im.thumbnail(sub_size), images)
-    image_no = len(images)
-    print('#Images: {}'.format(image_no))
+    #
+    # Extraction
+    #
+    input = '/home/orestis/Downloads/test.mp4'
+    output = '/home/orestis/Downloads/img%d.jpg'
+    duration = get_duration(input)
+    time_step = duration * percentage
+    image_no = int(duration // time_step)
+    extract_frames(input, time_step, output)
 
-    # Calculate sizes
     size = int(ceil(sqrt(image_no))) * step
-    print('Size: {}'.format(size))
-    final_size = (size, size)
-
-    # Create thumbnails
-    images = iter(images)
-    final_image = Image.new('RGB', final_size)
-    for i in range(0, size + step, step):
-        for j in range(0, size + step, step):
-            print(i, j)
-            try:
-                final_image.paste(images.next(), (i, j))
-            except StopIteration:
-                break
+    final_image = Image.new('RGB', (size, size))
+    positions = ((i, j)
+                 for i in range(0, size, step)
+                 for j in range(0, size, step))
+    for i in range(1, image_no):
+        im = Image.open('/home/orestis/Downloads/img{}.jpg'.format(i))
+        im.thumbnail((step, step))
+        final_image.paste(im, positions.next())
 
     final_image.save('/home/orestis/Downloads/test.jpg')

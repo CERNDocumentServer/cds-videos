@@ -6,7 +6,7 @@ addons:
     - libfreetype6-dev
 notifications:
   email: false
-sudo: false
+sudo: required
 language: python
 cache:
   directories:
@@ -27,6 +27,7 @@ python:
 - '2.7'
 - '3.5'
 before_install:
+- apt-get install -y ffmpeg
 - mkdir /tmp/elasticsearch
 - wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz
   | tar xz --directory=/tmp/elasticsearch --strip-components=1
