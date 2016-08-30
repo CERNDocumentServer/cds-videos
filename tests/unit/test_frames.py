@@ -26,7 +26,11 @@
 
 from __future__ import absolute_import, print_function
 from itertools import islice
+
+from math import ceil, sqrt
+
 import av
+from PIL import Image
 
 
 def test_av():
@@ -34,14 +38,33 @@ def test_av():
 
     # Settings
     percentage = 0.01
+    step = 100
+    sub_size = (step, step)
 
     # Extract frames
     container = av.open('/home/orestis/Downloads/test.mp4')
     video_stream = next(s for s in container.streams if s.type == 'video')
     frame_step = video_stream.frames * percentage
     frame_iterator = islice(container.decode(video=0), 0, None, frame_step)
-    for i, frame in enumerate(frame_iterator):
-        frame.to_image().save('/home/orestis/Downloads/%04d.jpg' % i)
+    images = [frame.to_image() for frame in frame_iterator]
+    map(lambda im: im.thumbnail(sub_size), images)
+    image_no = len(images)
+    print('#Images: {}'.format(image_no))
+
+    # Calculate sizes
+    size = int(ceil(sqrt(image_no))) * step
+    print('Size: {}'.format(size))
+    final_size = (size, size)
 
     # Create thumbnails
-    # Image.thumbnail()
+    images = iter(images)
+    final_image = Image.new('RGB', final_size)
+    for i in range(0, size + step, step):
+        for j in range(0, size + step, step):
+            print(i, j)
+            try:
+                final_image.paste(images.next(), (i, j))
+            except StopIteration:
+                break
+
+    final_image.save('/home/orestis/Downloads/test.jpg')
