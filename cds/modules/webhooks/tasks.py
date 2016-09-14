@@ -26,12 +26,8 @@
 
 from __future__ import absolute_import, division
 
+from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe
 from celery.task import Task
-
-
-import pexpect
-
-from subprocess import check_output
 
 from os import listdir, path, rename
 from os.path import join, isfile
@@ -164,45 +160,11 @@ def extract_frames(input_filename, start_percentage, end_percentage,
                    parent_id):
     """Extract thumbnails for some frames of the video."""
 
-    #
-    # FFmpeg wrappers
-    #
-    def get_information(input_filename, field):
-        return float(check_output([
-            'ffprobe', '-v', 'error', '-select_streams', 'v:0',
-            '-show_entries', 'stream={}'.format(field),
-            '-of', 'default=noprint_wrappers=1:nokey=1',
-            '{}'.format(input_filename)
-        ]))
-
-    def extract_frames(start_time, end_time, input_file, time_step, output):
-        cmd = 'ffmpeg -ss {0} -i {2} -to {1} -vf fps=1/{3} {4}'.format(
-            start_time, end_time, input_file, time_step, output
-        )
-        thread = pexpect.spawn(cmd)
-
-        regex = thread.compile_pattern_list(
-            [pexpect.EOF, 'time=(\d\d:\d\d:\d\d).\d\d']
-        )
-        while True:
-            index = thread.expect_list(regex, timeout=None)
-            if index == 0:
-                break
-            else:
-                yield sum(
-                    int(amount) * 60 ** power for power, amount in
-                    enumerate(reversed(thread.match.group(1).split(":")))
-                )
-
-    #
-    # Extraction
-    #
-
     # Extract video information
     output = path.join(output_folder, 'img%d.jpg')
-    duration = get_information(input_filename, "duration")
-    width = get_information(input_filename, "width")
-    height = get_information(input_filename, "height")
+    duration = ff_probe(input_filename, "duration")
+    width = ff_probe(input_filename, "width")
+    height = ff_probe(input_filename, "height")
     size_percentage = _percent_to_real(size_percentage)
     thumbnail_size = (width * size_percentage, height * size_percentage)
     step_percent = (end_percentage - start_percentage) / (number_of_frames - 1)
@@ -214,8 +176,8 @@ def extract_frames(input_filename, start_percentage, end_percentage,
 
     # Extract all requested frames as thumbnail images (full resolution)
     progress_updater(0, parent_id)
-    for seconds in extract_frames(start_time, end_time, input_filename,
-                                  time_step, output):
+    for seconds in ff_frames(start_time, end_time, input_filename,
+                             time_step, output):
         progress_updater_with_size(seconds, duration, parent_id)
 
     # Resize thumbnails to requested dimensions
@@ -272,5 +234,3 @@ def _extract_task_name():
 def _percent_to_real(percentage):
     """Convert an integer percentage to a real number from 0 to 1."""
     return percentage / 100
-
-
