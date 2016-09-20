@@ -34,8 +34,9 @@ from os.path import dirname, join
 
 import pytest
 from flask_cli import FlaskCLI, ScriptInfo
+from invenio_accounts.models import User
 from invenio_db import db as db_
-from invenio_files_rest.models import Location
+from invenio_files_rest.models import Location, Bucket
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from cds.factory import create_app
@@ -97,6 +98,14 @@ def location(db):
     shutil.rmtree(tmppath)
 
 
+@pytest.fixture()
+def bucket(db, location):
+    """Provide test bucket."""
+    bucket = Bucket.create(location)
+    db.session.commit()
+    return bucket
+
+
 @pytest.yield_fixture()
 def es(app):
     """Provide elasticsearch access."""
@@ -120,3 +129,9 @@ def datadir():
 def script_info(app):
     """Get ScriptInfo object for testing CLI."""
     return ScriptInfo(create_app=lambda info: app)
+
+
+@pytest.fixture()
+def video(datadir):
+    """Get test video file."""
+    return join(datadir, 'test.mp4')

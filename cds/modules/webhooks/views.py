@@ -34,7 +34,6 @@ from flask_babelex import lazy_gettext as _
 from invenio_db import db
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
 from invenio_oauth2server.models import Scope
-from invenio_webhooks import current_webhooks
 
 from invenio_webhooks.models import Event, InvalidPayload, \
     ReceiverDoesNotExist, WebhookError
@@ -105,23 +104,6 @@ class ReceiverEventListResource(MethodView):
         db.session.commit()
         return jsonify(**event.response), event.response_code
 
-    @require_api_auth()
-    @require_oauth_scopes('webhooks:event')
-    @error_handler
-    def get(self, receiver_id=None):
-        ret = "OK" if receiver_id in current_webhooks.receivers else "NOT OK"
-        return jsonify(dict(ret=ret)), 200
-
-
-class ReceiverListResource(MethodView):
-    """Receiver hook."""
-    @require_api_auth()
-    @require_oauth_scopes('webhooks:event')
-    @error_handler
-    def get(self):
-        receivers = {k: type(current_webhooks.receivers[k]).__name__
-                     for k in current_webhooks.receivers}
-        return jsonify(dict(receivers=receivers)), 200
 
 #
 # Register API resources
@@ -131,9 +113,3 @@ blueprint.add_url_rule(
     '/cds-hooks/receivers/<string:receiver_id>/events/',
     view_func=view,
 )
-view2 = ReceiverListResource.as_view('receiver_list')
-blueprint.add_url_rule(
-    '/cds-hooks/receivers/',
-    view_func=view2,
-)
-

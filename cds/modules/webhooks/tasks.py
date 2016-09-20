@@ -26,10 +26,12 @@
 
 from __future__ import absolute_import, division
 
+from math import ceil
+
 from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe
 from celery.task import Task
 
-from os import listdir, path, rename
+from os import listdir, rename
 from os.path import join, isfile
 import requests
 import signal
@@ -44,7 +46,7 @@ from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, MultipartObject, Part
-from six import BytesIO
+from six import BytesIO, b
 
 
 class FailureBaseTask(Task):
@@ -106,7 +108,7 @@ def download(url, bucket_id, key, chunk_size, parent_id):
 
     if total is None or total < chunk_size:
         mp = ObjectVersion.create(bucket_id, key,
-                                  stream=BytesIO(response.content))
+                                  stream=BytesIO(b(response.content)))
     else:
         cur = 0
         part_cnt = 0
@@ -115,7 +117,7 @@ def download(url, bucket_id, key, chunk_size, parent_id):
         progress_updater(0, parent_id)
         for chunk in response.iter_content(chunk_size=chunk_size):
             cur += len(chunk)
-            Part.create(mp, part_cnt, BytesIO(chunk))
+            Part.create(mp, part_cnt, BytesIO(b(chunk)))
             part_cnt += 1
             progress_updater_with_size(cur, total, parent_id)
         mp.complete()
@@ -161,28 +163,28 @@ def extract_frames(input_filename, start_percentage, end_percentage,
     """Extract thumbnails for some frames of the video."""
 
     # Extract video information
-    output = path.join(output_folder, 'img%d.jpg')
-    duration = ff_probe(input_filename, "duration")
-    width = ff_probe(input_filename, "width")
-    height = ff_probe(input_filename, "height")
+    output = join(output_folder, 'img%d.jpg')
+    duration = float(ff_probe(input_filename, 'duration'))
+    width = int(ff_probe(input_filename, 'width'))
+    height = int(ff_probe(input_filename, 'height'))
     size_percentage = _percent_to_real(size_percentage)
     thumbnail_size = (width * size_percentage, height * size_percentage)
     step_percent = (end_percentage - start_percentage) / (number_of_frames - 1)
 
     # Calculate time step
-    start_time = duration * _percent_to_real(start_percentage)
-    end_time = duration * _percent_to_real(end_percentage)
-    time_step = duration * _percent_to_real(step_percent)
+    start_time = int(duration * _percent_to_real(start_percentage))
+    end_time = ceil(duration * _percent_to_real(end_percentage))
+    time_step = int(duration * _percent_to_real(step_percent))
 
     # Extract all requested frames as thumbnail images (full resolution)
     progress_updater(0, parent_id)
-    for seconds in ff_frames(start_time, end_time, input_filename,
+    for seconds in ff_frames(input_filename, start_time, end_time,
                              time_step, output):
         progress_updater_with_size(seconds, duration, parent_id)
 
     # Resize thumbnails to requested dimensions
     for i in range(number_of_frames):
-        filename = path.join(output_folder, 'img{}.jpg'.format(i + 1))
+        filename = join(output_folder, 'img{}.jpg'.format(i + 1))
         im = Image.open(filename)
         im.thumbnail(thumbnail_size)
         im.save(filename)
@@ -191,7 +193,7 @@ def extract_frames(input_filename, start_percentage, end_percentage,
         new_filename = 'thumbnail-{0}x{1}-at-{2}-percent.jpg'.format(
           int(thumbnail_size[0]), int(thumbnail_size[1]), percentage
         )
-        rename(filename, path.join(output_folder, new_filename))
+        rename(filename, join(output_folder, new_filename))
     progress_updater(100, parent_id)
 
     return output_folder
@@ -201,22 +203,17 @@ def extract_frames(input_filename, start_percentage, end_percentage,
 def attach_files(output_folders, bucket_id, key, parent_id):
     """Create records from Sorenson's generated subformats."""
 
-    sorenson_output = output_folders[0]
-    frames_output = output_folders[1]
-
     # Collect
-    subformats = [join(sorenson_output, filename)
-                  for filename in listdir(sorenson_output) if
-                  isfile(join(sorenson_output, filename))]
-    thumbnails = [join(frames_output, im)
-                  for im in listdir(frames_output) if
-                  isfile(join(frames_output, im)) and
-                  (im.endswith(".jpg") or im.endswith(".jpeg"))]
+    files = [join(output_folder, filename)
+             for output_folder in output_folders
+             for filename in listdir(output_folder)
+             if isfile(join(output_folder, filename))]
 
     # Attach
-    total = len(subformats) + len(thumbnails)
-    for count, filename in enumerate(subformats + thumbnails):
-        ObjectVersion.create(bucket_id, key, stream=open(filename))
+    total = len(files)
+
+    for count, filename in enumerate(files):
+        ObjectVersion.create(bucket_id, key, stream=open(filename, 'rb'))
         progress_updater_with_size(count + 1, total, parent_id)
 
     try:
