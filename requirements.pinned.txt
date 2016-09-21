@@ -30,7 +30,7 @@ elasticsearch-dsl==2.1.0  # via invenio-oaiserver, invenio-records-rest, invenio
 elasticsearch==2.3.0      # via elasticsearch-dsl, invenio-search
 entrypoints==0.2.2        # via nbconvert
 Flask-Admin==1.4.2        # via invenio-admin
-Flask-Assets==0.11        # via invenio-assets
+Flask-Assets==0.12        # via invenio-assets
 Flask-BabelEx==0.9.3      # via invenio-accounts, invenio-communities, invenio-formatter, invenio-i18n, invenio-oaiserver, invenio-oauth2server, invenio-oauthclient, invenio-pages, invenio-pidstore, invenio-previewer, invenio-records-rest, invenio-records-ui, invenio-search, invenio-search-ui, invenio-theme, invenio-userprofiles, invenio-webhooks
 Flask-Breadcrumbs==0.4.0  # via invenio-oauth2server, invenio-oauthclient, invenio-theme, invenio-userprofiles
 flask-celeryext==0.2.0    # via invenio-celery, invenio-records
@@ -60,7 +60,7 @@ intervals==0.7.1          # via wtforms-components
 invenio-access==1.0.0a8
 invenio-accounts==1.0.0a13
 invenio-admin==1.0.0a3
-invenio-assets==1.0.0a5
+invenio-assets==1.0.0b2
 invenio-base==1.0.0a12
 invenio-celery==1.0.0a4
 invenio-communities==1.0.0a9
@@ -88,7 +88,7 @@ invenio-records[postgresql]==1.0.0a17
 invenio-rest[cors]==1.0.0a9
 invenio-search-ui==1.0.0a5
 invenio-search==1.0.0a7
-invenio-theme==1.0.0a13
+invenio-theme==1.0.0a14
 invenio-userprofiles==1.0.0a7
 invenio-webhooks==1.0.0a2
 ipython-genutils==0.1.0   # via nbformat, traitlets
@@ -151,7 +151,7 @@ validators==0.10.3        # via wtforms-components
 Wand==0.4.3
 wcwidth==0.1.7            # via prompt-toolkit
 webargs==1.3.4            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
-webassets==0.11.1         # via flask-assets, invenio-assets
+webassets==0.12.0         # via flask-assets, invenio-assets
 werkzeug==0.11.10         # via flask, flask-debugtoolbar, flask-kvsession, flask-wtf, invenio-migrator, jsonresolver
 whichcraft==0.4.0         # via cookiecutter
 WTForms-Alchemy==0.16.1   # via invenio-oauth2server

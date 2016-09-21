@@ -37,7 +37,7 @@ css = Bundle(
     ),
     NpmBundle(
         'scss/cds.scss',
-        filters='scss, cleancss',
+        filters='node-scss, cleancss',
         npm={
             'almond': '~0.3.1',
             'bootstrap-sass': '~3.3.5',
