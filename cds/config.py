@@ -145,6 +145,16 @@ RECORDS_UI_ENDPOINTS = dict(
     ),
 )
 
+#: Deposit UI endpoints
+DEPOSIT_RECORDS_UI_ENDPOINTS = {
+    'depid': {
+        'pid_type': 'depid',
+        'route': '/deposit/<pid_value>',
+        'template': 'cds_deposit/edit.html',
+        'record_class': 'cds.modules.deposit.api:CDSDeposit',
+    },
+}
+
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
 OAISERVER_RECORD_INDEX = 'records'
