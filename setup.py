@@ -194,6 +194,7 @@ setup(
         ],
         'invenio_webhooks.receivers': [
             'av = cds.modules.webhooks.receivers:AVWorkflow',
+            'metadata = cds.modules.webhooks.receivers:VideoMetadataExtractor'
         ],
     },
     extras_require=extras_require,

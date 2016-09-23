@@ -28,7 +28,7 @@ from __future__ import absolute_import, division
 
 from math import ceil
 
-from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe
+from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe, ff_probe_all
 from celery.task import Task
 
 from os import listdir, rename
@@ -36,6 +36,7 @@ from os.path import join, isfile
 import requests
 import signal
 import time
+import json
 
 from PIL import Image
 from celery import current_task, shared_task
@@ -96,6 +97,13 @@ def progress_updater(percentage, task_id):
         dict(progresses=progresses),
         state('PROGRESS')
     )
+
+
+@shared_task(base=FailureBaseTask)
+def extract_metadata(video_location):
+    """Extract metadata from given video file."""
+    information = json.loads(ff_probe_all(video_location))
+    print(information)  # TODO output to file?
 
 
 @shared_task(base=FailureBaseTask)

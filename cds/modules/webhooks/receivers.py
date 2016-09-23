@@ -29,7 +29,8 @@ from __future__ import absolute_import, division
 from celery import chain, group
 from celery.result import AsyncResult
 from invenio_webhooks import Receiver
-from .tasks import download, transcode, attach_files, extract_frames
+from .tasks import attach_files, download, extract_frames, extract_metadata, \
+    transcode
 
 
 class TaskReceiver(Receiver):
@@ -66,6 +67,33 @@ class TaskReceiver(Receiver):
 
     def cancel_task(self, task_id):
         raise NotImplemented()
+
+
+class CeleryTaskReceiver(TaskReceiver):
+    """Base class for Celery-based TaskReceivers.
+    Implementing this class requires the definition of a single Celery task.
+    .. note::
+        Arguments of the task must match the ones of the task provided exactly.
+    """
+
+    @property
+    def celery_task(self):
+        """Celery task to be executed by this receiver."""
+        raise NotImplementedError
+
+    def new_task(self, task_id, kwargs):
+        """Start asynchronous execution of Celery task."""
+        return self.celery_task.apply_async(task_id=task_id, kwargs=kwargs).id
+
+    def get_status(self, task_id):
+        """Retrieve status of current task from the Celery backend."""
+        result = AsyncResult(task_id)
+        return result.state, result.info if result.state == 'PROGRESS' else {}
+
+    def cancel_task(self, task_id):
+        """Cancel execution of the Celery task."""
+        AsyncResult(task_id).revoke(terminate=True)
+        return 'Revoked task'
 
 
 class CeleryChainTaskReceiver(TaskReceiver):
@@ -123,3 +151,8 @@ class AVWorkflow(CeleryChainTaskReceiver):
         (attach_files, {'bucket_id', 'key'}),
     ]
 
+
+class VideoMetadataExtractor(CeleryTaskReceiver):
+    """Receiver that extracts metadata from video URLs."""
+
+    celery_task = extract_metadata

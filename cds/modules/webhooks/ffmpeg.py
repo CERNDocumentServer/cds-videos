@@ -41,6 +41,14 @@ def ff_probe(input_filename, field):
     ]).rstrip()
 
 
+def ff_probe_all(input_filename):
+    """Retrieve requested field from the output of ffprobe."""
+    return check_output([
+        'ffprobe', '-v', 'error', '-print_format', 'json',
+        '-show_format', '-show_streams', '{}'.format(input_filename)
+    ]).decode('utf-8')
+
+
 def ff_frames(input_file, start_time, end_time, time_step, output):
     """Extract requested frames from video, while tracking progress."""
     cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(

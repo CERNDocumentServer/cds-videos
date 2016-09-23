@@ -30,7 +30,8 @@ import shutil
 import tempfile
 from os import listdir
 from os.path import isfile, join, dirname
-from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe
+import json
+from cds.modules.webhooks.ffmpeg import ff_frames, ff_probe, ff_probe_all
 
 
 def test_ffprobe(video):
@@ -42,6 +43,22 @@ def test_ffprobe(video):
     assert int(ff_probe(video, 'height')) == 360
     assert int(ff_probe(video, 'bit_rate')) == 612177
     assert ff_probe(video, 'invalid') == b''
+
+
+def test_ffprobe_all(online_video):
+    """Test ff_probe_all wrapper."""
+    information = json.loads(ff_probe_all(online_video))
+    assert 'streams' in information
+    for stream in information['streams']:
+        stream_keys = ['index', 'tags', 'bit_rate', 'codec_type',
+                       'start_time', 'duration']
+        assert all([key in stream for key in stream_keys])
+        if stream['codec_type'] in ['audio', 'video']:
+            assert 'codec_name' in stream
+    assert 'format' in information
+    format_keys = ['filename', 'nb_streams', 'format_name', 'format_long_name',
+                   'start_time', 'duration', 'size', 'bit_rate', 'tags']
+    assert all([key in information['format'] for key in format_keys])
 
 
 def test_ffmpeg(video):

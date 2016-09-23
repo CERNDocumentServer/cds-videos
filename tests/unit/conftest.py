@@ -135,3 +135,9 @@ def script_info(app):
 def video(datadir):
     """Get test video file."""
     return join(datadir, 'test.mp4')
+
+
+@pytest.fixture()
+def online_video():
+    """Get online test video file."""
+    return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
