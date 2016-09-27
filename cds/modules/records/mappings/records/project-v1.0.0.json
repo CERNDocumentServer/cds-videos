@@ -1,0 +1,25 @@
+{
+  "mappings": {
+    "project-v1.0.0": {
+      "properties": {
+        "basic_info": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "control_number": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
