@@ -179,6 +179,7 @@ setup(
         ],
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
+            'deposits = cds.modules.records.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
