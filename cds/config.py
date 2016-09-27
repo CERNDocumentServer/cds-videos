@@ -404,7 +404,7 @@ DEPOSIT_UI_NEW_TEMPLATE = 'cds_deposit/edit.html'
 # The schema form deposit
 DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/form.json'
 # Default schema for the deposit
-DEPOSIT_DEFAULT_JSONSCHEMA = 'marc21/bibliographic/bd1xx.json'
+DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
 DEPOSIT_SEARCH_API = '/api/deposits/'

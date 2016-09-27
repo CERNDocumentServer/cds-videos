@@ -1,18 +1,13 @@
 [
   {
     "type": "fieldset",
-    "title": "Personal Details",
     "items": [
       {
-        "key": "main_entry_personal_name.personal_name",
-        "title": "Name",
-        "description": "The user name"
-      },
-      {
-        "key": "main_entry_personal_name.language_of_a_work",
-        "title": "Language",
-        "description": "The language used",
-        "required": true
+        "key": "basic_info.name",
+        "title": "Name"
+      }, {
+        "key": "basic_info.description",
+        "title": "Description"
       }
     ]
   }
