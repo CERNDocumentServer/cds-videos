@@ -96,7 +96,7 @@ Run example development server:
 
 .. code-block:: console
 
-    $ cds --debug run
+    $ cds run --debugger
 
 Now you can visit http://localhost:5000/ :)
 
