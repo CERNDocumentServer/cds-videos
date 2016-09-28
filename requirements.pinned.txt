@@ -21,7 +21,7 @@ cffi==1.7.0               # via cairocffi, cryptography
 chardet==2.3.0            # via binaryornot, invenio-previewer
 Click==6.6                # via cookiecutter, dojson, flask, flask-cli, invenio-migrator
 cookiecutter==1.4.0       # via invenio-base
-cryptography==1.4         # via invenio-accounts, invenio-oauthclient, invenio-webhooks, sqlalchemy-utils
+cryptography==1.5.2       # via invenio-accounts, invenio-oauthclient, invenio-webhooks, sqlalchemy-utils
 datacite==0.2.1
 dcxml==0.1.0
 decorator==4.0.10         # via ipython, traitlets, validators
