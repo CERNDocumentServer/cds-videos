@@ -43,6 +43,9 @@ from cds.modules.webhooks.tasks import attach_files, download, \
 from os.path import isfile, join
 
 from celery.result import AsyncResult
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records import Record
+from six import iteritems
 
 
 def download_with_size(url, bucket_id, chunk_size,
@@ -88,7 +91,7 @@ def test_frame_extraction(video_mp4, location):
     """Test extract_frames task."""
     tmp = location.uri
 
-    # Extrace frames from video
+    # Extract frames from video
     extract_frames.delay(
         input_filename=video_mp4,
         start_percentage=5,
@@ -132,7 +135,7 @@ def test_file_attachment(db, bucket):
     map(shutil.rmtree, folders)
 
 
-def test_orchestrator(bucket, location, mock_sorenson):
+def test_orchestrator(bucket, location, depid, mock_sorenson):
     """Test orchestrator task."""
 
     # Generate master ID
@@ -143,7 +146,7 @@ def test_orchestrator(bucket, location, mock_sorenson):
 
     # Start orchestration
     chain_orchestrator.apply_async(
-        (workflow, ),
+        (workflow, depid),
         kwargs=dict(
             url='http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
             bucket_id=bucket.id,
@@ -158,14 +161,28 @@ def test_orchestrator(bucket, location, mock_sorenson):
         ),
         task_id=task_id)
 
-    # Get progress
+    # Check progress report on Celery backend
     result = AsyncResult(task_id)
     (state, meta) = result.state, result.info or {}
 
-    # Check that all individual sub-progresses were correctly reported
     assert state == states.STARTED
     for task in ['download', 'transcode', 'extract_frames', 'attach_files']:
         assert task in meta
         assert 'order' in meta[task]
         assert 'percentage' in meta[task]
         assert meta[task]['percentage'] == 100
+
+    # Check progress report on deposit
+    recid = PersistentIdentifier.get('depid', depid).object_uuid
+    record = Record.get_record(recid)
+
+    assert 'process' in record['_deposit']
+    state = record['_deposit']['process']
+
+    assert state == dict(
+        task_id=task_id,
+        download={'order': 1, 'status': 'DONE'},
+        transcode={'order': 2, 'status': 'DONE'},
+        extract_frames={'order': 2, 'status': 'DONE'},
+        attach_files={'order': 3, 'status': 'DONE'},
+    )
