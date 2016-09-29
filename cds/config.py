@@ -262,7 +262,7 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 # Files
 ###############################################################################
 FILES_REST_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_file_read_factory'
+    'cds.modules.access.access_control:cern_file_factory'
 
 
 ###############################################################################
