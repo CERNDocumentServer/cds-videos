@@ -54,20 +54,22 @@ using the environment variable ``APP_STATIC_FOLDER``
 """
 
 create_celery = create_app_factory(
-    'cds',
+    'cds_celery',
     config_loader=conf_loader,
     extension_entry_points=['invenio_base.apps'],
     blueprint_entry_points=['invenio_base.blueprints'],
+    converter_entry_points=['invenio_base.converters'],
     instance_path=instance_path,
     static_folder=static_folder,
 )
 """Create CLI/Celery application."""
 
 create_api = create_app_factory(
-    'cds',
+    'cds_api',
     config_loader=conf_loader,
     blueprint_entry_points=['invenio_base.api_blueprints'],
     extension_entry_points=['invenio_base.api_apps'],
+    converter_entry_points=['invenio_base.api_converters'],
     instance_path=instance_path,
 )
 """Create Flask API application."""
@@ -77,6 +79,7 @@ create_app = create_app_factory(
     config_loader=conf_loader,
     blueprint_entry_points=['invenio_base.blueprints'],
     extension_entry_points=['invenio_base.apps'],
+    converter_entry_points=['invenio_base.api_converters'],
     wsgi_factory=create_wsgi_factory({'/api': create_api}),
     instance_path=instance_path,
     static_folder=static_folder,

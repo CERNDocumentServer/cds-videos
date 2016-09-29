@@ -25,8 +25,17 @@
 {%- extends "invenio_accounts/login_user.html" %}
 
 {%- block form_header %}
-    <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
+  <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
 {%- endblock form_header %}
 
 {%- block form_outer %}
+  {%- if config.DEBUG -%}
+    {{ super() }}
+  {%- endif -%}
 {%- endblock form_outer %}
+
+{%- block page_body -%}
+  <div class="cds-login">
+    {{ super() }}
+  </div>
+{%- endblock -%}

@@ -52,3 +52,4 @@ recursive-include docker *
 recursive-include scripts *.sh
 recursive-include tests *.json
 recursive-include tests *.py
+recursive-include tests *.mp4
