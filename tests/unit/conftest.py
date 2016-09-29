@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015 2016 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -43,7 +43,9 @@ from jsonresolver.contrib.jsonref import json_loader_factory
 from jsonresolver.contrib.jsonschema import ref_resolver_factory
 from cds.modules.deposit.api import Project, Video, video_resolver
 from flask_security import login_user
+from invenio_access.models import ActionUsers
 from invenio_db import db as db_
+from invenio_deposit.api import Deposit
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_pidstore.providers.recordid import RecordIdProvider
@@ -117,6 +119,39 @@ def location(db):
 
 
 @pytest.fixture()
+def users(app, db):
+    """Create users."""
+    with db.session.begin_nested():
+        datastore = app.extensions['security'].datastore
+        user1 = datastore.create_user(email='info@inveniosoftware.org',
+                                      password='tester', active=True)
+        user2 = datastore.create_user(email='test@inveniosoftware.org',
+                                      password='tester2', active=True)
+        admin = datastore.create_user(email='admin@inveniosoftware.org',
+                                      password='tester3', active=True)
+        # Assign deposit-admin-access to admin only.
+        db.session.add(ActionUsers(
+            action='deposit-admin-access', user=admin
+        ))
+    db.session.commit()
+    return [user1, user2]
+
+
+@pytest.fixture()
+def depid(app, users, db):
+    """New deposit with files."""
+    record = {
+        'title': {'title': 'fuu'}
+    }
+    with app.test_request_context():
+        login_user(users[0])
+        deposit = Deposit.create(record)
+        deposit.commit()
+        db.session.commit()
+    return deposit['_deposit']['id']
+
+
+@pytest.fixture()
 def bucket(db, location):
     """Provide test bucket."""
     bucket = Bucket.create(location)
@@ -131,8 +166,8 @@ def es(app):
     try:
         list(current_search.create())
     except RequestError:
-        list(current_search.delete())
-        list(current_search.create())
+        list(current_search.delete(ignore=[404]))
+        list(current_search.create(ignore=[400]))
     current_search_client.indices.refresh()
     yield current_search_client
     list(current_search.delete(ignore=[404]))
@@ -334,3 +369,36 @@ def mock_sorenson():
     mock.patch(
         'cds.modules.webhooks.tasks.stop_encoding'
     ).start().return_value = None
+
+
+@pytest.fixture()
+def users(app, db):
+    """Create users."""
+    with db.session.begin_nested():
+        datastore = app.extensions['security'].datastore
+        user1 = datastore.create_user(email='info@inveniosoftware.org',
+                                      password='tester', active=True)
+        user2 = datastore.create_user(email='test@inveniosoftware.org',
+                                      password='tester2', active=True)
+        admin = datastore.create_user(email='admin@inveniosoftware.org',
+                                      password='tester3', active=True)
+        # Assign deposit-admin-access to admin only.
+        db.session.add(ActionUsers(
+            action='deposit-admin-access', user=admin
+        ))
+    db.session.commit()
+    return [user1, user2]
+
+
+@pytest.fixture()
+def depid(app, users, db):
+    """New deposit with files."""
+    record = {
+        'title': {'title': 'fuu'}
+    }
+    with app.test_request_context():
+        login_user(users[0])
+        deposit = Deposit.create(record)
+        deposit.commit()
+        db.session.commit()
+    return deposit['_deposit']['id']

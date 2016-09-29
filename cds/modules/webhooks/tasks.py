@@ -53,7 +53,6 @@ def download(self, url, bucket_id, chunk_size, key=None):
     :param url: URL of the file to download.
     :param bucket_id: ID of the bucket where the file will be stored.
     :param chunk_size: Size of the chunks for downloading.
-    :param parent_id: ID of the parent task.
     :param key: New filename. If not provided, the filename will be taken from
                 the URL.
     """
@@ -189,6 +188,10 @@ def attach_files(self, output_folders, bucket_id, key):
 def chain_orchestrator(self, workflow, **kwargs):
     """Orchestration task for chained Celery tasks or groups of tasks."""
 
+    # Set deposit ID for future updates
+    self.dep_id = kwargs.pop('dep_id', None)
+
+    # Construct Celery canvas
     task_list = []
     parent_kw = {'parent': self}
     for task_definition in workflow:
@@ -204,7 +207,9 @@ def chain_orchestrator(self, workflow, **kwargs):
                 kw.update(parent_kw)
                 subtasks.append(task.subtask(kwargs=kw))
             task_list.append(group(*subtasks))
-    return chain(*task_list)().id
+
+    # Execute workflow
+    chain(*task_list)()
 
 
 @shared_task()

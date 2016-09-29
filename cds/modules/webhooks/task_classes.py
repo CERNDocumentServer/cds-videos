@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, division
 
+from cds.modules.webhooks.helpers import update_deposit_status
 from celery import Task
 from celery.result import AsyncResult
 from celery.states import STARTED, FAILURE, state as state_cls
@@ -47,7 +48,7 @@ class AVCOrchestrator(Orchestrator):
     abstract = True
 
     def clear_state(self):
-        """Initialize master state."""
+        """Initialize orchestrator's state."""
         self.update_state(state=STARTED, meta={})
 
     def set_state(self, task_name, task_meta):
@@ -61,9 +62,12 @@ class AVCOrchestrator(Orchestrator):
         progresses.update({task_name: task_meta})
 
         # Update state
-        self.update_state(
-            state=STARTED, meta=progresses
-        )
+        self.update_state(state=STARTED, meta=progresses)
+
+    def update_deposit(self, name, status, order, **kwargs):
+        """Update deposit status."""
+        update_deposit_status(self.dep_id, self.request.id, name,
+                              status, order, **kwargs)
 
 
 class ProgressTask(Task):
@@ -77,13 +81,24 @@ class ProgressTask(Task):
         return self.name.split('.')[-1]
 
     def __call__(self, *args, **kwargs):
-        """Set task's parent automatically from given keyword arguments."""
+        """Set workflow-specific parameters automatically from given kwargs."""
+
+        # Set task's parent
         if 'parent' in kwargs:
             self.parent = kwargs['parent']
             del kwargs['parent']
         else:
             self.parent = None
-        return self.run(*args, **kwargs)
+
+        # Set deposit status to 'STARTED'
+        self.update_deposit('STARTED')
+
+        return_value = self.run(*args, **kwargs)
+
+        # Set deposit status to 'DONE'
+        self.update_deposit('DONE')
+
+        return return_value
 
     def set_state(self, state, meta):
         """Update tasks's state."""
@@ -108,6 +123,11 @@ class ProgressTask(Task):
     def update_progress_with_size(self, size, total):
         """Report progress of downloading celery task."""
         self.update_progress(size / total * 100)
+
+    def update_deposit(self, status):
+        """Update parent's deposit status."""
+        if self.parent:
+            self.parent.update_deposit(self.task_name, status, self.order)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Gracefully handle task exceptions."""
