@@ -32,12 +32,94 @@
   {% assets "invenio_deposit_dependencies_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
     angular.element(document).ready(function() {
-      angular.bootstrap(
-        document.getElementById('invenio-records'), [
+      angular.module('cdsDeposit', [
           'invenioRecords', 'schemaForm', 'mgcrea.ngStrap',
           'mgcrea.ngStrap.modal', 'pascalprecht.translate', 'ui.select',
           'mgcrea.ngStrap.select', 'invenioFiles'
-        ]
+        ])
+          .run(function($rootScope, InvenioFilesAPI) {
+            var unmatchedFiles = [];
+            var videoRegex = /(.*)\.(mp4|mov)$/;
+
+            var videosMap = null;
+
+            var commitVideo = function(videosMap, key) {
+              var video = videosMap[key];
+              var link = video.links.self;
+              InvenioFilesAPI.request({
+                url: link,
+                method: 'PUT',
+                headers: $rootScope.recordsVM.invenioRecordsArgs.headers,
+                data: video
+              });
+            };
+
+            var addFileToVideos = function(file, videosMap) {
+              var match = file.name.match(videoRegex);
+              if (match) {
+                return InvenioFilesAPI.request({
+                  method: 'POST',
+                  url: $rootScope.filesVM.invenioFilesEndpoints.initialization,
+                  data: {},
+                  headers:  $rootScope.filesVM.invenioFilesArgs.headers || {}
+                }).then(function(response) {
+                  var videoName = match[1];
+                  videosMap[videoName] = response.data;
+                  videosMap[videoName].metadata.files = [ file ];
+                  unmatchedFiles.filter(function(file) {
+                    return file.name.startsWith(videoName);
+                  }).forEach(function(file) {
+                    unmatchedFiles.splice(unmatchedFiles.indexOf(file), 1);
+                    videosMap[videoName].metadata.files.push(file);
+                  });
+                  return videoName;
+                });
+              } else {
+                for (var key in videosMap) {
+                  if (file.name.startsWith(key)) {
+                    videosMap[key].metadata.files.push(file);
+                    return Promise.resolve(key);
+                  }
+                }
+                unmatchedFiles.push(file);
+                return Promise.resolve(null);
+              }
+            };
+            $rootScope.$on('invenio.uploader.file.added', function(evt, newFiles) {
+              if (videosMap == null) {
+                videosMap = ($rootScope.recordsVM.invenioRecordsModel.videos || [])
+                .reduce(function(video, map) {
+                  for (var file in video.metadata.files) {
+                    var match = file.name.match(videoRegex);
+                    if (match) {
+                      var videoName = match[1];
+                      map[videoName] = video;
+                    }
+                  }
+                }, {});
+              }
+              var promises = newFiles.map(function(file) {
+                return addFileToVideos(file, videosMap);
+              });
+              Promise.all(promises).then(filenames) {
+                var uniqFiles = filenames.filter(function (v, i, a) {
+                  return v && a.indexOf(v) === i
+                });
+                uniqFiles.forEach(function(name) {
+                  commitVideo(videosMap, name);
+                });
+                // commit master record
+                var videoArray = [];
+                for (var name in videosMap) {
+                  videoArray.push(videosMap[name]);
+                }
+                $rootScope.recordsVM.invenioRecordsModel.videos = videoArray;
+                $rootScope.recordsVM.actionHandler(['self', 'PUT']);
+              };
+            });
+          });
+      angular.bootstrap(
+        document.getElementById('invenio-records'), ['cdsDeposit']
       );
     });
   </script>
