@@ -28,10 +28,13 @@ from __future__ import absolute_import, print_function
 
 import os
 
+from invenio_deposit.scopes import write_scope
+from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
 from .modules.access.access_control import CERNRecordsSearch
+from .modules.deposit.permissions import DepositPermission, can_edit_deposit
 
 
 # Identity function for string extraction
@@ -56,12 +59,12 @@ I18N_LANGUAGES = []
 
 # RabbitMQ.
 BROKER_URL = os.environ.get(
-    "APP_BROKER_URL",
-    "redis://localhost:6379/0")
+    'APP_BROKER_URL',
+    'redis://localhost:6379/0')
 # Celery results.
 CELERY_RESULT_BACKEND = os.environ.get(
-    "APP_CACHE_REDIS_URL",
-    "redis://localhost:6379/1")
+    'APP_CACHE_REDIS_URL',
+    'redis://localhost:6379/1')
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 
@@ -69,26 +72,26 @@ CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 # Cache
 ###############################################################################
 
-CACHE_KEY_PREFIX = "cache::"
+CACHE_KEY_PREFIX = 'cache::'
 CACHE_REDIS_URL = os.environ.get(
-    "APP_CACHE_REDIS_URL",
-    "redis://localhost:6379/0")
-CACHE_TYPE = "redis"
+    'APP_CACHE_REDIS_URL',
+    'redis://localhost:6379/0')
+CACHE_TYPE = 'redis'
 
 ###############################################################################
 # Database
 ###############################################################################
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    "SQLALCHEMY_DATABASE_URI",
-    "postgresql+psycopg2://localhost/cds")
+    'SQLALCHEMY_DATABASE_URI',
+    'postgresql+psycopg2://localhost/cds')
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 ###############################################################################
 # Debugbar
 ###############################################################################
-
+DEBUG = True
 DEBUG_TB_ENABLED = True
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
@@ -97,11 +100,11 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 ###############################################################################
 
 # Search API endpoint.
-SEARCH_UI_SEARCH_API = "/api/records/"
+SEARCH_UI_SEARCH_API = '/api/records/'
 # Default template for search UI.
-SEARCH_UI_SEARCH_TEMPLATE = "cds_search_ui/search.html"
+SEARCH_UI_SEARCH_TEMPLATE = 'cds_search_ui/search.html'
 # Default base template for search UI
-SEARCH_UI_BASE_TEMPLATE = "cds_theme/page.html"
+SEARCH_UI_BASE_TEMPLATE = 'cds_theme/page.html'
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
 # Do not map any keywords.
@@ -142,12 +145,22 @@ RECORDS_UI_ENDPOINTS = dict(
     ),
 )
 
+#: Deposit UI endpoints
+DEPOSIT_RECORDS_UI_ENDPOINTS = {
+    'depid': {
+        'pid_type': 'depid',
+        'route': '/deposit/<pid_value>',
+        'template': 'cds_deposit/edit.html',
+        'record_class': 'cds.modules.deposit.api:CDSDeposit',
+    },
+}
+
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
 OAISERVER_RECORD_INDEX = 'records'
 
 # 404 template.
-RECORDS_UI_TOMBSTONE_TEMPLATE = "invenio_records_ui/tombstone.html"
+RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
 # Endpoints for record API.
 RECORDS_REST_ENDPOINTS = dict(
@@ -249,7 +262,7 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 # Files
 ###############################################################################
 FILES_REST_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_file_read_factory'
+    'cds.modules.access.access_control:cern_file_factory'
 
 
 ###############################################################################
@@ -269,12 +282,12 @@ FORMATTER_BADGES_ENABLE = True
 ###############################################################################
 
 # Display a homepage.
-FRONTPAGE_ENDPOINT = "cds_home.index"
+FRONTPAGE_ENDPOINT = 'cds_home.index'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
-    {"size": 5, "page": 1},
-    {"size": 5, "page": 1},
-    {"size": 5, "page": 1},
+    {'size': 5, 'page': 1},
+    {'size': 5, 'page': 1},
+    {'size': 5, 'page': 1},
 ]
 # Quote before search box
 FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
@@ -290,7 +303,7 @@ SECURITY_CONFIRMABLE = False
 # SECURITY_CHANGEABLE = False # uncomment when related PR is merged (-accounts)
 
 # Override login template.
-SECURITY_LOGIN_USER_TEMPLATE = "cds_theme/login_user.html"
+SECURITY_LOGIN_USER_TEMPLATE = 'cds_theme/login_user.html'
 
 # Security login salt.
 SECURITY_LOGIN_SALT = 'CHANGE_ME'
@@ -300,7 +313,7 @@ SECURITY_LOGIN_SALT = 'CHANGE_ME'
 ###############################################################################
 
 # Override profile template.
-USERPROFILES_PROFILE_TEMPLATE = "cds_theme/profile.html"
+USERPROFILES_PROFILE_TEMPLATE = 'cds_theme/profile.html'
 USERPROFILES_EMAIL_ENABLED = False
 
 ###############################################################################
@@ -321,17 +334,19 @@ CERN_APP_CREDENTIALS = dict(
 ###############################################################################
 
 # The site name
-THEME_SITENAME = _("CERN Document Server")
+THEME_SITENAME = _('CERN Document Server')
 # The theme logo.
 THEME_LOGO = 'img/cds.svg'
 # The base template.
-BASE_TEMPLATE = "cds_theme/page.html"
+BASE_TEMPLATE = 'cds_theme/page.html'
 # Header template for entire site.
-HEADER_TEMPLATE = "cds_theme/header.html"
+HEADER_TEMPLATE = 'cds_theme/header.html'
 # RequireJS configuration.
-REQUIREJS_CONFIG = "js/cds-build.js"
+REQUIREJS_CONFIG = 'js/cds-build.js'
 # Endpoint for breadcrumb root.
 THEME_BREADCRUMB_ROOT_ENDPOINT = 'cds_home.index'
+# Cover template
+COVER_TEMPLATE = 'cds_theme/page_cover.html'
 
 ###############################################################################
 # Previewer
@@ -360,7 +375,7 @@ LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
 # JSON Schemas
 ###############################################################################
 
-JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "localhost:5000")
+JSONSCHEMAS_HOST = os.environ.get('JSONSCHEMAS_HOST', 'localhost:5000')
 
 ###############################################################################
 # Migration
@@ -371,9 +386,63 @@ MIGRATOR_RECORDS_DUMPLOADER_CLS = 'cds.modules.migrator.records:' \
 MIGRATOR_RECORDS_DUMP_CLS = 'cds.modules.migrator.records:CDSRecordDump'
 
 ###############################################################################
-# Indexr
+# Indexer
 ###############################################################################
 
 INDEXER_DEFAULT_INDEX = 'records-default-v1.0.0'
 INDEXER_DEFAULT_DOC_TYPE = 'default-v1.0.0'
 INDEXER_BULK_REQUEST_TIMEOUT = 60
+
+
+###############################################################################
+# Deposit
+###############################################################################
+# Template for deposit list view.
+DEPOSIT_UI_INDEX_TEMPLATE = 'cds_deposit/index.html'
+# Template to use for UI.
+DEPOSIT_UI_NEW_TEMPLATE = 'cds_deposit/edit.html'
+# The schema form deposit
+DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/form.json'
+# Default schema for the deposit
+DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
+# Template for <invenio-records-form> directive
+DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
+DEPOSIT_SEARCH_API = '/api/deposits/'
+_PID = 'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
+DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{pid_value}'
+DEPOSIT_REST_ENDPOINTS = dict(
+    depid=dict(
+        pid_type='depid',
+        pid_minter='deposit',
+        pid_fetcher='deposit',
+        record_class='cds.modules.deposit.api:CDSDeposit',
+        files_serializers={
+            'application/json': ('invenio_deposit.serializers'
+                                 ':json_v1_files_response'),
+        },
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_class='invenio_deposit.search:DepositSearch',
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/deposits/',
+        item_route='/deposits/<{0}:pid_value>'.format(_PID),
+        file_list_route='/deposits/<{0}:pid_value>/files'.format(_PID),
+        file_item_route='/deposits/<{0}:pid_value>/files/<path:key>'.format(
+            _PID),
+        default_media_type='application/json',
+        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        create_permission_factory_imp=check_oauth2_scope(
+            lambda x: True, write_scope.id),
+        read_permission_factory_imp=DepositPermission,
+        update_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        max_result_window=10000,
+    ),
+)

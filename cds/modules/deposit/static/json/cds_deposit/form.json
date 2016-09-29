@@ -1,0 +1,14 @@
+[
+  {
+    "type": "fieldset",
+    "items": [
+      {
+        "key": "basic_info.name",
+        "title": "Name"
+      }, {
+        "key": "basic_info.description",
+        "title": "Description"
+      }
+    ]
+  }
+]

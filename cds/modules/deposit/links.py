@@ -1,7 +1,7 @@
-{# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -21,21 +21,28 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#}
-{%- extends "invenio_accounts/login_user.html" %}
 
-{%- block form_header %}
-  <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
-{%- endblock form_header %}
+"""Links for record serialization."""
 
-{%- block form_outer %}
-  {%- if config.DEBUG -%}
-    {{ super() }}
-  {%- endif -%}
-{%- endblock form_outer %}
+from __future__ import absolute_import, print_function
 
-{%- block page_body -%}
-  <div class="cds-login">
-    {{ super() }}
-  </div>
-{%- endblock -%}
+import invenio_deposit.links
+from flask import current_app, request
+from invenio_records_files.links import default_bucket_link_factory
+
+
+def deposit_links_factory(pid):
+    """Factory for record links generation."""
+    links = invenio_deposit.links.deposit_links_factory(pid)
+
+    bucket_link = default_bucket_link_factory(pid)
+    if bucket_link is not None:
+        links['bucket'] = bucket_link
+
+    links['html'] = current_app.config['DEPOSIT_UI_ENDPOINT'].format(
+        host=request.host,
+        scheme=request.scheme,
+        pid_value=pid.pid_value,
+    )
+
+    return links

@@ -65,7 +65,7 @@ invenio-base==1.0.0a12
 invenio-celery==1.0.0a4
 invenio-communities==1.0.0a9
 invenio-config==1.0.0a1
-invenio-db[postgresql,versioning]==1.0.0a10
+invenio-db[postgresql,versioning]==1.0.0b1
 invenio-files-rest==1.0.0a4
 invenio-formatter==1.0.0a2
 invenio-i18n==1.0.0a4
