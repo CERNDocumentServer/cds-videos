@@ -31,16 +31,21 @@ import os
 import shutil
 import tempfile
 from os.path import dirname, join
+from time import sleep
 
 import pytest
 from cds.factory import create_app
 from elasticsearch import RequestError
 from flask_cli import ScriptInfo
+from jsonresolver import JSONResolver
+from jsonresolver.contrib.jsonref import json_loader_factory
+from jsonresolver.contrib.jsonschema import ref_resolver_factory
+from cds.modules.deposit.api import Project, Video
+from flask_security import login_user
 from invenio_db import db as db_
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
-from invenio_search import current_search
-from invenio_search import current_search_client
+from invenio_search import InvenioSearch, current_search, current_search_client
 from sqlalchemy_utils.functions import create_database, database_exists
 
 
@@ -62,7 +67,8 @@ def app():
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND="cache",
         CELERY_CACHE_BACKEND="memory",
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
+        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        JSONSCHEMAS_HOST='cdslabs.cern.ch',
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -112,6 +118,7 @@ def bucket(db, location):
 @pytest.yield_fixture()
 def es(app):
     """Provide elasticsearch access."""
+    InvenioSearch(app)
     try:
         list(current_search.create())
     except RequestError:
@@ -150,3 +157,78 @@ def video_mov(datadir):
 def online_video():
     """Get online test video file."""
     return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+
+
+@pytest.fixture()
+def users(app, db):
+    """Create users."""
+    with db.session.begin_nested():
+        datastore = app.extensions['security'].datastore
+        user1 = datastore.create_user(email='info@inveniosoftware.org',
+                                      password='tester', active=True)
+        user2 = datastore.create_user(email='test@inveniosoftware.org',
+                                      password='tester2', active=True)
+    db.session.commit()
+    return [user1, user2]
+
+
+@pytest.fixture()
+def cds_jsonresolver(app):
+    """Configure a jsonresolver for cds-dojson."""
+    resolver = JSONResolver(plugins=['demo.json_resolver'])
+    app.extensions['invenio-records'].ref_resolver_cls = ref_resolver_factory(
+        resolver)
+    app.extensions['invenio-records'].loader_cls = json_loader_factory(
+        resolver)
+
+
+@pytest.fixture()
+def project(app, es, cds_jsonresolver, users, location, db):
+    """New project with videos."""
+    project_data = {
+        'title': {
+            'title': 'my project',
+        },
+        '$schema': ('https://cdslabs.cern.ch/schemas/'
+                    'deposits/records/project-v1.0.0.json'),
+        '_access': {'read': 'open'},
+        'videos': [],
+    }
+    project_video_1 = {
+        'title': {
+            'title': 'video 1',
+        },
+        '$schema': ('https://cdslabs.cern.ch/schemas/'
+                    'deposits/records/video-v1.0.0.json'),
+        '_access': {'read': 'open'},
+    }
+    project_video_2 = {
+        'title': {
+            'title': 'video 2',
+        },
+        '$schema': ('https://cdslabs.cern.ch/schemas/'
+                    'deposits/records/video-v1.0.0.json'),
+        '_access': {'read': 'open'},
+    }
+    with app.test_request_context():
+        login_user(users[0])
+
+        # create empty project
+        project = Project.create(project_data).commit()
+
+        # create videos
+        video_1 = Video.create(project_video_1)
+        video_2 = Video.create(project_video_2)
+
+        # add videos inside the project
+        video_1.project = project
+        video_2.project = project
+
+        # save project and video
+        project.commit()
+        video_1.commit()
+        video_2.commit()
+
+    db.session.commit()
+    sleep(2)
+    return (project, video_1, video_2)
