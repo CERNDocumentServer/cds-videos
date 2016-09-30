@@ -30,7 +30,7 @@ from contextlib import contextmanager
 
 from invenio_db import db
 from invenio_deposit.api import Deposit
-from invenio_files_rest.models import Bucket, Location
+from invenio_files_rest.models import Bucket, MultipartObject, Location
 from invenio_records_files.models import RecordsBuckets
 
 
@@ -70,3 +70,8 @@ class CDSDeposit(Deposit):
             ))
         else:
             yield data
+
+    @property
+    def multipart_files(self):
+        """Get all multipart files."""
+        return MultipartObject.query_by_bucket(self.files.bucket)
