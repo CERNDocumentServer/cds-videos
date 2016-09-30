@@ -59,3 +59,52 @@ def to_links_js(pid, deposit=None):
         'publish': self_url + '/actions/publish',
         'files': self_url + '/files',
     }
+
+
+@blueprint.app_template_filter('tofilesjs')
+def to_files_js(deposit):
+    """List files in a deposit."""
+    if not isinstance(deposit, CDSDeposit):
+        return []
+
+    res = []
+
+    for f in deposit.files:
+        res.append({
+            'key': f.key,
+            'version_id': f.version_id,
+            'checksum': f.file.checksum,
+            'size': f.file.size,
+            'completed': True,
+            'progress': 100,
+            'links': {
+                'self': (
+                    current_app.config['DEPOSIT_FILES_API'] +
+                    u'/{bucket}/{key}?versionId={version_id}'.format(
+                        bucket=f.bucket_id,
+                        key=f.key,
+                        version_id=f.version_id,
+                    )),
+            }
+        })
+
+    for f in deposit.multipart_files.all():
+        res.append({
+            'key': f.key,
+            'size': f.size,
+            'multipart': True,
+            'completed': f.completed,
+            'processing': True,
+            'progress': 100,
+            'links': {
+                'self': (
+                    current_app.config['DEPOSIT_FILES_API'] +
+                    u'/{bucket}/{key}?uploadId={upload_id}'.format(
+                        bucket=f.bucket_id,
+                        key=f.key,
+                        upload_id=f.upload_id,
+                    )),
+            }
+        })
+
+    return res
