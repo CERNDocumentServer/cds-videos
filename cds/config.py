@@ -81,7 +81,7 @@ CACHE_TYPE = "redis"
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "SQLALCHEMY_DATABASE_URI",
-    "postgresql+psycopg2://localhost/cds")
+    "postgresql+psycopg2://cds:cds@localhost/cds")
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -248,8 +248,8 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 ###############################################################################
 # Files
 ###############################################################################
-FILES_REST_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_file_read_factory'
+# FILES_REST_PERMISSION_FACTORY = \
+#     'cds.modules.access.access_control:cern_file_read_factory'
 
 
 ###############################################################################
@@ -341,6 +341,18 @@ THEME_BREADCRUMB_ROOT_ENDPOINT = 'cds_home.index'
 PREVIEWER_BASE_CSS_BUNDLES = ['cds_theme_css']
 # Base JS bundle to include in all previewers
 PREVIEWER_BASE_JS_BUNDLES = ['cds_theme_js']
+# Decides which previewers are available and their priority.
+PREVIEWER_PREFERENCE = [
+    'csv_dthreejs',
+    'simple_image',
+    'json_prismjs',
+    'xml_prismjs',
+    'mistune',
+    'pdfjs',
+    'ipynb',
+    'cds_video',
+    'zip',
+]
 
 ###############################################################################
 # Storage
