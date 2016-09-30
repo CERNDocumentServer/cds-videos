@@ -348,6 +348,18 @@ COVER_TEMPLATE = 'cds_theme/page_cover.html'
 PREVIEWER_BASE_CSS_BUNDLES = ['cds_theme_css']
 # Base JS bundle to include in all previewers
 PREVIEWER_BASE_JS_BUNDLES = ['cds_theme_js']
+# Decides which previewers are available and their priority.
+PREVIEWER_PREFERENCE = [
+    'csv_dthreejs',
+    'simple_image',
+    'json_prismjs',
+    'xml_prismjs',
+    'mistune',
+    'pdfjs',
+    'ipynb',
+    'cds_video',
+    'zip',
+]
 
 ###############################################################################
 # Storage

@@ -1,0 +1,2235 @@
+/*!
+Video.js Default Styles (http://videojs.com)
+Version GENERATED_AT_BUILD
+Create your own skin at http://designer.videojs.com
+*/
+/* SKIN
+================================================================================
+The main class name for all skin-specific styles. To make your own skin,
+replace all occurances of 'vjs-default-skin' with a new name. Then add your new
+skin name to your video tag instead of the default skin.
+e.g. <video class="video-js my-skin-name">
+*/
+.vjs-default-skin {
+    color: #cccccc;
+}
+
+/* Font THEOplayer */
+@font-face {
+    font-family: "theoplayer";
+    src: url('font/theoplayer.v2.eot');
+    src: url('font/theoplayer.v2.eot#iefix') format('embedded-opentype'),
+    url('font/theoplayer.v2.woff') format('woff'),
+    url('font/theoplayer.v2.ttf') format('truetype'),
+    url('font/theoplayer.v2.svg#theoplayer') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.theoplayer [class^="icon-"]:before, .theoplayer [class*=" icon-"]:before {
+    font-family: "theoplayer";
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+
+    display: inline-block;
+    text-decoration: inherit;
+    width: 1em;
+    margin-right: .2em;
+    text-align: center;
+    /* opacity: .8; */
+
+    /* For safety - reset parent styles, that can break glyph codes*/
+    font-variant: normal;
+    text-transform: none;
+
+    /* fix buttons height, for twitter bootstrap */
+    line-height: 1em;
+
+    /* Animation center compensation - margins should be symmetric */
+    /* remove if not needed */
+    margin-left: .2em;
+
+    /* you can be more comfortable with increased icons size */
+    /* font-size: 120%; */
+
+    /* Uncomment for 3D effect */
+    /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+
+.theoplayer .icon-cog:before {
+    content: '\e800';
+}
+
+.theoplayer .icon-cog-alt:before {
+    content: '\e801';
+}
+
+.theoplayer .icon-play:before {
+    content: '\e802';
+}
+
+.theoplayer .icon-stop:before {
+    content: '\e803';
+}
+
+.theoplayer .icon-pause:before {
+    content: '\e804';
+}
+
+.theoplayer .icon-to-end:before {
+    content: '\e805';
+}
+
+.theoplayer .icon-to-end-alt:before {
+    content: '\e806';
+}
+
+.theoplayer .icon-to-start:before {
+    content: '\e807';
+}
+
+.theoplayer .icon-to-start-alt:before {
+    content: '\e808';
+}
+
+.theoplayer .icon-fast-fw:before {
+    content: '\e809';
+}
+
+.theoplayer .icon-fast-bw:before {
+    content: '\e80a';
+}
+
+.theoplayer .icon-eject:before {
+    content: '\e80b';
+}
+
+.theoplayer .icon-resize-full:before {
+    content: '\e80c';
+}
+
+.theoplayer .icon-resize-full-alt:before {
+    content: '\e80d';
+}
+
+.theoplayer .icon-link:before {
+    content: '\e80e';
+}
+
+.theoplayer .icon-download:before {
+    content: '\e80f';
+}
+
+.theoplayer .icon-upload:before {
+    content: '\e810';
+}
+
+.theoplayer .icon-share:before {
+    content: '\e811';
+}
+
+.theoplayer .icon-menu:before {
+    content: '\e812';
+}
+
+.theoplayer .icon-sliders:before {
+    content: '\e813';
+}
+
+.theoplayer .icon-volume-up:before {
+    content: '\e814';
+}
+
+.theoplayer .icon-volume-down:before {
+    content: '\e815';
+}
+
+.theoplayer .icon-volume-off:before {
+    content: '\e816';
+}
+
+.theoplayer .icon-resize-small:before {
+    content: '\e817';
+}
+
+.theoplayer .icon-arrows-cw:before {
+    content: '\e818';
+}
+
+.theoplayer .icon-shuffle:before {
+    content: '\e819';
+}
+
+.theoplayer .icon-toggle-on:before {
+    content: '\e81a';
+}
+
+.theoplayer .icon-toggle-off:before {
+    content: '\e81b';
+}
+
+.theoplayer .icon-spinner:before {
+    content: '\e81c';
+}
+
+.theoplayer .icon-cc:before {
+    content: '\e81d';
+}
+
+.theoplayer .icon-videocam:before {
+    content: '\e81e';
+}
+
+.theoplayer .icon-video:before {
+    content: '\e81f';
+}
+
+.theoplayer .icon-chart-bar:before {
+    content: '\e820';
+}
+
+.theoplayer .icon-chart-pie:before {
+    content: '\e821';
+}
+
+.theoplayer .icon-chart-area:before {
+    content: '\e822';
+}
+
+.theoplayer .icon-wrench:before {
+    content: '\e823';
+}
+
+.theoplayer .icon-magic:before {
+    content: '\e824';
+}
+
+.theoplayer .icon-music:before {
+    content: '\e825';
+}
+
+.theoplayer .icon-comment:before {
+    content: '\e826';
+}
+
+.theoplayer .icon-chromecast:before {
+    content: '\e827';
+}
+
+/* Base UI Component Classes
+--------------------------------------------------------------------------------
+*/
+/* Slider - used for Volume bar and Seek bar */
+.vjs-default-skin .vjs-slider {
+    /* Replace browser focus hightlight with handle highlight */
+    outline: 0;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    /* background-color-with-alpha */
+    background-color: #333333;
+    background-color: rgba(51, 51, 51, 0.9);
+}
+
+.vjs-default-skin .vjs-slider:focus {
+    /* box-shadow */
+    -webkit-box-shadow: 0 0 2em #ffffff;
+    -moz-box-shadow: 0 0 2em #ffffff;
+    box-shadow: 0 0 2em #ffffff;
+}
+
+.vjs-default-skin .vjs-slider-handle {
+    position: absolute;
+    /* Needed for IE6 */
+    left: 0;
+    top: 0;
+}
+
+.vjs-default-skin .vjs-slider-handle:before {
+    content: "\e803";
+    font-family: "theoplayer";
+    font-size: 1em;
+    line-height: 1;
+    text-align: center;
+    text-shadow: 0em 0em 1em #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Rotate the square icon to make a diamond */
+    /* transform */
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+/* Control Bar
+--------------------------------------------------------------------------------
+The default control bar that is a container for most of the controls.
+*/
+.vjs-default-skin .vjs-control-bar {
+    /* Start hidden */
+    display: none;
+    position: absolute;
+    /* Place control bar at the bottom of the player box/video.
+       If you want more margin below the control bar, add more height. */
+    bottom: 0;
+    /* Use left/right to stretch to 100% width of player div */
+    left: 0;
+    right: 0;
+    /* Height includes any margin you want above or below control items */
+    height: 3.0em;
+    /* background-color-with-alpha */
+    background-color: #07141e;
+    background-color: rgba(7, 20, 30, 0.7);
+}
+
+/* Show the control bar only once the video has started playing */
+.vjs-default-skin.vjs-has-started .vjs-control-bar {
+    display: block;
+    /* Visibility needed to make sure things hide in older browsers too. */
+
+    visibility: visible;
+    opacity: 1;
+    /* transition */
+    -webkit-transition: visibility 0.1s, opacity 0.1s;
+    -moz-transition: visibility 0.1s, opacity 0.1s;
+    -o-transition: visibility 0.1s, opacity 0.1s;
+    transition: visibility 0.1s, opacity 0.1s;
+}
+
+/* Hide the control bar when the video is playing and the user is inactive  */
+.vjs-default-skin.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar {
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    /* transition */
+    -webkit-transition: visibility 1s, opacity 1s;
+    -moz-transition: visibility 1s, opacity 1s;
+    -o-transition: visibility 1s, opacity 1s;
+    transition: visibility 1s, opacity 1s;
+}
+
+.vjs-default-skin.vjs-controls-disabled .vjs-control-bar {
+    display: none;
+}
+
+.vjs-default-skin.vjs-using-native-controls .vjs-control-bar {
+    display: none;
+}
+
+/* The control bar shouldn't show after an error */
+.vjs-default-skin.vjs-error .vjs-control-bar {
+    display: none;
+}
+
+/* IE8 is flakey with fonts, and you have to change the actual content to force
+fonts to show/hide properly.
+  - "\9" IE8 hack didn't work for this
+  - Found in XP IE8 from http://modern.ie. Does not show up in "IE8 mode" in IE9
+*/
+@media \0screen {
+    .vjs-default-skin.vjs-user-inactive.vjs-playing .vjs-control-bar :before {
+        content: "";
+    }
+}
+
+/* General styles for individual controls. */
+.vjs-default-skin .vjs-control {
+    outline: none;
+    position: relative;
+    float: left;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    height: 3.0em;
+    width: 4em;
+}
+
+/* FontAwsome button icons */
+.vjs-default-skin .vjs-control:before {
+    font-family: "theoplayer";
+    font-size: 1.5em;
+    line-height: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Replacement for focus outline */
+.vjs-default-skin .vjs-control:focus:before,
+.vjs-default-skin .vjs-control:hover:before {
+    text-shadow: 0em 0em 1em #ffffff;
+}
+
+.vjs-default-skin .vjs-control:focus {
+    /*  outline: 0; */
+    /* keyboard-only users cannot see the focus on several of the UI elements when
+    this is set to 0 */
+
+}
+
+/* Hide control text visually, but have it available for screenreaders */
+.vjs-default-skin .vjs-control-text {
+    /* hide-visually */
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* Play/Pause
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-play-control {
+    width: 5em;
+    cursor: pointer;
+}
+
+.vjs-default-skin .vjs-play-control:before {
+    content: "\e802";
+}
+
+.vjs-default-skin.vjs-playing .vjs-play-control:before {
+    content: "\e804";
+}
+
+/* Playback toggle
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-playback-rate .vjs-playback-rate-value {
+    font-size: 1.5em;
+    line-height: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.vjs-default-skin .vjs-playback-rate.vjs-menu-button .vjs-menu .vjs-menu-content {
+    width: 4em;
+    left: -2em;
+    list-style: none;
+}
+
+/* Volume/Mute
+-------------------------------------------------------------------------------- */
+.vjs-default-skin .vjs-mute-control,
+.vjs-default-skin .vjs-volume-menu-button {
+    cursor: pointer;
+    float: right;
+}
+
+.vjs-default-skin .vjs-mute-control:before,
+.vjs-default-skin .vjs-volume-menu-button:before {
+    content: "\e814";
+    margin-left: 0.25em
+}
+
+.vjs-default-skin .vjs-mute-control.vjs-vol-0:before,
+.vjs-default-skin .vjs-volume-menu-button.vjs-vol-0:before {
+    content: "\e816";
+    margin-left: 0;
+}
+
+.vjs-default-skin .vjs-mute-control.vjs-vol-1:before,
+.vjs-default-skin .vjs-volume-menu-button.vjs-vol-1:before {
+    content: "\e815";
+    margin-left: 0.1em
+}
+
+.vjs-default-skin .vjs-mute-control.vjs-vol-2:before,
+.vjs-default-skin .vjs-volume-menu-button.vjs-vol-2:before {
+    content: "\e815";
+    margin-left: 0.1em
+}
+
+.vjs-default-skin .vjs-volume-control {
+    width: 5em;
+    float: right;
+}
+
+.vjs-default-skin .vjs-volume-bar {
+    width: 5em;
+    height: 0.6em;
+    margin: 1.1em auto 0;
+}
+
+.vjs-default-skin .vjs-volume-menu-button .vjs-menu-content {
+    height: 2.9em;
+}
+
+.vjs-default-skin .vjs-volume-level {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0.5em;
+    /* assuming volume starts at 1.0 */
+
+    width: 100%;
+    background: #66a8cc url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
+}
+
+.vjs-default-skin .vjs-volume-bar .vjs-volume-handle {
+    width: 0.5em;
+    height: 0.5em;
+    /* Assumes volume starts at 1.0. If you change the size of the
+       handle relative to the volume bar, you'll need to update this value
+       too. */
+
+    left: 4.5em;
+}
+
+.vjs-default-skin .vjs-volume-handle:before {
+    font-size: 0.9em;
+    top: -0.2em;
+    left: -0.2em;
+    width: 1em;
+    height: 1em;
+}
+
+.vjs-default-skin .vjs-volume-menu-button .vjs-menu .vjs-menu-content {
+    width: 6em;
+    left: -4em;
+}
+
+/* Progress
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-progress-control {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+    font-size: 0.3em;
+    height: 1em;
+    /* Set above the rest of the controls. */
+    top: -1em;
+    /* Shrink the bar slower than it grows. */
+    /* transition */
+    -webkit-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    transition: all 0.4s;
+}
+
+/* On hover, make the progress bar grow to something that's more clickable.
+    This simply changes the overall font for the progress bar, and this
+    updates both the em-based widths and heights, as wells as the icon font */
+.vjs-default-skin:hover .vjs-progress-control {
+    font-size: .9em;
+    /* Even though we're not changing the top/height, we need to include them in
+        the transition so they're handled correctly. */
+
+    /* transition */
+    -webkit-transition: all 0.2s;
+    -moz-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+/* Box containing play and load progresses. Also acts as seek scrubber. */
+.vjs-default-skin .vjs-progress-holder {
+    height: 100%;
+}
+
+/* Progress Bars */
+.vjs-default-skin .vjs-progress-holder .vjs-play-progress,
+.vjs-default-skin .vjs-progress-holder .vjs-load-progress {
+    position: absolute;
+    display: block;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* updated by javascript during playback */
+
+    width: 0;
+    /* Needed for IE6 */
+    left: 0;
+    top: 0;
+}
+
+.vjs-default-skin .vjs-play-progress {
+    /*
+      Using a data URI to create the white diagonal lines with a transparent
+        background. Surprisingly works in IE8.
+        Created using http://www.patternify.com
+      Changing the first color value will change the bar color.
+      Also using a paralax effect to make the lines move backwards.
+        The -50% left position makes that happen.
+    */
+
+    background: #66a8cc url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
+}
+
+.vjs-default-skin .vjs-load-progress {
+    background: #646464 /* IE8- Fallback */;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.vjs-default-skin .vjs-seek-handle {
+    width: 1.5em;
+    height: 100%;
+}
+
+.vjs-default-skin .vjs-seek-handle:before {
+    padding-top: 0.1em /* Minor adjustment */;
+}
+
+/* Live Mode
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin.vjs-live .vjs-time-controls,
+.vjs-default-skin.vjs-live .vjs-time-divider,
+.vjs-default-skin.vjs-live .vjs-progress-control {
+    display: none;
+}
+
+.vjs-default-skin.vjs-live .vjs-live-controls {
+    display: block;
+}
+
+/* Live Display
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-live-controls {
+    display: none;
+    font-size: 1em;
+    line-height: 3em;
+}
+
+/* Time Display
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-time-controls {
+    font-size: 1em;
+    /* Align vertically by making the line height the same as the control bar */
+    line-height: 3em;
+}
+
+.vjs-default-skin .vjs-current-time {
+    float: left;
+}
+
+.vjs-default-skin .vjs-duration {
+    float: left;
+}
+
+/* Remaining time is in the HTML, but not included in default design */
+.vjs-default-skin .vjs-remaining-time {
+    display: none;
+    float: left;
+}
+
+.vjs-time-divider {
+    float: left;
+    line-height: 3em;
+}
+
+/* Fullscreen
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-fullscreen-control {
+    width: 3.8em;
+    cursor: pointer;
+    float: right;
+}
+
+.vjs-default-skin .vjs-fullscreen-control:before {
+    content: "\e80c";
+}
+
+/* Switch to the exit icon when the player is in fullscreen */
+.vjs-default-skin.vjs-fullscreen .vjs-fullscreen-control:before {
+    content: "\e817";
+}
+
+/* Big Play Button (play button at start)
+--------------------------------------------------------------------------------
+Positioning of the play button in the center or other corners can be done more
+easily in the skin designer. http://designer.videojs.com/
+*/
+.vjs-default-skin .vjs-big-play-button {
+    left: 0.5em;
+    top: 0.5em;
+    font-size: 3em;
+    display: block;
+    z-index: 2;
+    position: absolute;
+    width: 4em;
+    height: 2.6em;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    opacity: 1;
+    /* Need a slightly gray bg so it can be seen on black backgrounds */
+    /* background-color-with-alpha */
+    background-color: #07141e;
+    background-color: rgba(7, 20, 30, 0.7);
+    border: 0.1em solid #3b4249;
+    /* border-radius */
+    -webkit-border-radius: 0.8em;
+    -moz-border-radius: 0.8em;
+    border-radius: 0.8em;
+    /* box-shadow */
+    -webkit-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
+    -moz-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
+    box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
+    /* transition */
+    -webkit-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    transition: all 0.4s;
+}
+
+/* Optionally center */
+.vjs-default-skin.vjs-big-play-centered .vjs-big-play-button {
+    /* Center it horizontally */
+    left: 50%;
+    margin-left: -2.1em;
+    /* Center it vertically */
+    top: 50%;
+    margin-top: -1.4000000000000001em;
+}
+
+/* Hide if controls are disabled */
+.vjs-default-skin.vjs-controls-disabled .vjs-big-play-button {
+    display: none;
+}
+
+/* Hide when video starts playing */
+.vjs-default-skin.vjs-has-started .vjs-big-play-button {
+    display: none;
+}
+
+.vjs-default-skin:hover .vjs-big-play-button,
+.vjs-default-skin .vjs-big-play-button:focus {
+    outline: 0;
+    border-color: #fff;
+    /* IE8 needs a non-glow hover state */
+    background-color: #505050;
+    background-color: rgba(50, 50, 50, 0.75);
+    /* box-shadow */
+    -webkit-box-shadow: 0 0 3em #ffffff;
+    -moz-box-shadow: 0 0 3em #ffffff;
+    box-shadow: 0 0 3em #ffffff;
+    /* transition */
+    -webkit-transition: all 0s;
+    -moz-transition: all 0s;
+    -o-transition: all 0s;
+    transition: all 0s;
+}
+
+.vjs-default-skin .vjs-big-play-button:before {
+    content: "\e802";
+    font-family: "theoplayer";
+    /* In order to center the play icon vertically we need to set the line height
+       to the same as the button height */
+
+    line-height: 2.6em;
+    text-shadow: 0.05em 0.05em 0.1em #000;
+    text-align: center /* Needed for IE8 */;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.vjs-error .vjs-big-play-button {
+    display: none;
+}
+
+/* Error Display
+--------------------------------------------------------------------------------
+*/
+.vjs-error-display {
+    display: none;
+}
+
+.vjs-error .vjs-error-display {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.vjs-error .vjs-error-display:before {
+    content: 'X';
+    font-family: Arial;
+    font-size: 4em;
+    color: #666666;
+    /* In order to center the play icon vertically we need to set the line height
+       to the same as the button height */
+
+    line-height: 1;
+    text-shadow: 0.05em 0.05em 0.1em #000;
+    text-align: center /* Needed for IE8 */;
+    vertical-align: middle;
+    position: absolute;
+    top: 50%;
+    margin-top: -0.5em;
+    width: 100%;
+}
+
+.vjs-error-display div {
+    position: absolute;
+    font-size: 1.4em;
+    text-align: center;
+    bottom: 1em;
+    right: 1em;
+    left: 1em;
+}
+
+.vjs-error-display a,
+.vjs-error-display a:visited {
+    color: #F4A460;
+}
+
+/* Loading Spinner
+--------------------------------------------------------------------------------
+*/
+.vjs-loading-spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 4em;
+    line-height: 1;
+    width: 1em;
+    height: 1em;
+    margin-left: -0.5em;
+    margin-top: -0.5em;
+    opacity: 0.75;
+    /* animation */
+    -webkit-animation: spin 1.5s infinite linear;
+    -moz-animation: spin 1.5s infinite linear;
+    -o-animation: spin 1.5s infinite linear;
+    animation: spin 1.5s infinite linear;
+}
+
+/* Errors are unrecoverable without user interaction,
+   so hide the spinner in the case of an error */
+.video-js.vjs-error .vjs-loading-spinner {
+    /* using !important flag because currently the loading spinner
+       uses hide()/show() instead of classes. The !important can be
+       removed when that's updated */
+
+    display: none !important;
+    /* ensure animation doesn't continue while hidden */
+
+    /* animation */
+    -webkit-animation: none;
+    -moz-animation: none;
+    -o-animation: none;
+    animation: none;
+}
+
+.vjs-default-skin .vjs-loading-spinner:before {
+    content: "\e81c";
+    font-family: "theoplayer";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    text-shadow: 0em 0em 0.1em #000;
+}
+
+@-moz-keyframes spin {
+    0% {
+        -moz-transform: rotate(0deg);
+    }
+    100% {
+        -moz-transform: rotate(359deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+    }
+}
+
+@-o-keyframes spin {
+    0% {
+        -o-transform: rotate(0deg);
+    }
+    100% {
+        -o-transform: rotate(359deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(359deg);
+    }
+}
+
+/* Menu Buttons (Captions/Subtitles/etc.)
+--------------------------------------------------------------------------------
+*/
+.vjs-default-skin .vjs-menu-button {
+    float: right;
+    cursor: pointer;
+}
+
+.vjs-default-skin .vjs-menu {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0em;
+    /* (Width of vjs-menu - width of button) / 2 */
+
+    width: 0em;
+    height: 0em;
+    margin-bottom: 3em;
+    border-left: 2em solid transparent;
+    border-right: 2em solid transparent;
+    border-top: 1.55em solid #000000;
+    /* Same width top as ul bottom */
+
+    border-top-color: rgba(7, 40, 50, 0.5);
+    /* Same as ul background */
+
+}
+
+/* Button Pop-up Menu */
+.vjs-default-skin .vjs-menu-button .vjs-menu .vjs-menu-content {
+    display: block;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    width: 10em;
+    bottom: 1.5em;
+    /* Same bottom as vjs-menu border-top */
+
+    max-height: 15em;
+    overflow: auto;
+    left: -5em;
+    /* Width of menu - width of button / 2 */
+
+    /* background-color-with-alpha */
+    background-color: #07141e;
+    background-color: rgba(7, 20, 30, 0.7);
+    /* box-shadow */
+    -webkit-box-shadow: -0.2em -0.2em 0.3em rgba(255, 255, 255, 0.2);
+    -moz-box-shadow: -0.2em -0.2em 0.3em rgba(255, 255, 255, 0.2);
+    box-shadow: -0.2em -0.2em 0.3em rgba(255, 255, 255, 0.2);
+}
+
+.vjs-default-skin .vjs-menu-button:hover .vjs-menu {
+    display: block;
+}
+
+.vjs-default-skin .vjs-menu-button ul li {
+    list-style: none;
+    margin: 0;
+    padding: 0.3em 0 0.3em 0;
+    line-height: 1.4em;
+    font-size: 1.2em;
+    text-align: center;
+    text-transform: lowercase;
+}
+
+.vjs-default-skin .vjs-menu-button ul li:focus,
+.vjs-default-skin .vjs-menu-button ul li:hover {
+    color: #111;
+    /* background-color-with-alpha */
+    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+.vjs-default-skin .vjs-menu-button ul li.vjs-selected,
+.vjs-default-skin .vjs-menu-button ul li.vjs-selected:focus,
+.vjs-default-skin .vjs-menu-button ul li.vjs-selected:hover {
+    color: #111;
+    background-color: #ffc50f;
+}
+
+.vjs-default-skin .vjs-menu-button ul li:focus,
+.vjs-default-skin .vjs-menu-button ul li:hover,
+.vjs-default-skin .vjs-menu-button ul li.vjs-selected:focus,
+.vjs-default-skin .vjs-menu-button ul li.vjs-selected:hover {
+    outline: 0;
+    /* box-shadow */
+    -webkit-box-shadow: 0 0 1em #ffffff;
+    -moz-box-shadow: 0 0 1em #ffffff;
+    box-shadow: 0 0 1em #ffffff;
+}
+
+.vjs-default-skin .vjs-menu-button ul li.vjs-menu-title {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 1em;
+    line-height: 2em;
+    padding: 0;
+    margin: 0 0 0.3em 0;
+    font-weight: bold;
+    cursor: default;
+}
+
+/* Subtitles Button */
+.vjs-default-skin .vjs-subtitles-button:before {
+    content: "\e826";
+}
+
+/* Captions Button */
+.vjs-default-skin .vjs-captions-button:before {
+    content: "\e81d";
+}
+
+/* Replacement for focus outline */
+.vjs-default-skin .vjs-captions-button:focus .vjs-control-content:before,
+.vjs-default-skin .vjs-captions-button:hover .vjs-control-content:before {
+    /* box-shadow */
+    -webkit-box-shadow: 0 0 1em #ffffff;
+    -moz-box-shadow: 0 0 1em #ffffff;
+    box-shadow: 0 0 1em #ffffff;
+}
+
+/*
+REQUIRED STYLES (be careful overriding)
+================================================================================
+When loading the player, the video tag is replaced with a DIV,
+that will hold the video tag or object tag for other playback methods.
+The div contains the video playback element (Flash or HTML5) and controls,
+and sets the width and height of the video.
+
+** If you want to add some kind of border/padding (e.g. a frame), or special
+positioning, use another containing element. Otherwise you risk messing up
+control positioning and full window mode. **
+*/
+.video-js {
+    background-color: #000;
+    position: relative;
+    padding: 0;
+    /* Start with 10px for base font size so other dimensions can be em based and
+       easily calculable. */
+
+    font-size: 10px;
+    /* Allow poster to be vertially aligned. */
+
+    vertical-align: middle;
+    /*  display: table-cell; */
+    /*This works in Safari but not Firefox.*/
+
+    /* Provide some basic defaults for fonts */
+
+    font-weight: normal;
+    font-style: normal;
+    /* Avoiding helvetica: issue #376 */
+
+    font-family: Arial, sans-serif;
+    /* Turn off user selection (text highlighting) by default.
+       The majority of player components will not be text blocks.
+       Text areas will need to turn user selection back on. */
+
+    /* user-select */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Playback technology elements expand to the width/height of the containing div
+    <video> or <object> */
+.video-js .vjs-tech {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Fix for Firefox 9 fullscreen (only if it is enabled). Not needed when
+   checking fullScreenEnabled. */
+.video-js:-moz-full-screen {
+    position: absolute;
+}
+
+/* Fullscreen Styles */
+body.vjs-full-window {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    /* Fix for IE6 full-window. http://www.cssplay.co.uk/layouts/fixed.html */
+    overflow-y: auto;
+}
+
+.video-js.vjs-fullscreen {
+    position: fixed;
+    overflow: hidden;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 100% !important;
+    height: 100% !important;
+    /* IE6 full-window (underscore hack) */
+    _position: absolute;
+}
+
+.video-js:-webkit-full-screen {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.video-js.vjs-fullscreen.vjs-user-inactive {
+    cursor: none;
+}
+
+/* Poster Styles */
+.vjs-poster {
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+    cursor: pointer;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    float: left;
+    background-size: cover;
+    z-index: 2; /* IE issue when calling load(), this hides the poster! */
+}
+
+.vjs-poster img {
+    display: block;
+    margin: 0 auto;
+    max-height: 100%;
+    padding: 0;
+    width: 100%;
+}
+
+/* Text Track Styles */
+/* Overall track holder for both captions and subtitles */
+.video-js .vjs-text-track-display {
+    /* Pointer events should go to the video below */
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Move captions down when controls aren't being shown */
+.vjs-default-skin.vjs-controls-disabled .vjs-text-track-display,
+.vjs-default-skin.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-text-track-display {
+    bottom: 0;
+    /* transition */
+    -webkit-transition: bottom 1s;
+    -moz-transition: bottom 1s;
+    -o-transition: bottom 1s;
+    transition: bottom 1s;
+}
+
+/* Tracks container */
+.video-js .vjs-text-track-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 1.4em;
+}
+
+/* Individual tracks */
+.video-js .vjs-text-track {
+    display: none;
+    font-size: 1em;
+    text-align: center;
+    margin: 0;
+    /* Transparent black background, or fallback to all black (oldIE) */
+    /* background-color-with-alpha */
+    background-color: #000;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    left: 10%;
+    right: 10%;
+}
+
+.video-js .vjs-text-track.theoplayer-text-track-cea608 {
+    font-family: monospace;
+}
+
+.theoplayer-cea608-cue-fragment {
+    background: #000;
+    color: #fff;
+    box-shadow: 0.25em 0 0 0 #000, -0.25em 0 0 0 #000;
+}
+
+.video-js .vjs-subtitles {
+    color: #ffffff /* Subtitles are white */;
+}
+
+.video-js .vjs-captions {
+    color: #ffcc66 /* Captions are yellow */;
+}
+
+.vjs-tt-cue {
+    display: block;
+}
+
+/* Hide disabled or unsupported controls */
+.vjs-default-skin .vjs-hidden {
+    display: none;
+}
+
+.vjs-lock-showing {
+    display: block !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+/*  In IE8 w/ no JavaScript (no HTML5 shim), the video tag doesn't register.
+    The .video-js classname on the video tag also isn't considered.
+    This optional paragraph inside the video tag can provide a message to users
+    about what's required to play video. */
+.vjs-no-js {
+    padding: 20px;
+    color: #ccc;
+    background-color: #333;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    width: 300px;
+    height: 150px;
+    margin: 0px auto;
+}
+
+.vjs-no-js a,
+.vjs-no-js a:visited {
+    color: #F4A460;
+}
+
+/* theo specific */
+.theoplayer {
+    position: relative;
+    background-color: #000;
+    outline: none;
+}
+
+.theoplayer.vjs-fullscreen {
+    /* override adaptive player properties when fullscreen */
+    max-width: 100% !important;
+    max-height: 100% !important;
+    padding-bottom: 0 !important;
+}
+
+.theo-players {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.theo-player {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.theo-players .theo-player {
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.theo-audio {
+    display: none;
+}
+
+.theo-video {
+    z-index: 1;
+}
+
+.theo-video.theo-notable {
+    z-index: 2;
+}
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300);
+.theoplayer-skin .theoplayer-error {
+    display: none;
+}
+
+.theoplayer-skin.theoplayer-haserror .theoplayer-error {
+    display: block;
+}
+
+.theoplayer-skin .theoplayer-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    color: #fff;
+    text-align: center;
+    font-family: 'Open Sans Light';
+    font-weight: bold;
+    font-size: 14px;
+    background-image: url(data:image/gif;base64,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);
+}
+
+.theoplayer-skin .theoplayer-error-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 90%;
+    padding: 0 5%;
+    transform: translate(-50%, -50%);
+}
+
+.theoplayer-skin .theoplayer-offline {
+    display: none;
+    background: rgba(0,0,0,0.5);
+}
+
+.theoplayer-isoffline .theoplayer-offline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: block;
+}
+
+.theoplayer-skin .theoplayer-error a {
+    color: #ffc50f;
+    text-decoration: none;
+}
+
+.theoplayer-skin .theoplayer-error a:hover {
+    color: #bf920b;
+    text-decoration: underline;
+}
+
+.theo-context-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 14px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    background-clip: padding-box;
+    cursor: default;
+    text-align: left;
+}
+
+.theo-context-menu a,
+.theo-context-menu span {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.theo-context-menu > li[disabled=true] > a {
+    color: #ccc;
+    cursor: default;
+}
+
+.theo-context-menu .theo-context-divider {
+    height: 1px;
+    margin: 9px 0;
+    overflow: hidden;
+    background-color: #e5e5e5;
+}
+
+.theo-context-menu .theo-context-version {
+    font-style: italic;
+    font-size: 0.85em;
+}
+
+.theoplayer-skin.theoplayer-dvr .vjs-progress-control {
+    display: block;
+}
+
+.theoplayer-skin.theoplayer-dvr .vjs-progress-holder {
+    display: none;
+}
+
+.theoplayer-skin .theo-dvr-progress-holder {
+    display: none;
+}
+
+.theoplayer-skin.theoplayer-dvr .theo-dvr-progress-holder {
+    display: block;
+    height: 100%;
+}
+
+/* Progress Bars */
+.theoplayer-skin .theo-dvr-progress-holder .vjs-play-progress,
+.theoplayer-skin .theo-dvr-progress-holder .vjs-load-progress {
+    position: absolute;
+    display: block;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* updated by javascript during playback */
+
+    width: 0;
+    /* Needed for IE6 */
+    left: 0;
+    top: 0;
+}
+
+/* Time Display */
+.theoplayer-skin .theo-dvr-time-controls {
+    display: none;
+}
+
+.theoplayer-skin .theo-dvr-time-controls .vjs-current-time-display {
+    width: 6em;
+}
+
+.theoplayer-skin.theoplayer-dvr .theo-dvr-time-controls {
+    display: block;
+}
+
+.theoplayer-skin.theoplayer-dvr .theo-dvr-time-controls {
+    font-size: 1em;
+    /* Align vertically by making the line height the same as the control bar */
+    line-height: 3em;
+}
+
+.theoplayer-skin.theoplayer-dvr .vjs-live-controls {
+    cursor: pointer;
+}
+
+.theoplayer-skin.theoplayer-dvr.theoplayer-dvr-now .vjs-live-controls {
+    color: rgb(255, 197, 15);
+}
+
+/* theoplayer-skin for videojs
+--------------------------------------------------------------------------------
+*/
+.theoplayer-skin {
+    color: #ffffff;
+}
+
+.theoplayer-skin .vjs-slider {
+    /* background-color-with-alpha */
+    background-color: #828282;
+    background-color: rgba(130, 130, 130, 0.7);
+}
+
+.theoplayer-skin .vjs-control-bar {
+    z-index: 4;
+    /* background-color-with-alpha */
+    background-color: #000000;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.theoplayer-skin .vjs-volume-level {
+    background: #ffc50f url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
+}
+
+.theoplayer-skin .vjs-play-progress {
+    background: #ffc50f url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
+}
+
+.theoplayer-skin .vjs-big-play-button {
+    z-index: 4;
+    width: 5em;
+    height: 2.843em;
+    opacity: 0.5;
+    background: none;
+    border: 0;
+
+    /* Center it horizontally */
+    left: 50%;
+    margin-left: -2.6em;
+    /* Center it vertically */
+    top: 50%;
+    margin-top: -1.5215em;
+}
+
+.theoplayer-skin:hover .vjs-big-play-button,
+.theoplayer-skin .vjs-big-play-button:focus {
+    opacity: 1;
+    background: none;
+    border: 0;
+}
+
+.theoplayer-skin .vjs-big-play-button:before {
+    background: url('data:image/png;base64,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') no-repeat 0 0;
+    background-size: 5em 2.843em;
+    content: "";
+    line-height: 2.6em;
+}
+
+.theoplayer-skin .vjs-loading-spinner {
+    z-index: 4;
+}
+
+.theoplayer-skin .vjs-menu-button .vjs-menu .vjs-menu-content {
+    /* background-color-with-alpha */
+    background-color: #000000;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.theoplayer-skin .vjs-text-track-display {
+    z-index: 4;
+}
+
+.theoplayer-skin .vjs-poster {
+    background-color: #000;
+}
+
+/* Touch interface fixes */
+.theoplayer-skin.theoplayer-windows-phone {
+    font-size: 20px;
+}
+
+.theoplayer-skin.theoplayer-windows-phone .vjs-big-play-button {
+    font-size: 30px;
+}
+
+.theoplayer-skin.theoplayer-windows-phone video {
+    display: none;
+}
+
+.theoplayer-skin.theoplayer-windows-phone.vjs-has-started video {
+    display: inherit;
+}
+
+.theoplayer-skin.theoplayer-touch .vjs-progress-control,
+.theoplayer-skin.theoplayer-touch:hover .vjs-progress-control {
+    font-size: 0.9em;
+}
+
+/* VAST */
+.theoplayer-ad-info {
+    cursor: default;
+    display: block;
+    position: absolute;
+    bottom: 2.5em;
+    width: auto;
+    color: #AAA;
+    font-size: 1.5em;
+    line-height: 12px;
+    padding: 10px;
+    z-index: 998;
+}
+
+.theoplayer-skip-button {
+    right: 0;
+    background-color: #000;
+    max-width: 10em;
+    text-align: right;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.theoplayer-skip-button.enabled {
+    cursor: pointer;
+    color: #fff;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.theoplayer-skip-button.enabled:hover {
+    background: #000;
+    text-shadow: 0em 0em 1em #ffffff;
+}
+
+.theoplayer-ad-countdown {
+    pointer-events: none;
+    font-size: 1.2em;
+    left: 0;
+    color: #fff;
+    text-shadow: 0em 0em 3px #000;
+}
+
+.theoplayer-vast-blocker {
+    display: block;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Ads */
+
+/* Ad playback */
+.theoplayer-ad-playing .vjs-progress-control {
+    pointer-events: none;
+}
+
+/*disable seeking during advertisement*/
+.theoplayer-ad-playing:hover .vjs-progress-control,
+.theoplayer-ad-playing.theoplayer-touch .vjs-progress-control,
+.theoplayer-ad-playing.theoplayer-touch:hover .vjs-progress-control {
+    font-size: 0.3em;
+}
+
+.theoplayer-ad-playing .vjs-play-progress {
+    /*  background-color: #ff0000;*/
+}
+
+/* Ad loading */
+.theoplayer-ad-loading .vjs-loading-spinner {
+    display: block;
+}
+
+/*Banner*/
+.theoplayer .banner-holder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    overflow: hidden;
+    width: 100%;
+    z-index: 998;
+}
+
+.theoplayer .banner-inner img {
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+}
+
+.theoplayer .banner-inner {
+    display: inline-block;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+}
+
+.theoplayer-banner-close:before {
+    content: '\00D7';
+}
+
+.theoplayer-banner-close {
+    /*background-color: #121212;*/
+    color: #dddddd;
+    text-shadow: 0px 0px 3px #000;
+    font-size: 2em;
+    opacity: 0.75;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.theoplayer-banner-close:hover {
+    cursor: pointer;
+    font-size: 2em;
+    font-weight: bold;
+    opacity: 1;
+}
+
+/*PLAYLIST*/
+.theoplayer-playlist-holder {
+    background: #1b1b1b;
+    display: inline-block;
+    position: relative;
+    bottom: 0;
+    height: 100%;
+    vertical-align: top;
+}
+
+.theoplayer-playlist-menu {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    width: 360px;
+    overflow-y: auto;
+    color: #c0c0c0;
+    border-radius: 8px;
+    display: block;
+    position: relative;
+    background: -moz-linear-gradient(top, #000 0, #212121 19%, #212121 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #000), color-stop(19%, #212121), color-stop(100%, #212121));
+    background: -o-linear-gradient(top, #000 0, #212121 19%, #212121 100%);
+    background: -ms-linear-gradient(top, #000 0, #212121 19%, #212121 100%);
+    background: linear-gradient(to bottom, #000 0, #212121 19%, #212121 100%);
+    box-shadow: 0 1px 1px #1a1a1a inset, 0px 1px 1px #454545;
+    border: 1px solid #1a1a18;
+    scrollbar-base-color: #fff;
+    scrollbar-highlight-color: #fff;
+    scrollbar-arrow-color: #fff;
+    scrollbar-track-color: #161616;
+    scrollbar-shadow-color: #fff;
+}
+
+.theoplayer-playlist-menu::-webkit-scrollbar {
+    width: 10px;
+    background-color: #161616;
+    border-radius: 10px;
+}
+
+.theoplayer-playlist-menu::-webkit-scrollbar-thumb {
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.theoplayer-playlist-menu::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: 0em 0em 0.5em #ffffff;
+}
+
+.theoplayer-next {
+    float: right;
+}
+
+.theoplayer-previous {
+    float: left;
+    -moz-transform: scaleX(-1); /* Gecko */
+    -o-transform: scaleX(-1); /* Operah */
+    -webkit-transform: scaleX(-1); /* webkit */
+    transform: scaleX(-1); /* standard */
+    filter: FlipH; /* IE 6/7/8 */
+}
+
+.theoplayer-previous, .theoplayer-next {
+    cursor: pointer;
+    margin: 10px;
+    font-family: "theoplayer";
+    color: #fff;
+}
+
+.theoplayer-playlist-menu ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.theoplayer-playlist-menu ul li {
+    padding: 10px;
+    border-bottom: 1px solid #000;
+    cursor: pointer;
+}
+
+.theoplayer-playlist-menu ul li.active {
+    background-color: #4f4f4f;
+    border-color: #4f4f4f;
+    color: #FFF;
+}
+
+.theoplayer-playlist-menu ul li:hover {
+    border-color: #353535;
+    background: #353535;
+}
+
+.theoplayer-playlist-menu .thumbnail, .theoplayer-playlist-menu .title {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.theoplayer-playlist-menu .number {
+    padding-right: 10px;
+}
+
+.theoplayer-playlist-menu .thumbnail img {
+    width: 64px;
+}
+
+.theoplayer-playlist-menu .title {
+    padding-left: 10px;
+}
+
+/* Show the spinner when waiting for data and seeking to a new time */
+.vjs-waiting .vjs-loading-spinner,
+.vjs-seeking .vjs-loading-spinner {
+    display: block;
+    /* only animate when showing because it can be processor heavy */
+    /* animation */
+    -webkit-animation: spin 1.5s infinite linear;
+    -moz-animation: spin 1.5s infinite linear;
+    -o-animation: spin 1.5s infinite linear;
+    animation: spin 1.5s infinite linear;
+}
+
+/* Errors are unrecoverable without user interaction so hide the spinner */
+.vjs-error .vjs-loading-spinner,
+.theoplayer:not(.vjs-has-started) .vjs-loading-spinner,
+.theoplayer-loading-playlist-item .vjs-loading-spinner {
+    display: none;
+    /* ensure animation doesn't continue while hidden */
+    /* animation */
+    -webkit-animation: none;
+    -moz-animation: none;
+    -o-animation: none;
+    animation: none;
+}
+
+.theoplayer-resolution-button {
+    float: right;
+    line-height: 3em;
+}
+
+.theoplayer-skin .theoplayer-resolution-button ul li.vjs-selected {
+    background-color: #666;
+}
+
+.theoplayer-skin.vjs-has-started .vjs-poster {
+    display: none;
+}
+
+.theoplayer-skin.vjs-has-started.theoplayer-audio-only .vjs-poster {
+    display: block;
+}
+
+/* chromecast */
+.theoplayer-chromecast-button {
+    float: right !important;
+    cursor: pointer;
+    width: 3em !important;
+}
+
+.theoplayer-chromecast-button:before {
+    content: "\e827";
+    font-family: "theoplayer";
+}
+
+.theoplayer-chromecast-button.connected {
+    color: rgb(255, 197, 15);
+}
+
+.theoplayer-chromecast-image {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: #000;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    display: none;
+}
+
+.theoplayer-skin.casting .theoplayer-chromecast-image {
+    display: block;
+    z-index: 2;
+}
+
+.theoplayer-chromecast-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.6;
+    cursor: default;
+}
+
+.theoplayer-chromecast-description {
+    position: absolute;
+    left: 15px;
+    bottom: 50px;
+    right: 15px;
+    height: 50px;
+    color: #fff;
+}
+
+.theoplayer-chromecast-description-icon {
+    font-size: 44px;
+    line-height: 50px;
+    margin-right: 10px;
+    float: left;
+    width: 58px;
+    height: 50px;
+}
+
+.theoplayer-chromecast-description-icon:before {
+    content: "\e827";
+    font-family: "theoplayer";
+}
+
+.theoplayer-chromecast-description-receiver {
+    height: 50px;
+    font-size: 20px;
+    line-height: 20px;
+}
+
+.theoplayer-chromecast-description-receiver .theoplayer-chromecast-description-receiver-name {
+    padding-top: 5px;
+}
+
+.theoplayer-skin.casting.vjs-controls-enabled .vjs-control-bar {
+    display: block !important;
+    /* Visibility needed to make sure things hide in older browsers too. */
+
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* transition */
+    -webkit-transition: visibility 0.1s, opacity 0.1s !important;
+    -moz-transition: visibility 0.1s, opacity 0.1s !important;
+    -o-transition: visibility 0.1s, opacity 0.1s !important;
+    transition: visibility 0.1s, opacity 0.1s !important;
+}
+
+/* capitals in pop-up menus */
+.theoplayer-skin .vjs-menu-button ul li {
+    text-transform: none;
+}
+
+/* THUMBNAILS */
+/* a wrapper element that for the thumbnail */
+.theoplayer-thumbnail-holder {
+    position: absolute;
+    display: none;
+    bottom: 1.3em;
+    opacity: 0;
+    transition: opacity .2s ease;
+    -webkit-transition: opacity .2s ease;
+    -moz-transition: opacity .2s ease;
+    -mz-transition: opacity .2s ease;
+    background: rgba(0, 0, 0, 0.75);
+    border: 2px solid rgb(0, 0, 0);
+    border: 2px solid rgba(0, 0, 0, 0.75);
+    -webkit-background-clip: padding-box; /* for Safari */
+    background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+}
+
+.theoplayer-thumbnail-holder .theoplayer-thumbnail-time {
+    color: #fff;
+    text-align: center;
+    padding: 2px 0 0 0;
+}
+
+/* fade in the thumbnail when hovering over the progress bar */
+/* .fake-active is needed for Android only. It's removed on touchend/touchecancel */
+.vjs-progress-control:hover .theoplayer-thumbnail-holder,
+.vjs-progress-control.fake-active .theoplayer-thumbnail-holder,
+.vjs-progress-control:active .theoplayer-thumbnail-holder {
+    opacity: 1;
+    transition: opacity .2s ease;
+    -webkit-transition: opacity .2s ease;
+    -moz-transition: opacity .2s ease;
+    -mz-transition: opacity .2s ease;
+}
+
+/* ... but hide the thumbnail when hovering directly over it */
+.vjs-progress-control:hover .theoplayer-thumbnail-holder:hover,
+.vjs-progress-control:active .theoplayer-thumbnail-holder:active {
+    opacity: 0;
+    transition: opacity .2s ease;
+    -webkit-transition: opacity .2s ease;
+    -moz-transition: opacity .2s ease;
+    -mz-transition: opacity .2s ease;
+}
+
+/* configuration panel */
+.theoplayer-skin .theoplayer-configuration-control {
+    cursor: pointer;
+    float: right;
+}
+
+.theoplayer-configuration-control:before {
+    font-family: "theoplayer";
+    content: "\e800";
+}
+
+.theoplayer-skin .theoplayer-configuration-panel {
+    position: absolute;
+    right: 0;
+    bottom: 4.2em;
+    border: 2px solid rgb(0, 0, 0);
+    border: 2px solid rgba(0, 0, 0, 0.75);
+    -webkit-background-clip: padding-box; /* for Safari */
+    background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+}
+
+.theoplayer-skin .theoplayer-configuration-panel-visible {
+    display: block;
+}
+
+.theoplayer-skin .theoplayer-configuration-panel-item {
+    padding: 0.5em;
+    font-size: larger;
+}
+
+.theoplayer-skin .theoplayer-configuration-panel-item label {
+    width: 8em;
+    margin: 0 0.5em;
+    display: inline-block;
+}
+
+.theoplayer-skin .theoplayer-configuration-panel-item select {
+    color: #000;
+}
+
+.theoplayer-skin .theoplayer-configuration-panel-item .theoplayer-configuration-panel-content {
+    min-width: 6em;
+    padding: 0.25em;
+    border: 0;
+}
+
+.vjs_tech {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    float: left;
+}
+
+/* Social Sharing menu */
+.theoplayer-sharing-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 3.8em;
+    width: 40px;
+
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+}
+
+/* Hide the control bar when the video is playing and the user is inactive  */
+.vjs-default-skin.vjs-has-started.vjs-user-inactive.vjs-playing .theoplayer-sharing-menu,
+.vjs-default-skin.vjs-has-started.vjs-user-inactive.vjs-playing .theoplayer-sharing-permalink {
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transition: visibility 1s, opacity 1s;
+    -moz-transition: visibility 1s, opacity 1s;
+    -o-transition: visibility 1s, opacity 1s;
+    transition: visibility 1s, opacity 1s;
+}
+
+/* The control bar shouldn't show after an error */
+.vjs-default-skin.vjs-error .theoplayer-sharing-menu,
+.vjs-default-skin.vjs-error .theoplayer-sharing-permalink {
+    display: none;
+}
+
+/* Enable the social menu when the control button is toggled */
+.vjs-default-skin.vjs-has-started .theoplayer-sharing-menu.theoplayer-sharing-menu-toggled,
+.vjs-default-skin.vjs-has-started .theoplayer-sharing-permalink.theoplayer-sharing-permalink-toggled {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    -webkit-transition: visibility 0.1s, opacity 0.1s;
+    -moz-transition: visibility 0.1s, opacity 0.1s;
+    -o-transition: visibility 0.1s, opacity 0.1s;
+    transition: visibility 0.1s, opacity 0.1s;
+}
+
+.theoplayer-sharing-button {
+    font-family: "theoplayer";
+    text-shadow: 0 0 0.2em #000;
+    cursor: pointer;
+    position: relative;
+    height: 40px;
+    text-align: center;
+    line-height: 3;
+    font-size: 2em
+}
+
+.theoplayer-sharing-control:before {
+    font-family: "theoplayer"; /* Add to theoplayer font */
+    content: '\e811';
+}
+
+/* Enable the social menu when hovering over the video player */
+.vjs-default-skin.vjs-has-started .theoplayer-sharing-menu {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    -webkit-transition: visibility 0.1s, opacity 0.1s;
+    -moz-transition: visibility 0.1s, opacity 0.1s;
+    -o-transition: visibility 0.1s, opacity 0.1s;
+    transition: visibility 0.1s, opacity 0.1s;
+}
+
+/* Enable the social menu when the control button is toggled */
+.theoplayer-skin .theoplayer-sharing-control {
+    cursor: pointer;
+    float: right;
+    display: none;
+}
+
+.theoplayer-skin.theoplayer-show-social-sharing-button .theoplayer-sharing-control {
+    display: block;
+}
+
+.theoplayer-skin.theoplayer-show-social-sharing-button .theoplayer-sharing-menu {
+    display: none;
+}
+
+/* Social sharing permalink */
+.theoplayer-sharing-permalink {
+    display: none;
+    position: absolute;
+    right: 5em;
+    left: 5em;
+    top: 9em;
+
+    margin: auto;
+    padding: 1em 3em 1em 5em;
+
+    background: rgba(0, 0, 0, 0.3);
+    max-width: 50em;
+    z-index: 1000;
+}
+
+.theoplayer-sharing-permalink-icon {
+    position: absolute;
+    top: 0.2em;
+    left: 0.3em;
+
+    font-family: 'theoplayer';
+    font-size: 3em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.theoplayer-sharing-permalink-content {
+    height: 1.5em;
+    width: 100%;
+
+    font-size: 1.5em;
+    text-align: center;
+    box-shadow: none;
+}
+
+.theoplayer-sharing-permalink-button {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 1em;
+
+  font-family: 'theoplayer';
+  font-size: 1em;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Changes for captions/subtitles */
+.theoplayer-skin .vjs-text-track-display {
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.theoplayer-skin .vjs-text-track {
+    font-size: 100%;
+    background-color: transparent;
+}
+
+.theoplayer.theoplayer-configuration-spin .theoplayer-configuration-control {
+    -webkit-animation: spin 3s infinite linear;
+    -moz-animation: spin 3s infinite linear;
+    -ms-animation: spin 3s infinite linear;
+    animation: spin 3s infinite linear;
+}
+
+.theoplayer.theoplayer-configuration-panel-content {
+    color: #000;
+}
+
+.theoplayer.theoplayer-fullscreen-unavailable .vjs-volume-control {
+    margin-right: 1em;
+}
+
+.theoplayer.theoplayer-fullscreen-unavailable .vjs-fullscreen-control {
+    display: none;
+}
+
+
+/* VPAID container styling */
+.theoplayer-vpaid-sandbox, .theoplayer-vpaid-container{
+    position : absolute;
+    left : 0;
+    right : 0;
+    top : 0;
+    bottom : 0;
+    width : 100%;
+    overflow : visible;
+    backgroundColor : rgba(0,0,0,0);
+}
+.theoplayer-vpaid-sandbox {
+    height : 100%;
+    overflow : visible;
+    background : rgba(0,0,0,0);
+}
+
+.theoplayer-vpaid-container {
+    height : 90%;
+}
+.theoplayer-vpaid-banner-holder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Overlay technology */
+.theoplayer-overlay-element-container, .theoplayer-overlay-element{
+    position : absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.theoplayer-overlay-element-container {
+    z-index : 3;
+    visibility : hidden;
+}
+.theoplayer-overlay-element {
+    width : 100%;
+    height : 100%;
+    background : black;
+}
