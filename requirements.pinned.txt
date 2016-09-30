@@ -50,7 +50,7 @@ Flask-Principal==0.4.0    # via flask-security, invenio-admin
 Flask-RESTful==0.3.5      # via flask-iiif
 Flask-Security==1.7.5     # via invenio-accounts, invenio-oauth2server, invenio-oauthclient
 Flask-SQLAlchemy==2.1     # via invenio-db
-Flask-WTF==0.12           # via flask-security, invenio-files-rest, invenio-oauth2server, invenio-userprofiles
+Flask-WTF==0.13           # via flask-security, invenio-files-rest, invenio-oauth2server, invenio-userprofiles
 Flask==0.11.1             # via flask-admin, flask-assets, flask-babelex, flask-breadcrumbs, flask-celeryext, flask-cli, flask-collect, flask-cors, flask-debugtoolbar, flask-iiif, flask-kvsession, flask-limiter, flask-login, flask-mail, flask-menu, flask-oauthlib, flask-principal, flask-restful, flask-security, flask-sqlalchemy, flask-wtf, invenio-access, invenio-accounts, invenio-assets, invenio-base, invenio-celery, invenio-config, invenio-db, invenio-files-rest, invenio-formatter, invenio-jsonschemas, invenio-logging, invenio-mail, invenio-oauth2server, invenio-oauthclient, invenio-pages, invenio-previewer, invenio-records-files, invenio-theme, raven
 fs==0.5.4
 future==0.15.2
