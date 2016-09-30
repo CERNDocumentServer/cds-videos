@@ -155,6 +155,10 @@ setup(
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
             'cds_record_js = cds.modules.records.bundles:js',
+            'cds_previewer_video_css = cds.modules.previewer.bundles:video_css',
+            'cds_previewer_video_js = cds.modules.previewer.bundles:video_js',
+            'cds_previewer_theoplayer_js = cds.modules.previewer.bundles:theoplayer_js',
+            'cds_previewer_theoplayer_css = cds.modules.previewer.bundles:theoplayer_css'
         ],
         'invenio_base.api_apps': [
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
@@ -165,6 +169,7 @@ setup(
         ],
         'invenio_base.blueprints': [
             'cds_home = cds.modules.home.views:blueprint',
+            'cds_previewer = cds.modules.previewer.views:blueprint',
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
@@ -181,6 +186,9 @@ setup(
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
             'cds = cds_dojson.schemas',
+        ],
+        'invenio_previewer.previewers': [
+            'cds_video = cds.modules.previewer.extensions.video',
         ]
     },
     extras_require=extras_require,
