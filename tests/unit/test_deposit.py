@@ -27,6 +27,11 @@
 from __future__ import absolute_import, print_function
 
 import mock
+
+from cds.modules.deposit.api import CDSDeposit
+from cds.modules.deposit.links import deposit_links_factory
+from cds.modules.deposit.permissions import can_edit_deposit
+from cds.modules.deposit.views import to_links_js
 from flask import current_app, g, request, url_for
 from flask_login import login_user
 from flask_principal import Identity
@@ -36,13 +41,8 @@ from invenio_files_rest.models import Bucket
 from invenio_records.models import RecordMetadata
 from invenio_records_files.api import RecordsBuckets
 
-from cds.modules.deposit.api import CDSDeposit
-from cds.modules.deposit.links import deposit_links_factory
-from cds.modules.deposit.permissions import can_edit_deposit
-from cds.modules.deposit.views import to_links_js
 
-
-def test_deposit_link_factory_has_bucket(app, db, location):
+def test_deposit_link_factory_has_bucket(app, db, es, location):
     """Test bucket link factory retrieval of a bucket."""
     bucket = Bucket.create()
     with app.test_request_context(),\
@@ -67,13 +67,13 @@ def test_deposit_link_factory_has_bucket(app, db, location):
         )
 
 
-def test_cds_deposit(location):
+def test_cds_deposit(es, location):
     """Test CDS deposit creation."""
     deposit = CDSDeposit.create({})
     assert '_buckets' in deposit
 
 
-def test_links_filter(location):
+def test_links_filter(es, location):
     """Test Jinja to_links_js filter."""
     assert to_links_js(None) == []
     deposit = CDSDeposit.create({})
@@ -87,7 +87,7 @@ def test_links_filter(location):
     assert links['files'] == self_url + '/files'
 
 
-def test_permissions(location):
+def test_permissions(es, location):
     """Test deposit permissions."""
     deposit = CDSDeposit.create({})
     deposit.commit()

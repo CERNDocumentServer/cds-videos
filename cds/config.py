@@ -377,7 +377,9 @@ LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
 # JSON Schemas
 ###############################################################################
 
+JSONSCHEMAS_ENDPOINT = '/schemas'
 JSONSCHEMAS_HOST = os.environ.get('JSONSCHEMAS_HOST', 'localhost:5000')
+JSONSCHEMAS_URL_SCHEME = 'https'
 
 ###############################################################################
 # Migration
