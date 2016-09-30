@@ -28,7 +28,6 @@ from __future__ import absolute_import, print_function
 
 from flask import has_request_context
 from flask_security import current_user
-from invenio_deposit.permissions import admin_permission_factory
 
 
 class DepositPermission(object):
@@ -43,7 +42,7 @@ class DepositPermission(object):
 
         This method must align with the search class filtering of records.
         """
-        if not has_request_context() or admin_permission_factory().can():
+        if not has_request_context():
             return True
         else:
             uid = getattr(current_user, 'id', 0)

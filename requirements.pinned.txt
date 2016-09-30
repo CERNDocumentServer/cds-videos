@@ -76,7 +76,7 @@ invenio-jsonschemas==1.0.0a3
 invenio-logging[sentry]==1.0.0a3
 invenio-mail==1.0.0a5
 invenio-migrator==1.0.0a8
-invenio-oauth2server==1.0.0a9
+invenio-oauth2server==1.0.0a10
 invenio-oauthclient==1.0.0a11
 invenio-pages==1.0.0a3
 invenio-pidstore==1.0.0a9
