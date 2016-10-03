@@ -190,6 +190,13 @@ setup(
             'cds = cds_dojson.schemas',
             'cds_deposit = cds.modules.deposit.jsonschemas',
         ],
+        'invenio_celery.tasks': [
+            'cds = cds.modules.webhooks.tasks',
+        ],
+        'invenio_webhooks.receivers': [
+            'av = cds.modules.webhooks.receivers:AVWorkflow',
+            'metadata = cds.modules.webhooks.receivers:VideoMetadataExtractor',
+        ],
     },
     extras_require=extras_require,
     install_requires=install_requires,
