@@ -121,6 +121,7 @@ install_requires = [
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
     'Pillow>=3.2.0',
+    'pexpect>=4.2.1',
     'python-slugify>=1.2.0',
     'raven<=5.1.0',
     'requests>=2.10.0',

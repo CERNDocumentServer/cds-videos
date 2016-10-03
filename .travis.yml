@@ -31,6 +31,9 @@ before_install:
 - wget -O - https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz
   | tar xz --directory=/tmp/elasticsearch --strip-components=1
 - "/tmp/elasticsearch/bin/elasticsearch &"
+- mkdir /tmp/ffmpeg
+- wget -O - https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+  | tar --strip-components 1 -xJ -C /tmp/ffmpeg && export PATH=$PATH:/tmp/ffmpeg
 - travis_retry pip install --upgrade pip setuptools py
 - travis_retry pip install twine wheel coveralls requirements-builder
 - "./scripts/setup-npm.sh"
