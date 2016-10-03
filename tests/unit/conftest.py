@@ -122,3 +122,21 @@ def datadir():
 def script_info(app):
     """Get ScriptInfo object for testing CLI."""
     return ScriptInfo(create_app=lambda info: app)
+
+
+@pytest.fixture()
+def video_mp4(datadir):
+    """Get test video file."""
+    return join(datadir, 'test.mp4')
+
+
+@pytest.fixture()
+def video_mov(datadir):
+    """Get test video file."""
+    return join(datadir, 'test.mov')
+
+
+@pytest.fixture()
+def online_video():
+    """Get online test video file."""
+    return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
