@@ -116,7 +116,7 @@ install_requires = [
     'invenio-search>=1.0.0a7',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
-    'invenio-webhooks>=1.0.0a3',
+    'invenio-webhooks==1.0.0a3',
     'jsonref>=0.1',
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
@@ -171,6 +171,9 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
+        ],
+        'invenio_base.api_blueprints': [
+            'cds_webhooks = cds.modules.webhooks.views:blueprint',
         ],
         'invenio_pidstore.minters': [
             'cds_recid = cds.modules.records.minters:recid_minter',
