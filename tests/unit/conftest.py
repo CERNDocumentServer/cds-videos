@@ -33,13 +33,15 @@ import tempfile
 from os.path import dirname, join
 
 import pytest
-from flask_cli import FlaskCLI, ScriptInfo
-from invenio_db import db as db_
-from invenio_files_rest.models import Location
-from invenio_files_rest.views import blueprint as files_rest_blueprint
-from sqlalchemy_utils.functions import create_database, database_exists
-
 from cds.factory import create_app
+from elasticsearch import RequestError
+from flask_cli import ScriptInfo
+from invenio_db import db as db_
+from invenio_files_rest.models import Location, Bucket
+from invenio_files_rest.views import blueprint as files_rest_blueprint
+from invenio_search import current_search
+from invenio_search import current_search_client
+from sqlalchemy_utils.functions import create_database, database_exists
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -97,6 +99,14 @@ def location(db):
     yield loc
 
     shutil.rmtree(tmppath)
+
+
+@pytest.fixture()
+def bucket(db, location):
+    """Provide test bucket."""
+    bucket = Bucket.create(location)
+    db.session.commit()
+    return bucket
 
 
 @pytest.yield_fixture()

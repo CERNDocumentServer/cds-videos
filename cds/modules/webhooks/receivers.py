@@ -29,6 +29,8 @@ from __future__ import absolute_import, division
 from celery import chain, group
 from celery.result import AsyncResult
 from invenio_webhooks import Receiver
+from .tasks import attach_files, download, extract_metadata, extract_frames, \
+    transcode
 
 
 class TaskReceiver(Receiver):
@@ -135,3 +137,26 @@ class CeleryChainTaskReceiver(TaskReceiver):
     def cancel_task(self, task_id):
         AsyncResult(task_id).revoke(terminate=True)
         return 'Revoked task'
+
+
+class AVWorkflow(CeleryChainTaskReceiver):
+    """Composite CeleryChainTaskReceiver for the AV workflow."""
+
+    celery_tasks = [
+        (download, {'url', 'bucket_id', 'key', 'chunk_size'}),
+        [
+            (transcode, {'preset_name'}),
+            (extract_frames, {
+                'start_percentage', 'end_percentage', 'number_of_frames',
+                'size_percentage', 'output_folder'
+            })
+        ],
+        (attach_files, {'bucket_id', 'key'}),
+    ]
+
+
+class VideoMetadataExtractor(CeleryTaskReceiver):
+    """Receiver that extracts metadata from video URLs."""
+
+    celery_task = extract_metadata
+

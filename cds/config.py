@@ -57,7 +57,7 @@ I18N_LANGUAGES = []
 # Celery
 ###############################################################################
 
-# RabbitMQ.
+# Celery broker.
 BROKER_URL = os.environ.get(
     'APP_BROKER_URL',
     'redis://localhost:6379/0')
@@ -65,6 +65,8 @@ BROKER_URL = os.environ.get(
 CELERY_RESULT_BACKEND = os.environ.get(
     'APP_CACHE_REDIS_URL',
     'redis://localhost:6379/1')
+# Celery monitoring.
+CELERY_TRACK_STARTED = True
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 

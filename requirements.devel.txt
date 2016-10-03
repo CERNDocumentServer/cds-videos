@@ -30,6 +30,7 @@ psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+-e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
 -e git+https://github.com/inveniosoftware/invenio-access.git#egg=invenio-access
