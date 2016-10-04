@@ -397,6 +397,8 @@ INDEXER_BULK_REQUEST_TIMEOUT = 60
 ###############################################################################
 # Deposit
 ###############################################################################
+# PID minter used for record submissions.
+DEPOSIT_PID_MINTER = 'cds_recid'
 # Template for deposit list view.
 DEPOSIT_UI_INDEX_TEMPLATE = 'cds_deposit/index.html'
 # Template to use for UI.
