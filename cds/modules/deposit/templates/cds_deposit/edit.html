@@ -125,6 +125,33 @@
           .config(['$provide', function($provide) {
           $provide.decorator('invenioRecordsDirective', ['$rootScope', '$q', '$http', '$delegate',
             function($rootScope, $q, $http, $delegate) {
+              var originalLink = $delegate[0].link;
+              $delegate[0].compile = function() {
+                return function(scope) {
+                  originalLink.apply($delegate[0], arguments);
+                  scope.filesSchema = {
+                    "type": "object",
+                    "title": "Types",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "key": "metadata.name",
+                      }
+                    },
+                    "required": [
+                      "number"
+                    ]
+                  };
+                  scope.filesForm = [{
+                    'key': 'videos',
+                    'type': 'array',
+                    'items': [
+                      'videos[].metadata.name'
+                    ]
+                  }];
+                };
+              };
+
               var unmatchedFiles = [];
 
               var videoRegex = /(.*)\.(mp4|mov)$/;
@@ -260,6 +287,8 @@
               form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
               template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_FORM) }}">
             </invenio-records-form>
+          <form sf-model="recordsVM.invenioRecordsModel" sf-schema="filesSchema" sf-form="filesForm">
+          </form>
           <table class="table">
             <tr ng-repeat="vid in recordsVM.invenioRecordsModel.videos">
               <td>
