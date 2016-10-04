@@ -1,61 +1,16 @@
 {
+    "_all": {
+        "enable": true
+    },
     "numeric_detection": true,
     "properties": {
-        "copyright": {
-            "type": "object",
-            "properties": {
-                "holder": {
-                    "type": "string"
-                },
-                "year": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "contributors": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "affiliations": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "contribution": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "license": {
             "type": "string"
         },
-        "keywords": {
+        "_access": {
             "type": "object",
             "properties": {
-                "source": {
-                    "type": "string"
-                },
-                "value": {
+                "read": {
                     "type": "string"
                 }
             }
@@ -63,79 +18,38 @@
         "description": {
             "type": "object",
             "properties": {
-                "source": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "string"
-                }
-            }
-        },
-        "_files": {
-            "type": "object",
-            "properties": {
-                "thumbnail": {
-                    "type": "string"
                 },
-                "width": {
-                    "type": "string"
-                },
-                "height": {
-                    "type": "string"
-                },
-                "checksum": {
-                    "type": "string"
-                },
-                "category": {
-                    "type": "string"
-                },
-                "quality": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
-                },
-                "bitrate": {
-                    "type": "string"
-                },
-                "bucket": {
+                "source": {
                     "type": "string"
                 }
             }
         },
-        "_oai": {
+        "keywords": {
             "type": "object",
             "properties": {
-                "sets": {
+                "value": {
                     "type": "string"
                 },
-                "updated": {
-                    "type": "string"
-                },
-                "id": {
+                "source": {
                     "type": "string"
                 }
             }
         },
-        "creator": {
+        "contributors": {
             "type": "object",
             "properties": {
+                "role": {
+                    "type": "string"
+                },
                 "ids": {
                     "type": "object",
                     "properties": {
-                        "source": {
+                        "value": {
                             "type": "string"
                         },
-                        "value": {
+                        "source": {
                             "type": "string"
                         }
                     }
@@ -143,13 +57,84 @@
                 "affiliations": {
                     "type": "string"
                 },
-                "contribution": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "contribution": {
+                    "type": "string"
+                }
+            }
+        },
+        "_files": {
+            "type": "object",
+            "properties": {
+                "version_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "bucket": {
+                    "type": "string"
+                },
+                "previewer": {
+                    "type": "string"
+                },
+                "checksum": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "recid": {
+            "type": "double"
+        },
+        "title_translations": {
+            "type": "object",
+            "properties": {
+                "subtitle": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "videos": {
+            "type": "object",
+            "properties": {
+                "$reference": {
+                    "type": "string"
+                }
+            }
+        },
+        "_oai": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "sets": {
+                    "type": "string"
+                },
+                "updated": {
                     "type": "string"
                 }
             }
@@ -157,10 +142,10 @@
         "description_translations": {
             "type": "object",
             "properties": {
-                "source": {
+                "value": {
                     "type": "string"
                 },
-                "value": {
+                "source": {
                     "type": "string"
                 },
                 "language": {
@@ -171,47 +156,69 @@
         "_deposit": {
             "type": "object",
             "properties": {
-                "owners": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "string"
                 },
                 "created_by": {
                     "type": "integer"
+                },
+                "pid": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "type": "string"
+                        },
+                        "revision_id": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "owners": {
+                    "type": "integer"
                 }
             }
         },
-        "title_translations": {
+        "creator": {
             "type": "object",
             "properties": {
-                "source": {
+                "affiliations": {
                     "type": "string"
                 },
-                "subtitle": {
+                "name": {
                     "type": "string"
                 },
-                "language": {
+                "email": {
                     "type": "string"
                 },
-                "title": {
+                "contribution": {
                     "type": "string"
+                },
+                "ids": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "type": "string"
+                        },
+                        "source": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
-        },
-        "date": {
-            "type": "string"
-        },
-        "recid": {
-            "type": "double"
         },
         "title": {
             "type": "object",
             "properties": {
-                "source": {
+                "subtitle": {
                     "type": "string"
                 },
-                "subtitle": {
+                "source": {
                     "type": "string"
                 },
                 "title": {
@@ -222,18 +229,20 @@
         "$schema": {
             "type": "string"
         },
-        "_access": {
+        "date": {
+            "type": "string"
+        },
+        "_buckets": {
             "type": "object",
             "properties": {
-                "read": {
-                  "type": "string",
-                  "index": "not_analyzed"
+                "record": {
+                    "type": "string"
+                },
+                "deposit": {
+                    "type": "string"
                 }
             }
         }
-    },
-    "_all": {
-        "enable": true
     },
     "date_detection": true
 }
