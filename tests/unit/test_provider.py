@@ -46,7 +46,7 @@ def test_recid_provider():
         uuid = '12345678123456781234567812345678'
         recid_minter(uuid, data)
 
-        assert data['control_number'] == 1
+        assert data['recid'] == 1
         pid_create.assert_called_once_with(
             'recid', '999999', pid_provider=None, object_type='rec',
             object_uuid=uuid, status=PIDStatus.REGISTERED)

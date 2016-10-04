@@ -34,5 +34,5 @@ def recid_minter(record_uuid, data):
     assert 'control_number' not in data
     provider = CDSRecordIdProvider.create(
         object_type='rec', object_uuid=record_uuid)
-    data['control_number'] = provider.pid.pid_value
+    data['recid'] = int(provider.pid.pid_value)
     return provider.pid
