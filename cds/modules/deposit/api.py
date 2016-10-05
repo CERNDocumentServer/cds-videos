@@ -37,10 +37,6 @@ from invenio_records_files.models import RecordsBuckets
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
-    def is_published(self):
-        """Check if deposit is published."""
-        return self['_deposit'].get('pid') is not None
-
     @classmethod
     def create(cls, data, id_=None):
         """Create a deposit.
@@ -54,22 +50,6 @@ class CDSDeposit(Deposit):
         deposit = super(CDSDeposit, cls).create(data, id_=id_)
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
-
-    @contextmanager
-    def _process_files(self, record_id, data):
-        """Snapshot bucket and add files in record during first publishing."""
-        if self.files:
-            assert not self.files.bucket.locked
-            self.files.bucket.locked = True
-            snapshot = self.files.bucket.snapshot(lock=True)
-            data['_files'] = self.files.dumps(bucket=snapshot.id)
-            data['_buckets']['record'] = str(snapshot.id)
-            yield data
-            db.session.add(RecordsBuckets(
-                record_id=record_id, bucket_id=snapshot.id
-            ))
-        else:
-            yield data
 
     @property
     def multipart_files(self):

@@ -71,7 +71,6 @@ def test_cds_deposit(location):
     """Test CDS deposit creation."""
     deposit = CDSDeposit.create({})
     assert '_buckets' in deposit
-    assert not deposit.is_published()
 
 
 def test_links_filter(location):

@@ -31,7 +31,7 @@ from .providers import CDSRecordIdProvider
 
 def recid_minter(record_uuid, data):
     """Mint record identifiers."""
-    assert 'control_number' not in data
+    assert 'recid' not in data
     provider = CDSRecordIdProvider.create(
         object_type='rec', object_uuid=record_uuid)
     data['recid'] = int(provider.pid.pid_value)

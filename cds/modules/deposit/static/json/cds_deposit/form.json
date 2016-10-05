@@ -3,10 +3,10 @@
     "type": "fieldset",
     "items": [
       {
-        "key": "basic_info.name",
+        "key": "title.title",
         "title": "Name"
       }, {
-        "key": "basic_info.description",
+        "key": "title.subtitle",
         "title": "Description"
       }
     ]

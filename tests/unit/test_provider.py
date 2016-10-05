@@ -29,18 +29,17 @@ from __future__ import absolute_import, print_function
 import mock
 import pytest
 from cds.modules.records.minters import recid_minter
-from invenio_pidstore.errors import PersistentIdentifierError
 from invenio_pidstore.models import PIDStatus
 
 
-def test_recid_provider():
+def test_recid_provider(db):
     """Test the CDS recid provider."""
     with mock.patch('requests.get') as httpmock, mock.patch(
             'invenio_pidstore.models.PersistentIdentifier.create')\
             as pid_create:
         pid_create.configure_mock(**{'return_value.pid_provider': None,
                                      'return_value.pid_value': 1})
-        httpmock.return_value.text = '999999'
+        httpmock.return_value.text = '1'
 
         data = dict()
         uuid = '12345678123456781234567812345678'
@@ -48,13 +47,11 @@ def test_recid_provider():
 
         assert data['recid'] == 1
         pid_create.assert_called_once_with(
-            'recid', '999999', pid_provider=None, object_type='rec',
+            'recid', '1', pid_provider=None, object_type='rec',
             object_uuid=uuid, status=PIDStatus.REGISTERED)
 
 
-@mock.patch('requests.get')
-def test_recid_provider_exception(httpmock):
-    """Test the CDS recid provider error."""
-    httpmock.return_value.text = '[Error] error'
-    with pytest.raises(PersistentIdentifierError):
-        recid_minter('12345678123456781234567812345678', dict())
+def test_recid_provider_exception(db):
+    """Test if providing a recid will cause an error."""
+    with pytest.raises(AssertionError):
+        recid_minter('12345678123456781234567812345678', dict({'recid': 1}))

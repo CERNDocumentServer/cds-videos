@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 import requests
 from flask import current_app
 from invenio_pidstore.errors import PersistentIdentifierError
-from invenio_pidstore.models import PIDStatus
+from invenio_pidstore.models import PIDStatus, RecordIdentifier
 from invenio_pidstore.providers.base import BaseProvider
 
 
@@ -55,16 +55,21 @@ class CDSRecordIdProvider(BaseProvider):
         # Request next integer in recid sequence.
         assert 'pid_value' not in kwargs
 
-        response = requests.get(
-            current_app.config['RECORDS_ID_PROVIDER_ENDPOINT'],
-            headers={
-                'User-Agent': 'cdslabs'
-            }).text
+        if current_app.config.get('DEBUG'):
+            # Don't query external service in DEBUG mode
+            kwargs['pid_value'] = str(RecordIdentifier.next())
+        else:
+            response = requests.get(
+                current_app.config['RECORDS_ID_PROVIDER_ENDPOINT'],
+                headers={
+                    'User-Agent': 'cdslabs'
+                }).text
 
-        if response.strip().lower().startswith('[error]'):
-            raise PersistentIdentifierError(response)
+            if response.strip().lower().startswith('[error]'):
+                raise PersistentIdentifierError(response)
 
-        kwargs['pid_value'] = response
+            kwargs['pid_value'] = response
+
         kwargs.setdefault('status', cls.default_status)
         if object_type and object_uuid:
             kwargs['status'] = PIDStatus.REGISTERED
