@@ -93,7 +93,8 @@ class CDSRecordDump(RecordDump):
             back_marc_record = to_marc21.do(val)
             for key, value in marc_record.items():
                 if value != back_marc_record.get(key):
-                    lossy_fields.append((key, value, back_marc_record.get(key)))
+                    lossy_fields.append((key, value,
+                                         back_marc_record.get(key)))
 
             if lossy_fields:
                 current_app.logger.error(
