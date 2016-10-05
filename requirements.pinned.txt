@@ -67,7 +67,7 @@ invenio-celery==1.0.0b1
 invenio-communities==1.0.0a13
 invenio-config==1.0.0b1
 invenio-db[postgresql,versioning]==1.0.0b2
-invenio-deposit==1.0.0a5
+invenio-deposit==1.0.0a6
 invenio-files-rest==1.0.0a11
 invenio-formatter==1.0.0a2
 invenio-i18n==1.0.0b1
@@ -76,6 +76,7 @@ invenio-jsonschemas==1.0.0a3
 invenio-logging[sentry]==1.0.0a3
 invenio-mail==1.0.0a5
 invenio-migrator==1.0.0a8
+invenio-oaiserver==1.0.0a8
 invenio-oauth2server==1.0.0a10
 invenio-oauthclient==1.0.0a11
 invenio-pages==1.0.0a3

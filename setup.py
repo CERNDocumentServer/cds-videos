@@ -92,7 +92,7 @@ install_requires = [
     'invenio-communities>=1.0.0a13',
     'invenio-config>=1.0.0b1',
     'invenio-db[postgresql,versioning]>=1.0.0b2',
-    'invenio-deposit>=1.0.0a5',
+    'invenio-deposit>=1.0.0a6',
     'invenio-files-rest>=1.0.0a11',
     'invenio-formatter>=1.0.0a2',
     'invenio-i18n>=1.0.0b1',
@@ -179,7 +179,7 @@ setup(
         ],
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
-            'deposits = cds.modules.records.mappings',
+            'deposits = cds.modules.deposit.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
