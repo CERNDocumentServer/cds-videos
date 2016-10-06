@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import mock
 import pytest
+import uuid
 
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
@@ -57,6 +58,9 @@ def test_record_build_url():
 def test_deposit_build_url():
     """Test deposit build url."""
     assert '/deposit/1' == deposit_build_url(1)
+    assert '/deposit/1' == deposit_build_url('1')
+    assert '/deposit/95b0716a-c726-4481-96fe-2aa02c72cd41' == \
+        deposit_build_url(uuid.UUID('95b0716a-c726-4481-96fe-2aa02c72cd41'))
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -209,3 +213,42 @@ def test_project_discard(app, project_published):
     video.project = project
     with pytest.raises(DiscardConflict):
         project.discard()
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def test_project_edit(app, project_published):
+    """Test project edit."""
+    (project, video_1, video_2) = project_published
+    assert project.status == 'published'
+    assert video_1.status == 'published'
+    assert video_2.status == 'published'
+
+    with app.test_request_context():
+        # Edit project (change project title)
+        new_project = project.edit()
+        assert new_project.status == 'draft'
+        new_project.update(title={'title': 'My project'})
+
+        # Edit videos inside project (change video titles)
+        videos = video_resolver(new_project.video_ids)
+        assert len(videos) == 2
+        for i, video in enumerate(videos):
+            assert video.status == 'published'
+            new_video = video.edit()
+            assert new_video.status == 'draft'
+            new_video.update(title={'title': 'Video {}'.format(i + 1)})
+            new_video.publish()
+
+        # Publish all changes
+        new_project.publish()
+
+        # Check that everything is published
+        videos = video_resolver(new_project.video_ids)
+        assert new_project.status == 'published'
+        assert all(video.status == 'published' for video in videos)
+
+        # Check that all titles where properly changed
+        assert new_project['title']['title'] == 'My project'
+        assert videos[0]['title']['title'] == 'Video 1'
+        assert videos[1]['title']['title'] == 'Video 2'
