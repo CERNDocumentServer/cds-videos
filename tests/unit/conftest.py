@@ -33,6 +33,7 @@ import tempfile
 from os.path import dirname, join
 from time import sleep
 
+import mock
 import pytest
 from cds.factory import create_app
 from elasticsearch import RequestError
@@ -40,11 +41,12 @@ from flask_cli import ScriptInfo
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
 from jsonresolver.contrib.jsonschema import ref_resolver_factory
-from cds.modules.deposit.api import Project, Video
+from cds.modules.deposit.api import Project, Video, video_resolver
 from flask_security import login_user
 from invenio_db import db as db_
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
+from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_search import InvenioSearch, current_search, current_search_client
 from sqlalchemy_utils.functions import create_database, database_exists
 
@@ -232,3 +234,16 @@ def project(app, es, cds_jsonresolver, users, location, db):
     db.session.commit()
     sleep(2)
     return (project, video_1, video_2)
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.fixture()
+def project_published(app, project):
+    """New published project with videos."""
+    (project, video_1, video_2) = project
+    with app.test_request_context():
+        new_project = project.publish()
+        new_videos = video_resolver(new_project.video_ids)
+        assert len(new_videos) == 2
+    return new_project, new_videos[0], new_videos[1]
