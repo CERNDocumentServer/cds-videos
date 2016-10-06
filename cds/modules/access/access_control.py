@@ -32,7 +32,7 @@ from invenio_search.api import DefaultFilter
 #
 def _get_user_provides():
     """Extracts the user's provides from g."""
-    return [str(need.value) for need in sorted(g.identity.provides)]
+    return [str(need.value) for need in g.identity.provides]
 
 
 def _has_access(data, action='read'):
