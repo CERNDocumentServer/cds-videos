@@ -1,0 +1,110 @@
+[
+  {
+    "type": "section",
+    "htmlClass": "row",
+    "items": [
+      {
+        "type": "section",
+        "htmlClass": "col-md-3",
+        "items": [
+            {
+              "type": "template",
+              "templateUrl": "templates/video_deposit_previewer_column.html"
+          }
+      ]
+    },
+    {
+        "type": "section",
+        "htmlClass": "col-md-9",
+        "items": [
+            {
+                "type": "template",
+                "templateUrl": "templates/video_deposit_progressbar.html",
+            },
+            {
+                "type": "tabs",
+                "tabs": [
+                  {
+                    "title": "Metadata",
+                    "items": [
+                        {
+                            "title": "Name",
+                            "key": "title.title"
+                        },
+                        {
+                            "title": "Description",
+                            "key": "description",
+                            "type": "textarea"
+                        },
+                        {
+                            "title": "Contributors",
+                            "key": "contributors",
+                            "add": "Add another Contributor",
+                            "style": {
+                                "add": "btn-warning"
+                            },
+                            "items":[
+                                {
+                                    "title": "Name",
+                                    "key": "contributors[].name"
+                                    },
+                                    {
+                                        "title": "Role",
+                                        "key": "contributors[].role"
+                                        }
+                                    ]
+                        },
+                        {
+                            "title": "Keywords",
+                            "key": "keywords",
+                            "add": "Add another Keyword",
+                            "style": {
+                                "add": "btn-warning"
+                            },
+                            "items":[
+                                {
+                                    "title": "Source",
+                                    "key": "keywords[].source"
+                                    },
+                                    {
+                                        "title": "Value",
+                                        "key": "keywords[].value"
+                                        }
+                                    ]
+                        },
+                        {
+                          "title": "Date",
+                          "key": "date"
+                      },
+                      {
+                        "title": "License",
+                        "key": "license"
+                    },
+                    {
+                        "title": "Copyright URL",
+                        "key": "copyright.url"
+                    },
+                    {
+                        "type": "submit",
+                        "style": "btn-info",
+                        "title": "Inherit Project Details"
+                    }
+                ]
+                },
+                {
+                    "title": "Files",
+                    "items": [
+                        {
+                          "type": "template",
+                          "templateUrl": "templates/video_deposit_files.html"
+                      }
+                  ]
+                }
+            ]
+                
+            }
+        ]
+    }
+]
+}
+]
