@@ -1,0 +1,97 @@
+[
+  {
+    "type": "fieldset",
+    "title": "Video",
+    "description": "Add the video information.",
+    "items": [
+      {
+        "type": "button",
+        "title": "Save",
+        "onClick": "saveVideo()"
+      },
+      {
+        "type": "tabs",
+        "tabs": [
+          {
+            "title": "Metadata",
+            "items": [
+              {
+                "title": "Name",
+                "key": "title.title"
+              },
+              {
+                "title": "Description",
+                "key": "description.value",
+                "type": "textarea"
+              },
+              {
+                "title": "Contributors",
+                "key": "contributors",
+                "add": "Add another Contributor",
+                "style": {
+                  "add": "btn-warning"
+                },
+                "items": [
+                  {
+                    "title": "Name",
+                    "key": "contributors[].name"
+                  },
+                  {
+                    "title": "Role",
+                    "key": "contributors[].role",
+                    "fieldHtmlClass": "col-sm-9",
+                    "labelHtmlClass": "col-sm-3"
+                  }
+                ]
+              },
+              {
+                "title": "Keywords",
+                "key": "keywords",
+                "add": "Add another Keyword",
+                "style": {
+                  "add": "btn-warning"
+                },
+                "items": [
+                  {
+                    "title": "Source",
+                    "key": "keywords[].source"
+                  },
+                  {
+                    "title": "Value",
+                    "key": "keywords[].value"
+                  }
+                ]
+              },
+              {
+                "title": "Date",
+                "key": "date"
+              },
+              {
+                "title": "License",
+                "key": "license"
+              },
+              {
+                "title": "Copyright URL",
+                "key": "copyright.url"
+              },
+              {
+                "type": "submit",
+                "style": "btn-info",
+                "title": "Inherit Project Details"
+              }
+            ]
+          },
+          {
+            "title": "Files",
+            "items": [
+              {
+                "type": "template",
+                "template": "<invenio-files-uploader method=\"PUT\" endpoint=\"/api/files\"><invenio-files-upload-zone template=\"/static/node_modules/invenio-files-js/dist/templates/upload.html\"></invenio-files-upload-zone><invenio-files-list template=\"/static/node_modules/invenio-files-js/dist/templates/list.html\"></invenio-files-list>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
