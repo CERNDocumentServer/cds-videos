@@ -27,11 +27,14 @@
 from __future__ import absolute_import, print_function
 
 import mock
+import pytest
 
 from cds.modules.deposit.api import (record_build_url,
                                      video_resolver, deposit_build_url,
                                      Video)
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_pidstore.errors import PIDInvalidAction
+from invenio_records.models import RecordMetadata
 
 
 def test_video_resolver(app, project):
@@ -117,3 +120,55 @@ def test_video_publish_and_edit(app, project):
     video_path_1_v2 = deposit_build_url(video_1_v2['_deposit']['id'])
     assert any(video_ref['$reference'] == video_path_1_v2
                for video_ref in project['videos']) is True
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.mark.parametrize('force', [False, True])
+def test_delete_video_not_published(app, project, force):
+    """Test video delete when draft."""
+    (project, video_1, video_2) = project
+
+    project_id = project.id
+    video_1_ref = video_1.ref
+    video_2_id = video_2.id
+
+    assert project.status == 'draft'
+    assert video_2.status == 'draft'
+
+    video_2.delete(force=force)
+
+    project_meta = RecordMetadata.query.filter_by(id=project_id).first()
+    assert [{'$reference': video_1_ref}] == project_meta.json['videos']
+
+    video_2_meta = RecordMetadata.query.filter_by(id=video_2_id).first()
+    if force:
+        video_2_meta is None
+    else:
+        assert video_2_meta.json is None
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.mark.parametrize('force', [False, True])
+def test_delete_video_published(app, project, force):
+    """Test video delete after published."""
+    (project, video_1, video_2) = project
+
+    video_2 = video_2.publish()
+
+    project_id = project.id
+    video_2_id = video_2.id
+    video_2_ref = video_2.ref
+
+    assert project.status == 'draft'
+    assert video_2.status == 'published'
+
+    with pytest.raises(PIDInvalidAction):
+        video_2.delete(force=force)
+
+    video_2_meta = RecordMetadata.query.filter_by(id=video_2_id).first()
+    assert video_2_meta.json is not None
+
+    project_meta = RecordMetadata.query.filter_by(id=project_id).first()
+    assert {'$reference': video_2_ref} in project_meta.json['videos']

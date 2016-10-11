@@ -35,7 +35,9 @@ from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, deposit_build_url,
                                      is_deposit, record_unbuild_url)
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_pidstore.errors import PIDInvalidAction
 from cds.modules.deposit.errors import DiscardConflict
+from invenio_records.models import RecordMetadata
 
 
 def test_is_deposit():
@@ -74,14 +76,13 @@ def test_publish_all_videos(app, project):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # publish project
-    with app.test_request_context():
-        new_project = project.publish()
-        # check project and all video are published
-        assert new_project['_deposit']['status'] == 'published'
-        videos = video_resolver(new_project.video_ids)
-        assert len(videos) == 2
-        for video in videos:
-            assert video['_deposit']['status'] == 'published'
+    new_project = project.publish()
+    # check project and all video are published
+    assert new_project['_deposit']['status'] == 'published'
+    videos = video_resolver(new_project.video_ids)
+    assert len(videos) == 2
+    for video in videos:
+        assert video['_deposit']['status'] == 'published'
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -94,19 +95,18 @@ def test_publish_one_video(app, project):
     assert video_1['_deposit']['status'] == 'draft'
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
-    # publish project
-    with app.test_request_context():
-        # publish one video
-        video_1 = video_1.publish()
-        project = video_1.project
-        # publish the project (with one video still not publish)
-        project = project.publish()
-        # check project and all video are published
-        assert project['_deposit']['status'] == 'published'
-        videos = video_resolver(project.video_ids)
-        assert len(videos) == 2
-        for video in videos:
-            assert video['_deposit']['status'] == 'published'
+    # [publish project]
+    # publish one video
+    video_1 = video_1.publish()
+    project = video_1.project
+    # publish the project (with one video still not publish)
+    project = project.publish()
+    # check project and all video are published
+    assert project['_deposit']['status'] == 'published'
+    videos = video_resolver(project.video_ids)
+    assert len(videos) == 2
+    for video in videos:
+        assert video['_deposit']['status'] == 'published'
 
 
 def test_find_refs(project):
@@ -163,24 +163,23 @@ def test_add_video(app, es, cds_jsonresolver, users, location):
         '_access': {'read': 'open'},
     }
 
-    with app.test_request_context():
-        login_user(users[0])
+    login_user(users[0])
 
-        # create empty project
-        project = Project.create(project_data).commit()
-        # create video
-        video_1 = Video.create(project_video_1)
+    # create empty project
+    project = Project.create(project_data).commit()
+    # create video
+    video_1 = Video.create(project_video_1)
 
-        # check project <--/--> video
-        assert project['videos'] == []
-        assert video_1.project is None
+    # check project <--/--> video
+    assert project['videos'] == []
+    assert video_1.project is None
 
-        # add videos inside the project
-        video_1.project = project
+    # add videos inside the project
+    video_1.project = project
 
-        # check project <----> video
-        assert project._find_refs([video_1.ref])
-        assert video_1.project.id == project.id
+    # check project <----> video
+    assert project._find_refs([video_1.ref])
+    assert video_1.project.id == project.id
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -224,31 +223,134 @@ def test_project_edit(app, project_published):
     assert video_1.status == 'published'
     assert video_2.status == 'published'
 
-    with app.test_request_context():
-        # Edit project (change project title)
-        new_project = project.edit()
-        assert new_project.status == 'draft'
-        new_project.update(title={'title': 'My project'})
+    # Edit project (change project title)
+    new_project = project.edit()
+    assert new_project.status == 'draft'
+    new_project.update(title={'title': 'My project'})
 
-        # Edit videos inside project (change video titles)
-        videos = video_resolver(new_project.video_ids)
-        assert len(videos) == 2
-        for i, video in enumerate(videos):
-            assert video.status == 'published'
-            new_video = video.edit()
-            assert new_video.status == 'draft'
-            new_video.update(title={'title': 'Video {}'.format(i + 1)})
-            new_video.publish()
+    # Edit videos inside project (change video titles)
+    videos = video_resolver(new_project.video_ids)
+    assert len(videos) == 2
+    for i, video in enumerate(videos):
+        assert video.status == 'published'
+        new_video = video.edit()
+        assert new_video.status == 'draft'
+        new_video.update(title={'title': 'Video {}'.format(i + 1)})
+        new_video.publish()
 
-        # Publish all changes
-        new_project.publish()
+    # Publish all changes
+    new_project.publish()
 
-        # Check that everything is published
-        videos = video_resolver(new_project.video_ids)
-        assert new_project.status == 'published'
-        assert all(video.status == 'published' for video in videos)
+    # Check that everything is published
+    videos = video_resolver(new_project.video_ids)
+    assert new_project.status == 'published'
+    assert all(video.status == 'published' for video in videos)
 
-        # Check that all titles where properly changed
-        assert new_project['title']['title'] == 'My project'
-        assert videos[0]['title']['title'] == 'Video 1'
-        assert videos[1]['title']['title'] == 'Video 2'
+    # Check that all titles where properly changed
+    assert new_project['title']['title'] == 'My project'
+    assert videos[0]['title']['title'] == 'Video 1'
+    assert videos[1]['title']['title'] == 'Video 2'
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.mark.parametrize('force', [False, True])
+def test_project_delete_not_published(app, project, force):
+    """Test project delete when all is not published."""
+    (project, video_1, video_2) = project
+
+    project_id = project.id
+    video_1_id = video_1.id
+    video_2_id = video_2.id
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'draft'
+
+    project = project.delete(force=force)
+
+    reclist = RecordMetadata.query.filter(RecordMetadata.id.in_(
+        [project_id, video_1_id, video_2_id])).all()
+
+    if force:
+        assert len(reclist) == 0
+    else:
+        assert len(reclist) == 3
+        for rec in reclist:
+            assert rec.json is None
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.mark.parametrize('force', [False])  # , True])
+def test_project_delete_one_video_published(app, project, force):
+    """Test project delete when one video is published."""
+    def check_project(number_of_videos, video_2_status, video_1_ref,
+                      video_2_ref, project_id):
+        video_1_meta = RecordMetadata.query.filter_by(id=video_1_id).first()
+        video_2_meta = RecordMetadata.query.filter_by(id=video_2_id).first()
+        project_meta = RecordMetadata.query.filter_by(id=project_id).first()
+
+        assert video_1_meta.json is not None
+        assert video_2_meta.json is not None
+
+        assert {'$reference': video_1_ref} in project_meta.json['videos']
+        assert {'$reference': video_2_ref} in project_meta.json['videos']
+        assert len(project_meta.json['videos']) == number_of_videos
+
+        assert project.status == 'draft'
+        assert video_1.status == 'draft'
+        assert video_2.status == video_2_status
+
+    (project, video_1, video_2) = project
+
+    # publish video_2
+    video_2 = video_2.publish()
+
+    project_id = project.id
+    video_1_id = video_1.id
+    video_2_id = video_2.id
+
+    video_1_ref = video_1.ref
+    video_2_ref = video_2.ref
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'published'
+
+    # you can't delete because there is a video published!
+    with pytest.raises(PIDInvalidAction):
+        project.delete(force=force)
+
+    check_project(2, 'published', video_1_ref, video_2_ref, project_id)
+
+    # edit video_2
+    video_2 = video_2.edit()
+    video_2_id = video_2.id
+    project_id = video_2.project.id
+    video_1_ref = video_1.ref
+    video_2_ref = video_2.ref
+
+    # you can't delete because video_2 was previously published
+    with pytest.raises(PIDInvalidAction):
+        project.delete(force=force)
+
+    check_project(2, 'draft', video_1_ref, video_2_ref, project_id)
+
+    # discard video_2
+    video_2 = video_2.discard()
+    video_2_id = video_2.id
+    project_id = video_2.project.id
+    video_2_ref = video_2.ref
+
+    # you can't delete because there is a video published!
+    with pytest.raises(PIDInvalidAction):
+        project.delete(force=force)
+
+    check_project(2, 'published', video_1_ref, video_2_ref, project_id)
+
+    # TODO delete video_2
+    #  video_2.delete(force=force)
+    #  project_id = video_1.project.id
+
+    #  project.delete(force=force)

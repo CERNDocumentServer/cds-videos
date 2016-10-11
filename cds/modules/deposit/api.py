@@ -33,6 +33,7 @@ from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
+from invenio_pidstore.errors import PIDInvalidAction
 
 from .errors import DiscardConflict
 
@@ -206,6 +207,16 @@ class Project(CDSDeposit):
             # add new one
             self['videos'].append({'$reference': video_ref})
 
+    def delete(self, force=True, pid=None):
+        """Delete a project."""
+        videos = video_resolver(self.video_ids)
+        # check if I can delete all videos
+        if any(video['_deposit'].get('pid') for video in videos):
+            raise PIDInvalidAction()
+        for video in videos:
+            video.delete(force=force)
+        return super(Project, self).delete(force=force, pid=pid)
+
 
 class Video(CDSDeposit):
     """Define API for a video."""
@@ -242,15 +253,15 @@ class Video(CDSDeposit):
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
         # publish the video
-        super(Video, self).publish(pid=pid, id_=id_)
+        video_published = super(Video, self).publish(pid=pid, id_=id_)
         (_, record_new) = self.fetch_published()
         # update associated project
-        self.project._update_videos(
+        video_published.project._update_videos(
             [deposit_build_url(video_old_id)],
             [record_build_url(record_new['recid'])]
         )
-        self.project.commit()
-        return self
+        video_published.project.commit()
+        return video_published
 
     def edit(self, pid=None):
         """Edit a video and update the related project."""
@@ -259,9 +270,29 @@ class Video(CDSDeposit):
         # edit the video
         video_new = super(Video, self).edit(pid=pid)
         # update associated project
-        self.project._update_videos(
+        video_new.project._update_videos(
             [record_build_url(video_old_id)],
             [deposit_build_url(video_new['_deposit']['id'])]
         )
-        self.project.commit()
+        video_new.project.commit()
         return video_new
+
+    def delete(self, force=True, pid=None):
+        """Delete a video."""
+        ref_old = self.ref
+        project = self.project
+        # delete video
+        video_deleted = super(Video, self).delete(force=force, pid=pid)
+        # update project
+        project._delete_videos([ref_old])
+        return video_deleted
+
+    def discard(self, pid=None):
+        """Discard a video."""
+        video_old_ref = self.ref
+        video_discarded = super(Video, self).discard(pid=pid)
+        video_discarded.project._update_videos(
+            [video_old_ref],
+            [video_discarded.ref]
+        )
+        return video_discarded
