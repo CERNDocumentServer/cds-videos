@@ -143,7 +143,7 @@ class AVWorkflow(CeleryChainTaskReceiver):
     """Composite CeleryChainTaskReceiver for the AV workflow."""
 
     celery_tasks = [
-        (download, {'url', 'bucket_id', 'key', 'chunk_size'}),
+        (download, {'url', 'bucket_id', 'chunk_size', 'key'}),
         [
             (transcode, {'preset_name'}),
             (extract_frames, {

@@ -191,7 +191,7 @@ setup(
             'cds_deposit = cds.modules.deposit.jsonschemas',
         ],
         'invenio_celery.tasks': [
-            'cds = cds.modules.webhooks.tasks',
+            'cds_celery_tasks = cds.modules.webhooks.tasks',
         ],
         'invenio_webhooks.receivers': [
             'av = cds.modules.webhooks.receivers:AVWorkflow',
