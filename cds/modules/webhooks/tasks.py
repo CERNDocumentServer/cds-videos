@@ -26,88 +26,28 @@
 
 from __future__ import absolute_import, division
 
-from math import ceil
-
-from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
-from celery.task import Task
-
-from os import listdir, rename
-from os.path import join, isfile
+import json
 import requests
 import signal
 import time
-import json
-
+from math import ceil
+from os import listdir, rename
+from os.path import isfile, join
 from PIL import Image
-from celery import current_task, shared_task
-from celery.result import AsyncResult
-from celery.states import state
-from celery._state import current_app
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 
-from invenio_db import db
-from invenio_files_rest.models import ObjectVersion, MultipartObject, Part
+from cds.modules.webhooks.task_classes import with_order, AVCOrchestrator
 from six import BytesIO
 
-
-class FailureBaseTask(Task):
-    """Base class for tasks that propagate exceptions to a state's metadata."""
-
-    def run(self, *args, **kwargs):
-        """Identical run method."""
-        self.run(*args, **kwargs)
-
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        """Gracefully handle task exceptions."""
-        self.update_state(
-            state='EXCEPTION',
-            meta={'message': str(einfo.exception)}
-        )
+from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
+from celery import chain, group, shared_task
+from flask import current_app as flask_app
+from invenio_db import db
+from invenio_files_rest.models import MultipartObject, ObjectVersion, Part
 
 
-def clear_progress(task_id):
-    """Delete all progress entries from state."""
-    result = AsyncResult(task_id)
-    progresses = result.info.get('progresses', {}) if result.info else {}
-    progresses.clear()
-    current_app.backend.store_result(
-        task_id,
-        dict(progresses=progresses),
-        state('STARTED')
-    )
-
-
-def progress_updater_with_size(size, total, task_id):
-    """Report progress of downloading celery task."""
-    progress_updater(size / total * 100, task_id)
-
-
-def progress_updater(percentage, task_id):
-    """Report progress of downloading celery task."""
-    # Get current task progresses
-    result = AsyncResult(task_id)
-    progresses = result.info.get('progresses', {}) if result.info else {}
-
-    # Create/update progress for current task
-    progresses[_extract_task_name()] = percentage
-
-    # Update state
-    current_app.backend.store_result(
-        task_id,
-        dict(progresses=progresses),
-        state('PROGRESS')
-    )
-
-
-@shared_task(base=FailureBaseTask)
-def extract_metadata(video_location):
-    """Extract metadata from given video file."""
-    information = json.loads(ff_probe_all(video_location))
-    print(information)  # TODO output to file?
-
-
-@shared_task(base=FailureBaseTask)
-def download(url, bucket_id, chunk_size, parent_id, key=None):
+@shared_task(bind=True, base=with_order(1))
+def download(self, url, bucket_id, chunk_size, key=None):
     """Download file from a URL.
 
     :param url: URL of the file to download.
@@ -117,91 +57,93 @@ def download(url, bucket_id, chunk_size, parent_id, key=None):
     :param key: New filename. If not provided, the filename will be taken from
                 the URL.
     """
-    from ...wsgi import application
-    api_app = application.wsgi_app.mounts['/api']  # FIXME elegant solution
-    with api_app.app_context():
-        clear_progress(parent_id)
-        response = requests.get(url, stream=True)
-        total = int(response.headers.get('Content-Length'))
-        if not key:
-            key = url.rsplit('/', 1)[-1]
+    if self.parent:
+        self.parent.clear_state()
 
-        if total is None or total < chunk_size:
-            mp = ObjectVersion.create(bucket_id, key,
-                                      stream=BytesIO(response.content))
-        else:
-            cur = 0
-            part_cnt = 0
-            mp = MultipartObject.create(bucket_id, key, total, chunk_size)
+    # Make HTTP request
+    response = requests.get(url, stream=True)
+    total = int(response.headers.get('Content-Length'))
+    if not key:
+        key = url.rsplit('/', 1)[-1]
 
-            progress_updater(0, parent_id)
-            for chunk in response.iter_content(chunk_size=chunk_size):
-                cur += len(chunk)
+    # Stream data into bucket's object
+    self.update_progress(0)
+    if total is None or total < chunk_size:
+        mp = ObjectVersion.create(bucket_id, key,
+                                  stream=BytesIO(response.content))
+    else:
+        cur = 0
+        part_cnt = 0
+        mp = MultipartObject.create(bucket_id, key, total, chunk_size)
 
-                Part.create(mp, part_cnt, BytesIO(chunk))
-                part_cnt += 1
-                progress_updater_with_size(cur, total, parent_id)
-            mp.complete()
-            mp.merge_parts()
-        progress_updater(100, parent_id)
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            cur += len(chunk)
+            Part.create(mp, part_cnt, BytesIO(chunk))
+            part_cnt += 1
+            self.update_progress_with_size(cur, total)
+        mp.complete()
+        mp.merge_parts()
+    self.update_progress(100)
 
-        try:
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise
-        return mp.file.uri
+    # Get downloaded file location
+    file_location = mp.file.uri
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+    return file_location
 
 
-@shared_task(base=FailureBaseTask)
-def transcode(input_filename, preset_name, parent_id):
+@shared_task(bind=True, base=with_order(2))
+def transcode(self, input_filename, preset_name):
     """Transcode video on Sorenson."""
+    self.update_progress(0)
 
-    from ...wsgi import application
-    api_app = application.wsgi_app.mounts['/api']  # FIXME elegant solution
-    with api_app.app_context():
+    # Start encoding on Sorenson server
+    job_id = start_encoding(input_filename, preset_name)
 
-        job_id = start_encoding(input_filename, preset_name)
+    # Set handler for canceling task
+    def handler(signum, frame):
+        stop_encoding(job_id)
+    signal.signal(signal.SIGTERM, handler)
 
-        def handler(signum, frame):
-            stop_encoding(job_id)
-        signal.signal(signal.SIGTERM, handler)
-
+    # Query Sorenson for job status every second
+    response = get_encoding_status(job_id)
+    while response['Status']['TimeFinished'] is None:
+        percentage = response['Status']['Progress']
+        self.update_progress(percentage)
         response = get_encoding_status(job_id)
-        while response['Status']['TimeFinished'] is None:
-            percentage = response['Status']['Progress']
-            progress_updater(percentage, parent_id)
-            response = get_encoding_status(job_id)
-            time.sleep(1)
-    progress_updater(100, parent_id)
-    return api_app.config['CDS_SORENSON_OUTPUT_FOLDER']
+        time.sleep(1)
+
+    self.update_progress(100)
+    return flask_app.config['CDS_SORENSON_OUTPUT_FOLDER']
 
 
-@shared_task(base=FailureBaseTask)
-def extract_frames(input_filename, start_percentage, end_percentage,
-                   number_of_frames, size_percentage, output_folder,
-                   parent_id):
+@shared_task(bind=True, base=with_order(2))
+def extract_frames(self, input_filename, start_percentage, end_percentage,
+                   number_of_frames, size_percentage, output_folder):
     """Extract thumbnails for some frames of the video."""
-
     # Extract video information
     output = join(output_folder, 'img%d.jpg')
     duration = float(ff_probe(input_filename, 'duration'))
     width = int(ff_probe(input_filename, 'width'))
     height = int(ff_probe(input_filename, 'height'))
-    size_percentage = _percent_to_real(size_percentage)
+    size_percentage /= 100
     thumbnail_size = (width * size_percentage, height * size_percentage)
     step_percent = (end_percentage - start_percentage) / (number_of_frames - 1)
 
     # Calculate time step
-    start_time = int(duration * _percent_to_real(start_percentage))
-    end_time = ceil(duration * _percent_to_real(end_percentage))
-    time_step = int(duration * _percent_to_real(step_percent))
+    start_time = int(duration * start_percentage / 100)
+    end_time = ceil(duration * end_percentage / 100)
+    time_step = int(duration * step_percent / 100)
 
     # Extract all requested frames as thumbnail images (full resolution)
-    progress_updater(0, parent_id)
+    self.update_progress(0)
     for seconds in ff_frames(input_filename, start_time, end_time,
                              time_step, output):
-        progress_updater_with_size(seconds, duration, parent_id)
+        self.update_progress_with_size(seconds, duration)
 
     # Resize thumbnails to requested dimensions
     for i in range(number_of_frames):
@@ -215,15 +157,14 @@ def extract_frames(input_filename, start_percentage, end_percentage,
             int(thumbnail_size[0]), int(thumbnail_size[1]), percentage
         )
         rename(filename, join(output_folder, new_filename))
-    progress_updater(100, parent_id)
+    self.update_progress(100)
 
     return output_folder
 
 
-@shared_task(base=FailureBaseTask)
-def attach_files(output_folders, bucket_id, key, parent_id):
+@shared_task(bind=True, base=with_order(3))
+def attach_files(self, output_folders, bucket_id, key):
     """Create records from Sorenson's generated subformats."""
-
     # Collect
     files = [join(output_folder, filename)
              for output_folder in output_folders
@@ -235,7 +176,7 @@ def attach_files(output_folders, bucket_id, key, parent_id):
 
     for count, filename in enumerate(files):
         ObjectVersion.create(bucket_id, key, stream=open(filename, 'rb'))
-        progress_updater_with_size(count + 1, total, parent_id)
+        self.update_progress_with_size(count + 1, total)
 
     try:
         db.session.commit()
@@ -244,11 +185,30 @@ def attach_files(output_folders, bucket_id, key, parent_id):
         raise
 
 
-def _extract_task_name():
-    """Strip off module information from current task name."""
-    return current_task.name.split('.')[-1]
+@shared_task(bind=True, base=AVCOrchestrator)
+def chain_orchestrator(self, workflow, **kwargs):
+    """Orchestration task for chained Celery tasks or groups of tasks."""
+
+    task_list = []
+    parent_kw = {'parent': self}
+    for task_definition in workflow:
+        if isinstance(task_definition, tuple):
+            task, task_kw = task_definition
+            kw = {k: kwargs[k] for k in kwargs if k in task_kw}
+            kw.update(parent_kw)
+            task_list.append(task.subtask(kwargs=kw))
+        elif isinstance(task_definition, list):
+            subtasks = []
+            for task, task_kw in task_definition:
+                kw = {k: kwargs[k] for k in kwargs if k in task_kw}
+                kw.update(parent_kw)
+                subtasks.append(task.subtask(kwargs=kw))
+            task_list.append(group(*subtasks))
+    return chain(*task_list)().id
 
 
-def _percent_to_real(percentage):
-    """Convert an integer percentage to a real number from 0 to 1."""
-    return percentage / 100
+@shared_task()
+def extract_metadata(video_location):
+    """Extract metadata from given video file."""
+    information = json.loads(ff_probe_all(video_location))
+    return information  # TODO output to file?
