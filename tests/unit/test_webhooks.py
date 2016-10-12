@@ -26,23 +26,23 @@
 
 from __future__ import absolute_import
 
+import mock
 import uuid
-from random import randint
 import shutil
 import tempfile
-from os import listdir
 
-import mock
-import os
+from os import listdir
+from os.path import getsize, isfile, join
+from random import randint
+
 
 from cds.modules.webhooks.tasks import attach_files, download, \
     extract_frames, transcode
-from os.path import isfile, join
 
 
-def download_with_size(url, bucket_id, key, chunk_size, task_id, size):
+def download_with_size(url, bucket_id, chunk_size, task_id, size, key=None):
     """Download mock file with given size."""
-    content = ' ' * size
+    content = b'\x00' * size
     with mock.patch('requests.get') as mock_http:
         mock_http.return_value = type('Response', (object,), {
             'headers': {'Content-Length': size},
@@ -52,15 +52,21 @@ def download_with_size(url, bucket_id, key, chunk_size, task_id, size):
                 for pos in range(0, len(content), kw['chunk_size'])
             )
         })()
-        f = download.delay(url, bucket_id, key, chunk_size, task_id).result
-    assert os.path.getsize(f) == size
+        f = download.delay(url, bucket_id, chunk_size, task_id, key).result
+    assert getsize(f) == size
 
 
 def test_download(bucket):
     """Test download task."""
-    args = ['http://mock.gr', bucket.id, 'key', 6000000, 'id']
+    args = ['http://example.com/video.mp4', bucket.id, 6000000, 'id']
     download_with_size(*args, size=10)
     download_with_size(*args, size=10000000)
+
+
+def test_download_and_rename(bucket):
+    """Test renaming during the downloading."""
+    args = ['http://example.com/video.mp4', bucket.id, 6000000, 'id']
+    download_with_size(*args, size=10000000, key='new_name')
 
 
 def test_sorenson(app):

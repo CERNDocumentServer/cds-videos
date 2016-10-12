@@ -47,11 +47,12 @@ from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, MultipartObject, Part
-from six import BytesIO, b
+from six import BytesIO
 
 
 class FailureBaseTask(Task):
     """Base class for tasks that propagate exceptions to a state's metadata."""
+
     def run(self, *args, **kwargs):
         """Identical run method."""
         self.run(*args, **kwargs)
@@ -78,12 +79,11 @@ def clear_progress(task_id):
 
 def progress_updater_with_size(size, total, task_id):
     """Report progress of downloading celery task."""
-    progress_updater(size/total * 100, task_id)
+    progress_updater(size / total * 100, task_id)
 
 
 def progress_updater(percentage, task_id):
     """Report progress of downloading celery task."""
-
     # Get current task progresses
     result = AsyncResult(task_id)
     progresses = result.info.get('progresses', {}) if result.info else {}
@@ -107,37 +107,50 @@ def extract_metadata(video_location):
 
 
 @shared_task(base=FailureBaseTask)
-def download(url, bucket_id, key, chunk_size, parent_id):
-    """Download file from a URL."""
+def download(url, bucket_id, chunk_size, parent_id, key=None):
+    """Download file from a URL.
 
-    clear_progress(parent_id)
-    response = requests.get(url, stream=True)
-    total = int(response.headers.get('Content-Length'))
+    :param url: URL of the file to download.
+    :param bucket_id: ID of the bucket where the file will be stored.
+    :param chunk_size: Size of the chunks for downloading.
+    :param parent_id: ID of the parent task.
+    :param key: New filename. If not provided, the filename will be taken from
+                the URL.
+    """
+    from ...wsgi import application
+    api_app = application.wsgi_app.mounts['/api']  # FIXME elegant solution
+    with api_app.app_context():
+        clear_progress(parent_id)
+        response = requests.get(url, stream=True)
+        total = int(response.headers.get('Content-Length'))
+        if not key:
+            key = url.rsplit('/', 1)[-1]
 
-    if total is None or total < chunk_size:
-        mp = ObjectVersion.create(bucket_id, key,
-                                  stream=BytesIO(b(response.content)))
-    else:
-        cur = 0
-        part_cnt = 0
-        mp = MultipartObject.create(bucket_id, key, total, chunk_size)
+        if total is None or total < chunk_size:
+            mp = ObjectVersion.create(bucket_id, key,
+                                      stream=BytesIO(response.content))
+        else:
+            cur = 0
+            part_cnt = 0
+            mp = MultipartObject.create(bucket_id, key, total, chunk_size)
 
-        progress_updater(0, parent_id)
-        for chunk in response.iter_content(chunk_size=chunk_size):
-            cur += len(chunk)
-            Part.create(mp, part_cnt, BytesIO(b(chunk)))
-            part_cnt += 1
-            progress_updater_with_size(cur, total, parent_id)
-        mp.complete()
-        mp.merge_parts()
-    progress_updater(100, parent_id)
+            progress_updater(0, parent_id)
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                cur += len(chunk)
 
-    try:
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return mp.file.uri
+                Part.create(mp, part_cnt, BytesIO(chunk))
+                part_cnt += 1
+                progress_updater_with_size(cur, total, parent_id)
+            mp.complete()
+            mp.merge_parts()
+        progress_updater(100, parent_id)
+
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+        return mp.file.uri
 
 
 @shared_task(base=FailureBaseTask)
@@ -199,7 +212,7 @@ def extract_frames(input_filename, start_percentage, end_percentage,
 
         percentage = int(start_percentage + i * step_percent)
         new_filename = 'thumbnail-{0}x{1}-at-{2}-percent.jpg'.format(
-          int(thumbnail_size[0]), int(thumbnail_size[1]), percentage
+            int(thumbnail_size[0]), int(thumbnail_size[1]), percentage
         )
         rename(filename, join(output_folder, new_filename))
     progress_updater(100, parent_id)
