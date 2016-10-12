@@ -71,10 +71,13 @@ def app():
             'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
-        CELERY_RESULT_BACKEND="cache",
-        CELERY_CACHE_BACKEND="memory",
+        CELERY_RESULT_BACKEND='cache',
+        CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        CELERY_TRACK_STARTED=True,
+        BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
+        CDS_SORENSON_OUTPUT_FOLDER='/home/orestis/Downloads/Sorenson',
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -309,3 +312,25 @@ def project_published(app, project):
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
     return new_project, new_videos[0], new_videos[1]
+
+
+@pytest.fixture()
+def mock_sorenson():
+    """Mock requests to the Sorenson server."""
+
+    mock.patch(
+        'cds.modules.webhooks.tasks.start_encoding'
+    ).start().return_value = 123
+
+    mock.patch(
+        'cds.modules.webhooks.tasks.get_encoding_status'
+    ).start().side_effect = [
+        dict(Status=dict(Progress=0, TimeFinished=None)),
+        dict(Status=dict(Progress=45, TimeFinished=None)),
+        dict(Status=dict(Progress=95, TimeFinished=None)),
+        dict(Status=dict(Progress=100, TimeFinished='12:00')),
+    ]
+
+    mock.patch(
+        'cds.modules.webhooks.tasks.stop_encoding'
+    ).start().return_value = None

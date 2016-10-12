@@ -116,7 +116,7 @@ install_requires = [
     'invenio-search>=1.0.0a7',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
-    'invenio-webhooks==1.0.0a3',
+    'invenio-webhooks>=1.0.0a3',  # FIXME update when PR#38 is released
     'jsonref>=0.1',
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
@@ -199,7 +199,8 @@ setup(
             'cds_celery_tasks = cds.modules.webhooks.tasks',
         ],
         'invenio_webhooks.receivers': [
-            'av = cds.modules.webhooks.receivers:AVWorkflow',
+            'av = cds.modules.webhooks.receivers:AVCWorkflow',
+            'downloader = cds.modules.webhooks.receivers:Downloader',
             'metadata = cds.modules.webhooks.receivers:VideoMetadataExtractor',
         ],
         'invenio_previewer.previewers': [
