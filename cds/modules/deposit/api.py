@@ -31,9 +31,10 @@ import os
 from flask import current_app, url_for
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
+from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
-from invenio_pidstore.errors import PIDInvalidAction
+from werkzeug.local import LocalProxy
 
 from .errors import DiscardConflict
 
@@ -41,6 +42,10 @@ PRESERVE_FIELDS = (
     '_deposit',
     '_buckets',
     '_files',
+)
+
+current_jsonschemas = LocalProxy(
+    lambda: current_app.extensions['invenio-jsonschemas']
 )
 
 
@@ -82,6 +87,14 @@ class CDSDeposit(Deposit):
         return super(CDSDeposit, self).patch(*args, **kwargs)
 
 
+def project_resolver(project_id):
+    """Get records from PIDs."""
+    pid = PersistentIdentifier.query.filter_by(
+        pid_value=project_id
+    ).one().object_uuid
+    return Project.get_record(pid)
+
+
 def video_resolver(ids):
     """Get records from PIDs."""
     pids = [p.object_uuid for p in PersistentIdentifier.query.filter(
@@ -113,6 +126,17 @@ def is_deposit(url):
 
 class Project(CDSDeposit):
     """Define API for a project."""
+
+    @classmethod
+    def create(cls, data, id_=None):
+        """Create a deposit.
+
+        Adds bucket creation immediately on deposit creation.
+        """
+        data['$schema'] = current_jsonschemas.path_to_url(
+            'deposits/records/project-v1.0.0.json')
+        data.setdefault('videos', [])
+        return super(Project, cls).create(data, id_=id_)
 
     @property
     def video_ids(self):
@@ -221,6 +245,22 @@ class Project(CDSDeposit):
 class Video(CDSDeposit):
     """Define API for a video."""
 
+    @classmethod
+    def create(cls, data, id_=None):
+        """Create a deposit.
+
+        Adds bucket creation immediately on deposit creation.
+        """
+        project_id = data.get('_project_id')
+        data['$schema'] = current_jsonschemas.path_to_url(
+            'deposits/records/video-v1.0.0.json')
+        project = project_resolver(project_id)
+        video_new = super(Video, cls).create(data, id_=id_)
+        video_new.project = project
+        project.commit()
+        video_new.commit()
+        return video_new
+
     @property
     def ref(self):
         """Get video id."""
@@ -234,7 +274,7 @@ class Video(CDSDeposit):
         """Get the related project."""
         if not hasattr(self, '_project'):
             try:
-                project_id = self['_deposit']['project_id']
+                project_id = self['_project_id']
             except KeyError:
                 return None
             project_pid = PersistentIdentifier.query.filter_by(
@@ -245,7 +285,7 @@ class Video(CDSDeposit):
     @project.setter
     def project(self, project):
         """Set a project."""
-        self['_deposit']['project_id'] = project['_deposit']['id']
+        self['_project_id'] = project['_deposit']['id']
         project._add_video(self)
 
     def publish(self, pid=None, id_=None):
