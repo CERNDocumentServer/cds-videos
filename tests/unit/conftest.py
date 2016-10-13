@@ -49,6 +49,10 @@ from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_search import InvenioSearch, current_search, current_search_client
 from sqlalchemy_utils.functions import create_database, database_exists
+from invenio_deposit import InvenioDepositREST
+from invenio_records_rest import InvenioRecordsREST
+from invenio_records_rest.utils import PIDConverter
+from six import BytesIO
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -132,6 +136,15 @@ def es(app):
 
 
 @pytest.fixture()
+def deposit_rest(app):
+    """Init deposit REST API."""
+    InvenioRecordsREST(app)
+    app_deposit = InvenioDepositREST(app)
+    app.url_map.converters['pid'] = PIDConverter
+    return app_deposit
+
+
+@pytest.fixture()
 def datadir():
     """Get data directory."""
     return join(dirname(__file__), '..', 'data')
@@ -185,32 +198,83 @@ def cds_jsonresolver(app):
 
 
 @pytest.fixture()
+def project_metadata():
+    """Simple project metadata."""
+    return {
+        'title': {
+            'title': 'my project',
+            'subtitle': 'tempor quis elit mollit',
+        },
+        'creator': {
+            'email': 'test@cds.cern.ch',
+            'contribution': 'Fuu Bar',
+            'name': 'John Doe',
+        },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
+        'contributors': [
+            {
+                'name': 'amet',
+                'role': 'Editor'
+            },
+            {
+                'name': 'in tempor reprehenderit enim eiusmod',
+                'role': 'Camera operator',
+                'email': '1bABAg03RaVG3@JTHWJUUBLgqpgfaagop.wsx',
+            },
+            {
+                'name': 'adipisicing nulla ipsum voluptate',
+                'role': 'Director'
+            },
+            {
+                'name': 'commodo veniam dolore',
+                'role': 'Editor'
+            }
+        ],
+    }
+
+
+@pytest.fixture()
+def data_file_1():
+    """Data for file 1."""
+    filename = 'test.json'
+    file_to_upload = (BytesIO(b'### Testing textfile ###'), filename)
+    return {'file': file_to_upload, 'name': filename}
+
+
+@pytest.fixture()
+def data_file_2():
+    """Data for file 2."""
+    filename = 'test2.json'
+    file_to_upload = (BytesIO(b'### Testing textfile 2 ###'), filename)
+    return {'file': file_to_upload, 'name': filename}
+
+
+@pytest.fixture()
+def json_headers(app):
+    """JSON headers."""
+    return [('Content-Type', 'application/json'),
+            ('Accept', 'application/json')]
+
+
+@pytest.fixture()
 def project(app, es, cds_jsonresolver, users, location, db):
     """New project with videos."""
     project_data = {
         'title': {
             'title': 'my project',
         },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/project-v1.0.0.json'),
-        '_access': {'read': 'open'},
-        'videos': [],
     }
     project_video_1 = {
         'title': {
             'title': 'video 1',
         },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/video-v1.0.0.json'),
-        '_access': {'read': 'open'},
     }
     project_video_2 = {
         'title': {
             'title': 'video 2',
         },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/video-v1.0.0.json'),
-        '_access': {'read': 'open'},
     }
     with app.test_request_context():
         login_user(users[0])
@@ -219,12 +283,10 @@ def project(app, es, cds_jsonresolver, users, location, db):
         project = Project.create(project_data).commit()
 
         # create videos
+        project_video_1['_project_id'] = project['_deposit']['id']
+        project_video_2['_project_id'] = project['_deposit']['id']
         video_1 = Video.create(project_video_1)
         video_2 = Video.create(project_video_2)
-
-        # add videos inside the project
-        video_1.project = project
-        video_2.project = project
 
         # save project and video
         project.commit()

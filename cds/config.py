@@ -416,7 +416,10 @@ DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
 DEPOSIT_SEARCH_API = '/api/deposits/'
-_PID = 'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
+_CDSDeposit_PID = \
+    'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
+_Project_PID = 'pid(depid,record_class="cds.modules.deposit.api:Project")'
+_Video_PID = 'pid(depid,record_class="cds.modules.deposit.api:Video")'
 DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{pid_value}'
 # Deposit rest endpoints
 DEPOSIT_REST_ENDPOINTS = dict(
@@ -424,6 +427,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_type='depid',
         pid_minter='deposit',
         pid_fetcher='deposit',
+        default_endpoint_prefix=True,
         record_class='cds.modules.deposit.api:CDSDeposit',
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
@@ -439,10 +443,83 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/deposits/',
-        item_route='/deposits/<{0}:pid_value>'.format(_PID),
-        file_list_route='/deposits/<{0}:pid_value>/files'.format(_PID),
+        item_route='/deposits/<{0}:pid_value>'.format(_CDSDeposit_PID),
+        file_list_route='/deposits/<{0}:pid_value>/files'.format(
+            _CDSDeposit_PID),
         file_item_route='/deposits/<{0}:pid_value>/files/<path:key>'.format(
-            _PID),
+            _CDSDeposit_PID),
+        default_media_type='application/json',
+        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        create_permission_factory_imp=check_oauth2_scope(
+            lambda x: True, write_scope.id),
+        read_permission_factory_imp=DepositPermission,
+        update_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        max_result_window=10000,
+    ),
+    project=dict(
+        pid_type='depid',
+        pid_minter='deposit',
+        pid_fetcher='deposit',
+        default_endpoint_prefix=False,
+        record_class='cds.modules.deposit.api:Project',
+        files_serializers={
+            'application/json': ('invenio_deposit.serializers'
+                                 ':json_v1_files_response'),
+        },
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_class='invenio_deposit.search:DepositSearch',
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/deposits/project/',
+        item_route='/deposits/project/<{0}:pid_value>'.format(_Project_PID),
+        file_list_route='/deposits/project/<{0}:pid_value>/files'.format(
+            _Project_PID),
+        file_item_route='/deposits/project/<{0}:pid_value>/files/<path:key>'
+        .format(_Project_PID),
+        default_media_type='application/json',
+        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        create_permission_factory_imp=check_oauth2_scope(
+            lambda x: True, write_scope.id),
+        read_permission_factory_imp=DepositPermission,
+        update_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(
+            can_edit_deposit, write_scope.id),
+        max_result_window=10000,
+    ),
+    video=dict(
+        pid_type='depid',
+        pid_minter='deposit',
+        pid_fetcher='deposit',
+        default_endpoint_prefix=False,
+        record_class='cds.modules.deposit.api:Video',
+        files_serializers={
+            'application/json': ('invenio_deposit.serializers'
+                                 ':json_v1_files_response'),
+        },
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_class='invenio_deposit.search:DepositSearch',
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/deposits/video/',
+        item_route='/deposits/video/<{0}:pid_value>'.format(_Video_PID),
+        file_list_route='/deposits/video/<{0}:pid_value>/files'.format(
+            _Video_PID),
+        file_item_route='/deposits/video/<{0}:pid_value>/files/<path:key>'
+        .format(_Video_PID),
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
         create_permission_factory_imp=check_oauth2_scope(

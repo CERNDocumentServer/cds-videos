@@ -148,34 +148,25 @@ def test_add_video(app, es, cds_jsonresolver, users, location):
         'title': {
             'title': 'my project',
         },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/project-v1.0.0.json'),
-        '_access': {'read': 'open'},
         'videos': [],
-    }
-
-    project_video_1 = {
-        'title': {
-            'title': 'video 1',
-        },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/video-v1.0.0.json'),
-        '_access': {'read': 'open'},
     }
 
     login_user(users[0])
 
     # create empty project
     project = Project.create(project_data).commit()
-    # create video
-    video_1 = Video.create(project_video_1)
 
     # check project <--/--> video
     assert project['videos'] == []
-    assert video_1.project is None
 
-    # add videos inside the project
-    video_1.project = project
+    # create video
+    project_video_1 = {
+        'title': {
+            'title': 'video 1',
+        },
+        '_project_id': project['_deposit']['id'],
+    }
+    video_1 = Video.create(project_video_1)
 
     # check project <----> video
     assert project._find_refs([video_1.ref])
@@ -196,7 +187,6 @@ def test_project_discard(app, project_published):
     assert project['title']['title'] == new_title
     project = project.discard()
     assert project['title']['title'] == original_title
-    #  project = project.commit()
 
     # try to fail because a video added
     project = project.edit()
@@ -204,12 +194,9 @@ def test_project_discard(app, project_published):
         'title': {
             'title': 'video 1',
         },
-        '$schema': ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/video-v1.0.0.json'),
-        '_access': {'read': 'open'},
+        '_project_id': project['_deposit']['id'],
     }
-    video = Video.create(project_video)
-    video.project = project
+    Video.create(project_video)
     with pytest.raises(DiscardConflict):
         project.discard()
 

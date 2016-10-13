@@ -30,8 +30,7 @@ import mock
 import pytest
 
 from cds.modules.deposit.api import (record_build_url,
-                                     video_resolver, deposit_build_url,
-                                     Video)
+                                     video_resolver, deposit_build_url)
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_records.models import RecordMetadata
@@ -102,7 +101,7 @@ def test_video_publish_and_edit(app, project):
                for video_ref in project['videos']) is True
 
     # [edit the video 1]
-    video_1_v2 = Video.create(record_video_1)
+    [video_1_v2] = video_resolver([record_video_1['_deposit']['id']])
     video_1_v2 = video_1_v2.edit()
 
     # check video1 is not published
