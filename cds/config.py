@@ -452,3 +452,12 @@ DEPOSIT_REST_ENDPOINTS = dict(
         max_result_window=10000,
     ),
 )
+
+###############################################################################
+# SocketIO
+###############################################################################
+
+# SocketIO message broker
+SOCKETIO_MESSAGE_QUEUE = os.environ.get(
+    'APP_BROKER_URL',
+    'redis://localhost:6379/0')
