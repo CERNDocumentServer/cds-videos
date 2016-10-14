@@ -78,6 +78,7 @@ install_requires = [
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
     'Flask-WTF==0.13',
+    'Flask-SocketIO==2.7.1',
     'Flask>=0.11.1',
     'cds-dojson>=0.3.2',
     'datacite>=0.2.1',
@@ -164,6 +165,7 @@ setup(
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
+            'cds_socketio = cds.modules.cds_socketio:CDSSocketIO',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
