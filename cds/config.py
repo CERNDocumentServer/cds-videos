@@ -28,6 +28,8 @@ from __future__ import absolute_import, print_function
 
 import os
 
+from invenio_deposit.config import (DEPOSIT_REST_FACETS,
+                                    DEPOSIT_REST_SORT_OPTIONS)
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
@@ -236,6 +238,10 @@ RECORDS_REST_FACETS = dict(
         )
     )
 )
+
+# Update facets and sort options with deposit options
+RECORDS_REST_SORT_OPTIONS.update(DEPOSIT_REST_SORT_OPTIONS)
+RECORDS_REST_FACETS.update(DEPOSIT_REST_FACETS)
 
 # Add tuple as array type on record validation
 # http://python-jsonschema.readthedocs.org/en/latest/validate/#validating-types
@@ -541,3 +547,21 @@ DEPOSIT_RECORDS_UI_ENDPOINTS = {
         'record_class': 'cds.modules.deposit.api:CDSDeposit',
     },
 }
+# Deposit successful messages
+DEPOSIT_RESPONSE_MESSAGES = dict(
+    self=dict(
+        message="Saved successfully."
+    ),
+    delete=dict(
+        message="Deleted succesfully."
+    ),
+    discard=dict(
+        message="Changes discarded succesfully."
+    ),
+    publish=dict(
+        message="Published succesfully."
+    ),
+    edit=dict(
+        message="Edited succesfully."
+    ),
+)
