@@ -28,13 +28,19 @@ from __future__ import absolute_import, print_function
 
 import os
 
-from flask import url_for
-from invenio_deposit.api import Deposit
+from flask import current_app, url_for
+from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
 
 from .errors import DiscardConflict
+
+PRESERVE_FIELDS = (
+    '_deposit',
+    '_buckets',
+    '_files',
+)
 
 
 class CDSDeposit(Deposit):
@@ -58,6 +64,21 @@ class CDSDeposit(Deposit):
     def multipart_files(self):
         """Get all multipart files."""
         return MultipartObject.query_by_bucket(self.files.bucket)
+
+    @preserve(result=False, fields=PRESERVE_FIELDS)
+    def clear(self, *args, **kwargs):
+        """Clear only drafts."""
+        super(CDSDeposit, self).clear(*args, **kwargs)
+
+    @preserve(result=False, fields=PRESERVE_FIELDS)
+    def update(self, *args, **kwargs):
+        """Update only drafts."""
+        super(CDSDeposit, self).update(*args, **kwargs)
+
+    @preserve(result=False, fields=PRESERVE_FIELDS)
+    def patch(self, *args, **kwargs):
+        """Patch only drafts."""
+        return super(CDSDeposit, self).patch(*args, **kwargs)
 
 
 def video_resolver(ids):
