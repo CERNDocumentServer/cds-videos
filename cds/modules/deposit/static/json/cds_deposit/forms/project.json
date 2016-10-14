@@ -1,60 +1,90 @@
 [
-    {
+  {
+    "type": "fieldset",
+    "title": "Project",
+    "description": "Add the project information.",
+    "items": [
+      {
         "title": "Name",
         "key": "title.title"
-    },
-    {
-        "title": "Description",
-        "key": "description.value",
-        "type": "textarea"
-    },
-    {
-        "title": "Contributors",
+      },
+      {
+        "type": "template",
+        "key": "date",
+        "title": "Date",
+        "placeholder": "eg. 2013-05-08",
+        "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+        "format": "yyyy-MM-dd",
+        "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+        "fa_cls": "fa-calendar",
+        "required": true
+      },
+      {
+        "type": "section",
+        "htmlClass": "form-ckeditor",
+        "description": "",
+        "notitle": true,
+        "items": [
+          {
+            "type": "ckeditor",
+            "key": "description.value",
+            "title": "Description",
+            "ckeditor": {
+              "height": 200,
+              "toolbar": [
+                ["PasteText", "PasteFromWord"],
+                ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
+                ["NumberedList", "BulletedList", "Blockquote"],
+                ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
+                ["Source"], ["Maximize"]
+              ],
+              "disableNativeSpellChecker": false,
+              "removePlugins": "elementspath",
+              "removeButtons": ""
+            },
+            "required": true,
+            "description": "Required.",
+            "minLength": 1
+          }
+        ]
+      },
+      {
+        "type": "array",
         "key": "contributors",
-        "add": "Add another Contributor",
-        "style": {
-            "add": "btn-warning"
+        "title": "Contributors",
+        "description": "",
+        "sortOptions": {
+          "axis": "y",
+          "cursor": "move",
+          "disabled": false,
+          "handle": "i.sort-handle"
         },
-        "items":[
-            {
-                "title": "Name",
-                "key": "contributors[].name"
-            },
-            {
-                "title": "Role",
-                "key": "contributors[].role"
-            }
+        "fa_cls": "fa-user",
+        "required": true,
+        "add": "Add another contributor",
+        "inline": true,
+        "minItems": 1,
+        "items": [
+          {
+            "type": "text",
+            "key": "contributors[].name",
+            "placeholder": "Name",
+            "description": "",
+            "notitle": true
+          },
+          {
+            "type": "uiselect",
+            "key": "contributors[].role",
+            "placeholder": "Role",
+            "description": "",
+            "notitle": true
+          }
         ]
-    },
-    {
-        "title": "Keywords",
-        "key": "keywords",
-        "add": "Add another Keyword",
-        "style": {
-            "add": "btn-warning"
-        },
-        "items":[
-            {
-                "title": "Source",
-                "key": "keywords[].source"
-            },
-            {
-                "title": "Value",
-                "key": "keywords[].value"
-            }
-        ]
-    },
-    {
-      "title": "Date",
-      "key": "date"
-    },
-    {
+      },
+      {
         "title": "License",
         "key": "license"
-    },
-    {
-        "type": "submit",
-        "style": "btn-info",
-        "title": "Inherit to all videos"
-    }
+      }
+    ]
+  }
 ]
