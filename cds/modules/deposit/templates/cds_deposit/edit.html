@@ -335,6 +335,9 @@
             <invenio-files-list
               template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/list.html') }}"
             ></invenio-files-list>
+            <invenio-files-upload-remote
+                template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/remote_upload.html') }}">
+            </invenio-files-upload-remote>
         </invenio-files-uploader>
         </div>
       </div>
