@@ -114,9 +114,11 @@ install_requires = [
     'invenio-rest[cors]>=1.0.0a9',
     'invenio-search-ui>=1.0.0a5',
     'invenio-search>=1.0.0a7',
+    # FIXME wait invenio-sse is released
+    #  'invenio-sse>=1.0.0a1',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
-    'invenio-webhooks>=1.0.0a4',  # FIXME update when a5 is released
+    'invenio-webhooks>=1.0.0a4',
     'jsonref>=0.1',
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
@@ -157,10 +159,13 @@ setup(
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
             'cds_record_js = cds.modules.records.bundles:js',
-            'cds_previewer_video_css = cds.modules.previewer.bundles:video_css',
+            'cds_previewer_video_css = '
+            'cds.modules.previewer.bundles:video_css',
             'cds_previewer_video_js = cds.modules.previewer.bundles:video_js',
-            'cds_previewer_theoplayer_js = cds.modules.previewer.bundles:theoplayer_js',
-            'cds_previewer_theoplayer_css = cds.modules.previewer.bundles:theoplayer_css'
+            'cds_previewer_theoplayer_js = '
+            'cds.modules.previewer.bundles:theoplayer_js',
+            'cds_previewer_theoplayer_css = '
+            'cds.modules.previewer.bundles:theoplayer_css'
         ],
         'invenio_base.api_apps': [
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
