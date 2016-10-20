@@ -26,9 +26,25 @@
 
 from __future__ import absolute_import, division
 
+from invenio_db import db
 from invenio_webhooks.models import CeleryReceiver
+from sqlalchemy.orm.attributes import flag_modified
+
 from .tasks import attach_files, download, extract_metadata, extract_frames, \
     transcode, chain_orchestrator
+
+
+class CeleryTaskReceiver(CeleryReceiver):
+    """CeleryReceiver specialized for single task execution."""
+
+    @property
+    def task(self):
+        raise NotImplementedError()
+
+    def run(self, event):
+        """Execute task."""
+        event.response['event_id'] = str(event.id)
+        event.response['message'] = self.task.apply(kwargs=event.payload).get()
 
 
 class CeleryChainReceiver(CeleryReceiver):
@@ -36,16 +52,28 @@ class CeleryChainReceiver(CeleryReceiver):
 
     @property
     def workflow(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
-    def run(self, event):
+    def __call__(self, event):
         """Construct Celery canvas.
 
         This is achieved by chaining sequential tasks and grouping
         concurrent ones.
         """
+        event_id = str(event.id)
         chain_orchestrator.apply(
-            (self.workflow, ), kwargs=event.payload, task_id=event.id)
+            (self.workflow, ),
+            kwargs=event.payload,
+            task_id=event_id
+        )
+
+        with db.session.begin_nested():
+            event.response['event_id'] = event_id
+            event.response['message'] = 'Started workflow'
+            flag_modified(event, 'response')
+            flag_modified(event, 'response_headers')
+            db.session.add(event)
+        db.session.commit()
 
 
 class AVCWorkflow(CeleryChainReceiver):
@@ -60,23 +88,15 @@ class AVCWorkflow(CeleryChainReceiver):
                 'size_percentage', 'output_folder'
             })
         ],
-        (attach_files, {'bucket_id', 'key'}),
+        (attach_files, {'bucket_id'}),
     ]
 
 
-class Downloader(CeleryReceiver):
+class Downloader(CeleryTaskReceiver):
     """Receiver that downloads data from a URL."""
-
-    def run(self, event):
-        """Execute download task."""
-        download.apply_async(kwargs=event.payload)
+    task = download
 
 
-class VideoMetadataExtractor(CeleryReceiver):
+class VideoMetadataExtractor(CeleryTaskReceiver):
     """Receiver that extracts metadata from video URLs."""
-
-    def run(self, event):
-        """Execute extract_metadata task."""
-        extract_metadata.apply_async(kwargs=event.payload)
-        pass
-
+    task = extract_metadata

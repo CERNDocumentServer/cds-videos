@@ -42,11 +42,10 @@ from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from celery import chain, group, shared_task
 from flask import current_app as flask_app
-from invenio_db import db
 from invenio_files_rest.models import MultipartObject, ObjectVersion, Part
 
 
-@shared_task(bind=True, base=with_order(1))
+@shared_task(bind=True, base=with_order(1, db_session=True))
 def download(self, url, bucket_id, chunk_size, key=None):
     """Download file from a URL.
 
@@ -56,6 +55,7 @@ def download(self, url, bucket_id, chunk_size, key=None):
     :param key: New filename. If not provided, the filename will be taken from
                 the URL.
     """
+
     if self.parent:
         self.parent.clear_state()
 
@@ -84,15 +84,8 @@ def download(self, url, bucket_id, chunk_size, key=None):
         mp.merge_parts()
     self.update_progress(100)
 
-    # Get downloaded file location
-    file_location = mp.file.uri
-    try:
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-
-    return file_location
+    # Return downloaded file location
+    return mp.file.uri
 
 
 @shared_task(bind=True, base=with_order(2))
@@ -157,15 +150,15 @@ def extract_frames(self, input_filename, start_percentage, end_percentage,
         )
         rename(filename, join(output_folder, new_filename))
     self.update_progress(100)
-
     return output_folder
 
 
-@shared_task(bind=True, base=with_order(3))
-def attach_files(self, output_folders, bucket_id, key):
-    """Create records from Sorenson's generated subformats."""
+@shared_task(bind=True, base=with_order(3, db_session=True))
+def attach_files(self, output_folders, bucket_id):
+    """Collect files from Sorenson's sub-formats and extracted thumbnails."""
+
     # Collect
-    files = [join(output_folder, filename)
+    files = [(output_folder, filename)
              for output_folder in output_folders
              for filename in listdir(output_folder)
              if isfile(join(output_folder, filename))]
@@ -173,15 +166,10 @@ def attach_files(self, output_folders, bucket_id, key):
     # Attach
     total = len(files)
 
-    for count, filename in enumerate(files):
-        ObjectVersion.create(bucket_id, key, stream=open(filename, 'rb'))
+    for count, (output_folder, filename) in enumerate(files):
+        full_path = join(output_folder, filename)
+        ObjectVersion.create(bucket_id, filename, stream=open(full_path, 'rb'))
         self.update_progress_with_size(count + 1, total)
-
-    try:
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
 
 
 @shared_task(bind=True, base=AVCOrchestrator)
@@ -212,7 +200,7 @@ def chain_orchestrator(self, workflow, **kwargs):
     chain(*task_list)()
 
 
-@shared_task()
+@shared_task(base=with_order())
 def extract_metadata(video_location):
     """Extract metadata from given video file."""
     information = json.loads(ff_probe_all(video_location))
