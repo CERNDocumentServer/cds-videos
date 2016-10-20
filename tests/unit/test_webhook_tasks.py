@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""CDS Webhooks tests for Celery tasks."""
+"""CDS tests for Webhook Celery tasks."""
 
 from __future__ import absolute_import
 
@@ -45,7 +45,6 @@ from os.path import isfile, join
 from celery.result import AsyncResult
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-from six import iteritems
 
 
 def download_with_size(url, bucket_id, chunk_size,
@@ -125,7 +124,7 @@ def test_file_attachment(db, bucket):
         total_size += file_no * file_size
 
     # Attach to bucket
-    attach_files.delay(folders, bucket.id, 'key')
+    attach_files.delay(folders, bucket.id)
 
     # Check bucket is properly populated
     db.session.add(bucket)
@@ -146,11 +145,11 @@ def test_orchestrator(bucket, location, depid, mock_sorenson):
 
     # Start orchestration
     chain_orchestrator.apply_async(
-        (workflow, depid),
+        (workflow, ),
         kwargs=dict(
+            dep_id=depid,
             url='http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
             bucket_id=bucket.id,
-            key='KEY',
             chunk_size=5242880,
             preset_name='Youtube 480p',
             start_percentage=5,

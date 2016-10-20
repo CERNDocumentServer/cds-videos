@@ -30,6 +30,8 @@ from cds.modules.webhooks.helpers import update_deposit_status
 from celery import Task
 from celery.result import AsyncResult
 from celery.states import STARTED, FAILURE, state as state_cls
+from invenio_db import db
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class Orchestrator(Task):
@@ -39,7 +41,7 @@ class Orchestrator(Task):
 
     def set_state(self, task_name, task_meta):
         """Update orchestrator's state with sub-task's meta information."""
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class AVCOrchestrator(Orchestrator):
@@ -83,6 +85,10 @@ class ProgressTask(Task):
     def __call__(self, *args, **kwargs):
         """Set workflow-specific parameters automatically from given kwargs."""
 
+        # Begin DB session
+        if self.db_session:
+            db.session.begin(nested=True)
+
         # Set task's parent
         if 'parent' in kwargs:
             self.parent = kwargs['parent']
@@ -97,6 +103,14 @@ class ProgressTask(Task):
 
         # Set deposit status to 'DONE'
         self.update_deposit('DONE')
+
+        # Commit session
+        if self.db_session:
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                raise
 
         return return_value
 
@@ -134,16 +148,17 @@ class ProgressTask(Task):
         self.set_state(FAILURE, dict(message=str(einfo.exception)))
 
 
-def with_order(order):
+def with_order(order=0, db_session=False):
     """Factory method for creating ProgressTasks with fixed order."""
     return type(
         # Name
         'ExtendedTask',
         # Bases
-        (ProgressTask, Task),
+        (ProgressTask, ),
         # Attributes
         {
-            'order': order,
             'abstract': True,
+            'order': order,
+            'db_session': db_session,
         }
     )

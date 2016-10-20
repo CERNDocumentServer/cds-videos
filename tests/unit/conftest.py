@@ -36,8 +36,12 @@ from time import sleep
 import mock
 import pytest
 from cds.factory import create_app
+from celery import shared_task
 from elasticsearch import RequestError
 from flask_cli import ScriptInfo
+from invenio_oauth2server.models import Token
+from invenio_webhooks import current_webhooks
+from invenio_webhooks.models import CeleryReceiver
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
 from jsonresolver.contrib.jsonschema import ref_resolver_factory
@@ -61,6 +65,7 @@ from six import BytesIO
 def app():
     """Flask application fixture."""
     instance_path = tempfile.mkdtemp()
+    sorenson_output = tempfile.mkdtemp()
 
     os.environ.update(
         APP_INSTANCE_PATH=os.environ.get(
@@ -79,7 +84,7 @@ def app():
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
-        CDS_SORENSON_OUTPUT_FOLDER='/home/orestis/Downloads/Sorenson',
+        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -87,6 +92,15 @@ def app():
         yield app
 
     shutil.rmtree(instance_path)
+    shutil.rmtree(sorenson_output)
+
+
+@pytest.yield_fixture()
+def api_app(app):
+    """Flask API application fixture."""
+    api_app = app.wsgi_app.mounts['/api']
+    with api_app.app_context():
+        yield api_app
 
 
 @pytest.yield_fixture()
@@ -135,6 +149,13 @@ def users(app, db):
         ))
     db.session.commit()
     return [user1, user2]
+
+
+@pytest.fixture()
+def u_email(db, users):
+    """Valid user email."""
+    db.session.add(users[0])
+    return users[0].email
 
 
 @pytest.fixture()
@@ -210,19 +231,6 @@ def video_mov(datadir):
 def online_video():
     """Get online test video file."""
     return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
-
-
-@pytest.fixture()
-def users(app, db):
-    """Create users."""
-    with db.session.begin_nested():
-        datastore = app.extensions['security'].datastore
-        user1 = datastore.create_user(email='info@inveniosoftware.org',
-                                      password='tester', active=True)
-        user2 = datastore.create_user(email='test@inveniosoftware.org',
-                                      password='tester2', active=True)
-    db.session.commit()
-    return [user1, user2]
 
 
 @pytest.fixture()
@@ -364,41 +372,43 @@ def mock_sorenson():
         dict(Status=dict(Progress=45, TimeFinished=None)),
         dict(Status=dict(Progress=95, TimeFinished=None)),
         dict(Status=dict(Progress=100, TimeFinished='12:00')),
-    ]
+    ] * 5  # repeat for multiple usages of the mocked method
 
     mock.patch(
         'cds.modules.webhooks.tasks.stop_encoding'
     ).start().return_value = None
 
 
-@pytest.fixture()
-def users(app, db):
-    """Create users."""
-    with db.session.begin_nested():
-        datastore = app.extensions['security'].datastore
-        user1 = datastore.create_user(email='info@inveniosoftware.org',
-                                      password='tester', active=True)
-        user2 = datastore.create_user(email='test@inveniosoftware.org',
-                                      password='tester2', active=True)
-        admin = datastore.create_user(email='admin@inveniosoftware.org',
-                                      password='tester3', active=True)
-        # Assign deposit-admin-access to admin only.
-        db.session.add(ActionUsers(
-            action='deposit-admin-access', user=admin
-        ))
-    db.session.commit()
-    return [user1, user2]
-
-
-@pytest.fixture()
-def depid(app, users, db):
-    """New deposit with files."""
-    record = {
-        'title': {'title': 'fuu'}
-    }
-    with app.test_request_context():
-        login_user(users[0])
-        deposit = Deposit.create(record)
-        deposit.commit()
+@pytest.fixture
+def access_token(app, db, users):
+    """Fixture that create an access token."""
+    db.session.add(users[0])
+    tester_id = users[0].id
+    with app.app_context():
+        token = Token.create_personal(
+            'test-personal-{0}'.format(tester_id),
+            tester_id,
+            scopes=['webhooks:event'],
+            is_internal=True,
+        ).access_token
         db.session.commit()
-    return deposit['_deposit']['id']
+        return token
+
+
+@shared_task()
+def add(x, y):
+    return x + y
+
+
+@pytest.fixture
+def receiver(api_app):
+    """Register test celery receiver."""
+
+    class TestReceiver(CeleryReceiver):
+
+        def run(self, event):
+            ret = add.apply(kwargs=event.payload).get()
+            event.response['message'] = ret
+
+    current_webhooks.register('test-receiver', TestReceiver)
+    return 'test-receiver'
