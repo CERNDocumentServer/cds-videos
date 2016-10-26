@@ -32,7 +32,7 @@ import uuid
 
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
-                                     video_resolver, deposit_build_url,
+                                     video_resolver, video_build_url,
                                      is_deposit, record_unbuild_url)
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -42,27 +42,27 @@ from invenio_records.models import RecordMetadata
 
 def test_is_deposit():
     """Test is deposit function."""
-    assert is_deposit('/deposit/1') is True
+    assert is_deposit('/api/deposit/1') is True
     assert is_deposit('/record/1') is False
 
 
-def test_record_unbuild_url():
+def test_record_unbuild_url(deposit_rest):
     """Test record unbuild url."""
-    assert '1' == record_unbuild_url('/deposit/1')
+    assert '1' == record_unbuild_url('/deposits/video/1')
     assert '1' == record_unbuild_url('/record/1')
 
 
-def test_record_build_url():
+def test_record_build_url(deposit_rest):
     """Test record build url."""
     assert '/record/1' == record_build_url(1)
 
 
-def test_deposit_build_url():
+def test_video_build_url(deposit_rest):
     """Test deposit build url."""
-    assert '/deposit/1' == deposit_build_url(1)
-    assert '/deposit/1' == deposit_build_url('1')
-    assert '/deposit/95b0716a-c726-4481-96fe-2aa02c72cd41' == \
-        deposit_build_url(uuid.UUID('95b0716a-c726-4481-96fe-2aa02c72cd41'))
+    assert '/deposits/video/1' == video_build_url(1)
+    assert '/deposits/video/1' == video_build_url('1')
+    assert '/deposits/video/95b0716a-c726-4481-96fe-2aa02c72cd41' == \
+        video_build_url(uuid.UUID('95b0716a-c726-4481-96fe-2aa02c72cd41'))
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

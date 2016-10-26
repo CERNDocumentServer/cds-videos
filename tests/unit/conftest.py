@@ -195,12 +195,20 @@ def es(app):
 
 
 @pytest.fixture()
-def deposit_rest(app):
+def records_rest_app(app):
     """Init deposit REST API."""
-    InvenioRecordsREST(app)
-    app_deposit = InvenioDepositREST(app)
-    app.url_map.converters['pid'] = PIDConverter
-    return app_deposit
+    if 'invenio-records-rest' not in app.extensions:
+        InvenioRecordsREST(app)
+    return app
+
+
+@pytest.fixture()
+def deposit_rest(app, records_rest_app):
+    """Init deposit REST API."""
+    if 'invenio-deposit-rest' not in app.extensions:
+        InvenioDepositREST(app)
+        app.url_map.converters['pid'] = PIDConverter
+    return app
 
 
 @pytest.fixture()
@@ -305,7 +313,7 @@ def json_headers(app):
 
 
 @pytest.fixture()
-def project(app, es, cds_jsonresolver, users, location, db):
+def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
     """New project with videos."""
     project_data = {
         'title': {

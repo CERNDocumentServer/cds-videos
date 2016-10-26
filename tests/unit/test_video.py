@@ -30,13 +30,13 @@ import mock
 import pytest
 
 from cds.modules.deposit.api import (record_build_url,
-                                     video_resolver, deposit_build_url)
+                                     video_resolver, video_build_url)
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_records.models import RecordMetadata
 
 
-def test_video_resolver(app, project):
+def test_video_resolver(project):
     """Test vide resolver."""
     (project, video_1, video_2) = project
     videos = video_resolver(
@@ -50,7 +50,7 @@ def test_video_resolver(app, project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_video_publish_and_edit(app, project):
+def test_video_publish_and_edit(project):
     """Test video publish and edit."""
     (project, video_1, video_2) = project
     video_path_1 = project['videos'][0]['$reference']
@@ -116,7 +116,7 @@ def test_video_publish_and_edit(app, project):
     assert any(video_ref['$reference'] == record_path_1
                for video_ref in project['videos']) is False
     # check video1 v2 is inside the list
-    video_path_1_v2 = deposit_build_url(video_1_v2['_deposit']['id'])
+    video_path_1_v2 = video_build_url(video_1_v2['_deposit']['id'])
     assert any(video_ref['$reference'] == video_path_1_v2
                for video_ref in project['videos']) is True
 
@@ -124,7 +124,7 @@ def test_video_publish_and_edit(app, project):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
-def test_delete_video_not_published(app, project, force):
+def test_delete_video_not_published(project, force):
     """Test video delete when draft."""
     (project, video_1, video_2) = project
 
@@ -150,7 +150,7 @@ def test_delete_video_not_published(app, project, force):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
-def test_delete_video_published(app, project, force):
+def test_delete_video_published(project, force):
     """Test video delete after published."""
     (project, video_1, video_2) = project
 
