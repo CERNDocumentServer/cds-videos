@@ -242,7 +242,7 @@ class Project(CDSDeposit):
         # extract the PIDs from them
         ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
         # publish them and get the new PID
-        refs_new = [record_build_url(video.publish()['recid'])
+        refs_new = [record_build_url(video.publish().commit()['recid'])
                     for video in video_resolver(ids_old)]
         # update project video references
         self._update_videos(refs_old, refs_new)
