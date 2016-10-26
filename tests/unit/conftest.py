@@ -368,7 +368,6 @@ def project_published(app, project):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
-
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'
     ).start().return_value = 123
@@ -405,13 +404,13 @@ def access_token(app, db, users):
 
 @shared_task()
 def add(x, y):
+    """Simple shared task."""
     return x + y
 
 
 @pytest.fixture
 def receiver(api_app):
     """Register test celery receiver."""
-
     class TestReceiver(CeleryReceiver):
 
         def run(self, event):
