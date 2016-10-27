@@ -61,6 +61,11 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['videos'] == []
         assert project_dict['metadata']['title']['title'] == 'my project'
+        assert project_dict['links']['bucket'].startswith(
+            'http://localhost/files/')
+        assert all(link.startswith('http://localhost/deposits/project')
+                   for (key, link) in project_dict['links'].items()
+                   if key not in ['html', 'bucket'])
         # check database
         project_id = project_dict['metadata']['_deposit']['id']
         project = project_resolver(project_id)
@@ -77,6 +82,9 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
         assert video_1_dict['metadata']['_project_id'] == project_id
+        assert all(link.startswith('http://localhost/deposits/video')
+                   for (key, link) in video_1_dict['links'].items()
+                   if key not in ['html', 'bucket'])
         # check database: connection project <---> videos
         video_ids = [
             video_1_dict['metadata']['_deposit']['id']
@@ -108,6 +116,9 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert res.status_code == 201
         video_2_dict = json.loads(res.data.decode('utf-8'))
         assert video_2_dict['metadata']['_project_id'] == project_id
+        assert all(link.startswith('http://localhost/deposits/video')
+                   for (key, link) in video_2_dict['links'].items()
+                   if key not in ['html', 'bucket'])
         # check database: connection project <---> videos
         video_ids = [
             video_1_dict['metadata']['_deposit']['id'],
@@ -257,6 +268,9 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['title']['title'] ==\
             'new project title'
+        assert all(link.startswith('http://localhost/deposits/project')
+                   for (key, link) in project_dict['links'].items()
+                   if key not in ['html', 'bucket'])
         # check database
         project = project_resolver(project_dict['metadata']['_deposit']['id'])
         assert project['title']['title'] == 'new project title'

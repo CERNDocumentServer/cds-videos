@@ -491,7 +491,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         file_item_route='/deposits/project/<{0}:pid_value>/files/<path:key>'
         .format(_Project_PID),
         default_media_type='application/json',
-        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        links_factory_imp='cds.modules.deposit.links:project_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
             lambda x: True, write_scope.id),
         read_permission_factory_imp=DepositPermission,
@@ -527,7 +527,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         file_item_route='/deposits/video/<{0}:pid_value>/files/<path:key>'
         .format(_Video_PID),
         default_media_type='application/json',
-        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        links_factory_imp='cds.modules.deposit.links:video_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
             lambda x: True, write_scope.id),
         read_permission_factory_imp=DepositPermission,
