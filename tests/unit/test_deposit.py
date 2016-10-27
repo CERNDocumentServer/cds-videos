@@ -26,12 +26,10 @@
 
 from __future__ import absolute_import, print_function
 
-import mock
+import json
 
-from cds.modules.deposit.api import CDSDeposit
-from cds.modules.deposit.links import deposit_links_factory
-from cds.modules.deposit.permissions import can_edit_deposit
-from cds.modules.deposit.views import to_links_js
+import mock
+import pytest
 from flask import current_app, g, request, url_for
 from flask_login import login_user
 from flask_principal import Identity
@@ -40,6 +38,13 @@ from invenio_db import db
 from invenio_files_rest.models import Bucket
 from invenio_records.models import RecordMetadata
 from invenio_records_files.api import RecordsBuckets
+
+from cds.modules.deposit.api import CDSDeposit
+from cds.modules.deposit.links import deposit_links_factory
+from cds.modules.deposit.loaders import project_loader, video_loader
+from cds.modules.deposit.loaders.loader import MarshmallowErrors
+from cds.modules.deposit.permissions import can_edit_deposit
+from cds.modules.deposit.views import to_links_js
 
 
 def test_deposit_link_factory_has_bucket(app, db, es, location):
@@ -99,3 +104,40 @@ def test_permissions(es, location):
     assert not can_edit_deposit(deposit)
     deposit['_deposit']['owners'].append(user.id)
     assert can_edit_deposit(deposit)
+
+
+def test_validation_missing_fields(es, location):
+    """Test validation error due to missing fields."""
+    project_deposit = dict(contributors=[{}], _deposit={'id': None})
+    with current_app.test_request_context(
+        '/api/deposits/project', method='PUT',
+            data=json.dumps(project_deposit), content_type='application/json'):
+            with pytest.raises(MarshmallowErrors) as errors:
+                project_loader()
+            assert '400: Bad Request' in str(errors.value)
+
+            error_body = json.loads(errors.value.get_body())
+            assert error_body['status'] == 400
+            assert error_body['errors'][0]['field'] == 'contributors.0.name'
+
+    project_deposit['contributors'][0]['name'] = 'Jack'
+    with current_app.test_request_context(
+        '/api/deposits/project', method='PUT',
+            data=json.dumps(project_deposit), content_type='application/json'):
+            loaded = project_loader()
+            assert 'contributors' in loaded and '_deposit' in loaded
+
+
+def test_validation_unknown_fields(es, location):
+    """Test validation error due to unknown fields."""
+    json_data = json.dumps({'desc': {}, '_deposit': {'id': None}})
+    with current_app.test_request_context(
+        '/api/deposits/video', method='PUT',
+            data=json_data, content_type='application/json'):
+        with pytest.raises(MarshmallowErrors) as errors:
+            video_loader()
+        assert '400: Bad Request' in str(errors.value)
+
+        error_body = json.loads(errors.value.get_body())
+        assert error_body['status'] == 400
+        assert error_body['errors'][0]['field'] == 'desc'

@@ -29,12 +29,14 @@ from __future__ import absolute_import, print_function
 import os
 
 from flask import current_app, url_for
+
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
+from invenio_rest.errors import RESTValidationError
 from werkzeug.local import LocalProxy
 
 from .errors import DiscardConflict
