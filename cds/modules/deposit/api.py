@@ -29,11 +29,13 @@ from __future__ import absolute_import, print_function
 import os
 
 from flask import current_app, url_for
+
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
+from invenio_rest.errors import RESTValidationError
 from werkzeug.local import LocalProxy
 
 from .errors import DiscardConflict
@@ -290,6 +292,10 @@ class Video(CDSDeposit):
 
     def publish(self, pid=None, id_=None):
         """Publish a video and update the related project."""
+        # check if at least one file is present
+        if len(self.files) == 0:
+            raise RESTValidationError(description=
+                                      'At least one file must exist.')
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
         # publish the video

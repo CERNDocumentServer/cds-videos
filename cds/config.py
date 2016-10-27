@@ -34,6 +34,7 @@ from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
+from werkzeug.utils import import_string
 
 from .modules.access.access_control import CERNRecordsSearch
 from .modules.deposit.permissions import DepositPermission, can_edit_deposit
@@ -471,6 +472,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_fetcher='deposit',
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Project',
+        record_loaders={
+            'application/json': 'cds.modules.deposit.loaders:project_loader'
+        },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
                                  ':json_v1_files_response'),
@@ -507,6 +511,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_fetcher='deposit',
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Video',
+        record_loaders={
+            'application/json': 'cds.modules.deposit.loaders:video_loader'
+        },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
                                  ':json_v1_files_response'),
