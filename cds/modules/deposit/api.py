@@ -33,6 +33,7 @@ from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from werkzeug.local import LocalProxy
 
@@ -49,8 +50,45 @@ current_jsonschemas = LocalProxy(
 )
 
 
+class CDSFileObject(FileObject):
+    """Wrapper for files."""
+
+    def dumps(self):
+        """Create a dump of the metadata associated to the record."""
+        self.data.update({
+            'key': self.obj.key,
+            'version_id': str(self.obj.version_id),
+            'checksum': self.obj.file.checksum,
+            'size': self.obj.file.size,
+            'completed': True,
+            'progress': 100,
+            'links': {
+                'self': (
+                    current_app.config['DEPOSIT_FILES_API'] +
+                    u'/{bucket}/{key}?versionId={version_id}'.format(
+                        bucket=self.obj.bucket_id,
+                        key=self.obj.key,
+                        version_id=self.obj.version_id,
+                    )),
+            }
+        })
+        return self.data
+
+
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
+
+    def __init__(self, *args, **kwargs):
+        self.file_cls = CDSFileObject
+        return super(CDSDeposit, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def get_record(cls, id_, with_deleted=False):
+        """Get record instance."""
+        deposit = super(CDSDeposit, cls).get_record(
+            id_=id_, with_deleted=with_deleted)
+        deposit['_files'] = deposit.files.dumps()
+        return deposit
 
     @classmethod
     def create(cls, data, id_=None):

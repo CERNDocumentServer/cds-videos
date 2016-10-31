@@ -87,6 +87,16 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
             project_resolver(project_dict['metadata']['_deposit']['id']))
         assert video_1['$schema'] == video_schema
 
+        # [[ GET THE VIDEO 1 ]]
+        res = client.get(
+            video_1_dict['links']['self'],
+            headers=json_headers)
+
+        # check returned value
+        assert res.status_code == 200
+        video_1_dict = json.loads(res.data.decode('utf-8'))
+        assert video_1_dict['metadata']['_files'] == []
+
         # [[ ADD A NEW EMPTY VIDEO_2 ]]
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
@@ -133,6 +143,22 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         check_connection(
             video_resolver(video_ids),
             project_resolver(project_dict['metadata']['_deposit']['id']))
+
+        # [[ GET THE VIDEO 1 ]]
+        res = client.get(video_1_dict['links']['self'], headers=json_headers)
+
+        # check video metadata
+        assert res.status_code == 200
+        video_1_dict = json.loads(res.data.decode('utf-8'))
+        assert len(video_1_dict['metadata']['_files']) == 1
+        myfile = video_1_dict['metadata']['_files'][0]
+        assert myfile['links']['self'].startswith('/api/files/')
+        assert myfile['checksum'] == 'md5:eb88ae1e3666e6fe96a33ea72aab630e'
+        assert myfile['completed'] is True
+        assert 'version_id' in myfile
+        assert myfile['key'] == 'test.json'
+        assert myfile['progress'] == 100
+        assert myfile['size'] == 24
 
         # [[ PUBLISH VIDEO_1 ]]
         res = client.post(
