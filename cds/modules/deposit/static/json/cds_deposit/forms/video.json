@@ -1,0 +1,155 @@
+[
+  {
+    "type": "fieldset",
+    "title": "Video",
+    "htmlClass": "row",
+    "description": "Add the video information.",
+    "items": [
+      {
+        "type": "section",
+        "htmlClass": "col-md-2",
+        "items": [
+            {
+              "type": "template",
+              "template": "<video width='100%' controls><source src='http://techslides.com/demos/sample-videos/small.ogv' type='video/mp4'></video><button style='width:100%; margin:5px;' type='button' class='btn btn-default'>Preview Video</button><button style='width:100%; margin:5px;' type='button' class='btn btn-danger'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span> Delete</button>",
+              "templateUrl": "templates/foo.html"
+            }
+        ]
+      },
+      {
+        "type": "section",
+        "htmlClass": "col-md-10",
+        "items": [
+          {
+            "type": "template",
+            "template": "<div class='col-md-9'><div class='progress' style='margin:10px;'><div class=' progress-bar progress-bar-danger progress-bar-striped active' role='progressbar' aria-valuenow='70' aria-valuemin='0' aria-valuemax='100' style='width:30%'>Error Processing</div></div></div><div class='col-md-3'><button style='margin:10px;' type='button' class='btn btn-default'>View errors</button></div>",
+            "templateUrl": "templates/bar.html"
+          },
+          {
+            "type": "tabs",
+            "tabs": [
+              {
+                "title": "Metadata",
+                "items": [
+                  {
+                    "title": "Name",
+                    "key": "title.title"
+                  },
+                  {
+                    "type": "section",
+                    "htmlClass": "form-ckeditor",
+                    "description": "",
+                    "notitle": true,
+                    "items": [
+                      {
+                        "type": "ckeditor",
+                        "key": "description.value",
+                        "title": "Description",
+                        "ckeditor": {
+                          "height": 200,
+                          "toolbar": [
+                            ["PasteText", "PasteFromWord"],
+                            ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
+                            ["NumberedList", "BulletedList", "Blockquote"],
+                            ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
+                            ["Source"], ["Maximize"]
+                          ],
+                          "disableNativeSpellChecker": false,
+                          "removePlugins": "elementspath",
+                          "removeButtons": ""
+                        },
+                        "required": true,
+                        "description": "Required.",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  {
+                    "type": "template",
+                    "key": "date",
+                    "title": "Date",
+                    "placeholder": "eg. 2013-05-08",
+                    "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+                    "format": "yyyy-MM-dd",
+                    "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+                    "fa_cls": "fa-calendar",
+                    "required": true
+                  },
+                  {
+                    "type": "array",
+                    "key": "contributors",
+                    "title": "Contributors",
+                    "description": "",
+                    "sortOptions": {
+                      "axis": "y",
+                      "cursor": "move",
+                      "disabled": false,
+                      "handle": "i.sort-handle"
+                    },
+                    "fa_cls": "fa-user",
+                    "required": true,
+                    "add": "Add another contributor",
+                    "inline": true,
+                    "minItems": 1,
+                    "items": [
+                      {
+                        "type": "text",
+                        "key": "contributors[].name",
+                          "placeholder": "Name",
+                          "description": "",
+                          "notitle": true
+                        },
+                        {
+                          "type": "uiselect",
+                          "key": "contributors[].role",
+                            "placeholder": "Role",
+                            "description": "",
+                            "notitle": true
+                          }
+                        ]
+                  },
+                  {
+                    "title": "Keywords",
+                    "key": "keywords",
+                    "add": "Add another Keyword",
+                    "style": {
+                      "add": "btn-warning"
+                    },
+                    "items":[
+                      {
+                        "title": "Source",
+                        "key": "keywords[].source"
+                        },
+                        {
+                          "title": "Value",
+                          "key": "keywords[].value"
+                          }
+                        ]
+                  },
+
+                  {
+                    "title": "License",
+                    "key": "license"
+                  },
+                  {
+                    "title": "Copyright URL",
+                    "key": "copyright.url"
+                  }
+                ]
+              },
+              {
+                "title": "Files",
+                "items": [
+                  {
+                    "type": "template",
+                    "template": "file upload comes here"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
