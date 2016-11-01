@@ -1,14 +1,62 @@
 [
-  {
-    "type": "fieldset",
-    "items": [
-      {
-        "key": "title.title",
-        "title": "Name"
-      }, {
-        "key": "title.subtitle",
-        "title": "Description"
-      }
-    ]
-  }
+    {
+        "title": "Name",
+        "key": "title.title"
+    },
+    {
+        "title": "Description",
+        "key": "description.value",
+        "type": "textarea"
+    },
+    {
+        "title": "Contributors",
+        "key": "contributors",
+        "add": "Add another Contributor",
+        "style": {
+            "add": "btn-warning"
+        },
+        "items":[
+            {
+                "title": "Name",
+                "key": "contributors[].name"
+            },
+            {
+                "title": "Role",
+                "key": "contributors[].role",
+                "labelHtmlClass": "col-sm-3",
+                "fieldHtmlClass": "col-sm-9"
+            }
+        ]
+    },
+    {
+        "title": "Keywords",
+        "key": "keywords",
+        "add": "Add another Keyword",
+        "style": {
+            "add": "btn-warning"
+        },
+        "items":[
+            {
+                "title": "Source",
+                "key": "keywords[].source"
+            },
+            {
+                "title": "Value",
+                "key": "keywords[].value"
+            }
+        ]
+    },
+    {
+      "title": "Date",
+      "key": "date"
+    },
+    {
+        "title": "License",
+        "key": "license"
+    },
+    {
+        "type": "submit",
+        "style": "btn-info",
+        "title": "Inherit to all videos"
+    }
 ]

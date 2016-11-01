@@ -36,7 +36,7 @@
   {% assets "invenio_deposit_dependencies_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
     angular.element(document).ready(function() {
-      // Override templates
+       // Override templates
        app = angular.module('invenioRecords').config(['schemaFormDecoratorsProvider', function(decoratorsProvider){
          decoratorsProvider.addMapping('bootstrapDecorator', 'ckeditor', '{{ url_for("static", filename="templates/cds_deposit/ckeditor.html")}}');
          decoratorsProvider.addMapping('bootstrapDecorator', 'uiselect', '{{ url_for("static", filename="templates/cds_deposit/uiselect.html")}}');
@@ -115,16 +115,170 @@
             return srcArray;
           }
         });
-      angular.bootstrap(
-        document.getElementById('invenio-records'), [
+      angular.module('cdsDeposit', [
           'invenioRecords', 'schemaForm', 'mgcrea.ngStrap',
            'mgcrea.ngStrap.modal', 'pascalprecht.translate', 'ui.sortable',
            'ui.select', 'mgcrea.ngStrap.select', 'mgcrea.ngStrap.datepicker',
            'mgcrea.ngStrap.helpers.dateParser', 'mgcrea.ngStrap.tooltip',
            'invenioFiles'
-        ]
+      ])
+      .directive('cdsRecordsChild', function() {
+        return {
+          restrict: 'E',
+          link: function(scope, element, attrs) {
+            scope.saveVideo = function() {
+              scope.commitVideo(scope.child.metadata, scope.child.links.self);
+            };
+            scope.recordsVM.invenioRecordsModel['$schema'] = 'http://localhost:5000/schemas/deposits/records/video-v1.0.0.json';
+            setTimeout(function() {
+              scope.$broadcast('invenio.uploader.init',
+                  {},
+                  {initialization: scope.child.links.self},
+                  [],
+                  scope.child.links);
+            }, 0);
+          },
+          scope: {
+            child: '=',
+            links: '=',
+            filesSchema: '=',
+            filesForm: '=',
+            commitVideo: '='
+          },
+        {% raw %}
+          template: '<invenio-records form="/static/json/cds_deposit/video_form.json" initialization="{{ links.self }}" links="{{ links | json }}" record="{{ child.metadata | json }}" schema="{{ child.metadata[\'$schema\'] }}">' +
+          '<form sf-model="child.metadata" sf-schema="filesSchema" sf-form="filesForm"></form>' +
+          '</invenio-records>'
+        {% endraw %}
+        };
+      })
+      .directive('cdsRecordsChildren', function($rootScope, $q, $http) {
+        return {
+          restrict: 'E',
+          link: function(scope, element, attrs) {
+            var unmatchedFiles = [];
+
+            var videoRegex = /(.*)\.(mp4|mov)$/;
+            var isVideoFile = function(filename) {
+              return !!filename.match(videoRegex);
+            };
+
+            var getVideoName = function(filename) {
+              return filename.match(videoRegex)[1];
+            };
+
+            var fileBelongsToVideo = function(file, videoName) {
+              return file.key.startsWith(videoName);
+            };
+
+            var videosMap = null;
+
+            var commitVideo = function(video, link) {
+              link = link || video.links.self;
+              $http({
+                url: link,
+                method: 'PUT',
+                headers: $rootScope.recordsVM.invenioRecordsArgs.headers,
+                data: video
+              });
+            };
+
+            scope.commitVideo = commitVideo;
+
+            var actionHandler = scope.recordsVM.actionHandler;
+            scope.recordsVM.actionHandler = function() {
+              angular.forEach(videosMap || {}, function(video) {
+                commitVideo(video.metadata, video.links.self);
+              });
+              return actionHandler.apply(this, arguments);
+            };
+
+            var addFileToVideos = function(file, videosMap) {
+              var isVideo = isVideoFile(file.key);
+              if (isVideo) {
+                return $http({
+                  method: 'POST',
+                  url: $rootScope.recordsVM.invenioRecordsArgs.initialization,
+                  data: {},
+                  headers:  $rootScope.recordsVM.invenioRecordsArgs.headers || {}
+                }).then(function(response) {
+                  var videoName = getVideoName(file.key);
+                  videosMap[videoName] = response.data;
+                  videosMap[videoName].metadata.files = [ file ];
+                  videosMap[videoName].metadata.parent = $rootScope.recordsVM.invenioRecordsModel._deposit.id;
+                  unmatchedFiles.filter(function(file) {
+                    return fileBelongsToVideo(file, videoName);
+                  }).forEach(function(file) {
+                    unmatchedFiles.splice(unmatchedFiles.indexOf(file), 1);
+                    videosMap[videoName].metadata.files.push(file);
+                  });
+                  return videoName;
+                });
+              } else {
+                for (var key in videosMap) {
+                  if (fileBelongsToVideo(file, key)) {
+                    videosMap[key].metadata.files.push(file);
+                    return $q.resolve(key);
+                  }
+                }
+                unmatchedFiles.push(file);
+                return $q.resolve();
+              }
+            };
+            $rootScope.$on('invenio.uploader.file.added', function(evt, newFiles) {
+              if (videosMap == null) {
+                videosMap = ($rootScope.recordsVM.invenioRecordsVideos || [])
+                    .reduce(function(map, video) {
+                      video.metadata.files.forEach(function(file) {
+                        var isVideo = isVideoFile(file.key);
+                        if (isVideo) {
+                          var videoName = getVideoName(file.key);
+                          map[videoName] = video;
+                        }
+                      });
+                      return map;
+                    }, {});
+              }
+              var promises = newFiles.map(function(file) {
+                return addFileToVideos(file, videosMap);
+              });
+              $q.all(promises).then(function(filenames) {
+                var uniqFiles = filenames.filter(function (v, i, a) {
+                  return v && a.indexOf(v) === i
+                });
+                uniqFiles.forEach(function(name) {
+                  var video = videosMap[name];
+                  commitVideo(video.metadata, video.links.self);
+                });
+                // commit master record
+                var videoArray = [];
+                for (var name in videosMap) {
+                  videoArray.push(videosMap[name]);
+                }
+                $rootScope.recordsVM.invenioRecordsVideos = videoArray;
+              });
+            });
+            $http.get(attrs['schema']).then(function(response) {
+              scope.filesSchema = response.data;
+            });
+            $http.get(attrs['form']).then(function(response) {
+              scope.filesForm = response.data;
+            });
+          },
+          {% raw %}
+          template: '<div ng-repeat="video in recordsVM.invenioRecordsVideos track by $index">' +
+          '<cds-records-child child="video" links="video.links" files-schema="filesSchema" files-form="filesForm" commit-video="commitVideo"></cds-records-child>' +
+          '</div>',
+          {% endraw %}
+          controller: 'InvenioRecordsCtrl',
+          controllerAs: 'InvenioRecordsVideosCtrl'
+        };
+      });
+      angular.bootstrap(
+          document.getElementById('invenio-records'), ['cdsDeposit']
       );
     });
+
   </script>
 {%- endblock javascript %}
 
@@ -141,7 +295,7 @@
               initialization="{{ config.DEPOSIT_SEARCH_API }}"
             {% endif %}
             template-params='{"messages": {{ config.DEPOSIT_RESPONSE_MESSAGES|tojson }} }'
-            extra-params='{"headers":{"Content-Type": "application/json"}, "data": {"$schema": "{{ url_for("invenio_jsonschemas.get_schema", schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"}}'
+            extra-params='{"headers":{"Content-Type": "application/json"}, "data": {"$schema": "{{ url_for("invenio_jsonschemas.get_schema", schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"}, "initialization": "{{ config.DEPOSIT_SEARCH_API }}"}'
             form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
             record='{{ record | tojson }}'
             schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA) }}">
@@ -159,6 +313,10 @@
               form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
               template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_FORM) }}">
             </invenio-records-form>
+          <cds-records-children
+            schema="/schemas/deposits/records/video-v1.0.0.json"
+            form="/static/json/cds_deposit/video_form.json">
+          </cds-records-children>
           </invenio-records>
           <invenio-files-uploader
             method="PUT"
@@ -177,6 +335,9 @@
             <invenio-files-list
               template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/list.html') }}"
             ></invenio-files-list>
+            <invenio-files-upload-remote
+                template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/remote_upload.html') }}">
+            </invenio-files-upload-remote>
         </invenio-files-uploader>
         </div>
       </div>
