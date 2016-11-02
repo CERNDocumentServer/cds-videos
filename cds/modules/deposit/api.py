@@ -29,6 +29,10 @@ from __future__ import absolute_import, print_function
 import os
 import uuid
 
+import datetime
+
+import arrow
+from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
 
 from invenio_deposit.api import Deposit, preserve
@@ -39,6 +43,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
+from invenio_sequencegenerator.api import Sequence
 from werkzeug.local import LocalProxy
 from invenio_records.api import Record
 
@@ -62,22 +67,23 @@ class CDSFileObject(FileObject):
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
         def _dumps(obj):
-            return {'key': obj.key,
-                    'version_id': str(obj.version_id),
-                    'checksum': obj.file.checksum,
-                    'size': obj.file.size,
-                    'completed': True,
-                    'progress': 100,
-                    'tags': obj.get_tags(),
-                    'links': {
-                        'self': (
-                            current_app.config['DEPOSIT_FILES_API'] +
-                            u'/{bucket}/{key}?versionId={version_id}'.format(
-                                bucket=obj.bucket_id,
-                                key=obj.key,
-                                version_id=obj.version_id,
-                            )),
-                    }
+            return {
+                'key': obj.key,
+                'version_id': str(obj.version_id),
+                'checksum': obj.file.checksum,
+                'size': obj.file.size,
+                'completed': True,
+                'progress': 100,
+                'tags': obj.get_tags(),
+                'links': {
+                    'self': (
+                        current_app.config['DEPOSIT_FILES_API'] +
+                        u'/{bucket}/{key}?versionId={version_id}'.format(
+                            bucket=obj.bucket_id,
+                            key=obj.key,
+                            version_id=obj.version_id,
+                        )),
+                }
             }
 
         master_dump = _dumps(self.obj)
@@ -92,6 +98,7 @@ class CDSFileObject(FileObject):
         self.data.update(master_dump)
 
         return self.data
+
 
 class CDSFilesIterator(FilesIterator):
     """Iterator for files."""
@@ -117,7 +124,7 @@ class CDSDeposit(Deposit):
 
     def __init__(self, *args, **kwargs):
         """Init."""
-        return super(CDSDeposit, self).__init__(*args, **kwargs)
+        super(CDSDeposit, self).__init__(*args, **kwargs)
 
     @classmethod
     def get_record(cls, id_, with_deleted=False):
@@ -174,6 +181,34 @@ class CDSDeposit(Deposit):
         """Patch only drafts."""
         return super(CDSDeposit, self).patch(*args, **kwargs)
 
+    @property
+    def report_number(self):
+        try:
+            return self['report_number']['report_number']
+        except KeyError:
+            return None
+
+    @report_number.setter
+    def report_number(self, value):
+        self['report_number'] = dict(report_number=value)
+
+    def generate_report_number(self, **kwargs):
+        """Generates a new report number.
+
+        .. note :
+            Override in deposit subclass for custom behaviour.
+        """
+        self.report_number = report_number_minter(self.id, self, **kwargs)
+
+    def get_report_number_sequence(self, **kwargs):
+        """Get the sequence generator of this Deposit class.
+
+        .. note ::
+            this should return a tuple, consisting of the sequence generator
+            and the ``kwargs`` without the keywords used by this method
+        """
+        raise NotImplemented
+
 
 def project_resolver(project_id):
     """Get records from PIDs."""
@@ -221,6 +256,9 @@ def is_deposit(url):
 
 class Project(CDSDeposit):
     """Define API for a project."""
+
+    sequence_name = 'project-v1_0_0'
+    """Sequence identifier."""
 
     @classmethod
     def create(cls, data, id_=None):
@@ -298,13 +336,23 @@ class Project(CDSDeposit):
         # get reference of all deposit still not published
         refs_old = [video_ref for video_ref in self.video_refs
                     if is_deposit(video_ref)]
+
         # extract the PIDs from them
         ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
+
         # publish them and get the new PID
         refs_new = [record_build_url(video.publish().commit()['recid'])
                     for video in video_resolver(ids_old)]
+
         # update project video references
         self._update_videos(refs_old, refs_new)
+
+        # Return project with generated report number
+        videos_new = video_resolver(self.video_ids)
+        project_modified = videos_new[0].project
+        assert project_modified.report_number
+        self.report_number = project_modified.report_number
+
         # publish project
         return super(Project, self).publish(pid=pid, id_=id_).commit()
 
@@ -338,9 +386,24 @@ class Project(CDSDeposit):
             video.delete(force=force)
         return super(Project, self).delete(force=force, pid=pid)
 
+    def get_report_number_sequence(self, **kwargs):
+        """Get the sequence generator for Projects."""
+        try:
+            year = arrow.get(self['date']).year
+        except KeyError:
+            year = datetime.date.today().year
+
+        return Sequence(self.sequence_name,
+                        year=year,
+                        category=self['category'],
+                        type=self['type']), kwargs
+
 
 class Video(CDSDeposit):
     """Define API for a video."""
+
+    sequence_name = 'video-v1_0_0'
+    """Sequence identifier."""
 
     @classmethod
     def create(cls, data, id_=None):
@@ -385,6 +448,11 @@ class Video(CDSDeposit):
         self['_project_id'] = project['_deposit']['id']
         project._add_video(self)
 
+    def _publish_new(self, id_=None):
+        """Generate report number."""
+        self.generate_report_number()
+        return super(Video, self)._publish_new(id_)
+
     def publish(self, pid=None, id_=None):
         """Publish a video and update the related project."""
         # save a copy of the old PID
@@ -415,6 +483,7 @@ class Video(CDSDeposit):
             [video_build_url(video_new['_deposit']['id'])]
         )
         video_new.project.commit()
+        assert video_new.report_number
         return video_new
 
     def delete(self, force=True, pid=None):
@@ -436,6 +505,22 @@ class Video(CDSDeposit):
             [video_discarded.ref]
         )
         return video_discarded
+
+    def generate_report_number(self, **kwargs):
+        """Generate video's report number."""
+        if not self.project.report_number:
+            self.project.generate_report_number()
+            self.generate_report_number()
+        else:
+            super(Video, self).generate_report_number(
+                parent_report_number=self.project.report_number)
+
+    def get_report_number_sequence(self, **kwargs):
+        """Get the sequence generator for Videos. """
+        assert 'parent_report_number' in kwargs
+        parent_rn = kwargs.pop('parent_report_number')
+        parent_name = self.project.sequence_name
+        return Sequence(self.sequence_name, **{parent_name: parent_rn}), kwargs
 
 
 class Category(Record):

@@ -24,7 +24,8 @@ from __future__ import absolute_import
 from cds.modules.records.serializers.schemas.json.common import \
     StrictKeysSchema, ContributorSchema, KeywordsSchema, DescriptionSchema, \
     BucketSchema, OaiSchema, CreatorSchema, DescriptionTranslationSchema, \
-    DepositSchema, TitleTranslationSchema, TitleSchema, AccessSchema
+    DepositSchema, TitleTranslationSchema, TitleSchema, AccessSchema, \
+    ReportNumberSchema
 from marshmallow import fields
 
 
@@ -84,3 +85,4 @@ class VideoSchema(StrictKeysSchema):
 
     category = fields.Str()
     type = fields.Str()
+    report_number = fields.Nested(ReportNumberSchema, many=False)

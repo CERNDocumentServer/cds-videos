@@ -127,6 +127,17 @@
                 "type": {
                     "type": "string"
                 },
+                "report_number": {
+                    "properties": {
+                        "_report_number": {
+                            "type": "string"
+                        },
+                        "report_number": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
                 "creator": {
                     "properties": {
                         "contribution": {
