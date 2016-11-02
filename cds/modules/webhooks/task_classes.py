@@ -31,6 +31,7 @@ from celery import Task
 from celery.result import AsyncResult
 from celery.states import STARTED, FAILURE, state as state_cls
 from invenio_db import db
+from invenio_sse import current_sse
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -162,3 +163,20 @@ def with_order(order=0, db_session=False):
             'db_session': db_session,
         }
     )
+
+
+class SSETask(Task):
+    """Base class for tasks that send status updates to an SSE channel."""
+
+    abstract = True
+
+    def __call__(self, *args, **kwargs):
+        """Extract SSE channel from keyword arguments."""
+        self.sse_channel = kwargs.pop('sse_channel', 'sse')
+        return self.run(*args, **kwargs)
+
+    def update_state(self, task_id=None, state=None, meta=None):
+        """Propagate status updates to SSE channel."""
+        super(SSETask, self).update_state(task_id, state, meta)
+        data = dict(state=state, meta=meta)
+        current_sse.publish(data, type='message', channel=self.sse_channel)
