@@ -122,7 +122,9 @@ install_requires = [
     'invenio-rest[cors]>=1.0.0a9',
     'invenio-search-ui>=1.0.0a5',
     'invenio-search>=1.0.0a7',
-    # FIXME wait invenio-sse is released
+    # FIXME wait until invenio-sequencegenerator is released
+    #  'invenio-sequencegenerator>=1.0.0a1',
+    # FIXME wait until invenio-sse is released
     #  'invenio-sse>=1.0.0a1',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
@@ -202,6 +204,8 @@ setup(
         'invenio_pidstore.minters': [
             'cds_recid = cds.modules.records.minters:recid_minter',
             'cds_catid = cds.modules.deposit.minters:catid_minter',
+            'cds_report_number = '
+            'cds.modules.records.minters:report_number_minter',
         ],
         # FIXME removed until proper integration
         # 'invenio_i18n.translations': [

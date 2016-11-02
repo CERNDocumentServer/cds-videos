@@ -144,7 +144,7 @@ def test_delete_video_not_published(project, force):
 
     video_2_meta = RecordMetadata.query.filter_by(id=video_2_id).first()
     if force:
-        video_2_meta is None
+        assert video_2_meta is None
     else:
         assert video_2_meta.json is None
 
