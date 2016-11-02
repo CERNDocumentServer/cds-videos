@@ -37,13 +37,16 @@ from time import sleep
 import mock
 import pytest
 from cds.factory import create_app
-from cds.modules.deposit.api import CDSDeposit, Project, Video, video_resolver
+from cds.modules.deposit.api import CDSDeposit
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from celery import group, chain
+from celery import chain
+from celery import group
 from celery import shared_task
 from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
+from invenio_sequencegenerator.api import Template
+from cds.modules.deposit.api import Project, Video, video_resolver
 from flask_security import login_user
 from invenio_access.models import ActionUsers
 from invenio_accounts.models import User
@@ -610,3 +613,15 @@ def category_2(api_app, es, indexer, pidstore, cds_jsonresolver):
         '_record_type': ['video'],
     }
     return create_category(api_app=api_app, db=db_, data=data)
+
+
+@pytest.fixture(autouse=True)
+def templates(app, db):
+    """Register CDS templates for sequence generation."""
+    Template.create(name='project-v1_0_0',
+                    meta_template='{category}-{type}-{year}-{counter}',
+                    start=1)
+    Template.create(name='video-v1_0_0',
+                    meta_template='{project-v1_0_0}-{counter}',
+                    start=1)
+    db.session.commit()

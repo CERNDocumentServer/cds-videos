@@ -146,3 +146,10 @@ class BucketSchema(StrictKeysSchema):
 
     deposit = fields.Str()
     record = fields.Str()
+
+
+class ReportNumberSchema(StrictKeysSchema):
+    """ReportNumber schema."""
+
+    report_number = fields.Str()
+    _report_number = fields.Str()

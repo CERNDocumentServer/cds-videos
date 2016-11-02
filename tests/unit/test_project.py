@@ -30,6 +30,7 @@ import mock
 import pytest
 import uuid
 
+from cds.modules.records.providers import CDSRecordIdProvider
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
