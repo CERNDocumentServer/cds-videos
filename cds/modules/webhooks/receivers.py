@@ -21,82 +21,169 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Webhook Receivers"""
 
-from __future__ import absolute_import, division
+from __future__ import absolute_import
 
+from celery import chain, group
+from flask import url_for
 from invenio_db import db
-from invenio_webhooks.models import CeleryReceiver
+from invenio_webhooks.models import Receiver
 from sqlalchemy.orm.attributes import flag_modified
 
-from .tasks import attach_files, download, extract_metadata, extract_frames, \
-    transcode, chain_orchestrator
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
+                                       as_object_version)
+
+from .tasks import (download_to_object_version, video_extract_frames,
+                    video_metadata_extraction, video_transcode)
 
 
-class CeleryTaskReceiver(CeleryReceiver):
-    """CeleryReceiver specialized for single task execution."""
+class CeleryAsyncReceiver(Receiver):
+    """TODO."""
 
-    @property
-    def task(self):
-        raise NotImplementedError()
+    def status(self, event):
+        """TODO."""
+
+    def delete(self, event):
+        """TODO."""
+        pass
+
+
+class Downloader(CeleryAsyncReceiver):
+    """Receiver that downloads data from a URL."""
 
     def run(self, event):
-        """Execute task."""
-        event.response['event_id'] = str(event.id)
-        event.response['message'] = self.task.apply(kwargs=event.payload).get()
+        """Create object version and send celery task to download.
 
+        Mandatory fields in the payload:
+          * uri, location to download the viewo.
+          * bucket_id
+          * key, file name.
+          * deposit_id
 
-class CeleryChainReceiver(CeleryReceiver):
-    """CeleryReceiver specialized for multi-task workflows."""
+        Optional:
+          * sse_channel, if set all the tasks will publish their status update
+            to it.
 
-    @property
-    def workflow(self):
-        raise NotImplementedError()
-
-    def __call__(self, event):
-        """Construct Celery canvas.
-
-        This is achieved by chaining sequential tasks and grouping
-        concurrent ones.
+        For more info see the task
+        :func: `~cds.modules.webhooks.tasks.download_to_object_version` this
+        receiver is using.
         """
-        event_id = str(event.id)
-        chain_orchestrator.apply(
-            (self.workflow, ),
-            kwargs=event.payload,
-            task_id=event_id
-        )
+        assert 'bucket_id' in event.payload
+        assert 'uri' in event.payload
+        assert 'key' in event.payload
+        assert 'deposit_id' in event.payload
 
         with db.session.begin_nested():
-            event.response['event_id'] = event_id
-            event.response['message'] = 'Started workflow'
+            object_version = ObjectVersion.create(
+                bucket=event.payload['bucket_id'], key=event.payload['key'])
+
+            ObjectVersionTag.create(object_version, 'uri_origin',
+                                    event.payload['uri'])
+            ObjectVersionTag.create(object_version, '_event_id', str(event.id))
+            db.session.expunge(event)
+        db.session.commit()
+
+        task = download_to_object_version.s(event.payload['uri'],
+                                            str(object_version.version_id),
+                                            event_id=str(event.id),
+                                            **event.payload).apply_async()
+
+        with db.session.begin_nested():
+            object_version = as_object_version(object_version.version_id)
+            event.response = dict(
+                _tasks=task.as_tuple(),
+                links=dict(),
+                key=object_version.key,
+                version_id=str(object_version.version_id),
+                tags=object_version.get_tags(), )
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
             db.session.add(event)
         db.session.commit()
 
 
-class AVCWorkflow(CeleryChainReceiver):
-    """CeleryChainReceiver implementation for the AV workflow."""
+class AVCWorkflow(CeleryAsyncReceiver):
+    """AVC workflow receiver."""
 
-    workflow = [
-        (download, {'url', 'bucket_id', 'chunk_size', 'key'}),
-        [
-            (transcode, {'preset_name'}),
-            (extract_frames, {
-                'start_percentage', 'end_percentage', 'number_of_frames',
-                'size_percentage', 'output_folder'
-            })
-        ],
-        (attach_files, {'bucket_id'}),
-    ]
+    def run(self, event):
+        """Run AVC workflow for video transcoding.
 
+        Steps:
+          * Download the video file (if not done yet).
+          * Extract metadata from the video.
+          * Run video transcoding.
+          * Extract frames from the video.
 
-class Downloader(CeleryTaskReceiver):
-    """Receiver that downloads data from a URL."""
-    task = download
+        Mandatory fields in the payload:
+          * uri, if the video needs to be downloaded.
+          * bucket_id, only if URI is provided.
+          * key, only if URI is provided.
+          * version_id, if the video has been downloaded via HTTP (the previous
+            fields are not needed in this case).
+          * deposit_id
 
+        Optional:
+          * sse_channel, if set all the tasks will publish their status update
+            to it.
+          * video_presets, if not set the default presets will be used.
+          * frames_start, if not set the default value will be used.
+          * frames_end, if not set the default value will be used.
+          * frames_gap, if not set the default value will be used.
 
-class VideoMetadataExtractor(CeleryTaskReceiver):
-    """Receiver that extracts metadata from video URLs."""
-    task = extract_metadata
+        For more info see the tasks used in the workflow:
+          * :func: `~cds.modules.webhooks.tasks.download_to_object_version`
+          * :func: `~cds.modules.webhooks.tasks.video_metadata_extraction`
+          * :func: `~cds.modules.webhooks.tasks.video_extract_frames`
+          * :func: `~cds.modules.webhooks.tasks.video_transcode`
+        """
+        assert ('uri' in event.payload and 'bucket_id' in event.payload and
+                'key' in event.payload) or ('version_id' in event.payload)
+        assert 'deposit_id' in event.payload
+
+        with db.session.begin_nested():
+            if 'version_id' in event.payload:
+                object_version = as_object_version(event.payload['version_id'])
+                first_step = video_metadata_extraction.si(
+                    object_version.file.uri,
+                    str(object_version.version_id),
+                    event.payload['deposit_id'])
+            else:
+                object_version = ObjectVersion.create(
+                    bucket=event.payload['bucket_id'],
+                    key=event.payload['key'])
+                ObjectVersionTag.create(object_version, 'uri_origin',
+                                        event.payload['uri'])
+                first_step = group(
+                    download_to_object_version.si(
+                        event.payload['url'],
+                        str(object_version.version_id),
+                        event_id=event.id,
+                        **event.payload),
+                    video_metadata_extraction.si(
+                        event.payload['uri'],
+                        str(object_version.version_id),
+                        event_id=event.id,
+                        **event.payload), )
+
+            ObjectVersionTag.create(object_version, '_event_id', event.id)
+
+            tasks = chain(
+                first_step,
+                group(
+                    video_transcode.si(str(object_version.version_id),
+                                       event_id=event.id,
+                                       **event.payload),
+                    video_extract_frames.si(str(object_version.version_id),
+                                            event_id=event.id,
+                                            **event.payload), ),
+            ).apply_async()
+
+            event.response = dict(
+                _tasks=tasks.as_tuple(),
+                links=dict(),
+                key=object_version.key,
+                version_id=object_version.versrion_id,
+                tags=object_version.get_tags(), )
+            flag_modified(event, 'response')
+            flag_modified(event, 'response_headers')

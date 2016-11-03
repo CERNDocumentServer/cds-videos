@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import os
+from datetime import timedelta
 
 from invenio_deposit.config import (DEPOSIT_REST_FACETS,
                                     DEPOSIT_REST_SORT_OPTIONS)
@@ -72,6 +73,13 @@ CELERY_RESULT_BACKEND = os.environ.get(
 CELERY_TRACK_STARTED = True
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+# Celery Beat schedule
+CELERYBEAT_SCHEDULE = {
+    'indexer': {
+        'task': 'invenio_indexer.tasks.process_bulk_queue',
+        'schedule': timedelta(minutes=5),
+    },
+}
 
 ###############################################################################
 # Cache
