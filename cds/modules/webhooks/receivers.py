@@ -84,6 +84,7 @@ class Downloader(CeleryAsyncReceiver):
 
         Optional:
           * parent_deposit_id
+          * sse_channel
         """
         assert 'bucket_id' in event.payload
         assert 'uri' in event.payload

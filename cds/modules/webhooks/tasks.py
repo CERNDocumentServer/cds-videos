@@ -30,31 +30,34 @@ from celery import shared_task, Task
 from invenio_files_rest.models import as_object_version
 from invenio_sse import current_sse
 
+def factor_sse_task_base(type_=None):
+    """."""
+    class SSETask(Task):
+        """Base class for tasks which might be sending SSE messages."""
 
-class SSETask(Task):
-    """Base class for tasks which might be sending SSE messages."""
+        abstract = True
 
-    abstract = True
+        def __call__(self, *args, **kwargs):
+            """Extract SSE channel from keyword arguments.
 
-    def __call__(self, *args, **kwargs):
-        """Extract SSE channel from keyword arguments.
+            .. note ::
+                the channel is extracted from the ``sse_channel`` keyword argument.
+            """
+            self.sse_channel = kwargs.pop('sse_channel')
+            return self.run(*args, **kwargs)
 
-        .. note ::
-            the channel is extracted from the ``sse_channel`` keyword argument.
-        """
-        self.sse_channel = kwargs.pop('sse_channel')
-        return self.run(*args, **kwargs)
+        def update_state(self, task_id=None, state=None, meta=None):
+            """."""
+            super(SSETask, self).update_state(task_id, state, meta)
+            if self.sse_channel:
+                data = dict(state=state, meta=meta)
+                current_sse.publish(
+                    data, type_=type_, channel=self.sse_channel)
 
-    def update_state(self, task_id=None, state=None, meta=None):
-        """."""
-        super(SSETask, self).update_state(task_id, state, meta)
-        if self.sse_channel:
-            data = dict(state=state, meta=meta)
-            current_sse.publish(
-                data, type='status_update', channel=self.sse_channel)
+    return SSETask
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, base=factory_sse_task_base(type_='file_download'))
 def download_to_object_version(self, url, object_version, **kwargs):
     r"""Download file from a URL.
 
@@ -72,9 +75,13 @@ def download_to_object_version(self, url, object_version, **kwargs):
     def progress_updater(size, total):
         """Progress reporter."""
         meta = dict(
-            size=size,
-            total=total,
-            percentage=size / total * 100,
+            payload=dict(
+                key=object_version.key,
+                version_id=object_version.versrion_id,
+                size=total,
+                tags=object_version.get_tags(),
+                percentage=size / total * 100,
+                deposit_id=kwargs.get('deposit_id', None), ),
             task_id=self.task_id,
             envent_id=kwargs.get('event_id', None),
             message='Downloading {0} of {1}'.format(size, total), )
