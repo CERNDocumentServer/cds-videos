@@ -26,8 +26,32 @@
 from __future__ import absolute_import
 
 import requests
-from celery import shared_task
+from celery import shared_task, Task
 from invenio_files_rest.models import as_object_version
+from invenio_sse import current_sse
+
+
+class SSETask(Task):
+    """Base class for tasks which might be sending SSE messages."""
+
+    abstract = True
+
+    def __call__(self, *args, **kwargs):
+        """Extract SSE channel from keyword arguments.
+
+        .. note ::
+            the channel is extracted from the ``sse_channel`` keyword argument.
+        """
+        self.sse_channel = kwargs.pop('sse_channel')
+        return self.run(*args, **kwargs)
+
+    def update_state(self, task_id=None, state=None, meta=None):
+        """."""
+        super(SSETask, self).update_state(task_id, state, meta)
+        if self.sse_channel:
+            data = dict(state=state, meta=meta)
+            current_sse.publish(
+                data, type='status_update', channel=self.sse_channel)
 
 
 @shared_task(bind=True)
