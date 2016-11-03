@@ -34,11 +34,36 @@ from sqlalchemy.orm.attributes import flag_modified
 from .tasks import download_to_object_version
 
 
+def _task_info_extractor(res, children=None):
+    """."""
+    info = {'id': res.id}
+    if hasattr(res, 'status'):
+        info['status'] = res.status
+    if hasattr(res, 'info'):
+        info['info'] = res.info
+    if children:
+        info['next'] = children
+    return info
+
+
+def _expand_as_tuple(res):
+    """."""
+    if isinstance(res, (list, tuple)):
+        return [_expand_as_tuple(r) for r in res]
+    elif res.parent:
+        return _task_info_extractor(res, _expand_as_tuple(res.parent))
+    elif res.children:
+        return _task_info_extractor(res, _expand_as_tuple(res.children))
+    else:
+        return _task_info_extractor(res)
+
+
 class CeleryAsyncReceiver(Receiver):
     """TODO."""
 
     def status(self, event):
-        """TODO."""
+        """Return a tuple with current processing status code and message."""
+        raise NotImplementedError()
 
     def delete(self, event):
         """TODO."""
