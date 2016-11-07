@@ -2,7 +2,7 @@
   {
     "type": "fieldset",
     "title": "Project",
-    "description": "Add the project information.",
+    "description": "",
     "items": [
       {
         "title": "Name",
@@ -54,30 +54,59 @@
         "title": "Contributors",
         "description": "",
         "sortOptions": {
-          "axis": "y",
-          "cursor": "move",
           "disabled": false,
-          "handle": "i.sort-handle"
+          "handle": "i.sort-handle",
+          "cursor": "move",
+          "axis": "y"
         },
-        "fa_cls": "fa-user",
-        "required": true,
         "add": "Add another contributor",
         "inline": true,
-        "minItems": 1,
         "items": [
           {
-            "type": "text",
             "key": "contributors[].name",
             "placeholder": "Name",
             "description": "",
             "notitle": true
           },
           {
-            "type": "uiselect",
+            "type": "select",
             "key": "contributors[].role",
             "placeholder": "Role",
-            "description": "",
-            "notitle": true
+            "notitle": true,
+            "titleMap": [
+              {
+                "value":  "Director",
+                "name":  "Director"
+              },
+              {
+                "value":  "Camera operator",
+                "name":  "Camera operator"
+              },
+              {
+                "value":  "Producer",
+                "name":  "Producer"
+              },
+              {
+                "value":  "Music by",
+                "name":  "Music by"
+              },
+              {
+                "value":  "Editor",
+                "name":  "Editor"
+              },
+              {
+                "value":  "Provider",
+                "name":  "Provider"
+              },
+              {
+                "value":  "Translator",
+                "name":  "Translator"
+              },
+              {
+                "value":  "Other",
+                "name":  "Other"
+              }
+            ]
           }
         ]
       },

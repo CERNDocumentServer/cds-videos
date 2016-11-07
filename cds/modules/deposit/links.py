@@ -34,9 +34,10 @@ from functools import partial
 
 def deposit_links_factory(pid, deposit_type=None):
     """Factory for links generation."""
+    deposit_type = deposit_type or pid.pid_type
+
     def _url(name, **kwargs):
         """URL builder."""
-        deposit_type = deposit_type or pid.pid_type
         endpoint = '.{0}_{1}'.format(deposit_type, name)
         return url_for(endpoint, pid_value=pid.pid_value, _external=True,
                        **kwargs)

@@ -172,6 +172,8 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert myfile['size'] == 24
 
         # [[ PUBLISH VIDEO_1 ]]
+        # Not need to send _files
+        del video_1_dict['metadata']['_files']
         res = client.post(
             url_for('invenio_deposit_rest.video_actions',
                     pid_value=video_1['_deposit']['id'], action='publish'),
@@ -257,12 +259,13 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
 
         # [[ MODIFY PROJECT ]]
         project_dict['metadata']['title']['title'] = 'new project title'
+        # Not need to send _files
+        del project_dict['metadata']['_files']
         res = client.put(
             url_for('invenio_deposit_rest.project_item',
                     pid_value=project_dict['metadata']['_deposit']['id']),
             data=json.dumps(project_dict['metadata']),
             headers=json_headers)
-
         # check returned value
         assert res.status_code == 200
         project_dict = json.loads(res.data.decode('utf-8'))

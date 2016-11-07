@@ -62,7 +62,9 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
 -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
--e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
+#FIXME wait for https://github.com/inveniosoftware/invenio-records-files/pull/38
+#-e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
+-e git+https://github.com/jirikuncar/invenio-records-files.git@from-files-rest#egg=invenio-records-files
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
 -e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records

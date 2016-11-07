@@ -1,0 +1,56 @@
+<div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="row">
+        <div class="col-sm-3">
+          <img class="img-responsive" src="https://placeholdit.imgix.net/~text?txtsize=33&txt=video%20preview&h=288&w=288" />
+          <br />
+          <cds-actions
+            template="/static/templates/cds_deposit/types/video/actions.html"
+          >
+          </cds-actions>
+        </div>
+        <!-- Progress -->
+        <div class="col-sm-9">
+          <div ng-show="$ctrl.cdsDepositCtrl.loading" class="row">
+              <div class="col-sm-12">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.progress}}%;">
+                      Downloading {{$ctrl.cdsDepositCtrl.progress}} %
+                  </div>
+                </div>
+              </div>
+          </div>
+         <!-- Nav tabs -->
+         <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
+           <li role="presentation" ng-class="{active: active=='metadata'}"><a ng-click="active='metadata'" role="tab" data-toggle="tab">Metadata</a></li>
+           <li role="presentation" ng-class="{active: active=='files'}"><a ng-click="active='files'" role="tab" data-toggle="tab">Files</a></li>
+           <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug</a></li>
+         </ul>
+         <!-- Tab panes -->
+         <div class="tab-content cds-tab-content cds-padding-20 ">
+           <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
+             <form
+               name="$ctrl.cdsDepositCtrl.depositFormModel"
+               class="form-horizontal"
+               sf-schema="$ctrl.cdsDepositCtrl.schema"
+               sf-form="$ctrl.form"
+               sf-model="$ctrl.cdsDepositCtrl.record"
+               sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+               ></form>
+           </div>
+           <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
+             <div ng-transclude></div>
+           </div>
+           <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
+             <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
+             <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
+             <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>
+             <pre>{{ $ctrl.cdsDepositCtrl.links | json}}</pre>
+           </div>
+         </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
