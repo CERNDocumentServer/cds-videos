@@ -34,6 +34,7 @@ from flask import current_app, g, request, url_for
 from flask_login import login_user
 from flask_principal import Identity
 from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
 from invenio_db import db
 from invenio_files_rest.models import Bucket
 from invenio_records.models import RecordMetadata
@@ -47,28 +48,61 @@ from cds.modules.deposit.permissions import can_edit_deposit
 from cds.modules.deposit.views import to_links_js
 
 
-def test_deposit_link_factory_has_bucket(app, db, es, location):
+def test_deposit_link_factory_has_bucket(app, db, es, users, location,
+                                         cds_jsonresolver, json_headers,
+                                         deposit_rest, project_metadata):
     """Test bucket link factory retrieval of a bucket."""
-    bucket = Bucket.create()
-    with app.test_request_context(),\
-        mock.patch('invenio_deposit.links.deposit_links_factory',
-                   return_value={}):
+    with app.test_client() as client:
+        login_user_via_session(client, email=users[0].email)
 
-        with db.session.begin_nested():
-            record = RecordMetadata()
-            RecordsBuckets.create(record, bucket)
-            db.session.add(record)
-        pid = mock.Mock()
-        pid.get_assigned_object.return_value = record.id
-        links = deposit_links_factory(pid)
-        assert links['bucket'] == url_for(
-            'invenio_files_rest.bucket_api', bucket_id=bucket.id,
-            _external=True)
+        # Test links for project
+        res = client.post(
+            url_for('invenio_deposit_rest.project_list'),
+            data=json.dumps(project_metadata), headers=json_headers)
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+        links = data['links']
+        pid = data['metadata']['_deposit']['id']
+        assert 'bucket' in links
         assert links['html'] == current_app.config['DEPOSIT_UI_ENDPOINT']\
             .format(
                 host=request.host,
                 scheme=request.scheme,
-                pid_value=pid.pid_value,
+                pid_value=pid,
+        )
+
+        # Test links for videos
+        res = client.post(
+            url_for('invenio_deposit_rest.video_list'),
+            data=json.dumps({
+                '_project_id': pid,
+            }), headers=json_headers)
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+        links = data['links']
+        pid = data['metadata']['_deposit']['id']
+        assert 'bucket' in links
+        assert links['html'] == current_app.config['DEPOSIT_UI_ENDPOINT']\
+            .format(
+                host=request.host,
+                scheme=request.scheme,
+                pid_value=pid,
+        )
+
+        # Test links for general deposits
+        res = client.post(
+            url_for('invenio_deposit_rest.depid_list'),
+            data=json.dumps({}), headers=json_headers)
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+        links = data['links']
+        pid = data['metadata']['_deposit']['id']
+        assert 'bucket' in links
+        assert links['html'] == current_app.config['DEPOSIT_UI_ENDPOINT']\
+            .format(
+                host=request.host,
+                scheme=request.scheme,
+                pid_value=pid,
         )
 
 

@@ -1,0 +1,21 @@
+<div>
+  <div class="row">
+    <div class="col-sm-12">
+      <form
+        name="$ctrl.cdsDepositCtrl.depositFormModel"
+        class="form-horizontal"
+        sf-schema="$ctrl.cdsDepositCtrl.schema"
+        sf-form="$ctrl.form"
+        sf-model="$ctrl.cdsDepositCtrl.record"
+         sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+        ></form>
+    </div>
+  </div>
+  <a ng-init="showDebug=false" ng-click="showDebug=!showDebug">Debug</a>
+  <div ng-show="showDebug">
+    <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>
+    <pre>{{ $ctrl.cdsDepositCtrl.links | json}}</pre>
+    <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
+    <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
+  </div>
+</div>

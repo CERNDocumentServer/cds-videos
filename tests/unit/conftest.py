@@ -85,6 +85,7 @@ def app():
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+        DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -319,15 +320,24 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
         'title': {
             'title': 'my project',
         },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
     }
     project_video_1 = {
         'title': {
             'title': 'video 1',
         },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
     }
     project_video_2 = {
         'title': {
             'title': 'video 2',
+        },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
         },
     }
     with app.test_request_context():

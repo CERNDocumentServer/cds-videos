@@ -33,151 +33,39 @@
     // CKEDITOR static location
     window.CKEDITOR_BASEPATH = '{{url_for("static", filename="node_modules/ckeditor/", _external=True)}}';
   </script>
-  {% assets "invenio_deposit_dependencies_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
-    angular.element(document).ready(function() {
-      // Override templates
-       app = angular.module('invenioRecords').config(['schemaFormDecoratorsProvider', function(decoratorsProvider){
-         decoratorsProvider.addMapping('bootstrapDecorator', 'ckeditor', '{{ url_for("static", filename="templates/cds_deposit/ckeditor.html")}}');
-         decoratorsProvider.addMapping('bootstrapDecorator', 'uiselect', '{{ url_for("static", filename="templates/cds_deposit/uiselect.html")}}');
-       }]);
-       angular.module('schemaForm')
-        .controller('invenioDynamicSelectController', ['$scope', '$controller',
-          function ($scope, $controller) {
-            $controller('dynamicSelectController', {$scope: $scope});
-            // If it is ui-select inside an array...
-            if ($scope.modelArray) {
-              $scope.$watchCollection('modelArray', function(newValue) {
-                // If this is not the initial setting of the element...
-                if (!angular.equals($scope.select_model, {})) {
-                  // Get the element's correct value from the array model
-                  var value = $scope.modelArray[$scope.arrayIndex][$scope.form.key.slice(-1)[0]];
-                  // Set ui-select's model to the correct value if needed
-                  if ($scope.insideModel !== value) {
-                    $scope.insideModel = value;
-                    var query = $scope.$eval($scope.form.options.processQuery || 'query', {query: value});
-                    $scope.populateTitleMap($scope.form, query);
-                    $scope.select_model.selected = $scope.find_in_titleMap(value);
-                  }
-                }
-              });
-            }
-      }]);
-      app.directive('tooltip', function(){
-            return {
-                restrict: 'A',
-                link: function(scope, element, attrs){
-                    $(element).hover(function(){
-                        // on mouseenter
-                        $(element).tooltip('show');
-                    }, function(){
-                        // on mouseleave
-                        $(element).tooltip('hide');
-                    });
-                }
-            };
-        });
-        app.filter('fieldtitle', function(){
-          return function(fieldname, schemaform) {
-            if (!fieldname){
-              return null;
-            }
-            var parts = fieldname.split('.');
-            parts.shift(); // pop metadata
-            var title = null;
-            for (var i = 0; i < schemaform.length && parts.length != 0; i++) {
-              var set = schemaform[i];
-              for (var j = 0; j < set.items.length && parts.length != 0; j++) {
-                var field = set.items[j];
-                if(field && field.type != "section" && field.key && field.key[0] == parts[0] ){
-                  if(field.title) {
-                      title = field.title;
-                  }
-                  parts.shift();
-                }
-              }
-            }
-            return title;
-          };
-        });
-        // Excludes items from an array if they exist in some other array
-        app.filter('notIn', function($filter){
-          return function(srcArray, filterArray, srcKey, filterKey){
-            if(srcArray && srcArray.length && filterArray && filterArray.length){
-              return $filter('filter')(srcArray, function(srcItem){
-                return !filterArray.some(function(filterItem) {
-                  srcValue = srcKey ? srcItem[srcKey] : srcItem;
-                  filterValue = filterKey ? filterItem[filterKey] : filterItem;
-                  return srcValue === filterValue;
-                });
-              });
-            }
-            return srcArray;
-          }
-        });
-      angular.bootstrap(
-        document.getElementById('invenio-records'), [
-          'invenioRecords', 'schemaForm', 'mgcrea.ngStrap',
-           'mgcrea.ngStrap.modal', 'pascalprecht.translate', 'ui.sortable',
-           'ui.select', 'mgcrea.ngStrap.select', 'mgcrea.ngStrap.datepicker',
-           'mgcrea.ngStrap.helpers.dateParser', 'mgcrea.ngStrap.tooltip',
-           'invenioFiles'
-        ]
-      );
-    });
+  angular.element(document).ready(function() {
+    angular.bootstrap(
+      document.getElementById('cds-deposit'), ['cdsDeposit']
+    );
+  });
   </script>
 {%- endblock javascript %}
 
 {%- block page_body %}
+
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <div id="invenio-records">
-          <invenio-records
+        <div id="cds-deposit">
+        <cds-deposits
             {% if pid %}
-              initialization="{{ config.DEPOSIT_RECORDS_API.format(pid_value=pid.pid_value) }}"
-              links='{{pid|tolinksjs(record)|tojson}}'
+              master-links='{{pid|tolinksjs(record)|tojson}}'
             {% else %}
-              initialization="{{ config.DEPOSIT_SEARCH_API }}"
+              master-init="/api/deposits/project/"
             {% endif %}
-            template-params='{"messages": {{ config.DEPOSIT_RESPONSE_MESSAGES|tojson }} }'
-            extra-params='{"headers":{"Content-Type": "application/json"}, "data": {"$schema": "{{ url_for("invenio_jsonschemas.get_schema", schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"}}'
-            form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
-            record='{{ record | tojson }}'
-            schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA) }}">
-            <invenio-records-loading
-              template="{{ url_for('static', filename='node_modules/invenio-records-js/dist/templates/loading.html') }}">
-            </invenio-records-loading>
-            <invenio-records-alert
-              template="{{ url_for('static', filename='templates/cds_deposit/alert.html') }}">
-            </invenio-records-alert>
-            <invenio-records-actions
-              template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_ACTIONS) }}">
-            </invenio-records-actions>
-            <invenio-records-form
-              form-templates='{{ config.DEPOSIT_FORM_TEMPLATES | tojson }}'
-              form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
-              template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_FORM) }}">
-            </invenio-records-form>
-          </invenio-records>
-          <invenio-files-uploader
-            method="PUT"
-            endpoint="{{config.DEPOSIT_FILES_API}}"
-            {% if pid %}
-              initialization="{{ config.DEPOSIT_RECORDS_API.format(pid_value=pid.pid_value) }}"
-              links='{{pid|tolinksjs(record)|tojson}}'
-            {% else %}
-              initialization="{{ config.DEPOSIT_SEARCH_API }}"
-            {% endif %}
-            files='{{record|tofilesjs|tojson}}'
-          >
-            <invenio-files-upload-zone
-              template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/upload.html') }}">
-            </invenio-files-upload-zone>
-            <invenio-files-list
-              template="{{ url_for('static', filename='node_modules/invenio-files-js/dist/templates/list.html') }}"
-            ></invenio-files-list>
-        </invenio-files-uploader>
+            master-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"
+            master-form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
+            children-init="/api/deposits/video/"
+            children-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path='deposits/records/video-v1.0.0.json', _external=True) }}"
+            children-form="{{ url_for('static', filename='json/cds_deposit/forms/video.json') }}"
+            template="{{ url_for('static', filename='templates/cds_deposit/deposits.html') }}"
+            form-templates='{{ config.DEPOSIT_FORM_TEMPLATES | tojson }}'
+            form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
+        >
+        </cds-deposits>
         </div>
       </div>
     </div>

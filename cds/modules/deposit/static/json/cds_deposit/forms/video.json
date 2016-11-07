@@ -1,0 +1,93 @@
+[
+  {
+    "title": "Name",
+    "key": "title.title"
+  },
+  {
+    "title": "Description",
+    "key": "description.value",
+    "type": "textarea",
+    "required": true
+  },
+  {
+    "type": "template",
+    "key": "date",
+    "title": "Date",
+    "placeholder": "eg. 2013-05-08",
+    "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+    "format": "yyyy-MM-dd",
+    "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+    "fa_cls": "fa-calendar",
+    "required": true
+  },
+  {
+    "title": "License",
+    "key": "license"
+  },
+  {
+    "title": "Copyright URL",
+    "key": "copyright.url"
+  },
+  {
+    "type": "array",
+    "key": "contributors",
+    "title": "Contributors",
+    "description": "",
+    "sortOptions": {
+      "disabled": false,
+      "handle": "i.sort-handle",
+      "cursor": "move",
+      "axis": "y"
+    },
+    "add": "Add another contributor",
+    "inline": true,
+    "items": [
+      {
+        "key": "contributors[].name",
+        "placeholder": "Name",
+        "description": "",
+        "notitle": true
+      },
+      {
+        "type": "select",
+        "key": "contributors[].role",
+        "placeholder": "Role",
+        "notitle": true,
+        "titleMap": [
+          {
+            "value":  "Director",
+            "name":  "Director"
+          },
+          {
+            "value":  "Camera operator",
+            "name":  "Camera operator"
+          },
+          {
+            "value":  "Producer",
+            "name":  "Producer"
+          },
+          {
+            "value":  "Music by",
+            "name":  "Music by"
+          },
+          {
+            "value":  "Editor",
+            "name":  "Editor"
+          },
+          {
+            "value":  "Provider",
+            "name":  "Provider"
+          },
+          {
+            "value":  "Translator",
+            "name":  "Translator"
+          },
+          {
+            "value":  "Other",
+            "name":  "Other"
+          }
+        ]
+      }
+    ]
+  }
+]

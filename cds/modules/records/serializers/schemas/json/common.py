@@ -85,7 +85,7 @@ class TitleSchema(StrictKeysSchema):
 
     source = fields.Str()
     subtitle = fields.Str()
-    title = fields.Str(required=True, allow_none=False, validate=Length(min=1))
+    title = fields.Str(required=True, allow_none=False, validate=Length(min=3))
 
 
 class CreatorSchema(StrictKeysSchema):
@@ -128,7 +128,7 @@ class DescriptionSchema(StrictKeysSchema):
     """Description schema."""
 
     source = fields.Str()
-    value = fields.Str(required=True, allow_none=False, validate=Length(min=1))
+    value = fields.Str(required=True, allow_none=False, validate=Length(min=3))
 
 
 class DepositSchema(StrictKeysSchema):

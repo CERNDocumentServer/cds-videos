@@ -1,0 +1,72 @@
+<div class="well"
+  ngf-drag-over-class="'dragover'"
+  ngf-drop=""
+  ngf-change="$ctrl.addFiles($newFiles)"
+  ngf-max-size="20GB"
+  ngf-multiple="true"
+>
+  <center>
+    Drop files or folders here
+  </center>
+</div>
+<p class="text-center legend"><strong>— OR —</strong></p>
+<p class="text-center">
+  <button  class="btn btn-primary"
+    ngf-max-size="20GB"
+    ngf-multiple="true"
+    ngf-select=""
+    ngf-change="$ctrl.addFiles($newFiles)"
+  >
+    Click to select
+  </button>
+</p>
+<hr />
+<div ng-show="$ctrl.files.length > 0" class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-sm-6">
+        <p ng-show="$ctrl.files.length > 0" class="text-muted">
+        </p>
+      </div>
+      <div class="col-sm-offset-2 col-sm-4">
+        <div class="form-inline text-right">
+          <div class="form-group">
+            <span class="text-muted">{{ ($ctrl.files | filter:fileSearch).length }} files </span>
+            <input type="text" class="input-sm form-control" placeholder="Search the files" ng-model="fileSearch" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="table">
+    <tr>
+      <th>Filename</th>
+      <th>Size</th>
+      <th class="text-center">Progress</th>
+      <th class="text-center">Actions</th>
+    </tr>
+    <tr class="sel-file" ng-repeat="f in $ctrl.files | filter:fileSearch">
+      <td>{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 50">...</span></td>
+      <td>{{ f.size | bytesToHumanReadable }}</td>
+      <td class="text-center">
+        <span ng-show="f.progress < 100 && !f.errored">{{ f.progress }} %</span>
+        <span ng-show="f.processing && !f.errored">Processing...</span>
+        <span ng-show="f.errored" class="text-danger">Error</span>
+        <span ng-show="f.progress==100" class="text-success">✓</span>
+      </td>
+      <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
+    </tr>
+    <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
+      <td colspan="4" class="text-center text-muted"> No results.</td>
+    </tr>
+  </table>
+  <div class="panel-footer">
+    <div class="text-right">
+      <span class="text-muted" ng-show="$ctrl.loading">
+        Loading ..
+      </span>
+      <button class="btn btn-sm btn-default" type="submit" ng-show="$ctrl.invenioFilesBusy" ng-click="$ctrl.cancel()">Cancel</button>
+      <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0" ng-click="$ctrl.upload()">Start upload</button>
+    </div>
+  </div>
+</div>

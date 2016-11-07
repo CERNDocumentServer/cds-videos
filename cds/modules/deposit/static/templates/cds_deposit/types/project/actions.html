@@ -1,0 +1,30 @@
+<ul class="list-inline">
+  <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'>
+    <button
+     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+     class="btn btn-default"
+     ng-click="$ctrl.actionHandler('self', 'PUT')">
+     Save
+    </button>
+  </li>
+  <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'>
+    <button
+      ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      class="btn btn-success"
+      ng-click="$ctrl.actionMultipleHandler([['self', 'PUT'], ['publish', 'POST']], '/deposit')">
+      Save & Publish</button>
+  </li>
+  <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'>
+    <button
+      ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      class="btn btn-success"
+      ng-click="$ctrl.actionMultipleHandler([['edit', 'POST'], ['self', 'PUT']], '/deposit')">
+      Edit & Save</button>
+  </li>
+  <li ng-hide='!recordsVM.invenioRecordsEndpoints.discard || $ctrl.cdsDepositCtrl.record._deposit.status == "published" || !recordsVM.invenioRecordsModel["_deposit"].hasOwnProperty("pid")'>
+    <button ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      class="btn btn-danger"
+      ng-click="$ctrl.actionHandler('discard', 'POST', '/deposit')">
+      Discard</button>
+  </li>
+</ul>

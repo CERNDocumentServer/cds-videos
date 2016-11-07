@@ -39,6 +39,14 @@ a[ng-click]{
   cursor: pointer;
 }
 
+.cds-padding-10 {
+  padding: 10px;
+}
+
+.cds-padding-20 {
+  padding: 20px;
+}
+
 .cds-top-header {
   background-color: #eee;
   margin-top: -22px;
@@ -296,4 +304,13 @@ a[ng-click]{
 
 .cds-login .panel {
   margin-top: 25vh;
+}
+
+// deposit
+
+.cds-tab-content {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
 }
