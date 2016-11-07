@@ -45,6 +45,7 @@ PRESERVE_FIELDS = (
     '_deposit',
     '_buckets',
     '_files',
+    'videos',
 )
 
 current_jsonschemas = LocalProxy(
@@ -249,7 +250,7 @@ class Project(CDSDeposit):
         # update project video references
         self._update_videos(refs_old, refs_new)
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_)
+        return super(Project, self).publish(pid=pid, id_=id_).commit()
 
     def discard(self, pid=None):
         """Discard project changes."""

@@ -44,7 +44,6 @@ from cds.modules.deposit.links import deposit_links_factory
 from cds.modules.deposit.loaders import project_loader, video_loader
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
 from cds.modules.deposit.permissions import can_edit_deposit
-from cds.modules.deposit.views import to_links_js
 
 
 def test_deposit_link_factory_has_bucket(app, db, es, location):
@@ -76,20 +75,6 @@ def test_cds_deposit(es, location):
     """Test CDS deposit creation."""
     deposit = CDSDeposit.create({})
     assert '_buckets' in deposit
-
-
-def test_links_filter(es, location):
-    """Test Jinja to_links_js filter."""
-    assert to_links_js(None) == []
-    deposit = CDSDeposit.create({})
-    links = to_links_js(deposit.pid, deposit)
-    assert all([key in links for key in ['self', 'edit', 'publish', 'bucket',
-               'files', 'html', 'discard']])
-    self_url = links['self']
-    assert links['discard'] == self_url + '/actions/discard'
-    assert links['edit'] == self_url + '/actions/edit'
-    assert links['publish'] == self_url + '/actions/publish'
-    assert links['files'] == self_url + '/files'
 
 
 def test_permissions(es, location):

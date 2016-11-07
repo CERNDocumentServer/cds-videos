@@ -1,0 +1,82 @@
+<div ng-if="!$ctrl.initialized">
+  <div class="well"
+    ngf-drag-over-class="'dragover'"
+    ngf-drop=""
+    ngf-change="$ctrl.initDeposit($newFiles)"
+    ngf-max-size="20GB"
+    ngf-multiple="true"
+  >
+    <center>
+      Drop files or folders here
+    </center>
+  </div>
+  <p class="text-center legend"><strong>— OR —</strong></p>
+  <p class="text-center">
+    <button  class="btn btn-primary"
+      ngf-max-size="20GB"
+      ngf-multiple="true"
+      ngf-select=""
+      ngf-change="$ctrl.initDeposit($newFiles)"
+    >
+      Click to select
+    </button>
+  </p>
+</div>
+
+<div ng-if="$ctrl.initialized">
+  <div class="alerts" ng-repeat="alert in $ctrl.alerts">
+    <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
+      <button ng-click="$ctrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {{ alert.message }}
+    </div>
+  </div>
+  <div class="col-md-12">
+    <cds-deposit
+      master="true"
+      links="$ctrl.master.links"
+      update-record-after-success="true"
+      schema="{{ $ctrl.masterSchema }}"
+      record="$ctrl.master.metadata"
+      deposit-form-model="$ctrl.depositForms[0]"
+    >
+    <cds-actions
+      template="/static/templates/cds_deposit/types/project/actions.html"
+    >
+    </cds-actions>
+    <cds-form
+      template="/static/templates/cds_deposit/types/project/form.html"
+      form="{{$ctrl.masterForm}}"
+    >
+    </cds-form>
+    <hr />
+    <!-- ADD children -->
+    <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.children track by $index">
+      <div class="well">
+        <cds-deposit
+          index="$index + 1"
+          update-record-after-success="true"
+          links="child.links"
+          schema="{{ $ctrl.childrenSchema }}"
+          record="child.metadata"
+          deposit-form-model="$ctrl.depositForms[$index + 1]"
+        >
+          <cds-form
+            template="/static/templates/cds_deposit/types/video/form.html"
+            form="{{$ctrl.childrenForm}}"
+          >
+          <cds-uploader
+            files="child.metadata._files"
+            template="/static/templates/cds_deposit/types/common/uploader.html"
+          ></cds-uploader>
+          </cds-form>
+        </cds-deposit>
+      </div>
+    </div>
+    <!-- /ADD children -->
+    <cds-uploader
+      files="$ctrl.master.metadata._files"
+      template="/static/templates/cds_deposit/types/common/uploader.html"
+    ></cds-uploader>
+    </cds-deposit>
+  </div>
+</div>
