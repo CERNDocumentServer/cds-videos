@@ -25,13 +25,18 @@
 
 from __future__ import absolute_import
 
+import threading
+
 import mock
 
-from cds.modules.webhooks.tasks import download_to_object_version
+from cds.modules.webhooks.tasks import download_to_object_version, \
+    update_record, video_metadata_extraction
 from invenio_files_rest.models import ObjectVersion
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records import Record
 
 
-def test_donwload_to_object_version(bucket):
+def test_download_to_object_version(bucket):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
@@ -39,7 +44,61 @@ def test_donwload_to_object_version(bucket):
                                          {'content': b'\x00' * 1024})
 
         task = download_to_object_version.s('http://example.com/test.pdf',
-                                            obj.version_id).apply_async()
+                                            obj.version_id).apply()
 
         assert str(obj.version_id) == task.result
         assert obj.file.size == 1024
+
+
+def test_update_record(app, db):
+    # Create record
+    recid = str(Record.create({}).id)
+    db.session.commit()
+
+    class RecordUpdater(threading.Thread):
+
+        def __init__(self, path, value):
+            super(RecordUpdater, self).__init__()
+            self.path = path
+            self.value = value
+
+        def run(self):
+            with app.app_context():
+                update_record.s(
+                    recid,
+                    [{
+                        'op': 'add',
+                        'path': '/{}'.format(self.path),
+                        'value': self.value,
+                    }]).apply()
+
+    # Run threads
+    thread1 = RecordUpdater('test1', 1)
+    thread2 = RecordUpdater('test2', 2)
+
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    # Check that record was patched properly
+    record = Record.get_record(recid)
+    assert record.dumps() == {'test1': 1, 'test2': 2}
+
+
+def test_metadata_extraction(app, db, depid, bucket, online_video):
+    # Get corresponding record
+    recid = PersistentIdentifier.get('depid', depid).object_uuid
+
+    # Extract metadata
+    obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
+    video_metadata_extraction.s(online_video, obj.version_id, recid).apply()
+
+    # Check that deposit's metadata got updated
+    record = Record.get_record(recid)
+    assert 'extracted_metadata' in record['_deposit']
+    assert record['_deposit']['extracted_metadata']
+
+    # Check that ObjectVersionTags were added
+    assert obj.get_tags()
