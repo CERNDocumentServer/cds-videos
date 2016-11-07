@@ -67,8 +67,8 @@ CELERY_RESULT_BACKEND = os.environ.get('APP_CACHE_REDIS_URL',
                                        'redis://localhost:6379/1')
 # Celery monitoring.
 CELERY_TRACK_STARTED = True
-# Celery accepted content types.
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+# Celery serialization.
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml', 'pickle']
 #: Beat schedule
 CELERYBEAT_SCHEDULE = {
     'indexer': {

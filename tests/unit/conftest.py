@@ -40,6 +40,7 @@ from celery import shared_task
 from elasticsearch import RequestError
 from flask_cli import ScriptInfo
 from invenio_oauth2server.models import Token
+from invenio_sse import InvenioSSE
 from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import CeleryReceiver
 from jsonresolver import JSONResolver
@@ -78,15 +79,17 @@ def app():
             'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
+        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
     )
     app.register_blueprint(files_rest_blueprint)
+    if 'invenio-sse' not in app.extensions:
+        InvenioSSE(app)
 
     with app.app_context():
         yield app
