@@ -95,22 +95,21 @@ class Downloader(CeleryAsyncReceiver):
             object_version = ObjectVersion.create(
                 bucket=event.payload['bucket_id'], key=event.payload['key'])
 
+            ObjectVersionTag.create(object_version, 'uri_origin',
+                                    event.payload['uri'])
+            ObjectVersionTag.create(object_version, '_event_id', event.id)
+
             if 'sse_channel' not in event.payload:
-                deposit_id = envent.payload.get('parent_deposit_id',
-                                                event.payload['deposit_id'])
+                deposit_id = event.payload.get('parent_deposit_id',
+                                               event.payload['deposit_id'])
                 event.payload['sse_channel'] = url_for(
                     'invenio_deposit_sse.depid_sse', pid_value=deposit_id)
                 flag_modified(event, 'payload')
 
-            task = download_to_object_version(
+            task = download_to_object_version.s(
                 event.payload['url'],
-                object_version,
-                event_id=envent.id
-                **event.payload).apply_async(task_id=event.id)
-
-            ObjectVersionTag.create(object_version, 'uri_origin',
-                                    event.payload['uri'])
-            ObjectVersionTag.create(object_version, '_event_id', event.id)
+                str(object_version.version_id),
+                event_id=event.id**event.payload).apply_async(task_id=event.id)
 
             event.response = dict(
                 _tasks=task.as_tuple(),
@@ -120,3 +119,11 @@ class Downloader(CeleryAsyncReceiver):
                 tags=object_version.get_tags(), )
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
+
+
+class AVCWorkflow(CeleryAsyncReceiver):
+    """AVC workflow receiver."""
+
+    def run(self, event):
+        """."""
+        pass

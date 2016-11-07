@@ -21,12 +21,12 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """CDS base Invenio configuration."""
 
 from __future__ import absolute_import, print_function
 
 import os
+from datetime import timedelta
 
 from invenio_deposit.config import (DEPOSIT_REST_FACETS,
                                     DEPOSIT_REST_SORT_OPTIONS)
@@ -44,6 +44,7 @@ def _(x):
     """Identity function."""
     return x
 
+
 ###############################################################################
 # Translations & Time
 ###############################################################################
@@ -60,35 +61,37 @@ I18N_LANGUAGES = []
 ###############################################################################
 
 # Celery broker.
-BROKER_URL = os.environ.get(
-    'APP_BROKER_URL',
-    'redis://localhost:6379/0')
+BROKER_URL = os.environ.get('APP_BROKER_URL', 'redis://localhost:6379/0')
 # Celery results.
-CELERY_RESULT_BACKEND = os.environ.get(
-    'APP_CACHE_REDIS_URL',
-    'redis://localhost:6379/1')
+CELERY_RESULT_BACKEND = os.environ.get('APP_CACHE_REDIS_URL',
+                                       'redis://localhost:6379/1')
 # Celery monitoring.
 CELERY_TRACK_STARTED = True
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+#: Beat schedule
+CELERYBEAT_SCHEDULE = {
+    'indexer': {
+        'task': 'invenio_indexer.tasks.process_bulk_queue',
+        'schedule': timedelta(minutes=5),
+    },
+}
 
 ###############################################################################
 # Cache
 ###############################################################################
 
 CACHE_KEY_PREFIX = 'cache::'
-CACHE_REDIS_URL = os.environ.get(
-    'APP_CACHE_REDIS_URL',
-    'redis://localhost:6379/0')
+CACHE_REDIS_URL = os.environ.get('APP_CACHE_REDIS_URL',
+                                 'redis://localhost:6379/0')
 CACHE_TYPE = 'redis'
 
 ###############################################################################
 # Database
 ###############################################################################
 
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'SQLALCHEMY_DATABASE_URI',
-    'postgresql+psycopg2://localhost/cds')
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
+                                         'postgresql+psycopg2://localhost/cds')
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -133,21 +136,17 @@ RECORDS_UI_ENDPOINTS = dict(
         pid_type='recid',
         route='/record/<pid_value>',
         template='cds_records/record_detail.html',
-        record_class='invenio_records_files.api:Record',
-    ),
+        record_class='invenio_records_files.api:Record', ),
     recid_preview=dict(
         pid_type='recid',
         route='/record/<pid_value>/preview/<filename>',
         view_imp='invenio_previewer.views.preview',
-        record_class='invenio_records_files.api:Record',
-    ),
+        record_class='invenio_records_files.api:Record', ),
     recid_files=dict(
         pid_type='recid',
         route='/record/<pid_value>/files/<filename>',
         view_imp='invenio_files_rest.views.file_download_ui',
-        record_class='invenio_records_files.api:Record',
-    ),
-)
+        record_class='invenio_records_files.api:Record', ), )
 
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
@@ -177,67 +176,48 @@ RECORDS_REST_ENDPOINTS = dict(
         list_route='/records/',
         item_route='/record/<pid_value>',
         default_media_type='application/json',
-        max_result_window=10000,
-    ),
-)
+        max_result_window=10000, ), )
 
 # Sort options records REST API.
-RECORDS_REST_SORT_OPTIONS = dict(
-    records=dict(
-        bestmatch=dict(
-            title='Best match',
-            fields=['-_score'],
-            default_order='asc',
-            order=1,
-        ),
-        controlnumber=dict(
-            title='Control number',
-            fields=['control_number'],
-            default_order='desc',
-            order=2,
-        )
-    )
-)
+RECORDS_REST_SORT_OPTIONS = dict(records=dict(
+    bestmatch=dict(
+        title='Best match',
+        fields=['-_score'],
+        default_order='asc',
+        order=1, ),
+    controlnumber=dict(
+        title='Control number',
+        fields=['control_number'],
+        default_order='desc',
+        order=2, )))
 
 # Default sort for records REST API.
 RECORDS_REST_DEFAULT_SORT = dict(
-    records=dict(query='bestmatch', noquery='-controlnumber'),
-)
+    records=dict(
+        query='bestmatch', noquery='-controlnumber'), )
 
 # Defined facets for records REST API.
-RECORDS_REST_FACETS = dict(
-    records=dict(
-        aggs=dict(
-            authors=dict(terms=dict(
-                field='main_entry_personal_name.personal_name.untouched')),
-            languages=dict(terms=dict(
-                field='language_code.language_code_of_text_'
-                      'sound_track_or_separate_title')),
-            topic=dict(terms=dict(
-                field='subject_added_entry_topical_term.'
-                      'topical_term_or_geographic_name_entry_element.untouched'
-            )),
-            years=dict(date_histogram=dict(
-                field='imprint.complete_date',
-                interval='year',
-                format='yyyy')),
-        ),
-        post_filters=dict(
-            authors=terms_filter(
-                'main_entry_personal_name.personal_name.untouched'),
-            languages=terms_filter(
-                'language_code.language_code_of_text_'
-                'sound_track_or_separate_title'),
-            topic=terms_filter(
-                'subject_added_entry_topical_term.'
-                'topical_term_or_geographic_name_entry_element.untouched'),
-            years=range_filter(
-                'imprint.complete_date',
-                format='yyyy',
-                end_date_math='/y'),
-        )
-    )
-)
+RECORDS_REST_FACETS = dict(records=dict(
+    aggs=dict(
+        authors=dict(terms=dict(
+            field='main_entry_personal_name.personal_name.untouched')),
+        languages=dict(terms=dict(field='language_code.language_code_of_text_'
+                                  'sound_track_or_separate_title')),
+        topic=dict(terms=dict(
+            field='subject_added_entry_topical_term.'
+            'topical_term_or_geographic_name_entry_element.untouched')),
+        years=dict(date_histogram=dict(
+            field='imprint.complete_date', interval='year', format='yyyy')), ),
+    post_filters=dict(
+        authors=terms_filter(
+            'main_entry_personal_name.personal_name.untouched'),
+        languages=terms_filter('language_code.language_code_of_text_'
+                               'sound_track_or_separate_title'),
+        topic=terms_filter(
+            'subject_added_entry_topical_term.'
+            'topical_term_or_geographic_name_entry_element.untouched'),
+        years=range_filter(
+            'imprint.complete_date', format='yyyy', end_date_math='/y'), )))
 
 # Update facets and sort options with deposit options
 RECORDS_REST_SORT_OPTIONS.update(DEPOSIT_REST_SORT_OPTIONS)
@@ -245,9 +225,7 @@ RECORDS_REST_FACETS.update(DEPOSIT_REST_FACETS)
 
 # Add tuple as array type on record validation
 # http://python-jsonschema.readthedocs.org/en/latest/validate/#validating-types
-RECORDS_VALIDATION_TYPES = dict(
-    array=(list, tuple),
-)
+RECORDS_VALIDATION_TYPES = dict(array=(list, tuple), )
 
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
     'cds.modules.access.access_control:cern_read_factory'
@@ -261,7 +239,6 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 ###############################################################################
 FILES_REST_PERMISSION_FACTORY = \
     'cds.modules.access.access_control:cern_file_factory'
-
 
 ###############################################################################
 # Formatter
@@ -283,9 +260,18 @@ FORMATTER_BADGES_ENABLE = True
 FRONTPAGE_ENDPOINT = 'cds_home.index'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
-    {'size': 5, 'page': 1},
-    {'size': 5, 'page': 1},
-    {'size': 5, 'page': 1},
+    {
+        'size': 5,
+        'page': 1
+    },
+    {
+        'size': 5,
+        'page': 1
+    },
+    {
+        'size': 5,
+        'page': 1
+    },
 ]
 # Quote before search box
 FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
@@ -318,14 +304,11 @@ USERPROFILES_EMAIL_ENABLED = False
 # OAuth
 ###############################################################################
 
-OAUTHCLIENT_REMOTE_APPS = dict(
-    cern=cern.REMOTE_APP,
-)
+OAUTHCLIENT_REMOTE_APPS = dict(cern=cern.REMOTE_APP, )
 #: Credentials for CERN OAuth (must be changed to work).
 CERN_APP_CREDENTIALS = dict(
     consumer_key='CHANGE_ME',
-    consumer_secret='CHANGE_ME',
-)
+    consumer_secret='CHANGE_ME', )
 
 ###############################################################################
 # Theme
@@ -405,7 +388,6 @@ INDEXER_DEFAULT_INDEX = 'records-default-v1.0.0'
 INDEXER_DEFAULT_DOC_TYPE = 'default-v1.0.0'
 INDEXER_BULK_REQUEST_TIMEOUT = 60
 
-
 ###############################################################################
 # Deposit
 ###############################################################################
@@ -456,15 +438,14 @@ DEPOSIT_REST_ENDPOINTS = dict(
             _CDSDeposit_PID),
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
-        create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
+        create_permission_factory_imp=check_oauth2_scope(lambda x: True,
+                                                         write_scope.id),
         read_permission_factory_imp=DepositPermission,
-        update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        max_result_window=10000,
-    ),
+        update_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        max_result_window=10000, ),
     project=dict(
         pid_type='depid',
         pid_minter='deposit',
@@ -492,15 +473,14 @@ DEPOSIT_REST_ENDPOINTS = dict(
         .format(_Project_PID),
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
-        create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
+        create_permission_factory_imp=check_oauth2_scope(lambda x: True,
+                                                         write_scope.id),
         read_permission_factory_imp=DepositPermission,
-        update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        max_result_window=10000,
-    ),
+        update_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        max_result_window=10000, ),
     video=dict(
         pid_type='depid',
         pid_minter='deposit',
@@ -528,16 +508,14 @@ DEPOSIT_REST_ENDPOINTS = dict(
         .format(_Video_PID),
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
-        create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
+        create_permission_factory_imp=check_oauth2_scope(lambda x: True,
+                                                         write_scope.id),
         read_permission_factory_imp=DepositPermission,
-        update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
-        max_result_window=10000,
-    ),
-)
+        update_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        delete_permission_factory_imp=check_oauth2_scope(can_edit_deposit,
+                                                         write_scope.id),
+        max_result_window=10000, ), )
 # Deposit UI endpoints
 DEPOSIT_RECORDS_UI_ENDPOINTS = {
     'depid': {
@@ -549,22 +527,11 @@ DEPOSIT_RECORDS_UI_ENDPOINTS = {
 }
 # Deposit successful messages
 DEPOSIT_RESPONSE_MESSAGES = dict(
-    self=dict(
-        message="Saved successfully."
-    ),
-    delete=dict(
-        message="Deleted succesfully."
-    ),
-    discard=dict(
-        message="Changes discarded succesfully."
-    ),
-    publish=dict(
-        message="Published succesfully."
-    ),
-    edit=dict(
-        message="Edited succesfully."
-    ),
-)
+    self=dict(message="Saved successfully."),
+    delete=dict(message="Deleted succesfully."),
+    discard=dict(message="Changes discarded succesfully."),
+    publish=dict(message="Published succesfully."),
+    edit=dict(message="Edited succesfully."), )
 
 ###############################################################################
 # SSE

@@ -27,11 +27,20 @@ from __future__ import absolute_import
 
 import requests
 from celery import shared_task, Task
+from celery.states import STARTED
 from invenio_files_rest.models import as_object_version
+from invenio_db import db
 from invenio_sse import current_sse
+from six import BytesIO
 
-def factor_sse_task_base(type_=None):
-    """."""
+
+def _factory_sse_task_base(type_=None):
+    """Build base celery task to send SSE messages upon status update.
+
+    :param type_: Type of SSE message to send.
+    :return: ``SSETask`` class.
+    """
+
     class SSETask(Task):
         """Base class for tasks which might be sending SSE messages."""
 
@@ -41,9 +50,10 @@ def factor_sse_task_base(type_=None):
             """Extract SSE channel from keyword arguments.
 
             .. note ::
-                the channel is extracted from the ``sse_channel`` keyword argument.
+                the channel is extracted from the ``sse_channel`` keyword
+                argument.
             """
-            self.sse_channel = kwargs.pop('sse_channel')
+            self.sse_channel = kwargs.pop('sse_channel', None)
             return self.run(*args, **kwargs)
 
         def update_state(self, task_id=None, state=None, meta=None):
@@ -57,7 +67,7 @@ def factor_sse_task_base(type_=None):
     return SSETask
 
 
-@shared_task(bind=True, base=factory_sse_task_base(type_='file_download'))
+@shared_task(bind=True, base=_factory_sse_task_base(type_='file_download'))
 def download_to_object_version(self, url, object_version, **kwargs):
     r"""Download file from a URL.
 
@@ -66,31 +76,48 @@ def download_to_object_version(self, url, object_version, **kwargs):
     :param chunk_size: Size of the chunks for downloading.
     :param \**kwargs:
     """
-    obj = as_object_version(object_version)
+    with db.session.begin_nested():
+        object_version = as_object_version(object_version)
 
-    # Make HTTP request
-    response = requests.get(url, stream=True)
-    total = int(response.headers.get('Content-Length'))
+        # Make HTTP request
+        response = requests.get(url, stream=True)
 
-    def progress_updater(size, total):
-        """Progress reporter."""
-        meta = dict(
-            payload=dict(
-                key=object_version.key,
-                version_id=object_version.versrion_id,
-                size=total,
-                tags=object_version.get_tags(),
-                percentage=size / total * 100,
-                deposit_id=kwargs.get('deposit_id', None), ),
-            task_id=self.task_id,
-            envent_id=kwargs.get('event_id', None),
-            message='Downloading {0} of {1}'.format(size, total), )
+        def progress_updater(size, total):
+            """Progress reporter."""
+            meta = dict(
+                payload=dict(
+                    key=object_version.key,
+                    version_id=str(object_version.version_id),
+                    size=total,
+                    tags=object_version.get_tags(),
+                    percentage=size or 0.0 / total * 100,
+                    deposit_id=kwargs.get('deposit_id', None), ),
+                envent_id=kwargs.get('event_id', None),
+                message='Downloading {0} of {1}'.format(size, total), )
 
-        self.update_state(state=state('STARTED'), meta=meta)
+            self.update_state(state=STARTED, meta=meta)
 
-    obj.set_contents(response.content, progress_callback=progress_updater)
+        object_version.set_contents(
+            BytesIO(response.content), progress_callback=progress_updater)
 
     db.session.commit()
 
     # Return downloaded file location
-    return object_version
+    return str(object_version.version_id)
+
+
+@shared_task(
+    bind=True,
+    base=_factory_sse_task_base(type_='file_video_metadata_extraction'))
+def video_metadata_extraction(self, uri, object_version=None, record_id=None):
+    """Extract metadata from given video file.
+
+    :param uri:
+    :param object_version:
+    :param record_id:
+    """
+
+
+@shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
+def transcode(self, object_version):
+    """."""
