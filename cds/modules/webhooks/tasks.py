@@ -26,6 +26,8 @@
 from __future__ import absolute_import
 
 import requests
+import json
+from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
 from celery import shared_task, Task
 from celery.states import STARTED
 from invenio_files_rest.models import as_object_version
@@ -112,12 +114,61 @@ def download_to_object_version(self, url, object_version, **kwargs):
 def video_metadata_extraction(self, uri, object_version=None, record_id=None):
     """Extract metadata from given video file.
 
+    All technical metadata, i.e. bitrate, will be translated into
+    ``ObjectVersionTags``, plus all the metadata extracted will be store under
+    ``_deposit`` as ``extracted_metadta``.
+
     :param uri:
     :param object_version:
     :param record_id:
     """
+    info = json.loads(ff_probe_all(uri))
+    # extract technical metadata and added to the ObjectVersion as Tags
+
+    # create patch to update `_deposit/extracted_metadata`
+    patch = None
+    update_record.apply_async(record_id, patch)
+
+
+@shared_task(
+    bind=True, base=_factory_sse_task_base(type_='file_video_extract_frames'))
+def video_extract_frames(self, object_version, start=5, end=95, gap=10):
+    """Extract images from some frames of the video.
+
+    Each of the frame images generates an ``ObjectVersion`` tagged as "frame"
+    using ``ObjectVersionTags``.
+
+    :param object_version: master video to extract frames from.
+    :param start: Start percentage, default 5%.
+    :param end: End percentage, defatul 95%.
+    :param gap: Percentage between frames from start to end, default 10%.
+    """
+    pass
 
 
 @shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
-def transcode(self, object_version):
-    """."""
+def video_transcode(self, object_version, presets=None):
+    """Launch video transcoding.
+
+    For each of the presents generate a new ``ObjectVersion`` tagged as slave
+    with the preset name as key and a link to the master version.
+
+    :param object_version: Master video.
+    :param presets: List of presets to use for transcoding. If ``None`` it will
+        use the default values set in ``VIDEO_DEFAULT_PRESETS``.
+    """
+    pass
+
+
+@shared_task()
+def update_record(recid, patch, try_times=5, countdown=5):
+    """Update a given record with a patch.
+
+    Retries ``try_times`` after ``countdown`` seconds.
+
+    :param recid:
+    :param patch:
+    :param try_times:
+    :param countdown:
+    """
+    pass
