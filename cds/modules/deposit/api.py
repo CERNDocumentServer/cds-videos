@@ -247,6 +247,7 @@ class Project(CDSDeposit):
         # update project video references
         self._update_videos(refs_old, refs_new)
         # publish project
+
         return super(Project, self).publish(pid=pid, id_=id_)
 
     def discard(self, pid=None):

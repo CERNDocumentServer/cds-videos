@@ -182,9 +182,6 @@ setup(
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
-        'invenio_base.api_blueprints': [
-            'cds_webhooks = cds.modules.webhooks.views:blueprint',
-        ],
         'invenio_pidstore.minters': [
             'cds_recid = cds.modules.records.minters:recid_minter',
         ],
@@ -206,11 +203,13 @@ setup(
         'invenio_webhooks.receivers': [
             'avc = cds.modules.webhooks.receivers:AVCWorkflow',
             'downloader = cds.modules.webhooks.receivers:Downloader',
-            'metadata = cds.modules.webhooks.receivers:VideoMetadataExtractor',
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video',
-        ]
+        ],
+        'invenio_sse.integrations': [
+            'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
+        ],
     },
     extras_require=extras_require,
     install_requires=install_requires,
