@@ -38,7 +38,7 @@ import pytest
 from cds.factory import create_app
 from celery import shared_task
 from elasticsearch import RequestError
-from flask_cli import ScriptInfo
+from flask.cli import ScriptInfo
 from invenio_oauth2server.models import Token
 from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import CeleryReceiver
