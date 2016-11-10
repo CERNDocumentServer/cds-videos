@@ -101,7 +101,7 @@ install_requires = [
     'invenio-logging[sentry]>=1.0.0a3',
     'invenio-mail>=1.0.0a4',
     'invenio-migrator>=1.0.0a7',
-    'invenio-oauth2server>=1.0.0a10',
+    'invenio-oauth2server>=1.0.0a12',
     'invenio-oauthclient>=1.0.0a10',
     'invenio-pages>=1.0.0a3',
     'invenio-pidstore>=1.0.0a9',
@@ -128,6 +128,9 @@ install_requires = [
     'raven<=5.1.0',
     'requests>=2.10.0',
     'Wand>=0.4.2',
+    'celery<4.0,>=3.1',                 # FIXME: invenio-indexer
+    'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
+    'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
 ]
 
 packages = find_packages()
