@@ -45,7 +45,9 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 # -e git+https://github.com/inveniosoftware/invenio-deposit.git#egg=invenio-deposit
 # FIXME wait for https://github.com/inveniosoftware/invenio-deposit/pull/143
 -e git+https://github.com/jirikuncar/invenio-deposit@138-records-rest#egg=invenio-deposit
--e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
+# FIXME
+# -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
+-e git+https://github.com/egabancho/invenio-files-rest.git@object-version-tags#egg=invenio-files-rest
 -e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter
 -e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
@@ -56,9 +58,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 #FIXME wait for https://github.com/inveniosoftware/invenio-migrator/pull/61
 -e git+https://github.com/krzysztof/invenio-migrator@dev#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
-# FIXME wait for https://github.com/inveniosoftware/invenio-oauthclient/pull/108
-# -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
--e git+https://github.com/hachreak/invenio-oauthclient@fix_deps#egg=invenio-oauthclient
+-e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
 -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
