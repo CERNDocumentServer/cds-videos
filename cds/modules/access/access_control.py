@@ -21,7 +21,9 @@
 
 from elasticsearch_dsl.query import Q
 from flask import g
+from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records.api import Record
+from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
@@ -73,14 +75,20 @@ def cern_read_factory(record, *args, **kwargs):
 #
 # Files FIXME consider all actions
 #
-def cern_file_factory(bucket, action):
+def cern_file_factory(obj, action):
     """Restrict file access based on CERN groups and user e-mail."""
 
     def can(self):
         """Cross-check user's provides with the bucket's '_access' field."""
 
         # Get record bucket
-        rb = RecordsBuckets.query.filter_by(bucket_id=bucket.id).one()
+        bucket_id = None
+        if isinstance(obj, Bucket):
+            bucket_id = str(obj.id)
+        elif isinstance(obj, (ObjectVersion, MultipartObject, FileObject)):
+            bucket_id = str(obj.bucket_id)
+
+        rb = RecordsBuckets.query.filter_by(bucket_id=bucket_id).one()
         # Get record
         rec = rb.record.json
         # Check access

@@ -29,12 +29,14 @@ from __future__ import absolute_import, print_function
 import os
 
 from flask import current_app, url_for
+
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import Bucket, Location, MultipartObject
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
+from invenio_rest.errors import RESTValidationError
 from werkzeug.local import LocalProxy
 
 from .errors import DiscardConflict
@@ -43,6 +45,7 @@ PRESERVE_FIELDS = (
     '_deposit',
     '_buckets',
     '_files',
+    'videos',
 )
 
 current_jsonschemas = LocalProxy(
@@ -140,14 +143,14 @@ def video_resolver(ids):
     return Video.get_records(pids)
 
 
-def deposit_build_url(video_id):
+def video_build_url(video_id):
     """Build video url."""
-    return url_for('invenio_deposit_ui.depid', pid_value=video_id)
+    return url_for('invenio_deposit_rest.video_item', pid_value=video_id)
 
 
 def record_build_url(video_id):
     """Build video url."""
-    return url_for('invenio_records_ui.recid', pid_value=str(video_id))
+    return url_for('invenio_records_rest.recid_item', pid_value=str(video_id))
 
 
 def record_unbuild_url(url):
@@ -159,7 +162,7 @@ def record_unbuild_url(url):
 def is_deposit(url):
     """Check if it's a deposit or a record."""
     # TODO can we improve check?
-    return url.startswith('/deposit')
+    return 'deposit' in url
 
 
 class Project(CDSDeposit):
@@ -242,12 +245,12 @@ class Project(CDSDeposit):
         # extract the PIDs from them
         ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
         # publish them and get the new PID
-        refs_new = [record_build_url(video.publish()['recid'])
+        refs_new = [record_build_url(video.publish().commit()['recid'])
                     for video in video_resolver(ids_old)]
         # update project video references
         self._update_videos(refs_old, refs_new)
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_)
+        return super(Project, self).publish(pid=pid, id_=id_).commit()
 
     def discard(self, pid=None):
         """Discard project changes."""
@@ -305,7 +308,7 @@ class Video(CDSDeposit):
         if self.status == 'published':
             return record_build_url(self['recid'])
         else:
-            return deposit_build_url(self['_deposit']['id'])
+            return video_build_url(self['_deposit']['id'])
 
     @property
     def project(self):
@@ -328,6 +331,10 @@ class Video(CDSDeposit):
 
     def publish(self, pid=None, id_=None):
         """Publish a video and update the related project."""
+        # check if at least one file is present
+        if len(self.files) == 0:
+            raise RESTValidationError(description=
+                                      'At least one file must exist.')
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
         # publish the video
@@ -335,7 +342,7 @@ class Video(CDSDeposit):
         (_, record_new) = self.fetch_published()
         # update associated project
         video_published.project._update_videos(
-            [deposit_build_url(video_old_id)],
+            [video_build_url(video_old_id)],
             [record_build_url(record_new['recid'])]
         )
         video_published.project.commit()
@@ -350,7 +357,7 @@ class Video(CDSDeposit):
         # update associated project
         video_new.project._update_videos(
             [record_build_url(video_old_id)],
-            [deposit_build_url(video_new['_deposit']['id'])]
+            [video_build_url(video_new['_deposit']['id'])]
         )
         video_new.project.commit()
         return video_new

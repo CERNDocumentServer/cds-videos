@@ -1,0 +1,17 @@
+<fieldset
+  class="schema-form-fieldset {{ form.htmlClass }}"
+  ng-disabled="form.readonly"
+  >
+  <div class="panel panel-default deposit-panel">
+    <div class="panel-heading">
+      <a class="panel-toggle">
+        {{ form.title }}
+      </a>
+      <span class="fieldset-hint text-muted pull-right">{{ form.fieldhint || 'required' }}</span>
+    </div>
+    <div class="panel-body" >
+      <p ng-if="form.description" ng-bind-html="form.description"></p>
+      <sf-decorator ng-repeat="item in form.items" form="item"></sf-decorator>
+    </div>
+  </div>
+</fieldset>

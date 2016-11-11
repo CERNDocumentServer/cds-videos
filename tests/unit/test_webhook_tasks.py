@@ -21,167 +21,147 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """CDS tests for Webhook Celery tasks."""
 
 from __future__ import absolute_import
 
-import mock
+import threading
+import time
 import uuid
-import shutil
-import tempfile
 
-from os import listdir
-from random import randint
-
-from cds.modules.webhooks.receivers import AVCWorkflow
-from celery import states
-import os
-
-from cds.modules.webhooks.tasks import attach_files, download, \
-    extract_frames, transcode, chain_orchestrator
-from os.path import isfile, join
-
-from celery.result import AsyncResult
+import mock
+import pytest
+from invenio_files_rest.models import ObjectVersion
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
+from six import next
+
+from cds.modules.webhooks.tasks import (download_to_object_version,
+                                        update_record,
+                                        video_metadata_extraction)
 
 
-def download_with_size(url, bucket_id, chunk_size,
-                       size, key=None, parent=None):
-    """Download mock file with given size."""
-    content = b'\x00' * size
-    with mock.patch('requests.get') as mock_http:
-        mock_http.return_value = type('Response', (object,), {
-            'headers': {'Content-Length': size},
-            'content': content,
-            'iter_content': lambda _, **kw: (
-                content[pos:pos + kw['chunk_size']]
-                for pos in range(0, len(content), kw['chunk_size'])
-            )
-        })()
-        kwargs = dict(parent=parent, key=key)
-        f = download.delay(url, bucket_id, chunk_size, **kwargs).result
-    assert os.path.getsize(f) == size
+def test_donwload_to_object_version(db, bucket):
+    """Test download to object version task."""
+    with mock.patch('requests.get') as mock_request:
+        obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
+        db.session.commit()
+
+        mock_request.return_value = type('Response', (object, ),
+                                         {'content': b'\x00' * 1024})
+
+        assert obj.file is None
+
+        task = download_to_object_version.delay('http://example.com/test.pdf',
+                                                obj.version_id)
+
+        assert ObjectVersion.query.count() == 1
+
+        obj = ObjectVersion.query.first()
+        assert obj.key == 'test.pdf'
+        assert str(obj.version_id) == task.result
+        assert obj.file
+        assert obj.file.size == 1024
 
 
-def test_download(bucket):
-    """Test download task."""
-    args = ['http://example.com/video.mp4', bucket.id, 6000000]
-    download_with_size(*args, size=10)
-    download_with_size(*args, size=10000000)
+def test_update_record(app, db):
+    """Test update record with multiple concurrent transactions."""
+
+    if db.engine.name == 'sqlite':
+        raise pytest.skip(
+            'Concurrent transactions are not supported nicely on SQLite')
+
+    # Create record
+    recid = str(Record.create({}).id)
+    db.session.commit()
+
+    class RecordUpdater(threading.Thread):
+        def __init__(self, path, value):
+            super(RecordUpdater, self).__init__()
+            self.path = path
+            self.value = value
+
+        def run(self):
+            with app.app_context():
+                update_record.delay(recid, [{
+                    'op': 'add',
+                    'path': '/{}'.format(self.path),
+                    'value': self.value,
+                }])
+
+    # Run threads
+    thread1 = RecordUpdater('test1', 1)
+    thread2 = RecordUpdater('test2', 2)
+
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    # Check that record was patched properly
+    record = Record.get_record(recid)
+    assert record.dumps() == {'test1': 1, 'test2': 2}
 
 
-def test_download_and_rename(bucket):
-    """Test renaming during the downloading."""
-    args = ['http://example.com/video.mp4', bucket.id, 6000000]
-    download_with_size(*args, size=10000000, key='new_name')
+def test_metadata_extraction_video_mp4(app, db, depid, bucket, video_mp4):
+    """Test metadata extraction video mp4."""
+    # Extract metadata
+    obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
+    video_metadata_extraction.delay(
+        uri=video_mp4,
+        object_version=str(obj.version_id),
+        deposit_id=str(depid))
 
-
-def test_sorenson(app, mock_sorenson):
-    """Test transcode task."""
-    with app.app_context():
-        assert transcode.delay(
-            'video_filename', 'Youtube 480p'
-        ).result == app.config['CDS_SORENSON_OUTPUT_FOLDER']
-
-
-def test_frame_extraction(video_mp4, location):
-    """Test extract_frames task."""
-    tmp = location.uri
-
-    # Extract frames from video
-    extract_frames.delay(
-        input_filename=video_mp4,
-        start_percentage=5,
-        end_percentage=95,
-        number_of_frames=10,
-        size_percentage=10,
-        output_folder=tmp
-    )
-
-    # Check all frame thumbnails were extracted
-    assert len([f for f in listdir(tmp) if isfile(join(tmp, f))]) == 10
-
-
-def test_file_attachment(db, bucket):
-    """Test attach_files task."""
-    assert bucket.size == 0
-
-    # Setup
-    folder_no = randint(1, 10)
-    folders = [tempfile.mkdtemp() for _ in range(folder_no)]
-
-    # Create files
-    total_size = 0
-    for tmp in folders:
-        file_no = randint(1, 10)
-        file_size = randint(100, 1000)
-        for i in range(file_no):
-            tmp_file = open(join(tmp, '{}.txt'.format(i)), 'w')
-            tmp_file.write('$' * file_size)
-            tmp_file.close()
-        total_size += file_no * file_size
-
-    # Attach to bucket
-    attach_files.delay(folders, bucket.id)
-
-    # Check bucket is properly populated
-    db.session.add(bucket)
-    assert bucket.size == total_size
-
-    # Cleanup
-    map(shutil.rmtree, folders)
-
-
-def test_orchestrator(bucket, location, depid, mock_sorenson):
-    """Test orchestrator task."""
-
-    # Generate master ID
-    task_id = str(uuid.uuid4())
-
-    # Define task workflow
-    workflow = AVCWorkflow.workflow
-
-    # Start orchestration
-    chain_orchestrator.apply_async(
-        (workflow, ),
-        kwargs=dict(
-            dep_id=depid,
-            url='http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
-            bucket_id=bucket.id,
-            chunk_size=5242880,
-            preset_name='Youtube 480p',
-            start_percentage=5,
-            end_percentage=95,
-            number_of_frames=10,
-            size_percentage=5,
-            output_folder=location.uri
-        ),
-        task_id=task_id)
-
-    # Check progress report on Celery backend
-    result = AsyncResult(task_id)
-    (state, meta) = result.state, result.info or {}
-
-    assert state == states.STARTED
-    for task in ['download', 'transcode', 'extract_frames', 'attach_files']:
-        assert task in meta
-        assert 'order' in meta[task]
-        assert 'percentage' in meta[task]
-        assert meta[task]['percentage'] == 100
-
-    # Check progress report on deposit
+    # Check that deposit's metadata got updated
     recid = PersistentIdentifier.get('depid', depid).object_uuid
     record = Record.get_record(recid)
+    assert 'extracted_metadata' in record['_deposit']
+    assert record['_deposit']['extracted_metadata']
 
-    assert 'process' in record['_deposit']
-    state = record['_deposit']['process']
+    # Check that ObjectVersionTags were added
+    obj = ObjectVersion.query.first()
+    tags = obj.get_tags()
+    assert tags['duration'] == '60.095000'
+    assert tags['bit_rate'] == '612177'
+    assert tags['size'] == '5510872'
+    assert tags['avg_frame_rate'] == '288000/12019'
+    assert tags['codec_name'] == 'h264'
+    assert tags['width'] == '640'
+    assert tags['height'] == '360'
+    assert tags['nb_frames'] == '1440'
+    assert tags['display_aspect_ratio'] == '0:1'
+    assert tags['color_range'] == 'tv'
 
-    assert state == dict(
-        task_id=task_id,
-        download={'order': 1, 'status': 'DONE'},
-        transcode={'order': 2, 'status': 'DONE'},
-        extract_frames={'order': 2, 'status': 'DONE'},
-        attach_files={'order': 3, 'status': 'DONE'},
-    )
+
+def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
+    """Test SSE message for failure tasks."""
+    app = celery_not_fail_on_eager_app
+    sse_channel = 'test_channel'
+    obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
+
+    class Listener(threading.Thread):
+        def run(self):
+            from invenio_sse import current_sse
+            with app.app_context():
+                current_sse._pubsub.subscribe(sse_channel)
+                messages = current_sse._pubsub.listen()
+                # Skip subscribe message
+                next(messages)
+                message = next(messages)['data']
+                assert '"state": "FAILURE"' in message
+                assert 'ValueError' in message
+
+    # Establish connection
+    listener = Listener()
+    listener.start()
+    time.sleep(1)
+
+    task_id = str(uuid.uuid4())
+    video_metadata_extraction.delay(
+        uri='invalid_url',
+        object_version=str(obj.version_id),
+        deposit_id=depid,
+        sse_channel=sse_channel)
+
+    listener.join()

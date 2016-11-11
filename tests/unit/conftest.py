@@ -76,11 +76,47 @@ def app():
         DEBUG_TB_ENABLED=False,
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
+        # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        CELERY_TRACK_STARTED=True,
+        BROKER_TRANSPORT='redis',
+        JSONSCHEMAS_HOST='cdslabs.cern.ch',
+        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+    )
+    app.register_blueprint(files_rest_blueprint)
+
+    with app.app_context():
+        yield app
+
+    shutil.rmtree(instance_path)
+    shutil.rmtree(sorenson_output)
+
+
+@pytest.yield_fixture(scope='session', autouse=True)
+def celery_not_fail_on_eager_app(app):
+    """."""
+    instance_path = tempfile.mkdtemp()
+    sorenson_output = tempfile.mkdtemp()
+
+    os.environ.update(
+        APP_INSTANCE_PATH=os.environ.get(
+            'INSTANCE_PATH', instance_path),
+    )
+
+    app = create_app(
+        DEBUG_TB_ENABLED=False,
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
+        # SQLALCHEMY_ECHO=True,
+        TESTING=True,
+        CELERY_ALWAYS_EAGER=True,
+        CELERY_RESULT_BACKEND='cache',
+        CELERY_CACHE_BACKEND='memory',
+        CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
@@ -195,12 +231,20 @@ def es(app):
 
 
 @pytest.fixture()
-def deposit_rest(app):
+def records_rest_app(app):
     """Init deposit REST API."""
-    InvenioRecordsREST(app)
-    app_deposit = InvenioDepositREST(app)
-    app.url_map.converters['pid'] = PIDConverter
-    return app_deposit
+    if 'invenio-records-rest' not in app.extensions:
+        InvenioRecordsREST(app)
+    return app
+
+
+@pytest.fixture()
+def deposit_rest(app, records_rest_app):
+    """Init deposit REST API."""
+    if 'invenio-deposit-rest' not in app.extensions:
+        InvenioDepositREST(app)
+        app.url_map.converters['pid'] = PIDConverter
+    return app
 
 
 @pytest.fixture()
@@ -305,7 +349,7 @@ def json_headers(app):
 
 
 @pytest.fixture()
-def project(app, es, cds_jsonresolver, users, location, db):
+def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
     """New project with videos."""
     project_data = {
         'title': {
@@ -360,7 +404,6 @@ def project_published(app, project):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
-
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'
     ).start().return_value = 123
@@ -397,13 +440,13 @@ def access_token(app, db, users):
 
 @shared_task()
 def add(x, y):
+    """Simple shared task."""
     return x + y
 
 
 @pytest.fixture
 def receiver(api_app):
     """Register test celery receiver."""
-
     class TestReceiver(CeleryReceiver):
 
         def run(self, event):

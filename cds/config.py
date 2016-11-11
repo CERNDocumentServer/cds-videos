@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import os
+from datetime import timedelta
 
 from invenio_deposit.config import (DEPOSIT_REST_FACETS,
                                     DEPOSIT_REST_SORT_OPTIONS)
@@ -34,6 +35,7 @@ from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
+from werkzeug.utils import import_string
 
 from .modules.access.access_control import CERNRecordsSearch
 from .modules.deposit.permissions import DepositPermission, can_edit_deposit
@@ -71,6 +73,13 @@ CELERY_RESULT_BACKEND = os.environ.get(
 CELERY_TRACK_STARTED = True
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+# Celery Beat schedule
+CELERYBEAT_SCHEDULE = {
+    'indexer': {
+        'task': 'invenio_indexer.tasks.process_bulk_queue',
+        'schedule': timedelta(minutes=5),
+    },
+}
 
 ###############################################################################
 # Cache
@@ -144,7 +153,7 @@ RECORDS_UI_ENDPOINTS = dict(
     recid_files=dict(
         pid_type='recid',
         route='/record/<pid_value>/files/<filename>',
-        view_imp='invenio_files_rest.views.file_download_ui',
+        view_imp='invenio_records_files.utils:file_download_ui',
         record_class='invenio_records_files.api:Record',
     ),
 )
@@ -421,6 +430,7 @@ DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/forms/project.json'
 DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
+DEPOSIT_UI_JSTEMPLATE_ACTIONS = 'templates/cds_deposit/actions.html'
 DEPOSIT_SEARCH_API = '/api/deposits/'
 _CDSDeposit_PID = \
     'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
@@ -471,6 +481,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_fetcher='deposit',
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Project',
+        record_loaders={
+            'application/json': 'cds.modules.deposit.loaders:project_loader'
+        },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
                                  ':json_v1_files_response'),
@@ -491,7 +504,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         file_item_route='/deposits/project/<{0}:pid_value>/files/<path:key>'
         .format(_Project_PID),
         default_media_type='application/json',
-        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        links_factory_imp='cds.modules.deposit.links:project_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
             lambda x: True, write_scope.id),
         read_permission_factory_imp=DepositPermission,
@@ -507,6 +520,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_fetcher='deposit',
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Video',
+        record_loaders={
+            'application/json': 'cds.modules.deposit.loaders:video_loader'
+        },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
                                  ':json_v1_files_response'),
@@ -527,7 +543,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         file_item_route='/deposits/video/<{0}:pid_value>/files/<path:key>'
         .format(_Video_PID),
         default_media_type='application/json',
-        links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
+        links_factory_imp='cds.modules.deposit.links:video_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
             lambda x: True, write_scope.id),
         read_permission_factory_imp=DepositPermission,
@@ -538,8 +554,15 @@ DEPOSIT_REST_ENDPOINTS = dict(
         max_result_window=10000,
     ),
 )
+
 # Deposit UI endpoints
 DEPOSIT_RECORDS_UI_ENDPOINTS = {
+    'video_new': {
+        'pid_type': 'depid',
+        'route': '/deposit/video/new',
+        'template': 'cds_deposit/edit.html',
+        'record_class': 'cds.modules.deposit.api:CDSDeposit',
+    },
     'depid': {
         'pid_type': 'depid',
         'route': '/deposit/<pid_value>',
@@ -565,6 +588,20 @@ DEPOSIT_RESPONSE_MESSAGES = dict(
         message="Edited succesfully."
     ),
 )
+
+DEPOSIT_FORM_TEMPLATES_BASE = 'templates/cds_deposit/angular-schema-form'
+DEPOSIT_FORM_TEMPLATES = {
+    'default': 'default.html',
+    'fieldset': 'fieldset.html',
+    'ckeditor': 'ckeditor.html',
+    'uiselect': 'uiselect.html',
+    'array': 'array.html',
+    'radios_inline': 'radios_inline.html',
+    'radios': 'radios.html',
+    'select': 'select.html',
+    'button': 'button.html',
+    'textarea': 'textarea.html'
+}
 
 ###############################################################################
 # SSE

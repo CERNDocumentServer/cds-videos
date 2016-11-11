@@ -47,7 +47,7 @@ def test_ffprobe_mp4(video_mp4):
 
 def test_ffprobe_mov(video_mov):
     """Test ff_probe wrapper."""
-    assert float(ff_probe(video_mov, 'duration')) == 15.458333
+    assert float(ff_probe(video_mov, 'duration')) == 15.459
     assert ff_probe(video_mov, 'codec_type') == b'video'
     assert ff_probe(video_mov, 'codec_name') == b'h264'
     assert int(ff_probe(video_mov, 'width')) == 1280

@@ -21,187 +21,299 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Celery tasks for Webhook Receivers."""
 
-from __future__ import absolute_import, division
+from __future__ import absolute_import
 
 import json
-import requests
-import signal
-import time
-from math import ceil
-from os import listdir, rename
-from os.path import isfile, join
-from PIL import Image
 
-from cds.modules.webhooks.task_classes import with_order, AVCOrchestrator
-from six import BytesIO
+import requests
+import time
+from cds_sorenson.api import start_encoding, get_encoding_status
+from celery import Task, shared_task
+from celery.states import FAILURE, STARTED, SUCCESS
+from flask import current_app as flask_app
+from invenio_db import db
+from invenio_files_rest.models import ObjectVersionTag, as_object_version, \
+    FileInstance, ObjectVersion
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records import Record
+from invenio_sse import current_sse
+from os import path
+from six import BytesIO, iteritems
+from sqlalchemy.orm.exc import ConcurrentModificationError
 
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
-from celery import chain, group, shared_task
-from flask import current_app as flask_app
-from invenio_files_rest.models import MultipartObject, ObjectVersion, Part
 
 
-@shared_task(bind=True, base=with_order(1, db_session=True))
-def download(self, url, bucket_id, chunk_size, key=None):
-    """Download file from a URL.
+def _factory_sse_task_base(type_=None):
+    """Build base celery task to send SSE messages upon status update.
 
-    :param url: URL of the file to download.
-    :param bucket_id: ID of the bucket where the file will be stored.
-    :param chunk_size: Size of the chunks for downloading.
-    :param key: New filename. If not provided, the filename will be taken from
-                the URL.
+    :param type_: Type of SSE message to send.
+    :return: ``SSETask`` class.
     """
 
-    if self.parent:
-        self.parent.clear_state()
+    class SSETask(Task):
+        """Base class for tasks which might be sending SSE messages."""
+
+        abstract = True
+
+        def __init__(self):
+            """."""
+            super(SSETask, self).__init__()
+            self._base_payload = {}
+
+        def __call__(self, *args, **kwargs):
+            """Extract SSE channel from keyword arguments.
+
+            .. note ::
+                the channel is extracted from the ``sse_channel`` keyword
+                argument.
+            """
+            self.sse_channel = kwargs.pop('sse_channel', None)
+            with self.app.flask_app.app_context():
+                return self.run(*args, **kwargs)
+
+        def _publish(self, state, meta):
+            """Publish task's state to corresponding SSE channel."""
+            current_sse.publish(
+                dict(
+                    state=state, meta=meta),
+                type_=type_,
+                channel=self.sse_channel)
+
+        def update_state(self, task_id=None, state=None, meta=None):
+            """."""
+            self._base_payload.update(meta.get('payload', {}))
+            meta['payload'] = self._base_payload
+            super(SSETask, self).update_state(task_id, state, meta)
+
+            if self.sse_channel:
+                data = dict(state=state, meta=meta)
+                current_sse.publish(
+                    data, type_=type_, channel=self.sse_channel)
+
+        def on_failure(self, exc, task_id, args, kwargs, einfo):
+            """When an error occurs, attach useful information to the state."""
+            meta = dict(message=str(exc), payload=self._base_payload)
+            self._publish(state=FAILURE, meta=meta)
+
+    return SSETask
+
+
+@shared_task(bind=True, base=_factory_sse_task_base(type_='file_download'))
+def download_to_object_version(self, url, object_version, **kwargs):
+    r"""Download file from a URL.
+
+    :param url: URL of the file to download.
+    :param object_version: ``ObjectVersion`` instance or object version id.
+    :param chunk_size: Size of the chunks for downloading.
+    :param \**kwargs:
+    """
+    object_version = as_object_version(object_version)
+
+    self._base_payload = dict(
+        key=object_version.key,
+        version_id=str(object_version.version_id),
+        tags=object_version.get_tags(),
+        envent_id=kwargs.get('event_id', None),
+        deposit_id=kwargs.get('deposit_id', None), )
 
     # Make HTTP request
     response = requests.get(url, stream=True)
-    total = int(response.headers.get('Content-Length'))
-    if not key:
-        key = url.rsplit('/', 1)[-1]
 
-    # Stream data into bucket's object
-    self.update_progress(0)
-    if total is None or total < chunk_size:
-        mp = ObjectVersion.create(bucket_id, key,
-                                  stream=BytesIO(response.content))
-    else:
-        cur = 0
-        part_cnt = 0
-        mp = MultipartObject.create(bucket_id, key, total, chunk_size)
+    def progress_updater(size, total):
+        """Progress reporter."""
+        meta = dict(
+            payload=dict(
+                size=total,
+                percentage=size or 0.0 / total * 100, ),
+            message='Downloading {0} of {1}'.format(size or 0, total), )
 
-        for chunk in response.iter_content(chunk_size=chunk_size):
-            cur += len(chunk)
-            Part.create(mp, part_cnt, BytesIO(chunk))
-            part_cnt += 1
-            self.update_progress_with_size(cur, total)
-        mp.complete()
-        mp.merge_parts()
-    self.update_progress(100)
+        self.update_state(state=STARTED, meta=meta)
 
-    # Return downloaded file location
-    return mp.file.uri
+    object_version.set_contents(
+        BytesIO(response.content), progress_callback=progress_updater)
+
+    db.session.commit()
+
+    return str(object_version.version_id)
 
 
-@shared_task(bind=True, base=with_order(2))
-def transcode(self, input_filename, preset_name):
-    """Transcode video on Sorenson."""
-    self.update_progress(0)
+@shared_task(
+    bind=True,
+    base=_factory_sse_task_base(type_='file_video_metadata_extraction'))
+def video_metadata_extraction(self, uri, object_version, deposit_id, **kwargs):
+    """Extract metadata from given video file.
 
-    # Start encoding on Sorenson server
-    job_id = start_encoding(input_filename, preset_name)
+    All technical metadata, i.e. bitrate, will be translated into
+    ``ObjectVersionTags``, plus all the metadata extracted will be store under
+    ``_deposit`` as ``extracted_metadta``.
 
-    # Set handler for canceling task
-    def handler(signum, frame):
-        stop_encoding(job_id)
-    signal.signal(signal.SIGTERM, handler)
+    :param uri: the video's URI
+    :param object_version: the object version that (will) contain the actual
+           video
+    :param deposit_id: the ID od the deposit
+    """
+    object_version = as_object_version(object_version)
 
-    # Query Sorenson for job status every second
-    response = get_encoding_status(job_id)
-    while response['Status']['TimeFinished'] is None:
-        percentage = response['Status']['Progress']
-        self.update_progress(percentage)
-        response = get_encoding_status(job_id)
-        time.sleep(1)
+    self._base_payload = dict(
+        object_version=str(object_version.version_id),
+        uri=uri,
+        tags=object_version.get_tags(),
+        deposit_id=deposit_id,
+        envent_id=kwargs.get('event_id', None), )
 
-    self.update_progress(100)
-    return flask_app.config['CDS_SORENSON_OUTPUT_FOLDER']
+    recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
+
+    # Extract video's metadata using `ff_probe`
+    metadata = json.loads(ff_probe_all(uri))
+
+    # Add technical information to the ObjectVersion as Tags
+    format_keys = ['duration', 'bit_rate', 'size', ]
+    stream_keys = ['avg_frame_rate', 'codec_name', 'width', 'height',
+                   'nb_frames', 'display_aspect_ratio', 'color_range', ]
+
+    [ObjectVersionTag.create(object_version, k, v)
+     for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
+     if k in (format_keys + stream_keys)]
+
+    db.session.commit()
+
+    # Insert metadata into deposit's metadata
+    patch = [{
+        'op': 'add',
+        'path': '/_deposit/extracted_metadata',
+        'value': metadata
+    }]
+    result = update_record.s(recid, patch).apply_async()
+    result.get()
+
+    # Update state
+    self.update_state(
+        state=SUCCESS,
+        meta=dict(
+            payload=dict(
+                tags=object_version.get_tags(), ),
+            message='Attached video metadata'))
 
 
-@shared_task(bind=True, base=with_order(2))
-def extract_frames(self, input_filename, start_percentage, end_percentage,
-                   number_of_frames, size_percentage, output_folder):
-    """Extract thumbnails for some frames of the video."""
-    # Extract video information
-    output = join(output_folder, 'img%d.jpg')
-    duration = float(ff_probe(input_filename, 'duration'))
-    width = int(ff_probe(input_filename, 'width'))
-    height = int(ff_probe(input_filename, 'height'))
-    size_percentage /= 100
-    thumbnail_size = (width * size_percentage, height * size_percentage)
-    step_percent = (end_percentage - start_percentage) / (number_of_frames - 1)
+@shared_task(
+    bind=True, base=_factory_sse_task_base(type_='file_video_extract_frames'))
+def video_extract_frames(self,
+                         object_version,
+                         frames_start=5,
+                         frames_end=95,
+                         frames_gap=10,
+                         **kwargs):
+    """Extract images from some frames of the video.
 
-    # Calculate time step
-    start_time = int(duration * start_percentage / 100)
-    end_time = ceil(duration * end_percentage / 100)
-    time_step = int(duration * step_percent / 100)
+    Each of the frame images generates an ``ObjectVersion`` tagged as "frame"
+    using ``ObjectVersionTags``.
 
-    # Extract all requested frames as thumbnail images (full resolution)
-    self.update_progress(0)
-    for seconds in ff_frames(input_filename, start_time, end_time,
-                             time_step, output):
-        self.update_progress_with_size(seconds, duration)
+    :param object_version: master video to extract frames from.
+    :param frames_start: start percentage, default 5.
+    :param frames_end: end percentage, default 95.
+    :param frames_gap: percentage between frames from start to end, default 10.
+    """
+    pass
 
-    # Resize thumbnails to requested dimensions
-    for i in range(number_of_frames):
-        filename = join(output_folder, 'img{}.jpg'.format(i + 1))
-        im = Image.open(filename)
-        im.thumbnail(thumbnail_size)
-        im.save(filename)
 
-        percentage = int(start_percentage + i * step_percent)
-        new_filename = 'thumbnail-{0}x{1}-at-{2}-percent.jpg'.format(
-            int(thumbnail_size[0]), int(thumbnail_size[1]), percentage
+@shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
+def video_transcode(self, object_version, video_presets=None, **kwargs):
+    """Launch video transcoding.
+    For each of the presets generate a new ``ObjectVersion`` tagged as slave
+    with the preset name as key and a link to the master version.
+    :param object_version: Master video.
+    :param video_presets: List of presets to use for transcoding. If ``None``
+        it will use the default values set in ``VIDEO_DEFAULT_PRESETS``.
+    """
+    object_version = as_object_version(object_version)
+
+    self._base_payload = dict(
+        object_version=str(object_version.version_id),
+        video_presets=video_presets,
+        tags=object_version.get_tags(),
+        deposit_id=kwargs.get('deposit_id', None),
+        envent_id=kwargs.get('event_id', None),
+    )
+
+    # Get master file's bucket_id
+    bucket_id = object_version.bucket_id
+    bucket_location = object_version.bucket.location.uri
+
+    # Create a (dummy) slave file for each preset
+    job_ids = {}
+    for preset in video_presets or flask_app.config['CDS_SORENSON_PRESETS']:
+        # Create FileInstance and get generated UUID
+        file_instance = FileInstance.create()
+        # Create ObjectVersion
+        obj = ObjectVersion.create(
+            bucket=bucket_id,
+            key='{0}-{1}'.format(object_version.key, preset)
         )
-        rename(filename, join(output_folder, new_filename))
-    self.update_progress(100)
-    return output_folder
+        obj.set_file(file_instance)
+        assert obj.file == file_instance
+
+        # Extract new location
+        storage = file_instance.storage(default_location=bucket_location)
+        directory, filename = storage._get_fs()
+
+        # Call Sorenson
+        input_file = object_version.file.uri
+        output_file = path.join(directory.root_path, filename)
+
+        job_id = start_encoding(input_file, preset, output_file)
+        job_ids[preset] = job_id, file_instance, output_file
+
+    # Monitor jobs and report accordingly
+    while job_ids:
+        for preset, (job_id, file_instance, uri) in iteritems(job_ids):
+            # Get job status
+            status = get_encoding_status(job_id)['Status']
+            percentage = 100 if status['TimeFinished'] else status['Progress']
+
+            # Update task's state
+            self.update_state(
+                state=STARTED,
+                meta=dict(
+                    payload=dict(
+                        percentage=percentage,
+                        preset=preset,
+                        job_id=job_id,
+                    ),
+                    message='Transcoding status',
+                )
+            )
+
+            # Stop monitoring completed jobs
+            if percentage == 100:
+                del job_ids[preset]
+                # Set file's location
+                file_instance.set_uri(uri, path.getsize(), 'COMPUTE_ME')
+
+        time.sleep(5)
+
+    # Commit changes
+    db.session.commit()
 
 
-@shared_task(bind=True, base=with_order(3, db_session=True))
-def attach_files(self, output_folders, bucket_id):
-    """Collect files from Sorenson's sub-formats and extracted thumbnails."""
+@shared_task(bind=True)
+def update_record(self, recid, patch, max_retries=5, countdown=5):
+    """Update a given record with a patch.
 
-    # Collect
-    files = [(output_folder, filename)
-             for output_folder in output_folders
-             for filename in listdir(output_folder)
-             if isfile(join(output_folder, filename))]
+    Retries ``try_times`` after ``countdown`` seconds.
 
-    # Attach
-    total = len(files)
-
-    for count, (output_folder, filename) in enumerate(files):
-        full_path = join(output_folder, filename)
-        ObjectVersion.create(bucket_id, filename, stream=open(full_path, 'rb'))
-        self.update_progress_with_size(count + 1, total)
-
-
-@shared_task(bind=True, base=AVCOrchestrator)
-def chain_orchestrator(self, workflow, **kwargs):
-    """Orchestration task for chained Celery tasks or groups of tasks."""
-
-    # Set deposit ID for future updates
-    self.dep_id = kwargs.pop('dep_id', None)
-
-    # Construct Celery canvas
-    task_list = []
-    parent_kw = {'parent': self}
-    for task_definition in workflow:
-        if isinstance(task_definition, tuple):
-            task, task_kw = task_definition
-            kw = {k: kwargs[k] for k in kwargs if k in task_kw}
-            kw.update(parent_kw)
-            task_list.append(task.subtask(kwargs=kw))
-        elif isinstance(task_definition, list):
-            subtasks = []
-            for task, task_kw in task_definition:
-                kw = {k: kwargs[k] for k in kwargs if k in task_kw}
-                kw.update(parent_kw)
-                subtasks.append(task.subtask(kwargs=kw))
-            task_list.append(group(*subtasks))
-
-    # Execute workflow
-    chain(*task_list)()
-
-
-@shared_task(base=with_order())
-def extract_metadata(video_location):
-    """Extract metadata from given video file."""
-    information = json.loads(ff_probe_all(video_location))
-    return information  # TODO output to file?
+    :param recid: the UUID of the record
+    :param patch: the patch operation to apply
+    :param max_retries: times to retry operation
+    :param countdown: time to sleep between retries
+    """
+    try:
+        record = Record.get_record(recid)
+        record = record.patch(patch)
+        record.commit()
+        db.session.commit()
+    except ConcurrentModificationError as exc:
+        db.session.rollback()
+        self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
