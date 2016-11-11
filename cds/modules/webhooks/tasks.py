@@ -21,20 +21,24 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Celery tasks for Webhook Receivers."""
 
 from __future__ import absolute_import
 
-import requests
 import json
-from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
-from celery import shared_task, Task
-from celery.states import STARTED
-from invenio_files_rest.models import as_object_version
+
+import requests
+from celery import Task, shared_task
+from celery.states import FAILURE, STARTED, SUCCESS
 from invenio_db import db
+from invenio_files_rest.models import ObjectVersionTag, as_object_version
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records import Record
 from invenio_sse import current_sse
 from six import BytesIO
+from sqlalchemy.orm.exc import ConcurrentModificationError
+
+from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
 
 
 def _factory_sse_task_base(type_=None):
@@ -49,6 +53,11 @@ def _factory_sse_task_base(type_=None):
 
         abstract = True
 
+        def __init__(self):
+            """."""
+            super(SSETask, self).__init__()
+            self._base_payload = {}
+
         def __call__(self, *args, **kwargs):
             """Extract SSE channel from keyword arguments.
 
@@ -60,13 +69,29 @@ def _factory_sse_task_base(type_=None):
             with self.app.flask_app.app_context():
                 return self.run(*args, **kwargs)
 
+        def _publish(self, state, meta):
+            """Publish task's state to corresponding SSE channel."""
+            current_sse.publish(
+                dict(
+                    state=state, meta=meta),
+                type_=type_,
+                channel=self.sse_channel)
+
         def update_state(self, task_id=None, state=None, meta=None):
             """."""
+            self._base_payload.update(meta.get('payload', {}))
+            meta['payload'] = self._base_payload
             super(SSETask, self).update_state(task_id, state, meta)
+
             if self.sse_channel:
                 data = dict(state=state, meta=meta)
                 current_sse.publish(
                     data, type_=type_, channel=self.sse_channel)
+
+        def on_failure(self, exc, task_id, args, kwargs, einfo):
+            """When an error occurs, attach useful information to the state."""
+            meta = dict(message=str(exc), payload=self._base_payload)
+            self._publish(state=FAILURE, meta=meta)
 
     return SSETask
 
@@ -82,6 +107,13 @@ def download_to_object_version(self, url, object_version, **kwargs):
     """
     object_version = as_object_version(object_version)
 
+    self._base_payload = dict(
+        key=object_version.key,
+        version_id=str(object_version.version_id),
+        tags=object_version.get_tags(),
+        envent_id=kwargs.get('event_id', None),
+        deposit_id=kwargs.get('deposit_id', None), )
+
     # Make HTTP request
     response = requests.get(url, stream=True)
 
@@ -89,13 +121,8 @@ def download_to_object_version(self, url, object_version, **kwargs):
         """Progress reporter."""
         meta = dict(
             payload=dict(
-                key=object_version.key,
-                version_id=str(object_version.version_id),
                 size=total,
-                tags=object_version.get_tags(),
-                percentage=size or 0.0 / total * 100,
-                deposit_id=kwargs.get('deposit_id', None), ),
-            envent_id=kwargs.get('event_id', None),
+                percentage=size or 0.0 / total * 100, ),
             message='Downloading {0} of {1}'.format(size or 0, total), )
 
         self.update_state(state=STARTED, meta=meta)
@@ -111,27 +138,70 @@ def download_to_object_version(self, url, object_version, **kwargs):
 @shared_task(
     bind=True,
     base=_factory_sse_task_base(type_='file_video_metadata_extraction'))
-def video_metadata_extraction(self,
-                              uri,
-                              object_version=None,
-                              record_id=None,
-                              **kwargs):
+def video_metadata_extraction(self, uri, object_version, deposit_id, **kwargs):
     """Extract metadata from given video file.
 
     All technical metadata, i.e. bitrate, will be translated into
     ``ObjectVersionTags``, plus all the metadata extracted will be store under
     ``_deposit`` as ``extracted_metadta``.
 
-    :param uri:
-    :param object_version:
-    :param record_id:
+    :param uri: the video's URI
+    :param object_version: the object version that (will) contain the actual
+           video
+    :param deposit_id: the ID od the deposit
     """
-    info = json.loads(ff_probe_all(uri))
-    # extract technical metadata and added to the ObjectVersion as Tags
+    object_version = as_object_version(object_version)
 
-    # create patch to update `_deposit/extracted_metadata`
-    patch = None
-    update_record.apply_async(record_id, patch)
+    self._base_payload = dict(
+        object_version=str(object_version.version_id),
+        uri=uri,
+        tags=object_version.get_tags(),
+        deposit_id=deposit_id,
+        envent_id=kwargs.get('event_id', None), )
+
+    recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
+
+    # Extract video's metadata using `ff_probe`
+    metadata = json.loads(ff_probe_all(uri))
+
+    # Add technical information to the ObjectVersion as Tags
+    format_keys = [
+        'duration',
+        'bit_rate',
+        'size',
+    ]
+    stream_keys = [
+        'avg_frame_rate',
+        'codec_name',
+        'width',
+        'height',
+        'nb_frames',
+        'display_aspect_ratio',
+        'color_range',
+    ]
+
+    [ObjectVersionTag.create(object_version, k, v)
+     for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
+     if k in (format_keys + stream_keys)]
+
+    db.session.commit()
+
+    # Insert metadata into deposit's metadata
+    patch = [{
+        'op': 'add',
+        'path': '/_deposit/extracted_metadata',
+        'value': metadata
+    }]
+    result = update_record.s(recid, patch).apply_async()
+    result.get()
+
+    # Update state
+    self.update_state(
+        state=SUCCESS,
+        meta=dict(
+            payload=dict(
+                tags=object_version.get_tags(), ),
+            message='Attached video metadata'))
 
 
 @shared_task(
@@ -148,9 +218,9 @@ def video_extract_frames(self,
     using ``ObjectVersionTags``.
 
     :param object_version: master video to extract frames from.
-    :param frames_start: Start percentage, default 5.
-    :param frames_end: End percentage, default 95.
-    :param frames_gap: Percentage between frames from start to end, default 10.
+    :param frames_start: start percentage, default 5.
+    :param frames_end: end percentage, default 95.
+    :param frames_gap: percentage between frames from start to end, default 10.
     """
     pass
 
@@ -175,9 +245,16 @@ def update_record(recid, patch, try_times=5, countdown=5):
 
     Retries ``try_times`` after ``countdown`` seconds.
 
-    :param recid:
-    :param patch:
-    :param try_times:
-    :param countdown:
+    :param recid: the UUID of the record
+    :param patch: the patch operation to apply
+    :param try_times: times to retry operation
+    :param countdown: time to sleep between retries
     """
-    pass
+    try:
+        record = Record.get_record(recid)
+        record = record.patch(patch)
+        record.commit()
+        db.session.commit()
+    except ConcurrentModificationError as exc:
+        db.session.rollback()
+        self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
