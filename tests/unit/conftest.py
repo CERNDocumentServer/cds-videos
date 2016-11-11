@@ -96,7 +96,7 @@ def app():
     shutil.rmtree(sorenson_output)
 
 
-@pytest.yield_fixture(scope='session', autouse=True)
+@pytest.yield_fixture(scope='session')
 def celery_not_fail_on_eager_app(app):
     """."""
     instance_path = tempfile.mkdtemp()
@@ -404,9 +404,13 @@ def project_published(app, project):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
+    def mocked_encoding(input_file, preset_name, output_file):
+        shutil.copyfile(input_file, output_file)  # just copy file
+        return '1234'
+
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'
-    ).start().return_value = 123
+    ).start().side_effect = mocked_encoding
 
     mock.patch(
         'cds.modules.webhooks.tasks.get_encoding_status'

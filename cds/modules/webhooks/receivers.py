@@ -81,7 +81,7 @@ class Downloader(CeleryAsyncReceiver):
         """Create object version and send celery task to download.
 
         Mandatory fields in the payload:
-          * uri, location to download the viewo.
+          * uri, location to download the view.
           * bucket_id
           * key, file name.
           * deposit_id

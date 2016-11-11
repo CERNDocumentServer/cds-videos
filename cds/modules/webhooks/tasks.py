@@ -25,17 +25,28 @@
 
 from __future__ import absolute_import
 
+import Queue
+import hashlib
 import json
+from collections import deque
 
+import queue
 import requests
+import time
+
+import signal
+from cds_sorenson.api import start_encoding, get_encoding_status, stop_encoding
 from celery import Task, shared_task
 from celery.states import FAILURE, STARTED, SUCCESS
+from flask import current_app as flask_app
 from invenio_db import db
-from invenio_files_rest.models import ObjectVersionTag, as_object_version
+from invenio_files_rest.models import ObjectVersionTag, as_object_version, \
+    FileInstance, ObjectVersion
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
-from six import BytesIO
+from os import path
+from six import BytesIO, iteritems
 from sqlalchemy.orm.exc import ConcurrentModificationError
 
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
@@ -111,7 +122,7 @@ def download_to_object_version(self, url, object_version, **kwargs):
         key=object_version.key,
         version_id=str(object_version.version_id),
         tags=object_version.get_tags(),
-        envent_id=kwargs.get('event_id', None),
+        event_id=kwargs.get('event_id', None),
         deposit_id=kwargs.get('deposit_id', None), )
 
     # Make HTTP request
@@ -157,7 +168,7 @@ def video_metadata_extraction(self, uri, object_version, deposit_id, **kwargs):
         uri=uri,
         tags=object_version.get_tags(),
         deposit_id=deposit_id,
-        envent_id=kwargs.get('event_id', None), )
+        event_id=kwargs.get('event_id', None), )
 
     recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
 
@@ -167,10 +178,10 @@ def video_metadata_extraction(self, uri, object_version, deposit_id, **kwargs):
     # Add technical information to the ObjectVersion as Tags
     format_keys = ['duration', 'bit_rate', 'size', ]
     stream_keys = ['avg_frame_rate', 'codec_name', 'width', 'height',
-                   'nb_frames','display_aspect_ratio', 'color_range', ]
+                   'nb_frames', 'display_aspect_ratio', 'color_range', ]
 
     [ObjectVersionTag.create(object_version, k, v)
-     for k,v in dict(metadata['format'], **metadata['streams'][0]).items()
+     for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
      if k in (format_keys + stream_keys)]
 
     db.session.commit()
@@ -215,28 +226,122 @@ def video_extract_frames(self,
 
 
 @shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
-def video_transcode(self, object_version, video_presets=None):
+def video_transcode(self, object_version, video_presets=None,
+                    sleep_time=5, **kwargs):
     """Launch video transcoding.
-
-    For each of the presents generate a new ``ObjectVersion`` tagged as slave
+    For each of the presets generate a new ``ObjectVersion`` tagged as slave
     with the preset name as key and a link to the master version.
-
     :param object_version: Master video.
-    :param presets: List of presets to use for transcoding. If ``None`` it will
-        use the default values set in ``VIDEO_DEFAULT_PRESETS``.
+    :param video_presets: List of presets to use for transcoding. If ``None``
+        it will use the default values set in ``VIDEO_DEFAULT_PRESETS``.
+    :param sleep_time: the time interval between requests for Sorenson status
     """
-    pass
+    object_version = as_object_version(object_version)
+
+    self._base_payload = dict(
+        object_version=str(object_version.version_id),
+        video_presets=video_presets,
+        tags=object_version.get_tags(),
+        deposit_id=kwargs.get('deposit_id', None),
+        event_id=kwargs.get('event_id', None),
+    )
+
+    # Get master file's bucket_id
+    bucket_id = object_version.bucket_id
+    bucket_location = object_version.bucket.location.uri
+
+    # Create a (dummy) slave file for each preset
+    job_ids = deque()
+
+    # Set handler for canceling all jobs
+    def handler(signum, frame):
+        map(lambda _info: stop_encoding(info['job_id']), job_ids)
+    signal.signal(signal.SIGTERM, handler)
+
+    preset_config = flask_app.config['CDS_SORENSON_PRESETS']
+    for preset in video_presets or preset_config.keys():
+        # Create FileInstance and get generated UUID
+        file_instance = FileInstance.create()
+        # Create ObjectVersion
+        base_name = object_version.key.rsplit('.', 1)[0]
+        new_extension = preset_config[preset][1]
+        obj = ObjectVersion.create(
+            bucket=bucket_id,
+            key='{0}-{1}{2}'.format(base_name, preset, new_extension)
+        )
+        obj.set_file(file_instance)
+        ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
+
+        # Extract new location
+        storage = file_instance.storage(default_location=bucket_location)
+        directory, filename = storage._get_fs()
+
+        # Start Sorenson
+        input_file = object_version.file.uri
+        output_file = path.join(directory.root_path, filename)
+
+        job_id = start_encoding(input_file, preset, output_file)
+        ObjectVersionTag.create(obj, 'job_id', job_id)
+        self.update_state(
+            state=STARTED,
+            meta=dict(
+                payload=dict(preset=preset),
+                message='Started transcoding.'
+            )
+        )
+
+        job_ids.append(dict(
+            preset=preset, job_id=job_id,
+            file_instance=file_instance, uri=output_file
+        ))
+
+    # Monitor jobs and report accordingly
+    while job_ids:
+        info = job_ids.popleft()
+        uri = info['uri']
+
+        # Get job status
+        status = get_encoding_status(info['job_id'])['Status']
+        percentage = 100 if status['TimeFinished'] else status['Progress']
+
+        # Update task's state for each individual preset
+        self.update_state(
+            state=STARTED,
+            meta=dict(
+                payload=dict(
+                    preset=info['preset'],
+                    percentage=percentage,
+                ),
+                message='Transcoding status',
+            )
+        )
+
+        # Set file's location for completed jobs
+        if percentage == 100:
+            with open(uri, 'r') as transcoded_file:
+                data = transcoded_file.read()
+                size = path.getsize(uri)
+                digest = hashlib.md5(data).hexdigest()
+                checksum = '{0}:{1}'.format('md5', digest)
+                info['file_instance'].set_uri(uri, size, checksum)
+        else:
+            job_ids.append(info)
+
+        time.sleep(sleep_time)
+
+    # Commit changes
+    db.session.commit()
 
 
-@shared_task()
-def update_record(recid, patch, try_times=5, countdown=5):
+@shared_task(bind=True)
+def update_record(self, recid, patch, max_retries=5, countdown=5):
     """Update a given record with a patch.
 
     Retries ``try_times`` after ``countdown`` seconds.
 
     :param recid: the UUID of the record
     :param patch: the patch operation to apply
-    :param try_times: times to retry operation
+    :param max_retries: times to retry operation
     :param countdown: time to sleep between retries
     """
     try:

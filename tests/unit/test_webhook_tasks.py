@@ -27,21 +27,39 @@ from __future__ import absolute_import
 
 import threading
 import time
-import uuid
 
 import mock
 import pytest
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import ObjectVersion, Bucket
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-from six import next
+from six import next, BytesIO
 
 from cds.modules.webhooks.tasks import (download_to_object_version,
                                         update_record,
-                                        video_metadata_extraction)
+                                        video_metadata_extraction,
+                                        video_transcode)
 
 
-def test_donwload_to_object_version(db, bucket):
+def test_transcode(db, bucket, mock_sorenson):
+    """Test video_transcode task."""
+    def get_bucket_keys():
+        return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
+
+    obj = ObjectVersion.create(bucket, key='test.pdf',
+                               stream=BytesIO(b'\x00' * 1024))
+    db.session.commit()
+    assert get_bucket_keys() == ['test.pdf']
+
+    video_transcode.delay(obj.version_id,
+                          video_presets=['Youtube 480p'],
+                          sleep_time=0)
+
+    db.session.add(bucket)
+    assert get_bucket_keys() == ['test-Youtube 480p.mp4', 'test.pdf']
+
+
+def test_download_to_object_version(db, bucket):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
@@ -141,27 +159,36 @@ def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
     obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
 
     class Listener(threading.Thread):
+
+        def __init__(self, group=None, target=None, name=None, args=(),
+                     kwargs=None, verbose=None):
+            super(Listener, self).__init__(group, target, name, args, kwargs,
+                                           verbose)
+            self._return = None
+
+        def join(self, timeout=None):
+            super(Listener, self).join(timeout)
+            return self._return
+
         def run(self):
             from invenio_sse import current_sse
             with app.app_context():
                 current_sse._pubsub.subscribe(sse_channel)
                 messages = current_sse._pubsub.listen()
-                # Skip subscribe message
-                next(messages)
-                message = next(messages)['data']
-                assert '"state": "FAILURE"' in message
-                assert 'ValueError' in message
+                next(messages)  # Skip subscribe message
+                self._return = next(messages)['data']
 
     # Establish connection
     listener = Listener()
     listener.start()
     time.sleep(1)
 
-    task_id = str(uuid.uuid4())
     video_metadata_extraction.delay(
-        uri='invalid_url',
+        uri='invalid_uri',
         object_version=str(obj.version_id),
         deposit_id=depid,
         sse_channel=sse_channel)
 
-    listener.join()
+    message = listener.join()
+    assert '"state": "FAILURE"' in message
+    assert 'ffprobe' in message
