@@ -96,6 +96,41 @@ def app():
     shutil.rmtree(sorenson_output)
 
 
+@pytest.yield_fixture(scope='session', autouse=True)
+def celery_not_fail_on_eager_app(app):
+    """."""
+    instance_path = tempfile.mkdtemp()
+    sorenson_output = tempfile.mkdtemp()
+
+    os.environ.update(
+        APP_INSTANCE_PATH=os.environ.get(
+            'INSTANCE_PATH', instance_path),
+    )
+
+    app = create_app(
+        DEBUG_TB_ENABLED=False,
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
+        # SQLALCHEMY_ECHO=True,
+        TESTING=True,
+        CELERY_ALWAYS_EAGER=True,
+        CELERY_RESULT_BACKEND='cache',
+        CELERY_CACHE_BACKEND='memory',
+        CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
+        CELERY_TRACK_STARTED=True,
+        BROKER_TRANSPORT='redis',
+        JSONSCHEMAS_HOST='cdslabs.cern.ch',
+        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+    )
+    app.register_blueprint(files_rest_blueprint)
+
+    with app.app_context():
+        yield app
+
+    shutil.rmtree(instance_path)
+    shutil.rmtree(sorenson_output)
+
+
 @pytest.yield_fixture()
 def api_app(app):
     """Flask API application fixture."""
