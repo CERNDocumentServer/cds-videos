@@ -195,12 +195,20 @@ def es(app):
 
 
 @pytest.fixture()
-def deposit_rest(app):
+def records_rest_app(app):
     """Init deposit REST API."""
-    InvenioRecordsREST(app)
-    app_deposit = InvenioDepositREST(app)
-    app.url_map.converters['pid'] = PIDConverter
-    return app_deposit
+    if 'invenio-records-rest' not in app.extensions:
+        InvenioRecordsREST(app)
+    return app
+
+
+@pytest.fixture()
+def deposit_rest(app, records_rest_app):
+    """Init deposit REST API."""
+    if 'invenio-deposit-rest' not in app.extensions:
+        InvenioDepositREST(app)
+        app.url_map.converters['pid'] = PIDConverter
+    return app
 
 
 @pytest.fixture()
@@ -305,7 +313,7 @@ def json_headers(app):
 
 
 @pytest.fixture()
-def project(app, es, cds_jsonresolver, users, location, db):
+def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
     """New project with videos."""
     project_data = {
         'title': {
@@ -360,7 +368,6 @@ def project_published(app, project):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
-
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'
     ).start().return_value = 123
@@ -397,13 +404,13 @@ def access_token(app, db, users):
 
 @shared_task()
 def add(x, y):
+    """Simple shared task."""
     return x + y
 
 
 @pytest.fixture
 def receiver(api_app):
     """Register test celery receiver."""
-
     class TestReceiver(CeleryReceiver):
 
         def run(self, event):
