@@ -75,7 +75,8 @@ def app():
     app = create_app(
         DEBUG_TB_ENABLED=False,
         SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
+            'SQLALCHEMY_DATABASE_URI',
+            'postgresql+psycopg2://localhost/cds_testing'),
         # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
@@ -111,7 +112,8 @@ def celery_not_fail_on_eager_app(app):
     app = create_app(
         DEBUG_TB_ENABLED=False,
         SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI', 'sqlite://'),
+            'SQLALCHEMY_DATABASE_URI',
+            'postgresql+psycopg2://localhost/cds_testing'),
         # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,

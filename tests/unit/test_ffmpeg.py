@@ -59,8 +59,8 @@ def test_ffprobe_mov(video_mov):
 def test_ffmpeg_mp4(video_mp4):
     """Test ffmpeg wrapper for extract frames."""
     tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    start, end = 25, 45
-    list(ff_frames(video_mp4, start, end, 1, join(tmp, 'img%d.jpg')))
+    start, end = 5, 95
+    ff_frames(video_mp4, start, end, 1, join(tmp, 'img%d.jpg'))
     file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
     assert file_no == end - start
     shutil.rmtree(tmp)
@@ -69,8 +69,8 @@ def test_ffmpeg_mp4(video_mp4):
 def test_ffmpeg_mov(video_mov):
     """Test ffmpeg wrapper for extract frames."""
     tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    start, end = 5, 11
-    list(ff_frames(video_mov, start, end, 1, join(tmp, 'img%d.jpg')))
+    start, end = 5, 95
+    ff_frames(video_mov, start, end, 1, join(tmp, 'img%d.jpg'))
     file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
     assert file_no == end - start
     shutil.rmtree(tmp)
