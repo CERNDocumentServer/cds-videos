@@ -81,22 +81,17 @@ def _factory_sse_task_base(type_=None):
 
         def _publish(self, state, meta):
             """Publish task's state to corresponding SSE channel."""
-            current_sse.publish(
-                dict(
-                    state=state, meta=meta),
-                type_=type_,
-                channel=self.sse_channel)
+            if self.sse_channel:
+                data = dict(state=state, meta=meta)
+                current_sse.publish(
+                    data, type_=type_, channel=self.sse_channel)
 
         def update_state(self, task_id=None, state=None, meta=None):
             """."""
             self._base_payload.update(meta.get('payload', {}))
             meta['payload'] = self._base_payload
             super(SSETask, self).update_state(task_id, state, meta)
-
-            if self.sse_channel:
-                data = dict(state=state, meta=meta)
-                current_sse.publish(
-                    data, type_=type_, channel=self.sse_channel)
+            self._publish(state=state, meta=meta)
 
         def on_failure(self, exc, task_id, args, kwargs, einfo):
             """When an error occurs, attach useful information to the state."""
