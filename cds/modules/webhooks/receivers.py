@@ -56,7 +56,7 @@ class Downloader(CeleryAsyncReceiver):
         """Create object version and send celery task to download.
 
         Mandatory fields in the payload:
-          * uri, location to download the viewo.
+          * uri, location to download the view.
           * bucket_id
           * key, file name.
           * deposit_id
@@ -74,19 +74,21 @@ class Downloader(CeleryAsyncReceiver):
         assert 'key' in event.payload
         assert 'deposit_id' in event.payload
 
+        event_id = str(event.id)
+
         with db.session.begin_nested():
             object_version = ObjectVersion.create(
                 bucket=event.payload['bucket_id'], key=event.payload['key'])
 
             ObjectVersionTag.create(object_version, 'uri_origin',
                                     event.payload['uri'])
-            ObjectVersionTag.create(object_version, '_event_id', str(event.id))
+            ObjectVersionTag.create(object_version, '_event_id', event_id)
             db.session.expunge(event)
         db.session.commit()
 
         task = download_to_object_version.s(event.payload['uri'],
                                             str(object_version.version_id),
-                                            event_id=str(event.id),
+                                            event_id=event_id,
                                             **event.payload).apply_async()
 
         with db.session.begin_nested():
@@ -141,6 +143,8 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 'key' in event.payload) or ('version_id' in event.payload)
         assert 'deposit_id' in event.payload
 
+        event_id = str(event.id)
+
         with db.session.begin_nested():
             if 'version_id' in event.payload:
                 object_version = as_object_version(event.payload['version_id'])
@@ -156,29 +160,36 @@ class AVCWorkflow(CeleryAsyncReceiver):
                                         event.payload['uri'])
                 first_step = group(
                     download_to_object_version.si(
-                        event.payload['url'],
+                        event.payload['uri'],
                         str(object_version.version_id),
-                        event_id=event.id,
+                        event_id=event_id,
                         **event.payload),
                     video_metadata_extraction.si(
                         event.payload['uri'],
                         str(object_version.version_id),
-                        event_id=event.id,
+                        event_id=event_id,
                         **event.payload), )
 
-            ObjectVersionTag.create(object_version, '_event_id', event.id)
+            ObjectVersionTag.create(object_version, '_event_id', event_id)
 
-            tasks = chain(
-                first_step,
-                group(
-                    video_transcode.si(str(object_version.version_id),
-                                       event_id=event.id,
-                                       **event.payload),
-                    video_extract_frames.si(str(object_version.version_id),
-                                            event_id=event.id,
-                                            **event.payload), ),
-            ).apply_async()
+        obj_id = str(object_version.version_id)
+        obj_key = object_version.key
+        obj_tags = object_version.get_tags()
+        db.session.expunge(event)
+        db.session.commit()
 
+        tasks = chain(
+            first_step,
+            group(
+                video_transcode.si(obj_id,
+                                   event_id=event_id,
+                                   **event.payload),
+                video_extract_frames.si(str(object_version.version_id),
+                                        event_id=event_id,
+                                        **event.payload), ),
+        ).apply_async()
+
+        with db.session.begin_nested():
             event.response = dict(
                 _tasks=tasks.as_tuple(),
                 links=dict(),
@@ -187,3 +198,5 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 tags=object_version.get_tags(), )
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
+            db.session.add(event)
+        db.session.commit()
