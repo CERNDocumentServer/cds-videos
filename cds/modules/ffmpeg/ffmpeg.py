@@ -67,11 +67,28 @@ def ff_probe_all(input_filename):
     ]).decode('utf-8')
 
 
-def ff_frames(input_file, start_time, end_time, time_step, output):
-    """Extract requested frames from video, while tracking progress."""
+def ff_frames(input_file, start, end, step, output, progress_callback=None):
+    """Extract requested frames from video.
+
+    :param input_file:
+    :param start: percentage of the video to begin extracting frames.
+    :param end: percentage of the video to stop extracting frames.
+    :param step: percentage between of the video between frames.
+    :param output: output folder and format for the file names as in ``ffmpeg``,
+        i.e /path/to/somewhere/frames-%d.jpg
+    :param progress_callback: function taking as first parameter the number of seconds
+        processed and as second parameter the total duration of the video.
+    """
+    duration = float(ff_probe(input_file, 'duration'))
+    # Calculate time step
+    start_time = (duration * start / 100)
+    end_time = (duration * end / 100)
+    time_step = duration * step / 100
+
     cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(
         input_file, start_time, end_time, time_step, output
     )
+
     thread = pexpect.spawn(cmd)
 
     regex = thread.compile_pattern_list(
@@ -81,8 +98,8 @@ def ff_frames(input_file, start_time, end_time, time_step, output):
         index = thread.expect_list(regex, timeout=None)
         if index == 0:
             break
-        else:
-            yield sum(
+        elif progress_callback:
+            progress_callback(sum(
                 int(amount) * 60 ** power for power, amount in
                 enumerate(reversed(thread.match.group(1).split(b':')))
-            )
+            ), duration)

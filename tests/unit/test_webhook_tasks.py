@@ -31,13 +31,14 @@ import uuid
 
 import mock
 import pytest
-from invenio_files_rest.models import ObjectVersion
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
+                                       as_object_version)
 from invenio_records import Record
 from six import next
 
 from cds.modules.webhooks.tasks import (download_to_object_version,
-                                        update_record,
+                                        update_record, video_extract_frames,
                                         video_metadata_extraction)
 
 
@@ -132,6 +133,22 @@ def test_metadata_extraction_video_mp4(app, db, depid, bucket, video_mp4):
     assert tags['nb_frames'] == '1440'
     assert tags['display_aspect_ratio'] == '0:1'
     assert tags['color_range'] == 'tv'
+
+
+def test_video_extract_frames(app, db, bucket, video_mp4):
+    """Test extract frames from video."""
+    obj = ObjectVersion.create(
+        bucket=bucket, key='video.mp4', stream=open(video_mp4, 'rb'))
+    version_id = str(obj.version_id)
+    db.session.commit()
+
+    task = video_extract_frames.delay(version_id)
+
+    assert ObjectVersion.query.count() == 91  # master file + frames
+
+    frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
+        ObjectVersionTag.value == version_id).all()
+    assert len(frames) == 90
 
 
 def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):

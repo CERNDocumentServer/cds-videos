@@ -26,12 +26,16 @@
 from __future__ import absolute_import
 
 import json
+import os
+import shutil
+import tempfile
 
 import requests
 from celery import Task, shared_task
 from celery.states import FAILURE, STARTED, SUCCESS
 from invenio_db import db
-from invenio_files_rest.models import ObjectVersionTag, as_object_version
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
+                                       as_object_version)
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
@@ -210,7 +214,7 @@ def video_extract_frames(self,
                          object_version,
                          frames_start=5,
                          frames_end=95,
-                         frames_gap=10,
+                         frames_gap=1,
                          **kwargs):
     """Extract images from some frames of the video.
 
@@ -222,7 +226,40 @@ def video_extract_frames(self,
     :param frames_end: end percentage, default 95.
     :param frames_gap: percentage between frames from start to end, default 10.
     """
-    pass
+    object_version = as_object_version(object_version)
+
+    self._base_payload = dict()
+
+    input_file = object_version.file.uri
+    output_folder = tempfile.mkdtemp()
+
+    def progress_updater(seconds, duration):
+        """Progress reporter."""
+        meta = dict(
+            payload=dict(
+                size=duration,
+                percentage=seconds or 0.0 / duration * 100, ),
+            message='Extracting frames {0} of {1} seconds'.format(seconds, duration), )
+
+        self.update_state(state=STARTED, meta=meta)
+
+    ff_frames(
+        object_version.file.uri,
+        frames_start,
+        frames_end,
+        frames_gap,
+        os.path.join(output_folder, 'frame-%d.jpg'),
+        progress_callback=progress_updater)
+
+    for filename in os.listdir(output_folder):
+        obj = ObjectVersion.create(
+            bucket=object_version.bucket,
+            key=filename,
+            stream=open(os.path.join(output_folder, filename),'rb'))
+        ObjectVersionTag.create(obj, 'master', object_version.version_id)
+
+    shutil.rmtree(output_folder)
+    db.session.commit()
 
 
 @shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
