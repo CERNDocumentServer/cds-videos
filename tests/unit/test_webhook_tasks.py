@@ -35,11 +35,12 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 from invenio_records import Record
-from six import next
+from six import BytesIO, next
 
 from cds.modules.webhooks.tasks import (download_to_object_version,
                                         update_record, video_extract_frames,
-                                        video_metadata_extraction)
+                                        video_metadata_extraction,
+                                        video_transcode)
 
 
 def test_donwload_to_object_version(db, bucket):
@@ -193,3 +194,21 @@ def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
     message = listener.join()
     assert '"state": "FAILURE"' in message
     assert 'ffprobe' in message
+
+
+def test_transcode(db, bucket, mock_sorenson):
+    """Test video_transcode task."""
+    def get_bucket_keys():
+        return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
+
+    obj = ObjectVersion.create(bucket, key='test.pdf',
+                               stream=BytesIO(b'\x00' * 1024))
+    db.session.commit()
+    assert get_bucket_keys() == ['test.pdf']
+
+    video_transcode.delay(obj.version_id,
+                          video_presets=['Youtube 480p'],
+                          sleep_time=0)
+
+    db.session.add(bucket)
+    assert get_bucket_keys() == ['test-Youtube 480p.mp4', 'test.pdf']
