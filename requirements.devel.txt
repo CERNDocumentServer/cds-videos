@@ -54,17 +54,13 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
 -e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
-# -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
-#FIXME wait for https://github.com/inveniosoftware/invenio-migrator/pull/61
--e git+https://github.com/krzysztof/invenio-migrator@dev#egg=invenio-migrator
+-e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
 -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
 -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
-#FIXME wait for https://github.com/inveniosoftware/invenio-records-files/pull/38
-#-e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
--e git+https://github.com/jirikuncar/invenio-records-files.git@from-files-rest#egg=invenio-records-files
+-e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
 -e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records
