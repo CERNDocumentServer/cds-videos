@@ -1,5 +1,7 @@
 function cdsDepositCtrl($scope, $q) {
   var that = this;
+  // The Upload Queue
+  this.filesQueue = [];
   // The deposit can have the follwoing states
   this.$onInit = function() {
     // Resolve the record schema
@@ -36,8 +38,12 @@ function cdsDepositCtrl($scope, $q) {
     }
 
     // Register related events from sse
-    $scope.$on('sse.event.' + this.record._deposit.id, function(evt) {
+    var depositListenerName = 'sse.event.' + this.record._deposit.id;
+    $scope.$on(depositListenerName, function(evt, data) {
       console.log('RECEIVE ENET FOR', evt);
+      if (data.meta.payload.key) {
+        $scope.$broadcast(depositListenerName + '.' + data.meta.payload.key, data);
+      }
     });
   }
 

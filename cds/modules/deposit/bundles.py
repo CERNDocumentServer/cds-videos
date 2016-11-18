@@ -73,6 +73,7 @@ js_cds_deposit = Bundle(
     'js/cds_deposit/avc/components/cdsDeposits.js',
     'js/cds_deposit/avc/components/cdsForm.js',
     'js/cds_deposit/avc/components/cdsUploader.js',
+    'js/cds_deposit/avc/components/cdsRemoteUploader.js',
 )
 
 js_deposit = NpmBundle(
