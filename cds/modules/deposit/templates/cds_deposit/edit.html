@@ -29,6 +29,7 @@
 {%- endblock css %}
 
 {%- block javascript %}
+  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"></script>
   <script type="text/javascript">
     // CKEDITOR static location
     window.CKEDITOR_BASEPATH = '{{url_for("static", filename="node_modules/ckeditor/", _external=True)}}';
@@ -58,6 +59,7 @@
             {% endif %}
             master-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"
             master-form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
+            dropbox-app-key="{{ config.DEPOSIT_DROPBOX_APP_KEY }}"
             children-init="/api/deposits/video/"
             children-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path='deposits/records/video-v1.0.0.json', _external=True) }}"
             children-form="{{ url_for('static', filename='json/cds_deposit/forms/video.json') }}"

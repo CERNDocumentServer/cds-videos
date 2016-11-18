@@ -602,6 +602,9 @@ DEPOSIT_FORM_TEMPLATES = {
     'textarea': 'textarea.html'
 }
 
+# App key for uploading files from dropbox
+DEPOSIT_DROPBOX_APP_KEY = 'CHANGE_ME'
+
 ###############################################################################
 # SSE
 ###############################################################################
