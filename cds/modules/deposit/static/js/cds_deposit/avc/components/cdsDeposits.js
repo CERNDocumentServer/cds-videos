@@ -278,6 +278,8 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
         // general template base
         formTemplatesBase: '@?',
         formTemplates: '=?',
+        // Dropbox related
+        dropboxAppKey: '@',
       },
       controller: cdsDepositsCtrl,
       templateUrl: function($element, $attrs) {

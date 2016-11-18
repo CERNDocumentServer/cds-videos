@@ -1,9 +1,7 @@
-function cdsUploaderCtrl($scope, $q, Upload, $http) {
+function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   var that = this;
   // Is the uploader loading
   this.loading = false;
-  // The Upload Queue
-  this.queue = [];
   // Do we have any errors
   this.errors = [];
   // The ongoing uploads
@@ -11,19 +9,39 @@ function cdsUploaderCtrl($scope, $q, Upload, $http) {
 
   // On Component init
   this.$onInit = function() {
+    // The Uploader queue
+    this.queue = this.cdsDepositCtrl.filesQueue;
     // Add any files in the queue that are not completed
-    this.queue = _.reject(that.files, {completed: true});
+    Array.prototype.push.apply(this.queue, _.reject(that.files, {completed: true}));
 
     // Prepare file request
     this.prepareUpload = function(file) {
-      var args = {
-        url:  that.cdsDepositCtrl.links.bucket + '/' + file.key,
-        method: 'PUT',
-        headers: {
-          'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
-        },
-        data: file
-      };
+      var args;
+      if (file.receiver) {
+        args = {
+          url: file.receiver,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: {
+            uri: file.url,
+            key: file.key,
+            bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
+            deposit_id: that.cdsDepositCtrl.record._deposit.id,
+            sse_channel: '/api/deposits/'+that.cdsDepositCtrl.record._project_id+'/sse',
+          }
+        };
+      } else {
+        args = {
+          url: that.cdsDepositCtrl.links.bucket + '/' + file.key,
+          method: 'PUT',
+          headers: {
+            'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
+          },
+          data: file
+        };
+      }
       return args;
     };
 
@@ -42,37 +60,68 @@ function cdsUploaderCtrl($scope, $q, Upload, $http) {
       var defer = $q.defer();
       var data = [];
       function _chain(upload) {
+        var downloadPromise;
         var args = that.prepareUpload(upload);
-        Upload.http(args)
-        .then(
-          function success(response) {
-            // Update the file with status
-            response.data.completed = true;
-            response.data.progress = 100;
-            that.updateFile(
-              response.config.data.key,
-              response.data,
-              true
-            );
-            data.push(response.data);
-          },
-          function error(response) {
-            // Throw an error
-            defer.reject(response);
-          },
-          function progress(evt) {
-            var progress = parseInt(100.0 * evt.loaded / evt.total, 10);
-            that.cdsDepositCtrl.progress = progress;
-            // Update the file with status
-            that.updateFile(
-              evt.config.data.key,
-              {
-                progress: progress
+
+        if (!upload.receiver) {
+          downloadPromise = Upload.http(args).then(
+            function success(response) {
+              // Update the file with status
+              response.data.completed = true;
+              response.data.progress = 100;
+              that.updateFile(
+                response.config.data.key,
+                response.data,
+                true
+              );
+              data.push(response.data);
+            },
+            function error(response) {
+              // Throw an error
+              defer.reject(response);
+            },
+            function progress(evt) {
+              var progress = parseInt(100.0 * evt.loaded / evt.total, 10);
+              that.cdsDepositCtrl.progress = progress;
+              // Update the file with status
+              that.updateFile(
+                evt.config.data.key,
+                {
+                  progress: progress
+                }
+              );
+            }
+          );
+        } else {
+          Upload.http(args);
+          var fileListenerName = 'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key;
+          $scope.$on(fileListenerName, function(event, data) {
+            var updateObj, progress;
+            var payload = data.meta.payload;
+            if (data.state != 'FAILURE') {
+              progress = payload.percentage;
+              var completed = progress == 100;
+              updateObj = {
+                progress: progress,
+                completed: completed
+              };
+            } else {
+              updateObj = {
+                errored: true
+              };
+            }
+            $timeout(function() {
+              if (progress) {
+                that.cdsDepositCtrl.progress = progress;
               }
-            );
-          }
-        )
-        .finally(function finish(evt) {
+              that.updateFile(payload.key, updateObj);
+            }, 0);
+          }, false);
+          var deferred = $q.defer();
+          deferred.resolve();
+          downloadPromise = deferred.promise;
+        }
+        downloadPromise.finally(function finish(evt) {
           if (that.queue.length > 0) {
             return _chain(that.queue.shift());
           } else {
@@ -126,8 +175,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http) {
       return;
     }
 
-    this.files[index] = angular.merge(
-      {},
+    angular.merge(
       this.files[index],
       data || {}
     );
@@ -180,7 +228,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http) {
   };
 }
 
-cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http'];
+cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout'];
 
 function cdsUploader() {
   return {
@@ -189,7 +237,8 @@ function cdsUploader() {
       filterFiles: '=',
     },
     require: {
-      cdsDepositCtrl: '^cdsDeposit'
+      cdsDepositCtrl: '^cdsDeposit',
+      cdsDepositsCtrl: '^cdsDeposits'
     },
     controller: cdsUploaderCtrl,
     templateUrl: function($element, $attrs) {

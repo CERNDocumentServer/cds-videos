@@ -68,6 +68,16 @@
             files="child.metadata._files"
             template="/static/templates/cds_deposit/types/common/uploader.html"
           ></cds-uploader>
+          <cds-remote-uploader
+            template="/static/templates/cds_deposit/remote_upload.html"
+            dropbox-enabled="true"
+            dropbox-selector=".dropbox-upload"
+            dropbox-app-key="{{ dropboxAppKey }}"
+            remote-receiver="/api/hooks/receivers/downloader/events/"
+            files="child.metadata._files"
+          >
+            <div class="dropbox-upload"></div>
+          </cds-remote-uploader>
           </cds-form>
         </cds-deposit>
       </div>
@@ -80,3 +90,13 @@
     </cds-deposit>
   </div>
 </div>
+
+<cds-remote-uploader
+    template="/static/templates/cds_deposit/remote_upload.html"
+    dropbox-enabled="true"
+    dropbox-selector=".dropbox-upload"
+    dropbox-app-key="{{ dropboxAppKey }}"
+    remote-receiver="/api/hooks/receivers/downloader/events/"
+>
+  <div class="dropbox-upload"></div>
+</cds-remote-uploader>
