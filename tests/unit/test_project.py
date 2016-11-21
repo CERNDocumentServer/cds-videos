@@ -235,8 +235,9 @@ def test_project_edit(app, project_published):
 
     # Check that all titles where properly changed
     assert new_project['title']['title'] == 'My project'
-    assert videos[0]['title']['title'] == 'Video 1'
-    assert videos[1]['title']['title'] == 'Video 2'
+    assert videos[0]['title']['title'] in ['Video 1', 'Video 2']
+    assert videos[1]['title']['title'] in ['Video 1', 'Video 2']
+    assert videos[0]['title']['title'] != videos[1]['title']['title']
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
