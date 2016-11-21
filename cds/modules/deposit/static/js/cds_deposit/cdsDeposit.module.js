@@ -51,18 +51,49 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
         }
       );
     }
+
+    // Event Listener
+    this.sseEventListener = function(evt) {
+      // Do some magic
+      var data = JSON.parse(evt.data || '{}');
+      console.log('EVENT DATA', data);
+    }
+
+    // SSE stuff - move to somewhere else
+    var parser = document.createElement('a');
+    parser.href = this.masterLinks.html;
+    console.log('PARSER', parser.pathname);
+    var did = parser.pathname.split('/')[2];
+    that.sseListener = new EventSource('/api/deposits/' + did + '/sse');
+    console.log('THE LISTENER', that.sseListener);
+
+    that.sseListener.onmessage = function(msg) {
+      console.log('On message', msg);
+    }
+    that.sseListener.onerror = function(msg) {
+      console.log('On errro', msg);
+    }
+    that.sseListener.onopen = function(msg) {
+      console.log('On oepn', msg);
+    }
+    that.sseListener.addEventListener(
+      'file_download', that.sseEventListener, false
+    );
+    // SSE stuff - move to somewhere else
   }
 
   this.addMaster = function(deposit, files) {
     if (!this.initialized) {
-      deposit.metadata._files = files || [];
+      if (deposit.metadata._files === undefined) {
+        deposit.metadata._files = files || [];
+      }
       this.master = deposit;
       // Initialized
       this.initialized = true;
       if (this.master.links.html) {
         this.handleRedirect(this.master.links.html, true);
       }
-    };
+    }
   };
 
   this.addChildren = function(deposit, files) {
@@ -254,7 +285,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
         return $attrs.template;
       }
     }
-  };
+  }
 
   function cdsDeposit() {
     return {
@@ -565,7 +596,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
                   return _chain(that.queue.shift());
                 } else {
                   defer.resolve(data);
-                };
+                }
               });
             }
             _chain(that.queue.shift());
@@ -612,7 +643,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
           if (force === true) {
             this.files[index] = angular.copy(data);
             return;
-          };
+          }
 
           this.files[index] = angular.merge(
             {},
