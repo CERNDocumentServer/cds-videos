@@ -29,6 +29,12 @@ from cds.modules.records.serializers.schemas.json.common import \
 from marshmallow import fields
 
 
+class ProjectDepositSchema(DepositSchema):
+    """Project Deposit Schema."""
+
+    state = fields.Raw()
+
+
 class FileSchema(StrictKeysSchema):
     """File schema."""
 
@@ -53,7 +59,7 @@ class ProjectSchema(StrictKeysSchema):
 
     _access = fields.Nested(AccessSchema)
     _buckets = fields.Nested(BucketSchema)
-    _deposit = fields.Nested(DepositSchema)
+    _deposit = fields.Nested(ProjectDepositSchema)
     _oai = fields.Nested(OaiSchema)
     contributors = fields.Nested(ContributorSchema, many=True)
     creator = fields.Nested(CreatorSchema)

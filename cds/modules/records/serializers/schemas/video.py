@@ -21,15 +21,17 @@
 
 from __future__ import absolute_import
 
-from marshmallow import Schema
-from marshmallow.decorators import validates_schema
-from marshmallow.exceptions import ValidationError
-
 from cds.modules.records.serializers.schemas.json.common import \
     StrictKeysSchema, ContributorSchema, KeywordsSchema, DescriptionSchema, \
     BucketSchema, OaiSchema, CreatorSchema, DescriptionTranslationSchema, \
     DepositSchema, TitleTranslationSchema, TitleSchema, AccessSchema
 from marshmallow import fields
+
+
+class VideoDepositSchema(DepositSchema):
+    """Project Deposit Schema."""
+
+    state = fields.Raw()
 
 
 class CopyrightSchema(StrictKeysSchema):
@@ -63,7 +65,7 @@ class VideoSchema(StrictKeysSchema):
 
     _access = fields.Nested(AccessSchema)
     _buckets = fields.Nested(BucketSchema)
-    _deposit = fields.Nested(DepositSchema)
+    _deposit = fields.Nested(VideoDepositSchema)
     _oai = fields.Nested(OaiSchema)
     _project_id = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
