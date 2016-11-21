@@ -27,13 +27,11 @@ from __future__ import absolute_import
 
 import threading
 import time
-import uuid
 
 import mock
 import pytest
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
-                                       as_object_version)
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag)
 from invenio_records import Record
 from six import BytesIO, next
 
@@ -49,8 +47,12 @@ def test_donwload_to_object_version(db, bucket):
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
         db.session.commit()
 
-        mock_request.return_value = type('Response', (object, ),
-                                         {'content': b'\x00' * 1024})
+        file_size = 1024
+        mock_request.return_value = type(
+            'Response', (object, ), {
+                'content': b'\x00' * file_size,
+                'headers': {'Content-Length': file_size}
+            })
 
         assert obj.file is None
 
@@ -68,7 +70,6 @@ def test_donwload_to_object_version(db, bucket):
 
 def test_update_record(app, db):
     """Test update record with multiple concurrent transactions."""
-
     if db.engine.name == 'sqlite':
         raise pytest.skip(
             'Concurrent transactions are not supported nicely on SQLite')
@@ -110,10 +111,10 @@ def test_metadata_extraction_video_mp4(app, db, depid, bucket, video_mp4):
     """Test metadata extraction video mp4."""
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
-    video_metadata_extraction.delay(
+    video_metadata_extraction.s(
         uri=video_mp4,
         object_version=str(obj.version_id),
-        deposit_id=str(depid))
+        deposit_id=str(depid)).delay()
 
     # Check that deposit's metadata got updated
     recid = PersistentIdentifier.get('depid', depid).object_uuid
@@ -143,7 +144,7 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     version_id = str(obj.version_id)
     db.session.commit()
 
-    task = video_extract_frames.delay(version_id)
+    video_extract_frames.delay(version_id)
 
     assert ObjectVersion.query.count() == 91  # master file + frames
 
@@ -211,4 +212,7 @@ def test_transcode(db, bucket, mock_sorenson):
                           sleep_time=0)
 
     db.session.add(bucket)
-    assert get_bucket_keys() == ['test-Youtube 480p.mp4', 'test.pdf']
+    keys = get_bucket_keys()
+    assert len(keys) == 2
+    assert 'test-Youtube 480p.mp4' in keys
+    assert 'test.pdf' in keys
