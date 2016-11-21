@@ -36,7 +36,7 @@ from collections import deque
 
 import requests
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
-from celery import Task, shared_task
+from celery import Task, shared_task, current_app as celery_app
 from celery.states import FAILURE, STARTED, SUCCESS
 from flask import current_app
 from invenio_db import db
@@ -48,7 +48,7 @@ from invenio_sse import current_sse
 from six import BytesIO
 from sqlalchemy.orm.exc import ConcurrentModificationError
 
-from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from ..ffmpeg import ff_frames, ff_probe_all
 
 
 def _factory_sse_task_base(type_=None):
@@ -57,7 +57,6 @@ def _factory_sse_task_base(type_=None):
     :param type_: Type of SSE message to send.
     :return: ``SSETask`` class.
     """
-
     class SSETask(Task):
         """Base class for tasks which might be sending SSE messages."""
 
@@ -82,9 +81,9 @@ def _factory_sse_task_base(type_=None):
         def _publish(self, state, meta):
             """Publish task's state to corresponding SSE channel."""
             if self.sse_channel:
-                data = dict(state=state, meta=meta)
+                data = {'state': state, 'meta': meta}
                 current_sse.publish(
-                    data, type_=type_, channel=self.sse_channel)
+                    data=data, type_=type_, channel=self.sse_channel)
 
         def update_state(self, task_id=None, state=None, meta=None):
             """."""
@@ -95,17 +94,24 @@ def _factory_sse_task_base(type_=None):
 
         def on_failure(self, exc, task_id, args, kwargs, einfo):
             """When an error occurs, attach useful information to the state."""
-            meta = dict(message=str(exc), payload=self._base_payload)
-            self._publish(state=FAILURE, meta=meta)
+            with celery_app.flask_app.app_context():
+                meta = dict(message=str(exc), payload=self._base_payload)
+                self._publish(state=FAILURE, meta=meta)
+
+        def on_success(self, exc, *args, **kwargs):
+            """When end correctly, attach useful information to the state."""
+            with celery_app.flask_app.app_context():
+                meta = dict(message=str(exc), payload=self._base_payload)
+                self._publish(state=SUCCESS, meta=meta)
 
     return SSETask
 
 
 @shared_task(bind=True, base=_factory_sse_task_base(type_='file_download'))
-def download_to_object_version(self, url, object_version, **kwargs):
+def download_to_object_version(self, uri, object_version, **kwargs):
     r"""Download file from a URL.
 
-    :param url: URL of the file to download.
+    :param uri: URL of the file to download.
     :param object_version: ``ObjectVersion`` instance or object version id.
     :param chunk_size: Size of the chunks for downloading.
     :param \**kwargs:
@@ -120,15 +126,23 @@ def download_to_object_version(self, url, object_version, **kwargs):
         deposit_id=kwargs.get('deposit_id', None), )
 
     # Make HTTP request
-    response = requests.get(url, stream=True)
+    response = requests.get(uri, stream=True)
+
+    if 'Content-Length' in response.headers:
+        headers_size = int(response.headers.get('Content-Length'))
+    else:
+        headers_size = 0
 
     def progress_updater(size, total):
         """Progress reporter."""
+        size = size or headers_size
         meta = dict(
             payload=dict(
-                size=total,
-                percentage=size or 0.0 / total * 100, ),
-            message='Downloading {0} of {1}'.format(size or 0, total), )
+                size=size,
+                total=total,
+                percentage=total * 100 / size, ),
+            message='Downloading {0} of {1}'.format(total, size),
+        )
 
         self.update_state(state=STARTED, meta=meta)
 
@@ -143,14 +157,15 @@ def download_to_object_version(self, url, object_version, **kwargs):
 @shared_task(
     bind=True,
     base=_factory_sse_task_base(type_='file_video_metadata_extraction'))
-def video_metadata_extraction(self, url, object_version, deposit_id, **kwargs):
+def video_metadata_extraction(self, uri, object_version, deposit_id,
+                              *args, **kwargs):
     """Extract metadata from given video file.
 
     All technical metadata, i.e. bitrate, will be translated into
     ``ObjectVersionTags``, plus all the metadata extracted will be store under
     ``_deposit`` as ``extracted_metadta``.
 
-    :param url: the video's URI
+    :param uri: the video's URI
     :param object_version: the object version that (will) contain the actual
            video
     :param deposit_id: the ID od the deposit
@@ -159,7 +174,7 @@ def video_metadata_extraction(self, url, object_version, deposit_id, **kwargs):
 
     self._base_payload = dict(
         object_version=str(object_version.version_id),
-        uri=url,
+        uri=uri,
         tags=object_version.get_tags(),
         deposit_id=deposit_id,
         event_id=kwargs.get('event_id', None), )
@@ -167,7 +182,7 @@ def video_metadata_extraction(self, url, object_version, deposit_id, **kwargs):
     recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
 
     # Extract video's metadata using `ff_probe`
-    metadata = json.loads(ff_probe_all(url))
+    metadata = json.loads(ff_probe_all(uri))
 
     # Add technical information to the ObjectVersion as Tags
     format_keys = [
@@ -387,9 +402,21 @@ def update_record(self, recid, patch, max_retries=5, countdown=5):
     :param countdown: time to sleep between retries
     """
     try:
-        record = Record.get_record(recid)
-        record = record.patch(patch)
-        record.commit()
+        with db.session.begin_nested():
+            # FIXME
+            from sqlalchemy.orm.exc import DetachedInstanceError
+            from flask_security import current_user
+            try:
+                current_user.id
+            except DetachedInstanceError:
+                db.session.add(current_user)
+            except AttributeError:
+                pass
+            # /FIXME
+            record = Record.get_record(recid)
+            record = record.patch(patch)
+            #  db.session.refresh(record.model)
+            record.commit()
         db.session.commit()
     except ConcurrentModificationError as exc:
         db.session.rollback()
