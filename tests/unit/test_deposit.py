@@ -56,7 +56,7 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
                                          deposit_rest, project_metadata):
     """Test bucket link factory retrieval of a bucket."""
     with app.test_client() as client:
-        login_user_via_session(client, email=users[0].email)
+        login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # Test links for project
         res = client.post(

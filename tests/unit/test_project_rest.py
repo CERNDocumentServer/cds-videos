@@ -31,6 +31,7 @@ import json
 from cds.modules.deposit.api import project_resolver, video_resolver
 from flask import url_for
 from invenio_accounts.testutils import login_user_via_session
+from invenio_accounts.models import User
 
 
 def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
@@ -49,7 +50,7 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
                     'deposits/records/video-v1.0.0.json')
 
     with app.test_client() as client:
-        login_user_via_session(client, email=users[0].email)
+        login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
