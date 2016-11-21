@@ -35,7 +35,6 @@ from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
-from werkzeug.utils import import_string
 
 from .modules.access.access_control import CERNRecordsSearch
 from .modules.deposit.permissions import DepositPermission, can_edit_deposit
