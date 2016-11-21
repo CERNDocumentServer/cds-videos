@@ -36,8 +36,10 @@ from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
-from invenio_rest.errors import RESTValidationError
 from werkzeug.local import LocalProxy
+from invenio_webhooks.models import Event
+from ..webhooks.receivers import _compute_status
+from sqlalchemy.types import String
 
 from .errors import DiscardConflict
 
@@ -78,10 +80,29 @@ class CDSFileObject(FileObject):
         return self.data
 
 
+def _merge_new_status(stats, name, status):
+    if name in stats:
+        return _compute_status([stats[name], status])
+    else:
+        return status
+
+
+def _status_extractor(res, name, children=None):
+    stats = {}
+    # TODO merge not needed
+    stats[name] = _merge_new_status(stats, name, res.status)
+    if children:
+        for child in children:
+            for (name, status) in child.items():
+                stats[name] = _merge_new_status(stats, name, status)
+    return stats
+
+
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
     def __init__(self, *args, **kwargs):
+        """Init."""
         self.file_cls = CDSFileObject
         return super(CDSDeposit, self).__init__(*args, **kwargs)
 
@@ -91,7 +112,30 @@ class CDSDeposit(Deposit):
         deposit = super(CDSDeposit, cls).get_record(
             id_=id_, with_deleted=with_deleted)
         deposit['_files'] = deposit.files.dumps()
+        deposit['_deposit']['state'] = deposit._compute_tasks_status()
         return deposit
+
+    @property
+    def _events(self):
+        """Get a list of events."""
+        #  return Event.query.filter(
+        #      Event.payload.op('->>')(
+        #          'deposit_id').cast(String) == self['_deposit']['id']).all()
+        return Event.query.filter(
+            Event.payload['deposit_id'] == self['_deposit']['id']
+        ).all()
+
+    def _compute_tasks_status(self):
+        """Compute tasks status."""
+        events_status = [
+            event.receiver._status_and_info(event,
+                                            fun=_status_extractor)['info']
+            for event in self._events]
+        global_status = {}
+        for item in events_status:
+            for (k, v) in item.items():
+                global_status[k] = _merge_new_status(global_status, k, v)
+        return global_status
 
     @classmethod
     def create(cls, data, id_=None):
