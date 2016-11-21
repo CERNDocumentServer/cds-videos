@@ -140,6 +140,12 @@ def test_download_receiver(api_app, db, bucket, depid, access_token,
         )
 
 
+def mock_current_user(*args2, **kwargs2):
+    """Mock current user not logged-in."""
+    return None
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver(api_app, db, bucket, depid, access_token,
                                json_headers, mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""

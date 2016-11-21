@@ -59,6 +59,7 @@ from invenio_deposit import InvenioDepositREST
 from invenio_records_rest import InvenioRecordsREST
 from invenio_records_rest.utils import PIDConverter
 from six import BytesIO
+from invenio_accounts.models import User
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -77,7 +78,6 @@ def app():
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI',
             'postgresql+psycopg2://localhost/cds_testing'),
-        # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
@@ -114,7 +114,6 @@ def celery_not_fail_on_eager_app(app):
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI',
             'postgresql+psycopg2://localhost/cds_testing'),
-        # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
@@ -187,14 +186,16 @@ def users(app, db):
             action='deposit-admin-access', user=admin
         ))
     db.session.commit()
-    return [user1, user2]
+    id_1 = user1.id
+    id_2 = user2.id
+    return [id_1, id_2]
 
 
 @pytest.fixture()
 def u_email(db, users):
     """Valid user email."""
-    db.session.add(users[0])
-    return users[0].email
+    user = User.query.get(users[0])
+    return user.email
 
 
 @pytest.fixture()
@@ -204,7 +205,7 @@ def depid(app, users, db):
         'title': {'title': 'fuu'}
     }
     with app.test_request_context():
-        login_user(users[0])
+        login_user(User.query.get(users[0]))
         deposit = Deposit.create(record)
         deposit.commit()
         db.session.commit()
@@ -379,7 +380,7 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
         },
     }
     with app.test_request_context():
-        login_user(users[0])
+        login_user(User.query.get(users[0]))
 
         # create empty project
         project = Project.create(project_data).commit()
@@ -438,19 +439,18 @@ def mock_sorenson():
 
 
 @pytest.fixture
-def access_token(app, db, users):
+def access_token(api_app, db, users):
     """Fixture that create an access token."""
-    db.session.add(users[0])
-    tester_id = users[0].id
-    with app.app_context():
+    with db.session.begin_nested():
+        tester_id = User.query.get(users[0]).id
         token = Token.create_personal(
             'test-personal-{0}'.format(tester_id),
             tester_id,
             scopes=['webhooks:event'],
             is_internal=True,
         ).access_token
-        db.session.commit()
-        return token
+    db.session.commit()
+    return token
 
 
 @shared_task()

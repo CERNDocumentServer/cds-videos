@@ -170,39 +170,40 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
            video
     :param deposit_id: the ID od the deposit
     """
-    object_version = as_object_version(object_version)
+    with db.session.begin_nested():
+        object_version = as_object_version(object_version)
 
-    self._base_payload = dict(
-        object_version=str(object_version.version_id),
-        uri=uri,
-        tags=object_version.get_tags(),
-        deposit_id=deposit_id,
-        event_id=kwargs.get('event_id', None), )
+        self._base_payload = dict(
+            object_version=str(object_version.version_id),
+            uri=uri,
+            tags=object_version.get_tags(),
+            deposit_id=deposit_id,
+            event_id=kwargs.get('event_id', None), )
 
-    recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
+        recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
 
-    # Extract video's metadata using `ff_probe`
-    metadata = json.loads(ff_probe_all(uri))
+        # Extract video's metadata using `ff_probe`
+        metadata = json.loads(ff_probe_all(uri))
 
-    # Add technical information to the ObjectVersion as Tags
-    format_keys = [
-        'duration',
-        'bit_rate',
-        'size',
-    ]
-    stream_keys = [
-        'avg_frame_rate',
-        'codec_name',
-        'width',
-        'height',
-        'nb_frames',
-        'display_aspect_ratio',
-        'color_range',
-    ]
+        # Add technical information to the ObjectVersion as Tags
+        format_keys = [
+            'duration',
+            'bit_rate',
+            'size',
+        ]
+        stream_keys = [
+            'avg_frame_rate',
+            'codec_name',
+            'width',
+            'height',
+            'nb_frames',
+            'display_aspect_ratio',
+            'color_range',
+        ]
 
-    [ObjectVersionTag.create(object_version, k, v)
-     for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
-     if k in (format_keys + stream_keys)]
+        [ObjectVersionTag.create(object_version, k, v)
+        for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
+        if k in (format_keys + stream_keys)]
 
     db.session.commit()
 
@@ -403,19 +404,8 @@ def update_record(self, recid, patch, max_retries=5, countdown=5):
     """
     try:
         with db.session.begin_nested():
-            # FIXME
-            from sqlalchemy.orm.exc import DetachedInstanceError
-            from flask_security import current_user
-            try:
-                current_user.id
-            except DetachedInstanceError:
-                db.session.add(current_user)
-            except AttributeError:
-                pass
-            # /FIXME
             record = Record.get_record(recid)
             record = record.patch(patch)
-            #  db.session.refresh(record.model)
             record.commit()
         db.session.commit()
     except ConcurrentModificationError as exc:

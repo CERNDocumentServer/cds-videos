@@ -34,6 +34,7 @@ from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
                                      is_deposit, record_unbuild_url)
+from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from cds.modules.deposit.errors import DiscardConflict
@@ -151,7 +152,7 @@ def test_add_video(app, es, cds_jsonresolver, users, location):
         'videos': [],
     }
 
-    login_user(users[0])
+    login_user(User.query.get(users[0]))
 
     # create empty project
     project = Project.create(project_data).commit()
