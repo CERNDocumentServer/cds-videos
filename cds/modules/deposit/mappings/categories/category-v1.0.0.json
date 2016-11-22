@@ -1,0 +1,23 @@
+{
+  "mappings": {
+    "category-v1.0.0": {
+      "numeric_detection": true,
+      "properties": {
+        "types": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "_record_type": {
+          "type": "string"
+        },
+        "suggest_name": {
+          "type": "completion",
+          "payloads": true
+        }
+      },
+      "date_detection": true
+    }
+  }
+}

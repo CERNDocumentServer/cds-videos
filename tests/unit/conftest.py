@@ -60,6 +60,10 @@ from invenio_records_rest import InvenioRecordsREST
 from invenio_records_rest.utils import PIDConverter
 from six import BytesIO
 from invenio_accounts.models import User
+from invenio_indexer import InvenioIndexer
+from invenio_pidstore import InvenioPIDStore
+
+from helpers import create_category
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -232,6 +236,18 @@ def es(app):
     current_search_client.indices.refresh()
     yield current_search_client
     list(current_search.delete(ignore=[404]))
+
+
+@pytest.fixture()
+def pidstore(app):
+    """Initialize invenio-indexer app."""
+    return InvenioPIDStore(app)
+
+
+@pytest.fixture()
+def indexer(app):
+    """Initialize invenio-indexer app."""
+    return InvenioIndexer(app)
 
 
 @pytest.fixture()
@@ -470,3 +486,25 @@ def receiver(api_app):
 
     current_webhooks.register('test-receiver', TestReceiver)
     return 'test-receiver'
+
+
+@pytest.fixture()
+def category_1(api_app, es, indexer, pidstore, cds_jsonresolver):
+    """Create a fixture for category."""
+    data = {
+        'name': 'open',
+        'types': ['video', 'footage'],
+        '_record_type': ['video', 'project'],
+    }
+    return create_category(api_app=api_app, db=db_, data=data)
+
+
+@pytest.fixture()
+def category_2(api_app, es, indexer, pidstore, cds_jsonresolver):
+    """Create a fixture for category."""
+    data = {
+        'name': 'atlas',
+        'types': ['video'],
+        '_record_type': ['video'],
+    }
+    return create_category(api_app=api_app, db=db_, data=data)

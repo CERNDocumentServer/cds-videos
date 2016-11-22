@@ -187,6 +187,35 @@ RECORDS_REST_ENDPOINTS = dict(
         default_media_type='application/json',
         max_result_window=10000,
     ),
+    catid=dict(
+        default_endpoint_prefix=True,
+        pid_type='catid',
+        pid_minter='cds_recid',
+        pid_fetcher='cds_catid',
+        search_index='categories',
+        search_type=None,
+        search_class=CERNRecordsSearch,
+        search_factory_imp='invenio_records_rest.query.es_search_factory',
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/categories/',
+        item_route='/categories/<pid_value>',
+        default_media_type='application/json',
+        max_result_window=10000,
+        suggesters={
+            'suggest-name': {
+                'completion': {
+                    'field': 'suggest_name',
+                }
+            }
+        },
+    ),
 )
 
 # Sort options records REST API.

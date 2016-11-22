@@ -50,6 +50,7 @@ tests_require = [
     'pytest-runner>=2.7.0',
     'pytest>=2.8.0',
     'selenium>=2.53.6',
+    'simplejson>=3.10',
     'six>=1.10.0',
 ]
 
@@ -192,8 +193,12 @@ setup(
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
+        'invenio_pidstore.fetchers': [
+            'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
+        ],
         'invenio_pidstore.minters': [
             'cds_recid = cds.modules.records.minters:recid_minter',
+            'cds_catid = cds.modules.deposit.minters:catid_minter',
         ],
         'invenio_i18n.translations': [
             'messages = cds',
@@ -201,6 +206,7 @@ setup(
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
             'deposits = cds.modules.deposit.mappings',
+            'categories = cds.modules.deposit.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',

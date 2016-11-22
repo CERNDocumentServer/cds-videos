@@ -21,12 +21,15 @@
 
 from __future__ import absolute_import, print_function
 
+import simplejson
 import tarfile
 import uuid
 from os import listdir, makedirs
 from os.path import basename, exists, isdir, join, splitext
 
+from cds.modules.deposit.minters import catid_minter
 import click
+from cds.modules.deposit.api import Category
 import pkg_resources
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
@@ -159,8 +162,8 @@ def cds(temp, source):
             # FIXME: Add some progress
             # with click.progressbar(data) as records:
             with db.session.begin_nested():
-                for index, data in enumerate(
-                                    split_blob(source.read()), start=1):
+                for index, data in enumerate(split_blob(source.read()),
+                                             start=1):
                     # create uuid
                     rec_uuid = uuid.uuid4()
                     # do translate
@@ -232,7 +235,7 @@ def files(temp, source):
                 'files': [
                     {
                         'uri': '/api/files/{0}/{1}'.format(
-                                                    str(bucket.id), file_name),
+                            str(bucket.id), file_name),
                         'filename': file_name,
                         'bucket': str(bucket.id),
                         'local': True
@@ -255,3 +258,32 @@ def files(temp, source):
             RecordsBuckets.create(record=record.model, bucket=bucket)
     db.session.commit()
     click.echo('DONE :)')
+
+
+@fixtures.command()
+@click.option('--source', '-s', default=False)
+@with_appcontext
+def categories(source):
+    """Load categories."""
+    if not source:
+        source = pkg_resources.resource_filename(
+            'cds.modules.fixtures', 'data/categories.json'
+        )
+
+    with open(source, 'r') as fp:
+        categories = simplejson.load(fp)
+
+    # save in db
+    to_index = []
+    with db.session.begin_nested():
+        for data in categories:
+            cat_id = uuid.uuid4()
+            catid_minter(cat_id, data)
+            category = Category.create(data)
+            to_index.append(category.id)
+    db.session.commit()
+
+    # index them
+    indexer = RecordIndexer()
+    for cat_id in to_index:
+        indexer.index_by_id(cat_id)

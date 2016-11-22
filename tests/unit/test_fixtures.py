@@ -22,46 +22,22 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""CDS tests for Webhook receivers."""
+"""CDS fixtures tests."""
 
 from __future__ import absolute_import, print_function
 
-import uuid
-from celery import shared_task, states
-from cds.modules.deposit.minters import catid_minter
-from invenio_indexer.api import RecordIndexer
-
-from cds.modules.deposit.api import Category
+from click.testing import CliRunner
+from invenio_records.models import RecordMetadata
+from cds.modules.fixtures.cli import categories as cli_categories
 
 
-@shared_task(bind=True)
-def failing_task(self, *args, **kwargs):
-    """A failing shared task."""
-    self.update_state(state=states.FAILURE, meta={})
-
-
-@shared_task(bind=True)
-def success_task(self, *args, **kwargs):
-    """A failing shared task."""
-    self.update_state(state=states.SUCCESS, meta={})
-
-
-@shared_task()
-def simple_add(x, y):
-    """Simple shared task."""
-    return x + y
-
-
-def create_category(api_app, db, data):
-    """Create a fixture for category."""
-    with db.session.begin_nested():
-        record_id = uuid.uuid4()
-        catid_minter(record_id, data)
-        category = Category.create(data)
-
-    db.session.commit()
-
-    indexer = RecordIndexer()
-    indexer.index_by_id(category.id)
-
-    return category
+def test_fixture_categories(script_info, db):
+    """Test load category fixtures."""
+    assert len(RecordMetadata.query.all()) == 0
+    runner = CliRunner()
+    res = runner.invoke(cli_categories, [], obj=script_info)
+    assert res.exit_code == 0
+    categories = RecordMetadata.query.all()
+    assert len(categories) == 5
+    for category in categories:
+        assert 'video' in category.json['types']
