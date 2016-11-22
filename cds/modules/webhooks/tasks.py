@@ -180,7 +180,7 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
             deposit_id=deposit_id,
             event_id=kwargs.get('event_id', None), )
 
-        recid = PersistentIdentifier.get('depid', deposit_id).object_uuid
+        recid = str(PersistentIdentifier.get('depid', deposit_id).object_uuid)
 
         # Extract video's metadata using `ff_probe`
         metadata = json.loads(ff_probe_all(uri))
