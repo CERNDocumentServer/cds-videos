@@ -279,7 +279,7 @@ def video_extract_frames(self,
     db.session.commit()
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='file_trancode'))
+@shared_task(bind=True, base=_factory_sse_task_base(type_='file_transcode'))
 def video_transcode(self,
                     object_version,
                     video_presets=None,
@@ -308,6 +308,7 @@ def video_transcode(self,
     job_ids = deque()
     # Set handler for canceling all jobs
     def handler(signum, frame):
+        # TODO handle better file deleting and ObjectVersion cleaning
         map(lambda _info: stop_encoding(info['job_id']), job_ids)
     signal.signal(signal.SIGTERM, handler)
 
@@ -317,41 +318,50 @@ def video_transcode(self,
 
     preset_config = current_app.config['CDS_SORENSON_PRESETS']
     for preset in video_presets or preset_config.keys():
-        # Create FileInstance and get generated UUID
-        file_instance = FileInstance.create()
-        # Create ObjectVersion
-        base_name = object_version.key.rsplit('.', 1)[0]
-        new_extension = preset_config[preset][1]
-        obj = ObjectVersion.create(
-            bucket=bucket_id,
-            key='{0}-{1}{2}'.format(base_name, preset, new_extension)
-        )
-        obj.set_file(file_instance)
-        ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
-        ObjectVersionTag.create(obj, 'preset', preset)
+        with db.session.begin_nested():
+            # Create FileInstance and get generated UUID
+            file_instance = FileInstance.create()
+            # Create ObjectVersion
+            base_name = object_version.key.rsplit('.', 1)[0]
+            new_extension = preset_config[preset][1]
+            obj = ObjectVersion.create(
+                bucket=bucket_id,
+                key='{0}-{1}{2}'.format(base_name, preset, new_extension)
+            )
+            obj.set_file(file_instance)
+            ObjectVersionTag.create(
+                obj, 'master', str(object_version.version_id))
+            ObjectVersionTag.create(obj, 'preset', preset)
 
-        # Extract new location
-        storage = file_instance.storage(default_location=bucket_location)
-        directory, filename = storage._get_fs()
+            # Extract new location
+            storage = file_instance.storage(default_location=bucket_location)
+            directory, filename = storage._get_fs()
 
-        # Start Sorenson
-        input_file = object_version.file.uri
-        output_file = os.path.join(directory.root_path, filename)
+            # Start Sorenson
+            input_file = object_version.file.uri
+            output_file = os.path.join(directory.root_path, filename)
 
-        job_id = start_encoding(input_file, preset, output_file)
-        ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
+            job_id = start_encoding(input_file, preset, output_file)
+            ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
+            job_info = dict(
+                preset=preset,
+                job_id=job_id,
+                file_instance=str(file_instance.id),
+                uri=output_file,
+                object_version=str(obj.version_id),
+                key=obj.key,
+                tags=obj.get_tags(),
+            )
+        db.session.commit()
+
         self.update_state(
             state=STARTED,
             meta=dict(
-                payload=dict(preset=preset, job_id=job_id),
+                payload=dict(job_info=job_info),
                 message='Started transcoding.'
             )
         )
-
-        job_ids.append(dict(
-            preset=preset, job_id=job_id,
-            file_instance=file_instance, uri=output_file
-        ))
+        job_ids.append(job_info)
 
     # Monitor jobs and report accordingly
     while job_ids:
@@ -360,35 +370,32 @@ def video_transcode(self,
         # Get job status
         status = get_encoding_status(info['job_id'])['Status']
         percentage = 100 if status['TimeFinished'] else status['Progress']
+        info['percentage'] = percentage
 
         # Update task's state for each individual preset
         self.update_state(
             state=STARTED,
             meta=dict(
-                payload=dict(
-                    preset=info['preset'],
-                    job_id=info['job_id'],
-                    percentage=percentage,
-                ),
+                payload=dict(job_info=job_info),
                 message='Transcoding {0}'.format(percentage),
             )
         )
 
         # Set file's location for completed jobs
         if percentage == 100:
-            uri = info['uri']
-            with open(uri, 'rb') as transcoded_file:
-                digest = hashlib.md5(transcoded_file.read()).hexdigest()
-            size = os.path.getsize(uri)
-            checksum = '{0}:{1}'.format('md5', digest)
-            info['file_instance'].set_uri(uri, size, checksum)
+            with db.session.begin_nested():
+                uri = info['uri']
+                with open(uri, 'rb') as transcoded_file:
+                    digest = hashlib.md5(transcoded_file.read()).hexdigest()
+                size = os.path.getsize(uri)
+                checksum = '{0}:{1}'.format('md5', digest)
+                FileInstance.get(
+                    info['file_instance']).set_uri(uri, size, checksum)
+            db.session.commit()
         else:
             job_ids.append(info)
 
         time.sleep(sleep_time)
-
-    # Commit changes
-    db.session.commit()
 
 
 @shared_task(bind=True)
