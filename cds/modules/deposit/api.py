@@ -38,6 +38,7 @@ from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from werkzeug.local import LocalProxy
 from invenio_webhooks.models import Event
+from invenio_records.api import Record
 from ..webhooks.receivers import _compute_status
 import sqlalchemy
 
@@ -417,3 +418,19 @@ class Video(CDSDeposit):
             [video_discarded.ref]
         )
         return video_discarded
+
+
+class Category(Record):
+    """Define API for a category."""
+
+    @classmethod
+    def create(cls, data, id_=None):
+        """Create a category."""
+        data['$schema'] = current_jsonschemas.path_to_url(
+            'categories/category-v1.0.0.json')
+
+        data['suggest_name'] = {
+            'input': data.get('name', None),
+            'payload': {'types': data.get('types', [])}
+        }
+        return super(Category, cls).create(data=data, id_=id_)
