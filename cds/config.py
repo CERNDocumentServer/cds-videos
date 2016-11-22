@@ -71,7 +71,7 @@ CELERY_RESULT_BACKEND = os.environ.get(
 # Celery monitoring.
 CELERY_TRACK_STARTED = True
 # Celery accepted content types.
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml', 'pickle']
 # Celery Beat schedule
 CELERYBEAT_SCHEDULE = {
     'indexer': {
