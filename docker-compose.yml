@@ -9,7 +9,7 @@ frontend:
     - static
 web:
   build: .
-  command: cds --debug run -h 0.0.0.0 -p 5000
+  command: cds run -h 0.0.0.0 -p 5000
   ports:
     - "5000:5000"
   environment:
