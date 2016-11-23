@@ -45,6 +45,7 @@ from cds.modules.webhooks.receivers import CeleryAsyncReceiver, \
     _info_extractor, _compute_status
 from invenio_webhooks import current_webhooks
 from helpers import simple_add, failing_task, success_task
+from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 
 from cds.modules.deposit.loaders import project_loader, video_loader
@@ -192,10 +193,10 @@ def test_deposit_events_on_download(api_app, db, depid, bucket, access_token,
 
     with mock.patch('requests.get') as mock_request, \
             api_app.test_client() as client:
-        file_size = 1024
+        file_size = 1024 * 1024
         mock_request.return_value = type(
             'Response', (object, ), {
-                'content': b'\x00' * file_size,
+                'raw': BytesIO(b'\x00' * file_size),
                 'headers': {'Content-Length': file_size}
             })
 
@@ -207,6 +208,13 @@ def test_deposit_events_on_download(api_app, db, depid, bucket, access_token,
 
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
         assert resp.status_code == 202
+
+        file_size = 1024 * 1024 * 6
+        mock_request.return_value = type(
+            'Response', (object, ), {
+                'raw': BytesIO(b'\x00' * file_size),
+                'headers': {'Content-Length': file_size}
+            })
 
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
         assert resp.status_code == 202

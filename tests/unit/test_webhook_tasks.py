@@ -50,7 +50,7 @@ def test_donwload_to_object_version(db, bucket):
         file_size = 1024
         mock_request.return_value = type(
             'Response', (object, ), {
-                'content': b'\x00' * file_size,
+                'raw': BytesIO(b'\x00' * file_size),
                 'headers': {'Content-Length': file_size}
             })
 

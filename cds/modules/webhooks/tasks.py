@@ -45,7 +45,6 @@ from invenio_files_rest.models import (FileInstance, ObjectVersion,
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
-from six import BytesIO
 from sqlalchemy.orm.exc import ConcurrentModificationError
 
 from ..ffmpeg import ff_frames, ff_probe_all
@@ -131,11 +130,11 @@ def download_to_object_version(self, uri, object_version, **kwargs):
     if 'Content-Length' in response.headers:
         headers_size = int(response.headers.get('Content-Length'))
     else:
-        headers_size = 0
+        headers_size = None
 
     def progress_updater(size, total):
         """Progress reporter."""
-        size = size or headers_size
+        size = size or headers_size or 0
         meta = dict(
             payload=dict(
                 size=size,
@@ -147,7 +146,7 @@ def download_to_object_version(self, uri, object_version, **kwargs):
         self.update_state(state=STARTED, meta=meta)
 
     object_version.set_contents(
-        BytesIO(response.content), progress_callback=progress_updater)
+        response.raw, progress_callback=progress_updater, size=headers_size)
 
     db.session.commit()
 
