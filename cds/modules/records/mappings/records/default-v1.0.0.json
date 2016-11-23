@@ -1,9 +1,6 @@
 {
     "mappings": {
         "default-v1.0.0": {
-            "_all": {
-                "enabled": true
-            },
             "date_detection": true,
             "numeric_detection": true,
             "properties": {
