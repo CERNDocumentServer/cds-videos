@@ -117,11 +117,11 @@ Next, create the database, indexes, fixtures and an admin user:
 
 .. code-block:: console
 
-    $ docker-compose run web cds db create
-    $ docker-compose run web cds index init
-    $ docker-compose run web cds users create cds@cern.ch -a
-    $ docker-compose run web cds access allow admin-access -e cds@cern.ch
-    $ docker-compose run web cds fixtures cds
+    $ docker-compose run --rm web cds db create
+    $ docker-compose run --rm web cds index init
+    $ docker-compose run --rm web cds users create cds@cern.ch -a
+    $ docker-compose run --rm web cds access allow admin-access user cds@cern.ch
+    $ docker-compose run --rm web cds fixtures cds
 
 Now visit the following URL in your browser:
 

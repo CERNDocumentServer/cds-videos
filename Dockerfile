@@ -25,6 +25,7 @@ RUN apt-get update \
         libssl-dev \
         libxml2-dev \
         libxslt-dev \
+        imagemagick \
     # Node.js
     && curl -sL https://deb.nodesource.com/setup_iojs_2.x | bash - \
     && apt-get -qy install --fix-missing --no-install-recommends \
@@ -36,11 +37,12 @@ RUN apt-get update \
     && rm -rf /usr/share/man/* /usr/share/groff/* /usr/share/info/* \
     && find /usr/share/doc -depth -type f ! -name copyright -delete
 
-# Basic Python and Node.js tools
-RUN pip install --upgrade pip setuptools ipython gunicorn \
-    && npm update \
-    && npm install --silent -g node-sass clean-css uglify-js requirejs
+# Basic Python tools
+RUN pip install --upgrade pip setuptools ipython gunicorn
 
+# NPM
+COPY ./scripts/setup-npm.sh /tmp
+RUN /tmp/setup-npm.sh
 
 # CDS specific
 
