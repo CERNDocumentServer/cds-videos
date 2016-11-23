@@ -88,6 +88,7 @@ def test_download_receiver(api_app, db, bucket, depid, access_token,
         assert data['key'] == 'test.pdf'
         assert 'version_id' in data
         assert 'links' in data  # TODO decide with links are needed
+        assert all([link in data['links'] for link in ['self', 'version', 'cancel']])
 
         assert ObjectVersion.query.count() == 1
         obj = ObjectVersion.query.first()

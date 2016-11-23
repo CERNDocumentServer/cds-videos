@@ -29,6 +29,7 @@ from __future__ import absolute_import
 from celery import chain, group
 from invenio_db import db
 from celery import states
+from flask import url_for
 from invenio_webhooks.models import Receiver
 from sqlalchemy.orm.attributes import flag_modified
 from celery.result import result_from_tuple
@@ -166,7 +167,23 @@ class Downloader(CeleryAsyncReceiver):
         with db.session.begin_nested():
             object_version = as_object_version(object_version.version_id)
             event.response.update(
-                links=dict(),
+                links={
+                    'self': url_for(
+                        'invenio_files_rest.object_api',
+                        bucket_id=str(object_version.bucket_id),
+                        key=object_version.key,
+                        _external=True, ),
+                    'version': url_for(
+                        'invenio_files_rest.object_api',
+                        bucket_id=str(object_version.bucket_id),
+                        key=object_version.key,
+                        versionId=str(object_version.version_id),
+                        _external=True, ),
+                    'cancel': url_for(
+                        'invenio_webhooks.event_list',
+                        receiver_id='downloader',
+                        _external=True, )
+                },
                 key=object_version.key,
                 version_id=str(object_version.version_id),
                 tags=object_version.get_tags(),
