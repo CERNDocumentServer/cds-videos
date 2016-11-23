@@ -43,6 +43,7 @@ from invenio_webhooks import current_webhooks
 from cds.modules.webhooks.receivers import _compute_status
 from cds.modules.webhooks.receivers import _info_extractor
 from invenio_webhooks.models import Event
+from six import BytesIO
 
 from helpers import failing_task, success_task, simple_add
 
@@ -67,7 +68,7 @@ def test_download_receiver(api_app, db, bucket, depid, access_token,
         file_size = 1024
         mock_request.return_value = type(
             'Response', (object, ), {
-                'content': b'\x00' * file_size,
+                'raw': BytesIO(b'\x00' * file_size),
                 'headers': {'Content-Length': file_size}
             })
 
