@@ -39,7 +39,7 @@ from invenio_records_files.models import RecordsBuckets
 from werkzeug.local import LocalProxy
 from invenio_webhooks.models import Event
 from ..webhooks.receivers import _compute_status
-from sqlalchemy.types import String
+import sqlalchemy
 
 from .errors import DiscardConflict
 
@@ -122,7 +122,10 @@ class CDSDeposit(Deposit):
         #      Event.payload.op('->>')(
         #          'deposit_id').cast(String) == self['_deposit']['id']).all()
         return Event.query.filter(
-            Event.payload['deposit_id'] == self['_deposit']['id']
+            sqlalchemy.cast(
+                Event.payload['deposit_id'],
+                sqlalchemy.String) == sqlalchemy.type_coerce(
+                    self['_deposit']['id'], sqlalchemy.JSON)
         ).all()
 
     def _compute_tasks_status(self):
