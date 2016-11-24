@@ -5,7 +5,8 @@ function cdsActionsCtrl($scope) {
       // Stop loading
       $scope.$emit('cds.deposit.loading.stop');
       that.cdsDepositCtrl.loading = false;
-    }
+    };
+
     this.actionHandler = function(type, method) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
@@ -15,7 +16,8 @@ function cdsActionsCtrl($scope) {
         that.cdsDepositCtrl.onSuccessAction,
         that.cdsDepositCtrl.onErrorAction
       ).finally(that.postActions);
-    }
+    };
+
     this.actionMultipleHandler = function(actions) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
@@ -25,7 +27,7 @@ function cdsActionsCtrl($scope) {
         that.cdsDepositCtrl.onSuccessAction,
         that.cdsDepositCtrl.onErrorAction
       ).finally(that.postActions);
-    }
+    };
   }
 }
 

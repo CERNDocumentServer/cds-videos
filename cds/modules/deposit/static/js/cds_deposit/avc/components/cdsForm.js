@@ -1,4 +1,5 @@
 function cdsFormCtrl($scope, schemaFormDecorators) {
+
   var that = this;
   this.$onInit = function() {
     this.cdsDepositCtrl.depositForm = {};
