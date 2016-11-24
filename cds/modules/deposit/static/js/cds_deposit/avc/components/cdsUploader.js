@@ -11,9 +11,39 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   // On Component init
   this.$onInit = function() {
     // The Uploader queue
-    this.queue = this.cdsDepositCtrl.filesQueue;
+    this.queue = [];
+
     // Add any files in the queue that are not completed
-    Array.prototype.push.apply(this.queue, _.reject(that.files, {completed: true}));
+    Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
+
+    this.addFiles = function(_files) {
+      var existingFiles = that.files.map(function(file) {
+        return file.key
+      });
+      angular.forEach(_files, function(file) {
+        // GRRRRRRRRRRR :(
+        file.key = file.name;
+        // Mark the file as local
+        file.local = true;
+      });
+      // Exclude files that already exist
+      _files = _.reject(_files, function(file) {
+        return existingFiles.includes(file.key);
+      });
+      if (that.cdsDepositCtrl.master) {
+        // Add new videos and files to master
+        that.cdsDepositsCtrl.addFiles(_files, this.queue);
+      } else {
+        var videoFiles = _.values(that.cdsDepositsCtrl.filterOutFiles(_files).videos);
+        // Exclude video files
+        _files = _.difference(_files, videoFiles);
+        // Add the files to the list
+        Array.prototype.push.apply(that.files, _files);
+        // Add the files to the queue
+        Array.prototype.push.apply(that.queue, _files);
+      }
+    };
+
 
     // Prepare file request
     this.prepareUpload = function(file) {
@@ -30,7 +60,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
             key: file.key,
             bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
             deposit_id: that.cdsDepositCtrl.record._deposit.id,
-            sse_channel: '/api/deposits/'+that.cdsDepositCtrl.record._project_id+'/sse',
+            sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
           }
         };
       } else {
@@ -163,6 +193,13 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
     }
   }
 
+  this.$postLink = function() {
+    // Upload video file when creating a new deposit
+    if (!this.cdsDepositCtrl.master) {
+      this.upload();
+    }
+  }
+
   this.findFileIndex = function(files, key) {
     return _.indexOf(
       files,
@@ -182,19 +219,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       data || {}
     );
   }
-
-  this.addFiles = function(_files) {
-    angular.forEach(_files, function(file, index) {
-      // GRRRRRRRRRRR :(
-      file.key = file.name;
-      // Mark the file as local
-      file.local = true;
-      // Add the file to the list
-      that.files.push(file);
-      // Add the file to the queue
-      that.queue.push(file);
-    });
-  };
 
   this.abort = function() {
     // Abort the upload
@@ -234,6 +258,7 @@ cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout'];
 
 function cdsUploader() {
   return {
+    transclude: true,
     bindings: {
       files: '=',
       filterFiles: '=',

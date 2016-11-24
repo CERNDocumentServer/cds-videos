@@ -88,7 +88,16 @@ function cdsDepositCtrl($scope, $q) {
         });
         deferred.resolve();
       }
-    };
+    }
+
+    // Register related events from sse
+    var depositListenerName = 'sse.event.' + this.record._deposit.id;
+    $scope.$on(depositListenerName, function(evt, type, data) {
+      console.log('RECEIVE EVENT FOR', evt);
+      if (data.meta.payload.key) {
+        $scope.$broadcast(depositListenerName + '.' + data.meta.payload.key, type, data);
+      }
+    });
   }
 
   this.guessEndpoint = function(endpoint) {
