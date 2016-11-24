@@ -175,6 +175,8 @@ setup(
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
+            # FIXME should be move to invenio-webhooks
+            'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
