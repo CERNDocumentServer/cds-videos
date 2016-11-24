@@ -1,5 +1,6 @@
 function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   var that = this;
+
   // Is the uploader loading
   this.loading = false;
   // Do we have any errors
@@ -46,6 +47,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
     };
 
     this.prepareDelete = function(url) {
+      // add the logic here
       var args = {
         url:  url,
         method: 'DELETE'  ,
@@ -62,7 +64,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       function _chain(upload) {
         var downloadPromise;
         var args = that.prepareUpload(upload);
-
         if (!upload.receiver) {
           downloadPromise = Upload.http(args).then(
             function success(response) {
@@ -95,7 +96,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         } else {
           Upload.http(args);
           var fileListenerName = 'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key;
-          $scope.$on(fileListenerName, function(event, data) {
+          $scope.$on(fileListenerName, function(event, type, data) {
             var updateObj, progress;
             var payload = data.meta.payload;
             if (data.state != 'FAILURE') {
@@ -110,10 +111,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
                 errored: true
               };
             }
+            console.warn('PROGRESS', progress);
+            if (progress) {
+              that.cdsDepositCtrl.progress = progress;
+            }
             $timeout(function() {
-              if (progress) {
-                that.cdsDepositCtrl.progress = progress;
-              }
               that.updateFile(payload.key, updateObj);
             }, 0);
           }, false);

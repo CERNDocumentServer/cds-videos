@@ -1,6 +1,7 @@
-function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
+function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
   var that = this;
   this.edit = false;
+
   // The deposit forms
   this.depositForms = [];
   // The master deposit
@@ -13,6 +14,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
   this.loading = false;
 
   this.$onInit = function() {
+    console.log('STATES', states);
     if (this.masterLinks) {
       // Set mode to edit
       this.edit = true;
@@ -54,15 +56,14 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
         this.handleRedirect(this.master.links.html, true);
       }
     }
+
     // SSE
-    // Event Listener
     this.sseEventListener = function(evt) {
+      console.log('LISTENING', evt);
       // Do some magic
       var data = JSON.parse(evt.data || '{}');
-      console.log('EVENT DATA', data);
-      // Send the event dynamicly to the deposit_id
       var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
-      $scope.$broadcast(deposit_, data);
+      $scope.$broadcast(deposit_, evt.type, data);
     }
 
     // SSE stuff - move to somewhere else
@@ -72,24 +73,26 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
     } else {
       parser.href = this.master.links.html;
     }
-    console.log('PARSER', parser.pathname);
-    var did = parser.pathname.split('/')[2];
-    that.sseListener = new EventSource('/api/deposits/' + did + '/sse');
-    console.log('THE LISTENER', that.sseListener);
 
-    that.sseListener.onmessage = function(msg) {
-      console.log('On message', msg);
-    }
+    var dep_id = parser.pathname.split('/')[2];
+    that.sseListener = new EventSource('/api/deposits/' + dep_id + '/sse');
+
     that.sseListener.onerror = function(msg) {
-      console.log('On errro', msg);
+      console.error('SSE connection error', msg);
     }
+
     that.sseListener.onopen = function(msg) {
-      console.log('On oepn', msg);
+      console.info('SEE connection has been opened', msg);
     }
-    that.sseListener.addEventListener(
-      'file_download', that.sseEventListener, false
-    );
-    // SSE stuff - move to somewhere else
+
+    angular.forEach(states, function(type, index) {
+      console.log('Listen to type', type);
+      that.sseListener.addEventListener(
+        type,
+        that.sseEventListener,
+        false
+      )
+    });
     // SSE
   };
 
@@ -147,20 +150,37 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
       // Create the master
       that.addMaster(response.data, _files.project);
       var master_id = response.data.metadata._deposit.id;
+
+      // Build the promises
+      var _promises = [];
       // for each files create child
       angular.forEach(_files.videos, function(file, key) {
-        that.createDeposit(
-          that.childrenInit,
-          that.childrenSchema,
-          {_project_id: master_id}
-        )
-        .then(function(response) {
-          var _f = [];
-          _f.push(file);
-          _f = _f.concat(_files.videoFiles[key] || []);
-          that.addChildren(response.data, _f);
-        });
-      });
+        this.push([
+          function() {
+            return that.createDeposit(
+              that.childrenInit,
+              that.childrenSchema,
+              {_project_id: master_id}
+            )
+          },
+          function(response) {
+            var _f = [];
+            _f.push(file);
+            _f = _f.concat(_files.videoFiles[key] || []);
+            that.addChildren(response.data, _f);
+          }
+        ]);
+      }, _promises);
+
+      // Make requests for the videos
+      that.chainedActions(_promises).then(
+        function(data) {
+          console.log('DONE chained actions', data)
+        },
+        function(error) {
+          console.log('ERROR chained actins', error);
+        }
+      );
       // FIXME: Add a central function to deal with it
       // Update the master record with the references
       that.JSONResolver(that.master.links.self).then(
@@ -194,10 +214,22 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
     this.chainedActions = function(promises) {
       var defer = $q.defer();
       var data = [];
-      function _chain(fn) {
+      function _chain(promise) {
+        var fn = promise;
+        var callback;
+
+        if (typeof(promise) !== 'function') {
+          fn = promise[0];
+          callback = promise[1];
+        }
+
         fn().then(
           function(_data) {
             data.push(_data);
+            if (typeof(callback) === 'function') {
+              // Call the callback
+              callback(_data);
+            }
             if (promises.length > 0) {
               return _chain(promises.shift());
             } else {
@@ -228,7 +260,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
 
     this.JSONResolver = function(url) {
       return $http.get(url);
-    };
+    }
 
     this.dismissAlert = function(alert) {
       delete this.alerts[_.indexOf(this.alerts, alert.alert)];
@@ -260,7 +292,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location) {
     });
   }
 
-  cdsDepositsCtrl.$inject = ['$http', '$q', '$scope', '$window', '$location'];
+  cdsDepositsCtrl.$inject = ['$http', '$q', '$scope', '$window', '$location', 'states'];
 
   function cdsDeposits() {
     return {
