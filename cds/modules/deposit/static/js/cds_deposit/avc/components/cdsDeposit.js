@@ -1,13 +1,66 @@
 function cdsDepositCtrl($scope, $q) {
   var that = this;
+
+  this.statuses = {
+    PUBLISHED: 0,
+    ERROR: 1,
+    LOADING: 2,
+    UPLOADING: 3,
+    EVENTS: 4,
+    IDLE: 5,
+  };
+
+  this.states = {
+    file_upload: 0
+  };
+
+  this.progress_ = function() {
+    return this.progress;
+  }
+
+  this.currentStatus = this.statuses.IDLE;
+  this.currentState = null;
+
+  this.progress = 0;
   // The Upload Queue
   this.filesQueue = [];
+
   // The deposit can have the follwoing states
   this.$onInit = function() {
     // Resolve the record schema
     this.cdsDepositsCtrl.JSONResolver(this.schema)
     .then(function(response) {
       that.schema = response.data;
+    });
+    this.alerts = {};
+    $scope.$on(
+      'cds.deposit.alert.' + this.record._deposit.id,
+      function(evt, type, msg) {
+        console.error('Alert', type, msg);
+        that.alerts[type] = msg;
+      }
+    );
+
+    // Register related events from sse
+    var depositListenerName = 'sse.event.' + this.record._deposit.id;
+    $scope.$on(
+      depositListenerName,
+      function(evt, type, data) {
+        console.log('RECEIVE DEPOSIT', type, data);
+        if (data.state === 'FAILURE') {
+          $scope.$broadcast(
+            'cds.deposit.alert.' + that.record._deposit.id,
+            'danger',
+            data.meta.message
+          );
+        }
+        if (data.meta.payload.key) {
+          $scope.$broadcast(
+            depositListenerName + '.' + data.meta.payload.key,
+            type,
+            data
+          );
+        }
     });
 
     this.postSuccessProcess = function(responses) {
@@ -21,7 +74,7 @@ function cdsDepositCtrl($scope, $q) {
       if (this.updateLinksAfterSuccess) {
         this.links = response.links;
       }
-    }
+    };
 
     this.postErrorProcess = function(response) {
       // Process validation errors if any
@@ -35,16 +88,7 @@ function cdsDepositCtrl($scope, $q) {
         });
         deferred.resolve();
       }
-    }
-
-    // Register related events from sse
-    var depositListenerName = 'sse.event.' + this.record._deposit.id;
-    $scope.$on(depositListenerName, function(evt, data) {
-      console.log('RECEIVE ENET FOR', evt);
-      if (data.meta.payload.key) {
-        $scope.$broadcast(depositListenerName + '.' + data.meta.payload.key, data);
-      }
-    });
+    };
   }
 
   this.guessEndpoint = function(endpoint) {
