@@ -157,7 +157,6 @@ class Downloader(CeleryAsyncReceiver):
         db.session.commit()
 
         task = download_to_object_version.s(
-            #event.payload['uri'],
             object_version=str(object_version.version_id),
             event_id=event_id,
             **event.payload)
@@ -197,7 +196,7 @@ class Downloader(CeleryAsyncReceiver):
         """Get status and info from the event."""
         result = self._deserialize_result(event)
         status = result.status
-        info = fun(result, 'download')
+        info = fun(result, 'file_download')
         return {'status': status, 'info': info}
 
 
@@ -256,12 +255,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
                                         event.payload['uri'])
                 first_step = group(
                     download_to_object_version.si(
-                        #  event.payload['uri'],
                         object_version=str(object_version.version_id),
                         event_id=event_id,
                         **event.payload),
                     video_metadata_extraction.si(
-                        #  event.payload['uri'],
                         object_version=str(object_version.version_id),
                         event_id=event_id,
                         **event.payload),
@@ -271,7 +268,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
         mypayload = event.payload
         obj_id = str(object_version.version_id)
-        obj_key = object_version.key
         obj_tags = object_version.get_tags()
         db.session.expunge(event)
         db.session.commit()
@@ -310,9 +306,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 result.children[0].status,
                 result.children[1].status
             ])
-            info = fun(result.parent, 'metadata-extractor', [
-                fun(result.children[0], 'transcode'),
-                fun(result.children[1], 'extract-frames')
+            info = fun(result.parent, 'file_video_metadata_extraction', [
+                fun(result.children[0], 'file_transcode'),
+                fun(result.children[1], 'file_video_extract_frames')
             ])
         else:
             status = _compute_status([
@@ -323,13 +319,13 @@ class AVCWorkflow(CeleryAsyncReceiver):
             ])
             info = [
                 [
-                    fun(result.parent.children[0], 'download'),
-                    fun(
-                        result.parent.children[1], 'metadata-extractor'),
+                    fun(result.parent.children[0], 'file_download'),
+                    fun(result.parent.children[1],
+                        'file_video_metadata_extraction'),
                 ],
                 [
-                    fun(result.children[0], 'transcode'),
-                    fun(result.children[1], 'extract-frames'),
+                    fun(result.children[0], 'file_transcode'),
+                    fun(result.children[1], 'file_video_extract_frames'),
                 ]
             ]
         return {'status': status, 'info': info}
