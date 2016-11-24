@@ -201,8 +201,8 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
         ]
 
         [ObjectVersionTag.create(object_version, k, v)
-        for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
-        if k in (format_keys + stream_keys)]
+         for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
+         if k in (format_keys + stream_keys)]
 
     db.session.commit()
 
@@ -246,7 +246,6 @@ def video_extract_frames(self,
 
     self._base_payload = dict()
 
-    input_file = object_version.file.uri
     output_folder = tempfile.mkdtemp()
 
     def progress_updater(seconds, duration):
@@ -255,7 +254,9 @@ def video_extract_frames(self,
             payload=dict(
                 size=duration,
                 percentage=seconds or 0.0 / duration * 100, ),
-            message='Extracting frames {0} of {1} seconds'.format(seconds, duration), )
+            message='Extracting frames {0} of {1} seconds'.format(
+                seconds, duration),
+        )
 
         self.update_state(state=STARTED, meta=meta)
 
@@ -271,7 +272,7 @@ def video_extract_frames(self,
         obj = ObjectVersion.create(
             bucket=object_version.bucket,
             key=filename,
-            stream=open(os.path.join(output_folder, filename),'rb'))
+            stream=open(os.path.join(output_folder, filename), 'rb'))
         ObjectVersionTag.create(obj, 'master', object_version.version_id)
 
     shutil.rmtree(output_folder)
@@ -305,10 +306,12 @@ def video_transcode(self,
     )
 
     job_ids = deque()
+
     # Set handler for canceling all jobs
     def handler(signum, frame):
         # TODO handle better file deleting and ObjectVersion cleaning
         map(lambda _info: stop_encoding(info['job_id']), job_ids)
+
     signal.signal(signal.SIGTERM, handler)
 
     # Get master file's bucket_id
