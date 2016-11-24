@@ -245,11 +245,11 @@ def video_extract_frames(self,
     object_version = as_object_version(object_version)
 
     self._base_payload = dict(
-        object_version=str(object_version.version_id),
+        key=object_version.key,
+        version_id=str(object_version.version_id),
         tags=object_version.get_tags(),
-        deposit_id=kwargs.get('deposit_id'),
-        event_id=kwargs.get('event_id')
-    )
+        event_id=kwargs.get('event_id', None),
+        deposit_id=kwargs.get('deposit_id', None), )
 
     output_folder = tempfile.mkdtemp()
 
