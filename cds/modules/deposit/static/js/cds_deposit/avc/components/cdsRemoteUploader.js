@@ -1,68 +1,77 @@
+function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
+  var that = this;
+
+  this.$onInit = function() {
+    // Initialize dropbox dropin if enabled
+    if (this.dropboxEnabled) {
+      if (typeof Dropbox !== 'undefined') {
+        Dropbox.appKey = this.dropboxAppKey;
+        var button = Dropbox.createChooseButton({
+          success: function (files) {
+            var _files = files.map(function (file) {
+              return {
+                key: file.name,
+                name: file.name,
+                size: file.bytes,
+                receiver: that.remoteReceiver,
+                url: file.link
+              };
+            });
+            var ctrl = that.cdsUploaderCtrl || that.cdsDepositsCtrl;
+            ctrl.addFiles(_files);
+            $scope.$apply();
+          },
+          linkType: 'direct'
+        });
+        $element[0].querySelector(this.dropboxSelector).appendChild(button);
+      } else {
+        $scope.dropboxError = 'Dropbox dropins.js is not loaded';
+      }
+    }
+
+    $scope.startUrlUpload = function (url) {
+      // Use an a element to parse the URL
+      var parser = document.createElement('a');
+      parser.href = url;
+      var name = parser.pathname.split('/').pop();
+      var obj = {
+        key: name,
+        name: name,
+        receiver: that.remoteReceiver,
+        url: url
+      };
+      var sizePromise;
+      // Retrieve the file size if the protocol is http/s
+      if (url.startsWith('http')) {
+        sizePromise = $http.head(url).then(function (response) {
+          obj.size = response.headers('content-length');
+        });
+      } else {
+        sizePromise = $q.resolve();
+      }
+      sizePromise.finally(function () {
+        var ctrl = that.cdsUploaderCtrl || that.cdsDepositsCtrl;
+        ctrl.addFiles([obj]);
+      });
+    };
+  };
+}
+
+cdsRemoteUploadCtrl.$inject = ['$scope', '$http', '$element', '$q'];
+
 function cdsRemoteUploader() {
   return {
     require: {
-      cdsDepositsCtrl: '?^cdsDeposits',
-      cdsDepositCtrl: '?^cdsDeposit'
+      cdsUploaderCtrl: '?^cdsUploader',
+      cdsDepositsCtrl: '?^cdsDeposits'
     },
     bindings: {
       remoteReceiver: '@',
       dropboxEnabled: '<',
       dropboxAppKey: '@',
-      dropboxSelector: '@',
-      files: '=',
+      dropboxSelector: '@'
     },
-    controller: function($scope, $http, $element) {
-      var that = this;
-      if (this.dropboxEnabled) {
-        if (typeof Dropbox !== 'undefined') {
-          Dropbox.appKey = this.dropboxAppKey;
-          var button = Dropbox.createChooseButton({
-            success: function (files) {
-              var _files = files.map(function (file) {
-                return {
-                  key: file.name,
-                  name: file.name,
-                  size: file.bytes,
-                  receiver: that.remoteReceiver,
-                  url: file.link
-                };
-              });
-              if (that.files) {
-                that.cdsDepositCtrl.filesQueue.push.apply(
-                  that.cdsDepositCtrl.filesQueue, _files);
-                that.files.push.apply(that.files, _files);
-                $scope.$apply();
-              } else {
-                that.cdsDepositsCtrl.initDeposit(_files);
-              }
-            },
-            linkType: 'direct'
-          });
-          $element[0].querySelector(this.dropboxSelector).appendChild(button);
-        } else {
-          $scope.dropboxError = 'Dropbox dropins.js is not loaded';
-        }
-      }
-
-      $scope.startUrlUpload = function(url) {
-        var parser = document.createElement('a');
-        parser.href = url;
-        var name = parser.pathname.split('/').pop();
-        var obj = {
-          key: name,
-          name: name,
-          receiver: that.remoteReceiver,
-          url: url
-        };
-        if (that.files) {
-          that.cdsDepositCtrl.filesQueue.push(obj);
-          that.files.push(obj);
-        } else {
-          that.cdsDepositsCtrl.initDeposit([obj]);
-        }
-      };
-    },
-
+    controller: cdsRemoteUploadCtrl,
     templateUrl: function($element, $attrs) {
       return $attrs.template;
     }

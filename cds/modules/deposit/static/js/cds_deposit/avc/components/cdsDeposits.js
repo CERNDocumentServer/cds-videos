@@ -139,17 +139,23 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
     return _files;
   }
 
-  this.initDeposit = function(files) {
-
+  this.addFiles = function(files, filesQueue) {
     // Filter files by videos and project
     var _files = this.filterOutFiles(files);
+    var createMaster;
 
-    // first create master
-    this.createDeposit(this.masterInit, this.masterSchema)
-    .then(function(response) {
-      // Create the master
-      that.addMaster(response.data, _files.project);
-      var master_id = response.data.metadata._deposit.id;
+    if (!this.initialized) {
+      createMaster = this.initDeposit(_files.project);
+    } else {
+      Array.prototype.push.apply(that.master.metadata._files, _files.project);
+      createMaster = $q.resolve();
+    }
+
+    createMaster.then(function() {
+      if (filesQueue) {
+        Array.prototype.push.apply(filesQueue, _files.project);
+      }
+      var master_id = that.master.metadata._deposit.id;
 
       // Build the promises
       var _promises = [];
@@ -172,23 +178,31 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
         ]);
       }, _promises);
 
-      // Make requests for the videos
-      that.chainedActions(_promises).then(
-        function(data) {
-          console.log('DONE chained actions', data)
-        },
-        function(error) {
-          console.log('ERROR chained actins', error);
-        }
-      );
-      // FIXME: Add a central function to deal with it
-      // Update the master record with the references
-      that.JSONResolver(that.master.links.self).then(
-        function success(response) {
-          that.master = angular.merge(response.data, that.master);
+      if (_promises.length > 0) {
+        // Make requests for the videos
+        that.chainedActions(_promises).then(
+          function (data) {
+            console.log('DONE chained actions', data)
+          },
+          function (error) {
+            console.log('ERROR chained actins', error);
+          }
+        );
+      }
+    });
+  };
+
+    this.initDeposit = function(files) {
+      return this.createDeposit(this.masterInit, this.masterSchema)
+        .then(function (response) {
+          // Create the master
+          that.addMaster(response.data, files);
+          // Update the master record with the references
+          return that.JSONResolver(that.master.links.self);
+        }).then(function success(response) {
+          angular.merge(that.master, response.data);
         });
-      });
-    }
+    };
 
     this.createDeposit = function(url, schema, extra) {
       var data = angular.merge(
@@ -260,7 +274,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
 
     this.JSONResolver = function(url) {
       return $http.get(url);
-    }
+    };
 
     this.dismissAlert = function(alert) {
       delete this.alerts[_.indexOf(this.alerts, alert.alert)];

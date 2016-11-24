@@ -48,7 +48,10 @@ LODING-------- {{ $ctrl.loading }}
     </tr>
     <tr class="sel-file" ng-repeat="f in $ctrl.files | filter:fileSearch">
       <td>{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 50">...</span></td>
-      <td>{{ f.size | bytesToHumanReadable }}</td>
+      <td>
+          <span ng-show="f.size != undefined">{{ f.size | bytesToHumanReadable }}</span>
+          <span ng-show="f.size == undefined">Unknown</span>
+      </td>
       <td class="text-center">
         <span ng-show="f.progress < 100 && !f.errored">{{ f.progress }} %</span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
@@ -71,3 +74,4 @@ LODING-------- {{ $ctrl.loading }}
     </div>
   </div>
 </div>
+<div ng-transclude></div>
