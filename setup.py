@@ -64,6 +64,12 @@ extras_require['all'] = []
 for name, reqs in extras_require.items():
     extras_require['all'].extend(reqs)
 
+# Do not include in all requirement
+extras_require['xrootd'] = [
+    'invenio-xrootd>=1.0.0a3',
+    'xrootdpyfs>=0.1.3',
+]
+
 setup_requires = [
     'Babel>=1.3',
     'setuptools>=20.6.7',
@@ -171,10 +177,12 @@ setup(
         ],
         'invenio_base.api_apps': [
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
+            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
+            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',

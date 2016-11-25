@@ -194,7 +194,7 @@ def files(temp, source):
 
     files = _handle_source(source, temp)
 
-    d = current_app.config['DATADIR']
+    d = current_app.config['FIXTURES_FILES_LOCATION']
     if not exists(d):
         makedirs(d)
 
