@@ -216,10 +216,10 @@ setup(
             'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
         ],
         'invenio_pidstore.minters': [
-            'cds_recid = cds.modules.records.minters:recid_minter',
             'cds_catid = cds.modules.deposit.minters:catid_minter',
             'cds_report_number = '
             'cds.modules.records.minters:report_number_minter',
+            'cds_recid = cds.modules.records.minters:cds_record_minter',
         ],
         # FIXME removed until proper integration
         # 'invenio_i18n.translations': [

@@ -20,12 +20,14 @@
 
 from __future__ import absolute_import
 
+from marshmallow import fields
+
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
     DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
     OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
     TranslationsSchema
-from marshmallow import fields
+from .doi import DOI
 
 
 class ProjectDepositSchema(DepositSchema):
@@ -66,6 +68,7 @@ class ProjectSchema(StrictKeysSchema):
     creator = fields.Nested(CreatorSchema)
     date = fields.Str()
     description = fields.Nested(DescriptionSchema)
+    doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)
     recid = fields.Number()

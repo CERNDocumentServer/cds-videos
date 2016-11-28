@@ -107,6 +107,9 @@
                 "recid": {
                     "type": "double"
                 },
+                "doi": {
+                    "type": "string"
+                },
                 "_access": {
                     "type": "object",
                     "properties": {

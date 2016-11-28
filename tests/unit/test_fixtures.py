@@ -27,11 +27,9 @@
 from __future__ import absolute_import, print_function
 
 from click.testing import CliRunner
-from invenio_deposit import InvenioDepositREST
 from invenio_pages import InvenioPages, Page
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.models import RecordMetadata
-from invenio_records_rest import InvenioRecordsREST
 from invenio_sequencegenerator.models import TemplateDefinition
 from cds.modules.deposit.api import CDSDeposit
 from cds.modules.fixtures.cli import categories as cli_categories, \
@@ -79,7 +77,7 @@ def test_fixture_pages(app, script_info, db, client):
     assert about_response.status_code == 200
 
 
-def test_fixture_videos(app, script_info, db, location):
+def test_fixture_videos(app, deposit_rest, script_info, db, location):
     """Test load video fixtures."""
     PersistentIdentifier.query.delete()
     RecordMetadata.query.delete()
@@ -88,7 +86,7 @@ def test_fixture_videos(app, script_info, db, location):
     res = runner.invoke(cli_videos, [], obj=script_info)
     assert res.exit_code == 0
     pids = PersistentIdentifier.query.all()
-    assert len(pids) == 12
+    assert len(pids) == 16
     depids = [pid for pid in pids if pid.pid_type == 'depid']
     rns = [pid for pid in pids if pid.pid_type == 'rn']
     recids = [pid for pid in pids if pid.pid_type == 'recid']

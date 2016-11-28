@@ -22,18 +22,22 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test access control package."""
+"""Unit tests for record minters."""
 
 from __future__ import absolute_import, print_function
 
+from uuid import uuid4
+
 import mock
 import pytest
-from cds.modules.records.minters import recid_minter
-from invenio_pidstore.models import PIDStatus
+
+from cds.modules.records.minters import cds_record_minter, is_local_doi
+
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 
 def test_recid_provider(db):
-    """Test the CDS recid provider."""
+    """Test the CDS recid provider using random uuid for the record."""
     with mock.patch('requests.get') as httpmock, mock.patch(
             'invenio_pidstore.models.PersistentIdentifier.create')\
             as pid_create:
@@ -42,16 +46,76 @@ def test_recid_provider(db):
         httpmock.return_value.text = '1'
 
         data = dict()
-        uuid = '12345678123456781234567812345678'
-        recid_minter(uuid, data)
+        uuid = uuid4()
+        cds_record_minter(uuid, data)
 
         assert data['recid'] == 1
-        pid_create.assert_called_once_with(
+        pid_create.assert_any_call(
             'recid', '1', pid_provider=None, object_type='rec',
-            object_uuid=uuid, status=PIDStatus.REGISTERED)
+            object_uuid=uuid, status=PIDStatus.REGISTERED
+        )
+        pid_create.assert_any_call(
+            'doi', '10.0000/cds.1', object_type='rec',
+            object_uuid=uuid,
+            pid_provider='datacite',
+            status=PIDStatus.RESERVED)
+
+
+@pytest.mark.parametrize('doi_in, doi_out', [
+    # ('10.1234/foo', '10.1234/foo'),
+    # ('10.5072/foo', '10.5072/foo'),
+    (None, '10.0000/cds.1'),
+])
+def test_doi_minting(db, doi_in, doi_out):
+    """Test using same integer for dep/rec ids."""
+    rec_uuid = uuid4()
+    data = dict(doi=doi_in)
+    cds_record_minter(rec_uuid, data)
+    db.session.commit()
+
+    pid = PersistentIdentifier.get('doi', doi_out)
+    assert pid.object_uuid == rec_uuid
+    assert pid.status == PIDStatus.RESERVED
+
+
+@pytest.mark.parametrize('doi', [
+    'batman/superman',
+    'jessica/jones',
+])
+def test_invalid_doi(db, doi):
+    """Test invalid doi."""
+    uuid = uuid4()
+    data = dict(doi=doi)
+    with pytest.raises(AssertionError):
+        cds_record_minter(uuid, data)
 
 
 def test_recid_provider_exception(db):
     """Test if providing a recid will cause an error."""
     with pytest.raises(AssertionError):
-        recid_minter('12345678123456781234567812345678', dict({'recid': 1}))
+        cds_record_minter('12345678123456781234567812345678',
+                          dict({'recid': 1}))
+
+
+def test_minting_recid(db):
+    """Test reminting doi for published record."""
+    data = dict()
+    # Assert registration of recid.
+    rec_uuid = uuid4()
+    pid = cds_record_minter(rec_uuid, data)
+    assert pid.pid_type == 'recid'
+    assert pid.pid_value == '1'
+    assert pid.status == PIDStatus.REGISTERED
+    assert pid.object_uuid == rec_uuid
+    assert data['doi'] == '10.0000/cds.1'
+    with pytest.raises(AssertionError):
+        cds_record_minter(rec_uuid, data)
+
+
+def test_is_local_doi(app):
+    """Test is local."""
+    doi_1 = app.config['PIDSTORE_DATACITE_DOI_PREFIX']
+    assert is_local_doi('{0}/123'.format(doi_1)) is True
+    for doi in app.config['CDS_LOCAL_DOI_PREFIXES']:
+        assert is_local_doi('{0}/123'.format(doi)) is True
+    assert is_local_doi('test/doi') is False
