@@ -9,12 +9,15 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-          <div id="cds-record">
-            <cds-record-view
-              template="{{ url_for('static', filename='templates/cds_records/detail.default.html') }}"
-              record='{{ record | tojson }}'
-            ></cds-record-view>
-          </div>
+        <img data-toggle="modal" data-target="[data-modal='{{ record.doi }}']"
+          src="{{ url_for('invenio_formatter_badges.badge', title='DOI', value=record.doi, ext='svg') }}" alt="{{ record.doi }}">
+        </img>
+        <div id="cds-record">
+          <cds-record-view
+            template="{{ url_for('static', filename='templates/cds_records/detail.default.html') }}"
+            record='{{ record | tojson }}'
+          ></cds-record-view>
+        </div>
       </div>
     </div>
   </div>

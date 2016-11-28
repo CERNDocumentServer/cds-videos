@@ -21,12 +21,12 @@
 
 from __future__ import absolute_import
 
-from cds.modules.records.serializers.schemas.json.common import \
-    StrictKeysSchema, AccessSchema, DescriptionSchema, KeywordsSchema, \
-    ContributorSchema, TitleTranslationSchema, OaiSchema, \
-    DescriptionTranslationSchema, DepositSchema, CreatorSchema, TitleSchema, \
-    BucketSchema
 from marshmallow import fields
+
+from ..fields import  AccessSchema, BucketSchema, ContributorSchema, \
+    CreatorSchema, DepositSchema, DescriptionSchema, \
+    DescriptionTranslationSchema, DOI, KeywordsSchema, OaiSchema, \
+    StrictKeysSchema, TitleSchema, TitleTranslationSchema
 
 
 class ProjectDepositSchema(DepositSchema):
@@ -67,6 +67,7 @@ class ProjectSchema(StrictKeysSchema):
     description = fields.Nested(DescriptionSchema)
     description_translations = fields.Nested(DescriptionTranslationSchema,
                                              many=True)
+    doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Str()
     recid = fields.Number()
