@@ -1,6 +1,49 @@
 Installation
 ============
 
+Prerequisites
+-------------
+
+**nodejs and npm**
+
+Install the packages:
+
+    $ apt-get install nodejs nodejs-dev npm
+
+When installing node-sass with npm, it will use the command `node` instead of `nodejs`, which is not supported by some versions of `nodejs`. If this happens, create a symlink:
+
+    $ ln -s `which nodejs` /usr/bin/node
+
+
+**Virtual Environments**
+
+Install `virtualenv`:
+
+    $ pip install virtualenv
+
+Install `virtualenvwrapper` for useful commands:
+
+    $ pip install virtualenvwrapper
+
+**pip packages**
+
+When pip have missing precompiled .whl files for a package, it will compile its C component and try to find the required lib header files. Only debian linux distributions split lib-dev packages (for header files) from lib, therefore the following packages need to be individually installed. Therefore, the following packages are also needed:
+
+    $ apt-get install libpg-dev libjpeg-dev libxml2-dev libxslt-dev libffi-dev
+
+**Elasticsearch**
+
+Follow these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04
+
+**PostgreSQL**
+
+See this guide: https://wiki.postgresql.org/wiki/Detailed_installation_guides
+
+For a minimal setup to get started, you may use `SQLite` instead
+    
+    $ apt-get install sqlite3
+    $ export SQLALCHEMY_DATABASE_URI="sqlite:///foo.db"
+
 Manual
 ------
 
