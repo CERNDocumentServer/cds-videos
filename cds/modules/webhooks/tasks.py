@@ -121,8 +121,8 @@ def download_to_object_version(self, uri, object_version, **kwargs):
         key=object_version.key,
         version_id=str(object_version.version_id),
         tags=object_version.get_tags(),
-        event_id=kwargs.get('event_id', None),
-        deposit_id=kwargs.get('deposit_id', None), )
+        event_id=kwargs.get('event_id'),
+        deposit_id=kwargs.get('deposit_id'), )
 
     # Make HTTP request
     response = requests.get(uri, stream=True)
@@ -177,7 +177,7 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
             uri=uri,
             tags=object_version.get_tags(),
             deposit_id=deposit_id,
-            event_id=kwargs.get('event_id', None), )
+            event_id=kwargs.get('event_id'), )
 
         recid = str(PersistentIdentifier.get('depid', deposit_id).object_uuid)
 
@@ -244,7 +244,12 @@ def video_extract_frames(self,
     """
     object_version = as_object_version(object_version)
 
-    self._base_payload = dict()
+    self._base_payload = dict(
+        object_version=str(object_version.version_id),
+        tags=object_version.get_tags(),
+        deposit_id=kwargs.get('deposit_id'),
+        event_id=kwargs.get('event_id')
+    )
 
     output_folder = tempfile.mkdtemp()
 
@@ -301,8 +306,8 @@ def video_transcode(self,
         object_version=str(object_version.version_id),
         video_presets=video_presets,
         tags=object_version.get_tags(),
-        deposit_id=kwargs.get('deposit_id', None),
-        event_id=kwargs.get('event_id', None),
+        deposit_id=kwargs.get('deposit_id'),
+        event_id=kwargs.get('event_id'),
     )
 
     job_ids = deque()
