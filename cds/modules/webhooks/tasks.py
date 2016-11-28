@@ -273,7 +273,7 @@ def video_extract_frames(self,
             bucket=object_version.bucket,
             key=filename,
             stream=open(os.path.join(output_folder, filename), 'rb'))
-        ObjectVersionTag.create(obj, 'master', object_version.version_id)
+        ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
 
     shutil.rmtree(output_folder)
     db.session.commit()
