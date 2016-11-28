@@ -26,15 +26,20 @@
 
 from __future__ import absolute_import, print_function
 
+import idutils
+
+from flask import current_app
+
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
+
 from .providers import CDSRecordIdProvider, CDSReportNumberProvider
 
 
-def recid_minter(record_uuid, data):
+def cds_record_minter(record_uuid, data):
     """Mint record identifiers."""
-    assert 'recid' not in data
-    provider = CDSRecordIdProvider.create(
-        object_type='rec', object_uuid=record_uuid)
-    data['recid'] = int(provider.pid.pid_value)
+    provider = _rec_minter(record_uuid, data)
+    _doi_minter(record_uuid, data)
+
     return provider.pid
 
 
@@ -45,3 +50,53 @@ def report_number_minter(record_uuid, data, **kwargs):
         object_type='rec', object_uuid=record_uuid, data=data, **kwargs)
     data['report_number'] = dict(report_number=provider.pid.pid_value)
     return provider.pid.pid_value
+
+
+def cds_doi_generator(recid, prefix=None):
+    """Generate a DOI."""
+    return '{prefix}/cds.{recid}'.format(
+        prefix=prefix or current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'],
+        recid=recid
+    )
+
+
+def _rec_minter(record_uuid, data):
+    """Record minter."""
+    assert 'recid' not in data
+    provider = CDSRecordIdProvider.create(
+        object_type='rec', object_uuid=record_uuid)
+    data['recid'] = int(provider.pid.pid_value)
+    return provider
+
+
+def _doi_minter(record_uuid, data):
+    """Mint DOI."""
+    doi = data.get('doi')
+    assert 'recid' in data
+
+    # Create a DOI if no DOI was found.
+    if not doi:
+        doi = cds_doi_generator(data['recid'])
+        data['doi'] = doi
+
+    # Make sure it's a proper DOI
+    assert idutils.is_doi(doi)
+    return PersistentIdentifier.create(
+        'doi',
+        doi,
+        pid_provider='datacite',
+        object_type='rec',
+        object_uuid=record_uuid,
+        status=PIDStatus.RESERVED
+    )
+
+
+def is_local_doi(doi):
+    """Check if DOI is a locally managed DOI."""
+    prefixes = [
+        current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']
+    ] + current_app.config['CDS_LOCAL_DOI_PREFIXES']
+    for p in prefixes:
+        if doi.startswith('{0}/'.format(p)):
+            return True
+    return False

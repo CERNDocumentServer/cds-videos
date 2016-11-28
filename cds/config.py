@@ -35,7 +35,6 @@ from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
-
 from cds.modules.records.permissions import (deposit_delete_permission_factory,
                                              deposit_read_permission_factory,
                                              record_create_permission_factory,
@@ -168,6 +167,8 @@ CDS_RECORDS_EXPORTFORMATS = {
         serializer='cds.modules.records.serializers:datacite_v31'
     )
 }
+
+CDS_RECORDS_UI_LINKS_FORMAT = "https://cds.cern.ch/record/{recid}"
 
 # Endpoints for records.
 RECORDS_UI_ENDPOINTS = dict(
@@ -559,8 +560,16 @@ INDEXER_BULK_REQUEST_TIMEOUT = 60
 ###############################################################################
 # Deposit
 ###############################################################################
+#: DOI prefixes considered as local prefixes.
+CDS_LOCAL_DOI_PREFIXES = ['10.5072', '10.17181']
+
+#: DataCite API - Prefix for minting DOIs in (10.5072 is a test prefix).
+PIDSTORE_DATACITE_DOI_PREFIX = '10.5072'
 # PID minter used for record submissions.
 DEPOSIT_PID_MINTER = 'cds_recid'
+#: Enable the DataCite minding of DOIs after Deposit publishing
+DEPOSIT_DATACITE_MINTING_ENABLED = False
+
 # Template for deposit list view.
 DEPOSIT_UI_INDEX_TEMPLATE = 'cds_deposit/index.html'
 # Template to use for UI.
