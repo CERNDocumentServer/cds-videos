@@ -156,8 +156,8 @@ def test_delete_videos(project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_add_video(app, es, cds_jsonresolver, users, location,
-                   deposit_metadata):
+def test_add_video(api_app, deposit_rest, es, cds_jsonresolver, users,
+                   location, deposit_metadata):
     """Test add video."""
     project_data = {
         'title': {

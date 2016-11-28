@@ -34,6 +34,7 @@ from invenio_deposit.receivers import \
     index_deposit_after_publish as original_index_deposit_after_publish
 
 from .api import Project
+from .tasks import datacite_register
 
 
 current_jsonschemas = LocalProxy(
@@ -58,3 +59,12 @@ def index_deposit_after_publish(sender, action=None, pid=None, deposit=None):
     else:
         original_index_deposit_after_publish(sender=sender, action=action,
                                              pid=pid, deposit=deposit)
+
+
+def datacite_register_after_publish(sender, action=None, pid=None,
+                                    deposit=None):
+    """Mind DOI with DataCite after the deposit has been published."""
+    if action == "publish" and \
+            current_app.config['DEPOSIT_DATACITE_MINTING_ENABLED']:
+        recid_pid, record = deposit.fetch_published()
+        datacite_register.delay(recid_pid.pid_value, str(record.id))

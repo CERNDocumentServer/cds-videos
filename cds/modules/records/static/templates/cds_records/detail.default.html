@@ -49,9 +49,7 @@
                     <ul class="list-unstyled" ng-show="record.other_standard_identifier.length > 1">
                       <li ng-repeat="identifier in record.other_standard_identifier">
                         <!-- If the identifier is from DOI, display it as a link ... -->
-                        <a class="get-badge" ng-if="identifier.source_of_number_or_code == 'DOI'" ng-href="http://dx.doi.org/{{identifier.standard_number_or_code}}" target="_blank">
-                          <img ng-src="/badge/doi/{{identifier.standard_number_or_code}}.svg" alt="{{ identifier.standard_number_or_code }}">
-                        </a>
+                        <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
                         <!-- ... otherwise, display just a span -->
                         <span ng-if="identifier.source_of_number_or_code != 'DOI'">
                           {{identifier.standard_number_or_code}}

@@ -214,7 +214,6 @@ class CDSDeposit(Deposit):
         """Get record instance."""
         deposit = super(CDSDeposit, cls).get_record(
             id_=id_, with_deleted=with_deleted)
-        #  deposit['_files'] = deposit._get_files_dump()
         return deposit
 
     @classmethod
@@ -222,8 +221,6 @@ class CDSDeposit(Deposit):
         """Get records."""
         deposits = super(CDSDeposit, cls).get_records(
             ids=ids, with_deleted=with_deleted)
-        #  for deposit in deposits:
-        #      deposit['_files'] = deposit._get_files_dump()
         return deposits
 
     @classmethod

@@ -29,7 +29,8 @@ from __future__ import absolute_import, print_function
 from invenio_deposit.signals import post_action
 from invenio_indexer.signals import before_record_index
 
-from .receivers import index_deposit_after_publish
+from .receivers import index_deposit_after_publish, \
+    datacite_register_after_publish
 from .indexer import cdsdeposit_indexer_receiver
 
 
@@ -49,7 +50,12 @@ class CDSDepositApp(object):
     @staticmethod
     def register_signals(app):
         """Register CDS Deposit signals."""
+        # index records after published
         post_action.connect(index_deposit_after_publish,
                             sender=app, weak=False)
+        # if publish a project -> index also videos
         before_record_index.connect(
             cdsdeposit_indexer_receiver, sender=app, weak=False)
+        # register Datacite after publish record
+        post_action.connect(
+            datacite_register_after_publish, sender=app, weak=False)

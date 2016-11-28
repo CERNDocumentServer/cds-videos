@@ -24,9 +24,7 @@
           <div class="text-right">
             <ul class="list-inline">
               <li ng-if="record.doi">
-                <a class="get-badge" ng-href="http://dx.doi.org/{{ ::record.doi }}" target="_blank">
-                  <img ng-src="/badge/doi/{{ ::record.doi }}.svg" alt="{{ ::record.doi }}" />
-                </a>
+                <ng-include src="'static/templates/cds_records/doi.html'"></ng-include>
               </li>
               <li ng-if="record.report_number.report_number">
                 <span class="label label-info">{{ ::record.report_number.report_number }}</span>

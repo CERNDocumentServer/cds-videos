@@ -107,6 +107,7 @@ def app():
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
+        PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
     )
     app.register_blueprint(files_rest_blueprint)
 
