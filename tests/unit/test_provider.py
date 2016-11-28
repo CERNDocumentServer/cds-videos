@@ -22,9 +22,11 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test access control package."""
+"""Test minters package."""
 
 from __future__ import absolute_import, print_function
+
+from uuid import uuid4
 
 import mock
 import pytest
@@ -46,9 +48,34 @@ def test_recid_provider(db):
         recid_minter(uuid, data)
 
         assert data['recid'] == 1
-        pid_create.assert_called_once_with(
-            'recid', '1', pid_provider=None, object_type='rec',
-            object_uuid=uuid, status=PIDStatus.REGISTERED)
+        pid_create.assert_called_with(
+            'doi', '10.0000/cds.1', object_type='rec',
+            object_uuid=uuid, status=PIDStatus.RESERVED)
+
+
+def test_minting_recid(db):
+    """Test using random uuid for the record."""
+    data = dict()
+    # Assert registration of recid.
+    rec_uuid = uuid4()
+    pid = recid_minter(rec_uuid, data)
+    assert pid.pid_type == 'recid'
+    assert pid.pid_value == '1'
+    assert pid.status == PIDStatus.REGISTERED
+    assert pid.object_uuid == rec_uuid
+    assert data['doi'] == '10.0000/cds.1'
+
+
+@pytest.mark.parametrize('doi', [
+    'batman/superman',
+    'jessica/jones',
+])
+def test_invalid_doi(db, doi):
+    """Test invalid doi."""
+    uuid = uuid4()
+    data = dict(doi=doi)
+    with pytest.raises(AssertionError):
+        recid_minter(uuid, data)
 
 
 def test_recid_provider_exception(db):
