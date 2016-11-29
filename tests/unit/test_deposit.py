@@ -227,7 +227,7 @@ def test_deposit_events_on_download(api_app, db, depid, bucket, access_token,
         assert events[1].payload['deposit_id'] == depid
 
         status = video._compute_tasks_status()
-        assert status == {'download': states.STARTED}
+        assert status == {'file_download': states.STARTED}
 
         # check if the states are inside the deposit
         res = client.get(
@@ -236,7 +236,7 @@ def test_deposit_events_on_download(api_app, db, depid, bucket, access_token,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['download'] == states.STARTED
+        assert data['_deposit']['state']['file_download'] == states.STARTED
 
 
 def test_deposit_events_on_worlflow(api_app, db, depid, bucket, access_token,

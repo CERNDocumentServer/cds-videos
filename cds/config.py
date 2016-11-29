@@ -270,6 +270,9 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 FILES_REST_PERMISSION_FACTORY = \
     'cds.modules.access.access_control:cern_file_factory'
 
+# Files storage
+FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
+
 
 ###############################################################################
 # Formatter
@@ -376,13 +379,6 @@ PREVIEWER_PREFERENCE = [
 ]
 
 ###############################################################################
-# Storage
-###############################################################################
-
-# FIXME: Add proper data location
-DATADIR = '/tmp'
-
-###############################################################################
 # Logging
 ###############################################################################
 
@@ -417,6 +413,8 @@ INDEXER_BULK_REQUEST_TIMEOUT = 60
 ###############################################################################
 # Deposit
 ###############################################################################
+# FIXME: CHANGE ME
+PIDSTORE_DATACITE_DOI_PREFIX = '10.0000'
 # PID minter used for record submissions.
 DEPOSIT_PID_MINTER = 'cds_recid'
 # Template for deposit list view.
