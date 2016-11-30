@@ -7,6 +7,191 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   this.errors = [];
   // The ongoing uploads
   this.uploading = [];
+  // The SSE listener
+  this.sseEventListener = null;
+
+  this.$onDestroy = function() {
+    try {
+      // Destroy listener
+      that.sseEventListener();
+    } catch(error) {
+      // Ok probably already done
+    }
+  }
+
+  /*
+   * Updates the file with the success
+   */
+  function _success(key, data) {
+    // Add the necessary flags
+    data.progress = 100;
+    data.completed = true;
+    that.updateFile(
+      key,
+      data,
+      true
+    );
+  }
+
+  /*
+   * Updates the file with the percentage
+   */
+  function _progress(key, progress) {
+    that.updateFile(
+      key,
+      {
+        progress: progress || 0,
+        completed: progress === 100
+      }
+    );
+  }
+
+  /*
+   * Updates the file with the error
+   */
+  function _error(key) {
+    that.updateFile(
+      key,
+      {
+        errored: true,
+        progress: 0
+      }
+    );
+  }
+
+  /*
+   * Uploads a local file
+   */
+  function _local(upload) {
+    var promise = $q.defer();
+    var args = that.prepareUpload(upload);
+    Upload.http(args)
+      .then(
+        function success(response) {
+          _success(
+            response.config.data.key,
+            response.data
+          );
+          // Check if needs upload
+          var _subpromise;
+          if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
+            _subpromise = Upload.http(
+              _prepareLocalFileWebhooks(upload, response)
+            );
+          } else {
+            var d = $q.defer();
+            d.resolve();
+            _subpromise = d.promise;
+          }
+          _subpromise.then(
+            function success() {;
+              promise.resolve(response);
+            }
+          );
+        },
+        function error(response) {
+          promise.reject(response);
+        },
+        function progress(evt) {
+          _progress(
+            evt.config.data.key,
+            parseInt(100.0 * evt.loaded / evt.total, 10)
+          );
+        }
+      );
+    return promise.promise;
+  }
+
+  /*
+   * Uploads a remote file
+   */
+  function _remote(upload) {
+    var args = that.prepareUpload(upload);
+    var promise = $q.defer();
+    // Prepare the listener
+    that.sseEventListener = $scope.$on(
+      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key,
+      function(event, type, data) {
+        switch (data.state) {
+          case 'FAILURE':
+            _error(upload.key);
+            break;
+          case 'SUCCESS':
+            _success(upload.key, data.meta.payload);
+            promise.resolve(data.meta.payload);
+            // Turn off that listener we don't need it any more
+            that.sseEventListener();
+          default:
+            _progress(
+              upload.key,
+              data.meta.payload.percentage
+            );
+        }
+      });
+    $http(args)
+      .then(
+        function success(response) {
+        },
+        function error(response) {
+          promise.reject(response);
+        }
+      );
+    return promise.promise;
+  }
+
+  /*
+   * Prepare http request of Local File Upload without Webhooks
+   */
+  function _prepareLocalFile(file) {
+    return {
+      url: that.cdsDepositCtrl.links.bucket + '/' + file.key,
+      method: 'PUT',
+      headers: {
+        'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
+      },
+      data: file
+    };
+  };
+
+  /*
+   * Prepare http request of Remote File Upload with Webhooks
+   */
+  function _prepareRemoteFileWebhooks(file) {
+    return {
+      url: file.receiver,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        uri: file.url,
+        key: file.key,
+        bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
+        deposit_id: that.cdsDepositCtrl.record._deposit.id,
+        sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
+      }
+    };
+  }
+
+  /*
+   * Prepare http request of Local File Upload with Webhooks
+   */
+  function _prepareLocalFileWebhooks(file, response) {
+    return {
+      method: 'POST',
+      url: that.remoteMasterReceiver,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        version_id: response.data.version_id,
+        key: file.key,
+        bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
+        deposit_id: that.cdsDepositCtrl.record._deposit.id,
+        sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
+      }
+    }
+  }
 
   // On Component init
   this.$onInit = function() {
@@ -20,12 +205,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       var existingFiles = that.files.map(function(file) {
         return file.key
       });
+
       angular.forEach(_files, function(file) {
-        // GRRRRRRRRRRR :(
         file.key = file.name;
-        // Mark the file as local
-        file.local = true;
+        file.local = (file.receiver) ? false : true;
       });
+
       // Exclude files that already exist
       _files = _.reject(_files, function(file) {
         if (existingFiles.includes(file.key)) {
@@ -34,6 +219,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         existingFiles.push(file.key);
         return false;
       });
+
       if (that.cdsDepositCtrl.master) {
         // Add new videos and files to master
         that.cdsDepositsCtrl.addFiles(_files, this.queue);
@@ -48,36 +234,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       }
     };
 
-
     // Prepare file request
     this.prepareUpload = function(file) {
-      var args;
-      if (file.receiver) {
-        args = {
-          url: file.receiver,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          data: {
-            uri: file.url,
-            key: file.key,
-            bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
-            deposit_id: that.cdsDepositCtrl.record._deposit.id,
-            sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
-          }
-        };
-      } else {
-        args = {
-          url: that.cdsDepositCtrl.links.bucket + '/' + file.key,
-          method: 'PUT',
-          headers: {
-            'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
-          },
-          data: file
-        };
-      }
-      return args;
+      return (file.receiver) ? _prepareRemoteFileWebhooks(file) : _prepareLocalFile(file);
     };
 
     this.prepareDelete = function(url) {
@@ -96,89 +255,22 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       var defer = $q.defer();
       var data = [];
       function _chain(upload) {
-        var downloadPromise;
-        var args = that.prepareUpload(upload);
-        if (!upload.receiver) {
-          downloadPromise = Upload.http(args).then(
-            function success(response) {
-              // Update the file with status
-              response.data.completed = true;
-              response.data.progress = 100;
-              that.updateFile(
-                response.config.data.key,
-                response.data,
-                true
-              );
-              data.push(response.data);
-              if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
-                Upload.http({
-                  method: 'POST',
-                  url: that.remoteMasterReceiver,
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  data: {
-                    version_id: response.data.version_id,
-                    key: upload.key,
-                    bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
-                    deposit_id: that.cdsDepositCtrl.record._deposit.id
-                  }
-                });
-              }
-            },
-            function error(response) {
-              // Throw an error
-              defer.reject(response);
-            },
-            function progress(evt) {
-              var progress = parseInt(100.0 * evt.loaded / evt.total, 10);
-              that.cdsDepositCtrl.progress = progress;
-              // Update the file with status
-              that.updateFile(
-                evt.config.data.key,
-                {
-                  progress: progress
-                }
-              );
-            }
-          );
-        } else {
-          Upload.http(args);
-          var fileListenerName = 'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key;
-          $scope.$on(fileListenerName, function(event, type, data) {
-            var updateObj, progress;
-            var payload = data.meta.payload;
-            if (data.state != 'FAILURE') {
-              progress = payload.percentage;
-              var completed = progress == 100;
-              updateObj = {
-                progress: progress,
-                completed: completed
-              };
+        // Get the arguments
+        var promise = (upload.receiver) ? _remote(upload) : _local(upload);
+        promise.then(
+          function success(response) {
+            data.push(response);
+            // Check for the next one
+            if (that.queue.length > 0) {
+              return _chain(that.queue.shift());
             } else {
-              updateObj = {
-                errored: true
-              };
+              defer.resolve(data);
             }
-            console.warn('PROGRESS', progress);
-            if (progress) {
-              that.cdsDepositCtrl.progress = progress;
-            }
-            $timeout(function() {
-              that.updateFile(payload.key, updateObj);
-            }, 0);
-          }, false);
-          var deferred = $q.defer();
-          deferred.resolve();
-          downloadPromise = deferred.promise;
-        }
-        downloadPromise.finally(function finish(evt) {
-          if (that.queue.length > 0) {
-            return _chain(that.queue.shift());
-          } else {
-            defer.resolve(data);
+          },
+          function error(response) {
+            defer.reject(response);
           }
-        });
+        );
       }
       _chain(that.queue.shift());
       return defer.promise;
@@ -186,28 +278,28 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
 
     this.upload = function() {
       if (that.queue.length > 0) {
+        // FIXME: LOADING
         // Start loading
         $scope.$emit('cds.deposit.loading.start');
-        that.cdsDepositCtrl.loading = true;
         // Start local loading
+        that.cdsDepositCtrl.loading = true;
         that.loading = true;
         that.uploader()
-        .then(
-          function success(response) {
-          },
-          function error(response) {
-            // Inform the parents
-            $scope.$emit('cds.deposit.error', response);
-          }
-        ).finally(
-          function done() {
-            // Stop loading
-            $scope.$emit('cds.deposit.loading.stop');
-            that.cdsDepositCtrl.loading = false;
-            // Local loading
-            that.loading = false;
-          }
-        );
+          .then(
+            function success(response) {
+            },
+            function error(response) {
+              // Inform the parents
+              $scope.$emit('cds.deposit.error', response);
+            }
+          ).finally(
+            function done() {
+              // FIXME: LOADING
+              $scope.$emit('cds.deposit.loading.stop');
+              that.cdsDepositCtrl.loading = false;
+              that.loading = false;
+            }
+          );
       }
     }
   }
@@ -215,7 +307,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   this.$postLink = function() {
     // Upload video file when creating a new deposit
     if (!this.cdsDepositCtrl.master) {
-      this.upload();
+      $timeout(function () {
+        that.upload();
+      }, 1500);
     }
   }
 
@@ -259,16 +353,16 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         that.files[index].links.version || that.files[index].links.self
       );
       $http(args)
-      .then(
-        function success() {
-          // Remove the file from the list
-          that.files.splice(index, 1);
-        },
-        function error(error) {
-          // Inform the parents
-          $scope.$emit('cds.deposit.error', response);
-        }
-      );
+        .then(
+          function success() {
+            // Remove the file from the list
+            that.files.splice(index, 1);
+          },
+          function error(error) {
+            // Inform the parents
+            $scope.$emit('cds.deposit.error', response);
+          }
+        );
     }
   };
 

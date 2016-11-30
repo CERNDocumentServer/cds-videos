@@ -1,4 +1,6 @@
-function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
+function cdsDepositsCtrl(
+  $http, $q, $scope, $window, $location, depositStates, cdsAPI
+) {
   var that = this;
   this.edit = false;
 
@@ -12,21 +14,41 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
   this.alerts = [];
   // Global loading state
   this.loading = false;
+  // The connection
+  this.sseListener = {};
+
+  this.$onDestroy = function() {
+    try {
+      // On destroy delete the event listener
+      delete $window.onbeforeunload;
+      that.sseListener.close();
+    } catch (error) {
+      // Probably already closed
+    }
+  }
+
+  this.initState = {
+    PENDING: [],
+    STARTED: [],
+    FAILURE: [],
+    SUCCESS: [],
+  };
+
+  this.overallState = {};
 
   this.$onInit = function() {
-    console.log('STATES', states);
     if (this.masterLinks) {
       // Set mode to edit
       this.edit = true;
       // Fetch the project
-      this.JSONResolver(this.masterLinks.self)
+      cdsAPI.resolveJSON(this.masterLinks.self)
       .then(
         function success(response) {
           that.addMaster(response.data);
           that.initialized = true;
           // FIXME: Remove me when the project dereferencing the videos
           angular.forEach(response.data.metadata.videos, function(video, index) {
-            that.JSONResolver(video.$reference)
+            cdsAPI.resolveJSON(video.$reference)
             .then(
               function success(response){
                 that.children.push(response.data);
@@ -59,23 +81,17 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
 
     // SSE
     this.sseEventListener = function(evt) {
-      console.log('LISTENING', evt);
       // Do some magic
       var data = JSON.parse(evt.data || '{}');
       var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
+      console.info('RECEIVED', evt.type, data);
       $scope.$broadcast(deposit_, evt.type, data);
     }
 
     // SSE stuff - move to somewhere else
-    var parser = document.createElement('a');
-    if (this.masterLinks !== undefined) {
-      parser.href = this.masterLinks.html;
-    } else {
-      parser.href = this.master.links.html;
-    }
-
-    var dep_id = parser.pathname.split('/')[2];
-    that.sseListener = new EventSource('/api/deposits/' + dep_id + '/sse');
+    that.sseListener = new EventSource(
+      '/api/deposits/' + that.master.metadata._deposit.id + '/sse'
+    );
 
     that.sseListener.onerror = function(msg) {
       console.error('SSE connection error', msg);
@@ -85,20 +101,30 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
       console.info('SEE connection has been opened', msg);
     }
 
-    angular.forEach(states, function(type, index) {
-      console.log('Listen to type', type);
+    angular.forEach(depositStates, function(type, index) {
       that.sseListener.addEventListener(
         type,
         that.sseEventListener,
         false
       )
     });
+
+    // Make sure we kill the connection before reload
+    $window.onbeforeunload = function (event) {
+      // Make sure the connection is closed after the user reloads
+      try {
+        that.sseListener.close();
+      } catch (error) {
+        // Ignore probably already closed
+      }
+    }
     // SSE
   };
 
   this.addChildren = function(deposit, files) {
     deposit.metadata._files = files || [];
     this.children.push(deposit);
+    this.overallState[deposit.metadata._deposit.id] = angular.copy(that.initState);
   };
 
   this.isVideoFile = function(key) {
@@ -205,7 +231,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
         );
       }
     });
-  };
+    };
 
     this.initDeposit = function(files) {
       var prevFiles = [];
@@ -221,7 +247,7 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
           // Create the master
           that.addMaster(response.data, files);
           // Update the master record with the references
-          return that.JSONResolver(that.master.links.self);
+          return cdsAPI.resolveJSON(that.master.links.self);
         }).then(function success(response) {
           angular.merge(that.master, response.data);
         });
@@ -233,61 +259,22 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
         {$schema: schema},
         extra || {}
       );
-      return $http({
-        url: url,
-        method: 'POST',
-        data: data
-      });
+      return this.makeAction(url, 'POST', data);
     };
 
     this.makeAction = function(url, method, payload) {
-      return $http({
-        url: url,
-        method: method,
-        data: payload
-      });
+      return cdsAPI.action(url, method, payload);
     };
 
     this.chainedActions = function(promises) {
-      var defer = $q.defer();
-      var data = [];
-      function _chain(promise) {
-        var fn = promise;
-        var callback;
-
-        if (typeof(promise) !== 'function') {
-          fn = promise[0];
-          callback = promise[1];
-        }
-
-        fn().then(
-          function(_data) {
-            data.push(_data);
-            if (typeof(callback) === 'function') {
-              // Call the callback
-              callback(_data);
-            }
-            if (promises.length > 0) {
-              return _chain(promises.shift());
-            } else {
-              defer.resolve(data);
-            }
-          }, function(error) {
-            defer.reject(error);
-          }
-        );
-      }
-      _chain(promises.shift());
-      return defer.promise;
+      return cdsAPI.chainedActions(promises);
     };
 
     this.handleRedirect = function(url, replace) {
       if (!angular.isUndefined(url) && url !== '') {
         if (replace) {
-          // ¯\_(ツ)_/¯ https://github.com/angular/angular.js/issues/3924
-          var parser = document.createElement('a');
-          parser.href = url;
-          $location.url(parser.pathname);
+          var path = cdsAPI.getUrlPath(url);
+          $location.url(path);
           $location.replace();
         } else {
           $window.location.href = url;
@@ -296,12 +283,19 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
     }
 
     this.JSONResolver = function(url) {
-      return $http.get(url);
+      return cdsAPI.resolveJSON(url);
     };
 
     this.dismissAlert = function(alert) {
       delete this.alerts[_.indexOf(this.alerts, alert.alert)];
     }
+
+
+    // Global cdsDeposit events
+
+    // Success message
+    // Loading message
+    // Error message
 
     // Meessages Success
     $scope.$on('cds.deposit.success', function(evt, response) {
@@ -327,9 +321,33 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
     $scope.$on('cds.deposit.loading.stop', function(evt) {
       that.loading = false;
     });
+
+    this.overall = angular.copy(that.initState);
+
+    this.overallStatus = function() {
+      var data = angular.copy(that.initState);
+      angular.forEach(that.overallState, function(value, key) {
+        angular.forEach(value, function(_i, _k) {
+          data[_k] = data[_k].length + _i.length;
+        })
+      })
+    }
+
+    $scope.$on('cds.deposit.status.changed', function(evt, id, state) {
+      that.overallState[id] = angular.copy(state);
+    });
+
   }
 
-  cdsDepositsCtrl.$inject = ['$http', '$q', '$scope', '$window', '$location', 'states'];
+  cdsDepositsCtrl.$inject = [
+    '$http',
+    '$q',
+    '$scope',
+    '$window',
+    '$location',
+    'depositStates',
+    'cdsAPI',
+  ];
 
   function cdsDeposits() {
     return {

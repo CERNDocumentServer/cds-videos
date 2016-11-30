@@ -1,44 +1,45 @@
 <div ng-if="!$ctrl.initialized">
-  <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
-    <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
-    <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
-  </ul>
-  <div class="tab-content">
-    <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
-      <div class="well"
-           ngf-drag-over-class="'dragover'"
-           ngf-drop=""
-           ngf-change="$ctrl.addFiles($newFiles)"
-           ngf-max-size="20GB"
-           ngf-multiple="true"
-      >
-        <center>
-          Drop files or folders here
-        </center>
-      </div>
-      <p class="text-center legend"><strong>— OR —</strong></p>
-      <p class="text-center">
-        <button class="btn btn-primary"
-                ngf-max-size="20GB"
-                ngf-multiple="true"
-                ngf-select=""
-                ngf-change="$ctrl.addFiles($newFiles)"
+  <div class="cds-deposit-box cds-deposit-box-upload-intro">
+    <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
+      <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
+      <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
+        <div
+             ngf-drag-over-class="'dragover'"
+             ngf-drop=""
+             ngf-change="$ctrl.addFiles($newFiles)"
+             ngf-select=""
+             ngf-max-size="20GB"
+             ngf-multiple="true"
         >
-          Click to select
-        </button>
-      </p>
-    </div>
+          <div class="cds-deposit-box-upload-wrapper text-center">
+            <p class="cds-deposit-box-upload-icon">
+              <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
+            </p>
+            <div class="cds-deposit-box-upload-content">
+              <div class="cds-deposit-box-upload-title">
+                <h4>Select files to upload</h4>
+              </div>
+              <p class="cds-deposit-box-upload-description"> Or drag and drop video files</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
-      <cds-remote-uploader
-          template="/static/templates/cds_deposit/remote_upload.html"
-          dropbox-enabled="true"
-          dropbox-selector=".dropbox-upload"
-          dropbox-app-key="{{ dropboxAppKey }}"
-          remote-receiver="/api/hooks/receivers/downloader/events/"
-      >
-        <div class="dropbox-upload"></div>
-      </cds-remote-uploader>
+      <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
+        <cds-remote-uploader
+            template="/static/templates/cds_deposit/remote_upload.html"
+            dropbox-enabled="true"
+            dropbox-selector=".dropbox-upload"
+            dropbox-app-key="{{ dropboxAppKey }}"
+            remote-master-receiver="/api/hooks/receivers/avc/events/"
+            remote-children-receiver="/api/hooks/receivers/downloader/events/"
+        >
+          <div class="dropbox-upload"></div>
+        </cds-remote-uploader>
+      </div>
     </div>
   </div>
 </div>
@@ -53,6 +54,7 @@
   <div class="col-md-12">
     <cds-deposit
       master="true"
+      id="$ctrl.master.metadata._deposit.id"
       links="$ctrl.master.links"
       update-record-after-success="true"
       schema="{{ $ctrl.masterSchema }}"
@@ -71,10 +73,12 @@
     <hr />
     <!-- ADD children -->
     <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.children track by $index">
-      <div class="well">
+      <div class="cds-deposit-box">
         <cds-deposit
           index="$index + 1"
+          id="child.metadata._deposit.id"
           update-record-after-success="true"
+          update-record-in-background="10000"
           links="child.links"
           schema="{{ $ctrl.childrenSchema }}"
           record="child.metadata"
@@ -94,7 +98,8 @@
                 dropbox-enabled="true"
                 dropbox-selector=".dropbox-upload"
                 dropbox-app-key="{{ dropboxAppKey }}"
-                remote-receiver="/api/hooks/receivers/downloader/events/"
+                remote-master-receiver="/api/hooks/receivers/avc/events/"
+                remote-children-receiver="/api/hooks/receivers/downloader/events/"
             >
               <div class="dropbox-upload"></div>
             </cds-remote-uploader>
@@ -113,7 +118,8 @@
           dropbox-enabled="true"
           dropbox-selector=".dropbox-upload"
           dropbox-app-key="{{ dropboxAppKey }}"
-          remote-receiver="/api/hooks/receivers/downloader/events/"
+          remote-master-receiver="/api/hooks/receivers/avc/events/"
+          remote-children-receiver="/api/hooks/receivers/downloader/events/"
       >
         <div class="dropbox-upload"></div>
       </cds-remote-uploader>
