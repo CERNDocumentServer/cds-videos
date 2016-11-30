@@ -1,7 +1,8 @@
 function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
   var that = this;
-
+  var videoRegex = /(.*)\.(mp4|mov)$/;
   this.$onInit = function() {
+
     // Initialize dropbox dropin if enabled
     if (this.dropboxEnabled) {
       if (typeof Dropbox !== 'undefined') {
@@ -13,7 +14,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
                 key: file.name,
                 name: file.name,
                 size: file.bytes,
-                receiver: that.remoteReceiver,
+                receiver: file.name.match(videoRegex) ? that.remoteMasterReceiver : that.remoteChildReceiver,
                 url: file.link
               };
             });
@@ -39,7 +40,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
         var obj = {
           key: name,
           name: name,
-          receiver: that.remoteReceiver,
+          receiver: name.match(videoRegex) ? that.remoteMasterReceiver : that.remoteChildReceiver,
           url: url
         };
         var sizePromise;
@@ -77,7 +78,8 @@ function cdsRemoteUploader() {
       cdsDepositsCtrl: '?^cdsDeposits'
     },
     bindings: {
-      remoteReceiver: '@',
+      remoteMasterReceiver: '@',
+      remoteChildReceiver: '@',
       dropboxEnabled: '<',
       dropboxAppKey: '@',
       dropboxSelector: '@'

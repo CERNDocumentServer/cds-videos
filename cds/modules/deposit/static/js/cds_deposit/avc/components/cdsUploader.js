@@ -20,12 +20,14 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       var existingFiles = that.files.map(function(file) {
         return file.key
       });
+
       angular.forEach(_files, function(file) {
         // GRRRRRRRRRRR :(
         file.key = file.name;
         // Mark the file as local
         file.local = true;
       });
+
       // Exclude files that already exist
       _files = _.reject(_files, function(file) {
         if (existingFiles.includes(file.key)) {
@@ -34,6 +36,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         existingFiles.push(file.key);
         return false;
       });
+
       if (that.cdsDepositCtrl.master) {
         // Add new videos and files to master
         that.cdsDepositsCtrl.addFiles(_files, this.queue);
@@ -43,11 +46,10 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         _files = _.difference(_files, videoFiles);
         // Add the files to the list
         Array.prototype.push.apply(that.files, _files);
-        // Add the files to the queue
+        // Add the files to the queuew        Array.prototype.push.apply(that.queue, _files);
         Array.prototype.push.apply(that.queue, _files);
       }
     };
-
 
     // Prepare file request
     this.prepareUpload = function(file) {
@@ -171,11 +173,14 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
 
     this.upload = function() {
       if (that.queue.length > 0) {
+        // FIXME: LOADING
         // Start loading
         $scope.$emit('cds.deposit.loading.start');
-        that.cdsDepositCtrl.loading = true;
         // Start local loading
-        that.loading = true;
+        $timeout(function() {
+          that.cdsDepositCtrl.loading = true;
+          that.loading = true;
+        }, 0);
         that.uploader()
         .then(
           function success(response) {
@@ -186,10 +191,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
           }
         ).finally(
           function done() {
-            // Stop loading
+            // FIXME: LOADING
             $scope.$emit('cds.deposit.loading.stop');
             that.cdsDepositCtrl.loading = false;
-            // Local loading
             that.loading = false;
           }
         );
@@ -200,7 +204,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   this.$postLink = function() {
     // Upload video file when creating a new deposit
     if (!this.cdsDepositCtrl.master) {
-      this.upload();
+      $timeout(function () {
+        that.upload();
+      }, 1300);
     }
   }
 

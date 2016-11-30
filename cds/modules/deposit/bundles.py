@@ -67,15 +67,21 @@ js_jquery = NpmBundle(
     output='gen/cds.deposit.jquery.deposit.%(version)s.js',
 )
 
-js_cds_deposit = Bundle(
-    # 'js/cds_deposit/cdsDeposit.module.js',
+js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/avc.module.js',
+    'js/cds_deposit/avc/factories/states.js',
     'js/cds_deposit/avc/components/cdsActions.js',
     'js/cds_deposit/avc/components/cdsDeposit.js',
     'js/cds_deposit/avc/components/cdsDeposits.js',
     'js/cds_deposit/avc/components/cdsForm.js',
     'js/cds_deposit/avc/components/cdsUploader.js',
     'js/cds_deposit/avc/components/cdsRemoteUploader.js',
+    npm={
+        'angular-schema-form': '~0.8.13',
+        'angular-schema-form-bootstrap': '~0.2.0',
+        'objectpath': '~1.2.1',
+        'tv4': '~1.2.7',
+    }
 )
 
 js_deposit = NpmBundle(
