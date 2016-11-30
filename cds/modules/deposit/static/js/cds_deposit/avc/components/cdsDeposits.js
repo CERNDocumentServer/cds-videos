@@ -159,6 +159,17 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
 
       // Build the promises
       var _promises = [];
+      // Find already uploaded videos
+      var uploadedVideos = that.children.map(function(deposit) {
+        if (deposit.metadata._files && deposit.metadata._files.length > 0) {
+          return deposit.metadata._files[0].key
+        }
+      }).filter(function(key) {
+        return key != undefined
+      });
+      _files.videos = _.reject(_files.videos, function(file) {
+        return uploadedVideos.includes(file.key);
+      });
       // for each files create child
       angular.forEach(_files.videos, function(file, key) {
         this.push([
@@ -193,6 +204,14 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
   };
 
     this.initDeposit = function(files) {
+      var prevFiles = [];
+      files = _.reject(files, function(file) {
+        if (prevFiles.includes(file.key)) {
+          return true;
+        }
+        prevFiles.push(file.key);
+        return false;
+      });
       return this.createDeposit(this.masterInit, this.masterSchema)
         .then(function (response) {
           // Create the master

@@ -28,7 +28,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       });
       // Exclude files that already exist
       _files = _.reject(_files, function(file) {
-        return existingFiles.includes(file.key);
+        if (existingFiles.includes(file.key)) {
+          return true;
+        }
+        existingFiles.push(file.key);
+        return false;
       });
       if (that.cdsDepositCtrl.master) {
         // Add new videos and files to master

@@ -314,3 +314,19 @@ a[ng-click]{
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
 }
+
+.cds-pills-center {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 10px;
+
+  & > li > a {
+    border-radius: 5px;
+  }
+}
+
+.cds-urls-textarea {
+  min-height: 150px;
+  max-height: 300px;
+  margin-bottom: 5px;
+}
