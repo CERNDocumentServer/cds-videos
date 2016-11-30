@@ -27,7 +27,7 @@ angular.module('cdsDeposit', [
   'pascalprecht.translate', 'ui.sortable',
   'ui.select', 'mgcrea.ngStrap.select', 'mgcrea.ngStrap.datepicker',
   'mgcrea.ngStrap.helpers.dateParser',
-  'mgcrea.ngStrap.tooltip', 'ngFileUpload',
+  'mgcrea.ngStrap.tooltip', 'ngFileUpload', 'monospaced.elastic',
   'invenioFiles.filters'
 ])
 .provider("states", function() {
