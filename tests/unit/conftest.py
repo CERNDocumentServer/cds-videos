@@ -56,6 +56,7 @@ from invenio_indexer import InvenioIndexer
 from invenio_oauth2server.models import Token
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_previewer import InvenioPreviewer
 from invenio_records_rest import InvenioRecordsREST
 from invenio_records_rest.utils import PIDConverter
 from invenio_search import InvenioSearch, current_search, current_search_client
@@ -104,6 +105,7 @@ def app():
             'Youtube 720p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff5', '.mp4'),
         },
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
+
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -139,6 +141,16 @@ def celery_not_fail_on_eager_app(app):
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+        PREVIEWER_PREFERENCE=['cds_video', ],
+        RECORDS_UI_ENDPOINTS=dict(
+            video_preview=dict(
+                pid_type='depid',
+                route='/deposit/<pid_value>/preview/video/<filename>',
+                view_imp='cds.modules.previewer.views.preview_depid',
+                record_class='cds.modules.deposit.api:Video',
+            ),
+        )
+
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -302,6 +314,14 @@ def webhooks(app):
     """Init webhooks API."""
     if 'invenio-webhooks' not in app.extensions:
         InvenioWebhooks(app)
+    return app
+
+
+@pytest.fixture()
+def previewer_app(app):
+    """Init deposit REST API."""
+    if 'invenio-previewer' not in app.extensions:
+        InvenioPreviewer(app)
     return app
 
 

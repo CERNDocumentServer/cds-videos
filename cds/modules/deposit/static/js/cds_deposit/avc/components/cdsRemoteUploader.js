@@ -12,7 +12,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
                 key: file.name,
                 name: file.name,
                 size: file.bytes,
-                receiver: that.cdsDepositsCtrl.isVideoFile(file.name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
+                receiver: that.cdsDepositsCtrl.isVideoFile(file.name) ? that.remoteMasterReceiver : that.remoteChildrenReceiver,
                 url: file.link
               };
             });
@@ -38,7 +38,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
         var obj = {
           key: name,
           name: name,
-          receiver: that.cdsDepositsCtrl.isVideoFile(name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
+          receiver: that.cdsDepositsCtrl.isVideoFile(name) ? that.remoteMasterReceiver : that.remoteChildrenReceiver,
           url: url
         };
         var sizePromise;
@@ -76,7 +76,8 @@ function cdsRemoteUploader() {
       cdsDepositsCtrl: '?^cdsDeposits'
     },
     bindings: {
-      remoteReceiver: '@',
+      remoteMasterReceiver: '@',
+      remoteChildrenReceiver: '@',
       dropboxEnabled: '<',
       dropboxAppKey: '@',
       dropboxSelector: '@'

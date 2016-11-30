@@ -179,12 +179,12 @@ setup(
         ],
         'invenio_base.api_apps': [
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
-            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.apps': [
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
-            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
         ],
