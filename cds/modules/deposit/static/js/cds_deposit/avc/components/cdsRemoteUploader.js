@@ -29,29 +29,40 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
       }
     }
 
-    $scope.startUrlUpload = function (url) {
-      // Use an a element to parse the URL
-      var parser = document.createElement('a');
-      parser.href = url;
-      var name = parser.pathname.split('/').pop();
-      var obj = {
-        key: name,
-        name: name,
-        receiver: that.remoteReceiver,
-        url: url
-      };
-      var sizePromise;
-      // Retrieve the file size if the protocol is http/s
-      if (url.startsWith('http')) {
-        sizePromise = $http.head(url).then(function (response) {
-          obj.size = response.headers('content-length');
+    $scope.startUrlUploads = function (urls) {
+      var _urls = urls.split('\n');
+      var urlsResolved = $q.all(_urls.map(function(url) {
+        // Use an a element to parse the URL
+        var parser = document.createElement('a');
+        parser.href = url;
+        var name = parser.pathname.split('/').pop();
+        var obj = {
+          key: name,
+          name: name,
+          receiver: that.remoteReceiver,
+          url: url
+        };
+        var sizePromise;
+        // Retrieve the file size if the protocol is http/s
+        if (url.startsWith('http')) {
+          sizePromise = $http.head(url).then(function (response) {
+            var len = response.headers('content-length');
+            if (len) {
+              obj.size = len;
+            }
+          });
+        } else {
+          sizePromise = $q.resolve();
+        }
+        // Return the object wrapped in a promise
+        return sizePromise.catch(angular.noop).then(function () {
+          return obj;
         });
-      } else {
-        sizePromise = $q.resolve();
-      }
-      sizePromise.finally(function () {
+      }));
+      // When all the objects have been formed, add them as files
+      urlsResolved.then(function(objs) {
         var ctrl = that.cdsUploaderCtrl || that.cdsDepositsCtrl;
-        ctrl.addFiles([obj]);
+        ctrl.addFiles(objs);
       });
     };
   };

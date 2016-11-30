@@ -39,10 +39,12 @@ js_main = NpmBundle(
     'node_modules/angular/angular.js',
     'node_modules/angular-sanitize/angular-sanitize.js',
     'node_modules/underscore/underscore.js',
+    'node_modules/angular-elastic/elastic.js',
     npm={
         'angular': '~1.5.8',
         'angular-sanitize': '~1.5.8',
         'underscore': '~1.8.3',
+        'angular-elastic': '~2.5.1',
     }
 )
 
