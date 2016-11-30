@@ -3,39 +3,82 @@
     <div class="col-sm-12">
       <div class="row">
         <div class="col-sm-3">
-          <img class="img-responsive" src="https://placeholdit.imgix.net/~text?txtsize=33&txt=video%20preview&h=288&w=288" />
+          <div
+           class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
+           ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
+
+            <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
+              <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
+              <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
+            </div>
+            <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+          </div>
           <br />
           <cds-actions
             template="/static/templates/cds_deposit/types/video/actions.html"
           >
           </cds-actions>
+          <div class="cds-deposit-box-upload-status">
+            <h5>Upload status:</h5>
+            <p>{{ $ctrl.cdsDepositCtrl.depositStatusCurrent }}</p>
+          </div>
         </div>
         <!-- Progress -->
         <div class="col-sm-9">
-          {{$ctrl.cdsDepositCtrl.alerts | json}}
-          <div ng-show="$ctrl.cdsDepositCtrl.record._deposit.state">
+          <!-- FAILURE -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
+            <div class="row">
+                <div class="col-sm-12">
+                  <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE">
+                    <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message }}</strong>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <!-- PENDING -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
+            <div class="row">
+                <div class="col-sm-12">
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                      Loading ...
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <!-- STARTED -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
               <div class="col-sm-12">
                 <div class="progress">
-                  <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.progress_()}}%;">
-                      {{$ctrl.cdsDepositCtrl.record._deposit.state}}
-                  </div>
+                    <div ng-hide="$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                      {{ $ctrl.cdsDepositCtrl.stateCurrent}}
+                    </div>
+                    <div ng-show="$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage > 0" class="progress-bar text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage}}%;">
+                      {{ $ctrl.cdsDepositCtrl.stateCurrent}} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
+                    </div>
                 </div>
               </div>
           </div>
-          <div ng-show="$ctrl.cdsDepositCtrl.loading" class="row">
-              <div class="col-sm-12">
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.progress}}%;">
-                      Downloading {{$ctrl.cdsDepositCtrl.progress}} %
+          <!-- SUCCESS -->
+          <div
+            ng-show="$ctrl.cdsDepositCtrl.displaySuccess()">
+            <div class="row">
+                <div class="col-sm-12">
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                      <strong>Success</strong>
+                    </div>
                   </div>
                 </div>
-              </div>
+            </div>
           </div>
+
          <!-- Nav tabs -->
          <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
            <li role="presentation" ng-class="{active: active=='metadata'}"><a ng-click="active='metadata'" role="tab" data-toggle="tab">Metadata</a></li>
            <li role="presentation" ng-class="{active: active=='files'}"><a ng-click="active='files'" role="tab" data-toggle="tab">Files</a></li>
-           <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug</a></li>
+           <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug (for @drjova)</a></li>
          </ul>
          <!-- Tab panes -->
          <div class="tab-content cds-tab-content cds-padding-20 ">
@@ -53,6 +96,19 @@
              <div ng-transclude></div>
            </div>
            <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
+             -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
+             -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
+             -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />
+             -- STATUS: {{$ctrl.cdsDepositCtrl.depositStatusCurrent}} -- <br />
+             -- State reporterd $ctrl.cdsDepositCtrl.stateReporter -- <br />
+             -- State current {{ $ctrl.cdsDepositCtrl.stateCurrent }} -- <br />
+             -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
+             <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
+             <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
+             <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}
+             <strong>SUCCESS:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.SUCCESS }}
+             <br />
+             <hr />
              <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
              <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
              <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>

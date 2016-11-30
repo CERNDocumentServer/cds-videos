@@ -40,17 +40,12 @@
 
 {%- block css %}
   {{ super() }}
+  {% assets "cds_previewer_video_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {%- endblock css %}
 
 {% block panel %}
-<div class="container">
-  <div class="row">
-    <div id="container" class="col-md-12">
-      <video width="640" height="480" 
-        src="{{file.uri}}" 
-        controls="controls">
-      </video>
-    </div>
-  </div>
-</div>
+  <video class="cds-previewer-video-player"
+    src="{{file_url}}"
+    controls="controls">
+  </video>
 {% endblock %}

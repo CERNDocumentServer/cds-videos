@@ -232,6 +232,8 @@ class Project(CDSDeposit):
             'deposits/records/project-v1.0.0.json')
         data.setdefault('videos', [])
         return super(Project, cls).create(data, id_=id_)
+        # project.commit()
+        # return project
 
     @property
     def video_ids(self):
