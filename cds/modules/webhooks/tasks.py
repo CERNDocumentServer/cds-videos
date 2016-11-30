@@ -253,7 +253,7 @@ def video_extract_frames(self,
         meta = dict(
             payload=dict(
                 size=duration,
-                percentage=seconds or 0.0 / duration * 100, ),
+                percentage=(seconds or 0.0) / duration * 100, ),
             message='Extracting frames {0} of {1} seconds'.format(
                 seconds, duration),
         )
