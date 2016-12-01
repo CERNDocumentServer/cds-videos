@@ -268,6 +268,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
         mypayload = event.payload
         obj_id = str(object_version.version_id)
+        obj_key = object_version.key
         obj_tags = object_version.get_tags()
         db.session.expunge(event)
         db.session.commit()
@@ -288,7 +289,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
             event.response.update(
                 links=dict(),
-                key=object_version.key,
+                key=obj_key,
                 version_id=obj_id,
                 tags=obj_tags,
             )
