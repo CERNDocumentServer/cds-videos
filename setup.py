@@ -197,8 +197,8 @@ setup(
             'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
         ],
         'invenio_pidstore.minters': [
-            'cds_recid = cds.modules.records.minters:recid_minter',
             'cds_catid = cds.modules.deposit.minters:catid_minter',
+            'cds_recid = cds.modules.records.minters:cds_record_minter',
         ],
         'invenio_i18n.translations': [
             'messages = cds',
