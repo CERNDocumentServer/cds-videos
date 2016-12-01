@@ -87,15 +87,11 @@ def _merge_new_status(stats, name, status):
         return status
 
 
-def _status_extractor(res, name, children=None):
-    stats = {}
-    # TODO merge not needed
-    stats[name] = _merge_new_status(stats, name, res.status)
-    if children:
-        for child in children:
-            for (name, status) in child.items():
-                stats[name] = _merge_new_status(stats, name, status)
-    return stats
+class _status_extractor(object):
+    def __init__(self):
+        self._status = {}
+    def __call__(self, res, name, children=None):
+        self._status[name] = _merge_new_status(self._status, name, res.status)
 
 
 class CDSDeposit(Deposit):
@@ -130,15 +126,12 @@ class CDSDeposit(Deposit):
 
     def _compute_tasks_status(self):
         """Compute tasks status."""
+        status_extractor = _status_extractor()
         events_status = [
             event.receiver._status_and_info(event,
-                                            fun=_status_extractor)['info']
+                                            fun=status_extractor)['info']
             for event in self._events]
-        global_status = {}
-        for item in events_status:
-            for (k, v) in item.items():
-                global_status[k] = _merge_new_status(global_status, k, v)
-        return global_status
+        return status_extractor._status
 
     @classmethod
     def create(cls, data, id_=None):

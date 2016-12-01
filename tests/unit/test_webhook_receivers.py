@@ -38,10 +38,11 @@ import pytest
 
 from celery import states, chain, group
 from celery.result import AsyncResult
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from invenio_webhooks import current_webhooks
+from cds.modules.deposit.api import video_resolver
 from cds.modules.webhooks.receivers import _compute_status
 from cds.modules.webhooks.receivers import _info_extractor
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from invenio_webhooks.models import Event
 from six import BytesIO
 
@@ -215,6 +216,15 @@ def test_avc_workflow_receiver(api_app, db, bucket, depid, access_token,
         assert slave.key == 'test-Youtube 480p.mp4'
         assert master.file
         assert master.file.size == video_size
+
+        # check deposit tasks status
+        video = video_resolver([depid])[0]
+        tasks_status = video._compute_tasks_status()
+        assert len(tasks_status) == 4
+        assert 'file_download' in tasks_status
+        assert 'file_transcode' in tasks_status
+        assert 'file_video_extract_frames' in tasks_status
+        assert 'file_video_metadata_extraction' in tasks_status
 
 
 @pytest.mark.parametrize(
