@@ -1,26 +1,46 @@
 <div ng-if="!$ctrl.initialized">
-  <div class="well"
-    ngf-drag-over-class="'dragover'"
-    ngf-drop=""
-    ngf-change="$ctrl.initDeposit($newFiles)"
-    ngf-max-size="20GB"
-    ngf-multiple="true"
-  >
-    <center>
-      Drop files or folders here
-    </center>
+  <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
+    <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
+    <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
+      <div class="well"
+           ngf-drag-over-class="'dragover'"
+           ngf-drop=""
+           ngf-change="$ctrl.addFiles($newFiles)"
+           ngf-max-size="20GB"
+           ngf-multiple="true"
+      >
+        <center>
+          Drop files or folders here
+        </center>
+      </div>
+      <p class="text-center legend"><strong>— OR —</strong></p>
+      <p class="text-center">
+        <button class="btn btn-primary"
+                ngf-max-size="20GB"
+                ngf-multiple="true"
+                ngf-select=""
+                ngf-change="$ctrl.addFiles($newFiles)"
+        >
+          Click to select
+        </button>
+      </p>
+    </div>
+
+    <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
+      <cds-remote-uploader
+          template="/static/templates/cds_deposit/remote_upload.html"
+          dropbox-enabled="true"
+          dropbox-selector=".dropbox-upload"
+          dropbox-app-key="{{ dropboxAppKey }}"
+          remote-receiver="/api/hooks/receivers/downloader/events/"
+      >
+        <div class="dropbox-upload"></div>
+      </cds-remote-uploader>
+    </div>
   </div>
-  <p class="text-center legend"><strong>— OR —</strong></p>
-  <p class="text-center">
-    <button  class="btn btn-primary"
-      ngf-max-size="20GB"
-      ngf-multiple="true"
-      ngf-select=""
-      ngf-change="$ctrl.initDeposit($newFiles)"
-    >
-      Click to select
-    </button>
-  </p>
 </div>
 
 <div ng-if="$ctrl.initialized">
@@ -67,7 +87,17 @@
           <cds-uploader
             files="child.metadata._files"
             template="/static/templates/cds_deposit/types/common/uploader.html"
-          ></cds-uploader>
+          >
+            <cds-remote-uploader
+                template="/static/templates/cds_deposit/remote_upload.html"
+                dropbox-enabled="true"
+                dropbox-selector=".dropbox-upload"
+                dropbox-app-key="{{ dropboxAppKey }}"
+                remote-receiver="/api/hooks/receivers/downloader/events/"
+            >
+              <div class="dropbox-upload"></div>
+            </cds-remote-uploader>
+          </cds-uploader>
           </cds-form>
         </cds-deposit>
       </div>
@@ -76,7 +106,18 @@
     <cds-uploader
       files="$ctrl.master.metadata._files"
       template="/static/templates/cds_deposit/types/common/uploader.html"
-    ></cds-uploader>
+    >
+      <cds-remote-uploader
+          template="/static/templates/cds_deposit/remote_upload.html"
+          dropbox-enabled="true"
+          dropbox-selector=".dropbox-upload"
+          dropbox-app-key="{{ dropboxAppKey }}"
+          remote-receiver="/api/hooks/receivers/downloader/events/"
+      >
+        <div class="dropbox-upload"></div>
+      </cds-remote-uploader>
+    </cds-uploader>
+
     </cds-deposit>
   </div>
 </div>

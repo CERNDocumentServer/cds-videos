@@ -39,10 +39,12 @@ js_main = NpmBundle(
     'node_modules/angular/angular.js',
     'node_modules/angular-sanitize/angular-sanitize.js',
     'node_modules/underscore/underscore.js',
+    'node_modules/angular-elastic/elastic.js',
     npm={
         'angular': '~1.5.8',
         'angular-sanitize': '~1.5.8',
         'underscore': '~1.8.3',
+        'angular-elastic': '~2.5.1',
     }
 )
 
@@ -66,7 +68,14 @@ js_jquery = NpmBundle(
 )
 
 js_cds_deposit = Bundle(
-    'js/cds_deposit/cdsDeposit.module.js',
+    # 'js/cds_deposit/cdsDeposit.module.js',
+    'js/cds_deposit/avc/avc.module.js',
+    'js/cds_deposit/avc/components/cdsActions.js',
+    'js/cds_deposit/avc/components/cdsDeposit.js',
+    'js/cds_deposit/avc/components/cdsDeposits.js',
+    'js/cds_deposit/avc/components/cdsForm.js',
+    'js/cds_deposit/avc/components/cdsUploader.js',
+    'js/cds_deposit/avc/components/cdsRemoteUploader.js',
 )
 
 js_deposit = NpmBundle(
