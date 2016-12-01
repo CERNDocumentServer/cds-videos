@@ -1,0 +1,6 @@
+<div class="text-center form-inline">
+  <div ng-show="dropboxError" ng-bind="dropboxError"></div>
+  <div class="dropbox-upload"></div>
+  <input class="form-control" type="text" ng-model="uploadUrl" />
+  <button class="btn btn-default" ng-click="startUrlUpload(uploadUrl); uploadUrl='';">Upload by URL</button>
+</div>

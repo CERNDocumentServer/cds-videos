@@ -12,6 +12,16 @@
         </div>
         <!-- Progress -->
         <div class="col-sm-9">
+          {{$ctrl.cdsDepositCtrl.alerts | json}}
+          <div ng-show="$ctrl.cdsDepositCtrl.record._deposit.state">
+              <div class="col-sm-12">
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.progress_()}}%;">
+                      {{$ctrl.cdsDepositCtrl.record._deposit.state}}
+                  </div>
+                </div>
+              </div>
+          </div>
           <div ng-show="$ctrl.cdsDepositCtrl.loading" class="row">
               <div class="col-sm-12">
                 <div class="progress">
