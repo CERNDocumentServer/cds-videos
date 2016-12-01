@@ -193,16 +193,7 @@ setup(
             'cds_theme = cds.modules.theme.views:blueprint',
         ],
         'invenio_pidstore.minters': [
-            'cds_recid = cds.modules.records.minters:recid_minter',
-            'cds_depid = cds.modules.deposit.minters:cds_deposit_minter',
-        ],
-        'invenio_pidstore.fetchers': [
-            'cds_record_fetcher '
-            '= cds.modules.records.fetchers:cds_record_fetcher',
-            'cds_deposit_fetcher '
-            '= cds.modules.deposit.fetchers:cds_deposit_fetcher',
-            'cds_doi_fetcher '
-            '= cds.modules.records.fetchers:cds_doi_fetcher',
+            'cds_recid = cds.modules.records.minters:cds_record_minter',
         ],
         'invenio_i18n.translations': [
             'messages = cds',

@@ -35,7 +35,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from .providers import CDSRecordIdProvider
 
 
-def recid_minter(record_uuid, data):
+def cds_record_minter(record_uuid, data):
     """Mint record identifiers."""
     assert 'recid' not in data
     provider = CDSRecordIdProvider.create(
