@@ -30,7 +30,7 @@ import time
 import mock
 import pytest
 
-from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag)
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag, Bucket)
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
@@ -48,27 +48,36 @@ def test_download_to_object_version(db, bucket):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
+        bid = bucket.id
         db.session.commit()
 
+        # Mock download request
         file_size = 1024
         mock_request.return_value = type(
             'Response', (object, ), {
                 'raw': BytesIO(b'\x00' * file_size),
                 'headers': {'Content-Length': file_size}
             })
-
         assert obj.file is None
 
-        task = download_to_object_version.delay('http://example.com/test.pdf',
-                                                obj.version_id)
-
+        task_s = download_to_object_version.s('http://example.com/test.pdf',
+                                              object_version=obj.version_id)
+        # Download
+        task = task_s.delay()
         assert ObjectVersion.query.count() == 1
-
         obj = ObjectVersion.query.first()
         assert obj.key == 'test.pdf'
         assert str(obj.version_id) == task.result
         assert obj.file
-        assert obj.file.size == 1024
+        assert obj.file.size == file_size
+        assert Bucket.get(bid).size == file_size
+
+        # Undo
+        task_s.delay(undo=True)
+        assert ObjectVersion.query.count() == 1
+        obj = ObjectVersion.query.first()
+        assert obj.file is None
+        assert Bucket.get(bid).size == 0
 
 
 def test_update_record_thread(app, db):
@@ -136,10 +145,14 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     """Test metadata extraction video mp4."""
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
-    video_metadata_extraction.s(
-        uri=video_mp4,
-        object_version=str(obj.version_id),
-        deposit_id=str(cds_depid)).delay()
+    obj_id = str(obj.version_id)
+    dep_id = str(cds_depid)
+    task_s = video_metadata_extraction.s(uri=video_mp4,
+                                         object_version=obj_id,
+                                         deposit_id=dep_id)
+
+    # Extract metadata
+    task_s.delay()
 
     # Check that deposit's metadata got updated
     recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
@@ -148,8 +161,7 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     assert record['_deposit']['extracted_metadata']
 
     # Check that ObjectVersionTags were added
-    obj = ObjectVersion.query.first()
-    tags = obj.get_tags()
+    tags = ObjectVersion.query.first().get_tags()
     assert tags['duration'] == '60.095000'
     assert tags['bit_rate'] == '612177'
     assert tags['size'] == '5510872'
@@ -161,6 +173,17 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     assert tags['display_aspect_ratio'] == '0:1'
     assert tags['color_range'] == 'tv'
 
+    # Undo
+    task_s.delay(undo=True)
+
+    # Check that deposit's metadata got reverted
+    record = Record.get_record(recid)
+    assert 'extracted_metadata' not in record['_deposit']
+
+    # Check that ObjectVersionTags were removed
+    tags = ObjectVersion.query.first().get_tags()
+    assert len(tags) == 0
+
 
 def test_video_extract_frames(app, db, bucket, video_mp4):
     """Test extract frames from video."""
@@ -169,13 +192,25 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     version_id = str(obj.version_id)
     db.session.commit()
 
-    video_extract_frames.delay(version_id)
+    task_s = video_extract_frames.s(object_version=version_id)
 
+    # Extract frames
+    task_s.delay()
     assert ObjectVersion.query.count() == 91  # master file + frames
 
     frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
+        ObjectVersionTag.key == 'master',
         ObjectVersionTag.value == version_id).all()
     assert len(frames) == 90
+
+    # Undo
+    task_s.delay(undo=True)
+
+    assert ObjectVersion.query.count() == 1  # master file
+    frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
+        ObjectVersionTag.key == 'master',
+        ObjectVersionTag.value == version_id).all()
+    assert len(frames) == 0
 
 
 def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
@@ -185,17 +220,12 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
     obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
 
     class Listener(threading.Thread):
-        def __init__(self,
-                     group=None,
-                     target=None,
-                     name=None,
-                     args=(),
-                     kwargs={}):
-            super(Listener, self).__init__(group, target, name, args, kwargs)
+        def __init__(self):
+            super(Listener, self).__init__()
             self._return = None
 
-        def join(self, timeout=None):
-            super(Listener, self).join(timeout)
+        def await(self):
+            super(Listener, self).join()
             return self._return
 
         def run(self):
@@ -217,7 +247,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
         deposit_id=cds_depid,
         sse_channel=sse_channel)
 
-    message = listener.join()
+    message = listener.await()
     assert '"state": "FAILURE"' in message
     assert 'ffprobe' in message
 
@@ -227,17 +257,34 @@ def test_transcode(db, bucket, mock_sorenson):
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
+    filesize = 1024
     obj = ObjectVersion.create(bucket, key='test.pdf',
-                               stream=BytesIO(b'\x00' * 1024))
+                               stream=BytesIO(b'\x00' * filesize))
+    obj_id = str(obj.version_id)
     db.session.commit()
     assert get_bucket_keys() == ['test.pdf']
+    assert bucket.size == filesize
 
-    video_transcode.delay(obj.version_id,
-                          preset='Youtube 480p',
-                          sleep_time=0)
+    task_s = video_transcode.s(object_version=obj_id,
+                               preset='Youtube 480p',
+                               sleep_time=0)
+
+    # Transcode
+    task_s.delay()
 
     db.session.add(bucket)
     keys = get_bucket_keys()
     assert len(keys) == 2
     assert 'test-Youtube 480p.mp4' in keys
     assert 'test.pdf' in keys
+    assert bucket.size == 2 * filesize
+
+    # Undo
+    task_s.delay(undo=True)
+
+    db.session.add(bucket)
+    keys = get_bucket_keys()
+    assert len(keys) == 1
+    assert 'test-Youtube 480p.mp4' not in keys
+    assert 'test.pdf' in keys
+    assert bucket.size == filesize
