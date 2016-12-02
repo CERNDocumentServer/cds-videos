@@ -411,10 +411,10 @@ def update_record(self, recid, patch, max_retries=5, countdown=5):
 
     Retries ``max_retries`` after ``countdown`` seconds.
 
-    :param recid: the UUID of the record
-    :param patch: the patch operation to apply
-    :param max_retries: times to retry operation
-    :param countdown: time to sleep between retries
+    :param recid: the UUID of the record.
+    :param patch: the patch operation to apply.
+    :param max_retries: times to retry operation.
+    :param countdown: time to sleep between retries.
     """
     try:
         with db.session.begin_nested():
@@ -424,4 +424,4 @@ def update_record(self, recid, patch, max_retries=5, countdown=5):
         db.session.commit()
     except ConcurrentModificationError as exc:
         db.session.rollback()
-        self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
+        raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
