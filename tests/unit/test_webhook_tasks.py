@@ -27,13 +27,16 @@ from __future__ import absolute_import
 
 import threading
 import time
-
 import mock
 import pytest
-from invenio_pidstore.models import PersistentIdentifier
+
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag)
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
+from invenio_records.models import RecordMetadata
 from six import BytesIO, next
+from celery.exceptions import Retry
+from sqlalchemy.orm.exc import ConcurrentModificationError
 
 from cds.modules.webhooks.tasks import (download_to_object_version,
                                         update_record, video_extract_frames,
@@ -41,7 +44,7 @@ from cds.modules.webhooks.tasks import (download_to_object_version,
                                         video_transcode)
 
 
-def test_donwload_to_object_version(db, bucket):
+def test_download_to_object_version(db, bucket):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
@@ -109,9 +112,6 @@ def test_update_record_thread(app, db):
 
 def test_update_record_retry(app, db):
     """Test update record with retry."""
-    from celery.exceptions import Retry
-    from sqlalchemy.orm.exc import ConcurrentModificationError
-
     # Create record
     recid = str(Record.create({}).id)
     patch = [{
@@ -127,23 +127,22 @@ def test_update_record_retry(app, db):
             update_record.s(recid=recid, patch=patch).apply()
         assert mock_commit.call_count == 2
 
-    from invenio_records.models import RecordMetadata
     records = RecordMetadata.query.all()
     assert len(records) == 1
     assert records[0].json == {'fuu': 'bar'}
 
 
-def test_metadata_extraction_video_mp4(app, db, depid, bucket, video_mp4):
+def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     """Test metadata extraction video mp4."""
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     video_metadata_extraction.s(
         uri=video_mp4,
         object_version=str(obj.version_id),
-        deposit_id=str(depid)).delay()
+        deposit_id=str(cds_depid)).delay()
 
     # Check that deposit's metadata got updated
-    recid = PersistentIdentifier.get('depid', depid).object_uuid
+    recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
     record = Record.get_record(recid)
     assert 'extracted_metadata' in record['_deposit']
     assert record['_deposit']['extracted_metadata']
@@ -179,7 +178,7 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     assert len(frames) == 90
 
 
-def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
+def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
     """Test SSE message for failure tasks."""
     app = celery_not_fail_on_eager_app
     sse_channel = 'test_channel'
@@ -215,7 +214,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
     video_metadata_extraction.delay(
         uri='invalid_uri',
         object_version=str(obj.version_id),
-        deposit_id=depid,
+        deposit_id=cds_depid,
         sse_channel=sse_channel)
 
     message = listener.join()

@@ -39,35 +39,14 @@ import json
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 
+from .status import ComputeGlobalStatus, iterate_result, collect_info
 from .tasks import (download_to_object_version, video_extract_frames,
-                    video_metadata_extraction, video_transcode)
-
-
-def _compute_status(statuses):
-    for status_to_check in [states.FAILURE, states.STARTED, states.RETRY,
-                            states.PENDING]:
-        if any(status == status_to_check for status in statuses):
-            return status_to_check
-    return states.SUCCESS
-
-
-def _info_extractor(res, name, children=None):
-    """Return all tasks information."""
-    info = {'id': res.id}
-    if hasattr(res, 'status'):
-        info['status'] = res.status
-    if hasattr(res, 'info'):
-        info['info'] = str(res.info)
-    if children:
-        info['next'] = children
-    if hasattr(res, 'result'):
-        info['result'] = str(res.result)
-    info['name'] = name
-    return info
+                    video_metadata_extraction, video_transcode,
+                    update_deposit_state)
 
 
 class CeleryAsyncReceiver(Receiver):
-    """TODO."""
+    """Celery Async Receiver abstract class."""
 
     CELERY_STATES_TO_HTTP = {
         states.PENDING: 202,
@@ -78,6 +57,10 @@ class CeleryAsyncReceiver(Receiver):
         states.REVOKED: 409,
     }
     """Mapping of Celery result states to HTTP codes."""
+
+    def has_result(self, event):
+        """Return true if some result are in the event."""
+        return '_tasks' in event.response
 
     @classmethod
     def _deserialize_result(cls, event):
@@ -107,17 +90,33 @@ class CeleryAsyncReceiver(Receiver):
         result = self._deserialize_result(event)
         result.revoke()
 
-    def _make_status_response(self, status, info):
-        """Make a response."""
+    def status(self, event):
+        """Get the status."""
+        # get raw info from the celery receiver
+        raw_info = self._raw_info(event)
+        # extract global status
+        global_status = ComputeGlobalStatus()
+        iterate_result(raw_info=raw_info, fun=global_status)
+        # extract information
+        info = iterate_result(raw_info=raw_info, fun=collect_info)
+        # build response
         return (
-            CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(status),
+            CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(
+                global_status.status),
             json.dumps(info)
         )
 
-    def status(self, event):
-        """Get the status."""
-        return self._make_status_response(**self._status_and_info(
-            event=event))
+    def persist(self, event, result):
+        """Persist event and result after execution."""
+        with db.session.begin_nested():
+            self._serialize_result(event=event, result=result)
+            db.session.add(event)
+        db.session.commit()
+        update_deposit_state(
+            deposit_id=event.payload.get('deposit_id'),
+            event_id=event.id,
+            sse_channel=event.payload.get('sse_channel')
+        )
 
 
 class Downloader(CeleryAsyncReceiver):
@@ -162,10 +161,10 @@ class Downloader(CeleryAsyncReceiver):
             event_id=event_id,
             **event.payload)
 
-        self._serialize_result(event=event, result=task.apply_async())
+        obj_version_id = object_version.version_id
 
         with db.session.begin_nested():
-            object_version = as_object_version(object_version.version_id)
+            object_version = as_object_version(obj_version_id)
             event.response.update(
                 links={
                     'self': url_for(
@@ -190,15 +189,13 @@ class Downloader(CeleryAsyncReceiver):
             )
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
-            db.session.add(event)
-        db.session.commit()
 
-    def _status_and_info(self, event, fun=_info_extractor):
-        """Get status and info from the event."""
+        super(Downloader, self).persist(event=event, result=task.apply_async())
+
+    def _raw_info(self, event):
+        """Get info from the event."""
         result = self._deserialize_result(event)
-        status = result.status
-        info = fun(result, 'file_download')
-        return {'status': status, 'info': info}
+        return {"file_download": result}
 
 
 class AVCWorkflow(CeleryAsyncReceiver):
@@ -292,8 +289,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
         ).apply_async()
 
         with db.session.begin_nested():
-            self._serialize_result(event=event, result=result)
-
             event.response.update(
                 links=dict(),
                 key=obj_key,
@@ -302,38 +297,21 @@ class AVCWorkflow(CeleryAsyncReceiver):
             )
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
-            db.session.add(event)
-        db.session.commit()
 
-    def _status_and_info(self, event, fun=_info_extractor):
-        """Get status and info from the event."""
+        super(AVCWorkflow, self).persist(event, result)
+
+    def _raw_info(self, event):
+        """Get info from the event."""
         result = self._deserialize_result(event)
+        first_step = []
         if 'version_id' in event.payload:
-            status = _compute_status([
-                result.parent.status,
-                result.children[0].status,
-                result.children[1].status
-            ])
-            info = fun(result.parent, 'file_video_metadata_extraction', [
-                fun(result.children[0], 'file_transcode'),
-                fun(result.children[1], 'file_video_extract_frames')
-            ])
+            first_step = [{"file_video_metadata_extraction": result.parent}]
         else:
-            status = _compute_status([
-                result.parent.children[0].status,
-                result.parent.children[1].status,
-                result.children[0].status,
-                result.children[1].status,
-            ])
-            info = [
-                [
-                    fun(result.parent.children[0], 'file_download'),
-                    fun(result.parent.children[1],
-                        'file_video_metadata_extraction'),
-                ],
-                [
-                    fun(result.children[0], 'file_transcode'),
-                    fun(result.children[1], 'file_video_extract_frames'),
-                ]
+            first_step = [
+                {"file_download": result.parent.children[0]},
+                {"file_video_metadata_extraction": result.parent.children[1]}
             ]
-        return {'status': status, 'info': info}
+        second_step = [{"file_transcode": result.children[0]}]
+        for res in result.children[1:]:
+            second_step.append({"file_video_extract_frames": res})
+        return (first_step, second_step)

@@ -31,6 +31,7 @@ from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
 from invenio_indexer.api import RecordIndexer
 
+from cds.modules.webhooks.tasks import _factory_sse_task_base
 from cds.modules.deposit.api import Category
 
 
@@ -46,9 +47,29 @@ def success_task(self, *args, **kwargs):
     self.update_state(state=states.SUCCESS, meta={})
 
 
-@shared_task()
+@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_failure'))
+def sse_failing_task(self, *args, **kwargs):
+    """A failing shared task."""
+    self.update_state(
+        state=states.FAILURE, meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
+
+
+@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_failure'))
+def sse_success_task(self, *args, **kwargs):
+    """A failing shared task."""
+    self.update_state(state=states.SUCCESS, meta={})
+
+
+@shared_task
 def simple_add(x, y):
     """Simple shared task."""
+    return x + y
+
+
+@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_add'))
+def sse_simple_add(self, x, y, **kwargs):
+    """Simple shared task."""
+    self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
     return x + y
 
 
@@ -65,3 +86,8 @@ def create_category(api_app, db, data):
     indexer.index_by_id(category.id)
 
     return category
+
+
+def mock_current_user(*args2, **kwargs2):
+    """Mock current user not logged-in."""
+    return None
