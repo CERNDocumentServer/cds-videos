@@ -77,4 +77,15 @@ angular.module('cdsDeposit', [
     return result;
   };
 })
+.filter('splitText', function() {
+  return function(input, by) {
+    var text
+    try {
+      text = input.split(by).join(' ');
+    } catch(error) {
+      text = input;
+    }
+    return text;
+  };
+})
 .config(cdsDepositsConfig)

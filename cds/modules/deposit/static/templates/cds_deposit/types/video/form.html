@@ -21,18 +21,18 @@
 
         <div class="col-sm-9">
           <!-- FAILURE -->
-          <div ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE">
+          <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
             <div class="row">
                 <div class="col-sm-12">
                   <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE">
-                    <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message }}</strong>
+                    <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message | splitText:'_'}}</strong>
                   </div>
                 </div>
             </div>
           </div>
           <!-- PENDING -->
           <div
-            ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.PENDING">
+            ng-show="$ctrl.cdsDepositCtrl.displayPending()">
             <div class="row">
                 <div class="col-sm-12">
                   <div class="progress">
@@ -44,18 +44,19 @@
             </div>
           </div>
           <!-- STARTED -->
-          <div ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.STARTED && $ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent] && $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.PENDING" class="row">
-              <div class="col-sm-12">
-                <div class="progress">
-                    <div class="progress-bar text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage}}%;">
-                      {{ $ctrl.cdsDepositCtrl.stateCurrent}} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
-                    </div>
+          <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="progress">
+                      <div class="progress-bar text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage}}%;">
+                        {{ $ctrl.cdsDepositCtrl.stateCurrent | splitText:'_'}} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
+                      </div>
+                  </div>
                 </div>
               </div>
           </div>
           <!-- SUCCESS -->
-          <div
-            ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS">
+          <div ng-show="$ctrl.cdsDepositCtrl.displaySuccess()">
             <div class="row">
                 <div class="col-sm-12">
                   <div class="progress">

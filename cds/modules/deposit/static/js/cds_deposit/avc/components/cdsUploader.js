@@ -50,6 +50,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
         Array.prototype.push.apply(that.queue, _files);
       }
     };
+    this.cancel = {};
 
     // Prepare file request
     this.prepareUpload = function(file) {
@@ -130,7 +131,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
             }
           );
         } else {
-          Upload.http(args);
+          Upload.http(args)
+            .then(function(response) {
+              console.log('RESPONSE FOR RECEIVER', response);
+              that.cancel = response.data.links.cancel;
+            });
           var fileListenerName = 'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key;
           $scope.$on(fileListenerName, function(event, type, data) {
             var updateObj, progress;

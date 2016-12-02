@@ -34,6 +34,7 @@ from invenio_webhooks.models import Receiver
 from sqlalchemy.orm.attributes import flag_modified
 from celery.result import result_from_tuple
 import json
+import os
 
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
@@ -102,11 +103,12 @@ class CeleryAsyncReceiver(Receiver):
             flag_modified(event, 'response_headers')
 
     def delete(self, event):
-        """TODO."""
+        """Revoke all associated tasks."""
         result = self._deserialize_result(event)
-        result.revoke()
+        result.revoke(terminate=True)
 
-    def _make_status_response(self, status, info):
+    @staticmethod
+    def _make_status_response(status, info):
         """Make a response."""
         return (
             CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(status),
@@ -121,6 +123,9 @@ class CeleryAsyncReceiver(Receiver):
 
 class Downloader(CeleryAsyncReceiver):
     """Receiver that downloads data from a URL."""
+
+    generated_objects = {}
+    """Stores generated resources that require de-allocation."""
 
     def run(self, event):
         """Create object version and send celery task to download.
@@ -145,11 +150,13 @@ class Downloader(CeleryAsyncReceiver):
         assert 'deposit_id' in event.payload
 
         event_id = str(event.id)
+        bucket_id = event.payload['bucket_id']
+        key = event.payload['key']
 
         with db.session.begin_nested():
-            object_version = ObjectVersion.create(
-                bucket=event.payload['bucket_id'], key=event.payload['key'])
-
+            object_version = ObjectVersion.create(bucket=bucket_id, key=key)
+            obj_id = str(object_version.version_id)
+            self.generated_objects[event_id] = obj_id
             ObjectVersionTag.create(object_version, 'uri_origin',
                                     event.payload['uri'])
             ObjectVersionTag.create(object_version, '_event_id', event_id)
@@ -157,34 +164,34 @@ class Downloader(CeleryAsyncReceiver):
         db.session.commit()
 
         task = download_to_object_version.s(
-            object_version=str(object_version.version_id),
+            object_version=obj_id,
             event_id=event_id,
             **event.payload)
 
         self._serialize_result(event=event, result=task.apply_async())
 
         with db.session.begin_nested():
-            object_version = as_object_version(object_version.version_id)
+            object_version = as_object_version(obj_id)
             event.response.update(
                 links={
                     'self': url_for(
                         'invenio_files_rest.object_api',
-                        bucket_id=str(object_version.bucket_id),
-                        key=object_version.key,
-                        _external=True, ),
+                        bucket_id=bucket_id, key=key, _external=True,
+                    ),
                     'version': url_for(
                         'invenio_files_rest.object_api',
-                        bucket_id=str(object_version.bucket_id),
-                        key=object_version.key,
-                        versionId=str(object_version.version_id),
-                        _external=True, ),
+                        bucket_id=bucket_id, key=key,
+                        version_id=obj_id, _external=True,
+                    ),
                     'cancel': url_for(
-                        'invenio_webhooks.event_list',
+                        'invenio_webhooks.event_item',
                         receiver_id='downloader',
-                        _external=True, )
+                        event_id=event_id,
+                        _external=True,
+                    ),
                 },
-                key=object_version.key,
-                version_id=str(object_version.version_id),
+                key=key,
+                version_id=obj_id,
                 tags=object_version.get_tags(),
             )
             flag_modified(event, 'response')
@@ -199,9 +206,17 @@ class Downloader(CeleryAsyncReceiver):
         info = fun(result, 'file_download')
         return {'status': status, 'info': info}
 
+    def delete(self, event):
+        """Delete generated files."""
+        super(Downloader, self).delete(event)
+        dispose_object_version(self.generated_objects[str(event.id)])
+
 
 class AVCWorkflow(CeleryAsyncReceiver):
     """AVC workflow receiver."""
+
+    generated_objects = {}
+    """Stores generated resources that require de-allocation."""
 
     def run(self, event):
         """Run AVC workflow for video transcoding.
@@ -242,24 +257,27 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
         with db.session.begin_nested():
             if 'version_id' in event.payload:
-                object_version = as_object_version(event.payload['version_id'])
+                obj_id = event.payload['version_id']
+                object_version = as_object_version(obj_id)
                 first_step = video_metadata_extraction.si(
                     uri=object_version.file.uri,
-                    object_version=str(object_version.version_id),
+                    object_version=obj_id,
                     deposit_id=event.payload['deposit_id'])
             else:
                 object_version = ObjectVersion.create(
                     bucket=event.payload['bucket_id'],
                     key=event.payload['key'])
+                obj_id = str(object_version.version_id)
+                self.generated_objects[event_id] = obj_id
                 ObjectVersionTag.create(object_version, 'uri_origin',
                                         event.payload['uri'])
                 first_step = group(
                     download_to_object_version.si(
-                        object_version=str(object_version.version_id),
+                        object_version=obj_id,
                         event_id=event_id,
                         **event.payload),
                     video_metadata_extraction.si(
-                        object_version=str(object_version.version_id),
+                        object_version=obj_id,
                         event_id=event_id,
                         **event.payload),
                 )
@@ -267,7 +285,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
             ObjectVersionTag.create(object_version, '_event_id', event_id)
 
         mypayload = event.payload
-        obj_id = str(object_version.version_id)
         obj_key = object_version.key
         obj_tags = object_version.get_tags()
         db.session.expunge(event)
@@ -279,7 +296,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 video_transcode.si(object_version=obj_id,
                                    event_id=event_id,
                                    **mypayload),
-                video_extract_frames.si(object_version=str(obj_id),
+                video_extract_frames.si(object_version=obj_id,
                                         event_id=event_id,
                                         **mypayload), ),
         ).apply_async()
@@ -288,7 +305,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
             self._serialize_result(event=event, result=result)
 
             event.response.update(
-                links=dict(),
+                links={
+                    'cancel': url_for(
+                        'invenio_webhooks.event_item',
+                        receiver_id='avc',
+                        event_id=event_id,
+                        _external=True,
+                    ),
+                },
                 key=obj_key,
                 version_id=obj_id,
                 tags=obj_tags,
@@ -330,3 +354,39 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 ]
             ]
         return {'status': status, 'info': info}
+
+    def delete(self, event):
+        """Delete generated files."""
+        super(AVCWorkflow, self).delete(event)
+        dispose_master_object(self.generated_objects[str(event.id)])
+
+
+#
+# Resource cleaning
+#
+def dispose_master_object(master_id):
+    """Delete all resources related to an ObjectVersion."""
+    # Delete all slave objects
+    for slave_id in [slave.version_id
+                     for slave in ObjectVersion.query.all()
+                     if slave.get_tags().get('master') == master_id]:
+        dispose_object_version(slave_id)
+
+    # Delete master object
+    dispose_object_version(master_id)
+
+
+def dispose_object_version(object_version_id):
+    """Delete an ObjectVersion, as well as its FileInstance and actual file."""
+    with db.session.begin_nested():
+        if object_version_id:
+            master = as_object_version(object_version_id)
+            master_file = master.file
+            if master_file:
+                master_uri = master_file.uri
+                master.remove()  # delete ObjectVersion
+                master_file.delete()  # delete FileInstance
+                os.remove(master_uri)  # delete actual file
+            else:
+                master.remove()
+    db.session.commit()  # commit changes

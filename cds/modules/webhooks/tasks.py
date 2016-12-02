@@ -162,7 +162,7 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
 
     All technical metadata, i.e. bitrate, will be translated into
     ``ObjectVersionTags``, plus all the metadata extracted will be store under
-    ``_deposit`` as ``extracted_metadta``.
+    ``_deposit`` as ``extracted_metadata``.
 
     :param uri: the video's URI
     :param object_version: the object version that (will) contain the actual
@@ -253,6 +253,11 @@ def video_extract_frames(self,
 
     output_folder = tempfile.mkdtemp()
 
+    # Remove output folder on `cancel`
+    def handler(signum, frame):
+        shutil.rmtree(output_folder, ignore_errors=True)
+    signal.signal(signal.SIGTERM, handler)
+
     def progress_updater(seconds, duration):
         """Progress reporter."""
         meta = dict(
@@ -311,12 +316,12 @@ def video_transcode(self,
     )
 
     job_ids = deque()
+    jobs_to_cancel = []
 
-    # Set handler for canceling all jobs
+    # Stop encoding jobs on `cancel`
     def handler(signum, frame):
-        # TODO handle better file deleting and ObjectVersion cleaning
-        map(lambda _info: stop_encoding(info['job_id']), job_ids)
-
+        map(lambda job: stop_encoding(job), jobs_to_cancel)
+        print("HELLOO")
     signal.signal(signal.SIGTERM, handler)
 
     # Get master file's bucket_id
@@ -359,6 +364,9 @@ def video_transcode(self,
                 key=obj.key,
                 tags=obj.get_tags(),
             )
+            # Save resources for cleaning-up later
+            jobs_to_cancel.append(job_id)
+
         db.session.commit()
 
         self.update_state(
@@ -383,7 +391,7 @@ def video_transcode(self,
         self.update_state(
             state=STARTED,
             meta=dict(
-                payload=dict(job_info=job_info),
+                payload=dict(job_info=info),
                 message='Transcoding {0}'.format(percentage),
             )
         )

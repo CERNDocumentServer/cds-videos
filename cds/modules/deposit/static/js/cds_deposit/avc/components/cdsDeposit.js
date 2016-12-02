@@ -26,7 +26,7 @@ function cdsDepositCtrl(
   };
 
   // Initialize stateOrder
-  this.stateOrder = depositStates;
+  this.stateOrder = angular.copy(depositStates);
   // Initilize stateCurrent
   this.stateCurrent = {};
 
@@ -62,10 +62,10 @@ function cdsDepositCtrl(
                 function successUpdate(response) {
                     // Check for new files
                     that.record._files = angular.merge(
-                      [],
                       that.record._files,
                       response.data.metadata._files
                     );
+                    console.warn('GETTING AN UPDATE', response.data.metadata._deposit.state);
                     // Check for new state
                     that.record._deposit.state = angular.merge(
                       {},
@@ -73,8 +73,8 @@ function cdsDepositCtrl(
                       response.data.metadata._deposit.state || {}
                     );
                     that.lastUpdated = new Date();
-                  // Re re run
-                  that.autoRefresh();
+                    // Re re run
+                    that.autoRefresh();
                 },
                 function errorUpdate(response) {
                   // Something wrong happend don't run again
@@ -86,6 +86,10 @@ function cdsDepositCtrl(
       }
     };
 
+    $scope.$watch('record', function(newValue, oldValue) {
+      console.info('STATE CHAGNED', newValue, oldValue);
+    });
+
     this.initializeStateQueue = function() {
       if (this.record._deposit.state) {
         angular.forEach(this.record._deposit.state, function(value, key) {
@@ -93,7 +97,6 @@ function cdsDepositCtrl(
           // Remove it from the state order if
           if (['SUCCESS', 'FAILURE'].indexOf(value) > -1) {
             that.stateOrder = _.without(that.stateOrder, key);
-            console.log('JUST REMOVED', key);
           };
         });
       } else {
@@ -146,7 +149,7 @@ function cdsDepositCtrl(
     this.sseEventListener = $scope.$on(
       depositListenerName,
       function(evt, type, data) {
-        console.log('RECEIVING', type, data);
+        console.info('RECEIVING', type, data);
       $scope.$apply(function() {
         // Handle my state
         if (that.stateQueue[data.state].indexOf(type) === -1) {
@@ -163,14 +166,12 @@ function cdsDepositCtrl(
               that.stateQueue.FAILURE.push(type);
               // On error remove it from the status order
               that.stateOrder = _.without(that.stateOrder, type);
-              console.log('{FAILED} JUST REMOVED', type, tath.stateOrder);
               break;
             case 'SUCCESS':
               that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
               that.stateQueue.SUCCESS.push(type);
               // On success remove it from the status order
               that.stateOrder = _.without(that.stateOrder, type);
-              console.log('[SUCCESS} JUST REMOVED', type, tath.stateOrder);
               break;
           }
           // The state has been changed update the current
@@ -191,6 +192,31 @@ function cdsDepositCtrl(
       }
     });
 
+    this.displayFailure = function() {
+      return that.depositStatusCurrent === that.depositStatuses.FAILURE;
+    }
+
+    this.displayPending = function() {
+      return (
+        that.depositStatusCurrent === that.depositStatuses.PENDING ||
+        (
+          that.stateCurrent === null &&
+          that.depositStatusCurrent !== that.depositStatuses.FAILURE &&
+          that.depositStatusCurrent !== that.depositStatuses.SUCCESS
+        )
+      )
+    }
+
+    this.displayStarted = function() {
+      return (
+        that.depositStatusCurrent === that.depositStatuses.STARTED &&
+        that.stateCurrent !== null
+      );
+    }
+
+    this.displaySuccess = function() {
+      return that.depositStatusCurrent === that.depositStatuses.SUCCESS;
+    }
 
     this.postSuccessProcess = function(responses) {
       // Get only the latest response (in case of multiple actions)

@@ -79,3 +79,24 @@ cdsAPI.$inject = [
 
 angular.module('cdsDeposit.factories')
   .factory('cdsAPI', cdsAPI);
+
+
+function cdsAutoUpdate($timeout) {
+  var timerID;
+
+  function start() {
+
+  }
+
+  function close() {
+
+  }
+
+  function run() {
+
+  }
+}
+
+function StateManager($timeout) {
+  
+}
