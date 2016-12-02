@@ -34,8 +34,8 @@ import shutil
 import signal
 import tempfile
 import time
+from functools import partial
 
-from collections import deque
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from celery import Task, shared_task, current_app as celery_app, chain
 from celery.states import FAILURE, STARTED, SUCCESS
@@ -43,9 +43,11 @@ from flask import current_app
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
+from invenio_files_rest.tasks import remove_file_data
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
+from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from invenio_indexer.api import RecordIndexer
 from werkzeug.utils import import_string
@@ -62,21 +64,26 @@ def sse_publish_event(channel, type_, state, meta):
         current_sse.publish(data=data, type_=type_, channel=channel)
 
 
-def _factory_sse_task_base(type_=None):
+def _factory_avc_task_base(type_=None, undo_fun=None):
     """Build base celery task to send SSE messages upon status update.
 
     :param type_: Type of SSE message to send.
-    :return: ``SSETask`` class.
+    :return: ``AVCTask`` class.
     """
-    class SSETask(Task):
+    class AVCTask(Task):
         """Base class for tasks which might be sending SSE messages."""
 
         abstract = True
 
         def __init__(self):
-            """."""
-            super(SSETask, self).__init__()
+            """Constructor."""
+            super(AVCTask, self).__init__()
             self._base_payload = {}
+
+        def _extract_call_arguments(self, arg_list, **kwargs):
+            for name in arg_list:
+                setattr(self, name, kwargs.pop(name, None))
+            return kwargs
 
         def __call__(self, *args, **kwargs):
             """Extract SSE channel from keyword arguments.
@@ -85,15 +92,24 @@ def _factory_sse_task_base(type_=None):
                 the channel is extracted from the ``sse_channel`` keyword
                 argument.
             """
-            self.sse_channel = kwargs.pop('sse_channel', None)
+            arg_list = [
+                'sse_channel', 'event_id', 'deposit_id', 'bucket_id', 'key']
+            kwargs = self._extract_call_arguments(arg_list, **kwargs)
+
+            self.object = as_object_version(kwargs.pop('object_version'))
+            self.obj_id = str(self.object.version_id)
+
+            self.undo = kwargs.pop('undo', False)
             with self.app.flask_app.app_context():
+                if self.undo:
+                    return undo_fun(self, *args, **kwargs)
                 return self.run(*args, **kwargs)
 
         def update_state(self, task_id=None, state=None, meta=None):
             """."""
             self._base_payload.update(meta.get('payload', {}))
             meta['payload'] = self._base_payload
-            super(SSETask, self).update_state(task_id, state, meta)
+            super(AVCTask, self).update_state(task_id, state, meta)
             sse_publish_event(channel=self.sse_channel, type_=type_,
                               state=state, meta=meta)
 
@@ -124,26 +140,41 @@ def _factory_sse_task_base(type_=None):
                         sse_channel=self.sse_channel
                     )
 
-    return SSETask
+        @staticmethod
+        def set_revoke_handler(handler):
+            """Set handler to be executed when the task gets revoked."""
+            def _handler(signum, frame):
+                handler()
+            signal.signal(signal.SIGTERM, _handler)
+
+    return AVCTask
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='file_download'))
-def download_to_object_version(self, uri, object_version, **kwargs):
+#
+# Download
+#
+def download_to_object_version_undo(self, *args, **kwargs):
+    """Undo download task."""
+    dispose_object_version(self.object, delete_object=False)
+
+
+@shared_task(
+    bind=True,
+    base=_factory_avc_task_base(type_='file_download',
+                                undo_fun=download_to_object_version_undo))
+def download_to_object_version(self, uri):
     r"""Download file from a URL.
 
+    :param self: reference to instance of task base class
     :param uri: URL of the file to download.
-    :param object_version: ``ObjectVersion`` instance or object version id.
-    :param chunk_size: Size of the chunks for downloading.
-    :param \**kwargs:
     """
-    object_version = as_object_version(object_version)
 
     self._base_payload = dict(
-        key=object_version.key,
-        version_id=str(object_version.version_id),
-        tags=object_version.get_tags(),
-        event_id=kwargs.get('event_id'),
-        deposit_id=kwargs.get('deposit_id'), )
+        key=self.object.key,
+        version_id=self.obj_id,
+        tags=self.object.get_tags(),
+        event_id=self.event_id,
+        deposit_id=self.deposit_id, )
 
     # Make HTTP request
     response = requests.get(uri, stream=True)
@@ -155,75 +186,94 @@ def download_to_object_version(self, uri, object_version, **kwargs):
 
     def progress_updater(size, total):
         """Progress reporter."""
-        size = size or headers_size or 1
+        size = size or headers_size
+        if size is None:
+            # FIXME decide on proper error-handling behaviour
+            raise RuntimeError('Cannot locate "Content-Length" header.')
         meta = dict(
             payload=dict(
                 size=size,
                 total=total,
                 percentage=total * 100 / size, ),
-            message='Downloading {0} of {1}'.format(total, size),
-        )
+            message='Downloading {0} of {1}'.format(total, size), )
 
         self.update_state(state=STARTED, meta=meta)
 
-    object_version.set_contents(
+    self.object.set_contents(
         response.raw, progress_callback=progress_updater, size=headers_size)
 
     db.session.commit()
 
-    return str(object_version.version_id)
+    return self.obj_id
+
+
+#
+# Extract metadata
+#
+format_keys = [
+    'duration',
+    'bit_rate',
+    'size',
+]
+stream_keys = [
+    'avg_frame_rate',
+    'codec_name',
+    'width',
+    'height',
+    'nb_frames',
+    'display_aspect_ratio',
+    'color_range',
+]
+all_keys = format_keys + stream_keys
+
+
+def video_metadata_extraction_undo(self, *args, **kwargs):
+    """Undo metadata extraction."""
+    recid = str(PersistentIdentifier.get('depid', self.deposit_id).object_uuid)
+
+    # Delete generated ObjectVersionTags
+    [ObjectVersionTag.delete(self.object, k) for k in all_keys]
+    db.session.commit()
+
+    # Revert patch on record
+    patch = [{
+        'op': 'remove',
+        'path': '/_deposit/extracted_metadata',
+    }]
+    update_record.s(recid, patch).apply()
 
 
 @shared_task(
     bind=True,
-    base=_factory_sse_task_base(type_='file_video_metadata_extraction'))
-def video_metadata_extraction(self, uri, object_version, deposit_id,
-                              *args, **kwargs):
+    base=_factory_avc_task_base(type_='file_video_metadata_extraction',
+                                undo_fun=video_metadata_extraction_undo))
+def video_metadata_extraction(self, uri):
     """Extract metadata from given video file.
 
     All technical metadata, i.e. bitrate, will be translated into
     ``ObjectVersionTags``, plus all the metadata extracted will be store under
-    ``_deposit`` as ``extracted_metadta``.
+    ``_deposit`` as ``extracted_metadata``.
 
-    :param uri: the video's URI
-    :param object_version: the object version that (will) contain the actual
-           video
-    :param deposit_id: the ID od the deposit
+    :param self: reference to instance of task base class
+    :param uri: URL of the file to extract metadata from.
     """
-    with db.session.begin_nested():
-        object_version = as_object_version(object_version)
+    recid = str(PersistentIdentifier.get('depid', self.deposit_id).object_uuid)
 
-        self._base_payload = dict(
-            object_version=str(object_version.version_id),
-            uri=uri,
-            tags=object_version.get_tags(),
-            deposit_id=deposit_id,
-            event_id=kwargs.get('event_id'), )
+    self._base_payload = dict(
+        object_version=str(self.object.version_id),
+        uri=uri,
+        tags=self.object.get_tags(),
+        deposit_id=self.deposit_id,
+        event_id=self.event_id, )
 
-        recid = str(PersistentIdentifier.get('depid', deposit_id).object_uuid)
+    # Extract video's metadata using `ff_probe`
+    metadata = json.loads(ff_probe_all(uri))
+    extracted_dict = dict(metadata['format'], **metadata['streams'][0])
 
-        # Extract video's metadata using `ff_probe`
-        metadata = json.loads(ff_probe_all(uri))
-
-        # Add technical information to the ObjectVersion as Tags
-        format_keys = [
-            'duration',
-            'bit_rate',
-            'size',
-        ]
-        stream_keys = [
-            'avg_frame_rate',
-            'codec_name',
-            'width',
-            'height',
-            'nb_frames',
-            'display_aspect_ratio',
-            'color_range',
-        ]
-
-        [ObjectVersionTag.create(object_version, k, v)
-         for k, v in dict(metadata['format'], **metadata['streams'][0]).items()
-         if k in (format_keys + stream_keys)]
+    # Add technical information to the ObjectVersion as Tags
+    [ObjectVersionTag.create(self.object, k, v)
+     for k, v in extracted_dict.items()
+     if k in all_keys]
 
     db.session.commit()
 
@@ -233,46 +283,57 @@ def video_metadata_extraction(self, uri, object_version, deposit_id,
         'path': '/_deposit/extracted_metadata',
         'value': metadata
     }]
-    result = update_record.s(recid, patch).apply_async()
-    result.get()
+    update_record.s(recid, patch).apply()
 
     # Update state
     self.update_state(
         state=SUCCESS,
         meta=dict(
             payload=dict(
-                tags=object_version.get_tags(), ),
+                tags=self.object.get_tags(), ),
             message='Attached video metadata'))
 
 
+#
+# Extract frames
+#
+def video_extract_frames_undo(self, *args, **kwargs):
+    """Delete generated ObjectVersion slaves."""
+    slaves = ObjectVersion.query.join(ObjectVersion.tags).filter(
+        ObjectVersionTag.key == 'master',
+        ObjectVersionTag.value == self.obj_id
+    ).all()
+    for slave in slaves:
+        dispose_object_version(slave)
+    db.session.commit()
+
+
 @shared_task(
-    bind=True, base=_factory_sse_task_base(type_='file_video_extract_frames'))
-def video_extract_frames(self,
-                         object_version,
-                         frames_start=5,
-                         frames_end=95,
-                         frames_gap=1,
-                         **kwargs):
+    bind=True,
+    base=_factory_avc_task_base(type_='file_video_extract_frames',
+                                undo_fun=video_extract_frames_undo))
+def video_extract_frames(self, frames_start=5, frames_end=95, frames_gap=1):
     """Extract images from some frames of the video.
 
     Each of the frame images generates an ``ObjectVersion`` tagged as "frame"
     using ``ObjectVersionTags``.
 
-    :param object_version: master video to extract frames from.
+    :param self: reference to instance of task base class
     :param frames_start: start percentage, default 5.
     :param frames_end: end percentage, default 95.
     :param frames_gap: percentage between frames from start to end, default 10.
     """
-    object_version = as_object_version(object_version)
+    output_folder = tempfile.mkdtemp()
+
+    # Remove temporary directory on abrupt execution halts.
+    self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
+                                                  ignore_errors=True))
 
     self._base_payload = dict(
-        key=object_version.key,
-        version_id=str(object_version.version_id),
-        tags=object_version.get_tags(),
-        event_id=kwargs.get('event_id', None),
-        deposit_id=kwargs.get('deposit_id', None), )
-
-    output_folder = tempfile.mkdtemp()
+        object_version=self.obj_id,
+        tags=self.object.get_tags(),
+        deposit_id=self.deposit_id,
+        event_id=self.event_id, )
 
     def progress_updater(seconds, duration):
         """Progress reporter."""
@@ -281,13 +342,12 @@ def video_extract_frames(self,
                 size=duration,
                 percentage=(seconds or 0.0) / duration * 100, ),
             message='Extracting frames {0} of {1} seconds'.format(
-                seconds, duration),
-        )
+                seconds, duration), )
 
         self.update_state(state=STARTED, meta=meta)
 
     ff_frames(
-        object_version.file.uri,
+        self.object.file.uri,
         frames_start,
         frames_end,
         frames_gap,
@@ -296,43 +356,60 @@ def video_extract_frames(self,
 
     for filename in os.listdir(output_folder):
         obj = ObjectVersion.create(
-            bucket=object_version.bucket,
+            bucket=self.object.bucket,
             key=filename,
             stream=open(os.path.join(output_folder, filename), 'rb'))
-        ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
+        ObjectVersionTag.create(obj, 'master', self.obj_id)
         ObjectVersionTag.create(obj, 'type', 'frame')
 
     shutil.rmtree(output_folder)
     db.session.commit()
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='file_transcode'))
-def video_transcode(self,
-                    object_version,
-                    preset,
-                    sleep_time=5,
-                    **kwargs):
+#
+# Transcode video
+#
+def video_transcode_undo(self, *args, **kwargs):
+    """Delete generated ObjectVersion slaves."""
+    tag_alias_1 = aliased(ObjectVersionTag)
+    tag_alias_2 = aliased(ObjectVersionTag)
+    dispose_object_version(
+        ObjectVersion.query
+        .join(tag_alias_1, ObjectVersion.tags)
+        .join(tag_alias_2, ObjectVersion.tags)
+        .filter(
+            tag_alias_1.key == 'master',
+            tag_alias_1.value == self.obj_id)
+        .filter(
+            tag_alias_2.key == 'preset',
+            tag_alias_2.value == kwargs['preset'])
+        .one())
+
+
+@shared_task(
+    bind=True,
+    base=_factory_avc_task_base(type_='file_transcode',
+                                undo_fun=video_transcode_undo))
+def video_transcode(self, preset, sleep_time=5):
     """Launch video transcoding.
 
     For each of the presets generate a new ``ObjectVersion`` tagged as slave
     with the preset name as key and a link to the master version.
 
-    :param object_version: Master video.
+    :param self: reference to instance of task base class
     :param preset: Sorenson preset to use for transcoding.
-    :param sleep_time: the time interval between requests for Sorenson status
+    :param sleep_time: Time interval between requests for the Sorenson status.
     """
-    object_version = as_object_version(object_version)
-
     self._base_payload = dict(
-        object_version=str(object_version.version_id),
+        object_version=str(self.object.version_id),
         video_preset=preset,
-        tags=object_version.get_tags(),
-        deposit_id=kwargs.get('deposit_id'),
-        event_id=kwargs.get('event_id'), )
+        tags=self.object.get_tags(),
+        deposit_id=self.deposit_id,
+        event_id=self.event_id, )
 
     # Get master file's bucket_id
-    bucket_id = object_version.bucket_id
-    bucket_location = object_version.bucket.location.uri
+    bucket_id = self.object.bucket_id
+    bucket_location = self.object.bucket.location.uri
 
     preset_config = current_app.config['CDS_SORENSON_PRESETS']
     preset_ext = preset_config[preset][1]
@@ -341,7 +418,7 @@ def video_transcode(self,
         file_instance = FileInstance.create()
 
         # Create ObjectVersion
-        base_name = object_version.key.rsplit('.', 1)[0]
+        base_name = self.object.key.rsplit('.', 1)[0]
         obj_key = '{0}-{1}{2}'.format(base_name, preset, preset_ext)
         obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
 
@@ -349,15 +426,17 @@ def video_transcode(self,
         storage = file_instance.storage(default_location=bucket_location)
         directory, filename = storage._get_fs()
 
-        input_file = object_version.file.uri
+        input_file = self.object.file.uri
         output_file = os.path.join(directory.root_path, filename)
 
         # Start Sorenson
         job_id = start_encoding(input_file, preset, output_file)
 
+        # Set revoke handler, in case of an abrupt execution halt.
+        self.set_revoke_handler(partial(stop_encoding, job_id))
+
         # Create ObjectVersionTags
-        ObjectVersionTag.create(
-            obj, 'master', str(object_version.version_id))
+        ObjectVersionTag.create(obj, 'master', self.obj_id)
         ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
         ObjectVersionTag.create(obj, 'preset', preset)
         ObjectVersionTag.create(obj, 'type', 'video')
@@ -369,7 +448,7 @@ def video_transcode(self,
             file_instance=str(file_instance.id),
             uri=output_file,
             object_version=str(obj.version_id),
-            key=obj.key,
+            key=obj_key,
             tags=obj.get_tags(),
             percentage=0, )
 
@@ -379,11 +458,9 @@ def video_transcode(self,
         state=STARTED,
         meta=dict(
             payload=dict(job_info=job_info),
-            message='Started transcoding.'
-        )
-    )
+            message='Started transcoding.'))
 
-    # Monitor jobs and report accordingly
+    # Monitor job and report accordingly
     while job_info['percentage'] < 100:
         # Get job status
         status = get_encoding_status(job_id)['Status']
@@ -397,10 +474,9 @@ def video_transcode(self,
                 payload=dict(job_info=job_info),
                 message='Transcoding {0}'.format(percentage)))
 
-        if percentage < 100:
-            time.sleep(sleep_time)
+        time.sleep(sleep_time)
 
-    # Set file's location, when job has completed
+    # Set file's location, if job has completed
     with db.session.begin_nested():
         uri = output_file
         with open(uri, 'rb') as transcoded_file:
@@ -412,6 +488,9 @@ def video_transcode(self,
     db.session.commit()
 
 
+#
+# Patch record
+#
 @shared_task(bind=True)
 def update_record(self, recid, patch, validator=None,
                   max_retries=5, countdown=5):
@@ -490,3 +569,19 @@ def update_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
                 spread_deposit_update.s(event_id=str(event_id),
                                         sse_channel=sse_channel)
             ).apply_async()
+
+
+def dispose_object_version(object_version, delete_object=True):
+    """Clean up resources related to an ObjectVersion."""
+    object_version = as_object_version(object_version)
+    with db.session.begin_nested():
+        file_id = object_version.file_id
+        if file_id:
+            object_version.bucket.size -= object_version.file.size
+            object_file = object_version.file
+            object_version.file_id = None
+            remove_file_data.s(file_id, silent=False).apply()
+            object_file.delete()
+        if delete_object:
+            object_version.remove()
+    db.session.commit()

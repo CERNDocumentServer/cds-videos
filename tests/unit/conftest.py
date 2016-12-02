@@ -118,7 +118,7 @@ def app():
 
 @pytest.yield_fixture(scope='session')
 def celery_not_fail_on_eager_app(app):
-    """."""
+    """Celery configuration that does not raise errors inside test."""
     instance_path = tempfile.mkdtemp()
     sorenson_output = tempfile.mkdtemp()
 

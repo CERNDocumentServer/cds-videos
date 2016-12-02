@@ -31,7 +31,7 @@ import json
 import mock
 from flask import url_for
 
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import ObjectVersion, as_object_version
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 import pytest
