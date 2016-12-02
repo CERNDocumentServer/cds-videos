@@ -68,7 +68,7 @@ def test_donwload_to_object_version(db, bucket):
         assert obj.file.size == 1024
 
 
-def test_update_record(app, db):
+def test_update_record_thread(app, db):
     """Test update record with multiple concurrent transactions."""
     if db.engine.name == 'sqlite':
         raise pytest.skip(
@@ -105,6 +105,32 @@ def test_update_record(app, db):
     # Check that record was patched properly
     record = Record.get_record(recid)
     assert record.dumps() == {'test1': 1, 'test2': 2}
+
+
+def test_update_record_retry(app, db):
+    """Test update record with retry."""
+    from celery.exceptions import Retry
+    from sqlalchemy.orm.exc import ConcurrentModificationError
+
+    # Create record
+    recid = str(Record.create({}).id)
+    patch = [{
+        'op': 'add',
+        'path': '/fuu',
+        'value': 'bar',
+    }]
+    db.session.commit()
+    with mock.patch(
+            'invenio_records.api.Record.validate',
+            side_effect=[ConcurrentModificationError, None]) as mock_commit:
+        with pytest.raises(Retry):
+            update_record.s(recid=recid, patch=patch).apply()
+        assert mock_commit.call_count == 2
+
+    from invenio_records.models import RecordMetadata
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert records[0].json == {'fuu': 'bar'}
 
 
 def test_metadata_extraction_video_mp4(app, db, depid, bucket, video_mp4):
