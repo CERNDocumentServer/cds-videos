@@ -37,10 +37,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from werkzeug.local import LocalProxy
-from invenio_webhooks.models import Event
 from invenio_records.api import Record
-from ..webhooks.receivers import _compute_status
-import sqlalchemy
 
 from .errors import DiscardConflict
 
@@ -81,20 +78,6 @@ class CDSFileObject(FileObject):
         return self.data
 
 
-def _merge_new_status(stats, name, status):
-    if name in stats:
-        return _compute_status([stats[name], status])
-    else:
-        return status
-
-
-class _status_extractor(object):
-    def __init__(self):
-        self._status = {}
-    def __call__(self, res, name, children=None):
-        self._status[name] = _merge_new_status(self._status, name, res.status)
-
-
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
@@ -109,30 +92,16 @@ class CDSDeposit(Deposit):
         deposit = super(CDSDeposit, cls).get_record(
             id_=id_, with_deleted=with_deleted)
         deposit['_files'] = deposit.files.dumps()
-        deposit['_deposit']['state'] = deposit._compute_tasks_status()
         return deposit
 
-    @property
-    def _events(self):
-        """Get a list of events."""
-        #  return Event.query.filter(
-        #      Event.payload.op('->>')(
-        #          'deposit_id').cast(String) == self['_deposit']['id']).all()
-        return Event.query.filter(
-            sqlalchemy.cast(
-                Event.payload['deposit_id'],
-                sqlalchemy.String) == sqlalchemy.type_coerce(
-                    self['_deposit']['id'], sqlalchemy.JSON)
-        ).all()
-
-    def _compute_tasks_status(self):
-        """Compute tasks status."""
-        status_extractor = _status_extractor()
-        events_status = [
-            event.receiver._status_and_info(event,
-                                            fun=status_extractor)['info']
-            for event in self._events]
-        return status_extractor._status
+    @classmethod
+    def get_records(cls, ids, with_deleted=False):
+        """Get records."""
+        deposits = super(CDSDeposit, cls).get_records(
+            ids=ids, with_deleted=with_deleted)
+        for deposit in deposits:
+            deposit['_files'] = deposit.files.dumps()
+        return deposits
 
     @classmethod
     def create(cls, data, id_=None):
@@ -145,6 +114,7 @@ class CDSDeposit(Deposit):
         )
         data['_buckets'] = {'deposit': str(bucket.id)}
         deposit = super(CDSDeposit, cls).create(data, id_=id_)
+        deposit['_deposit']['state'] = {}
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
 
@@ -175,6 +145,13 @@ def project_resolver(project_id):
         pid_value=project_id
     ).one().object_uuid
     return Project.get_record(pid)
+
+
+def cds_resolver(ids):
+    """Get records from PIDs."""
+    pids = [p.object_uuid for p in PersistentIdentifier.query.filter(
+        PersistentIdentifier.pid_value.in_(ids)).all()]
+    return CDSDeposit.get_records(pids)
 
 
 def video_resolver(ids):

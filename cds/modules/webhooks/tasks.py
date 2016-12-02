@@ -27,16 +27,17 @@ from __future__ import absolute_import
 
 import hashlib
 import json
+import jsonpatch
 import os
+import requests
 import shutil
 import signal
 import tempfile
 import time
-from collections import deque
 
-import requests
+from collections import deque
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
-from celery import Task, shared_task, current_app as celery_app
+from celery import Task, shared_task, current_app as celery_app, chain
 from celery.states import FAILURE, STARTED, SUCCESS
 from flask import current_app
 from invenio_db import db
@@ -46,8 +47,19 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
 from sqlalchemy.orm.exc import ConcurrentModificationError
+from invenio_indexer.api import RecordIndexer
+from werkzeug.utils import import_string
 
+from .status import get_tasks_status_by_task, get_deposit_events
+from ..deposit.api import cds_resolver, CDSDeposit
 from ..ffmpeg import ff_frames, ff_probe_all
+
+
+def sse_publish_event(channel, type_, state, meta):
+    """Publish a message on SSE channel."""
+    if channel:
+        data = {'state': state, 'meta': meta}
+        current_sse.publish(data=data, type_=type_, channel=channel)
 
 
 def _factory_sse_task_base(type_=None):
@@ -77,31 +89,40 @@ def _factory_sse_task_base(type_=None):
             with self.app.flask_app.app_context():
                 return self.run(*args, **kwargs)
 
-        def _publish(self, state, meta):
-            """Publish task's state to corresponding SSE channel."""
-            if self.sse_channel:
-                data = {'state': state, 'meta': meta}
-                current_sse.publish(
-                    data=data, type_=type_, channel=self.sse_channel)
-
         def update_state(self, task_id=None, state=None, meta=None):
             """."""
             self._base_payload.update(meta.get('payload', {}))
             meta['payload'] = self._base_payload
             super(SSETask, self).update_state(task_id, state, meta)
-            self._publish(state=state, meta=meta)
+            sse_publish_event(channel=self.sse_channel, type_=type_,
+                              state=state, meta=meta)
 
         def on_failure(self, exc, task_id, args, kwargs, einfo):
             """When an error occurs, attach useful information to the state."""
             with celery_app.flask_app.app_context():
                 meta = dict(message=str(exc), payload=self._base_payload)
-                self._publish(state=FAILURE, meta=meta)
+                sse_publish_event(channel=self.sse_channel, type_=type_,
+                                  state=FAILURE, meta=meta)
+                self._update_record()
 
         def on_success(self, exc, *args, **kwargs):
             """When end correctly, attach useful information to the state."""
             with celery_app.flask_app.app_context():
                 meta = dict(message=str(exc), payload=self._base_payload)
-                self._publish(state=SUCCESS, meta=meta)
+                sse_publish_event(channel=self.sse_channel, type_=type_,
+                                  state=SUCCESS, meta=meta)
+                self._update_record()
+
+        def _update_record(self):
+            # update record state
+            with celery_app.flask_app.app_context():
+                if 'deposit_id' in self._base_payload \
+                        and self._base_payload['deposit_id']:
+                    update_deposit_state(
+                        deposit_id=self._base_payload.get('deposit_id'),
+                        event_id=self._base_payload.get('event_id'),
+                        sse_channel=self.sse_channel
+                    )
 
     return SSETask
 
@@ -134,7 +155,7 @@ def download_to_object_version(self, uri, object_version, **kwargs):
 
     def progress_updater(size, total):
         """Progress reporter."""
-        size = size or headers_size or 0
+        size = size or headers_size or 1
         meta = dict(
             payload=dict(
                 size=size,
@@ -390,22 +411,80 @@ def video_transcode(self,
 
 
 @shared_task(bind=True)
-def update_record(self, recid, patch, max_retries=5, countdown=5):
+def update_record(self, recid, patch, validator=None,
+                  max_retries=5, countdown=5):
     """Update a given record with a patch.
 
     Retries ``max_retries`` after ``countdown`` seconds.
 
     :param recid: the UUID of the record.
     :param patch: the patch operation to apply.
+    :param validator: a jsonschema validator.
     :param max_retries: times to retry operation.
     :param countdown: time to sleep between retries.
     """
-    try:
-        with db.session.begin_nested():
-            record = Record.get_record(recid)
-            record = record.patch(patch)
-            record.commit()
-        db.session.commit()
-    except ConcurrentModificationError as exc:
-        db.session.rollback()
-        raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
+    if patch:
+        try:
+            with db.session.begin_nested():
+                record = Record.get_record(recid)
+                record = record.patch(patch)
+                if validator:
+                    validator = import_string(validator)
+                record.commit(validator=validator)
+            db.session.commit()
+            return recid
+        except ConcurrentModificationError as exc:
+            db.session.rollback()
+            raise self.retry(
+                max_retries=max_retries, countdown=countdown, exc=exc)
+
+
+def get_patch_tasks_status(deposit):
+    """Get the patch to apply to update record tasks status."""
+    old_status = deposit['_deposit']['state']
+    new_status = get_tasks_status_by_task(
+        get_deposit_events(deposit['_deposit']['id']))
+    # create tasks status patch
+    patches = jsonpatch.make_patch(old_status, new_status).patch
+    # make it suitable for the deposit
+    for patch in patches:
+        patch['path'] = '/_deposit/state{0}'.format(patch['path'])
+    return patches
+
+
+@shared_task
+def spread_deposit_update(id_=None, event_id=None, sse_channel=None):
+    """If record is updated correctly, spread the news."""
+    if id_:
+        # get_record
+        deposit = CDSDeposit.get_record(id_)
+        # send a message to SSE
+        sse_publish_event(
+            channel=sse_channel, type_='update_deposit', state=SUCCESS,
+            meta={
+                'payload': {
+                    'deposit': deposit,
+                    'event_id': event_id,
+                    'deposit_id': deposit['_deposit']['id'],
+                }
+            })
+        # send deposit to the reindex queue
+        RecordIndexer().bulk_index(iter([id_]))
+
+
+def update_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
+                         **kwargs):
+    """Update deposit state on SSE and ElasticSearch."""
+    if deposit_id:
+        # get_record
+        deposit = cds_resolver([deposit_id])[0]
+        # create the patch
+        patch = get_patch_tasks_status(deposit=deposit)
+        # update record
+        if patch:
+            validator = 'invenio_records.validators.PartialDraft4Validator'
+            chain(
+                update_record.s(str(deposit.id), patch, validator=validator),
+                spread_deposit_update.s(event_id=str(event_id),
+                                        sse_channel=sse_channel)
+            ).apply_async()

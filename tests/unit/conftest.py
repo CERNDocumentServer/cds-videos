@@ -36,34 +36,41 @@ from time import sleep
 import mock
 import pytest
 from cds.factory import create_app
+from cds.modules.deposit.api import CDSDeposit
+from cds.modules.deposit.api import Project, Video, video_resolver
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from celery import group, chain
 from celery import shared_task
+from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
+from flask_security import login_user
+from invenio_access.models import ActionUsers
+from invenio_accounts.models import User
+from invenio_db import db as db_
+from invenio_deposit import InvenioDepositREST
+from invenio_deposit.api import Deposit
+from invenio_files_rest.models import Location, Bucket
+from invenio_files_rest.views import blueprint as files_rest_blueprint
+from invenio_indexer import InvenioIndexer
 from invenio_oauth2server.models import Token
+from invenio_pidstore import InvenioPIDStore
+from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_records_rest import InvenioRecordsREST
+from invenio_records_rest.utils import PIDConverter
+from invenio_search import InvenioSearch, current_search, current_search_client
+from invenio_webhooks import InvenioWebhooks
 from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import CeleryReceiver
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
 from jsonresolver.contrib.jsonschema import ref_resolver_factory
-from cds.modules.deposit.api import Project, Video, video_resolver
-from flask_security import login_user
-from invenio_access.models import ActionUsers
-from invenio_db import db as db_
-from invenio_deposit.api import Deposit
-from invenio_files_rest.models import Location, Bucket
-from invenio_files_rest.views import blueprint as files_rest_blueprint
-from invenio_pidstore.providers.recordid import RecordIdProvider
-from invenio_search import InvenioSearch, current_search, current_search_client
-from sqlalchemy_utils.functions import create_database, database_exists
-from invenio_deposit import InvenioDepositREST
-from invenio_records_rest import InvenioRecordsREST
-from invenio_records_rest.utils import PIDConverter
 from six import BytesIO
-from invenio_accounts.models import User
-from invenio_indexer import InvenioIndexer
-from invenio_pidstore import InvenioPIDStore
+from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy_utils.functions import create_database, database_exists
 
-from helpers import create_category
+from helpers import create_category, sse_simple_add, sse_failing_task, \
+    sse_success_task
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -91,6 +98,10 @@ def app():
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+        CDS_SORENSON_PRESETS={
+            'Youtube 480p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff4', '.mp4'),
+            'Youtube 720p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff5', '.mp4'),
+        },
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
     )
     app.register_blueprint(files_rest_blueprint)
@@ -217,6 +228,20 @@ def depid(app, users, db):
 
 
 @pytest.fixture()
+def cds_depid(api_app, users, db, bucket):
+    """New deposit with files."""
+    record = {
+        'title': {'title': 'fuu'}
+    }
+    with api_app.test_request_context():
+        login_user(User.query.get(users[0]))
+        deposit = CDSDeposit.create(record)
+        deposit.commit()
+        db.session.commit()
+    return deposit['_deposit']['id']
+
+
+@pytest.fixture()
 def bucket(db, location):
     """Provide test bucket."""
     bucket = Bucket.create(location)
@@ -234,6 +259,10 @@ def es(app):
         list(current_search.delete(ignore=[404]))
         list(current_search.create(ignore=[400]))
     current_search_client.indices.refresh()
+    queue = app.config['INDEXER_MQ_QUEUE']
+    with establish_connection() as c:
+        q = queue(c)
+        q.declare()
     yield current_search_client
     list(current_search.delete(ignore=[404]))
 
@@ -264,6 +293,14 @@ def deposit_rest(app, records_rest_app):
     if 'invenio-deposit-rest' not in app.extensions:
         InvenioDepositREST(app)
         app.url_map.converters['pid'] = PIDConverter
+    return app
+
+
+@pytest.fixture()
+def webhooks(app):
+    """Init webhooks API."""
+    if 'invenio-webhooks' not in app.extensions:
+        InvenioWebhooks(app)
     return app
 
 
@@ -486,6 +523,41 @@ def receiver(api_app):
 
     current_webhooks.register('test-receiver', TestReceiver)
     return 'test-receiver'
+
+
+@pytest.fixture
+def workflow_receiver(api_app, db, webhooks, es, cds_depid):
+    """Workflow receiver."""
+    class TestReceiver(CeleryAsyncReceiver):
+        def run(self, event):
+            workflow = chain(
+                sse_simple_add.s(x=1, y=2, deposit_id=cds_depid),
+                group(sse_failing_task.s(), sse_success_task.s())
+            )
+            event.payload['deposit_id'] = cds_depid
+            with db.session.begin_nested():
+                flag_modified(event, 'payload')
+                db.session.expunge(event)
+            db.session.commit()
+            self.persist(
+                event=event, result=workflow.apply_async())
+
+        def _raw_info(self, event):
+            result = self._deserialize_result(event)
+            return (
+                [{'add': result.parent}],
+                [
+                    {'failing': result.children[0]},
+                    {'failing': result.children[1]}
+                ]
+            )
+
+    receiver_id = 'add-receiver'
+    from cds.celery import celery
+    celery.flask_app.extensions['invenio-webhooks'].register(
+        receiver_id, TestReceiver)
+    current_webhooks.register(receiver_id, TestReceiver)
+    return receiver_id
 
 
 @pytest.fixture()
