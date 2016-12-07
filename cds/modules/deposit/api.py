@@ -68,6 +68,7 @@ class CDSFileObject(FileObject):
             'size': self.obj.file.size,
             'completed': True,
             'progress': 100,
+            'tags': {tag.key: tag.value for tag in self.obj.tags},
             'links': {
                 'self': (
                     current_app.config['DEPOSIT_FILES_API'] +

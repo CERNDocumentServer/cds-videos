@@ -565,8 +565,8 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_files_response'),
         },
         record_serializers={
-            'application/json': ('invenio_records_rest.serializers'
-                                 ':json_v1_response'),
+            'application/json': ('cds.modules.records.serializers'
+                                 ':json_serializer'),
         },
         search_class='invenio_deposit.search:DepositSearch',
         search_serializers={

@@ -284,6 +284,7 @@ def video_extract_frames(self,
             key=filename,
             stream=open(os.path.join(output_folder, filename), 'rb'))
         ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
+        ObjectVersionTag.create(obj, 'type', 'frame')
 
     shutil.rmtree(output_folder)
     db.session.commit()
