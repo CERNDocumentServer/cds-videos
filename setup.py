@@ -102,7 +102,8 @@ install_requires = [
     'invenio-deposit>=1.0.0a6',
     'invenio-files-rest>=1.0.0a11',
     'invenio-formatter>=1.0.0a2',
-    'invenio-i18n>=1.0.0b1',
+    # FIXME remove until proper integration
+    # 'invenio-i18n>=1.0.0b1',
     'invenio-indexer>=1.0.0a7',
     'invenio-jsonschemas>=1.0.0a3',
     'invenio-logging[sentry]>=1.0.0a3',
@@ -200,9 +201,10 @@ setup(
             'cds_recid = cds.modules.records.minters:recid_minter',
             'cds_catid = cds.modules.deposit.minters:catid_minter',
         ],
-        'invenio_i18n.translations': [
-            'messages = cds',
-        ],
+        # FIXME removed until proper integration
+        # 'invenio_i18n.translations': [
+            # 'messages = cds',
+        # ],
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
             'deposits = cds.modules.deposit.mappings',
