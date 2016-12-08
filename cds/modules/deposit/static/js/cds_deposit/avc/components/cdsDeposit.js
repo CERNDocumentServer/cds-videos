@@ -1,5 +1,6 @@
 function cdsDepositCtrl(
-  $scope, $q, $timeout, depositStates, depositStatuses, cdsAPI
+  $scope, $q, $timeout, $sce, depositStates, depositStatuses, cdsAPI,
+  previewerURLBuilder
 ) {
   var that = this;
   // The Upload Queue
@@ -16,6 +17,8 @@ function cdsDepositCtrl(
 
   // Add depositStatuses to the scope
   this.depositStatuses = depositStatuses;
+
+  this.previewer = null;
 
   // FIXME Init stateQueue -  maybe ```Object(depositStatuses).keys()```
   this.stateQueue = {
@@ -86,10 +89,6 @@ function cdsDepositCtrl(
       }
     };
 
-    $scope.$watch('record', function(newValue, oldValue) {
-      console.info('STATE CHAGNED', newValue, oldValue);
-    });
-
     this.initializeStateQueue = function() {
       if (this.record._deposit.state) {
         angular.forEach(this.record._deposit.state, function(value, key) {
@@ -133,6 +132,18 @@ function cdsDepositCtrl(
       return depositStatuses.PENDING;
     };
 
+
+    this.videoPreviewer = function(deposit, key) {
+      if (that.stateQueue.SUCCESS.indexOf('file_download') > -1 || key) {
+        that.previewer = $sce.trustAsResourceUrl(
+          previewerURLBuilder.video({
+            deposit: deposit || that.record._deposit.id,
+            key: key || that.record._files[0].key
+          })
+        );
+      }
+    }
+
     // Start autoRefresh record in the background
     this.autoRefresh();
     // Initialize state the queue
@@ -143,6 +154,8 @@ function cdsDepositCtrl(
     this.depositStatusCurrent = this.calculateStatus();
     // Set stateCurrent - If null -> Waiting SSE events
     that.stateCurrent = that.stateQueue.STARTED[0] || null;
+    // Check for previewer
+    that.videoPreviewer();
 
     // Register related events from sse
     var depositListenerName = 'sse.event.' + this.record._deposit.id;
@@ -160,18 +173,25 @@ function cdsDepositCtrl(
           switch(data.state) {
             case 'STARTED':
               that.stateQueue.STARTED.push(type);
+              // Callback on started
+              that.startedCallback(type, data);
               break;
             case 'FAILURE':
               that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
               that.stateQueue.FAILURE.push(type);
               // On error remove it from the status order
               that.stateOrder = _.without(that.stateOrder, type);
+              // Callback on failure
+              that.failureCallback(type, data);
               break;
             case 'SUCCESS':
               that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
               that.stateQueue.SUCCESS.push(type);
               // On success remove it from the status order
               that.stateOrder = _.without(that.stateOrder, type);
+              console.log('calling success');
+              // Callback on success
+              that.successCallback(type, data);
               break;
           }
           // The state has been changed update the current
@@ -191,6 +211,24 @@ function cdsDepositCtrl(
         );
       }
     });
+
+    this.successCallback = function(type, data) {
+      if (type === 'file_download') {
+        // Render video previewer as soon as the file is downloaded
+        that.videoPreviewer(
+          data.meta.payload.deposit_id, data.meta.payload.key
+        );
+      }
+    }
+
+
+    this.failureCallback = function(type, data) {
+
+    }
+
+    this.startedCallback = function(type, data) {
+
+    }
 
     this.displayFailure = function() {
       return that.depositStatusCurrent === that.depositStatuses.FAILURE;
@@ -292,7 +330,8 @@ function cdsDepositCtrl(
 }
 
 cdsDepositCtrl.$inject = [
-  '$scope', '$q', '$timeout', 'depositStates', 'depositStatuses', 'cdsAPI'
+  '$scope', '$q', '$timeout', '$sce', 'depositStates', 'depositStatuses', 'cdsAPI',
+  'previewerURLBuilder'
 ];
 
 /**

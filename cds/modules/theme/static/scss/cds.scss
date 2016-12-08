@@ -339,7 +339,6 @@ a[ng-click]{
 
 .cds-deposit-box-video-preview {
   text-align: center;
-  padding: 50px;
   background-color: $gray-lighter;
   i {
     color: $gray-light;
@@ -350,6 +349,10 @@ a[ng-click]{
     i {
       color: $state-danger-text;
     }
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
   }
 }
 

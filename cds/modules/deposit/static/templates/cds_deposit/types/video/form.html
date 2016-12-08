@@ -3,9 +3,15 @@
     <div class="col-sm-12">
       <div class="row">
         <div class="col-sm-3">
-          <div class="cds-deposit-box-video-preview" ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
-            <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
-            <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
+          <div
+           class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
+           ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
+            <div ng-show="!$ctrl.cdsDepositCtrl.previewer">
+              <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
+              <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
+            </div>
+            <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+
           </div>
           <br />
           <cds-actions

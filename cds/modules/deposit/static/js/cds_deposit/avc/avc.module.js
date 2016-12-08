@@ -1,5 +1,6 @@
 function cdsDepositsConfig(
-  $locationProvider, depositStatesProvider, depositStatusesProvider
+  $locationProvider, depositStatesProvider, depositStatusesProvider,
+  previewerURLBuilderProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -23,6 +24,11 @@ function cdsDepositsConfig(
       SUCCESS: 'DEPOSIT_STATE/SUCCESS'
     }
   );
+  previewerURLBuilderProvider.setBlueprints(
+    {
+      "video": "/deposit/<%=deposit%>/preview/video/<%=key%>"
+    }
+  )
 }
 
 // Inject the necessary angular services
@@ -30,6 +36,7 @@ cdsDepositsConfig.$inject = [
   '$locationProvider',
   'depositStatesProvider',
   'depositStatusesProvider',
+  'previewerURLBuilderProvider',
 ];
 
 angular.module('cdsDeposit.components', []);
@@ -63,6 +70,24 @@ angular.module('cdsDeposit', [
     },
     $get: function() {
       return statuses;
+    }
+  }
+})
+.provider("previewerURLBuilder", function() {
+  var blueprints = {};
+
+  function setBlueprint(key, value) {
+    // underscorejs templates
+    blueprints[key] = _.template(value);
+  }
+  return {
+    setBlueprints: function(blueprints_) {
+      angular.forEach(blueprints_, function(value, key) {
+        setBlueprint(key, value);
+      })
+    },
+    $get: function() {
+      return blueprints;
     }
   }
 })
