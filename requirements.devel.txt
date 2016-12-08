@@ -23,7 +23,9 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 # When installing from github the requirements extras doesn't seem to work
-CairoSVG >= 1.0.20 # dependency of invenio-formatter[badges]
+# Cairo 2.X drops python 2 support
+# http://cairosvg.org/news/
+CairoSVG == 1.0.21 # dependency of invenio-formatter[badges]
 Flask-Cors>=2.1.2 # dependency of invenio-rest
 Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
@@ -47,7 +49,8 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 # -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
 -e git+https://github.com/egabancho/invenio-files-rest.git@object-version-tags#egg=invenio-files-rest
 -e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter
--e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
+# FIXME removed until proper integration
+# -e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
 -e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
