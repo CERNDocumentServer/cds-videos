@@ -156,6 +156,18 @@ RECORDS_UI_ENDPOINTS = dict(
         view_imp='invenio_records_files.utils:file_download_ui',
         record_class='invenio_records_files.api:Record',
     ),
+    video_preview=dict(
+        pid_type='depid',
+        route='/deposit/<pid_value>/preview/video/<filename>',
+        view_imp='cds.modules.previewer.views.preview_depid',
+        record_class='cds.modules.deposit.api:Video',
+    ),
+    project_preview=dict(
+        pid_type='depid',
+        route='/deposit/<pid_value>/preview/project/<filename>',
+        view_imp='cds.modules.previewer.views.preview_depid',
+        record_class='cds.modules.deposit.api:Project',
+    ),
 )
 
 # OAI Server.

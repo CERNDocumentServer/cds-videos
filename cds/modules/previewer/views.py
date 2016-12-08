@@ -21,9 +21,12 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint
+from flask import Blueprint, abort, current_app, request
 
-from flask_iiif import IIIF
+from invenio_previewer.extensions import default
+from invenio_previewer.proxies import current_previewer
+
+from .api import CDSPreviewDepositFile
 
 blueprint = Blueprint(
     'cds_previewer',
@@ -31,3 +34,37 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
+
+
+def preview_depid(pid, record, template=None, **kwargs):
+    """Preview file for given deposit."""
+
+    fileobj = current_previewer.record_file_factory(
+        pid, record, request.view_args.get(
+            'filename', request.args.get('filename', type=str))
+    )
+
+    if not fileobj:
+        abort(404)
+
+    # Try to see if specific previewer is requested?
+    try:
+        file_previewer = fileobj['previewer']
+    except KeyError:
+        file_previewer = None
+
+    fileobj = CDSPreviewDepositFile(pid, record, fileobj)
+
+    for plugin in current_previewer.iter_previewers(
+            previewers=[file_previewer] if file_previewer else None):
+        if plugin.can_preview(fileobj):
+            try:
+                return plugin.preview(fileobj)
+            except Exception:
+                current_app.logger.warning(
+                    ('Preview failed for {key}, in {pid_type}:{pid_value}'
+                     .format(key=fileobj.file.key,
+                             pid_type=fileobj.pid.pid_type,
+                             pid_value=fileobj.pid.pid_value)),
+                    exc_info=True)
+    return default.preview(fileobj)
