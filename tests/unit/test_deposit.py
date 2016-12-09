@@ -34,6 +34,7 @@ import pytest
 from cds.modules.deposit.api import CDSDeposit, video_resolver
 from cds.modules.deposit.permissions import can_edit_deposit
 from cds.modules.deposit.views import to_links_js
+from cds.modules.records.serializers import json_serializer
 from flask import current_app, g, request, url_for
 from flask_login import login_user
 from flask_principal import Identity
@@ -43,6 +44,7 @@ from invenio_db import db
 from celery import chain, states, group
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver, \
     _info_extractor, _compute_status
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_webhooks import current_webhooks
 from helpers import simple_add, failing_task, success_task
 from six import BytesIO
@@ -312,3 +314,33 @@ def test_deposit_events_on_worlflow(api_app, db, depid, bucket, access_token,
         data = json.loads(res.data.decode('utf-8'))['metadata']
         assert data['_deposit']['state']['add'] == states.PENDING
         assert data['_deposit']['state']['failing'] == states.FAILURE
+
+
+def test_json_serializer(es, location):
+    """Test nesting of files by JSON serializer."""
+    record = dict(
+        _files=[
+            dict(key='master', tags=dict(), version_id='123'),
+            dict(key='master2', tags=dict(), version_id='456'),
+            dict(key='file-10', tags=dict(type='frame', master='123')),
+            dict(key='file-2', tags=dict(type='frame', master='123')),
+            dict(key='file-1', tags=dict(type='frame', master='123')),
+            dict(key='file-5', tags=dict(type='frame', master='456')),
+            dict(key='sub-1', tags=dict(type='subtitles', master='123'))
+        ]
+    )
+    deposit = CDSDeposit.create(record)
+    deposit.commit()
+    db.session.commit()
+    json = json_serializer(0, deposit).json
+    files = json['metadata']['_files']
+    # two master files
+    assert len(files) == 2
+    master = json['metadata']['_files'][0]
+    assert master['version_id'] == '123'
+    assert len(master['frame']) == 3
+    # frame must be sorted correctly
+    assert master['frame'][0]['key'] == 'file-1'
+    assert master['frame'][1]['key'] == 'file-2'
+    assert master['frame'][2]['key'] == 'file-10'
+    assert master['subtitles'][0]['key'] == 'sub-1'

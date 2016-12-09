@@ -310,7 +310,85 @@ a[ng-click]{
 
 .cds-tab-content {
   background-color: #fff;
-  border-bottom: 1px solid #ddd;
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
+
+}
+
+.cds-pills-center {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 10px;
+
+  & > li > a {
+    border-radius: 5px;
+  }
+}
+
+.cds-urls-textarea {
+  min-height: 150px;
+  max-height: 300px;
+  margin-bottom: 5px;
+}
+
+.cds-deposit-box {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+.cds-deposit-box-video-preview {
+  text-align: center;
+  background-color: $gray-lighter;
+  i {
+    color: $gray-light;
+  }
+  &.preview-failed {
+    border: 1px solid $state-danger-border;
+    background-color: $state-danger-bg;
+    i {
+      color: $state-danger-text;
+    }
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.cds-deposit-box-upload-status {
+  margin-top: 20px;
+  display: inline-block;
+  h5 {
+    color: $gray-dark;
+  }
+  p {
+    color: $gray;
+  }
+}
+
+.cds-deposit-box-upload-wrapper {
+  cursor: pointer;
+  padding: 40px;
+
+  .cds-deposit-box-upload-title {
+    color: $gray-dark;
+  }
+
+  .cds-deposit-box-upload-description {
+    color: $gray;
+  }
+
+  .cds-deposit-box-upload-icon {
+    font-size: 35px;
+    i {
+      color: $gray-light;
+    }
+  }
+
+  &:hover {
+    .cds-deposit-box-upload-icon i {
+      color: $primary-color;
+    }
+  }
 }

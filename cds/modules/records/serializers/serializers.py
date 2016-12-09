@@ -1,4 +1,4 @@
-{# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
 # Copyright (C) 2016 CERN.
@@ -21,31 +21,26 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#}
 
-{%- extends config.PREVIEWER_ABSTRACT_TEMPLATE %}
+"""Response serialization."""
 
-{%- block javascript %}
-  {{ super() }}
-  {% assets "cds_previewer_oplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-  <script type="text/javascript">
-    theoplayer = {
-      configuration : {
-        libraryLocation : '/static/js/cds_previewer/theoplayer/',
-        styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css'
-      }
-    };
-    </script>
-{%- endblock javascript %}
+from collections import defaultdict
 
-{%- block css %}
-  {{ super() }}
-  {% assets "cds_previewer_video_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{%- endblock css %}
+from invenio_records_rest.serializers import json_v1_response
 
-{% block panel %}
-  <video class="cds-previewer-video-player"
-    src="{{file_url}}"
-    controls="controls">
-  </video>
-{% endblock %}
+
+def json_serializer(pid, record, *args, **kwargs):
+    """Nest video owned files under each video."""
+    if '_files' in record:
+        # Sort by file key, first by length and then alphabetically
+        record['_files'].sort(key=lambda f: (len(f['key']), f['key']))
+        master_files = defaultdict(lambda: defaultdict(list))
+        for file in record['_files']:
+            master = file['tags'].get('master')
+            # Append to master's files if it's a child, otherwise update master
+            if master:
+                master_files[master][file['tags']['type']].append(file)
+            else:
+                master_files[file['version_id']].update(file)
+        record['_files'] = master_files.values()
+    return json_v1_response(pid, record, *args, **kwargs)

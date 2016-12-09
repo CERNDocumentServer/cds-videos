@@ -27,11 +27,13 @@
 from __future__ import absolute_import, print_function
 
 import json
+import os
 
 import mock
 from flask import url_for
 
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import ObjectVersion, FileInstance, \
+    as_object_version, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 import pytest
@@ -47,6 +49,55 @@ from invenio_webhooks.models import Event
 from six import BytesIO
 
 from helpers import failing_task, success_task, simple_add
+
+
+def test_download_receiver_cancel(api_app, db, bucket, depid, access_token,
+                                  json_headers):
+    """Test downloader receiver cancel behaviour."""
+    db.session.add(bucket)
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='downloader',
+            access_token=access_token)
+
+    with mock.patch('requests.get') as mock_request, \
+            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            api_app.test_client() as client:
+
+        sse_channel = 'mychannel'
+        mock_sse.return_value = None
+
+        file_size = 100000
+        mock_request.return_value = type(
+            'Response', (object, ), {
+                'raw': BytesIO(b'\x00' * file_size),
+                'headers': {'Content-Length': file_size}
+            })
+
+        # Start receiver
+        payload = dict(
+            uri='http://example.com/test.pdf',
+            bucket_id=str(bucket.id),
+            deposit_id=depid,
+            key='test.pdf',
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+        data = json.loads(resp.data.decode('utf-8'))
+        filename = as_object_version(data['version_id']).file.uri
+
+        # Cancel receiver
+        client.delete(data['links']['cancel'],
+                      query_string='access_token={}'.format(access_token))
+
+        # Make sure all resources were deleted
+        assert not os.path.isfile(filename)
+        assert FileInstance.query.count() == 0
+        assert ObjectVersion.query.count() == 0
+        assert ObjectVersionTag.query.count() == 0
 
 
 def test_download_receiver(api_app, db, bucket, depid, access_token,
@@ -90,7 +141,8 @@ def test_download_receiver(api_app, db, bucket, depid, access_token,
         assert data['key'] == 'test.pdf'
         assert 'version_id' in data
         assert 'links' in data  # TODO decide with links are needed
-        assert all([link in data['links'] for link in ['self', 'version', 'cancel']])
+        assert all([link in data['links']
+                    for link in ['self', 'version', 'cancel']])
 
         assert ObjectVersion.query.count() == 1
         obj = ObjectVersion.query.first()
@@ -146,6 +198,43 @@ def test_download_receiver(api_app, db, bucket, depid, access_token,
 def mock_current_user(*args2, **kwargs2):
     """Mock current user not logged-in."""
     return None
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_cancel(api_app, db, bucket, depid,
+                                      access_token, json_headers,
+                                      mock_sorenson, online_video):
+    """Test AVCWorkflow receiver cancel behaviour."""
+    db.session.add(bucket)
+    master_key, slave_key = 'test.mp4', 'test-Youtube 480p.mp4'
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=depid,
+            key=master_key,
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+        data = json.loads(resp.data.decode('utf-8'))
+
+        # Cancel receiver
+        assert 'links' in data
+        assert 'cancel' in data['links']
+        client.delete(data['links']['cancel'],
+                      query_string='access_token={}'.format(access_token))
+
+        assert FileInstance.query.count() == 0
+        assert ObjectVersion.query.count() == 0
+        assert ObjectVersionTag.query.count() == 0
 
 
 @mock.patch('flask_login.current_user', mock_current_user)

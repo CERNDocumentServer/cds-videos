@@ -97,6 +97,7 @@ CACHE_TYPE = 'redis'
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     'SQLALCHEMY_DATABASE_URI',
     'postgresql+psycopg2://localhost/cds', )
+#    'postgresql+psycopg2://localhost/cdshom', )
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -154,6 +155,18 @@ RECORDS_UI_ENDPOINTS = dict(
         route='/record/<pid_value>/files/<filename>',
         view_imp='invenio_records_files.utils:file_download_ui',
         record_class='invenio_records_files.api:Record',
+    ),
+    video_preview=dict(
+        pid_type='depid',
+        route='/deposit/<pid_value>/preview/video/<filename>',
+        view_imp='cds.modules.previewer.views.preview_depid',
+        record_class='cds.modules.deposit.api:Video',
+    ),
+    project_preview=dict(
+        pid_type='depid',
+        route='/deposit/<pid_value>/preview/project/<filename>',
+        view_imp='cds.modules.previewer.views.preview_depid',
+        record_class='cds.modules.deposit.api:Project',
     ),
 )
 
@@ -552,8 +565,8 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_files_response'),
         },
         record_serializers={
-            'application/json': ('invenio_records_rest.serializers'
-                                 ':json_v1_response'),
+            'application/json': ('cds.modules.records.serializers'
+                                 ':json_serializer'),
         },
         search_class='invenio_deposit.search:DepositSearch',
         search_serializers={
@@ -627,7 +640,14 @@ DEPOSIT_FORM_TEMPLATES = {
     'textarea': 'textarea.html'
 }
 
+# App key for uploading files from dropbox
+DEPOSIT_DROPBOX_APP_KEY = 'CHANGE_ME'
+
 ###############################################################################
 # SSE
 ###############################################################################
 SSE_REDIS_URL = 'redis://localhost:6379/1'
+CDS_SORENSON_PROXIES = {
+    'http': 'socks5://127.0.01:8123',
+    'https': 'socks5://127.0.01:8123',
+}
