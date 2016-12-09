@@ -101,16 +101,20 @@ function cdsDepositsCtrl($http, $q, $scope, $window, $location, states) {
     this.children.push(deposit);
   };
 
+  this.isVideoFile = function(key) {
+    var videoRegex = /(.*)\.(mp4|mov)$/;
+    return key.match(videoRegex);
+  }
+
   this.filterOutFiles = function(files) {
     // Logic to separated
-    var videoRegex = /(.*)\.(mp4|mov)$/;
     var _files = {
       project: [],
       videos: {},
       videoFiles: {}
     }
     angular.forEach(files, function(file, index) {
-      var match = file.name.match(videoRegex);
+      var match = that.isVideoFile(file.name);
       // Grrrrr
       file.key = file.name;
       var name;
