@@ -36,6 +36,30 @@
       </td>
       <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
     </tr>
+    <tr ng-show="$ctrl.getFrames()">
+      <td>Extracted frames</td>
+      <td></td>
+      <td class="text-center">
+        <span class="text-success">✓</span>
+      </td>
+      <td class="text-center">
+        <a ng-click="showFrames = !showFrames">
+          <span ng-show="!showFrames">Show</span>
+          <span ng-show="showFrames">Hide</span>
+        </a>
+      </td>
+    </tr>
+    <tr ng-show="showFrames">
+      <td colspan="4">
+        <div class="row cds-deposit-thumbnail-pad">
+          <div class="col-sm-2 cds-deposit-thumbnail-pad" ng-repeat="frame in $ctrl.getFrames()">
+            <a ng-href="{{ frame.links.self }}" target="_blank">
+              <img width="100%" ng-src="{{ frame.links.self }}" />
+            </a>
+          </div>
+        </div>
+      </td>
+    </tr>
     <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
       <td colspan="4" class="text-center text-muted"> No results.</td>
     </tr>

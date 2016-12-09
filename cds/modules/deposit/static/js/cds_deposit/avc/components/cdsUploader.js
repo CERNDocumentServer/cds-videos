@@ -113,6 +113,21 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
                 true
               );
               data.push(response.data);
+              if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
+                Upload.http({
+                  method: 'POST',
+                  url: that.remoteMasterReceiver,
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  data: {
+                    version_id: response.data.version_id,
+                    key: upload.key,
+                    bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
+                    deposit_id: that.cdsDepositCtrl.record._deposit.id
+                  }
+                });
+              }
             },
             function error(response) {
               // Throw an error
@@ -267,6 +282,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
       );
     }
   };
+
+  this.getFrames = function() {
+    return that.files.reduce(function (frames, next) {
+      return frames || next.frame;
+    }, null);
+  };
 }
 
 cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout'];
@@ -277,6 +298,7 @@ function cdsUploader() {
     bindings: {
       files: '=',
       filterFiles: '=',
+      remoteMasterReceiver: '@?'
     },
     require: {
       cdsDepositCtrl: '^cdsDeposit',

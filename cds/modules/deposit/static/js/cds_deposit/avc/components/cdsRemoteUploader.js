@@ -1,6 +1,5 @@
 function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
   var that = this;
-  var videoRegex = /(.*)\.(mp4|mov)$/;
   this.$onInit = function() {
 
     // Initialize dropbox dropin if enabled
@@ -14,7 +13,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
                 key: file.name,
                 name: file.name,
                 size: file.bytes,
-                receiver: file.name.match(videoRegex) ? that.remoteMasterReceiver : that.remoteChildReceiver,
+                receiver: that.cdsDepositsCtrl.isVideoFile(file.name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
                 url: file.link
               };
             });
@@ -40,7 +39,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
         var obj = {
           key: name,
           name: name,
-          receiver: name.match(videoRegex) ? that.remoteMasterReceiver : that.remoteChildReceiver,
+          receiver: that.cdsDepositsCtrl.isVideoFile(name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
           url: url
         };
         var sizePromise;
