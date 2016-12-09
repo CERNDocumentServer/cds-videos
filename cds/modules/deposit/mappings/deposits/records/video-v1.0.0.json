@@ -150,6 +150,9 @@
                         },
                         "created_by": {
                             "type": "integer"
+                        },
+                        "extracted_metadata": {
+                          "type": "object"
                         }
                     },
                     "type": "object"
