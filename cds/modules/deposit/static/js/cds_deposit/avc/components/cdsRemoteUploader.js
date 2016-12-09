@@ -1,6 +1,5 @@
 function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
   var that = this;
-
   this.$onInit = function() {
     // Initialize dropbox dropin if enabled
     if (this.dropboxEnabled) {
@@ -13,7 +12,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
                 key: file.name,
                 name: file.name,
                 size: file.bytes,
-                receiver: that.remoteReceiver,
+                receiver: that.cdsDepositsCtrl.isVideoFile(file.name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
                 url: file.link
               };
             });
@@ -39,7 +38,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
         var obj = {
           key: name,
           name: name,
-          receiver: that.remoteReceiver,
+          receiver: that.cdsDepositsCtrl.isVideoFile(name) ? that.remoteMasterReceiver : that.remoteChildReceiver,
           url: url
         };
         var sizePromise;
