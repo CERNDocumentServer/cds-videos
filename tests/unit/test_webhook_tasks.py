@@ -41,7 +41,7 @@ from cds.modules.webhooks.tasks import (download_to_object_version,
                                         video_transcode)
 
 
-def test_donwload_to_object_version(db, bucket):
+def test_download_to_object_version(db, bucket):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
@@ -186,17 +186,12 @@ def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
     obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
 
     class Listener(threading.Thread):
-        def __init__(self,
-                     group=None,
-                     target=None,
-                     name=None,
-                     args=(),
-                     kwargs={}):
-            super(Listener, self).__init__(group, target, name, args, kwargs)
+        def __init__(self):
+            super(Listener, self).__init__()
             self._return = None
 
-        def join(self, timeout=None):
-            super(Listener, self).join(timeout)
+        def await(self):
+            super(Listener, self).join()
             return self._return
 
         def run(self):
@@ -218,7 +213,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, depid, bucket):
         deposit_id=depid,
         sse_channel=sse_channel)
 
-    message = listener.join()
+    message = listener.await()
     assert '"state": "FAILURE"' in message
     assert 'ffprobe' in message
 
