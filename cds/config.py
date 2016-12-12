@@ -135,6 +135,14 @@ REST_ENABLE_CORS = True
 # Records
 ###############################################################################
 
+# Mapping of export formats to content type.
+CDS_RECORDS_EXPORTFORMATS = {
+    'json': dict(
+        title='JSON',
+        serializer='invenio_records_rest.serializers:json_v1'
+    ),
+}
+
 # Endpoints for records.
 RECORDS_UI_ENDPOINTS = dict(
     recid=dict(
@@ -166,6 +174,15 @@ RECORDS_UI_ENDPOINTS = dict(
         route='/deposit/<pid_value>/preview/project/<filename>',
         view_imp='cds.modules.previewer.views.preview_depid',
         record_class='cds.modules.deposit.api:Project',
+    ),
+    recid_export=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/export/<any({0}):format>'.format(
+                ", ".join(list(CDS_RECORDS_EXPORTFORMATS.keys()))
+            ),
+        template='cds_records/record_export.html',
+        view_imp='cds.modules.records.views.records_ui_export',
+        record_class='invenio_records_files.api:Record',
     ),
 )
 

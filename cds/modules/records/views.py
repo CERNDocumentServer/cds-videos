@@ -20,8 +20,9 @@
 """CDS Records UI."""
 
 from __future__ import absolute_import, print_function
-
-from flask import Blueprint
+import six
+from flask import Blueprint, current_app, render_template, request
+from werkzeug.utils import import_string
 
 blueprint = Blueprint(
     'cds_records',
@@ -29,3 +30,26 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
+
+
+def records_ui_export(pid, record, template=None, **kwargs):
+
+    formats = current_app.config.get('CDS_RECORDS_EXPORTFORMATS')
+    fmt = request.view_args.get('format')
+
+    if formats.get(fmt) is None:
+        return render_template(
+            'cds_records/records_export_unsupported.html'), 410
+    else:
+        serializer = import_string(formats[fmt]['serializer'])
+        data = serializer.serialize(pid, record)
+        if isinstance(data, six.binary_type):
+            data = data.decode('utf8')
+
+        return render_template(
+            template,
+            pid=pid,
+            record=record,
+            data=data,
+            format_title=formats[fmt]['title']
+        )

@@ -1,0 +1,14 @@
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{%- block page_body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+      <h4>Record export <small>{{ format_title }}</small></h4>
+      <div class="well">
+        <pre>{{ data }}</pre>
+      </div>
+      </div>
+    </div>
+  </div>
+{%- endblock page_body %}
