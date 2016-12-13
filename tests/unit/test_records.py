@@ -44,10 +44,13 @@ def test_records_ui_export(app, project_published):
     """Test view."""
     (project, video_1, video_2) = project_published
     pid = project['_deposit']['pid']['value']
+    vid = video_1['_deposit']['pid']['value']
     with app.test_client() as client:
         # Test that default view function can deal with multiple parameters.
         res = client.get('/record/' + pid + '/export/blabla')
         assert res.status_code == 404
+        res = client.get('/record/' + vid + '/export/smil')
+        assert res.status_code == 200
         res = client.get('/record/' + pid + '/export/json')
         assert res.status_code == 200
         # Test that actual data has been exported (not blank)
