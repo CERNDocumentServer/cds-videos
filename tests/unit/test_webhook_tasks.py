@@ -234,7 +234,7 @@ def test_transcode(db, bucket, mock_sorenson):
     assert get_bucket_keys() == ['test.pdf']
 
     video_transcode.delay(obj.version_id,
-                          video_presets=['Youtube 480p'],
+                          preset='Youtube 480p',
                           sleep_time=0)
 
     db.session.add(bucket)
