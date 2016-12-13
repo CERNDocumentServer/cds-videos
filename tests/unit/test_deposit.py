@@ -112,6 +112,11 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
 def test_cds_deposit(es, location):
     """Test CDS deposit creation."""
     deposit = CDSDeposit.create({})
+    id_ = deposit.id
+    db.session.expire_all()
+    deposit = CDSDeposit.get_record(id_)
+    assert deposit['_deposit']['state'] == {}
+    assert len(cds_resolver([deposit['_deposit']['id']])) == 1
     assert '_buckets' in deposit
 
 

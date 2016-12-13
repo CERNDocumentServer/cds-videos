@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import os
+import uuid
 
 from flask import current_app, url_for
 
@@ -109,12 +110,15 @@ class CDSDeposit(Deposit):
 
         Adds bucket creation immediately on deposit creation.
         """
+        if '_deposit' not in data:
+            id_ = id_ or uuid.uuid4()
+            cls.deposit_minter(id_, data)
         bucket = Bucket.create(
             default_location=Location.get_default()
         )
         data['_buckets'] = {'deposit': str(bucket.id)}
+        data['_deposit']['state'] = {}
         deposit = super(CDSDeposit, cls).create(data, id_=id_)
-        deposit['_deposit']['state'] = {}
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
 
