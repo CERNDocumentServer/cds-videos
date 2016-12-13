@@ -287,7 +287,7 @@ def video_extract_frames(self,
 @shared_task(bind=True, base=_factory_sse_task_base(type_='file_transcode'))
 def video_transcode(self,
                     object_version,
-                    video_presets=None,
+                    preset,
                     sleep_time=5,
                     **kwargs):
     """Launch video transcoding.
@@ -296,113 +296,97 @@ def video_transcode(self,
     with the preset name as key and a link to the master version.
 
     :param object_version: Master video.
-    :param video_presets: List of presets to use for transcoding. If ``None``
-        it will use the default values set in ``VIDEO_DEFAULT_PRESETS``.
+    :param preset: Sorenson preset to use for transcoding.
     :param sleep_time: the time interval between requests for Sorenson status
     """
     object_version = as_object_version(object_version)
 
     self._base_payload = dict(
         object_version=str(object_version.version_id),
-        video_presets=video_presets,
+        video_preset=preset,
         tags=object_version.get_tags(),
         deposit_id=kwargs.get('deposit_id'),
-        event_id=kwargs.get('event_id'),
-    )
-
-    job_ids = deque()
-
-    # Set handler for canceling all jobs
-    def handler(signum, frame):
-        # TODO handle better file deleting and ObjectVersion cleaning
-        map(lambda _info: stop_encoding(info['job_id']), job_ids)
-
-    signal.signal(signal.SIGTERM, handler)
+        event_id=kwargs.get('event_id'), )
 
     # Get master file's bucket_id
     bucket_id = object_version.bucket_id
     bucket_location = object_version.bucket.location.uri
 
     preset_config = current_app.config['CDS_SORENSON_PRESETS']
-    for preset in video_presets or preset_config.keys():
-        with db.session.begin_nested():
-            # Create FileInstance and get generated UUID
-            file_instance = FileInstance.create()
-            # Create ObjectVersion
-            base_name = object_version.key.rsplit('.', 1)[0]
-            new_extension = preset_config[preset][1]
-            obj = ObjectVersion.create(
-                bucket=bucket_id,
-                key='{0}-{1}{2}'.format(base_name, preset, new_extension)
-            )
-            obj.set_file(file_instance)
-            ObjectVersionTag.create(
-                obj, 'master', str(object_version.version_id))
-            ObjectVersionTag.create(obj, 'preset', preset)
+    preset_ext = preset_config[preset][1]
+    with db.session.begin_nested():
+        # Create FileInstance
+        file_instance = FileInstance.create()
 
-            # Extract new location
-            storage = file_instance.storage(default_location=bucket_location)
-            directory, filename = storage._get_fs()
+        # Create ObjectVersion
+        base_name = object_version.key.rsplit('.', 1)[0]
+        obj_key = '{0}-{1}{2}'.format(base_name, preset, preset_ext)
+        obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
 
-            # Start Sorenson
-            input_file = object_version.file.uri
-            output_file = os.path.join(directory.root_path, filename)
+        # Extract new location
+        storage = file_instance.storage(default_location=bucket_location)
+        directory, filename = storage._get_fs()
 
-            job_id = start_encoding(input_file, preset, output_file)
-            ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
-            job_info = dict(
-                preset=preset,
-                job_id=job_id,
-                file_instance=str(file_instance.id),
-                uri=output_file,
-                object_version=str(obj.version_id),
-                key=obj.key,
-                tags=obj.get_tags(),
-            )
-        db.session.commit()
+        input_file = object_version.file.uri
+        output_file = os.path.join(directory.root_path, filename)
 
-        self.update_state(
-            state=STARTED,
-            meta=dict(
-                payload=dict(job_info=job_info),
-                message='Started transcoding.'
-            )
+        # Start Sorenson
+        job_id = start_encoding(input_file, preset, output_file)
+
+        # Create ObjectVersionTags
+        ObjectVersionTag.create(
+            obj, 'master', str(object_version.version_id))
+        ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
+        ObjectVersionTag.create(obj, 'preset', preset)
+
+        # Information necessary for monitoring
+        job_info = dict(
+            preset=preset,
+            job_id=job_id,
+            file_instance=str(file_instance.id),
+            uri=output_file,
+            object_version=str(obj.version_id),
+            key=obj.key,
+            tags=obj.get_tags(),
+            percentage=0, )
+
+    db.session.commit()
+
+    self.update_state(
+        state=STARTED,
+        meta=dict(
+            payload=dict(job_info=job_info),
+            message='Started transcoding.'
         )
-        job_ids.append(job_info)
+    )
 
     # Monitor jobs and report accordingly
-    while job_ids:
-        info = job_ids.popleft()
-
+    while job_info['percentage'] < 100:
         # Get job status
-        status = get_encoding_status(info['job_id'])['Status']
+        status = get_encoding_status(job_id)['Status']
         percentage = 100 if status['TimeFinished'] else status['Progress']
-        info['percentage'] = percentage
+        job_info['percentage'] = percentage
 
-        # Update task's state for each individual preset
+        # Update task's state for this preset
         self.update_state(
             state=STARTED,
             meta=dict(
                 payload=dict(job_info=job_info),
-                message='Transcoding {0}'.format(percentage),
-            )
-        )
+                message='Transcoding {0}'.format(percentage)))
 
-        # Set file's location for completed jobs
-        if percentage == 100:
-            with db.session.begin_nested():
-                uri = info['uri']
-                with open(uri, 'rb') as transcoded_file:
-                    digest = hashlib.md5(transcoded_file.read()).hexdigest()
-                size = os.path.getsize(uri)
-                checksum = '{0}:{1}'.format('md5', digest)
-                FileInstance.get(
-                    info['file_instance']).set_uri(uri, size, checksum)
-            db.session.commit()
-        else:
-            job_ids.append(info)
+        if percentage < 100:
+            time.sleep(sleep_time)
 
-        time.sleep(sleep_time)
+    # Set file's location, when job has completed
+    with db.session.begin_nested():
+        uri = output_file
+        with open(uri, 'rb') as transcoded_file:
+            digest = hashlib.md5(transcoded_file.read()).hexdigest()
+        size = os.path.getsize(uri)
+        checksum = '{0}:{1}'.format('md5', digest)
+        file_instance.set_uri(uri, size, checksum)
+        as_object_version(job_info['object_version']).set_file(file_instance)
+    db.session.commit()
 
 
 @shared_task(bind=True)

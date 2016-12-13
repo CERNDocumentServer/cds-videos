@@ -27,6 +27,7 @@
 from __future__ import absolute_import
 
 from celery import chain, group
+from flask import current_app
 from invenio_db import db
 from celery import states
 from flask import url_for
@@ -273,15 +274,21 @@ class AVCWorkflow(CeleryAsyncReceiver):
         db.session.expunge(event)
         db.session.commit()
 
+        presets = mypayload.pop('video_presets', None) or current_app.config[
+            'CDS_SORENSON_PRESETS'].keys()
         result = chain(
             first_step,
             group(
-                video_transcode.si(object_version=obj_id,
-                                   event_id=event_id,
-                                   **mypayload),
-                video_extract_frames.si(object_version=str(obj_id),
-                                        event_id=event_id,
-                                        **mypayload), ),
+                video_extract_frames.si(
+                    object_version=str(obj_id),
+                    event_id=event_id,
+                    **mypayload),
+                *[video_transcode.si(object_version=obj_id,
+                                     event_id=event_id,
+                                     preset=preset,
+                                     **mypayload)
+                  for preset in presets]
+            )
         ).apply_async()
 
         with db.session.begin_nested():
