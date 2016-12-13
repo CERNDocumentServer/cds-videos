@@ -420,6 +420,147 @@ def project_metadata(deposit_metadata):
 
 
 @pytest.fixture()
+def video_metadata():
+    """Deposit metadata."""
+    metadata = {
+        "_files": [
+            {
+                "tags": {
+                    "bit_rate": "11915822",
+                    "height": "2160",
+                    "uri_origin": (
+                        "https://mediaarchive.cern.ch/MediaArchive/"
+                        "Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-06"
+                        "6/CERN-MOVIE-2016-066-001/CERN-MOVIE-2016-066-00"
+                        "1-11872-kbps-4096x2160-audio-128-kbps-stereo.mp4"
+                    ),
+                    "width": "4096"
+                },
+                "video": [
+                    {
+                        "checksum": "md5:127efd1d7b090924d6c2e46848987b69",
+                        "completed": True,
+                        "key": (
+                            "CERN-MOVIE-2016-066-001-11872-kbps-"
+                            "4096x2160-audio-128-kbps-stereo[240p].mp4"
+                        ),
+                        "links": {
+                            "self": (
+                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
+                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
+                                "-4096x2160-audio-128-kbps-stereo[240p].mp"
+                                "4?versionId=02ff769e-21e0-4a79-93b1-7e82a"
+                                "9e8efe1"
+                            ),
+                        },
+                        "progress": 100,
+                        "size": 4457627,
+                        "tags": {
+                            "_sorenson_job_id":
+                                "1d0ab2fa-e26b-41c1-8fca-45afe2d00b61",
+                            "master":
+                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
+                            "preset_quality": "240p",
+                            "type": "video"
+                        },
+                        "version_id":
+                            "02ff769e-21e0-4a79-93b1-7e82a9e8efe1"
+                    },
+                    {
+                        "checksum": "",
+                        "completed": True,
+                        "key": (
+                            "CERN-MOVIE-2016-066-001-11872-kbps-"
+                            "4096x2160-audio-128-kbps-stereo[360p].mp4"
+                        ),
+                        "links": {
+                            "self": (
+                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
+                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
+                                "-4096x2160-audio-128-kbps-stereo[360p].mp"
+                                "4?versionId=e5f98169-a041-47d0-ae24-f1734"
+                                "44c1147"
+                            ),
+                        },
+                        "progress": 100,
+                        "size": 0,
+                        "tags": {
+                            "_sorenson_job_id":
+                                "8d6f784c-f20f-45e6-a18c-bb1d186f46b0",
+                            "master":
+                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
+                            "preset_quality": "360p",
+                            "type": "video"
+                        },
+                        "version_id":
+                            "e5f98169-a041-47d0-ae24-f173444c1147"
+                    },
+                    {
+                        "checksum": "md5:9999176fd09d9c54ecb56534fae0ff54",
+                        "completed": True,
+                        "key": (
+                            "CERN-MOVIE-2016-066-001-11872-kbps-"
+                            "4096x2160-audio-128-kbps-stereo[480p].mp4"
+                        ),
+                        "links": {
+                            "self": (
+                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
+                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
+                                "-4096x2160-audio-128-kbps-stereo[480p].mp"
+                                "4?versionId=92e6ac64-708a-4075-846a-6e385"
+                                "3707a1a"
+                            ),
+                        },
+                        "progress": 100,
+                        "size": 14382281,
+                        "tags": {
+                            "_sorenson_job_id":
+                                "deb59f6a-5836-4936-9d61-06516a045b03",
+                            "master":
+                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
+                            "preset_quality": "480p",
+                            "type": "video"
+                        },
+                        "version_id":
+                            "92e6ac64-708a-4075-846a-6e3853707a1a"
+                    },
+                    {
+                        "checksum": "md5:fb3d75b05bce32cca582e69316a97918",
+                        "completed": True,
+                        "key": (
+                            "CERN-MOVIE-2016-066-001-11872-kbps-"
+                            "4096x2160-audio-128-kbps-stereo[720p].mp4"
+                        ),
+                        "links": {
+                            "self": (
+                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
+                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
+                                "-4096x2160-audio-128-kbps-stereo[720p].mp"
+                                "4?versionId=15d67ae2-f998-4681-9c26-6770a"
+                                "c0e18c4"
+                            ),
+                        },
+                        "progress": 100,
+                        "size": 26662844,
+                        "tags": {
+                            "_sorenson_job_id":
+                                "6c3d597e-3eed-43eb-b8d0-e773f767d853",
+                            "master":
+                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
+                            "preset_quality": "720p",
+                            "type": "video"
+                        },
+                        "version_id":
+                            "15d67ae2-f998-4681-9c26-6770ac0e18c4"
+                    }
+                ]
+            }
+        ],
+    }
+    return metadata
+
+
+@pytest.fixture()
 def data_file_1():
     """Data for file 1."""
     filename = 'test.json'
