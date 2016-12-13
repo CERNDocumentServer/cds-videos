@@ -82,6 +82,7 @@ def app():
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI',
             'postgresql+psycopg2://localhost/cds_testing'),
+        # SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',

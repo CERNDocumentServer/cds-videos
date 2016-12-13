@@ -31,11 +31,13 @@ import os
 from flask import current_app, url_for
 
 from invenio_deposit.api import Deposit, preserve
-from invenio_files_rest.models import Bucket, Location, MultipartObject
+from invenio_files_rest.models import (Bucket, Location, MultipartObject,
+                                       ObjectVersion, ObjectVersionTag)
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_records_files.api import FileObject
+from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
+from invenio_records_files.utils import sorted_files_from_bucket
 from werkzeug.local import LocalProxy
 from invenio_webhooks.models import Event
 from invenio_records.api import Record
@@ -61,24 +63,51 @@ class CDSFileObject(FileObject):
 
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
-        self.data.update({
-            'key': self.obj.key,
-            'version_id': str(self.obj.version_id),
-            'checksum': self.obj.file.checksum,
-            'size': self.obj.file.size,
-            'completed': True,
-            'progress': 100,
-            'links': {
-                'self': (
-                    current_app.config['DEPOSIT_FILES_API'] +
-                    u'/{bucket}/{key}?versionId={version_id}'.format(
-                        bucket=self.obj.bucket_id,
-                        key=self.obj.key,
-                        version_id=self.obj.version_id,
-                    )),
+        def _dumps(obj):
+            return {'key': obj.key,
+                    'version_id': str(obj.version_id),
+                    'checksum': obj.file.checksum,
+                    'size': obj.file.size,
+                    'completed': True,
+                    'progress': 100,
+                    'tags': obj.get_tags(),
+                    'links': {
+                        'self': (
+                            current_app.config['DEPOSIT_FILES_API'] +
+                            u'/{bucket}/{key}?versionId={version_id}'.format(
+                                bucket=obj.bucket_id,
+                                key=obj.key,
+                                version_id=obj.version_id,
+                            )),
+                    }
             }
-        })
+
+        master_dump = _dumps(self.obj)
+        # get all the slaves and add them inside <type> as a list order by key
+        for slave in ObjectVersion.query.join(ObjectVersion.tags).filter(
+                ObjectVersionTag.key == 'master',
+                ObjectVersionTag.value == str(self.obj.version_id)
+                ).order_by(ObjectVersion.key):
+            master_dump.setdefault(
+                slave.get_tags()['type'], []).append(_dumps(slave))
+        # Sort slaves by key within their lists
+        self.data.update(master_dump)
+
         return self.data
+
+class CDSFilesIterator(FilesIterator):
+    """Iterator for files."""
+
+    def dumps(self, bucket=None):
+        """Serialize files from a bucket."""
+        files = []
+        for o in sorted_files_from_bucket(bucket or self.bucket, self.keys):
+            if 'master' in o.get_tags():
+                continue
+            dump = self.file_cls(o, self.filesmap.get(o.key, {})).dumps()
+            if dump:
+                files.append(dump)
+        return files
 
 
 def _merge_new_status(stats, name, status):
@@ -98,9 +127,12 @@ class _status_extractor(object):
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
+    file_cls = CDSFileObject
+
+    files_iter_cls = CDSFilesIterator
+
     def __init__(self, *args, **kwargs):
         """Init."""
-        self.file_cls = CDSFileObject
         return super(CDSDeposit, self).__init__(*args, **kwargs)
 
     @classmethod

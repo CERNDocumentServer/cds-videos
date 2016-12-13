@@ -279,6 +279,7 @@ def video_extract_frames(self,
             key=filename,
             stream=open(os.path.join(output_folder, filename), 'rb'))
         ObjectVersionTag.create(obj, 'master', str(object_version.version_id))
+        ObjectVersionTag.create(obj, 'type', 'frame')
 
     shutil.rmtree(output_folder)
     db.session.commit()
@@ -338,6 +339,7 @@ def video_transcode(self,
             obj, 'master', str(object_version.version_id))
         ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
         ObjectVersionTag.create(obj, 'preset', preset)
+        ObjectVersionTag.create(obj, 'type', 'video')
 
         # Information necessary for monitoring
         job_info = dict(
