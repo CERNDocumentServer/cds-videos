@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Invenio.
+# This file is part of CDS.
 # Copyright (C) 2016 CERN.
 #
-# Invenio is free software; you can redistribute it
+# CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 2 of the
 # License, or (at your option) any later version.
 #
-# Invenio is distributed in the hope that it will be
+# CDS is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the
+# along with CDS; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307, USA.
 #
@@ -22,19 +22,27 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Record serialization."""
+"""Test cds package."""
 
 from __future__ import absolute_import, print_function
 
-from .smil import SmilSerializer
-from invenio_records_rest.serializers.response import record_responsify
+import xml.etree.ElementTree as ET
 
-# Serializers
-# ===========
-#: CDS SMIL serializer version 1.0.0
-smil_v1 = SmilSerializer()
+import pytest
 
-# Records-REST serializers
-# ========================
-#: SMIL record serializer for individual records.
-smil_v1_response = record_responsify(smil_v1, 'application/smil')
+from cds.modules.records.serializers.smil import Smil
+
+
+def test_smil_serializer(video_metadata):
+    """Test smil serializer"""
+    rec = video_metadata
+    serializer = Smil(record=rec)
+    data = serializer.format()
+    root = ET.fromstring(data)
+    assert root.tag == 'smil'
+    assert len(root[1][0]) == 4
+    for child in root[1][0]:
+        assert child.tag == 'video'
+        assert child.attrib["system-bitrate"] == '11915822'
+        assert child.attrib["width"] == '4096'
+        assert child.attrib["height"] == '2160'
