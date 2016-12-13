@@ -90,8 +90,9 @@ def app():
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
-        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
+        oCDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
+        PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
     )
     app.register_blueprint(files_rest_blueprint)
 
