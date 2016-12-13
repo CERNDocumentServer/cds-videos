@@ -28,12 +28,14 @@ from __future__ import absolute_import, print_function
 
 import mock
 import pytest
-
-from cds.modules.deposit.api import (record_build_url,
-                                     video_resolver, video_build_url)
-from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_pidstore.errors import PIDInvalidAction
+from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records.models import RecordMetadata
+from six import BytesIO
+
+from cds.modules.deposit.api import (record_build_url, video_build_url,
+                                     video_resolver)
 
 
 def test_video_resolver(project):
@@ -171,3 +173,34 @@ def test_delete_video_published(project, force):
 
     project_meta = RecordMetadata.query.filter_by(id=project_id).first()
     assert {'$reference': video_2_ref} in project_meta.json['videos']
+
+
+def test_video_dumps(db, project, video_mp4):
+    """Test video dump, in particular file dump."""
+    (project, video_1, video_2) = project
+    bucket_id = video_1['_buckets']['deposit']
+    obj = ObjectVersion.create(
+        bucket=bucket_id, key='master.mp4', stream=open(video_mp4, 'rb'))
+    slave_1 = ObjectVersion.create(
+        bucket=bucket_id, key='slave_1.mp4', stream=open(video_mp4, 'rb'))
+    ObjectVersionTag.create(slave_1, 'master', str(obj.version_id))
+    ObjectVersionTag.create(slave_1, 'type', 'video')
+
+    for i in reversed(range(10)):
+        slave = ObjectVersion.create(
+            bucket=bucket_id, key='frame-{0}.jpeg'.format(i),
+            stream=BytesIO(b'\x00' * 1024))
+        ObjectVersionTag.create(slave, 'master', str(obj.version_id))
+        ObjectVersionTag.create(slave, 'type', 'frame')
+
+    db.session.commit()
+
+    files = video_1.files.dumps()[0]  # only one master file
+
+    assert 'frame' in files
+    assert len(files['frame']) == 10
+    # check sorted by key
+    assert files['frame'][0]['key'] == 'frame-0.jpeg'
+    assert files['frame'][-1]['key'] == 'frame-9.jpeg'
+    assert 'video' in files
+    assert len(files['video']) == 1
