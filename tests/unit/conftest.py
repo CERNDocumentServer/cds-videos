@@ -30,14 +30,14 @@ from __future__ import absolute_import, print_function
 import os
 import shutil
 import tempfile
+
 from os.path import dirname, join
 from time import sleep
 
 import mock
 import pytest
 from cds.factory import create_app
-from cds.modules.deposit.api import CDSDeposit
-from cds.modules.deposit.api import Project, Video, video_resolver
+from cds.modules.deposit.api import CDSDeposit, Project, Video, video_resolver
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from celery import group, chain
 from celery import shared_task
