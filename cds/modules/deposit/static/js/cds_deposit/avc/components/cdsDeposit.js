@@ -53,6 +53,9 @@ function cdsDepositCtrl(
 
     this.initializeStateQueue = function() {
       if (Object.keys(this.record._deposit.state || {}).length > 0) {
+        if (!Object.keys(this.record._deposit.state).includes('file_download')) {
+          that.stateQueue.SUCCESS.push('file_download');
+        }
         angular.forEach(this.record._deposit.state, function(value, key) {
           that.stateQueue[value].push(key);
           // Remove it from the state order if
@@ -62,6 +65,12 @@ function cdsDepositCtrl(
         });
       } else {
         that.stateQueue.PENDING = angular.copy(depositStates);
+        var videoFile = that.record._files[0];
+        if (videoFile && !videoFile.url) {
+          that.stateQueue.PENDING.splice(
+            depositStates.indexOf('file_download'), 1);
+          that.stateQueue.SUCCESS.push('file_download');
+        }
       }
       if (!that.master) {
         $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
