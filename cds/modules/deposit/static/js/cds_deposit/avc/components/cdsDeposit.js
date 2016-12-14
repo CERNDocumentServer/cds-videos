@@ -1,6 +1,6 @@
 function cdsDepositCtrl(
   $scope, $q, $timeout, $sce, depositStates, depositStatuses, cdsAPI,
-  previewerURLBuilder, typeReducer
+  urlBuilder, typeReducer
 ) {
   var that = this;
   // The Upload Queue
@@ -100,7 +100,7 @@ function cdsDepositCtrl(
     this.videoPreviewer = function(deposit, key) {
       if (that.stateQueue.SUCCESS.indexOf('file_download') > -1 || key) {
         that.previewer = $sce.trustAsResourceUrl(
-          previewerURLBuilder.video({
+          urlBuilder.video({
             deposit: deposit || that.record._deposit.id,
             key: key || that.record._files[0].key
           })
@@ -318,7 +318,7 @@ function cdsDepositCtrl(
 
 cdsDepositCtrl.$inject = [
   '$scope', '$q', '$timeout', '$sce', 'depositStates', 'depositStatuses', 'cdsAPI',
-  'previewerURLBuilder', 'typeReducer'
+  'urlBuilder', 'typeReducer'
 ];
 
 /**

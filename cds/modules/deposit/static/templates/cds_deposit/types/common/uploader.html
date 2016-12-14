@@ -54,7 +54,7 @@
         <div class="row cds-deposit-thumbnail-pad">
           <div class="col-sm-2 cds-deposit-thumbnail-pad" ng-repeat="frame in $ctrl.getFrames()">
             <a ng-href="{{ frame.links.self }}" target="_blank">
-              <img width="100%" ng-src="{{ frame.links.self }}" />
+              <img width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
             </a>
           </div>
         </div>
