@@ -1,4 +1,4 @@
-function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
+function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   var that = this;
 
   // Is the uploader loading
@@ -366,6 +366,14 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
     }
   };
 
+  this.thumbnailPreview = function(key) {
+    return urlBuilder.iiif({
+      deposit: that.cdsDepositCtrl.record._buckets.deposit,
+      key: key,
+      res: '150,100'
+    });
+  };
+
   this.getFrames = function() {
     return that.files.reduce(function (frames, next) {
       return frames || next.frame;
@@ -373,7 +381,8 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout) {
   };
 }
 
-cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout'];
+cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout',
+                           'urlBuilder'];
 
 function cdsUploader() {
   return {
