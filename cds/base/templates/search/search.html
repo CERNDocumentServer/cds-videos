@@ -1,0 +1,54 @@
+{#
+# This file is part of Invenio.
+# Copyright (C) 2015 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#}
+{%- extends "search/search_base.html" -%}
+
+{% block javascript %}
+  {{ super() }}
+
+  <script type="text/javascript">
+    require(["jquery",
+             "js/search/facets_filter",
+             "js/search/search",
+             "js/search/query_filters_widget",
+             "js/search/facets_menu"],
+             function($,
+                 FacetsFilter,
+                 Search,
+                 SearchQueryFiltersWidget,
+                 FacetsMenu) {
+      var facetsFilter = new FacetsFilter({{ filtered_facets | tojson | safe }});
+      var context = {
+        searchUrl: '{{ url_for('search.search') }}',
+        urlArgs: {{ request.args.to_dict() | tojson | safe }},
+        facetsMenuSelector: '.facet',
+        searchFormSelector: '#cds-main-search-input',
+        searchQueryFiltersSelector: '#search-query-filters',
+        searchQueryFiltersTextSelector: '.search-query-filters-text',
+        searchQueryFiltersEditSelector: '.search-query-filters-edit',
+        searchResultsSelector: '#search_results',
+        facetsFilter: facetsFilter,
+      }
+      FacetsMenu.attachTo(context.facetsMenuSelector, context);
+      SearchQueryFiltersWidget.attachTo(context.searchQueryFiltersSelector, context);
+      Search.attachTo(document, context);
+      $(document).trigger("initSearch");
+    });
+  </script>
+
+{% endblock javascript %}
