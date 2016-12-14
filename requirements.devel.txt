@@ -31,6 +31,9 @@ Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
+#FIXME: Until v1.0.0a10 is released
+-e git+https://github.com/inveniosoftware/invenio-oauth2server.git@82_fix_incompat#egg=invenio-oauth2server
+
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
