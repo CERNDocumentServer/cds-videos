@@ -152,4 +152,32 @@ angular.module('cdsDeposit', [
     return result;
   };
 })
+.filter('progressClass', function() {
+  return function(input) {
+    switch (input) {
+      case 'SUCCESS':
+        return 'success';
+      case 'STARTED':
+        return 'info';
+      case 'FAILURE':
+        return 'danger';
+      case 'PENDING':
+        return 'warning';
+    }
+  };
+})
+.filter('progressIcon', function() {
+  return function(input) {
+    switch (input) {
+      case 'SUCCESS':
+        return 'fa-check';
+      case 'STARTED':
+        return 'fa-hourglass';
+      case 'FAILURE':
+        return 'fa-ban';
+      case 'PENDING':
+        return 'fa-pause';
+    }
+  };
+})
 .config(cdsDepositsConfig)

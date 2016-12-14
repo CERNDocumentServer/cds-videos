@@ -65,6 +65,25 @@
       template="/static/templates/cds_deposit/types/project/actions.html"
     >
     </cds-actions>
+    <table class="table">
+      <tr class="{{ $ctrl.aggregatedState['file_download'] | progressClass }}">
+        <td>File download</td>
+        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_download'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_download'] }}</td>
+      </tr>
+      <tr class="{{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressClass }}">
+        <td>Extract metadata</td>
+        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_video_metadata_extraction'] }}</td>
+      </tr>
+      <tr class="{{ $ctrl.aggregatedState['file_video_extract_frames'] | progressClass }}">
+        <td>Extract frames</td>
+        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_extract_frames'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_video_extract_frames'] }}</td>
+      </tr>
+      <tr class="{{ $ctrl.aggregatedState['file_transcode'] | progressClass }}">
+        <td>File transcode</td>
+        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_transcode'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_transcode'] }}</td>
+      </tr>
+    </table>
+
     <cds-form
       template="/static/templates/cds_deposit/types/project/form.html"
       form="{{$ctrl.masterForm}}"

@@ -127,6 +127,43 @@ function cdsDepositsCtrl(
     this.overallState[deposit.metadata._deposit.id] = angular.copy(that.initState);
   };
 
+  this.getOverallState = function() {
+    var states = {};
+    var values = [];
+    that.state = 'PENDING';
+
+    for (var key in that.overallState) {
+      values.push(that.overallState[key]);
+    }
+    var finished = false;
+    depositStates.forEach(function(i) {
+      states[i] = 'PENDING';
+
+      if (!finished) {
+        finished = true;
+
+        var keyIncludes = function (key) {
+          return function (val) {
+            return val[key].includes(i);
+          }
+        };
+
+        var allSucceeded = values.every(keyIncludes('SUCCESS'));
+
+        if (allSucceeded) {
+          states[i] = 'SUCCESS';
+          finished = false;
+        } else if (values.some(keyIncludes('FAILURE'))) {
+          states[i] = 'FAILURE';
+        } else if (values.some(keyIncludes('STARTED'))) {
+          states[i] = 'STARTED';
+        }
+        that.state = states[i];
+      }
+    });
+    return states;
+  }
+
   this.isVideoFile = function(key) {
     var videoRegex = /(.*)\.(mp4|mov)$/;
     return key.match(videoRegex);
@@ -335,6 +372,7 @@ function cdsDepositsCtrl(
 
     $scope.$on('cds.deposit.status.changed', function(evt, id, state) {
       that.overallState[id] = angular.copy(state);
+      that.aggregatedState = that.getOverallState();
     });
 
   }
