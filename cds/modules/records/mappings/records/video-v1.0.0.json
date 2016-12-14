@@ -210,6 +210,9 @@
                 "recid": {
                     "type": "double"
                 },
+                "doi": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "object",
                     "properties": {
