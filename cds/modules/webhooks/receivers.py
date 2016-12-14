@@ -311,7 +311,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 {"file_download": result.parent.children[0]},
                 {"file_video_metadata_extraction": result.parent.children[1]}
             ]
-        second_step = [{"file_transcode": result.children[0]}]
+        second_step = [{"file_video_extract_frames": result.children[0]}]
         for res in result.children[1:]:
-            second_step.append({"file_video_extract_frames": res})
+            second_step.append({"file_transcode": res})
         return (first_step, second_step)
