@@ -91,7 +91,7 @@ install_requires = [
     'dcxml>=0.1.0',
     'idutils>=0.2.3',
     'invenio-access>=1.0.0a9',
-    'invenio-accounts>=1.0.0a16',
+    'invenio-accounts>=1.0.0b1',
     'invenio-admin>=1.0.0a3',
     'invenio-assets>=1.0.0b2',
     'invenio-base>=1.0.0a14',
@@ -100,7 +100,7 @@ install_requires = [
     'invenio-config>=1.0.0b1',
     'invenio-db[postgresql,versioning]>=1.0.0b2',
     'invenio-deposit>=1.0.0a6',
-    'invenio-files-rest>=1.0.0a11',
+    'invenio-files-rest>=1.0.0a12',
     'invenio-formatter>=1.0.0a2',
     # FIXME remove until proper integration
     # 'invenio-i18n>=1.0.0b1',
