@@ -277,11 +277,11 @@ def test_avc_workflow_receiver(api_app, db, bucket, cds_depid, access_token,
         assert info[0][1].status == states.STARTED
         assert info[1][0] == 'file_video_metadata_extraction'
         assert info[1][1].status == states.SUCCESS
-        assert info[2][0] == 'file_transcode'
+        assert info[2][0] == 'file_video_extract_frames'
         assert info[2][1].status == states.STARTED
-        assert info[3][0] == 'file_video_extract_frames'
+        assert info[3][0] == 'file_transcode'
         assert info[3][1].status == states.STARTED
-        assert info[4][0] == 'file_video_extract_frames'
+        assert info[4][0] == 'file_transcode'
         assert info[4][1].status == states.STARTED
 
         # check sse is called
