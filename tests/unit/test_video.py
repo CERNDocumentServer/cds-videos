@@ -195,7 +195,10 @@ def test_video_dumps(db, project, video_mp4):
 
     db.session.commit()
 
-    files = video_1.files.dumps()[0]  # only one master file
+    files = video_1.files.dumps()
+
+    assert len(files) == 1
+    files = files[0]  # only one master file
 
     assert 'frame' in files
     assert len(files['frame']) == 10
