@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import
 
+from copy import deepcopy
 from celery import chain, group
 from flask import current_app
 from invenio_db import db
@@ -122,6 +123,58 @@ class CeleryAsyncReceiver(Receiver):
 class Downloader(CeleryAsyncReceiver):
     """Receiver that downloads data from a URL."""
 
+    def _init_object_version(self, event):
+        """Create the version object."""
+        event_id = str(event.id)
+        with db.session.begin_nested():
+            object_version = ObjectVersion.create(
+                bucket=event.payload['bucket_id'], key=event.payload['key'])
+
+            ObjectVersionTag.create(object_version, 'uri_origin',
+                                    event.payload['uri'])
+            ObjectVersionTag.create(object_version, '_event_id', event_id)
+        return object_version
+
+    def _workflow(self, event, version_id):
+        """Define the workflow."""
+        event_id = str(event.id)
+        return download_to_object_version.s(
+            object_version=version_id,
+            event_id=event_id,
+            **event.payload)
+
+    def _update_event_response(self, event, version_id):
+        """Update event response."""
+        object_version = as_object_version(version_id)
+        obj_tags = object_version.get_tags()
+        bucket_id = str(object_version.bucket_id)
+        object_version_key = object_version.key
+        with db.session.begin_nested():
+            event.response.update(
+                links={
+                    'self': url_for(
+                        'invenio_files_rest.object_api',
+                        bucket_id=bucket_id,
+                        key=object_version_key,
+                        _external=True, ),
+                    'version': url_for(
+                        'invenio_files_rest.object_api',
+                        bucket_id=bucket_id,
+                        key=object_version_key,
+                        versionId=version_id,
+                        _external=True, ),
+                    'cancel': url_for(
+                        'invenio_webhooks.event_list',
+                        receiver_id='downloader',
+                        _external=True, )
+                },
+                key=object_version_key,
+                version_id=version_id,
+                tags=obj_tags,
+            )
+            flag_modified(event, 'response')
+            flag_modified(event, 'response_headers')
+
     def run(self, event):
         """Create object version and send celery task to download.
 
@@ -144,53 +197,19 @@ class Downloader(CeleryAsyncReceiver):
         assert 'key' in event.payload
         assert 'deposit_id' in event.payload
 
-        event_id = str(event.id)
-
-        with db.session.begin_nested():
-            object_version = ObjectVersion.create(
-                bucket=event.payload['bucket_id'], key=event.payload['key'])
-
-            ObjectVersionTag.create(object_version, 'uri_origin',
-                                    event.payload['uri'])
-            ObjectVersionTag.create(object_version, '_event_id', event_id)
-            db.session.expunge(event)
+        # 1. create the object version
+        object_version = self._init_object_version(event=event)
+        version_id = str(object_version.version_id)
+        db.session.expunge(event)
+        db.session.expunge(object_version)
         db.session.commit()
-
-        task = download_to_object_version.s(
-            object_version=str(object_version.version_id),
-            event_id=event_id,
-            **event.payload)
-
-        obj_version_id = object_version.version_id
-
-        with db.session.begin_nested():
-            object_version = as_object_version(obj_version_id)
-            event.response.update(
-                links={
-                    'self': url_for(
-                        'invenio_files_rest.object_api',
-                        bucket_id=str(object_version.bucket_id),
-                        key=object_version.key,
-                        _external=True, ),
-                    'version': url_for(
-                        'invenio_files_rest.object_api',
-                        bucket_id=str(object_version.bucket_id),
-                        key=object_version.key,
-                        versionId=str(object_version.version_id),
-                        _external=True, ),
-                    'cancel': url_for(
-                        'invenio_webhooks.event_list',
-                        receiver_id='downloader',
-                        _external=True, )
-                },
-                key=object_version.key,
-                version_id=str(object_version.version_id),
-                tags=object_version.get_tags(),
-            )
-            flag_modified(event, 'response')
-            flag_modified(event, 'response_headers')
-
-        super(Downloader, self).persist(event=event, result=task.apply_async())
+        # 2. define the workflow and run
+        result = self._workflow(
+            event=event, version_id=version_id).apply_async()
+        # 3. update event response
+        self._update_event_response(event=event, version_id=version_id)
+        # 4. serialize event and result
+        super(Downloader, self).persist(event=event, result=result)
 
     def _raw_info(self, event):
         """Get info from the event."""
@@ -200,6 +219,86 @@ class Downloader(CeleryAsyncReceiver):
 
 class AVCWorkflow(CeleryAsyncReceiver):
     """AVC workflow receiver."""
+
+    def _first_step(self, event, version_id, undo=False):
+        """First step definition."""
+        event_id = str(event.id)
+        with db.session.begin_nested():
+            if 'version_id' in event.payload:
+                object_version = as_object_version(event.payload['version_id'])
+                first_step = video_metadata_extraction.si(
+                    uri=object_version.file.uri,
+                    object_version=version_id,
+                    deposit_id=event.payload['deposit_id'],
+                    undo=undo
+                )
+            else:
+                first_step = group(
+                    download_to_object_version.si(
+                        object_version=version_id,
+                        event_id=event_id,
+                        undo=undo,
+                        **event.payload
+                    ),
+                    video_metadata_extraction.si(
+                        object_version=version_id,
+                        event_id=event_id,
+                        undo=undo,
+                        **event.payload),
+                )
+        return first_step
+
+    def _second_step(self, event, version_id, undo=False):
+        """Second step definition."""
+        event_id = str(event.id)
+        payload = deepcopy(event.payload)
+        presets = payload.pop('video_presets', None) or current_app.config[
+            'CDS_SORENSON_PRESETS'].keys()
+        return group(
+            video_extract_frames.si(
+                object_version=version_id,
+                event_id=event_id,
+                undo=undo,
+                **payload
+            ),
+            *[video_transcode.si(
+                object_version=version_id,
+                event_id=event_id,
+                preset=preset,
+                undo=undo,
+                **payload
+            ) for preset in presets]
+        )
+
+    def _init_object_version(self, event):
+        """Create, if doesn't exists, the version object."""
+        event_id = str(event.id)
+        with db.session.begin_nested():
+            if 'version_id' in event.payload:
+                object_version = as_object_version(event.payload['version_id'])
+            else:
+                object_version = ObjectVersion.create(
+                    bucket=event.payload['bucket_id'],
+                    key=event.payload['key'])
+                ObjectVersionTag.create(object_version, 'uri_origin',
+                                        event.payload['uri'])
+            ObjectVersionTag.create(object_version, '_event_id', event_id)
+        return object_version
+
+    def _update_event_response(self, event, version_id):
+        """Update event response."""
+        object_version = as_object_version(version_id)
+        obj_tags = object_version.get_tags()
+        obj_key = object_version.key
+        with db.session.begin_nested():
+            event.response.update(
+                links=dict(),
+                key=obj_key,
+                version_id=version_id,
+                tags=obj_tags,
+            )
+            flag_modified(event, 'response')
+            flag_modified(event, 'response_headers')
 
     def run(self, event):
         """Run AVC workflow for video transcoding.
@@ -236,68 +335,21 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 'key' in event.payload) or ('version_id' in event.payload)
         assert 'deposit_id' in event.payload
 
-        event_id = str(event.id)
-
-        with db.session.begin_nested():
-            if 'version_id' in event.payload:
-                object_version = as_object_version(event.payload['version_id'])
-                first_step = video_metadata_extraction.si(
-                    uri=object_version.file.uri,
-                    object_version=str(object_version.version_id),
-                    deposit_id=event.payload['deposit_id'])
-            else:
-                object_version = ObjectVersion.create(
-                    bucket=event.payload['bucket_id'],
-                    key=event.payload['key'])
-                ObjectVersionTag.create(object_version, 'uri_origin',
-                                        event.payload['uri'])
-                first_step = group(
-                    download_to_object_version.si(
-                        object_version=str(object_version.version_id),
-                        event_id=event_id,
-                        **event.payload),
-                    video_metadata_extraction.si(
-                        object_version=str(object_version.version_id),
-                        event_id=event_id,
-                        **event.payload),
-                )
-
-            ObjectVersionTag.create(object_version, '_event_id', event_id)
-
-        mypayload = event.payload
-        obj_id = str(object_version.version_id)
-        obj_key = object_version.key
-        obj_tags = object_version.get_tags()
+        # 1. create the object version if doesn't exist
+        object_version = self._init_object_version(event=event)
+        version_id = str(object_version.version_id)
         db.session.expunge(event)
+        #  db.session.expunge(object_version)
         db.session.commit()
-
-        presets = mypayload.pop('video_presets', None) or current_app.config[
-            'CDS_SORENSON_PRESETS'].keys()
-        result = chain(
-            first_step,
-            group(
-                video_extract_frames.si(
-                    object_version=str(obj_id),
-                    event_id=event_id,
-                    **mypayload),
-                *[video_transcode.si(object_version=obj_id,
-                                     event_id=event_id,
-                                     preset=preset,
-                                     **mypayload)
-                  for preset in presets]
-            )
-        ).apply_async()
-
-        with db.session.begin_nested():
-            event.response.update(
-                links=dict(),
-                key=obj_key,
-                version_id=obj_id,
-                tags=obj_tags,
-            )
-            flag_modified(event, 'response')
-            flag_modified(event, 'response_headers')
-
+        # 2. define the workflow and run
+        first_step = self._first_step(
+            event=event, version_id=version_id)
+        second_step = self._second_step(
+            event=event, version_id=version_id)
+        result = chain(first_step, second_step).apply_async()
+        # 3. update event response
+        self._update_event_response(event=event, version_id=version_id)
+        # 4. serialize event and result
         super(AVCWorkflow, self).persist(event, result)
 
     def _raw_info(self, event):
