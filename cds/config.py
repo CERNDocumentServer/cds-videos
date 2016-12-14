@@ -442,6 +442,8 @@ INDEXER_BULK_REQUEST_TIMEOUT = 60
 ###############################################################################
 # Deposit
 ###############################################################################
+# FIXME: CHANGE ME
+PIDSTORE_DATACITE_DOI_PREFIX = '10.0000'
 # PID minter used for record submissions.
 DEPOSIT_PID_MINTER = 'cds_recid'
 # Template for deposit list view.

@@ -104,6 +104,7 @@ def app():
             'Youtube 720p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff5', '.mp4'),
         },
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
+        PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
     )
     app.register_blueprint(files_rest_blueprint)
 
