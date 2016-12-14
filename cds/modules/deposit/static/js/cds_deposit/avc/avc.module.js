@@ -1,6 +1,6 @@
 function cdsDepositsConfig(
   $locationProvider, depositStatesProvider, depositStatusesProvider,
-  previewerURLBuilderProvider, typeReducerProvider
+  urlBuilderProvider, typeReducerProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -25,9 +25,10 @@ function cdsDepositsConfig(
       SUCCESS: 'DEPOSIT_STATE/SUCCESS'
     }
   );
-  previewerURLBuilderProvider.setBlueprints(
+  urlBuilderProvider.setBlueprints(
     {
-      "video": "/deposit/<%=deposit%>/preview/video/<%=key%>"
+      "video": "/deposit/<%=deposit%>/preview/video/<%=key%>",
+      "iiif": "/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png"
     }
   )
   typeReducerProvider.setBlueprints(
@@ -48,7 +49,7 @@ cdsDepositsConfig.$inject = [
   '$locationProvider',
   'depositStatesProvider',
   'depositStatusesProvider',
-  'previewerURLBuilderProvider',
+  'urlBuilderProvider',
   'typeReducerProvider',
 ];
 
@@ -86,7 +87,7 @@ angular.module('cdsDeposit', [
     }
   }
 })
-.provider("previewerURLBuilder", function() {
+.provider("urlBuilder", function() {
   var blueprints = {};
 
   function setBlueprint(key, value) {
