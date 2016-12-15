@@ -41,9 +41,9 @@ from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 
 from .status import ComputeGlobalStatus, iterate_result, collect_info
-from .tasks import (download_to_object_version, video_extract_frames,
-                    video_metadata_extraction, video_transcode,
-                    update_deposit_state)
+from .tasks import (dispose_object_version, download_to_object_version,
+                    video_extract_frames, video_metadata_extraction,
+                    video_transcode, update_deposit_state, )
 
 
 class CeleryAsyncReceiver(Receiver):
@@ -87,9 +87,9 @@ class CeleryAsyncReceiver(Receiver):
             flag_modified(event, 'response_headers')
 
     def delete(self, event):
-        """TODO."""
+        """Revoke all associated tasks."""
         result = self._deserialize_result(event)
-        result.revoke()
+        result.revoke(terminate=True)
 
     def status(self, event):
         """Get the status."""
@@ -129,7 +129,6 @@ class Downloader(CeleryAsyncReceiver):
         with db.session.begin_nested():
             object_version = ObjectVersion.create(
                 bucket=event.payload['bucket_id'], key=event.payload['key'])
-
             ObjectVersionTag.create(object_version, 'uri_origin',
                                     event.payload['uri'])
             ObjectVersionTag.create(object_version, '_event_id', event_id)
@@ -145,6 +144,7 @@ class Downloader(CeleryAsyncReceiver):
 
     def _update_event_response(self, event, version_id):
         """Update event response."""
+        event_id = str(event.id)
         object_version = as_object_version(version_id)
         obj_tags = object_version.get_tags()
         bucket_id = str(object_version.bucket_id)
@@ -164,9 +164,11 @@ class Downloader(CeleryAsyncReceiver):
                         versionId=version_id,
                         _external=True, ),
                     'cancel': url_for(
-                        'invenio_webhooks.event_list',
+                        'invenio_webhooks.event_item',
                         receiver_id='downloader',
-                        _external=True, )
+                        event_id=event_id,
+                        _external=True,
+                    ),
                 },
                 key=object_version_key,
                 version_id=version_id,
@@ -216,6 +218,11 @@ class Downloader(CeleryAsyncReceiver):
         result = self._deserialize_result(event)
         return {"file_download": result}
 
+    def delete(self, event):
+        """Delete generated files."""
+        super(Downloader, self).delete(event)
+        dispose_object_version(event.response['version_id'])
+
 
 class AVCWorkflow(CeleryAsyncReceiver):
     """AVC workflow receiver."""
@@ -254,6 +261,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
         payload = deepcopy(event.payload)
         presets = payload.pop('video_presets', None) or current_app.config[
             'CDS_SORENSON_PRESETS'].keys()
+        payload.pop('uri', None)
         return group(
             video_extract_frames.si(
                 object_version=version_id,
@@ -287,12 +295,27 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def _update_event_response(self, event, version_id):
         """Update event response."""
+        event_id = str(event.id)
         object_version = as_object_version(version_id)
         obj_tags = object_version.get_tags()
         obj_key = object_version.key
+        obj_bucket_id = str(object_version.bucket_id)
         with db.session.begin_nested():
             event.response.update(
-                links=dict(),
+                links={
+                    'self': url_for(
+                        'invenio_files_rest.object_api',
+                        bucket_id=obj_bucket_id,
+                        key=obj_key,
+                        _external=True,
+                    ),
+                    'cancel': url_for(
+                        'invenio_webhooks.event_item',
+                        receiver_id='avc',
+                        event_id=event_id,
+                        _external=True,
+                    ),
+                },
                 key=obj_key,
                 version_id=version_id,
                 tags=obj_tags,
@@ -355,7 +378,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
     def _raw_info(self, event):
         """Get info from the event."""
         result = self._deserialize_result(event)
-        first_step = []
         if 'version_id' in event.payload:
             first_step = [{"file_video_metadata_extraction": result.parent}]
         else:
@@ -367,3 +389,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
         for res in result.children[1:]:
             second_step.append({"file_transcode": res})
         return (first_step, second_step)
+
+    def delete(self, event):
+        """Delete generated files."""
+        super(AVCWorkflow, self).delete(event)
+        object_version = event.response.get('version_id')
+        if object_version:
+            dispose_object_version(object_version)

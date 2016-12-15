@@ -31,7 +31,7 @@ from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
 from invenio_indexer.api import RecordIndexer
 
-from cds.modules.webhooks.tasks import _factory_sse_task_base
+from cds.modules.webhooks.tasks import _factory_avc_task_base
 from cds.modules.deposit.api import Category
 
 
@@ -47,14 +47,14 @@ def success_task(self, *args, **kwargs):
     self.update_state(state=states.SUCCESS, meta={})
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_failure'))
+@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_failure'))
 def sse_failing_task(self, *args, **kwargs):
     """A failing shared task."""
     self.update_state(
         state=states.FAILURE, meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_failure'))
+@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_failure'))
 def sse_success_task(self, *args, **kwargs):
     """A failing shared task."""
     self.update_state(state=states.SUCCESS, meta={})
@@ -66,7 +66,7 @@ def simple_add(x, y):
     return x + y
 
 
-@shared_task(bind=True, base=_factory_sse_task_base(type_='simple_add'))
+@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_add'))
 def sse_simple_add(self, x, y, **kwargs):
     """Simple shared task."""
     self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
