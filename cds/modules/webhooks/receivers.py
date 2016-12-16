@@ -41,9 +41,8 @@ from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 
 from .status import ComputeGlobalStatus, iterate_result, collect_info
-from .tasks import (dispose_object_version, download_to_object_version,
-                    video_extract_frames, video_metadata_extraction,
-                    video_transcode, update_deposit_state, )
+from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
+    TranscodeVideoTask, update_deposit_state
 
 
 class CeleryAsyncReceiver(Receiver):
@@ -88,8 +87,9 @@ class CeleryAsyncReceiver(Receiver):
 
     def delete(self, event):
         """Revoke all associated tasks."""
-        result = self._deserialize_result(event)
-        result.revoke(terminate=True)
+        iterate_result(
+            raw_info=self._raw_info(event),
+            fun=lambda task_name, result: result.revoke(terminate=True))
 
     def status(self, event):
         """Get the status."""
@@ -111,6 +111,17 @@ class CeleryAsyncReceiver(Receiver):
         """Persist event and result after execution."""
         with db.session.begin_nested():
             self._serialize_result(event=event, result=result)
+
+            status = iterate_result(
+                raw_info=self._raw_info(event),
+                fun=lambda task_name, result: {
+                    task_name: {
+                        'id': result.id,
+                        'status': result.status
+                    }
+                })
+            event.response.update(global_status=status)
+
             db.session.add(event)
         db.session.commit()
         update_deposit_state(
@@ -137,7 +148,7 @@ class Downloader(CeleryAsyncReceiver):
     def _workflow(self, event, version_id):
         """Define the workflow."""
         event_id = str(event.id)
-        return download_to_object_version.s(
+        return DownloadTask().s(
             object_version=version_id,
             event_id=event_id,
             **event.payload)
@@ -191,7 +202,7 @@ class Downloader(CeleryAsyncReceiver):
             to it.
 
         For more info see the task
-        :func: `~cds.modules.webhooks.tasks.download_to_object_version` this
+        :func: `~cds.modules.webhooks.tasks.DownloadTask` this
         receiver is using.
         """
         assert 'bucket_id' in event.payload
@@ -221,76 +232,147 @@ class Downloader(CeleryAsyncReceiver):
     def delete(self, event):
         """Delete generated files."""
         super(Downloader, self).delete(event)
-        dispose_object_version(event.response['version_id'])
+        DownloadTask().clean(version_id=event.response['version_id'])
+
+
+class AVCFirstStep(object):
+    """Facade pattern to use manage the first step of the AVCWorkflow."""
+
+    def __init__(self, event):
+        """Init."""
+        self.event = event
+        self._cleaner = {
+            'file_video_metadata_extraction':
+            self._video_metadata_extraction_clean,
+            'file_download': self._download_to_object_version_clean,
+        }
+
+    def _download_to_object_version(self):
+        """Task download."""
+        event_id = str(self.event.id)
+        version_id = self.event.response['version_id']
+        return DownloadTask().si(
+            object_version=version_id, event_id=event_id,
+            **self.event.payload
+        )
+
+    def _video_metadata_extraction(self):
+        """Video metadata extraction task."""
+        event_id = str(self.event.id)
+        version_id = self.event.response['version_id']
+        payload = deepcopy(self.event.payload)
+        if 'version_id' in self.event.payload:
+            object_version = as_object_version(version_id)
+            payload['uri'] = object_version.file.uri
+        else:
+            object_version = version_id
+        return ExtractMetadataTask().si(
+            object_version=version_id, event_id=event_id, **payload)
+
+    def _video_metadata_extraction_clean(self, event):
+        """Clean video metadata extraction task."""
+        ExtractMetadataTask().clean(
+            deposit_id=event.payload['deposit_id'],
+            version_id=event.response['version_id']
+        )
+
+    def _download_to_object_version_clean(self, event):
+        """Clean download task."""
+        if 'version_id' not in event.payload:
+            DownloadTask().clean(version_id=event.response['version_id'])
+
+    def clean(self, task_name=None, *args, **kwargs):
+        """Clean everything was created."""
+        if task_name:
+            self._cleaner[task_name](event=self.event, *args, **kwargs)
+        else:
+            self._video_metadata_extraction_clean(event=self.event)
+            self._download_to_object_version_clean(event=self.event)
+
+
+class AVCSecondStep(object):
+    """Facade pattern to use manage the second step of the AVCWorkflow."""
+
+    def __init__(self, event):
+        """Init."""
+        self.event = event
+        self._cleaner = {
+            'file_transcode': self._video_transcode_tasks_clean,
+            'file_video_extract_frames': self._video_extract_frame_clean
+        }
+
+    def _video_extract_frames(self):
+        """Task video extract frames."""
+        event_id = str(self.event.id)
+        version_id = self.event.response['version_id']
+        return ExtractFramesTask().si(
+            object_version=version_id,
+            event_id=event_id,
+            **self.event.payload
+        )
+
+    def _video_transcodes(self):
+        """List of task to video transcode."""
+        event_id = str(self.event.id)
+        version_id = self.event.response['version_id']
+        presets = self.event.payload.get('video_presets', None) or \
+            current_app.config['CDS_SORENSON_PRESETS'].keys()
+        return [TranscodeVideoTask().si(
+            object_version=version_id,
+            event_id=event_id,
+            preset=preset,
+            **self.event.payload
+        ) for preset in presets]
+
+    def _video_extract_frame_clean(self, event):
+        """Clean video extract frames task."""
+        ExtractFramesTask().clean(version_id=event.response['version_id'])
+
+    def _video_transcode_tasks_clean(self, event):
+        """Clean all video transcode tasks."""
+        presets = event.payload.get('video_presets', None) \
+            or current_app.config['CDS_SORENSON_PRESETS'].keys()
+        for preset in presets:
+            self._video_transcode_task_clean(event=event, preset=preset)
+
+    def _video_transcode_task_clean(self, event, preset):
+        """Clean a video transcode task."""
+        TranscodeVideoTask().clean(
+            version_id=event.response['version_id'], preset=preset)
+
+    def clean(self, task_name=None, *args, **kwargs):
+        """Clean everything was created."""
+        if task_name:
+            self._cleaner[task_name](event=self.event, *args, **kwargs)
+        else:
+            # clean video_frames
+            self._video_extract_frame_clean(event=self.event)
+            # clean video transcode
+            self._video_transcode_tasks_clean(event=self.event)
 
 
 class AVCWorkflow(CeleryAsyncReceiver):
     """AVC workflow receiver."""
 
-    def _first_step(self, event, version_id, undo=False):
-        """First step definition."""
-        event_id = str(event.id)
-        with db.session.begin_nested():
-            if 'version_id' in event.payload:
-                object_version = as_object_version(event.payload['version_id'])
-                first_step = video_metadata_extraction.si(
-                    uri=object_version.file.uri,
-                    object_version=version_id,
-                    deposit_id=event.payload['deposit_id'],
-                    undo=undo
-                )
-            else:
-                first_step = group(
-                    download_to_object_version.si(
-                        object_version=version_id,
-                        event_id=event_id,
-                        undo=undo,
-                        **event.payload
-                    ),
-                    video_metadata_extraction.si(
-                        object_version=version_id,
-                        event_id=event_id,
-                        undo=undo,
-                        **event.payload),
-                )
-        return first_step
-
-    def _second_step(self, event, version_id, undo=False):
-        """Second step definition."""
-        event_id = str(event.id)
-        payload = deepcopy(event.payload)
-        presets = payload.pop('video_presets', None) or current_app.config[
-            'CDS_SORENSON_PRESETS'].keys()
-        payload.pop('uri', None)
-        return group(
-            video_extract_frames.si(
-                object_version=version_id,
-                event_id=event_id,
-                undo=undo,
-                **payload
-            ),
-            *[video_transcode.si(
-                object_version=version_id,
-                event_id=event_id,
-                preset=preset,
-                undo=undo,
-                **payload
-            ) for preset in presets]
-        )
-
     def _init_object_version(self, event):
         """Create, if doesn't exists, the version object."""
         event_id = str(event.id)
         with db.session.begin_nested():
+            # create a object version if doesn't exists
             if 'version_id' in event.payload:
-                object_version = as_object_version(event.payload['version_id'])
+                version_id = event.payload['version_id']
+                object_version = as_object_version(version_id)
             else:
                 object_version = ObjectVersion.create(
                     bucket=event.payload['bucket_id'],
                     key=event.payload['key'])
                 ObjectVersionTag.create(object_version, 'uri_origin',
                                         event.payload['uri'])
+                version_id = str(object_version.version_id)
+            # and a tag associated to him
             ObjectVersionTag.create(object_version, '_event_id', event_id)
+            # save in response the version_id
+            event.response['version_id'] = version_id
         return object_version
 
     def _update_event_response(self, event, version_id):
@@ -323,6 +405,32 @@ class AVCWorkflow(CeleryAsyncReceiver):
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
 
+    def _first_step(self, event):
+        """Define first step."""
+        avc_first = AVCFirstStep(event=event)
+        with db.session.begin_nested():
+            if 'version_id' in event.payload:
+                first_step = avc_first._video_metadata_extraction()
+            else:
+                first_step = group(
+                    avc_first._download_to_object_version(),
+                    avc_first._video_metadata_extraction()
+                )
+        return first_step
+
+    def _second_step(self, event):
+        """Define second step."""
+        avc_second = AVCSecondStep(event=event)
+        return group(
+            avc_second._video_extract_frames(),
+            *avc_second._video_transcodes()
+        )
+
+    def _workflow(self, event):
+        first_step = self._first_step(event=event)
+        second_step = self._second_step(event=event)
+        return chain(first_step, second_step)
+
     def run(self, event):
         """Run AVC workflow for video transcoding.
 
@@ -349,10 +457,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
           * frames_gap, if not set the default value will be used.
 
         For more info see the tasks used in the workflow:
-          * :func: `~cds.modules.webhooks.tasks.download_to_object_version`
-          * :func: `~cds.modules.webhooks.tasks.video_metadata_extraction`
-          * :func: `~cds.modules.webhooks.tasks.video_extract_frames`
-          * :func: `~cds.modules.webhooks.tasks.video_transcode`
+          * :func: `~cds.modules.webhooks.tasks.DownloadTask`
+          * :func: `~cds.modules.webhooks.tasks.ExtractMetadataTask`
+          * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
+          * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
         """
         assert ('uri' in event.payload and 'bucket_id' in event.payload and
                 'key' in event.payload) or ('version_id' in event.payload)
@@ -362,18 +470,26 @@ class AVCWorkflow(CeleryAsyncReceiver):
         object_version = self._init_object_version(event=event)
         version_id = str(object_version.version_id)
         db.session.expunge(event)
-        #  db.session.expunge(object_version)
         db.session.commit()
         # 2. define the workflow and run
-        first_step = self._first_step(
-            event=event, version_id=version_id)
-        second_step = self._second_step(
-            event=event, version_id=version_id)
-        result = chain(first_step, second_step).apply_async()
+        result = self._workflow(event=event).apply_async()
         # 3. update event response
         self._update_event_response(event=event, version_id=version_id)
         # 4. serialize event and result
         super(AVCWorkflow, self).persist(event, result)
+
+    def delete(self, event):
+        """Delete tasks and everything created by them."""
+        super(AVCWorkflow, self).delete(event)
+        AVCSecondStep(event=event).clean()
+        AVCFirstStep(event=event).clean()
+        self.clean(event=event)
+        db.session.commit()
+
+    def clean(self, event):
+        """Delete the event."""
+        ObjectVersionTag.query.filter_by(key='_event_id', value=event.id)
+        db.session.delete(event)
 
     def _raw_info(self, event):
         """Get info from the event."""
@@ -389,10 +505,3 @@ class AVCWorkflow(CeleryAsyncReceiver):
         for res in result.children[1:]:
             second_step.append({"file_transcode": res})
         return (first_step, second_step)
-
-    def delete(self, event):
-        """Delete generated files."""
-        super(AVCWorkflow, self).delete(event)
-        object_version = event.response.get('version_id')
-        if object_version:
-            dispose_object_version(object_version)

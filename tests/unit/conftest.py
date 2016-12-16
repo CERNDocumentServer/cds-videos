@@ -90,7 +90,7 @@ def app():
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI',
             'postgresql+psycopg2://localhost/cds_testing'),
-        # SQLALCHEMY_ECHO=True,
+        #  SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
@@ -552,8 +552,8 @@ def workflow_receiver(api_app, db, webhooks, es, cds_depid):
     class TestReceiver(CeleryAsyncReceiver):
         def run(self, event):
             workflow = chain(
-                sse_simple_add.s(x=1, y=2, deposit_id=cds_depid),
-                group(sse_failing_task.s(), sse_success_task.s())
+                sse_simple_add().s(x=1, y=2, deposit_id=cds_depid),
+                group(sse_failing_task().s(), sse_success_task().s())
             )
             event.payload['deposit_id'] = cds_depid
             with db.session.begin_nested():

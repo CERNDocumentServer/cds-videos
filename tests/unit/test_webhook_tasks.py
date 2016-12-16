@@ -30,7 +30,8 @@ import time
 import mock
 import pytest
 
-from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag, Bucket)
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
+    Bucket, FileInstance
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
@@ -38,10 +39,12 @@ from six import BytesIO, next
 from celery.exceptions import Retry
 from sqlalchemy.orm.exc import ConcurrentModificationError
 
-from cds.modules.webhooks.tasks import (download_to_object_version,
-                                        update_record, video_extract_frames,
-                                        video_metadata_extraction,
-                                        video_transcode)
+from cds.modules.webhooks.tasks import (DownloadTask,
+                                        update_record, ExtractFramesTask,
+                                        ExtractMetadataTask,
+                                        TranscodeVideoTask)
+
+from helpers import transcode_task
 
 
 def test_download_to_object_version(db, bucket):
@@ -60,8 +63,8 @@ def test_download_to_object_version(db, bucket):
             })
         assert obj.file is None
 
-        task_s = download_to_object_version.s('http://example.com/test.pdf',
-                                              object_version=obj.version_id)
+        task_s = DownloadTask().s('http://example.com/test.pdf',
+                                  object_version=obj.version_id)
         # Download
         task = task_s.delay()
         assert ObjectVersion.query.count() == 1
@@ -71,12 +74,13 @@ def test_download_to_object_version(db, bucket):
         assert obj.file
         assert obj.file.size == file_size
         assert Bucket.get(bid).size == file_size
+        assert FileInstance.query.count() == 1
 
         # Undo
-        task_s.delay(undo=True)
-        assert ObjectVersion.query.count() == 1
-        obj = ObjectVersion.query.first()
-        assert obj.file is None
+        DownloadTask().clean(version_id=obj.version_id)
+
+        assert ObjectVersion.query.count() == 0
+        assert FileInstance.query.count() == 0
         assert Bucket.get(bid).size == 0
 
 
@@ -147,9 +151,9 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
     dep_id = str(cds_depid)
-    task_s = video_metadata_extraction.s(uri=video_mp4,
-                                         object_version=obj_id,
-                                         deposit_id=dep_id)
+    task_s = ExtractMetadataTask().s(uri=video_mp4,
+                                     object_version=obj_id,
+                                     deposit_id=dep_id)
 
     # Extract metadata
     task_s.delay()
@@ -174,7 +178,8 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     assert tags['color_range'] == 'tv'
 
     # Undo
-    task_s.delay(undo=True)
+    ExtractMetadataTask().clean(deposit_id=dep_id,
+                                version_id=obj_id)
 
     # Check that deposit's metadata got reverted
     record = Record.get_record(recid)
@@ -192,7 +197,7 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     version_id = str(obj.version_id)
     db.session.commit()
 
-    task_s = video_extract_frames.s(object_version=version_id)
+    task_s = ExtractFramesTask().s(object_version=version_id)
 
     # Extract frames
     task_s.delay()
@@ -204,7 +209,7 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     assert len(frames) == 90
 
     # Undo
-    task_s.delay(undo=True)
+    ExtractFramesTask().clean(version_id=version_id)
 
     assert ObjectVersion.query.count() == 1  # master file
     frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
@@ -241,7 +246,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
     listener.start()
     time.sleep(1)
 
-    video_metadata_extraction.delay(
+    ExtractMetadataTask().delay(
         uri='invalid_uri',
         object_version=str(obj.version_id),
         deposit_id=cds_depid,
@@ -253,11 +258,12 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
 
 
 def test_transcode(db, bucket, mock_sorenson):
-    """Test video_transcode task."""
+    """Test TranscodeVideoTask task."""
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
     filesize = 1024
+    preset = 'Youtube 480p'
     obj = ObjectVersion.create(bucket, key='test.pdf',
                                stream=BytesIO(b'\x00' * filesize))
     obj_id = str(obj.version_id)
@@ -265,9 +271,9 @@ def test_transcode(db, bucket, mock_sorenson):
     assert get_bucket_keys() == ['test.pdf']
     assert bucket.size == filesize
 
-    task_s = video_transcode.s(object_version=obj_id,
-                               preset='Youtube 480p',
-                               sleep_time=0)
+    task_s = TranscodeVideoTask().s(object_version=obj_id,
+                                    preset=preset,
+                                    sleep_time=0)
 
     # Transcode
     task_s.delay()
@@ -280,7 +286,7 @@ def test_transcode(db, bucket, mock_sorenson):
     assert bucket.size == 2 * filesize
 
     # Undo
-    task_s.delay(undo=True)
+    TranscodeVideoTask().clean(version_id=obj_id, preset=preset)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
@@ -288,3 +294,43 @@ def test_transcode(db, bucket, mock_sorenson):
     assert 'test-Youtube 480p.mp4' not in keys
     assert 'test.pdf' in keys
     assert bucket.size == filesize
+
+
+def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
+    """Test TranscodeVideoTask task when run 2 task and delete 1."""
+    def get_bucket_keys():
+        return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
+
+    filesize = 1024
+    filename = 'test.mp4'
+    preset1 = 'Youtube 480p'
+    preset2 = 'Youtube 720p'
+    presets = [preset1, preset2]
+    (version_id, [task_s1, task_s2]) = transcode_task(
+        bucket=bucket, filesize=filesize, filename=filename, presets=presets)
+
+    assert get_bucket_keys() == [filename]
+    assert bucket.size == filesize
+
+    # Transcode
+    task_s1.delay()
+    task_s2.delay()
+
+    db.session.add(bucket)
+    keys = get_bucket_keys()
+    assert len(keys) == 3
+    assert 'test-Youtube 480p.mp4' in keys
+    assert 'test-Youtube 720p.mp4' in keys
+    assert filename in keys
+    assert bucket.size == (3 * filesize)
+
+    # Undo
+    TranscodeVideoTask().clean(version_id=version_id, preset=preset1)
+
+    db.session.add(bucket)
+    keys = get_bucket_keys()
+    assert len(keys) == 2
+    assert 'test-Youtube 480p.mp4' not in keys
+    assert 'test-Youtube 720p.mp4' in keys
+    assert filename in keys
+    assert bucket.size == (2 * filesize)
