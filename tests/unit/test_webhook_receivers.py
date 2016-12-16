@@ -31,10 +31,12 @@ import json
 import mock
 from flask import url_for
 
-from invenio_files_rest.models import ObjectVersion, as_object_version
+from invenio_files_rest.models import ObjectVersion, \
+    Bucket, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 import pytest
+from invenio_records.models import RecordMetadata
 
 from celery import states, chain, group
 from celery.result import AsyncResult
@@ -46,8 +48,9 @@ from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.status import CollectInfoTasks
 from invenio_webhooks.models import Event
 from six import BytesIO
+from cds.modules.webhooks.receivers import AVCSecondStep, AVCFirstStep
 
-from helpers import failing_task, simple_add, mock_current_user
+from helpers import failing_task, simple_add, mock_current_user, success_task
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -169,11 +172,31 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         assert str(deposit.id) == deposit_to_index
         assert deposit['_deposit']['state'] == {u'file_download': u'STARTED'}
 
+    # Test cleaning!
+    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
+
+    with mock.patch('requests.get') as mock_request, \
+            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            as mock_indexer, \
+            api_app.test_client() as client:
+        resp = client.delete(url, headers=json_headers)
+
+        assert resp.status_code == 202
+        data = json.loads(resp.data.decode('utf-8'))
+
+        assert ObjectVersion.query.count() == 0
+        bucket = Bucket.query.first()
+        assert bucket.size == 0
+
+        assert mock_sse.called is False
+        assert mock_indexer.called is False
+
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver(api_app, db, bucket, cds_depid, access_token,
-                               json_headers, mock_sorenson, online_video,
-                               webhooks):
+def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
+                                    access_token, json_headers, mock_sorenson,
+                                    online_video, webhooks):
     """Test AVCWorkflow receiver."""
     db.session.add(bucket)
     bucket_id = bucket.id
@@ -284,6 +307,9 @@ def test_avc_workflow_receiver(api_app, db, bucket, cds_depid, access_token,
         assert info[4][0] == 'file_transcode'
         assert info[4][1].status == states.STARTED
 
+        # check tags
+        assert ObjectVersionTag.query.count() == 200
+
         # check sse is called
         assert mock_sse.called
 
@@ -341,11 +367,266 @@ def test_avc_workflow_receiver(api_app, db, bucket, cds_depid, access_token,
             'file_transcode': states.STARTED,
         }
 
+    # Test cleaning!
+    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
+
+    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            as mock_indexer, \
+            api_app.test_client() as client:
+        resp = client.delete(url, headers=json_headers)
+
+        assert resp.status_code == 202
+        data = json.loads(resp.data.decode('utf-8'))
+
+        # check that object version, tags are deleted
+        assert ObjectVersion.query.count() == 0
+        assert ObjectVersionTag.query.count() == 0
+        bucket = Bucket.query.first()
+        # and bucket is empty
+        assert bucket.size == 0
+
+        records = RecordMetadata.query.all()
+        assert len(records) == 1
+        record = records[0]
+        events = get_deposit_events(record.json['_deposit']['id'])
+
+        # check metadata patch are deleted
+        assert 'extracted_metadata' not in record.json['_deposit']
+
+        # check there are no events
+        assert events == []
+
+        # check no SSE message and reindexing is fired
+        assert mock_sse.called is False
+        assert mock_indexer.called is False
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_clean_download(
+        api_app, db, bucket, cds_depid, access_token, json_headers,
+        mock_sorenson, online_video, webhooks):
+    """Test AVCWorkflow receiver."""
+    db.session.add(bucket)
+    master_key = 'test.mp4'
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=cds_depid,
+            key=master_key,
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+    event = Event.query.first()
+    AVCFirstStep(event=event).clean(task_name='file_download')
+
+    # check extracted metadata is not there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
+
+    # 2 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 92
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 188
+
+    # RUN again first step
+    event.receiver._init_object_version(event=event)
+    event.receiver._first_step(event=event).apply()
+
+    # 1 master + 2 slave + 90 frames == 93
+    assert ObjectVersion.query.count() == 93
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_clean_video_frames(
+        api_app, db, bucket, cds_depid, access_token, json_headers,
+        mock_sorenson, online_video, webhooks):
+    """Test AVCWorkflow receiver."""
+    db.session.add(bucket)
+    master_key = 'test.mp4'
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=cds_depid,
+            key=master_key,
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+    event = Event.query.first()
+    AVCSecondStep(event=event).clean(task_name='file_video_extract_frames')
+
+    # check extracted metadata is not there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
+
+    # check object versions don't change:
+    # 1 original + 2 slave == 3
+    assert ObjectVersion.query.count() == 3
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 20
+
+    # RUN again frame extraction
+    AVCSecondStep(event=event)._video_extract_frames().apply()
+
+    # 1 master + 2 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 93
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_clean_video_transcode(
+        api_app, db, bucket, cds_depid, access_token, json_headers,
+        mock_sorenson, online_video, webhooks):
+    """Test AVCWorkflow receiver."""
+    db.session.add(bucket)
+    master_key = 'test.mp4'
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=cds_depid,
+            key=master_key,
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+    event = Event.query.first()
+    AVCSecondStep(event=event).clean(task_name='file_transcode')
+
+    # check extracted metadata is not there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
+
+    # check object versions don't change:
+    # 1 original + 90 frames == 91
+    assert ObjectVersion.query.count() == 91
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 192
+
+    # RUN again frame extraction
+    for task in AVCSecondStep(event=event)._video_transcodes():
+        task.apply()
+
+    # 1 master + 2 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 93
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_clean_extract_metadata(
+        api_app, db, bucket, cds_depid, access_token, json_headers,
+        mock_sorenson, online_video, webhooks):
+    """Test AVCWorkflow receiver."""
+    db.session.add(bucket)
+    master_key = 'test.mp4'
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=cds_depid,
+            key=master_key,
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 202
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
+    event = Event.query.first()
+    AVCFirstStep(event=event).clean(task_name='file_video_metadata_extraction')
+
+    # check extracted metadata is not there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' not in records[0].json['_deposit']
+
+    # check object versions don't change:
+    # 1 original + 2 slave + 90 frames == 93
+    assert ObjectVersion.query.count() == 93
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 190
+
+    # RUN again first step
+    AVCFirstStep(event=event)._video_metadata_extraction().apply()
+
+    # 1 master + 2 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 93
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 200
+
 
 @pytest.mark.parametrize(
     'receiver_id,workflow,status,http_status, payload,result', [
-        #  ('failing-task', failing_task, states.FAILURE, 500, {}, None),
-        #  ('success-task', success_task, states.SUCCESS, 201, {}, None),
+        ('failing-task', failing_task, states.FAILURE, 500, {}, None),
+        ('success-task', success_task, states.SUCCESS, 201, {}, None),
         ('add-task', simple_add, states.SUCCESS, 202, {'x': 40, 'y': 2}, 42)
     ]
 )

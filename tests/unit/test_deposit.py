@@ -259,7 +259,6 @@ def test_deposit_events_on_workflow(webhooks, api_app, db, cds_depid, bucket,
                                     workflow_receiver):
     """Test deposit events."""
     receiver_id = workflow_receiver
-    #  current_webhooks.register(receiver_id, TestReceiver)
     db.session.add(bucket)
 
     with api_app.test_request_context():
