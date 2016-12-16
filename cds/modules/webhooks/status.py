@@ -144,5 +144,24 @@ class CollectInfoTasks(object):
         self._task_names.append((task_name, result))
 
     def __iter__(self):
+        """Iterator."""
         for info in self._task_names:
             yield info
+
+
+class GetTaskNameByID(object):
+    """Find task name by task id."""
+
+    def __init__(self, task_id):
+        """Init."""
+        self._task_id = task_id
+
+    def __call__(self, task_name, result):
+        """Search task name."""
+        if result.id == self._task_id:
+            self._task_name = task_name
+
+    @property
+    def task_name(self):
+        """Get task name."""
+        return self._task_name

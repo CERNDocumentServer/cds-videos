@@ -27,12 +27,16 @@
 from __future__ import absolute_import, print_function
 
 import uuid
+
+from invenio_files_rest.models import ObjectVersion
+from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
 from invenio_indexer.api import RecordIndexer
-
-from cds.modules.webhooks.tasks import _factory_avc_task_base
+from invenio_db import db
+from cds.modules.webhooks.tasks import AVCTask
 from cds.modules.deposit.api import Category
+from cds.modules.webhooks.tasks import TranscodeVideoTask
 
 
 @shared_task(bind=True)
@@ -47,17 +51,28 @@ def success_task(self, *args, **kwargs):
     self.update_state(state=states.SUCCESS, meta={})
 
 
-@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_failure'))
-def sse_failing_task(self, *args, **kwargs):
-    """A failing shared task."""
-    self.update_state(
-        state=states.FAILURE, meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
+class sse_failing_task(AVCTask):
+
+    def __init__(self):
+        self._type = 'simple_failure'
+        self._base_payload = {}
+
+    def run(self, *args, **kwargs):
+        """A failing shared task."""
+        self.update_state(
+            state=states.FAILURE,
+            meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
 
 
-@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_failure'))
-def sse_success_task(self, *args, **kwargs):
-    """A failing shared task."""
-    self.update_state(state=states.SUCCESS, meta={})
+class sse_success_task(AVCTask):
+
+    def __init__(self):
+        self._type = 'simple_failure'
+        self._base_payload = {}
+
+    def run(self, *args, **kwargs):
+        """A failing shared task."""
+        self.update_state(state=states.SUCCESS, meta={})
 
 
 @shared_task
@@ -66,11 +81,15 @@ def simple_add(x, y):
     return x + y
 
 
-@shared_task(bind=True, base=_factory_avc_task_base(type_='simple_add'))
-def sse_simple_add(self, x, y, **kwargs):
-    """Simple shared task."""
-    self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
-    return x + y
+class sse_simple_add(AVCTask):
+    def __init__(self):
+        self._type = 'simple_add'
+        self._base_payload = {}
+
+    def run(self, x, y, **kwargs):
+        """Simple shared task."""
+        self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
+        return x + y
 
 
 def create_category(api_app, db, data):
@@ -91,3 +110,17 @@ def create_category(api_app, db, data):
 def mock_current_user(*args2, **kwargs2):
     """Mock current user not logged-in."""
     return None
+
+
+def transcode_task(bucket, filesize, filename, presets):
+    """Get a transcode task."""
+    obj = ObjectVersion.create(bucket, key=filename,
+                               stream=BytesIO(b'\x00' * filesize))
+    obj_id = str(obj.version_id)
+    db.session.commit()
+
+    return (obj_id, [
+        TranscodeVideoTask().s(
+            object_version=obj_id, preset=preset, sleep_time=0)
+        for preset in presets
+    ])

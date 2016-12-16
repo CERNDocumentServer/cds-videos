@@ -37,13 +37,13 @@ import time
 from functools import partial
 
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
+from cds_sorenson.error import SorensonError
 from celery import Task, shared_task, current_app as celery_app, chain
 from celery.states import FAILURE, STARTED, SUCCESS
 from flask import current_app
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
-from invenio_files_rest.tasks import remove_file_data
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
@@ -64,428 +64,457 @@ def sse_publish_event(channel, type_, state, meta):
         current_sse.publish(data=data, type_=type_, channel=channel)
 
 
-def _factory_avc_task_base(type_=None, undo_fun=None):
-    """Build base celery task to send SSE messages upon status update.
-
-    :param type_: Type of SSE message to send.
-    :return: ``AVCTask`` class.
-    """
-    class AVCTask(Task):
-        """Base class for tasks which might be sending SSE messages."""
-
-        abstract = True
-
-        def __init__(self):
-            """Constructor."""
-            super(AVCTask, self).__init__()
-            self._base_payload = {}
-
-        def _extract_call_arguments(self, arg_list, **kwargs):
-            for name in arg_list:
-                setattr(self, name, kwargs.pop(name, None))
-            return kwargs
-
-        def __call__(self, *args, **kwargs):
-            """Extract SSE channel from keyword arguments.
-
-            .. note ::
-                the channel is extracted from the ``sse_channel`` keyword
-                argument.
-            """
-            arg_list = [
-                'sse_channel', 'event_id', 'deposit_id', 'bucket_id', 'key']
-            kwargs = self._extract_call_arguments(arg_list, **kwargs)
-
-            self.object = as_object_version(kwargs.pop('object_version'))
-            self.obj_id = str(self.object.version_id)
-
-            self.undo = kwargs.pop('undo', False)
-            with self.app.flask_app.app_context():
-                if self.undo:
-                    return undo_fun(self, *args, **kwargs)
-                return self.run(*args, **kwargs)
-
-        def update_state(self, task_id=None, state=None, meta=None):
-            """."""
-            self._base_payload.update(meta.get('payload', {}))
-            meta['payload'] = self._base_payload
-            super(AVCTask, self).update_state(task_id, state, meta)
-            sse_publish_event(channel=self.sse_channel, type_=type_,
-                              state=state, meta=meta)
-
-        def on_failure(self, exc, task_id, args, kwargs, einfo):
-            """When an error occurs, attach useful information to the state."""
-            with celery_app.flask_app.app_context():
-                meta = dict(message=str(exc), payload=self._base_payload)
-                sse_publish_event(channel=self.sse_channel, type_=type_,
-                                  state=FAILURE, meta=meta)
-                self._update_record()
-
-        def on_success(self, exc, *args, **kwargs):
-            """When end correctly, attach useful information to the state."""
-            with celery_app.flask_app.app_context():
-                meta = dict(message=str(exc), payload=self._base_payload)
-                sse_publish_event(channel=self.sse_channel, type_=type_,
-                                  state=SUCCESS, meta=meta)
-                self._update_record()
-
-        def _update_record(self):
-            # update record state
-            with celery_app.flask_app.app_context():
-                if 'deposit_id' in self._base_payload \
-                        and self._base_payload['deposit_id']:
-                    update_deposit_state(
-                        deposit_id=self._base_payload.get('deposit_id'),
-                        event_id=self._base_payload.get('event_id'),
-                        sse_channel=self.sse_channel
-                    )
-
-        @staticmethod
-        def set_revoke_handler(handler):
-            """Set handler to be executed when the task gets revoked."""
-            def _handler(signum, frame):
-                handler()
-            signal.signal(signal.SIGTERM, _handler)
-
-    return AVCTask
-
-
-#
-# Download
-#
-def download_to_object_version_undo(self, *args, **kwargs):
-    """Undo download task."""
-    dispose_object_version(self.object, delete_object=False)
-
-
-@shared_task(
-    bind=True,
-    base=_factory_avc_task_base(type_='file_download',
-                                undo_fun=download_to_object_version_undo))
-def download_to_object_version(self, uri):
-    r"""Download file from a URL.
-
-    :param self: reference to instance of task base class
-    :param uri: URL of the file to download.
-    """
-
-    self._base_payload = dict(
-        key=self.object.key,
-        version_id=self.obj_id,
-        tags=self.object.get_tags(),
-        event_id=self.event_id,
-        deposit_id=self.deposit_id, )
-
-    # Make HTTP request
-    response = requests.get(uri, stream=True)
-
-    if 'Content-Length' in response.headers:
-        headers_size = int(response.headers.get('Content-Length'))
-    else:
-        headers_size = None
-
-    def progress_updater(size, total):
-        """Progress reporter."""
-        size = size or headers_size
-        if size is None:
-            # FIXME decide on proper error-handling behaviour
-            raise RuntimeError('Cannot locate "Content-Length" header.')
-        meta = dict(
-            payload=dict(
-                size=size,
-                total=total,
-                percentage=total * 100 / size, ),
-            message='Downloading {0} of {1}'.format(total, size), )
-
-        self.update_state(state=STARTED, meta=meta)
-
-    self.object.set_contents(
-        response.raw, progress_callback=progress_updater, size=headers_size)
-
-    db.session.commit()
-
-    return self.obj_id
-
-
-#
-# Extract metadata
-#
-format_keys = [
-    'duration',
-    'bit_rate',
-    'size',
-]
-stream_keys = [
-    'avg_frame_rate',
-    'codec_name',
-    'width',
-    'height',
-    'nb_frames',
-    'display_aspect_ratio',
-    'color_range',
-]
-all_keys = format_keys + stream_keys
-
-
-def video_metadata_extraction_undo(self, *args, **kwargs):
-    """Undo metadata extraction."""
-    recid = str(PersistentIdentifier.get('depid', self.deposit_id).object_uuid)
-
-    # Delete generated ObjectVersionTags
-    [ObjectVersionTag.delete(self.object, k) for k in all_keys]
-    db.session.commit()
-
-    # Revert patch on record
-    patch = [{
-        'op': 'remove',
-        'path': '/_deposit/extracted_metadata',
-    }]
-    update_record.s(recid, patch).apply()
-
-
-@shared_task(
-    bind=True,
-    base=_factory_avc_task_base(type_='file_video_metadata_extraction',
-                                undo_fun=video_metadata_extraction_undo))
-def video_metadata_extraction(self, uri):
-    """Extract metadata from given video file.
-
-    All technical metadata, i.e. bitrate, will be translated into
-    ``ObjectVersionTags``, plus all the metadata extracted will be store under
-    ``_deposit`` as ``extracted_metadata``.
-
-    :param self: reference to instance of task base class
-    :param uri: URL of the file to extract metadata from.
-    """
-    recid = str(PersistentIdentifier.get('depid', self.deposit_id).object_uuid)
-
-    self._base_payload = dict(
-        object_version=str(self.object.version_id),
-        uri=uri,
-        tags=self.object.get_tags(),
-        deposit_id=self.deposit_id,
-        event_id=self.event_id, )
-
-    # Extract video's metadata using `ff_probe`
-    metadata = json.loads(ff_probe_all(uri))
-    extracted_dict = dict(metadata['format'], **metadata['streams'][0])
-
-    # Add technical information to the ObjectVersion as Tags
-    [ObjectVersionTag.create(self.object, k, v)
-     for k, v in extracted_dict.items()
-     if k in all_keys]
-
-    db.session.commit()
-
-    # Insert metadata into deposit's metadata
-    patch = [{
-        'op': 'add',
-        'path': '/_deposit/extracted_metadata',
-        'value': metadata
-    }]
-    update_record.s(recid, patch).apply()
-
-    # Update state
-    self.update_state(
-        state=SUCCESS,
-        meta=dict(
-            payload=dict(
-                tags=self.object.get_tags(), ),
-            message='Attached video metadata'))
-
-
-#
-# Extract frames
-#
-def video_extract_frames_undo(self, *args, **kwargs):
-    """Delete generated ObjectVersion slaves."""
-    slaves = ObjectVersion.query.join(ObjectVersion.tags).filter(
-        ObjectVersionTag.key == 'master',
-        ObjectVersionTag.value == self.obj_id
-    ).all()
-    for slave in slaves:
-        dispose_object_version(slave)
-    db.session.commit()
-
-
-@shared_task(
-    bind=True,
-    base=_factory_avc_task_base(type_='file_video_extract_frames',
-                                undo_fun=video_extract_frames_undo))
-def video_extract_frames(self, frames_start=5, frames_end=95, frames_gap=1):
-    """Extract images from some frames of the video.
-
-    Each of the frame images generates an ``ObjectVersion`` tagged as "frame"
-    using ``ObjectVersionTags``.
-
-    :param self: reference to instance of task base class
-    :param frames_start: start percentage, default 5.
-    :param frames_end: end percentage, default 95.
-    :param frames_gap: percentage between frames from start to end, default 10.
-    """
-    output_folder = tempfile.mkdtemp()
-
-    # Remove temporary directory on abrupt execution halts.
-    self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
-                                                  ignore_errors=True))
-
-    self._base_payload = dict(
-        object_version=self.obj_id,
-        tags=self.object.get_tags(),
-        deposit_id=self.deposit_id,
-        event_id=self.event_id, )
-
-    def progress_updater(seconds, duration):
-        """Progress reporter."""
-        meta = dict(
-            payload=dict(
-                size=duration,
-                percentage=(seconds or 0.0) / duration * 100, ),
-            message='Extracting frames {0} of {1} seconds'.format(
-                seconds, duration), )
-
-        self.update_state(state=STARTED, meta=meta)
-
-    ff_frames(
-        self.object.file.uri,
-        frames_start,
-        frames_end,
-        frames_gap,
-        os.path.join(output_folder, 'frame-%d.jpg'),
-        progress_callback=progress_updater)
-
-    for filename in os.listdir(output_folder):
-        obj = ObjectVersion.create(
-            bucket=self.object.bucket,
-            key=filename,
-            stream=open(os.path.join(output_folder, filename), 'rb'))
-        ObjectVersionTag.create(obj, 'master', self.obj_id)
-        ObjectVersionTag.create(obj, 'type', 'frame')
-
-    shutil.rmtree(output_folder)
-    db.session.commit()
-
-
-#
-# Transcode video
-#
-def video_transcode_undo(self, *args, **kwargs):
-    """Delete generated ObjectVersion slaves."""
-    tag_alias_1 = aliased(ObjectVersionTag)
-    tag_alias_2 = aliased(ObjectVersionTag)
-    dispose_object_version(
-        ObjectVersion.query
-        .join(tag_alias_1, ObjectVersion.tags)
-        .join(tag_alias_2, ObjectVersion.tags)
-        .filter(
-            tag_alias_1.key == 'master',
-            tag_alias_1.value == self.obj_id)
-        .filter(
-            tag_alias_2.key == 'preset',
-            tag_alias_2.value == kwargs['preset'])
-        .one())
-
-
-@shared_task(
-    bind=True,
-    base=_factory_avc_task_base(type_='file_transcode',
-                                undo_fun=video_transcode_undo))
-def video_transcode(self, preset, sleep_time=5):
-    """Launch video transcoding.
-
-    For each of the presets generate a new ``ObjectVersion`` tagged as slave
-    with the preset name as key and a link to the master version.
-
-    :param self: reference to instance of task base class
-    :param preset: Sorenson preset to use for transcoding.
-    :param sleep_time: Time interval between requests for the Sorenson status.
-    """
-    self._base_payload = dict(
-        object_version=str(self.object.version_id),
-        video_preset=preset,
-        tags=self.object.get_tags(),
-        deposit_id=self.deposit_id,
-        event_id=self.event_id, )
-
-    # Get master file's bucket_id
-    bucket_id = self.object.bucket_id
-    bucket_location = self.object.bucket.location.uri
-
-    preset_config = current_app.config['CDS_SORENSON_PRESETS']
-    preset_ext = preset_config[preset][1]
-    with db.session.begin_nested():
-        # Create FileInstance
-        file_instance = FileInstance.create()
-
-        # Create ObjectVersion
-        base_name = self.object.key.rsplit('.', 1)[0]
-        obj_key = '{0}-{1}{2}'.format(base_name, preset, preset_ext)
-        obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
-
-        # Extract new location
-        storage = file_instance.storage(default_location=bucket_location)
-        directory, filename = storage._get_fs()
-
-        input_file = self.object.file.uri
-        output_file = os.path.join(directory.root_path, filename)
-
-        # Start Sorenson
-        job_id = start_encoding(input_file, preset, output_file)
-
-        # Set revoke handler, in case of an abrupt execution halt.
-        self.set_revoke_handler(partial(stop_encoding, job_id))
-
-        # Create ObjectVersionTags
-        ObjectVersionTag.create(obj, 'master', self.obj_id)
-        ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
-        ObjectVersionTag.create(obj, 'preset', preset)
-        ObjectVersionTag.create(obj, 'type', 'video')
-
-        # Information necessary for monitoring
-        job_info = dict(
-            preset=preset,
-            job_id=job_id,
-            file_instance=str(file_instance.id),
-            uri=output_file,
-            object_version=str(obj.version_id),
-            key=obj_key,
-            tags=obj.get_tags(),
-            percentage=0, )
-
-    db.session.commit()
-
-    self.update_state(
-        state=STARTED,
-        meta=dict(
-            payload=dict(job_info=job_info),
-            message='Started transcoding.'))
-
-    # Monitor job and report accordingly
-    while job_info['percentage'] < 100:
-        # Get job status
-        status = get_encoding_status(job_id)['Status']
-        percentage = 100 if status['TimeFinished'] else status['Progress']
-        job_info['percentage'] = percentage
-
-        # Update task's state for this preset
+class AVCTask(Task):
+    """Base class for tasks which might be sending SSE messages."""
+
+    abstract = True
+
+    def __init__(self, type_):
+        """Constructor."""
+        super(AVCTask, self).__init__()
+        self._base_payload = {}
+        self._type = type_
+
+    def _extract_call_arguments(self, arg_list, **kwargs):
+        for name in arg_list:
+            setattr(self, name, kwargs.pop(name, None))
+        return kwargs
+
+    def __call__(self, *args, **kwargs):
+        """Extract SSE channel from keyword arguments.
+
+        .. note ::
+            the channel is extracted from the ``sse_channel`` keyword
+            argument.
+        """
+        arg_list = [
+            'sse_channel', 'event_id', 'deposit_id', 'bucket_id', 'key']
+        kwargs = self._extract_call_arguments(arg_list, **kwargs)
+
+        with self.app.flask_app.app_context():
+            self.object = as_object_version(kwargs.pop('object_version', None))
+            if self.object:
+                self.obj_id = str(self.object.version_id)
+            return self.run(*args, **kwargs)
+
+    def update_state(self, task_id=None, state=None, meta=None):
+        """."""
+        self._base_payload.update(meta.get('payload', {}))
+        meta['payload'] = self._base_payload
+        super(AVCTask, self).update_state(task_id, state, meta)
+        sse_publish_event(channel=self.sse_channel, type_=self._type,
+                          state=state, meta=meta)
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        """When an error occurs, attach useful information to the state."""
+        with celery_app.flask_app.app_context():
+            meta = dict(message=str(exc), payload=self._base_payload)
+            sse_publish_event(channel=self.sse_channel, type_=self._type,
+                              state=FAILURE, meta=meta)
+            self._update_record()
+
+    def on_success(self, exc, *args, **kwargs):
+        """When end correctly, attach useful information to the state."""
+        with celery_app.flask_app.app_context():
+            meta = dict(message=str(exc), payload=self._base_payload)
+            sse_publish_event(channel=self.sse_channel, type_=self._type,
+                              state=SUCCESS, meta=meta)
+            self._update_record()
+
+    def _update_record(self):
+        # update record state
+        with celery_app.flask_app.app_context():
+            if 'deposit_id' in self._base_payload \
+                    and self._base_payload['deposit_id']:
+                update_deposit_state(
+                    deposit_id=self._base_payload.get('deposit_id'),
+                    event_id=self._base_payload.get('event_id'),
+                    sse_channel=self.sse_channel
+                )
+
+    @staticmethod
+    def set_revoke_handler(handler):
+        """Set handler to be executed when the task gets revoked."""
+        def _handler(signum, frame):
+            handler()
+        signal.signal(signal.SIGTERM, _handler)
+
+
+class DownloadTask(AVCTask):
+    """Download task."""
+
+    def __init__(self):
+        """Init."""
+        self._type = 'file_download'
+        self._base_payload = {}
+
+    def clean(self, version_id, *args, **kwargs):
+        """Undo download task."""
+        # Delete the file and the object version
+        dispose_object_version(version_id)
+
+    def run(self, uri):
+        r"""Download file from a URL.
+
+        :param self: reference to instance of task base class
+        :param uri: URL of the file to download.
+        """
+        self._base_payload = dict(
+            key=self.object.key,
+            version_id=self.obj_id,
+            tags=self.object.get_tags(),
+            event_id=self.event_id,
+            deposit_id=self.deposit_id, )
+
+        # Make HTTP request
+        response = requests.get(uri, stream=True)
+
+        if 'Content-Length' in response.headers:
+            headers_size = int(response.headers.get('Content-Length'))
+        else:
+            headers_size = None
+
+        def progress_updater(size, total):
+            """Progress reporter."""
+            size = size or headers_size
+            if size is None:
+                # FIXME decide on proper error-handling behaviour
+                raise RuntimeError('Cannot locate "Content-Length" header.')
+            meta = dict(
+                payload=dict(
+                    size=size,
+                    total=total,
+                    percentage=total * 100 / size, ),
+                message='Downloading {0} of {1}'.format(total, size), )
+
+            self.update_state(state=STARTED, meta=meta)
+
+        self.object.set_contents(response.raw,
+                                 progress_callback=progress_updater,
+                                 size=headers_size)
+
+        db.session.commit()
+
+        return self.obj_id
+
+
+class ExtractMetadataTask(AVCTask):
+    """Extract metadata task."""
+
+    def __init__(self):
+        """Init."""
+        self._type = 'file_video_metadata_extraction'
+        self._base_payload = {}
+        format_keys = [
+            'duration',
+            'bit_rate',
+            'size',
+        ]
+        stream_keys = [
+            'avg_frame_rate',
+            'codec_name',
+            'width',
+            'height',
+            'nb_frames',
+            'display_aspect_ratio',
+            'color_range',
+        ]
+        self._all_keys = format_keys + stream_keys
+
+    def clean(self, deposit_id, version_id, *args, **kwargs):
+        """Undo metadata extraction."""
+        # 1. Revert patch on record
+        recid = str(PersistentIdentifier.get(
+            'depid', deposit_id).object_uuid)
+        patch = [{
+            'op': 'remove',
+            'path': '/_deposit/extracted_metadata',
+        }]
+        validator = 'invenio_records.validators.PartialDraft4Validator'
+        patch_record(recid=recid, patch=patch, validator=validator)
+
+        # 2. delete every tag created
+        for tag in ObjectVersionTag.query.filter(
+                ObjectVersionTag.version_id == version_id,
+                ObjectVersionTag.key.in_(self._all_keys)).all():
+            db.session.delete(tag)
+
+    def run(self, uri, *args, **kwargs):
+        """Extract metadata from given video file.
+
+        All technical metadata, i.e. bitrate, will be translated into
+        ``ObjectVersionTags``, plus all the metadata extracted will be
+        store under ``_deposit`` as ``extracted_metadata``.
+
+        :param self: reference to instance of task base class
+        :param uri: URL of the file to extract metadata from.
+        """
+        recid = str(PersistentIdentifier.get(
+            'depid', self.deposit_id).object_uuid)
+
+        self._base_payload = dict(
+            object_version=str(self.object.version_id),
+            uri=uri,
+            tags=self.object.get_tags(),
+            deposit_id=self.deposit_id,
+            event_id=self.event_id, )
+
+        # Extract video's metadata using `ff_probe`
+        metadata = json.loads(ff_probe_all(uri))
+        extracted_dict = dict(metadata['format'], **metadata['streams'][0])
+
+        # Add technical information to the ObjectVersion as Tags
+        [ObjectVersionTag.create(self.object, k, v)
+         for k, v in extracted_dict.items()
+         if k in self._all_keys]
+
+        tags = self.object.get_tags()
+
+        db.session.commit()
+
+        # Insert metadata into deposit's metadata
+        patch = [{
+            'op': 'add',
+            'path': '/_deposit/extracted_metadata',
+            'value': metadata
+        }]
+        update_record.s(recid, patch).apply()
+
+        # Update state
+        self.update_state(
+            state=SUCCESS,
+            meta=dict(
+                payload=dict(tags=tags,),
+                message='Attached video metadata'))
+
+
+class ExtractFramesTask(AVCTask):
+    """Extract frames task."""
+
+    def __init__(self):
+        """Init."""
+        self._type = 'file_video_extract_frames'
+        self._base_payload = {}
+
+    def clean(self, version_id, *args, **kwargs):
+        """Delete generated ObjectVersion slaves."""
+        # remove all objects version "slave" with type "frame" and,
+        # automatically, all tags connected
+        tag_alias_1 = aliased(ObjectVersionTag)
+        tag_alias_2 = aliased(ObjectVersionTag)
+        slaves = ObjectVersion.query \
+            .join(tag_alias_1, ObjectVersion.tags) \
+            .join(tag_alias_2, ObjectVersion.tags) \
+            .filter(
+                tag_alias_1.key == 'master',
+                tag_alias_1.value == version_id) \
+            .filter(tag_alias_2.key == 'type', tag_alias_2.value == 'frame') \
+            .all()
+        # FIXME do a test for check separately every "undo" when
+        # run a AVC workflow
+        for slave in slaves:
+            dispose_object_version(slave)
+
+    def run(self, frames_start=5, frames_end=95, frames_gap=1,
+            *args, **kwargs):
+        """Extract images from some frames of the video.
+
+        Each of the frame images generates an ``ObjectVersion`` tagged as
+        "frame" using ``ObjectVersionTags``.
+
+        :param self: reference to instance of task base class
+        :param frames_start: start percentage, default 5.
+        :param frames_end: end percentage, default 95.
+        :param frames_gap: percentage between frames from start to end,
+            default 10.
+        """
+        output_folder = tempfile.mkdtemp()
+
+        # Remove temporary directory on abrupt execution halts.
+        self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
+                                                      ignore_errors=True))
+
+        self._base_payload = dict(
+            object_version=self.obj_id,
+            tags=self.object.get_tags(),
+            deposit_id=self.deposit_id,
+            event_id=self.event_id, )
+
+        def progress_updater(seconds, duration):
+            """Progress reporter."""
+            meta = dict(
+                payload=dict(
+                    size=duration,
+                    percentage=(seconds or 0.0) / duration * 100, ),
+                message='Extracting frames {0} of {1} seconds'.format(
+                    seconds, duration), )
+
+            self.update_state(state=STARTED, meta=meta)
+
+        ff_frames(
+            self.object.file.uri,
+            frames_start,
+            frames_end,
+            frames_gap,
+            os.path.join(output_folder, 'frame-%d.jpg'),
+            progress_callback=progress_updater)
+
+        for filename in os.listdir(output_folder):
+            obj = ObjectVersion.create(
+                bucket=self.object.bucket,
+                key=filename,
+                stream=open(os.path.join(output_folder, filename), 'rb'))
+            ObjectVersionTag.create(obj, 'master', self.obj_id)
+            ObjectVersionTag.create(obj, 'type', 'frame')
+
+        shutil.rmtree(output_folder)
+        db.session.commit()
+
+
+class TranscodeVideoTask(AVCTask):
+    """Transcode video task."""
+
+    def __init__(self):
+        """Init."""
+        self._type = 'file_transcode'
+        self._base_payload = {}
+
+    def _build_slave_key(self, preset, master_key):
+        """Build the object version key connected with the transcoding."""
+        preset_config = current_app.config['CDS_SORENSON_PRESETS']
+        preset_ext = preset_config[preset][1]
+        base_name = master_key.rsplit('.', 1)[0]
+        return '{0}-{1}{2}'.format(base_name, preset, preset_ext)
+
+    def clean(self, version_id, preset, *args, **kwargs):
+        """Delete generated ObjectVersion slaves."""
+        object_version = as_object_version(version_id)
+        obj_key = self._build_slave_key(
+            preset=preset, master_key=object_version.key)
+        object_version = ObjectVersion.query.filter_by(
+            bucket_id=object_version.bucket_id, key=obj_key).one()
+        dispose_object_version(object_version)
+
+    def run(self, preset, sleep_time=5, *args, **kwargs):
+        """Launch video transcoding.
+
+        For each of the presets generate a new ``ObjectVersion`` tagged as
+        slave with the preset name as key and a link to the master version.
+
+        :param self: reference to instance of task base class
+        :param preset: Sorenson preset to use for transcoding.
+        :param sleep_time: Time interval between requests for the Sorenson
+            status.
+        """
+        self._base_payload = dict(
+            object_version=str(self.object.version_id),
+            video_preset=preset,
+            tags=self.object.get_tags(),
+            deposit_id=self.deposit_id,
+            event_id=self.event_id, )
+
+        # Get master file's bucket_id
+        bucket_id = self.object.bucket_id
+        bucket_location = self.object.bucket.location.uri
+        # and master file's key
+        master_key = self.object.key
+
+        with db.session.begin_nested():
+            # Create FileInstance
+            file_instance = FileInstance.create()
+
+            # Create ObjectVersion
+            obj_key = self._build_slave_key(
+                preset=preset, master_key=master_key)
+            obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
+
+            # Extract new location
+            storage = file_instance.storage(default_location=bucket_location)
+            directory, filename = storage._get_fs()
+
+            input_file = self.object.file.uri
+            output_file = os.path.join(directory.root_path, filename)
+
+            try:
+                # Start Sorenson
+                job_id = start_encoding(input_file, preset, output_file)
+            except SorensonError as e:
+                self.update_state(
+                    state=FAILURE,
+                    meta={'payload': {}, 'message': str(e)})
+
+            # Set revoke handler, in case of an abrupt execution halt.
+            self.set_revoke_handler(partial(stop_encoding, job_id))
+
+            # Create ObjectVersionTags
+            ObjectVersionTag.create(obj, 'master', self.obj_id)
+            ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
+            ObjectVersionTag.create(obj, 'preset', preset)
+            ObjectVersionTag.create(obj, 'type', 'video')
+
+            # Information necessary for monitoring
+            job_info = dict(
+                preset=preset,
+                job_id=job_id,
+                file_instance=str(file_instance.id),
+                uri=output_file,
+                object_version=str(obj.version_id),
+                key=obj_key,
+                tags=obj.get_tags(),
+                percentage=0, )
+
+        db.session.commit()
+
         self.update_state(
             state=STARTED,
             meta=dict(
                 payload=dict(job_info=job_info),
-                message='Transcoding {0}'.format(percentage)))
+                message='Started transcoding.'))
 
-        time.sleep(sleep_time)
+        try:
+            # Monitor job and report accordingly
+            while job_info['percentage'] < 100:
+                # Get job status
+                status = get_encoding_status(job_id)['Status']
+                percentage = 100 if status['TimeFinished'] \
+                    else status['Progress']
+                job_info['percentage'] = percentage
 
-    # Set file's location, if job has completed
+                # Update task's state for this preset
+                self.update_state(
+                    state=STARTED,
+                    meta=dict(
+                        payload=dict(job_info=job_info),
+                        message='Transcoding {0}'.format(percentage)))
+
+                time.sleep(sleep_time)
+        except SorensonError as e:
+            self.update_state(
+                state=FAILURE,
+                meta={'payload': {'job_id': job_id}, 'message': str(e)})
+
+        # Set file's location, if job has completed
+        with db.session.begin_nested():
+            uri = output_file
+            with open(uri, 'rb') as transcoded_file:
+                digest = hashlib.md5(transcoded_file.read()).hexdigest()
+            size = os.path.getsize(uri)
+            checksum = '{0}:{1}'.format('md5', digest)
+            file_instance.set_uri(uri, size, checksum)
+            as_object_version(
+                job_info['object_version']).set_file(file_instance)
+        db.session.commit()
+
+
+def patch_record(recid, patch, validator=None):
+    """Patch a record."""
     with db.session.begin_nested():
-        uri = output_file
-        with open(uri, 'rb') as transcoded_file:
-            digest = hashlib.md5(transcoded_file.read()).hexdigest()
-        size = os.path.getsize(uri)
-        checksum = '{0}:{1}'.format('md5', digest)
-        file_instance.set_uri(uri, size, checksum)
-        as_object_version(job_info['object_version']).set_file(file_instance)
-    db.session.commit()
+        record = Record.get_record(recid)
+        record = record.patch(patch)
+        if validator:
+            validator = import_string(validator)
+        record.commit(validator=validator)
+    return record
 
 
 #
@@ -506,12 +535,8 @@ def update_record(self, recid, patch, validator=None,
     """
     if patch:
         try:
-            with db.session.begin_nested():
-                record = Record.get_record(recid)
-                record = record.patch(patch)
-                if validator:
-                    validator = import_string(validator)
-                record.commit(validator=validator)
+            patch_record(recid=recid, patch=patch,
+                         validator=validator)
             db.session.commit()
             return recid
         except ConcurrentModificationError as exc:
@@ -571,17 +596,14 @@ def update_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
             ).apply_async()
 
 
-def dispose_object_version(object_version, delete_object=True):
+def dispose_object_version(object_version):
     """Clean up resources related to an ObjectVersion."""
     object_version = as_object_version(object_version)
-    with db.session.begin_nested():
-        file_id = object_version.file_id
-        if file_id:
-            object_version.bucket.size -= object_version.file.size
-            object_file = object_version.file
-            object_version.file_id = None
-            remove_file_data.s(file_id, silent=False).apply()
-            object_file.delete()
-        if delete_object:
-            object_version.remove()
-    db.session.commit()
+    file_id = object_version.file_id
+    object_version.remove()
+    if file_id:
+        # TODO add a "force" option on remove_file_data() task?
+        #  remove_file_data.s(file_id, silent=False).apply_async()
+        f = FileInstance.get(file_id)
+        f.delete()
+        f.storage().delete()
