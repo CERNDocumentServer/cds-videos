@@ -389,6 +389,9 @@ class Video(CDSDeposit):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
+        # inherit ``category`` and ``type`` fields from parent project
+        self['category'] = self.project['category']
+        self['type'] = self.project['type']
         # publish the video
         video_published = super(Video, self).publish(pid=pid, id_=id_)
         (_, record_new) = self.fetch_published()

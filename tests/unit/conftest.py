@@ -400,6 +400,9 @@ def project_metadata():
                 'role': 'Editor'
             }
         ],
+        'date': '2016-12-03T00:00:00Z',
+        'category': 'CERN',
+        'type': 'MOVIE',
     }
 
 
@@ -436,6 +439,9 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
         'description': {
             'value': 'in tempor reprehenderit enim eiusmod',
         },
+        'date': '2016-12-03T00:00:00Z',
+        'category': 'CERN',
+        'type': 'MOVIE',
     }
     project_video_1 = {
         'title': {
