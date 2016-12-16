@@ -143,7 +143,8 @@ def test_delete_videos(project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_add_video(app, es, cds_jsonresolver, users, location):
+def test_add_video(app, es, cds_jsonresolver, users, location,
+                   deposit_metadata):
     """Test add video."""
     project_data = {
         'title': {
@@ -151,6 +152,7 @@ def test_add_video(app, es, cds_jsonresolver, users, location):
         },
         'videos': [],
     }
+    project_data.update(deposit_metadata)
 
     login_user(User.query.get(users[0]))
 
@@ -343,3 +345,17 @@ def test_project_delete_one_video_published(app, project, force):
     #  project_id = video_1.project.id
 
     #  project.delete(force=force)
+
+
+def test_inheritance(app, project):
+    """Test that videos inherit the proper fields from parent project."""
+    (project, video, _) = project
+    assert 'category' in project
+    assert 'type' in project
+
+    # Publish the video
+    video = video.publish()
+    assert 'category' in video
+    assert 'type' in video
+    assert video['category'] == project['category']
+    assert video['type'] == project['type']

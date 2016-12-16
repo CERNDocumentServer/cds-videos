@@ -241,11 +241,10 @@ def depid(app, users, db):
 
 
 @pytest.fixture()
-def cds_depid(api_app, users, db, bucket):
+def cds_depid(api_app, users, db, bucket, deposit_metadata):
     """New deposit with files."""
-    record = {
-        'title': {'title': 'fuu'}
-    }
+    record = {'title': {'title': 'fuu'}}
+    record.update(deposit_metadata)
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
         deposit = CDSDeposit.create(record)
@@ -366,9 +365,18 @@ def cds_jsonresolver(app):
 
 
 @pytest.fixture()
-def project_metadata():
-    """Simple project metadata."""
+def deposit_metadata():
     return {
+        'date': '2016-12-03T00:00:00Z',
+        'category': 'CERN',
+        'type': 'MOVIE',
+    }
+
+
+@pytest.fixture()
+def project_metadata(deposit_metadata):
+    """Simple project metadata."""
+    metadata = {
         'title': {
             'title': 'my project',
             'subtitle': 'tempor quis elit mollit',
@@ -401,6 +409,8 @@ def project_metadata():
             }
         ],
     }
+    metadata.update(deposit_metadata)
+    return metadata
 
 
 @pytest.fixture()
@@ -427,7 +437,8 @@ def json_headers(app):
 
 
 @pytest.fixture()
-def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
+def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
+            deposit_metadata):
     """New project with videos."""
     project_data = {
         'title': {
@@ -437,6 +448,7 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
             'value': 'in tempor reprehenderit enim eiusmod',
         },
     }
+    project_data.update(deposit_metadata)
     project_video_1 = {
         'title': {
             'title': 'video 1',
@@ -445,6 +457,7 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
             'value': 'in tempor reprehenderit enim eiusmod',
         },
     }
+    project_video_1.update(deposit_metadata)
     project_video_2 = {
         'title': {
             'title': 'video 2',
@@ -453,6 +466,7 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db):
             'value': 'in tempor reprehenderit enim eiusmod',
         },
     }
+    project_video_2.update(deposit_metadata)
     with app.test_request_context():
         login_user(User.query.get(users[0]))
 
