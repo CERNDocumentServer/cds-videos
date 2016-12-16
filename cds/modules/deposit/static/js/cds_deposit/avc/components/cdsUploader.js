@@ -379,6 +379,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       return frames || next.frame;
     }, null);
   };
+
+  this.getSubformats = function() {
+    return that.files.reduce(function (videos, next) {
+      return videos || next.video;
+    }, null);
+  };
 }
 
 cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout',
