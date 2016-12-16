@@ -36,8 +36,31 @@
       </td>
       <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
     </tr>
+    <tr ng-show="$ctrl.getSubformats()">
+      <td><b>Extracted subformats</b></td>
+      <td></td>
+      <td class="text-center">
+        <span class="text-success">✓</span>
+      </td>
+      <td class="text-center">
+        <a ng-click="showSubformats = !showSubformats">
+          <span ng-show="!showSubformats">Show</span>
+          <span ng-show="showSubformats">Hide</span>
+        </a>
+      </td>
+    </tr>
+    <tr class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
+      <td>{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 50">...</span></td>
+      <td>
+        <span>{{ f.size | bytesToHumanReadable }}</span>
+      </td>
+      <td class="text-center">
+        <span class="text-success">✓</span>
+      </td>
+      <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
+    </tr>
     <tr ng-show="$ctrl.getFrames()">
-      <td>Extracted frames</td>
+      <td><b>Extracted frames</b></td>
       <td></td>
       <td class="text-center">
         <span class="text-success">✓</span>
