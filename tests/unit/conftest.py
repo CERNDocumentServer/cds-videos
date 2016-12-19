@@ -244,7 +244,10 @@ def depid(app, users, db):
 def cds_depid(api_app, users, db, bucket):
     """New deposit with files."""
     record = {
-        'title': {'title': 'fuu'}
+        'title': {'title': 'fuu'},
+        'date': '2016-12-03T00:00:00Z',
+        'category': 'CERN',
+        'type': 'MOVIE',
     }
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
