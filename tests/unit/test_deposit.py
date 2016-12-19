@@ -109,9 +109,9 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
         )
 
 
-def test_cds_deposit(es, location):
+def test_cds_deposit(es, location, deposit_metadata):
     """Test CDS deposit creation."""
-    deposit = CDSDeposit.create({})
+    deposit = CDSDeposit.create(deposit_metadata)
     id_ = deposit.id
     db.session.expire_all()
     deposit = CDSDeposit.get_record(id_)
@@ -120,10 +120,10 @@ def test_cds_deposit(es, location):
     assert '_buckets' in deposit
 
 
-def test_links_filter(es, location):
+def test_links_filter(es, location, deposit_metadata):
     """Test Jinja to_links_js filter."""
     assert to_links_js(None) == []
-    deposit = CDSDeposit.create({})
+    deposit = CDSDeposit.create(deposit_metadata)
     links = to_links_js(deposit.pid, deposit)
     assert all([key in links for key in ['self', 'edit', 'publish', 'bucket',
                'files', 'html', 'discard']])
@@ -134,9 +134,9 @@ def test_links_filter(es, location):
     assert links['files'] == self_url + '/files'
 
 
-def test_permissions(es, location):
+def test_permissions(es, location, deposit_metadata):
     """Test deposit permissions."""
-    deposit = CDSDeposit.create({})
+    deposit = CDSDeposit.create(deposit_metadata)
     deposit.commit()
     user = User(email='user@cds.cern', password='123456', active=True)
     g.identity = Identity(user.id)
