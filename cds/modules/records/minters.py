@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from .providers import CDSRecordIdProvider
+from .providers import CDSRecordIdProvider, CDSReportNumberProvider
 
 
 def recid_minter(record_uuid, data):
@@ -36,3 +36,11 @@ def recid_minter(record_uuid, data):
         object_type='rec', object_uuid=record_uuid)
     data['recid'] = int(provider.pid.pid_value)
     return provider.pid
+
+
+def report_number_minter(record_uuid, data, **kwargs):
+    """Mint report number."""
+    provider = CDSReportNumberProvider.create(
+        object_type='rec', object_uuid=record_uuid, data=data, **kwargs)
+    data['report_number'] = dict(report_number=provider.pid.pid_value)
+    return provider.pid.pid_value

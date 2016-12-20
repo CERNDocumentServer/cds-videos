@@ -73,5 +73,32 @@ class CDSRecordIdProvider(BaseProvider):
         kwargs.setdefault('status', cls.default_status)
         if object_type and object_uuid:
             kwargs['status'] = PIDStatus.REGISTERED
+
         return super(CDSRecordIdProvider, cls).create(
+            object_type=object_type, object_uuid=object_uuid, **kwargs)
+
+
+class CDSReportNumberProvider(BaseProvider):
+    """Report number provider."""
+
+    pid_type = 'rn'
+    """Type of persistent identifier."""
+
+    pid_provider = None
+    """Name of provider."""
+
+    default_status = PIDStatus.RESERVED
+    """Report numbers are by default registered immediately."""
+
+    @classmethod
+    def create(cls, object_type=None, object_uuid=None, data=None, **kwargs):
+        """Create a new report number."""
+        sequence_generator, kwargs = data.get_report_number_sequence(**kwargs)
+        kwargs['pid_value'] = sequence_generator.next()
+
+        kwargs.setdefault('status', cls.default_status)
+        if object_type and object_uuid:
+            kwargs['status'] = PIDStatus.REGISTERED
+
+        return super(CDSReportNumberProvider, cls).create(
             object_type=object_type, object_uuid=object_uuid, **kwargs)

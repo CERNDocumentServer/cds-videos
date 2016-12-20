@@ -235,6 +235,23 @@
                             "index": "not_analyzed"
                         }
                     }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "report_number": {
+                    "properties": {
+                        "_report_number": {
+                            "type": "string"
+                        },
+                        "report_number": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
                 }
             },
             "date_detection": true

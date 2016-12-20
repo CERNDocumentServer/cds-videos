@@ -30,6 +30,7 @@ import mock
 import pytest
 import uuid
 
+from cds.modules.records.providers import CDSRecordIdProvider
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
@@ -343,3 +344,17 @@ def test_project_delete_one_video_published(app, project, force):
     #  project_id = video_1.project.id
 
     #  project.delete(force=force)
+
+
+def test_inheritance(app, project):
+    """Test that videos inherit the proper fields from parent project."""
+    (project, video, _) = project
+    assert 'category' in project
+    assert 'type' in project
+
+    # Publish the video
+    video = video.publish()
+    assert 'category' in video
+    assert 'type' in video
+    assert video['category'] == project['category']
+    assert video['type'] == project['type']
