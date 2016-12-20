@@ -29,7 +29,7 @@ from __future__ import absolute_import
 import mock
 import json
 from flask import url_for
-from cds.modules.webhooks.status import GetTaskNameByID, iterate_result
+from cds.modules.webhooks.status import GetInfoByID, iterate_result
 from invenio_webhooks.models import Event
 from helpers import mock_current_user
 
@@ -59,7 +59,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
         data = json.loads(resp.data.decode('utf-8'))
         event = Event.query.first()
@@ -68,7 +68,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
             for task in group:
                 task_name, info = next(iter(task.items()))
                 task_id = info['id']
-                search = GetTaskNameByID(task_id=task_id)
+                search = GetInfoByID(task_id=task_id)
                 iterate_result(raw_info=event.receiver._raw_info(event=event),
                                fun=search)
                 assert search.task_name == task_name

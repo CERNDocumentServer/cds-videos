@@ -72,7 +72,7 @@ class AVCTask(Task):
     def __init__(self, type_):
         """Constructor."""
         super(AVCTask, self).__init__()
-        self._base_payload = {}
+        self._base_payload = {'type': type_}
         self._type = type_
 
     def _extract_call_arguments(self, arg_list, **kwargs):
@@ -92,7 +92,7 @@ class AVCTask(Task):
         kwargs = self._extract_call_arguments(arg_list, **kwargs)
 
         with self.app.flask_app.app_context():
-            self.object = as_object_version(kwargs.pop('object_version', None))
+            self.object = as_object_version(kwargs.pop('version_id', None))
             if self.object:
                 self.obj_id = str(self.object.version_id)
             return self.run(*args, **kwargs)
@@ -109,16 +109,19 @@ class AVCTask(Task):
         """When an error occurs, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
-            sse_publish_event(channel=self.sse_channel, type_=self._type,
-                              state=FAILURE, meta=meta)
+            # NOTE: workaround to be able to save the meta in case of exception
+            exception = {}
+            exception['exc_message'] = meta
+            exception['exc_type'] = 'TypeError'
+            self.update_state(task_id=task_id, state=FAILURE, meta=exception)
+            # /NOTE
             self._update_record()
 
-    def on_success(self, exc, *args, **kwargs):
+    def on_success(self, exc, task_id, *args, **kwargs):
         """When end correctly, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
-            sse_publish_event(channel=self.sse_channel, type_=self._type,
-                              state=SUCCESS, meta=meta)
+            self.update_state(task_id=task_id, state=SUCCESS, meta=meta)
             self._update_record()
 
     def _update_record(self):
@@ -146,7 +149,7 @@ class DownloadTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_download'
-        self._base_payload = {}
+        self._base_payload = {}  # {'type': self._type}
 
     def clean(self, version_id, *args, **kwargs):
         """Undo download task."""
@@ -159,7 +162,7 @@ class DownloadTask(AVCTask):
         :param self: reference to instance of task base class
         :param uri: URL of the file to download.
         """
-        self._base_payload = dict(
+        self._base_payload.update(
             key=self.object.key,
             version_id=self.obj_id,
             tags=self.object.get_tags(),
@@ -204,7 +207,7 @@ class ExtractMetadataTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_video_metadata_extraction'
-        self._base_payload = {}
+        self._base_payload = {}  # {'type': self._type}
         format_keys = [
             'duration',
             'bit_rate',
@@ -252,8 +255,8 @@ class ExtractMetadataTask(AVCTask):
         recid = str(PersistentIdentifier.get(
             'depid', self.deposit_id).object_uuid)
 
-        self._base_payload = dict(
-            object_version=str(self.object.version_id),
+        self._base_payload.update(
+            version_id=str(self.object.version_id),
             uri=uri,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
@@ -294,7 +297,7 @@ class ExtractFramesTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_video_extract_frames'
-        self._base_payload = {}
+        self._base_payload = {}  # {'type': self._type}
 
     def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
@@ -334,8 +337,8 @@ class ExtractFramesTask(AVCTask):
         self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
                                                       ignore_errors=True))
 
-        self._base_payload = dict(
-            object_version=self.obj_id,
+        self._base_payload.update(
+            version_id=self.obj_id,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
             event_id=self.event_id, )
@@ -377,7 +380,7 @@ class TranscodeVideoTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_transcode'
-        self._base_payload = {}
+        self._base_payload = {}  # {'type': self._type}
 
     def _build_slave_key(self, preset, master_key):
         """Build the object version key connected with the transcoding."""
@@ -392,7 +395,7 @@ class TranscodeVideoTask(AVCTask):
         obj_key = self._build_slave_key(
             preset=preset, master_key=object_version.key)
         object_version = ObjectVersion.query.filter_by(
-            bucket_id=object_version.bucket_id, key=obj_key).one()
+            bucket_id=object_version.bucket_id, key=obj_key).first()
         dispose_object_version(object_version)
 
     def run(self, preset, sleep_time=5, *args, **kwargs):
@@ -406,9 +409,9 @@ class TranscodeVideoTask(AVCTask):
         :param sleep_time: Time interval between requests for the Sorenson
             status.
         """
-        self._base_payload = dict(
-            object_version=str(self.object.version_id),
-            video_preset=preset,
+        self._base_payload.update(
+            version_id=str(self.object.version_id),
+            preset=preset,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
             event_id=self.event_id, )
@@ -458,7 +461,7 @@ class TranscodeVideoTask(AVCTask):
                 job_id=job_id,
                 file_instance=str(file_instance.id),
                 uri=output_file,
-                object_version=str(obj.version_id),
+                version_id=str(obj.version_id),
                 key=obj_key,
                 tags=obj.get_tags(),
                 percentage=0, )
@@ -502,7 +505,7 @@ class TranscodeVideoTask(AVCTask):
             checksum = '{0}:{1}'.format('md5', digest)
             file_instance.set_uri(uri, size, checksum)
             as_object_version(
-                job_info['object_version']).set_file(file_instance)
+                job_info['version_id']).set_file(file_instance)
         db.session.commit()
 
 
@@ -598,12 +601,16 @@ def update_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
 
 def dispose_object_version(object_version):
     """Clean up resources related to an ObjectVersion."""
-    object_version = as_object_version(object_version)
-    file_id = object_version.file_id
-    object_version.remove()
-    if file_id:
-        # TODO add a "force" option on remove_file_data() task?
-        #  remove_file_data.s(file_id, silent=False).apply_async()
-        f = FileInstance.get(file_id)
-        f.delete()
-        f.storage().delete()
+    # TODO move the "file removal" in a separate function to be able to
+    # remove the file from download without remove the object version.
+    # See: AVC workflow download task (clean)
+    if object_version:
+        object_version = as_object_version(object_version)
+        file_id = object_version.file_id
+        object_version.remove()
+        if file_id:
+            # TODO add a "force" option on remove_file_data() task?
+            #  remove_file_data.s(file_id, silent=False).apply_async()
+            f = FileInstance.get(file_id)
+            f.delete()
+            f.storage().delete()

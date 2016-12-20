@@ -149,7 +149,7 @@ class CollectInfoTasks(object):
             yield info
 
 
-class GetTaskNameByID(object):
+class GetInfoByID(object):
     """Find task name by task id."""
 
     def __init__(self, task_id):
@@ -159,9 +159,5 @@ class GetTaskNameByID(object):
     def __call__(self, task_name, result):
         """Search task name."""
         if result.id == self._task_id:
-            self._task_name = task_name
-
-    @property
-    def task_name(self):
-        """Get task name."""
-        return self._task_name
+            self.task_name = task_name
+            self.result = result
