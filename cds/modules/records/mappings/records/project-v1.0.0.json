@@ -121,6 +121,12 @@
                     },
                     "type": "object"
                 },
+                "category": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
                 "creator": {
                     "properties": {
                         "contribution": {

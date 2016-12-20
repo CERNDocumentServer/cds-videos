@@ -235,6 +235,12 @@
                             "index": "not_analyzed"
                         }
                     }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             },
             "date_detection": true
