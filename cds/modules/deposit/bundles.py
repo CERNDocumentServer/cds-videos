@@ -53,11 +53,14 @@ js_dependecies_schema_form = NpmBundle(
     'node_modules/objectpath/lib/ObjectPath.js',
     'node_modules/angular-schema-form/dist/schema-form.js',
     'node_modules/angular-schema-form/dist/bootstrap-decorator.js',
+    'node_modules/angular-schema-form-dynamic-select/' +
+    'angular-schema-form-dynamic-select.js',
     npm={
         'angular-schema-form': '~0.8.13',
         'angular-schema-form-bootstrap': '~0.2.0',
         'objectpath': '~1.2.1',
         'tv4': '~1.2.7',
+        'angular-schema-form-dynamic-select': '~0.13.1',
     }
 )
 

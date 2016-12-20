@@ -49,6 +49,35 @@
         ]
       },
       {
+        "key": "category",
+        "required": true,
+        "placeholder": "Category",
+        "title": "Category",
+        "type": "strapselect",
+        "labelHtmlClass": "col-sm-3",
+        "fieldHtmlClass": "col-sm-9",
+        "htmlClass": "cds-deposit-strap-select",
+        "options": {
+          "url": "/api/categories",
+          "asyncCallback": "$ctrl.autocompleteCategories"
+        }
+      },
+      {
+        "key": "type",
+        "required": true,
+        "placeholder": "Type",
+        "title": "Type",
+        "type": "strapselect",
+        "labelHtmlClass": "col-sm-3",
+        "fieldHtmlClass": "col-sm-9",
+        "htmlClass": "cds-deposit-strap-select",
+        "options": {
+          "filterTriggers": ["model.category"],
+          "filter" : "item.category == model.category",
+          "asyncCallback": "$ctrl.autocompleteType"
+        }
+      },
+      {
         "type": "array",
         "key": "contributors",
         "title": "Contributors",
