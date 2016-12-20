@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import json
 
+from copy import deepcopy
 from cds.modules.deposit.api import project_resolver, video_resolver
 from flask import url_for
 from invenio_accounts.testutils import login_user_via_session
@@ -36,7 +37,7 @@ from invenio_accounts.models import User
 
 def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
                          project_metadata, json_headers, deposit_rest,
-                         data_file_1, data_file_2):
+                         data_file_1, data_file_2, deposit_metadata):
     """Test project simple workflow."""
     def check_connection(videos, project):
         """check project <---> video connection."""
@@ -73,11 +74,12 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert project['$schema'] == project_schema
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
+        video_metadata = deepcopy(deposit_metadata)
+        video_metadata.update(
+            _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps({
-                '_project_id': project_dict['metadata']['_deposit']['id'],
-            }), headers=json_headers)
+            data=json.dumps(video_metadata), headers=json_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -107,11 +109,12 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert video_1_dict['metadata']['_files'] == []
 
         # [[ ADD A NEW EMPTY VIDEO_2 ]]
+        video_metadata = deepcopy(deposit_metadata)
+        video_metadata.update(
+            _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps({
-                '_project_id': project_dict['metadata']['_deposit']['id'],
-            }), headers=json_headers)
+            data=json.dumps(video_metadata), headers=json_headers)
 
         # check returned value
         assert res.status_code == 201

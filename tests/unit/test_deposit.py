@@ -92,22 +92,6 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
                 pid_value=pid,
         )
 
-        # Test links for general deposits
-        res = client.post(
-            url_for('invenio_deposit_rest.depid_list'),
-            data=json.dumps({}), headers=json_headers)
-        assert res.status_code == 201
-        data = json.loads(res.data.decode('utf-8'))
-        links = data['links']
-        pid = data['metadata']['_deposit']['id']
-        assert 'bucket' in links
-        assert links['html'] == current_app.config['DEPOSIT_UI_ENDPOINT']\
-            .format(
-                host=request.host,
-                scheme=request.scheme,
-                pid_value=pid,
-        )
-
 
 def test_cds_deposit(es, location, deposit_metadata):
     """Test CDS deposit creation."""
