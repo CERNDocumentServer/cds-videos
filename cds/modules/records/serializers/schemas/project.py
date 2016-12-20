@@ -61,6 +61,8 @@ class ProjectSchema(StrictKeysSchema):
     _buckets = fields.Nested(BucketSchema)
     _deposit = fields.Nested(ProjectDepositSchema)
     _oai = fields.Nested(OaiSchema)
+    category = fields.Str()
+    type = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
     creator = fields.Nested(CreatorSchema)
     date = fields.Str()
