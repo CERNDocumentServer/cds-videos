@@ -402,3 +402,22 @@ a[ng-click]{
 .cds-deposit-thumbnail-pad {
   padding: 5px;
 }
+
+.cds-deposit-strap-select {
+  margin-left: 0 !important;
+
+  button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  ul.dropdown-menu {
+    width: 95%;
+  }
+
+  &.has-success * {
+    color: inherit;
+  }
+}

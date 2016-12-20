@@ -1,4 +1,4 @@
-function cdsFormCtrl($scope, schemaFormDecorators) {
+function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   var that = this;
   this.$onInit = function() {
@@ -43,9 +43,48 @@ function cdsFormCtrl($scope, schemaFormDecorators) {
       );
     }
   }
+
+  this.types = $q.defer();
+
+  this.autocompleteCategories = function(options, query) {
+    if (!that.categories) {
+      that.categories = $http.get(options.url).then(function(data) {
+        var categories = data.data.hits.hits;
+        that.types.resolve({ data: [].concat.apply([], categories.map(
+          function (category) {
+            return category.metadata.types.map(
+              function (type) {
+                return {
+                  name: type,
+                  value: type,
+                  category: category.metadata.name
+                };
+              }
+            );
+          }
+        ))});
+        return categories.map(function(category) {
+          return {
+            name: category.metadata.name,
+            value: category.metadata.name,
+            types: category.metadata.types
+          };
+        });
+      });
+    }
+    return that.categories.then(function(categories) {
+      return {
+        data: categories
+      };
+    });
+  }
+
+  this.autocompleteType = function() {
+    return that.types.promise;
+  }
 }
 
-cdsFormCtrl.$inject = ['$scope', 'schemaFormDecorators'];
+cdsFormCtrl.$inject = ['$scope', '$http', '$q', 'schemaFormDecorators'];
 
 function cdsForm() {
   return {
