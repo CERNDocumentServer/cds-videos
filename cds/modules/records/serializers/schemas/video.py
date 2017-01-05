@@ -56,7 +56,7 @@ class VideoFileSchema(StrictKeysSchema):
     quality = fields.Str()
     size = fields.Integer()
     thumbnail = fields.Str()
-    type = fields.Str()
+    type_ = fields.Str(attribute='type', load_from='type', dump_to='type')
     version_id = fields.Str()
     width = fields.Str()
 
@@ -70,19 +70,21 @@ class VideoSchema(StrictKeysSchema):
     _oai = fields.Nested(OaiSchema)
     _project_id = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
-    copyright = fields.Nested(CopyrightSchema)
+    copyright_ = fields.Nested(CopyrightSchema, attribute='copyright')
     creator = fields.Nested(CreatorSchema)
-    date = fields.Str()
     description = fields.Nested(DescriptionSchema)
     description_translations = fields.Nested(DescriptionTranslationSchema,
                                              many=True)
     keywords = fields.Nested(KeywordsSchema, many=True)
-    license = fields.Str()
+    license_ = fields.Str(attribute='licence')
     recid = fields.Number()
     schema = fields.Str(attribute="$schema")
     title = fields.Nested(TitleSchema)
     title_translations = fields.Nested(TitleTranslationSchema, many=True)
 
-    category = fields.Str()
-    type = fields.Str()
+    date = fields.Str()
+    category = fields.Str(required=True)
+    type_ = fields.Str(required=True,
+                       attribute='type', load_from='type', dump_to='type')
     report_number = fields.Nested(ReportNumberSchema, many=False)
+
