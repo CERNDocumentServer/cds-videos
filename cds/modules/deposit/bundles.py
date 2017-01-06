@@ -72,6 +72,15 @@ js_jquery = NpmBundle(
 
 js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/avc.module.js',
+    'js/cds_deposit/avc/filters/progressClass.js',
+    'js/cds_deposit/avc/filters/progressIcon.js',
+    'js/cds_deposit/avc/filters/toInt.js',
+    'js/cds_deposit/avc/providers/depositStates.js',
+    'js/cds_deposit/avc/providers/depositSSEEvents.js',
+    'js/cds_deposit/avc/providers/depositStatuses.js',
+    'js/cds_deposit/avc/providers/stateReducer.js',
+    'js/cds_deposit/avc/providers/typeReducer.js',
+    'js/cds_deposit/avc/providers/urlBuilder.js',
     'js/cds_deposit/avc/factories/states.js',
     'js/cds_deposit/avc/components/cdsActions.js',
     'js/cds_deposit/avc/components/cdsDeposit.js',
@@ -79,9 +88,11 @@ js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/components/cdsForm.js',
     'js/cds_deposit/avc/components/cdsUploader.js',
     'js/cds_deposit/avc/components/cdsRemoteUploader.js',
+    'node_modules/angular-lazy-image/release/lazy-image.js',
     npm={
         'angular-schema-form': '~0.8.13',
         'angular-schema-form-bootstrap': '~0.2.0',
+        'angular-lazy-image': '~0.3.2',
         'objectpath': '~1.2.1',
         'tv4': '~1.2.7',
     }

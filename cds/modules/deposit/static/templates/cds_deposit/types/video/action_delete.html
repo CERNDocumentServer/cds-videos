@@ -1,0 +1,9 @@
+<div class="text-right">
+  <button
+    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
+    ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+    class="btn btn-link"
+    ng-click="$ctrl.deleteDeposit()">
+    <i class="fa fa-times text-muted"></i>
+  </button>
+</div>
