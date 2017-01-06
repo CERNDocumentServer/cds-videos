@@ -33,6 +33,7 @@ class VideoDepositSchema(DepositSchema):
     """Project Deposit Schema."""
 
     state = fields.Raw()
+    extracted_metadata = fields.Raw()
 
 
 class CopyrightSchema(StrictKeysSchema):

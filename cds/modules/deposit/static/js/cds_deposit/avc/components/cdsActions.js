@@ -11,7 +11,7 @@ function cdsActionsCtrl($scope) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
       that.cdsDepositCtrl.loading = true;
-      that.cdsDepositCtrl.makeSingleAction(type, method)
+      return that.cdsDepositCtrl.makeSingleAction(type, method)
       .then(
         that.cdsDepositCtrl.onSuccessAction,
         that.cdsDepositCtrl.onErrorAction
@@ -22,11 +22,24 @@ function cdsActionsCtrl($scope) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
       that.cdsDepositCtrl.loading = true;
-      that.cdsDepositCtrl.makeMultipleActions(actions)
+      return that.cdsDepositCtrl.makeMultipleActions(actions)
       .then(
         that.cdsDepositCtrl.onSuccessAction,
         that.cdsDepositCtrl.onErrorAction
       ).finally(that.postActions);
+    };
+
+    this.deleteDeposit = function() {
+      that.actionHandler('self', 'DELETE').then(function() {
+        var children = that.cdsDepositCtrl.cdsDepositsCtrl.children;
+        for (var i in children) {
+          if (children[i].metadata._deposit.id == that.cdsDepositCtrl.id) {
+            children.splice(i, 1);
+          }
+        }
+        delete that.cdsDepositCtrl.cdsDepositsCtrl.
+          overallState[that.cdsDepositCtrl.id];
+      });
     };
   }
 }

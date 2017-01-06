@@ -14,11 +14,25 @@
       ng-click="$ctrl.actionMultipleHandler([['self', 'PUT'], ['publish', 'POST']], '/deposit')">
       Publish</button>
   </li>
+  <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'>
+    <button
+        ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+        class="btn btn-danger btn-sm"
+        ng-click="$ctrl.deleteDeposit()">
+      Delete</button>
+  </li>
   <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'>
     <button
       ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-success btn-sm"
       ng-click="$ctrl.actionMultipleHandler([['edit', 'POST'], ['self', 'PUT']], '/deposit')">
       Edit</button>
+  </li>
+  <li ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || !$ctrl.cdsDepositCtrl.record._deposit.pid'>
+    <button
+        ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+        class="btn btn-danger btn-sm"
+        ng-click="$ctrl.actionHandler('discard', 'POST')">
+      Discard</button>
   </li>
 </ul>
