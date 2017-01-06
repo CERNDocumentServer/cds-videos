@@ -6,7 +6,6 @@
           <div
            class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
            ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
-
             <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
               <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
               <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
@@ -30,7 +29,7 @@
             <div class="row">
                 <div class="col-sm-12">
                   <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE">
-                    <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message }}</strong>
+                      <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message }}</strong>
                   </div>
                 </div>
             </div>
@@ -96,6 +95,13 @@
              <div ng-transclude></div>
            </div>
            <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
+
+            -- PRESETS FINISHED --
+            -- HOW MANY {{that.presets_finished}}
+            <hr />
+            File transcode: {{$ctrl.cdsDepositCtrl.stateReporter['file_transcode']}} <br />
+            <hr />
+
              -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
              -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
              -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />

@@ -1,6 +1,13 @@
 function cdsDepositCtrl(
-  $scope, $q, $timeout, $sce, depositStates, depositStatuses, cdsAPI,
-  urlBuilder, typeReducer
+  $scope,
+  $q,
+  $timeout,
+  $sce,
+  depositStates,
+  depositStatuses,
+  cdsAPI,
+  urlBuilder,
+  typeReducer,
 ) {
   var that = this;
   // The Upload Queue
@@ -21,12 +28,7 @@ function cdsDepositCtrl(
   this.previewer = null;
 
   // FIXME Init stateQueue -  maybe ```Object(depositStatuses).keys()```
-  this.stateQueue = {
-    PENDING: [],
-    STARTED: [],
-    FAILURE: [],
-    SUCCESS: [],
-  };
+  this.stateQueue = { PENDING: [], STARTED: [], FAILURE: [], SUCCESS: [] };
 
   // Initialize stateOrder
   this.stateOrder = angular.copy(depositStates);
@@ -38,40 +40,42 @@ function cdsDepositCtrl(
       // Destroy listener
       that.sseEventListener();
       $timout.cancel(that.autoUpdateTimeout);
-    } catch(error) {
-      // Ok probably already done
-    }
-  }
+    } catch (error) {}
+  };
 
   // The deposit can have the follwoing depositStates
   this.$onInit = function() {
     // Resolve the record schema
-    this.cdsDepositsCtrl.JSONResolver(this.schema)
-      .then(function(response) {
-        that.schema = response.data;
-      });
+    this.cdsDepositsCtrl.JSONResolver(this.schema).then(function(response) {
+      that.schema = response.data;
+    });
 
     this.initializeStateQueue = function() {
       if (Object.keys(this.record._deposit.state || {}).length > 0) {
-        if (!Object.keys(this.record._deposit.state).includes('file_download')) {
+        if (
+          !Object.keys(this.record._deposit.state).includes('file_download')
+        ) {
           that.stateQueue.SUCCESS.push('file_download');
         }
         angular.forEach(this.record._deposit.state, function(value, key) {
           that.stateQueue[value].push(key);
           // Remove it from the state order if
-          if (['SUCCESS', 'FAILURE'].indexOf(value) > -1) {
+          if ([ 'SUCCESS', 'FAILURE' ].indexOf(value) > -1) {
             that.stateOrder = _.without(that.stateOrder, key);
-          };
+          }
         });
       } else {
         that.stateQueue.PENDING = angular.copy(depositStates);
         var videoFile = that.record._files[0];
         if (videoFile && !videoFile.url) {
           that.stateQueue.PENDING.splice(
-            depositStates.indexOf('file_download'), 1);
+            depositStates.indexOf('file_download'),
+            1,
+          );
           that.stateQueue.SUCCESS.push('file_download');
         }
       }
+
       if (!that.master) {
         $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
       }
@@ -79,13 +83,14 @@ function cdsDepositCtrl(
 
     this.initializeStateReported = function() {
       that.stateReporter = {};
+      that.presets_finished = [];
+      // FIXME: Get them from the Webhooks
+      that.presets = [ '360p', '720p', '480p', '240p', '1080p', '1024p' ];
       depositStates.map(function(state) {
         that.stateReporter[state] = {
           status: state,
           message: state,
-          payload: {
-            percentage: 0
-          }
+          payload: { percentage: 0 },
         };
       });
     };
@@ -111,27 +116,27 @@ function cdsDepositCtrl(
         that.previewer = $sce.trustAsResourceUrl(
           urlBuilder.video({
             deposit: deposit || that.record._deposit.id,
-            key: key || that.record._files[0].key
-          })
+            key: key || that.record._files[0].key,
+          }),
         );
       }
-    }
+    };
 
     this.updateDeposit = function(deposit) {
       that.record._files = angular.merge(
         [],
         that.record._files,
-        deposit._files || []
+        deposit._files || [],
       );
 
       // Check for new state
       that.record._deposit.state = angular.merge(
         {},
         that.record._deposit.state,
-        deposit._deposit.state || {}
+        deposit._deposit.state || {},
       );
       that.lastUpdated = new Date();
-    }
+    };
 
     // Initialize state the queue
     this.initializeStateQueue();
@@ -144,12 +149,43 @@ function cdsDepositCtrl(
     // Check for previewer
     that.videoPreviewer();
 
+    // Calculate the transcode
+    this.updateStateReporter = function(type, data) {
+      if (type === 'file_transcode') {
+        if (data.state === 'SUCCESS') {
+          that.presets_finished.push(data.meta.payload.preset_quality);
+          if (that.presets_finished.length === that.presets.length) {
+            that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
+            that.stateQueue.SUCCESS.push(type);
+            // On success remove it from the status order
+            that.stateOrder = _.without(that.stateOrder, type);
+          }
+          if (that.presets_finished.length === 1) {
+            that.videoPreviewer(
+              that.record._deposit.id,
+              that.record._files[0].key,
+            );
+          }
+        } else {
+          that.stateReporter[type] = angular.merge(that.stateReporter[type], {
+            payload: {
+              percentage: that.presets_finished.length / that.presets.length *
+                100,
+            },
+          });
+        }
+      } else {
+        that.stateReporter[type] = angular.copy(data.meta);
+      }
+    };
+
     // Register related events from sse
     var depositListenerName = 'sse.event.' + this.id;
-    this.sseEventListener = $scope.$on(
-      depositListenerName,
-      function(evt, type, data) {
-      console.log('RECEIVING', type, data);
+    this.sseEventListener = $scope.$on(depositListenerName, function(
+      evt,
+      type,
+      data,
+    ) {
       $scope.$apply(function() {
         // Handle my state
         if (that.stateQueue[data.state].indexOf(type) === -1) {
@@ -157,14 +193,17 @@ function cdsDepositCtrl(
           if (index > -1) {
             that.stateQueue.PENDING.splice(index, 1);
           }
-          switch(data.state) {
+          switch (data.state) {
             case 'STARTED':
               that.stateQueue.STARTED.push(type);
               // Callback on started
               that.startedCallback(type, data);
               break;
             case 'FAILURE':
-              that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
+              that.stateQueue.STARTED = _.without(
+                that.stateQueue.STARTED,
+                type,
+              );
               that.stateQueue.FAILURE.push(type);
               // On error remove it from the status order
               that.stateOrder = _.without(that.stateOrder, type);
@@ -173,8 +212,11 @@ function cdsDepositCtrl(
               break;
             case 'SUCCESS':
               // FIXME: Better handling
-              if (type !== 'update_deposit') {
-                that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
+              if (type !== 'update_deposit' && type !== 'file_transcode') {
+                that.stateQueue.STARTED = _.without(
+                  that.stateQueue.STARTED,
+                  type,
+                );
                 that.stateQueue.SUCCESS.push(type);
                 // On success remove it from the status order
                 that.stateOrder = _.without(that.stateOrder, type);
@@ -191,14 +233,14 @@ function cdsDepositCtrl(
           $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
         }
         // Update the metadata
-        that.stateReporter[type] = data.meta;
+        that.updateStateReporter(type, data);
       });
 
       if (data.meta.payload.key && type === 'file_download') {
         $scope.$broadcast(
           depositListenerName + '.' + data.meta.payload.key,
           type,
-          data
+          data,
         );
       }
     });
@@ -207,50 +249,41 @@ function cdsDepositCtrl(
       switch (type) {
         case 'file_download':
           // Add the previewer
-          that.videoPreviewer(
-            data.meta.payload.deposit_id, data.meta.payload.key
-          );
+          /*that.videoPreviewer(
+            data.meta.payload.deposit_id,
+            data.meta.payload.key
+          );*/
           break;
         case 'update_deposit':
           // Update deposit
           that.updateDeposit(data.meta.payload.deposit);
           break;
-      };
-    }
+      }
+    };
 
-    this.failureCallback = function(type, data) {
+    this.failureCallback = function(type, data) {};
 
-    }
-
-    this.startedCallback = function(type, data) {
-
-    }
+    this.startedCallback = function(type, data) {};
 
     this.displayFailure = function() {
       return that.depositStatusCurrent === that.depositStatuses.FAILURE;
-    }
+    };
 
     this.displayPending = function() {
-      return (
-        that.depositStatusCurrent === that.depositStatuses.PENDING ||
-        (
-          that.stateCurrent === null &&
+      return that.depositStatusCurrent === that.depositStatuses.PENDING ||
+        that.stateCurrent === null &&
           that.depositStatusCurrent !== that.depositStatuses.FAILURE &&
-          that.depositStatusCurrent !== that.depositStatuses.SUCCESS
-        )
-      )
-    }
+          that.depositStatusCurrent !== that.depositStatuses.SUCCESS;
+    };
 
     this.displayStarted = function() {
-      return (
-        that.depositStatusCurrent === that.depositStatuses.STARTED &&
-        that.stateCurrent !== null
-      );
-    }
+      return that.depositStatusCurrent === that.depositStatuses.STARTED &&
+        that.stateCurrent !== null;
+    };
 
     this.displaySuccess = function() {
       return that.depositStatusCurrent === that.depositStatuses.SUCCESS;
-    }
+    };
 
     this.postSuccessProcess = function(responses) {
       // Get only the latest response (in case of multiple actions)
@@ -277,8 +310,8 @@ function cdsDepositCtrl(
         });
         deferred.resolve();
       }
-    }
-  }
+    };
+  };
 
   this.guessEndpoint = function(endpoint) {
     if (Object.keys(that.links).indexOf(endpoint) > -1) {
@@ -291,22 +324,29 @@ function cdsDepositCtrl(
   this.makeSingleAction = function(endpoint, method, redirect) {
     // Guess the endpoint
     var url = this.guessEndpoint(endpoint);
-    return this.cdsDepositsCtrl
-      .makeAction(url, method, cdsAPI.cleanData(that.record));
-  }
+    return this.cdsDepositsCtrl.makeAction(
+      url,
+      method,
+      cdsAPI.cleanData(that.record),
+    );
+  };
 
   // Do multiple actions at once
   this.makeMultipleActions = function(actions, redirect) {
     var promises = [];
     var cleanRecord = cdsAPI.cleanData(that.record);
-    angular.forEach(actions, function(action, index) {
-      var url = that.guessEndpoint(action[0]);
-      this.push(function() {
-        return that.cdsDepositsCtrl.makeAction(url, action[1], cleanRecord);
-      });
-    }, promises);
+    angular.forEach(
+      actions,
+      function(action, index) {
+        var url = that.guessEndpoint(action[0]);
+        this.push(function() {
+          return that.cdsDepositsCtrl.makeAction(url, action[1], cleanRecord);
+        });
+      },
+      promises,
+    );
     return that.cdsDepositsCtrl.chainedActions(promises);
-  }
+  };
 
   this.onSuccessAction = function(response) {
     // Post success process
@@ -315,19 +355,26 @@ function cdsDepositCtrl(
     $scope.$emit('cds.deposit.success', response);
     // Make the form pristine again
     that.depositFormModel.$setPristine();
-  }
+  };
 
   this.onErrorAction = function(response) {
     // Post error process
     that.postErrorProcess(response);
     // Inform the parents
     $scope.$emit('cds.deposit.error', response);
-  }
+  };
 }
 
 cdsDepositCtrl.$inject = [
-  '$scope', '$q', '$timeout', '$sce', 'depositStates', 'depositStatuses', 'cdsAPI',
-  'urlBuilder', 'typeReducer'
+  '$scope',
+  '$q',
+  '$timeout',
+  '$sce',
+  'depositStates',
+  'depositStatuses',
+  'cdsAPI',
+  'urlBuilder',
+  'typeReducer',
 ];
 
 /**
@@ -335,7 +382,7 @@ cdsDepositCtrl.$inject = [
  * @name cdsDeposit
  * @description
  *   Hendles the actions and SSE events for each ``deposit_id``. For each
- *   ``childrend`` a new ``cds-deposit`` directive will be generated.
+ *   ``children`` a new ``cds-deposit`` directive will be generated.
  * @attr {String} index - The deposit index in the list of deposits.
  * @attr {Boolean} master - If this deposit is the ``master``.
  * @attr {Boolean} updateRecordAfterSuccess - Update the record after action.
@@ -372,13 +419,10 @@ function cdsDeposit() {
       // The form model
       depositFormModel: '=?',
     },
-    require: {
-      cdsDepositsCtrl: '^cdsDeposits'
-    },
+    require: { cdsDepositsCtrl: '^cdsDeposits' },
     controller: cdsDepositCtrl,
-    template: "<div ng-transclude></div>"
+    template: '<div ng-transclude></div>',
   };
 }
 
-angular.module('cdsDeposit.components')
-  .component('cdsDeposit', cdsDeposit());
+angular.module('cdsDeposit.components').component('cdsDeposit', cdsDeposit());

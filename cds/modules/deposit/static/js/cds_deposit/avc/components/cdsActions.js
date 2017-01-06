@@ -11,22 +11,26 @@ function cdsActionsCtrl($scope) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
       that.cdsDepositCtrl.loading = true;
-      return that.cdsDepositCtrl.makeSingleAction(type, method)
-      .then(
-        that.cdsDepositCtrl.onSuccessAction,
-        that.cdsDepositCtrl.onErrorAction
-      ).finally(that.postActions);
+      return that.cdsDepositCtrl
+        .makeSingleAction(type, method)
+        .then(
+          that.cdsDepositCtrl.onSuccessAction,
+          that.cdsDepositCtrl.onErrorAction,
+        )
+        .finally(that.postActions);
     };
 
     this.actionMultipleHandler = function(actions) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
       that.cdsDepositCtrl.loading = true;
-      return that.cdsDepositCtrl.makeMultipleActions(actions)
-      .then(
-        that.cdsDepositCtrl.onSuccessAction,
-        that.cdsDepositCtrl.onErrorAction
-      ).finally(that.postActions);
+      return that.cdsDepositCtrl
+        .makeMultipleActions(actions)
+        .then(
+          that.cdsDepositCtrl.onSuccessAction,
+          that.cdsDepositCtrl.onErrorAction,
+        )
+        .finally(that.postActions);
     };
 
     this.deleteDeposit = function() {
@@ -37,28 +41,23 @@ function cdsActionsCtrl($scope) {
             children.splice(i, 1);
           }
         }
-        delete that.cdsDepositCtrl.cdsDepositsCtrl.
-          overallState[that.cdsDepositCtrl.id];
+        delete that.cdsDepositCtrl.cdsDepositsCtrl.overallState[that.cdsDepositCtrl.id];
       });
     };
-  }
+  };
 }
 
-cdsActionsCtrl.$inject = ['$scope'];
+cdsActionsCtrl.$inject = [ '$scope' ];
 
 function cdsActions() {
   return {
-    bindings: {
-    },
-    require: {
-      cdsDepositCtrl: '^cdsDeposit'
-    },
+    bindings: {},
+    require: { cdsDepositCtrl: '^cdsDeposit' },
     controller: cdsActionsCtrl,
     templateUrl: function($element, $attrs) {
       return $attrs.template;
-    }
-  }
+    },
+  };
 }
 
-angular.module('cdsDeposit.components')
-  .component('cdsActions', cdsActions());
+angular.module('cdsDeposit.components').component('cdsActions', cdsActions());

@@ -1,148 +1,141 @@
 [
   {
-    "type": "fieldset",
-    "title": "Project",
+    "title": "Name",
+    "key": "title.title"
+  },
+  {
+    "type": "template",
+    "key": "date",
+    "title": "Date",
+    "placeholder": "eg. 2013-05-08",
+    "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+    "format": "yyyy-MM-dd",
+    "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+    "fa_cls": "fa-calendar",
+    "required": true
+  },
+  {
+    "type": "section",
+    "htmlClass": "form-ckeditor",
     "description": "",
+    "notitle": true,
     "items": [
       {
-        "title": "Name",
-        "key": "title.title"
-      },
-      {
-        "type": "template",
-        "key": "date",
-        "title": "Date",
-        "placeholder": "eg. 2013-05-08",
-        "templateUrl": "/static/templates/cds_deposit/datepicker.html",
-        "format": "yyyy-MM-dd",
-        "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
-        "fa_cls": "fa-calendar",
-        "required": true
-      },
-      {
-        "type": "section",
-        "htmlClass": "form-ckeditor",
-        "description": "",
-        "notitle": true,
-        "items": [
-          {
-            "type": "ckeditor",
-            "key": "description.value",
-            "title": "Description",
-            "ckeditor": {
-              "height": 200,
-              "toolbar": [
-                ["PasteText", "PasteFromWord"],
-                ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
-                ["NumberedList", "BulletedList", "Blockquote"],
-                ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-                ["Source"], ["Maximize"]
-              ],
-              "disableNativeSpellChecker": false,
-              "removePlugins": "elementspath",
-              "removeButtons": ""
-            },
-            "required": true,
-            "description": "Required.",
-            "minLength": 1
-          }
-        ]
-      },
-      {
-        "key": "category",
-        "required": true,
-        "placeholder": "Category",
-        "title": "Category",
-        "type": "strapselect",
-        "labelHtmlClass": "col-sm-3",
-        "fieldHtmlClass": "col-sm-9",
-        "htmlClass": "cds-deposit-strap-select",
-        "options": {
-          "url": "/api/categories",
-          "asyncCallback": "$ctrl.autocompleteCategories"
-        }
-      },
-      {
-        "key": "type",
-        "required": true,
-        "placeholder": "Type",
-        "title": "Type",
-        "type": "strapselect",
-        "labelHtmlClass": "col-sm-3",
-        "fieldHtmlClass": "col-sm-9",
-        "htmlClass": "cds-deposit-strap-select",
-        "options": {
-          "filterTriggers": ["model.category"],
-          "filter" : "item.category == model.category",
-          "asyncCallback": "$ctrl.autocompleteType"
-        }
-      },
-      {
-        "type": "array",
-        "key": "contributors",
-        "title": "Contributors",
-        "description": "",
-        "sortOptions": {
-          "disabled": false,
-          "handle": "i.sort-handle",
-          "cursor": "move",
-          "axis": "y"
+        "type": "ckeditor",
+        "key": "description.value",
+        "title": "Description",
+        "ckeditor": {
+          "height": 200,
+          "toolbar": [
+            ["PasteText", "PasteFromWord"],
+            ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
+            ["NumberedList", "BulletedList", "Blockquote"],
+            ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
+            ["Source"], ["Maximize"]
+          ],
+          "disableNativeSpellChecker": false,
+          "removePlugins": "elementspath",
+          "removeButtons": ""
         },
-        "add": "Add another contributor",
-        "inline": true,
-        "items": [
-          {
-            "key": "contributors[].name",
-            "placeholder": "Name",
-            "description": "",
-            "notitle": true
-          },
-          {
-            "type": "select",
-            "key": "contributors[].role",
-            "placeholder": "Role",
-            "notitle": true,
-            "titleMap": [
-              {
-                "value":  "Director",
-                "name":  "Director"
-              },
-              {
-                "value":  "Camera operator",
-                "name":  "Camera operator"
-              },
-              {
-                "value":  "Producer",
-                "name":  "Producer"
-              },
-              {
-                "value":  "Music by",
-                "name":  "Music by"
-              },
-              {
-                "value":  "Editor",
-                "name":  "Editor"
-              },
-              {
-                "value":  "Provider",
-                "name":  "Provider"
-              },
-              {
-                "value":  "Translator",
-                "name":  "Translator"
-              },
-              {
-                "value":  "Other",
-                "name":  "Other"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "title": "License",
-        "key": "license"
+        "required": true,
+        "description": "Required.",
+        "minLength": 1
       }
     ]
+  },
+  {
+    "key": "category",
+    "required": true,
+    "placeholder": "Category",
+    "title": "Category",
+    "type": "strapselect",
+    "labelHtmlClass": "col-sm-3",
+    "fieldHtmlClass": "col-sm-9",
+    "htmlClass": "cds-deposit-strap-select",
+    "options": {
+      "url": "/api/categories",
+      "asyncCallback": "$ctrl.autocompleteCategories"
+    }
+  },
+  {
+    "key": "type",
+    "required": true,
+    "placeholder": "Type",
+    "title": "Type",
+    "type": "strapselect",
+    "labelHtmlClass": "col-sm-3",
+    "fieldHtmlClass": "col-sm-9",
+    "htmlClass": "cds-deposit-strap-select",
+    "options": {
+      "filterTriggers": ["model.category"],
+      "filter" : "item.category == model.category",
+      "asyncCallback": "$ctrl.autocompleteType"
+    }
+  },
+  {
+    "type": "array",
+    "key": "contributors",
+    "title": "Contributors",
+    "description": "",
+    "sortOptions": {
+      "disabled": false,
+      "handle": "i.sort-handle",
+      "cursor": "move",
+      "axis": "y"
+    },
+    "add": "Add another contributor",
+    "inline": true,
+    "items": [
+      {
+        "key": "contributors[].name",
+        "placeholder": "Name",
+        "description": "",
+        "notitle": true
+      },
+      {
+        "type": "select",
+        "key": "contributors[].role",
+        "placeholder": "Role",
+        "notitle": true,
+        "titleMap": [
+          {
+            "value":  "Director",
+            "name":  "Director"
+          },
+          {
+            "value":  "Camera operator",
+            "name":  "Camera operator"
+          },
+          {
+            "value":  "Producer",
+            "name":  "Producer"
+          },
+          {
+            "value":  "Music by",
+            "name":  "Music by"
+          },
+          {
+            "value":  "Editor",
+            "name":  "Editor"
+          },
+          {
+            "value":  "Provider",
+            "name":  "Provider"
+          },
+          {
+            "value":  "Translator",
+            "name":  "Translator"
+          },
+          {
+            "value":  "Other",
+            "name":  "Other"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "License",
+    "key": "license"
   }
 ]
