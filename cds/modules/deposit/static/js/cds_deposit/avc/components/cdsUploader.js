@@ -375,13 +375,13 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   };
 
   this.getFrames = function() {
-    return that.files.reduce(function (frames, next) {
+    return (that.files || []).reduce(function (frames, next) {
       return frames || next.frame;
     }, null);
   };
 
   this.getSubformats = function() {
-    return that.files.reduce(function (videos, next) {
+    return (that.files || []).reduce(function (videos, next) {
       return videos || next.video;
     }, null);
   };
