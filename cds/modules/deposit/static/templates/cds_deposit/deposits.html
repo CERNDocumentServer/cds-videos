@@ -1,4 +1,7 @@
 <div ng-if="!$ctrl.initialized">
+  <div class="container">
+    <div class="row">
+  <div class="col-md-12">
   <div class="cds-deposit-box cds-deposit-box-upload-intro">
     <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
       <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
@@ -43,15 +46,11 @@
     </div>
   </div>
 </div>
+</div>
+</div>
+</div>
 
 <div ng-if="$ctrl.initialized">
-  <div class="alerts" ng-repeat="alert in $ctrl.alerts">
-    <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
-      <button ng-click="$ctrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      {{ alert.message }}
-    </div>
-  </div>
-  <div class="col-md-12">
     <cds-deposit
       master="true"
       id="$ctrl.master.metadata._deposit.id"
@@ -61,56 +60,100 @@
       record="$ctrl.master.metadata"
       deposit-form-model="$ctrl.depositForms[0]"
     >
-    <cds-actions
-      template="/static/templates/cds_deposit/types/project/actions.html"
-    >
-    </cds-actions>
-    <table class="table">
-      <tr class="{{ $ctrl.aggregatedState['file_download'] | progressClass }}">
-        <td>File download</td>
-        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_download'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_download'] }}</td>
-      </tr>
-      <tr class="{{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressClass }}">
-        <td>Extract metadata</td>
-        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_video_metadata_extraction'] }}</td>
-      </tr>
-      <tr class="{{ $ctrl.aggregatedState['file_video_extract_frames'] | progressClass }}">
-        <td>Extract frames</td>
-        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_extract_frames'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_video_extract_frames'] }}</td>
-      </tr>
-      <tr class="{{ $ctrl.aggregatedState['file_transcode'] | progressClass }}">
-        <td>File transcode</td>
-        <td><i class="fa fa-fw {{ $ctrl.aggregatedState['file_transcode'] | progressIcon }}"></i>{{ $ctrl.aggregatedState['file_transcode'] }}</td>
-      </tr>
-    </table>
+    <div set-class-when-at-top="status-fix-top" class="cds-deposit-avc-overall-status">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-9">
+            <ul class="list-inline text-left">
+              <li>
+                <i class="fa fa-fw {{ $ctrl.aggregatedState['file_download'] | progressIcon }} {{ $ctrl.aggregatedState['file_download'] | progressClass }}"></i> File download
+              </li>
+              <li>
+                <i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressIcon }} {{ $ctrl.aggregatedState['file_video_metadata_extraction'] | progressClass }}"></i> Extract metadata
 
-    <cds-form
-      template="/static/templates/cds_deposit/types/project/form.html"
-      form="{{$ctrl.masterForm}}"
-    >
-    </cds-form>
-    <hr />
-    <!-- ADD children -->
-    <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.children track by $index">
-      <div class="cds-deposit-box">
-        <cds-deposit
-          index="$index + 1"
-          id="child.metadata._deposit.id"
-          update-record-after-success="true"
-          update-record-in-background="10000"
-          links="child.links"
-          schema="{{ $ctrl.childrenSchema }}"
-          record="child.metadata"
-          deposit-form-model="$ctrl.depositForms[$index + 1]"
-        >
-          <cds-form
-            template="/static/templates/cds_deposit/types/video/form.html"
-            form="{{$ctrl.childrenForm}}"
-          >
+              </li>
+              <li>
+                <i class="fa fa-fw {{ $ctrl.aggregatedState['file_video_extract_frames'] | progressIcon }} {{ $ctrl.aggregatedState['file_video_extract_frames'] | progressClass }}"></i> Extract frames
+              </li>
+              <li>
+                <i class="fa fa-fw {{ $ctrl.aggregatedState['file_transcode'] | progressIcon}} {{ $ctrl.aggregatedState['file_transcode'] | progressClass}}"></i> File transcode
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-3">
+            <cds-actions
+              template="/static/templates/cds_deposit/types/project/actions.html"
+            >
+            </cds-actions>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alerts" ng-repeat="alert in $ctrl.alerts">
+            <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
+              <button ng-click="$ctrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              {{ alert.message }}
+            </div>
+          </div>
+          <div class="cds-deposit-box">
+            <cds-form
+              template="/static/templates/cds_deposit/types/project/form.html"
+              form="{{$ctrl.masterForm}}"
+            >
+            </cds-form>
+          </div>
+          <hr />
+          <!-- ADD children -->
+          <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.children track by $index">
+            <cds-deposit
+              index="$index + 1"
+              id="child.metadata._deposit.id"
+              update-record-after-success="true"
+              update-record-in-background="10000"
+              links="child.links"
+              schema="{{ $ctrl.childrenSchema }}"
+              record="child.metadata"
+              deposit-form-model="$ctrl.depositForms[$index + 1]"
+            >
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <cds-actions
+                  template="/static/templates/cds_deposit/types/video/action_delete.html"
+                >
+                </cds-actions>
+              </div>
+              <div class="panel-body">
+                <cds-form
+                  template="/static/templates/cds_deposit/types/video/form.html"
+                  form="{{$ctrl.childrenForm}}"
+                >
+                <cds-uploader
+                  files="child.metadata._files"
+                  template="/static/templates/cds_deposit/types/common/uploader.html"
+                  remote-master-receiver="/api/hooks/receivers/avc/events/"
+                >
+                  <cds-remote-uploader
+                      template="/static/templates/cds_deposit/remote_upload.html"
+                      dropbox-enabled="true"
+                      dropbox-selector=".dropbox-upload"
+                      dropbox-app-key="{{ dropboxAppKey }}"
+                      remote-master-receiver="/api/hooks/receivers/avc/events/"
+                      remote-children-receiver="/api/hooks/receivers/downloader/events/"
+                  >
+                    <div class="dropbox-upload"></div>
+                  </cds-remote-uploader>
+                </cds-uploader>
+                </cds-form>
+              </div>
+            </cds-deposit>
+          </div>
+          <!-- /ADD children -->
           <cds-uploader
-            files="child.metadata._files"
+            files="$ctrl.master.metadata._files"
             template="/static/templates/cds_deposit/types/common/uploader.html"
-            remote-master-receiver="/api/hooks/receivers/avc/events/"
           >
             <cds-remote-uploader
                 template="/static/templates/cds_deposit/remote_upload.html"
@@ -123,27 +166,8 @@
               <div class="dropbox-upload"></div>
             </cds-remote-uploader>
           </cds-uploader>
-          </cds-form>
-        </cds-deposit>
+        </div>
       </div>
     </div>
-    <!-- /ADD children -->
-    <cds-uploader
-      files="$ctrl.master.metadata._files"
-      template="/static/templates/cds_deposit/types/common/uploader.html"
-    >
-      <cds-remote-uploader
-          template="/static/templates/cds_deposit/remote_upload.html"
-          dropbox-enabled="true"
-          dropbox-selector=".dropbox-upload"
-          dropbox-app-key="{{ dropboxAppKey }}"
-          remote-master-receiver="/api/hooks/receivers/avc/events/"
-          remote-children-receiver="/api/hooks/receivers/downloader/events/"
-      >
-        <div class="dropbox-upload"></div>
-      </cds-remote-uploader>
-    </cds-uploader>
-
-    </cds-deposit>
-  </div>
+  </cds-deposit>
 </div>

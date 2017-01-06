@@ -34,8 +34,8 @@ $cds-enormus-spacing: 20px;
 
 // Brand colors CDS
 $light-color: #ffffff;
-$primary-color-dark: #448aff;
 $primary-color: #0c63aa;
+$primary-color-dark: darken($primary-color, 10%);
 $primary-color-light: #3498db;
 $primary-color-text: #212121;
 $accent-color: #03A9F4;
@@ -46,7 +46,7 @@ $divider-color: #B6B6B6;
 // Bootstrap
 $brand-primary: $primary-color;
 
-$font-size-base: 16px;
+$font-size-base: 14px;
 
 // Navbar colors
 $navbar-height: 60px;

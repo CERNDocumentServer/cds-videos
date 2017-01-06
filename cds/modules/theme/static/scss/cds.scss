@@ -421,3 +421,25 @@ a[ng-click]{
     color: inherit;
   }
 }
+
+.cds-deposit-avc-overall-status {
+  margin-top: -20px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  padding: 20px 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  border: 1px solid #ddd;
+  background-color: rgba(255, 255, 255, .9);
+  ul {
+    margin-bottom: 0;
+    margin-top: 5px;
+  }
+}
+
+.status-fix-top {
+  position: fixed;
+  margin-top: 0px;
+  width: 100%;
+  z-index: 100;
+  top: 0;
+}

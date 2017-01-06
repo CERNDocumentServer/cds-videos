@@ -5,25 +5,34 @@
         <p ng-show="$ctrl.files.length > 0" class="text-muted">
         </p>
       </div>
-      <div class="col-sm-offset-2 col-sm-4">
-        <div class="form-inline text-right">
-          <div class="form-group">
-            <span class="text-muted">{{ ($ctrl.files | filter:fileSearch).length }} files </span>
-            <input type="text" class="input-sm form-control" placeholder="Search the files" ng-model="fileSearch" />
-          </div>
+      <div class="col-sm-12">
+        <div class="form-group">
+          <input type="text" class="input-sm form-control" placeholder="Search" ng-model="fileSearch" />
         </div>
       </div>
     </div>
   </div>
   <table class="table">
     <tr>
-      <th>Filename</th>
-      <th>Size</th>
+      <th>
+        <a ng-click='sortType="key"; sortReverse=!sortReverse'>
+          Filename
+          <span ng-show="sortType == 'key' && !sortReverse" class="fa fa-caret-down"></span>
+          <span ng-show="sortType == 'key' && sortReverse" class="fa fa-caret-up"></span>
+        </a>
+      </th>
+      <th>
+        <a ng-click='sortType="size"; sortReverse=!sortReverse'>
+          Size
+          <span ng-show="sortType == 'size' && !sortReverse" class="fa fa-caret-down"></span>
+          <span ng-show="sortType == 'size' && sortReverse" class="fa fa-caret-up"></span>
+        </a>
+      </th>
       <th class="text-center">Progress</th>
       <th class="text-center">Actions</th>
     </tr>
-    <tr class="sel-file" ng-repeat="f in $ctrl.files | filter:fileSearch">
-      <td>{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 50">...</span></td>
+    <tr class="sel-file" ng-repeat="f in $ctrl.files | orderBy:sortType:sortReverse | filter:fileSearch">
+      <td>{{ f.key | limitTo:30 }} <span ng-show="f.key.length > 30">...</span></td>
       <td>
         <span ng-show="f.size != undefined">{{ f.size | bytesToHumanReadable }}</span>
         <span ng-show="f.size == undefined">Unknown</span>
@@ -36,8 +45,11 @@
       </td>
       <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
     </tr>
-    <tr ng-show="$ctrl.getSubformats()">
-      <td><b>Extracted subformats</b></td>
+    <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
+      <td colspan="4" class="text-center text-muted"> No results.</td>
+    </tr>
+    <tr class="warning" ng-show="$ctrl.getSubformats()">
+      <td>Extracted subformats</td>
       <td></td>
       <td class="text-center">
         <span class="text-success">✓</span>
@@ -59,8 +71,8 @@
       </td>
       <td ng-show="f" class="text-center"><a ng-click="$ctrl.remove(f.key)">✗</a></td>
     </tr>
-    <tr ng-show="$ctrl.getFrames()">
-      <td><b>Extracted frames</b></td>
+    <tr class="warning" ng-show="$ctrl.getFrames()">
+      <td>Extracted frames</td>
       <td></td>
       <td class="text-center">
         <span class="text-success">✓</span>
@@ -77,20 +89,18 @@
         <div class="row cds-deposit-thumbnail-pad">
           <div class="col-sm-2 cds-deposit-thumbnail-pad" ng-repeat="frame in $ctrl.getFrames()">
             <a ng-href="{{ frame.links.self }}" target="_blank">
-              <img width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
+              <img ng-if="showFrames" width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
             </a>
           </div>
         </div>
       </td>
     </tr>
-    <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
-      <td colspan="4" class="text-center text-muted"> No results.</td>
-    </tr>
   </table>
   <div class="panel-footer">
     <div class="text-right">
       <span class="text-muted" ng-show="$ctrl.loading">
-        Loading ..
+        <i class="fa fa-spinner fa-pulse fa-fw"></i>
+        <span class="sr-only">Loading...</span>
       </span>
       <button class="btn btn-sm btn-default" type="submit" ng-show="$ctrl.invenioFilesBusy" ng-click="$ctrl.cancel()">Cancel</button>
       <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0" ng-click="$ctrl.upload()">Start upload</button>
@@ -99,7 +109,7 @@
 </div>
 <hr />
 
-<div class="cds-deposit-box cds-deposit-box-upload-intro">
+<div class="cds-deposit-box">
   <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
     <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
     <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
