@@ -21,6 +21,6 @@
 
 from __future__ import absolute_import, print_function
 
-from .ffmpeg import ff_frames, ff_probe, ff_probe_all
+from .ffmpeg import ff_frames, ff_probe, ff_probe_all, valid_aspect_ratios
 
-__all__ = ('ff_frames', 'ff_probe', 'ff_probe_all')
+__all__ = ('ff_frames', 'ff_probe', 'ff_probe_all', 'valid_aspect_ratios')
