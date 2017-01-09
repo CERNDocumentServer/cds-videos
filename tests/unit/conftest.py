@@ -369,6 +369,7 @@ def cds_jsonresolver(app):
 
 @pytest.fixture()
 def deposit_metadata():
+    """Deposit metadata."""
     return {
         'date': '2016-12-03T00:00:00Z',
         'category': 'CERN',
@@ -571,6 +572,7 @@ def workflow_receiver(api_app, db, webhooks, es, cds_depid):
             workflow = chain(
                 sse_simple_add().s(x=1, y=2, deposit_id=cds_depid),
                 group(sse_failing_task().s(), sse_success_task().s())
+
             )
             event.payload['deposit_id'] = cds_depid
             with db.session.begin_nested():

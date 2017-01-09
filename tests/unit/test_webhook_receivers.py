@@ -48,7 +48,6 @@ from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.status import CollectInfoTasks
 from invenio_webhooks.models import Event
 from six import BytesIO
-from cds.modules.webhooks.receivers import AVCSecondStep, AVCFirstStep
 
 from helpers import failing_task, simple_add, mock_current_user, success_task
 
@@ -89,7 +88,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
 
         assert '_tasks' in data
@@ -170,7 +169,8 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         (arg,) = args
         deposit_to_index = next(arg)
         assert str(deposit.id) == deposit_to_index
-        assert deposit['_deposit']['state'] == {u'file_download': u'STARTED'}
+        assert deposit['_deposit']['state'] == {
+            u'file_download': states.SUCCESS}
 
     # Test cleaning!
     url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
@@ -182,7 +182,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
 
         assert ObjectVersion.query.count() == 0
@@ -225,7 +225,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
 
         assert '_tasks' in data
@@ -297,15 +297,15 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         iterate_events_results(events=events, fun=collector)
         info = list(collector)
         assert info[0][0] == 'file_download'
-        assert info[0][1].status == states.STARTED
+        assert info[0][1].status == states.SUCCESS
         assert info[1][0] == 'file_video_metadata_extraction'
         assert info[1][1].status == states.SUCCESS
         assert info[2][0] == 'file_video_extract_frames'
-        assert info[2][1].status == states.STARTED
+        assert info[2][1].status == states.SUCCESS
         assert info[3][0] == 'file_transcode'
-        assert info[3][1].status == states.STARTED
+        assert info[3][1].status == states.SUCCESS
         assert info[4][0] == 'file_transcode'
-        assert info[4][1].status == states.STARTED
+        assert info[4][1].status == states.SUCCESS
 
         # check tags
         assert ObjectVersionTag.query.count() == 200
@@ -361,10 +361,10 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         deposit_to_index = next(arg)
         assert str(deposit.id) == deposit_to_index
         assert deposit['_deposit']['state'] == {
-            'file_download': states.STARTED,
+            'file_download': states.SUCCESS,
             'file_video_metadata_extraction': states.SUCCESS,
-            'file_video_extract_frames': states.STARTED,
-            'file_transcode': states.STARTED,
+            'file_video_extract_frames': states.SUCCESS,
+            'file_transcode': states.SUCCESS,
         }
 
     # Test cleaning!
@@ -376,7 +376,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
 
         # check that object version, tags are deleted
@@ -427,13 +427,13 @@ def test_avc_workflow_receiver_clean_download(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
     # check tags
     assert ObjectVersionTag.query.count() == 200
 
     event = Event.query.first()
-    AVCFirstStep(event=event).clean(task_name='file_download')
+    event.receiver.clean_task(event=event, task_name='file_download')
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -482,13 +482,14 @@ def test_avc_workflow_receiver_clean_video_frames(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
     # check tags
     assert ObjectVersionTag.query.count() == 200
 
     event = Event.query.first()
-    AVCSecondStep(event=event).clean(task_name='file_video_extract_frames')
+    event.receiver.clean_task(
+        event=event, task_name='file_video_extract_frames')
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -503,9 +504,10 @@ def test_avc_workflow_receiver_clean_video_frames(
     assert ObjectVersionTag.query.count() == 20
 
     # RUN again frame extraction
-    AVCSecondStep(event=event)._video_extract_frames().apply()
+    event.receiver.run_task(
+        event=event, task_name='file_video_extract_frames').apply()
 
-    # 1 master + 2 slave + 90 frames == 92
+    # 1 master + 2 slave + 90 frames == 93
     assert ObjectVersion.query.count() == 93
 
     # check tags
@@ -519,6 +521,8 @@ def test_avc_workflow_receiver_clean_video_transcode(
     """Test AVCWorkflow receiver."""
     db.session.add(bucket)
     master_key = 'test.mp4'
+    preset1 = 'Youtube 480p'
+    preset2 = 'Youtube 720p'
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -537,15 +541,33 @@ def test_avc_workflow_receiver_clean_video_transcode(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
     # check tags
     assert ObjectVersionTag.query.count() == 200
 
+    # delete one trancode file
     event = Event.query.first()
-    AVCSecondStep(event=event).clean(task_name='file_transcode')
+    event.receiver.clean_task(
+        event=event, task_name='file_transcode', preset=preset1)
 
-    # check extracted metadata is not there
+    # check extracted metadata is there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
+
+    # check object versions don't change:
+    # 1 original + 1 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 92
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 196
+
+    # delete also the other one
+    event.receiver.clean_task(
+        event=event, task_name='file_transcode', preset=preset2)
+
+    # check extracted metadata is there
     records = RecordMetadata.query.all()
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_deposit']
@@ -557,11 +579,22 @@ def test_avc_workflow_receiver_clean_video_transcode(
     # check tags
     assert ObjectVersionTag.query.count() == 192
 
-    # RUN again frame extraction
-    for task in AVCSecondStep(event=event)._video_transcodes():
-        task.apply()
+    # RUN again trancode 1
+    event.receiver.run_task(
+        event=event, task_name='file_transcode', preset=preset1).apply()
 
-    # 1 master + 2 slave + 90 frames == 92
+    # 1 master + 1 slave + 90 frames == 92
+    assert ObjectVersion.query.count() == 92
+
+    # check tags
+    assert ObjectVersionTag.query.count() == 196
+
+    # RUN again trancode 2
+    event = Event.query.first()
+    event.receiver.run_task(
+        event=event, task_name='file_transcode', preset=preset2).apply()
+
+    # 1 master + 2 slave + 90 frames == 93
     assert ObjectVersion.query.count() == 93
 
     # check tags
@@ -593,13 +626,14 @@ def test_avc_workflow_receiver_clean_extract_metadata(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
     # check tags
     assert ObjectVersionTag.query.count() == 200
 
     event = Event.query.first()
-    AVCFirstStep(event=event).clean(task_name='file_video_metadata_extraction')
+    event.receiver.clean_task(
+        event=event, task_name='file_video_metadata_extraction')
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -614,13 +648,19 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     assert ObjectVersionTag.query.count() == 190
 
     # RUN again first step
-    AVCFirstStep(event=event)._video_metadata_extraction().apply()
+    event.receiver.run_task(
+        event=event, task_name='file_video_metadata_extraction').apply()
 
-    # 1 master + 2 slave + 90 frames == 92
+    # 1 master + 2 slave + 90 frames == 93
     assert ObjectVersion.query.count() == 93
 
     # check tags
     assert ObjectVersionTag.query.count() == 200
+
+    # check extracted metadata is there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
 
 
 @pytest.mark.parametrize(

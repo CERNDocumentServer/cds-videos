@@ -64,7 +64,7 @@ def test_download_to_object_version(db, bucket):
         assert obj.file is None
 
         task_s = DownloadTask().s('http://example.com/test.pdf',
-                                  object_version=obj.version_id)
+                                  version_id=obj.version_id)
         # Download
         task = task_s.delay()
         assert ObjectVersion.query.count() == 1
@@ -152,7 +152,7 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     obj_id = str(obj.version_id)
     dep_id = str(cds_depid)
     task_s = ExtractMetadataTask().s(uri=video_mp4,
-                                     object_version=obj_id,
+                                     version_id=obj_id,
                                      deposit_id=dep_id)
 
     # Extract metadata
@@ -197,7 +197,7 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
     version_id = str(obj.version_id)
     db.session.commit()
 
-    task_s = ExtractFramesTask().s(object_version=version_id)
+    task_s = ExtractFramesTask().s(version_id=version_id)
 
     # Extract frames
     task_s.delay()
@@ -248,7 +248,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
 
     ExtractMetadataTask().delay(
         uri='invalid_uri',
-        object_version=str(obj.version_id),
+        version_id=str(obj.version_id),
         deposit_id=cds_depid,
         sse_channel=sse_channel)
 
@@ -271,7 +271,7 @@ def test_transcode(db, bucket, mock_sorenson):
     assert get_bucket_keys() == ['test.pdf']
     assert bucket.size == filesize
 
-    task_s = TranscodeVideoTask().s(object_version=obj_id,
+    task_s = TranscodeVideoTask().s(version_id=obj_id,
                                     preset=preset,
                                     sleep_time=0)
 
