@@ -198,7 +198,7 @@ def test_deposit_events_on_download(api_app, webhooks, db, cds_depid, bucket,
             key='test.pdf')
 
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
         file_size = 1024 * 1024 * 6
         mock_request.return_value = type(
@@ -208,7 +208,7 @@ def test_deposit_events_on_download(api_app, webhooks, db, cds_depid, bucket,
             })
 
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 202
+        assert resp.status_code == 201
 
         deposit = cds_resolver([cds_depid])[0]
 
@@ -219,7 +219,7 @@ def test_deposit_events_on_download(api_app, webhooks, db, cds_depid, bucket,
         assert events[1].payload['deposit_id'] == cds_depid
 
         status = get_tasks_status_by_task(events)
-        assert status == {'file_download': states.STARTED}
+        assert status == {'file_download': states.SUCCESS}
 
         # check if the states are inside the deposit
         res = client.get(
@@ -228,7 +228,7 @@ def test_deposit_events_on_download(api_app, webhooks, db, cds_depid, bucket,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['file_download'] == states.STARTED
+        assert data['_deposit']['state']['file_download'] == states.SUCCESS
 
         # check the record is inside the indexer queue
         args, kwargs = mock_indexer.call_args
@@ -267,13 +267,13 @@ def test_deposit_events_on_workflow(webhooks, api_app, db, cds_depid, bucket,
         assert events[1].payload['deposit_id'] == cds_depid
         # check computed status
         status = get_tasks_status_by_task(events)
-        assert status['add'] == states.PENDING
+        assert status['add'] == states.SUCCESS
         assert status['failing'] == states.FAILURE
 
         # check every task for every event
         for event in events:
             result = event.receiver._deserialize_result(event)
-            assert result.parent.status == states.PENDING
+            assert result.parent.status == states.SUCCESS
             assert result.children[0].status == states.FAILURE
             assert result.children[1].status == states.SUCCESS
 
@@ -284,5 +284,5 @@ def test_deposit_events_on_workflow(webhooks, api_app, db, cds_depid, bucket,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['add'] == states.PENDING
+        assert data['_deposit']['state']['add'] == states.SUCCESS
         assert data['_deposit']['state']['failing'] == states.FAILURE

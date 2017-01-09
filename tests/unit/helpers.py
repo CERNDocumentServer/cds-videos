@@ -59,6 +59,10 @@ class sse_failing_task(AVCTask):
 
     def run(self, *args, **kwargs):
         """A failing shared task."""
+        pass
+
+    def on_success(self, exc, task_id, *args, **kwargs):
+        """Set Fail."""
         self.update_state(
             state=states.FAILURE,
             meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
@@ -121,6 +125,6 @@ def transcode_task(bucket, filesize, filename, presets):
 
     return (obj_id, [
         TranscodeVideoTask().s(
-            object_version=obj_id, preset=preset, sleep_time=0)
+            version_id=obj_id, preset=preset, sleep_time=0)
         for preset in presets
     ])

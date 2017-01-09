@@ -197,6 +197,7 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
+            'cds_webhooks = cds.modules.webhooks.views:blueprint',
         ],
         'invenio_pidstore.fetchers': [
             'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
