@@ -174,7 +174,7 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     assert tags['width'] == '640'
     assert tags['height'] == '360'
     assert tags['nb_frames'] == '1440'
-    assert tags['display_aspect_ratio'] == '0:1'
+    assert tags['display_aspect_ratio'] == '16:9'
     assert tags['color_range'] == 'tv'
 
     # Undo

@@ -26,11 +26,15 @@
 
 from __future__ import absolute_import
 
+import json
 from subprocess import check_output
 
 import pexpect
 
 
+#
+# Metadata extraction
+#
 def ff_probe(input_filename, field):
     """Retrieve requested field from the output of ffprobe.
 
@@ -41,6 +45,9 @@ def ff_probe(input_filename, field):
     * *-show_entries stream=<field>* show only requested field
     * *-of default=noprint_wrappers=1:nokey=1* extract only values
     """
+    if field == 'display_aspect_ratio':
+        return probe_aspect_ratio(input_filename)
+
     return check_output([
         'ffprobe', '-v', 'error',
         '-select_streams', 'v:0',
@@ -59,14 +66,52 @@ def ff_probe_all(input_filename):
     * *-show_format -print_format json* output in JSON format
     * *-show_streams -select_streams v:0* show information for video streams
     """
-    return check_output([
+    metadata = check_output([
         'ffprobe', '-v', 'error',
         '-show_format', '-print_format', 'json',
         '-show_streams', '-select_streams', 'v:0',
         '{}'.format(input_filename)
     ]).decode('utf-8')
 
+    return _patch_aspect_ratio(metadata)
 
+
+#
+# Aspect Ratio  # TODO remove when Sorenson is updated
+#
+def valid_aspect_ratios():
+    return [(16, 9), (4, 3), (3, 2), (20, 9), (256, 135), (64, 35), (2, 1)]
+
+
+def probe_aspect_ratio(input_filename):
+    """Probe video's aspect ratio, calculating it if needed."""
+    metadata = ff_probe_all(input_filename)
+    return json.loads(metadata)['streams'][0]['display_aspect_ratio']
+
+
+def _calculate_aspect_ratio(width, height):
+    """Calculate a video's aspect ratio from its dimensions."""
+    ratios = valid_aspect_ratios()
+    for (w, h) in ratios:
+        if w / h == width / height:
+            return '{0}:{1}'.format(w, h)
+    raise RuntimeError('Video dimensions do not correspond to any valid '
+                       'aspect ratio.')
+
+
+def _patch_aspect_ratio(metadata):
+    """Replace invalid aspect ratio(i.e. '0:1') with calculated one."""
+    info = json.loads(metadata)
+    sinfo = info['streams'][0]
+    key = 'display_aspect_ratio'
+    if sinfo[key] == '0:1':
+        sinfo[key] = _calculate_aspect_ratio(sinfo['width'], sinfo['height'])
+    return json.dumps(info)
+
+
+#
+# Frame extraction
+#
 def ff_frames(input_file, start, end, step, output, progress_callback=None):
     """Extract requested frames from video.
 
@@ -74,10 +119,10 @@ def ff_frames(input_file, start, end, step, output, progress_callback=None):
     :param start: percentage of the video to begin extracting frames.
     :param end: percentage of the video to stop extracting frames.
     :param step: percentage between of the video between frames.
-    :param output: output folder and format for the file names as in ``ffmpeg``,
-        i.e /path/to/somewhere/frames-%d.jpg
-    :param progress_callback: function taking as first parameter the number of seconds
-        processed and as second parameter the total duration of the video.
+    :param output: output folder and format for the file names as in ``ffmpeg``
+    , i.e /path/to/somewhere/frames-%d.jpg
+    :param progress_callback: function taking as first parameter the number of
+    seconds processed and as second parameter the total duration of the video.
     """
     duration = float(ff_probe(input_file, 'duration'))
     # Calculate time step

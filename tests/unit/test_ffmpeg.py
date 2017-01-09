@@ -31,7 +31,9 @@ import tempfile
 from os import listdir
 from os.path import isfile, join, dirname
 import json
-from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+
+from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all, \
+    valid_aspect_ratios
 
 
 def test_ffprobe_mp4(video_mp4):
@@ -90,3 +92,13 @@ def test_ffprobe_all(online_video):
     format_keys = ['filename', 'nb_streams', 'format_name', 'format_long_name',
                    'start_time', 'duration', 'size', 'bit_rate', 'tags']
     assert all([key in information['format'] for key in format_keys])
+
+
+def test_aspect_ratio(video_mp4, video_mov, online_video):
+    """Test calculation of video's aspect ratio."""
+    for video in [video_mp4, video_mov, online_video]:
+        metadata = json.loads(ff_probe_all(video))['streams'][0]
+        for aspect_ratio in [ff_probe(video, 'display_aspect_ratio'),
+                             metadata['display_aspect_ratio']]:
+            assert aspect_ratio in ['{}:{}'.format(w, h)
+                                    for (w, h) in valid_aspect_ratios()]
