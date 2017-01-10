@@ -35,10 +35,10 @@ from helpers import mock_current_user
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
-                                    access_token, json_headers, mock_sorenson,
-                                    online_video, webhooks):
-    """Test AVCWorkflow receiver."""
+def test_tasks_status(api_app, db, bucket, cds_depid,
+                      access_token, json_headers, mock_sorenson,
+                      online_video, webhooks):
+    """Test status of tasks."""
     db.session.add(bucket)
     master_key = 'test.mp4'
     with api_app.test_request_context():
