@@ -238,12 +238,11 @@ class Downloader(CeleryAsyncReceiver):
     def delete(self, event):
         """Delete generated files."""
         super(Downloader, self).delete(event)
-        DownloadTask().clean(version_id=event.response['version_id'])
+        self.clean_task(event=event, task_name='file_download')
 
-    def delete_task(self, event, task_id, *args, **kwargs):
+    def clean_task(self, event, task_name, *args, **kwargs):
         """Delete everything created by a task."""
-        # TODO create a test!
-        if task_id == 'file_download':
+        if task_name == 'file_download':
             DownloadTask().clean(version_id=event.response['version_id'])
 
 
@@ -421,12 +420,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
         if 'version_id' not in event.payload:
             self.clean_task(event=event, task_name='file_download')
         self.clean(event=event)
-        db.session.commit()
 
     def clean(self, event):
         """Delete the event."""
         ObjectVersionTag.query.filter_by(key='_event_id', value=event.id)
-        db.session.delete(event)
 
     def _raw_info(self, event):
         """Get info from the event."""

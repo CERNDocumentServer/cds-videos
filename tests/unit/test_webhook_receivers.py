@@ -395,7 +395,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert 'extracted_metadata' not in record.json['_deposit']
 
         # check there are no events
-        assert events == []
+        assert len(events) == 1
 
         # check no SSE message and reindexing is fired
         assert mock_sse.called is False
