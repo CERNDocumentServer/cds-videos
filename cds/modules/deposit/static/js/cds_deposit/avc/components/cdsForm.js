@@ -24,12 +24,14 @@ function cdsFormCtrl($scope, schemaFormDecorators) {
     }
   };
 
-  $scope.$on('cds.deposit.validation.error', function(evt, value) {
-    $scope.$broadcast(
-      'schemaForm.error.' + value.field,
-      'backendValidationError',
-      value.message
-    );
+  $scope.$on('cds.deposit.validation.error', function(evt, value, depositId) {
+    if (that.cdsDepositCtrl.id == depositId) {
+      $scope.$broadcast(
+        'schemaForm.error.' + value.field,
+        'backendValidationError',
+        value.message
+      );
+    }
   });
 
   this.removeValidationMessage = function(fieldValue, form) {

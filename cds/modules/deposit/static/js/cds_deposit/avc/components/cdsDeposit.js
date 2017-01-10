@@ -263,7 +263,7 @@ function cdsDepositCtrl(
         var promise = deferred.promise;
         promise.then(function displayValidationErrors() {
           angular.forEach(response.data.errors, function(value) {
-            $scope.$broadcast('cds.deposit.validation.error', value);
+            $scope.$broadcast('cds.deposit.validation.error', value, that.id);
           });
         });
         deferred.resolve();
