@@ -31,7 +31,7 @@ import pytest
 
 import mock
 from flask import url_for
-from helpers import mock_current_user
+from helpers import get_object_count, get_tag_count, mock_current_user
 from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
@@ -61,11 +61,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
 
         assert resp.status_code == 201
 
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -106,11 +103,8 @@ def check_video_transcode(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    # 1 master + 1 slave + 90 frames == 92
-    assert ObjectVersion.query.count() == 92
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 196
+    assert ObjectVersion.query.count() == get_object_count() - 1
+    assert ObjectVersionTag.query.count() == get_tag_count() - 4
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -143,11 +137,8 @@ def check_video_transcode(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    # 1 master + 90 frames == 91
-    assert ObjectVersion.query.count() == 91
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 192
+    assert ObjectVersion.query.count() == get_object_count() - 2
+    assert ObjectVersionTag.query.count() == get_tag_count() - 8
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -179,11 +170,8 @@ def check_video_frames(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    # 1 master + 2 slave == 3
-    assert ObjectVersion.query.count() == 3
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 20
+    assert ObjectVersion.query.count() == get_object_count(frames=False)
+    assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -215,11 +203,8 @@ def check_video_download(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    # 2 slave + 90 frames == 92
-    assert ObjectVersion.query.count() == 92
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 188
+    assert ObjectVersion.query.count() == get_object_count(download=False)
+    assert ObjectVersionTag.query.count() == get_tag_count(download=False)
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -252,11 +237,8 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 190
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -295,7 +277,8 @@ def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -307,12 +290,8 @@ def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_deposit']
 
-    # check object versions don't change:
-    # 1 original + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     event_id = data['tags']['_event_id']
     ###

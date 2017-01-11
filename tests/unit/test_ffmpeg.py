@@ -32,8 +32,8 @@ from os import listdir
 from os.path import isfile, join, dirname
 import json
 
-from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all, \
-    valid_aspect_ratios
+from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from cds_sorenson.api import get_available_aspect_ratios
 
 
 def test_ffprobe_mp4(video_mp4):
@@ -100,5 +100,4 @@ def test_aspect_ratio(video_mp4, video_mov, online_video):
         metadata = json.loads(ff_probe_all(video))['streams'][0]
         for aspect_ratio in [ff_probe(video, 'display_aspect_ratio'),
                              metadata['display_aspect_ratio']]:
-            assert aspect_ratio in ['{}:{}'.format(w, h)
-                                    for (w, h) in valid_aspect_ratios()]
+            assert aspect_ratio in get_available_aspect_ratios()

@@ -156,7 +156,7 @@ class DownloadTask(AVCTask):
         # Delete the file and the object version
         dispose_object_version(version_id)
 
-    def run(self, uri):
+    def run(self, uri, **kwargs):
         r"""Download file from a URL.
 
         :param self: reference to instance of task base class
@@ -382,36 +382,35 @@ class TranscodeVideoTask(AVCTask):
         self._type = 'file_transcode'
         self._base_payload = {}  # {'type': self._type}
 
-    def _build_slave_key(self, preset, master_key):
+    @staticmethod
+    def _build_slave_key(preset_quality, master_key):
         """Build the object version key connected with the transcoding."""
-        preset_config = current_app.config['CDS_SORENSON_PRESETS']
-        preset_ext = preset_config[preset][1]
-        base_name = master_key.rsplit('.', 1)[0]
-        return '{0}-{1}{2}'.format(base_name, preset, preset_ext)
+        base_name, extension = master_key.rsplit('.', 1)
+        return '{0}[{1}].{2}'.format(base_name, preset_quality, extension)
 
-    def clean(self, version_id, preset, *args, **kwargs):
+    def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
         object_version = as_object_version(version_id)
         obj_key = self._build_slave_key(
-            preset=preset, master_key=object_version.key)
+            preset_quality=preset_quality, master_key=object_version.key)
         object_version = ObjectVersion.query.filter_by(
             bucket_id=object_version.bucket_id, key=obj_key).first()
         dispose_object_version(object_version)
 
-    def run(self, preset, sleep_time=5, *args, **kwargs):
+    def run(self, preset_quality, sleep_time=5, *args, **kwargs):
         """Launch video transcoding.
 
         For each of the presets generate a new ``ObjectVersion`` tagged as
         slave with the preset name as key and a link to the master version.
 
         :param self: reference to instance of task base class
-        :param preset: Sorenson preset to use for transcoding.
-        :param sleep_time: Time interval between requests for the Sorenson
+        :param preset_quality: preset quality to use for transcoding.
+        :param sleep_time: time interval between requests for the Sorenson
             status.
         """
         self._base_payload.update(
             version_id=str(self.object.version_id),
-            preset=preset,
+            preset_quality=preset_quality,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
             event_id=self.event_id, )
@@ -419,8 +418,10 @@ class TranscodeVideoTask(AVCTask):
         # Get master file's bucket_id
         bucket_id = self.object.bucket_id
         bucket_location = self.object.bucket.location.uri
-        # and master file's key
+        # Get master file's key
         master_key = self.object.key
+        # Get master file's aspect ratio
+        aspect_ratio = self.object.get_tags()['display_aspect_ratio']
 
         with db.session.begin_nested():
             # Create FileInstance
@@ -428,7 +429,7 @@ class TranscodeVideoTask(AVCTask):
 
             # Create ObjectVersion
             obj_key = self._build_slave_key(
-                preset=preset, master_key=master_key)
+                preset_quality=preset_quality, master_key=master_key)
             obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
 
             # Extract new location
@@ -440,11 +441,13 @@ class TranscodeVideoTask(AVCTask):
 
             try:
                 # Start Sorenson
-                job_id = start_encoding(input_file, preset, output_file)
+                job_id = start_encoding(input_file, output_file,
+                                        preset_quality, aspect_ratio)
             except SorensonError as e:
                 self.update_state(
                     state=FAILURE,
                     meta={'payload': {}, 'message': str(e)})
+                return
 
             # Set revoke handler, in case of an abrupt execution halt.
             self.set_revoke_handler(partial(stop_encoding, job_id))
@@ -452,12 +455,12 @@ class TranscodeVideoTask(AVCTask):
             # Create ObjectVersionTags
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
-            ObjectVersionTag.create(obj, 'preset', preset)
+            ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
             ObjectVersionTag.create(obj, 'type', 'video')
 
             # Information necessary for monitoring
             job_info = dict(
-                preset=preset,
+                preset_quality=preset_quality,
                 job_id=job_id,
                 file_instance=str(file_instance.id),
                 uri=output_file,

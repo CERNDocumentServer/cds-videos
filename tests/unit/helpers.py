@@ -28,7 +28,8 @@ from __future__ import absolute_import, print_function
 
 import uuid
 
-from invenio_files_rest.models import ObjectVersion
+from cds_sorenson.api import get_available_preset_qualities
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
@@ -116,15 +117,35 @@ def mock_current_user(*args2, **kwargs2):
     return None
 
 
-def transcode_task(bucket, filesize, filename, presets):
+def transcode_task(bucket, filesize, filename, preset_qualities):
     """Get a transcode task."""
     obj = ObjectVersion.create(bucket, key=filename,
                                stream=BytesIO(b'\x00' * filesize))
+    ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
     obj_id = str(obj.version_id)
     db.session.commit()
 
     return (obj_id, [
         TranscodeVideoTask().s(
-            version_id=obj_id, preset=preset, sleep_time=0)
-        for preset in presets
+            version_id=obj_id, preset_quality=preset_quality, sleep_time=0)
+        for preset_quality in preset_qualities
+    ])
+
+
+def get_object_count(download=True, frames=True, transcode=True):
+    """Get number of ObjectVersions, based on executed tasks."""
+    return sum([
+        1 if download else 0,
+        90 if frames else 0,
+        len(get_available_preset_qualities()) if transcode else 0,
+    ])
+
+
+def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
+    """Get number of ObjectVersionTags, based on executed tasks."""
+    return sum([
+        2 if download else 0,
+        10 if download and metadata else 0,
+        90 * 2 if frames else 0,
+        len(get_available_preset_qualities()) * 4 if transcode else 0,
     ])

@@ -263,16 +263,19 @@ def test_transcode(db, bucket, mock_sorenson):
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
     filesize = 1024
-    preset = 'Youtube 480p'
-    obj = ObjectVersion.create(bucket, key='test.pdf',
+    filename = 'test.mp4'
+    preset_quality = '480p'
+    new_filename = 'test[{0}].mp4'.format(preset_quality)
+    obj = ObjectVersion.create(bucket, key=filename,
                                stream=BytesIO(b'\x00' * filesize))
+    ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
     obj_id = str(obj.version_id)
     db.session.commit()
-    assert get_bucket_keys() == ['test.pdf']
+    assert get_bucket_keys() == [filename]
     assert bucket.size == filesize
 
     task_s = TranscodeVideoTask().s(version_id=obj_id,
-                                    preset=preset,
+                                    preset_quality=preset_quality,
                                     sleep_time=0)
 
     # Transcode
@@ -281,18 +284,19 @@ def test_transcode(db, bucket, mock_sorenson):
     db.session.add(bucket)
     keys = get_bucket_keys()
     assert len(keys) == 2
-    assert 'test-Youtube 480p.mp4' in keys
-    assert 'test.pdf' in keys
+    assert filename in keys
+    assert new_filename in keys
     assert bucket.size == 2 * filesize
 
     # Undo
-    TranscodeVideoTask().clean(version_id=obj_id, preset=preset)
+    TranscodeVideoTask().clean(version_id=obj_id,
+                               preset_quality=preset_quality)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
     assert len(keys) == 1
-    assert 'test-Youtube 480p.mp4' not in keys
-    assert 'test.pdf' in keys
+    assert filename in keys
+    assert new_filename not in keys
     assert bucket.size == filesize
 
 
@@ -303,11 +307,12 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
 
     filesize = 1024
     filename = 'test.mp4'
-    preset1 = 'Youtube 480p'
-    preset2 = 'Youtube 720p'
-    presets = [preset1, preset2]
+    preset_qualities = ['480p', '720p']
+    new_filenames = ['test[{0}].mp4'.format(p) for p in preset_qualities]
+
     (version_id, [task_s1, task_s2]) = transcode_task(
-        bucket=bucket, filesize=filesize, filename=filename, presets=presets)
+        bucket=bucket, filesize=filesize, filename=filename,
+        preset_qualities=preset_qualities)
 
     assert get_bucket_keys() == [filename]
     assert bucket.size == filesize
@@ -319,18 +324,18 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     db.session.add(bucket)
     keys = get_bucket_keys()
     assert len(keys) == 3
-    assert 'test-Youtube 480p.mp4' in keys
-    assert 'test-Youtube 720p.mp4' in keys
+    assert new_filenames[0] in keys
+    assert new_filenames[1] in keys
     assert filename in keys
     assert bucket.size == (3 * filesize)
 
     # Undo
-    TranscodeVideoTask().clean(version_id=version_id, preset=preset1)
-
+    TranscodeVideoTask().clean(version_id=version_id,
+                               preset_quality=preset_qualities[0])
     db.session.add(bucket)
     keys = get_bucket_keys()
     assert len(keys) == 2
-    assert 'test-Youtube 480p.mp4' not in keys
-    assert 'test-Youtube 720p.mp4' in keys
+    assert new_filenames[0] not in keys
+    assert new_filenames[1] in keys
     assert filename in keys
     assert bucket.size == (2 * filesize)

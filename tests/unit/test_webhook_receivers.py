@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
+from cds_sorenson.api import get_available_preset_qualities
 from flask import url_for
 
 from invenio_files_rest.models import ObjectVersion, \
@@ -49,7 +50,8 @@ from cds.modules.webhooks.status import CollectInfoTasks
 from invenio_webhooks.models import Event
 from six import BytesIO
 
-from helpers import failing_task, simple_add, mock_current_user, success_task
+from helpers import failing_task, get_object_count, get_tag_count, \
+    simple_add, mock_current_user, success_task
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -183,7 +185,6 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
 
         assert ObjectVersion.query.count() == 0
         bucket = Bucket.query.first()
@@ -202,8 +203,8 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
     bucket_id = bucket.id
     video_size = 5510872
     master_key = 'test.mp4'
-    slave_key1 = 'test-Youtube 480p.mp4'
-    slave_key2 = 'test-Youtube 720p.mp4'
+    slave_keys = ['test[{0}].mp4'.format(quality)
+                  for quality in get_available_preset_qualities()]
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -221,7 +222,8 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -234,8 +236,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert 'version_id' in data
         assert 'links' in data  # TODO decide with links are needed
 
-        # 1 original + 2 slave + 90 frames == 93
-        assert ObjectVersion.query.count() == 93
+        assert ObjectVersion.query.count() == get_object_count()
 
         # Master file
         master = ObjectVersion.get(bucket_id, master_key)
@@ -259,27 +260,17 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert all([key in str(record['_deposit']['extracted_metadata'])
                     for key in metadata_keys])
 
-        # Slave file 1
-        slave = ObjectVersion.get(bucket_id, slave_key1)
-        tags = slave.get_tags()
-        assert '_sorenson_job_id' in tags
-        assert tags['_sorenson_job_id'] == '1234'
-        assert 'master' in tags
-        assert tags['master'] == str(master.version_id)
-        assert slave.key == 'test-Youtube 480p.mp4'
-        assert master.file
-        assert master.file.size == video_size
-
-        # Slave file 2
-        slave = ObjectVersion.get(bucket_id, slave_key2)
-        tags = slave.get_tags()
-        assert '_sorenson_job_id' in tags
-        assert tags['_sorenson_job_id'] == '1234'
-        assert 'master' in tags
-        assert tags['master'] == str(master.version_id)
-        assert slave.key == 'test-Youtube 720p.mp4'
-        assert master.file
-        assert master.file.size == video_size
+        # Check slaves
+        for slave_key in slave_keys:
+            slave = ObjectVersion.get(bucket_id, slave_key)
+            tags = slave.get_tags()
+            assert slave.key == slave_key
+            assert '_sorenson_job_id' in tags
+            assert tags['_sorenson_job_id'] == '1234'
+            assert 'master' in tags
+            assert tags['master'] == str(master.version_id)
+            assert master.file
+            assert master.file.size == video_size
 
         video = video_resolver([cds_depid])[0]
         events = get_deposit_events(video['_deposit']['id'])
@@ -308,7 +299,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert info[4][1].status == states.SUCCESS
 
         # check tags
-        assert ObjectVersionTag.query.count() == 200
+        assert ObjectVersionTag.query.count() == get_tag_count()
 
         # check sse is called
         assert mock_sse.called
@@ -346,10 +337,10 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
         assert len(list_kwargs) == 1
         _, kwargs = list_kwargs[0]
-        kwargs['type_'] == 'update_deposit'
-        kwargs['channel'] == 'mychannel'
-        kwargs['data']['state'] == states.SUCCESS
-        kwargs['data']['meta']['payload'] == {
+        assert kwargs['type_'] == 'update_deposit'
+        assert kwargs['channel'] == 'mychannel'
+        assert kwargs['data']['state'] == states.SUCCESS
+        assert kwargs['data']['meta']['payload'] == {
             'deposit_id': deposit['_deposit']['id'],
             'event_id': data['tags']['_event_id'],
             'deposit': deposit,
@@ -377,9 +368,8 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
 
-        # check that object version, tags are deleted
+        # check that object versions and tags are deleted
         assert ObjectVersion.query.count() == 0
         assert ObjectVersionTag.query.count() == 0
         bucket = Bucket.query.first()
@@ -423,38 +413,32 @@ def test_avc_workflow_receiver_clean_download(
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
 
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     event = Event.query.first()
     event.receiver.clean_task(event=event, task_name='file_download')
 
-    # check extracted metadata is not there
+    # check extracted metadata is there
     records = RecordMetadata.query.all()
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_deposit']
 
-    # 2 slave + 90 frames == 92
-    assert ObjectVersion.query.count() == 92
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 188
+    assert ObjectVersion.query.count() == get_object_count(download=False)
+    assert ObjectVersionTag.query.count() == get_tag_count(download=False)
 
     # RUN again first step
     event.receiver._init_object_version(event=event)
     event.receiver._first_step(event=event).apply()
 
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -478,14 +462,15 @@ def test_avc_workflow_receiver_clean_video_frames(
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
 
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     event = Event.query.first()
     event.receiver.clean_task(
@@ -496,22 +481,15 @@ def test_avc_workflow_receiver_clean_video_frames(
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_deposit']
 
-    # check object versions don't change:
-    # 1 original + 2 slave == 3
-    assert ObjectVersion.query.count() == 3
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 20
+    assert ObjectVersion.query.count() == get_object_count(frames=False)
+    assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
 
     # RUN again frame extraction
     event.receiver.run_task(
         event=event, task_name='file_video_extract_frames').apply()
 
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -521,8 +499,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
     """Test AVCWorkflow receiver."""
     db.session.add(bucket)
     master_key = 'test.mp4'
-    preset1 = 'Youtube 480p'
-    preset2 = 'Youtube 720p'
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -537,68 +513,51 @@ def test_avc_workflow_receiver_clean_video_transcode(
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
 
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
-    # delete one trancode file
-    event = Event.query.first()
-    event.receiver.clean_task(
-        event=event, task_name='file_transcode', preset=preset1)
+    #
+    # CLEAN
+    #
+    for i, preset_quality in enumerate(get_available_preset_qualities(), 1):
+        # Clean transcode task for each preset
+        event = Event.query.first()
+        event.receiver.clean_task(event=event, task_name='file_transcode',
+                                  preset_quality=preset_quality)
 
-    # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+        # check extracted metadata is there
+        records = RecordMetadata.query.all()
+        assert len(records) == 1
+        assert 'extracted_metadata' in records[0].json['_deposit']
 
-    # check object versions don't change:
-    # 1 original + 1 slave + 90 frames == 92
-    assert ObjectVersion.query.count() == 92
+        assert ObjectVersion.query.count() == get_object_count() - i
+        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 4)
 
-    # check tags
-    assert ObjectVersionTag.query.count() == 196
+    assert ObjectVersion.query.count() == get_object_count(transcode=False)
+    assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
 
-    # delete also the other one
-    event.receiver.clean_task(
-        event=event, task_name='file_transcode', preset=preset2)
+    #
+    # RUN again
+    #
+    for i, preset_quality in enumerate(get_available_preset_qualities(), 1):
+        event = Event.query.first()
+        event.receiver.run_task(event=event, task_name='file_transcode',
+                                preset_quality=preset_quality).apply()
 
-    # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+        assert ObjectVersion.query.count() == get_object_count(
+            transcode=False) + i
+        assert ObjectVersionTag.query.count() == get_tag_count(
+            transcode=False) + (i * 4)
 
-    # check object versions don't change:
-    # 1 original + 90 frames == 91
-    assert ObjectVersion.query.count() == 91
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 192
-
-    # RUN again trancode 1
-    event.receiver.run_task(
-        event=event, task_name='file_transcode', preset=preset1).apply()
-
-    # 1 master + 1 slave + 90 frames == 92
-    assert ObjectVersion.query.count() == 92
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 196
-
-    # RUN again trancode 2
-    event = Event.query.first()
-    event.receiver.run_task(
-        event=event, task_name='file_transcode', preset=preset2).apply()
-
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -622,14 +581,15 @@ def test_avc_workflow_receiver_clean_extract_metadata(
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
 
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     event = Event.query.first()
     event.receiver.clean_task(
@@ -640,22 +600,15 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     assert len(records) == 1
     assert 'extracted_metadata' not in records[0].json['_deposit']
 
-    # check object versions don't change:
-    # 1 original + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 190
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
 
     # RUN again first step
     event.receiver.run_task(
         event=event, task_name='file_video_metadata_extraction').apply()
 
-    # 1 master + 2 slave + 90 frames == 93
-    assert ObjectVersion.query.count() == 93
-
-    # check tags
-    assert ObjectVersionTag.query.count() == 200
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -664,7 +617,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
 
 
 @pytest.mark.parametrize(
-    'receiver_id,workflow,status,http_status, payload,result', [
+    'receiver_id, workflow, status, http_status, payload, result', [
         ('failing-task', failing_task, states.FAILURE, 500, {}, None),
         ('success-task', success_task, states.SUCCESS, 201, {}, None),
         ('add-task', simple_add, states.SUCCESS, 202, {'x': 40, 'y': 2}, 42)
