@@ -57,7 +57,7 @@
         <div id="cds-deposit">
         <cds-deposits
             {% if pid %}
-              master-links='{{pid|tolinksjs(record)|tojson}}'
+              master-links='{{pid|tolinksjs(record, dep_type=record_type)|tojson}}'
             {% else %}
               master-init="/api/deposits/project/"
             {% endif %}

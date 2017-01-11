@@ -118,6 +118,16 @@ def test_links_filter(es, location, deposit_metadata):
     assert links['edit'] == self_url + '/actions/edit'
     assert links['publish'] == self_url + '/actions/publish'
     assert links['files'] == self_url + '/files'
+    links_type = to_links_js(deposit.pid, deposit, 'project')
+    self_url_type = links_type['self']
+    assert links_type['discard'] == self_url_type + '/actions/discard'
+    assert links_type['edit'] == self_url_type + '/actions/edit'
+    assert links_type['publish'] == self_url_type + '/actions/publish'
+    assert links_type['files'] == self_url_type + '/files'
+    with current_app.test_client() as client:
+        data = client.get(links_type['html']).get_data().decode('utf-8')
+        for key in links_type:
+            assert links_type[key] in data
 
 
 def test_permissions(es, location, deposit_metadata):

@@ -472,7 +472,10 @@ _CDSDeposit_PID = \
     'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
 _Project_PID = 'pid(depid,record_class="cds.modules.deposit.api:Project")'
 _Video_PID = 'pid(depid,record_class="cds.modules.deposit.api:Video")'
-DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{pid_value}'
+DEPOSIT_UI_ENDPOINT_DEFAULT = '{scheme}://{host}/deposit/{pid_value}'
+DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{type}/{pid_value}'
+DEPOSIT_RECORDS_API_DEFAULT = '/api/deposits/{pid_value}'
+DEPOSIT_RECORDS_API = '/api/deposits/{type}/{pid_value}'
 # Deposit rest endpoints
 DEPOSIT_REST_ENDPOINTS = dict(
     depid=dict(
@@ -604,6 +607,13 @@ DEPOSIT_RECORDS_UI_ENDPOINTS = {
         'route': '/deposit/<pid_value>',
         'template': 'cds_deposit/edit.html',
         'record_class': 'cds.modules.deposit.api:CDSDeposit',
+    },
+    'project': {
+        'pid_type': 'depid',
+        'route': '/deposit/project/<pid_value>',
+        'template': 'cds_deposit/edit.html',
+        'record_class': 'cds.modules.deposit.api:Project',
+        'view_imp': 'cds.modules.deposit.views:project_view'
     },
 }
 # Deposit successful messages

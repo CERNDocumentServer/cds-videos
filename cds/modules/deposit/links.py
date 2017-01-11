@@ -34,6 +34,7 @@ from functools import partial
 
 def deposit_links_factory(pid, deposit_type=None):
     """Factory for links generation."""
+    type_exists = deposit_type is not None
     deposit_type = deposit_type or pid.pid_type
 
     def _url(name, **kwargs):
@@ -47,14 +48,16 @@ def deposit_links_factory(pid, deposit_type=None):
         links['bucket'] = bucket_link
     links['self'] = _url('item')
     links['files'] = _url('files')
-    ui_endpoint = current_app.config.get('DEPOSIT_UI_ENDPOINT')
+    ui_endpoint = current_app.config.get(
+        'DEPOSIT_UI_ENDPOINT' if type_exists else 'DEPOSIT_UI_ENDPOINT_DEFAULT'
+    )
     if ui_endpoint is not None:
         links['html'] = ui_endpoint.format(
             host=request.host,
             scheme=request.scheme,
+            type=deposit_type,
             pid_value=pid.pid_value,
         )
-
     for action in ('publish', 'edit', 'discard'):
         links[action] = _url('actions', action=action)
     return links

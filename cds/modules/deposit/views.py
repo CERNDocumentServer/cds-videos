@@ -27,6 +27,8 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, current_app, url_for
+from flask import render_template
+from invenio_records_ui.signals import record_viewed
 
 from .api import CDSDeposit
 
@@ -38,19 +40,38 @@ blueprint = Blueprint(
 )
 
 
+def project_view(pid, record, template=None, **kwargs):
+    """Edit project view."""
+    record_viewed.send(
+        current_app._get_current_object(),
+        pid=pid,
+        record=record,
+    )
+    return render_template(
+        template,
+        pid=pid,
+        record=record,
+        record_type='project',
+    )
+
+
 @blueprint.app_template_filter('tolinksjs')
-def to_links_js(pid, deposit=None):
+def to_links_js(pid, deposit=None, dep_type=None):
     """Get API links."""
     if not isinstance(deposit, CDSDeposit):
         return []
 
-    self_url = current_app.config['DEPOSIT_RECORDS_API'].format(
-        pid_value=pid.pid_value)
+    if dep_type:
+        api_endpoint = current_app.config['DEPOSIT_RECORDS_API']
+        self_url = api_endpoint.format(pid_value=pid.pid_value, type=dep_type)
+    else:
+        api_endpoint = current_app.config['DEPOSIT_RECORDS_API_DEFAULT']
+        self_url = api_endpoint.format(pid_value=pid.pid_value)
 
     return {
         'self': self_url,
         'html': url_for(
-            'invenio_deposit_ui.{}'.format(pid.pid_type),
+            'invenio_deposit_ui.{}'.format(dep_type or pid.pid_type),
             pid_value=pid.pid_value),
         'bucket': current_app.config['DEPOSIT_FILES_API'] + '/{0}'.format(
             str(deposit.files.bucket.id)),
