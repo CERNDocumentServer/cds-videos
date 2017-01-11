@@ -35,6 +35,9 @@ import pexpect
 #
 # Metadata extraction
 #
+from cds_sorenson.api import get_available_aspect_ratios
+
+
 def ff_probe(input_filename, field):
     """Retrieve requested field from the output of ffprobe.
 
@@ -79,10 +82,6 @@ def ff_probe_all(input_filename):
 #
 # Aspect Ratio  # TODO remove when Sorenson is updated
 #
-def valid_aspect_ratios():
-    return [(16, 9), (4, 3), (3, 2), (20, 9), (256, 135), (64, 35), (2, 1)]
-
-
 def probe_aspect_ratio(input_filename):
     """Probe video's aspect ratio, calculating it if needed."""
     metadata = ff_probe_all(input_filename)
@@ -91,7 +90,7 @@ def probe_aspect_ratio(input_filename):
 
 def _calculate_aspect_ratio(width, height):
     """Calculate a video's aspect ratio from its dimensions."""
-    ratios = valid_aspect_ratios()
+    ratios = get_available_aspect_ratios(pairs=True)
     for (w, h) in ratios:
         if w / h == width / height:
             return '{0}:{1}'.format(w, h)

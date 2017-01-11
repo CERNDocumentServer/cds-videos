@@ -29,9 +29,10 @@ from __future__ import absolute_import
 import json
 
 from copy import deepcopy
+
+from cds_sorenson.api import get_available_preset_qualities
 from celery import chain, group
 from celery.result import AsyncResult
-from flask import current_app
 from invenio_db import db
 from celery import states
 from flask import url_for
@@ -340,19 +341,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 )
         return first_step
 
-    def _presets(self, event):
-        """Get list of presets."""
-        return event.payload.get('video_presets', None) or \
-            current_app.config['CDS_SORENSON_PRESETS'].keys()
-
     def _second_step(self, event):
         """Define second step."""
-        presets = self._presets(event=event)
         return group(
             self.run_task(event=event, task_name='file_video_extract_frames'),
             *[self.run_task(
-                event=event, task_name='file_transcode', preset=preset)
-                for preset in presets]
+                event=event, task_name='file_transcode',
+                preset_quality=preset_quality)
+                for preset_quality in get_available_preset_qualities()]
         )
 
     def _workflow(self, event):
@@ -380,7 +376,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
         Optional:
           * sse_channel, if set all the tasks will publish their status update
             to it.
-          * video_presets, if not set the default presets will be used.
           * frames_start, if not set the default value will be used.
           * frames_end, if not set the default value will be used.
           * frames_gap, if not set the default value will be used.
@@ -410,11 +405,11 @@ class AVCWorkflow(CeleryAsyncReceiver):
     def delete(self, event):
         """Delete tasks and everything created by them."""
         super(AVCWorkflow, self).delete(event)
-        presets = self._presets(event=event)
         self.clean_task(event=event, task_name='file_video_extract_frames')
-        for preset in presets:
+        for preset_quality in get_available_preset_qualities():
             self.clean_task(
-                event=event, task_name='file_transcode', preset=preset)
+                event=event, task_name='file_transcode',
+                preset_quality=preset_quality)
         self.clean_task(
             event=event, task_name='file_video_metadata_extraction')
         if 'version_id' not in event.payload:
@@ -438,4 +433,4 @@ class AVCWorkflow(CeleryAsyncReceiver):
         second_step = [{"file_video_extract_frames": result.children[0]}]
         for res in result.children[1:]:
             second_step.append({"file_transcode": res})
-        return (first_step, second_step)
+        return first_step, second_step

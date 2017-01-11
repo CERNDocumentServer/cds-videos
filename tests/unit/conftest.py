@@ -81,7 +81,6 @@ from helpers import create_category, sse_simple_add, sse_failing_task, \
 def app():
     """Flask application fixture."""
     instance_path = tempfile.mkdtemp()
-    sorenson_output = tempfile.mkdtemp()
 
     os.environ.update(
         APP_INSTANCE_PATH=os.environ.get(
@@ -102,11 +101,6 @@ def app():
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
-        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
-        CDS_SORENSON_PRESETS={
-            'Youtube 480p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff4', '.mp4'),
-            'Youtube 720p': ('2c5a86db-1018-4ff8-a5ad-daebd4cb4ff5', '.mp4'),
-        },
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
 
     )
@@ -116,14 +110,12 @@ def app():
         yield app
 
     shutil.rmtree(instance_path)
-    shutil.rmtree(sorenson_output)
 
 
 @pytest.yield_fixture(scope='session')
 def celery_not_fail_on_eager_app(app):
     """Celery configuration that does not raise errors inside test."""
     instance_path = tempfile.mkdtemp()
-    sorenson_output = tempfile.mkdtemp()
 
     os.environ.update(
         APP_INSTANCE_PATH=os.environ.get(
@@ -143,7 +135,6 @@ def celery_not_fail_on_eager_app(app):
         CELERY_TRACK_STARTED=True,
         BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
-        CDS_SORENSON_OUTPUT_FOLDER=sorenson_output,
         PREVIEWER_PREFERENCE=['cds_video', ],
         RECORDS_UI_ENDPOINTS=dict(
             video_preview=dict(
@@ -161,7 +152,6 @@ def celery_not_fail_on_eager_app(app):
         yield app
 
     shutil.rmtree(instance_path)
-    shutil.rmtree(sorenson_output)
 
 
 @pytest.yield_fixture()
@@ -509,7 +499,7 @@ def project_published(app, project):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
-    def mocked_encoding(input_file, preset_name, output_file):
+    def mocked_encoding(input_file, output_file, preset_name, aspect_ratio):
         shutil.copyfile(input_file, output_file)  # just copy file
         return '1234'
     mock.patch(
@@ -523,7 +513,7 @@ def mock_sorenson():
         dict(Status=dict(Progress=45, TimeFinished=None)),
         dict(Status=dict(Progress=95, TimeFinished=None)),
         dict(Status=dict(Progress=100, TimeFinished='12:00')),
-    ] * 5  # repeat for multiple usages of the mocked method
+    ] * 50  # repeat for multiple usages of the mocked method
 
     mock.patch(
         'cds.modules.webhooks.tasks.stop_encoding'
