@@ -358,6 +358,16 @@ def cds_jsonresolver(app):
 
 
 @pytest.fixture()
+def cds_jsonresolver_required_fields(app):
+    """Configure a jsonresolver for cds-dojson."""
+    resolver = JSONResolver(plugins=['demo.json_resolver_required_fields'])
+    app.extensions['invenio-records'].ref_resolver_cls = ref_resolver_factory(
+        resolver)
+    app.extensions['invenio-records'].loader_cls = json_loader_factory(
+        resolver)
+
+
+@pytest.fixture()
 def deposit_metadata():
     """Deposit metadata."""
     return {

@@ -31,7 +31,7 @@ from invenio_records.models import RecordMetadata
 from cds.modules.fixtures.cli import categories as cli_categories
 
 
-def test_fixture_categories(script_info, db):
+def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()

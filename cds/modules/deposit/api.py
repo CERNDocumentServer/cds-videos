@@ -35,11 +35,13 @@ import arrow
 from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
 
+from jsonschema.validators import Draft4Validator
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag)
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_records.validators import PartialDraft4Validator
 from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
@@ -157,7 +159,8 @@ class CDSDeposit(Deposit):
         )
         data['_buckets'] = {'deposit': str(bucket.id)}
         data['_deposit']['state'] = {}
-        deposit = super(CDSDeposit, cls).create(data, id_=id_)
+        deposit = super(CDSDeposit, cls).create(
+            data, id_=id_, validator=PartialDraft4Validator)
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
 
@@ -183,6 +186,7 @@ class CDSDeposit(Deposit):
 
     @property
     def report_number(self):
+        """Return report number."""
         try:
             return self['report_number']['report_number']
         except KeyError:
@@ -190,10 +194,11 @@ class CDSDeposit(Deposit):
 
     @report_number.setter
     def report_number(self, value):
+        """Set new report number."""
         self['report_number'] = dict(report_number=value)
 
     def generate_report_number(self, **kwargs):
-        """Generates a new report number.
+        """Generate a new report number.
 
         .. note :
             Override in deposit subclass for custom behaviour.
@@ -208,6 +213,12 @@ class CDSDeposit(Deposit):
             and the ``kwargs`` without the keywords used by this method
         """
         raise NotImplemented
+
+    def commit(self, **kwargs):
+        """Set partial validator as default."""
+        if 'validator' not in kwargs:
+            kwargs['validator'] = PartialDraft4Validator
+        return super(CDSDeposit, self).commit(**kwargs)
 
 
 def project_resolver(project_id):
@@ -270,8 +281,6 @@ class Project(CDSDeposit):
             'deposits/records/project-v1.0.0.json')
         data.setdefault('videos', [])
         return super(Project, cls).create(data, id_=id_)
-        # project.commit()
-        # return project
 
     @property
     def video_ids(self):
@@ -354,7 +363,7 @@ class Project(CDSDeposit):
         self.report_number = project_modified.report_number
 
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_).commit()
+        return super(Project, self).publish(pid=pid, id_=id_)  # .commit()
 
     def discard(self, pid=None):
         """Discard project changes."""
