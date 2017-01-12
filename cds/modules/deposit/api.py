@@ -72,8 +72,8 @@ class CDSFileObject(FileObject):
             return {
                 'key': obj.key,
                 'version_id': str(obj.version_id),
-                'checksum': obj.file.checksum,
-                'size': obj.file.size,
+                'checksum': obj.file.checksum if obj.file else '',
+                'size': obj.file.size if obj.file else 0,
                 'completed': True,
                 'progress': 100,
                 'tags': obj.get_tags(),

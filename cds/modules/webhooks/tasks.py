@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import
 
+import fnmatch
 import hashlib
 import json
 import jsonpatch
@@ -37,10 +38,10 @@ import time
 from functools import partial
 
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
-from cds_sorenson.error import SorensonError
+from cds_sorenson.error import SorensonError, InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app, chain
-from celery.states import FAILURE, STARTED, SUCCESS
-from flask import current_app
+from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
+
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
@@ -388,6 +389,23 @@ class TranscodeVideoTask(AVCTask):
         base_name, extension = master_key.rsplit('.', 1)
         return '{0}[{1}].{2}'.format(base_name, preset_quality, extension)
 
+    #FIXME maybe we need to move this part to CDS-Sorenson
+    @staticmethod
+    def _clean_file_name(uri):
+        """Remove file extension from file name.
+
+        For some reason the Sorenson Server adds the extension to the output
+        file, creating ``data.mp4``. Our file storage does not use extensions
+        and this is causing troubles.
+        The best/dirtiest solution is to remove the file extension once the
+        transcoded file is created.
+        """
+        folder = os.path.dirname(uri)
+        for file_ in os.listdir(folder):
+            if fnmatch.fnmatch(file_, 'data.*'):
+                os.rename(os.path.join(folder, file_),
+                          os.path.join(folder, 'data'))
+
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
         object_version = as_object_version(version_id)
@@ -443,9 +461,9 @@ class TranscodeVideoTask(AVCTask):
                 # Start Sorenson
                 job_id = start_encoding(input_file, output_file,
                                         preset_quality, aspect_ratio)
-            except SorensonError as e:
+            except InvalidResolutionError as e:
                 self.update_state(
-                    state=FAILURE,
+                    state=REVOKED,
                     meta={'payload': {}, 'message': str(e)})
                 return
 
@@ -477,29 +495,24 @@ class TranscodeVideoTask(AVCTask):
                 payload=dict(job_info=job_info),
                 message='Started transcoding.'))
 
-        try:
-            # Monitor job and report accordingly
-            while job_info['percentage'] < 100:
-                # Get job status
-                status = get_encoding_status(job_id)['Status']
-                percentage = 100 if status['TimeFinished'] \
-                    else status['Progress']
-                job_info['percentage'] = percentage
+        status = ''
+        # Monitor job and report accordingly
+        while status != 'Finished':
+            # Get job status
+            status, percentage = get_encoding_status(job_id)
+            job_info['percentage'] = percentage
 
-                # Update task's state for this preset
-                self.update_state(
-                    state=STARTED,
-                    meta=dict(
-                        payload=dict(job_info=job_info),
-                        message='Transcoding {0}'.format(percentage)))
-
-                time.sleep(sleep_time)
-        except SorensonError as e:
+            # Update task's state for this preset
             self.update_state(
-                state=FAILURE,
-                meta={'payload': {'job_id': job_id}, 'message': str(e)})
+                state=STARTED,
+                meta=dict(
+                    payload=dict(job_info=job_info),
+                    message='Transcoding {0}'.format(percentage)))
+
+            time.sleep(sleep_time)
 
         # Set file's location, if job has completed
+        self._clean_file_name(output_file)
         with db.session.begin_nested():
             uri = output_file
             with open(uri, 'rb') as transcoded_file:
