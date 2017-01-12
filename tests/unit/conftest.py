@@ -519,10 +519,10 @@ def mock_sorenson():
     mock.patch(
         'cds.modules.webhooks.tasks.get_encoding_status'
     ).start().side_effect = [
-        dict(Status=dict(Progress=0, TimeFinished=None)),
-        dict(Status=dict(Progress=45, TimeFinished=None)),
-        dict(Status=dict(Progress=95, TimeFinished=None)),
-        dict(Status=dict(Progress=100, TimeFinished='12:00')),
+        ('Waiting', 0),
+        ('Transcoding', 45),
+        ('Transcoding', 95),
+        ('Finished', 100),
     ] * 50  # repeat for multiple usages of the mocked method
 
     mock.patch(
