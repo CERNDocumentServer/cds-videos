@@ -31,17 +31,19 @@ import json
 import mock
 import pytest
 
+from copy import deepcopy
 from cds.modules.deposit.api import CDSDeposit, cds_resolver
 from cds.modules.deposit.permissions import can_edit_deposit
 from cds.modules.deposit.views import to_links_js
+from celery import states
 from flask import current_app, g, request, url_for
 from flask_login import login_user
 from flask_principal import Identity
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_db import db
+from jsonschema.exceptions import ValidationError
 from six import BytesIO
-from celery import states
 
 from helpers import mock_current_user
 
@@ -286,3 +288,37 @@ def test_deposit_events_on_workflow(webhooks, api_app, db, cds_depid, bucket,
         data = json.loads(res.data.decode('utf-8'))['metadata']
         assert data['_deposit']['state']['add'] == states.SUCCESS
         assert data['_deposit']['state']['failing'] == states.FAILURE
+
+
+def test_deposit_partial_validation(
+        app, db, cds_jsonresolver_required_fields, deposit_metadata, location):
+    """Test project create/publish with partial validation/validation."""
+    # create a deposit without a required field
+    if 'fuu' in deposit_metadata:
+        del deposit_metadata['fuu']
+    deposit = CDSDeposit.create(deposit_metadata)
+    id_ = deposit.id
+    db.session.expire_all()
+    deposit = CDSDeposit.get_record(id_)
+    assert deposit is not None
+    # if publish, then generate an validation error
+    with pytest.raises(ValidationError):
+        deposit.publish()
+    # patch deposit
+    patch = [{
+        'op': 'replace',
+        'path': '/category',
+        'value': 'bar',
+    }]
+    id_ = deposit.id
+    db.session.expire_all()
+    deposit = CDSDeposit.get_record(id_)
+    deposit.patch(patch).commit()
+    # update deposit
+    copy = deepcopy(deposit)
+    copy['category'] = 'qwerty'
+    id_ = deposit.id
+    db.session.expire_all()
+    deposit = CDSDeposit.get_record(id_)
+    deposit.update(copy)
+    deposit.commit()

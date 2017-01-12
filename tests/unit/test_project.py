@@ -30,7 +30,7 @@ import mock
 import pytest
 import uuid
 
-from cds.modules.records.providers import CDSRecordIdProvider
+from copy import deepcopy
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
@@ -38,6 +38,7 @@ from cds.modules.deposit.api import (record_build_url, Project, Video,
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
+from jsonschema.exceptions import ValidationError
 from cds.modules.deposit.errors import DiscardConflict
 from invenio_records.models import RecordMetadata
 
@@ -360,3 +361,62 @@ def test_inheritance(app, project):
     assert 'type' in video
     assert video['category'] == project['category']
     assert video['type'] == project['type']
+
+
+def test_project_partial_validation(
+        app, db, cds_jsonresolver_required_fields, deposit_metadata, location,
+        deposit_rest):
+    """Test project create/publish with partial validation/validation."""
+    # create a project/video without a required field
+    if 'fuu' in deposit_metadata:
+        del deposit_metadata['fuu']
+    project_video_1 = deepcopy(deposit_metadata)
+    project = Project.create(deposit_metadata)
+    # insert a video
+    project_video_1['_project_id'] = project['_deposit']['id']
+    video = Video.create(project_video_1)
+    video_id = video.id
+    # check project
+    id_ = project.id
+    db.session.expire_all()
+    project = Project.get_record(id_)
+    assert project is not None
+    # if publish, then generate an validation error
+    with pytest.raises(ValidationError):
+        project.publish()
+    # patch project
+    patch = [{
+        'op': 'replace',
+        'path': '/category',
+        'value': 'bar',
+    }]
+    id_ = project.id
+    db.session.expire_all()
+    project = Project.get_record(id_)
+    project.patch(patch).commit()
+    # update project
+    copy = deepcopy(project)
+    copy['category'] = 'qwerty'
+    id_ = project.id
+    db.session.expire_all()
+    project = Project.get_record(id_)
+    project.update(copy)
+    project.commit()
+    # patch video
+    patch = [{
+        'op': 'replace',
+        'path': '/category',
+        'value': 'bar',
+    }]
+    id_ = video_id
+    db.session.expire_all()
+    video = Video.get_record(id_)
+    video.patch(patch).commit()
+    # update video
+    copy = deepcopy(video)
+    copy['category'] = 'qwerty'
+    id_ = video_id
+    db.session.expire_all()
+    video = Video.get_record(id_)
+    video.update(copy)
+    video.commit()

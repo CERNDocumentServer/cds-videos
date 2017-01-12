@@ -32,9 +32,7 @@ psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
-# FIXME wait for PR#19
-#-e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
--e git+https://github.com/omelkonian/cds-sorenson.git@video-api#egg=cds-sorenson
+-e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
 -e git+https://github.com/inveniosoftware/invenio-access.git#egg=invenio-access
@@ -46,7 +44,9 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
 -e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db
--e git+https://github.com/inveniosoftware/invenio-deposit.git#egg=invenio-deposit
+# FIXME waiting for PR#157
+# -e git+https://github.com/inveniosoftware/invenio-deposit.git@create_validator#egg=invenio-deposit
+-e git+https://github.com/hachreak/invenio-deposit.git@create_validator#egg=invenio-deposit
 # FIXME wait for PR#132
 # -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
 -e git+https://github.com/egabancho/invenio-files-rest.git@object-version-tags#egg=invenio-files-rest
@@ -62,9 +62,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
-# FIXME waiting for invenio-previewer#60
-# -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
--e git+https://github.com/hachreak/invenio-previewer.git@fix_nbconvert#egg=invenio-previewer
+-e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
 -e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
