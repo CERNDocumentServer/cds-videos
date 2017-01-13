@@ -506,7 +506,7 @@ class TranscodeVideoTask(AVCTask):
             self.update_state(
                 state=STARTED,
                 meta=dict(
-                    payload=dict(job_info=job_info),
+                    payload=dict(**job_info),
                     message='Transcoding {0}'.format(percentage)))
 
             time.sleep(sleep_time)
