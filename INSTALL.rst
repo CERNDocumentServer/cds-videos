@@ -15,7 +15,7 @@ Prepare the environment
 
 .. note::
 
-    Before stating the installation you can verify you have installed all the
+    Before starting the installation you can verify you have installed all the
     system requirements using the `Invenio scripts <https://github.com/inveniosoftware/invenio/tree/master/scripts>`_
 
 
