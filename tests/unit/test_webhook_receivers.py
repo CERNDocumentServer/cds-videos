@@ -234,6 +234,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert data['tags']['uri_origin'] == online_video
         assert data['key'] == master_key
         assert 'version_id' in data
+        assert data.get('presets') == get_available_preset_qualities()
         assert 'links' in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()

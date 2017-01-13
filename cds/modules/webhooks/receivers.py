@@ -343,12 +343,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def _second_step(self, event):
         """Define second step."""
+        preset_qualities = get_available_preset_qualities()
+        event.response['presets'] = preset_qualities
         return group(
             self.run_task(event=event, task_name='file_video_extract_frames'),
             *[self.run_task(
                 event=event, task_name='file_transcode',
                 preset_quality=preset_quality)
-                for preset_quality in get_available_preset_qualities()]
+              for preset_quality in preset_qualities]
         )
 
     def _workflow(self, event):
