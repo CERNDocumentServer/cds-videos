@@ -385,6 +385,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       return videos || next.video;
     }, null);
   };
+
+  this.allFinished = function() {
+    return (that.files || []).every(function(file) {
+      return file.completed;
+    });
+  }
 }
 
 cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout',
