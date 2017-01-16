@@ -34,6 +34,7 @@ import tempfile
 from os.path import dirname, join
 from time import sleep
 
+import requests
 import mock
 import pytest
 from cds.factory import create_app
@@ -72,6 +73,7 @@ from jsonresolver.contrib.jsonschema import ref_resolver_factory
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
+from invenio_files_rest.models import ObjectVersion
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
     sse_success_task
@@ -632,3 +634,14 @@ def templates(app, db):
                     meta_template='{project-v1_0_0}-{counter}',
                     start=1)
     db.session.commit()
+
+
+@pytest.fixture()
+def local_file(db, bucket, location, online_video):
+    """A local file."""
+    response = requests.get(online_video, stream=True)
+    object_version = ObjectVersion.create(
+        bucket, "test.mp4", stream=response.raw)
+    version_id = object_version.version_id
+    db.session.commit()
+    return version_id

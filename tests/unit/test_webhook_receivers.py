@@ -394,6 +394,199 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
+def test_avc_workflow_receiver_local_file_pass(
+        api_app, db, bucket, cds_depid, access_token, json_headers,
+        mock_sorenson, online_video, webhooks, local_file):
+    """Test AVCWorkflow receiver."""
+    db.session.add(bucket)
+    bucket_id = bucket.id
+    video_size = 5510872
+    master_key = 'test.mp4'
+    slave_keys = ['test[{0}].mp4'.format(quality)
+                  for quality in get_available_preset_qualities()]
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='avc',
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client, \
+            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            as mock_indexer:
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            bucket_id=str(bucket.id),
+            deposit_id=cds_depid,
+            key=master_key,
+            sse_channel=sse_channel,
+            sleep_time=0,
+            version_id=str(local_file),
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 201
+        data = json.loads(resp.data.decode('utf-8'))
+
+        assert '_tasks' in data
+        assert data['key'] == master_key
+        assert 'version_id' in data
+        assert data.get('presets') == get_available_preset_qualities()
+        assert 'links' in data  # TODO decide with links are needed
+
+        assert ObjectVersion.query.count() == get_object_count()
+
+        # Master file
+        master = ObjectVersion.get(bucket_id, master_key)
+        tags = master.get_tags()
+        assert tags['_event_id'] == data['tags']['_event_id']
+        assert master.key == master_key
+        assert str(master.version_id) == data['version_id']
+        assert master.file
+        assert master.file.size == video_size
+
+        # Check metadata tags
+        metadata_keys = ['duration', 'bit_rate', 'size', 'avg_frame_rate',
+                         'codec_name', 'width', 'height', 'nb_frames',
+                         'display_aspect_ratio', 'color_range']
+        assert all([key in tags for key in metadata_keys])
+
+        # Check metadata patch
+        recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
+        record = Record.get_record(recid)
+        assert 'extracted_metadata' in record['_deposit']
+        assert all([key in str(record['_deposit']['extracted_metadata'])
+                    for key in metadata_keys])
+
+        # Check slaves
+        for slave_key in slave_keys:
+            slave = ObjectVersion.get(bucket_id, slave_key)
+            tags = slave.get_tags()
+            assert slave.key == slave_key
+            assert '_sorenson_job_id' in tags
+            assert tags['_sorenson_job_id'] == '1234'
+            assert 'master' in tags
+            assert tags['master'] == str(master.version_id)
+            assert master.file
+            assert master.file.size == video_size
+
+        video = video_resolver([cds_depid])[0]
+        events = get_deposit_events(video['_deposit']['id'])
+
+        # check deposit tasks status
+        tasks_status = get_tasks_status_by_task(events)
+        assert len(tasks_status) == 3
+        assert 'file_transcode' in tasks_status
+        assert 'file_video_extract_frames' in tasks_status
+        assert 'file_video_metadata_extraction' in tasks_status
+
+        # check single status
+        collector = CollectInfoTasks()
+        iterate_events_results(events=events, fun=collector)
+        info = list(collector)
+        assert len(info) == 8
+        assert info[0][0] == 'file_video_metadata_extraction'
+        assert info[0][1].status == states.SUCCESS
+        assert info[1][0] == 'file_video_extract_frames'
+        assert info[1][1].status == states.SUCCESS
+        for myinfo in info[2:]:
+            assert myinfo[0] == 'file_transcode'
+            assert myinfo[1].status == states.SUCCESS
+
+        # check tags
+        assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
+
+        # check sse is called
+        assert mock_sse.called
+
+        messages = [
+            (sse_channel, states.SUCCESS, 'file_video_metadata_extraction'),
+            (sse_channel, states.STARTED, 'file_transcode'),
+            (sse_channel, states.SUCCESS, 'file_transcode'),
+            (sse_channel, states.STARTED, 'file_video_extract_frames'),
+            (sse_channel, states.SUCCESS, 'file_video_extract_frames'),
+            (sse_channel, states.SUCCESS, 'update_deposit'),
+        ]
+
+        call_args = []
+        for (_, kwargs) in mock_sse.call_args_list:
+            type_ = kwargs['type_']
+            state = kwargs['data']['state']
+            channel = kwargs['channel']
+            tuple_ = (channel, state, type_)
+            if tuple_ not in call_args:
+                call_args.append(tuple_)
+
+        assert len(call_args) == len(messages)
+        for message in messages:
+            assert message in call_args
+
+        deposit = cds_resolver([cds_depid])[0]
+
+        def filter_events(call_args):
+            _, x = call_args
+            return x['type_'] == 'update_deposit'
+
+        list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
+        assert len(list_kwargs) == 1
+        _, kwargs = list_kwargs[0]
+        assert kwargs['type_'] == 'update_deposit'
+        assert kwargs['channel'] == 'mychannel'
+        assert kwargs['data']['state'] == states.SUCCESS
+        assert kwargs['data']['meta']['payload'] == {
+            'deposit_id': deposit['_deposit']['id'],
+            'event_id': data['tags']['_event_id'],
+            'deposit': deposit,
+        }
+
+        # check ElasticSearch is called
+        args, kwargs = mock_indexer.call_args
+        (arg,) = args
+        deposit_to_index = next(arg)
+        assert str(deposit.id) == deposit_to_index
+        assert deposit['_deposit']['state'] == {
+            'file_video_metadata_extraction': states.SUCCESS,
+            'file_video_extract_frames': states.SUCCESS,
+            'file_transcode': states.SUCCESS,
+        }
+
+    # Test cleaning!
+    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
+
+    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            as mock_indexer, \
+            api_app.test_client() as client:
+        resp = client.delete(url, headers=json_headers)
+
+        assert resp.status_code == 201
+
+        # check that object versions and tags are deleted
+        assert ObjectVersion.query.count() == 1
+        assert ObjectVersionTag.query.count() == 0
+        bucket = Bucket.query.first()
+        # and bucket is empty
+        assert bucket.size == 0
+
+        records = RecordMetadata.query.all()
+        assert len(records) == 1
+        record = records[0]
+        events = get_deposit_events(record.json['_deposit']['id'])
+
+        # check metadata patch are deleted
+        assert 'extracted_metadata' not in record.json['_deposit']
+
+        # check there are no events
+        assert len(events) == 1
+
+        # check no SSE message and reindexing is fired
+        assert mock_sse.called is False
+        assert mock_indexer.called is False
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_download(
         api_app, db, bucket, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, webhooks):
