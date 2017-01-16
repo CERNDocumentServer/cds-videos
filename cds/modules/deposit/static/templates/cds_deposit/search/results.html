@@ -8,17 +8,20 @@
           <i class="glyphicon glyphicon-{{ record.metadata._deposit.status!=='R' && 'open' || 'saved' }} text-{{ record.metadata._deposit.status!=='R' && 'success' || 'danger' }}"></i>
         </div>
       </div>
-      <div class="pull-left">
+      <div class="pull-left cds-deposit-listing">
+        <small class="pull-right label label-default">
+          #{{ record.metadata._deposit.id }}
+        </small>
         <h5 class="list-group-item-heading">
-          {{ record.metadata.title.title }}
+          <b>{{ record.metadata.title.title || 'No title' }}</b>
         </h5>
-        <p class="list-group-item-text">
-        Created {{ record.metadata.description.value }}
+        <p class="list-group-item-text line-clamp">
+          {{ record.metadata.description.value | stripTags }}
+        </p>
+        <p class="list-group-item-text text-muted">
+          <small>Created on {{ record.created | date:'medium' }}, last updated on {{ record.updated | date:'medium' }}</small>
         </p>
       </div>
-      <small class="pull-right label label-default">
-        #{{ record.metadata._deposit.id }}
-      </small>
       <div class="clearfix"></div>
     </a>
   </div>

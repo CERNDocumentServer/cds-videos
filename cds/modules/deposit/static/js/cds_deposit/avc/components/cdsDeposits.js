@@ -18,8 +18,6 @@ function cdsDepositsCtrl(
   this.master = {};
   // The children deposit
   this.children = [];
-  // Alerts
-  this.alerts = [];
   // Global loading state
   this.loading = false;
   // The connection
@@ -306,26 +304,6 @@ function cdsDepositsCtrl(
   this.JSONResolver = function(url) {
     return cdsAPI.resolveJSON(url);
   };
-
-  this.dismissAlert = function(alert) {
-    delete this.alerts[_.indexOf(this.alerts, alert.alert)];
-  };
-
-  // Global cdsDeposit events
-  // Meessages Success
-  $scope.$on('cds.deposit.success', function(evt, response) {
-    that.alerts = [];
-    that.alerts.push({
-      message: response.status || 'Success',
-      type: 'success',
-    });
-  });
-
-  // Meessages Error
-  $scope.$on('cds.deposit.error', function(evt, response) {
-    that.alerts = [];
-    that.alerts.push({ message: response.data.message, type: 'danger' });
-  });
 
   // Loading Start
   $scope.$on('cds.deposit.loading.start', function(evt) {

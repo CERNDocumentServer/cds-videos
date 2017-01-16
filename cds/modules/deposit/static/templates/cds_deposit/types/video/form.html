@@ -1,3 +1,10 @@
+<div class="alerts" ng-repeat="alert in $ctrl.cdsDepositCtrl.alerts">
+  <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
+    <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {{ alert.message }}
+  </div>
+</div>
+
 <div>
   <div class="row">
     <div class="col-sm-12">

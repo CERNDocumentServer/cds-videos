@@ -21,7 +21,9 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-define([], function(){
-  var app = angular.module('cds', []);
-  return app;
+var app = angular.module('cds', []);
+app.filter('stripTags', function() {
+  return function(text) {
+    return text ? String(text).replace(/<[^>]+>/gm, '') : '';
+  }
 });

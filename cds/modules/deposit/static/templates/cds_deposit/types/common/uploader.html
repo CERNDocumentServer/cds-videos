@@ -103,7 +103,7 @@
         <span class="sr-only">Loading...</span>
       </span>
       <button class="btn btn-sm btn-default" type="submit" ng-show="$ctrl.invenioFilesBusy" ng-click="$ctrl.cancel()">Cancel</button>
-      <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0" ng-click="$ctrl.upload()">Start upload</button>
+      <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0 || $ctrl.allFinished()" ng-click="$ctrl.upload()">Start upload</button>
     </div>
   </div>
 </div>
