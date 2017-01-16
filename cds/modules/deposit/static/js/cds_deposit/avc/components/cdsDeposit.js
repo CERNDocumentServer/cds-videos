@@ -25,6 +25,12 @@ function cdsDepositCtrl(
   // Add depositStatuses to the scope
   this.depositStatuses = depositStatuses;
 
+  // Alerts
+  this.alerts = [];
+
+  // Ignore server validation errors for the following fields
+  this.noValidateFields = ['description.value'];
+
   this.previewer = null;
 
   // FIXME Init stateQueue -  maybe ```Object(depositStatuses).keys()```
@@ -137,6 +143,33 @@ function cdsDepositCtrl(
       );
       that.lastUpdated = new Date();
     };
+
+    // cdsDeposit events
+
+    // Success message
+    // Loading message
+    // Error message
+
+    // Messages Success
+    $scope.$on('cds.deposit.success', function(evt, response) {
+      if (evt.currentScope == evt.targetScope) {
+        that.alerts = [];
+        that.alerts.push({
+          message: response.status || 'Success',
+          type: 'success'
+        });
+      }
+    });
+    // Messages Error
+    $scope.$on('cds.deposit.error', function(evt, response) {
+      if (evt.currentScope == evt.targetScope) {
+        that.alerts = [];
+        that.alerts.push({
+          message: response.data.message,
+          type: 'danger'
+        });
+      }
+    });
 
     // Initialize state the queue
     this.initializeStateQueue();
@@ -318,6 +351,10 @@ function cdsDepositCtrl(
       return that.links[endpoint];
     }
     return endpoint;
+  };
+
+  this.dismissAlert = function(alert) {
+    this.alerts.splice(_.indexOf(this.alerts, alert.alert), 1);
   };
 
   // Do a single action at once

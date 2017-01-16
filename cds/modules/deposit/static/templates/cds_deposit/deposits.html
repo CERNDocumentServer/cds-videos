@@ -92,12 +92,6 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          <div class="alerts" ng-repeat="alert in $ctrl.alerts">
-            <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
-              <button ng-click="$ctrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              {{ alert.message }}
-            </div>
-          </div>
           <div class="cds-deposit-box">
             <cds-form
               template="/static/templates/cds_deposit/types/project/form.html"

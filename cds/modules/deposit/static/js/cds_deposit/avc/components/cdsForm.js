@@ -25,7 +25,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   };
 
   $scope.$on('cds.deposit.validation.error', function(evt, value, depositId) {
-    if (that.cdsDepositCtrl.id == depositId) {
+    if (that.cdsDepositCtrl.id == depositId &&
+      !that.cdsDepositCtrl.noValidateFields.includes(value.field)) {
       $scope.$broadcast(
         'schemaForm.error.' + value.field,
         'backendValidationError',
