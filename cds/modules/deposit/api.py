@@ -32,10 +32,10 @@ import uuid
 import datetime
 
 import arrow
+from celery import states
 from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
 
-from jsonschema.validators import Draft4Validator
 from invenio_deposit.api import Deposit, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag)
@@ -50,6 +50,9 @@ from werkzeug.local import LocalProxy
 from invenio_records.api import Record
 
 from .errors import DiscardConflict
+from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
+    iterate_events_results
+
 
 PRESERVE_FIELDS = (
     '_deposit',
@@ -363,7 +366,7 @@ class Project(CDSDeposit):
         self.report_number = project_modified.report_number
 
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_)  # .commit()
+        return super(Project, self).publish(pid=pid, id_=id_)
 
     def discard(self, pid=None):
         """Discard project changes."""
@@ -462,10 +465,20 @@ class Video(CDSDeposit):
         self.generate_report_number()
         return super(Video, self)._publish_new(id_)
 
+    def _tasks_global_status(self):
+        """Check if all tasks are successfully."""
+        global_status = ComputeGlobalStatus()
+        events = get_deposit_events(deposit_id=self['_deposit']['id'])
+        iterate_events_results(events=events, fun=global_status)
+        return global_status.status
+
     def publish(self, pid=None, id_=None):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
+        # check all tasks are successfully
+        if self._tasks_global_status() != states.SUCCESS:
+            raise PIDInvalidAction()
         # inherit ``category`` and ``type`` fields from parent project
         self['category'] = self.project['category']
         self['type'] = self.project['type']
