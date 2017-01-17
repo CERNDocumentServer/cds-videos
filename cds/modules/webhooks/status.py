@@ -38,6 +38,7 @@ def get_deposit_events(deposit_id):
     #  return Event.query.filter(
     #      Event.payload.op('->>')(
     #          'deposit_id').cast(String) == self['_deposit']['id']).all()
+    deposit_id = str(deposit_id)
     return Event.query.filter(
         sqlalchemy.cast(
             Event.payload['deposit_id'],
