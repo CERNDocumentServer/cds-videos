@@ -29,7 +29,9 @@ from __future__ import absolute_import, print_function
 import mock
 import pytest
 import uuid
+import json
 
+from invenio_db import db
 from copy import deepcopy
 from flask_security import login_user
 from cds.modules.deposit.api import (record_build_url, Project, Video,
@@ -40,7 +42,9 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from jsonschema.exceptions import ValidationError
 from cds.modules.deposit.errors import DiscardConflict
+from cds.modules.webhooks.status import get_deposit_events
 from invenio_records.models import RecordMetadata
+from invenio_webhooks.models import Event
 
 
 def test_is_deposit():
@@ -420,3 +424,52 @@ def test_project_partial_validation(
     video = Video.get_record(id_)
     video.update(copy)
     video.commit()
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def test_project_publish_with_workflow(
+        app, users,
+        project,
+        workflow_receiver_video_failing):
+    """Test publish a project with a workflow."""
+    project, video_1, video_2 = project
+    video_1_depid = video_1['_deposit']['id']
+    video_2_depid = video_2['_deposit']['id']
+
+    headers = [('Content-Type', 'application/json')]
+    payload = json.dumps(dict(somekey='somevalue'))
+    with app.test_request_context(headers=headers, data=payload):
+        event = Event.create(receiver_id=workflow_receiver_video_failing)
+        db.session.add(event)
+        event.process()
+    db.session.commit()
+
+    events = get_deposit_events(deposit_id=video_1_depid)
+    assert len(events) == 1
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'draft'
+
+    video_2 = video_resolver([video_2_depid])[0]
+    video_2.publish()
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'published'
+
+    video_1 = video_resolver([video_1_depid])[0]
+    with pytest.raises(PIDInvalidAction):
+        video_1.publish()
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'published'
+
+    with pytest.raises(PIDInvalidAction):
+        project.publish()
+
+    assert project.status == 'draft'
+    assert video_1.status == 'draft'
+    assert video_2.status == 'published'

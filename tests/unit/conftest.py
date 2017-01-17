@@ -602,6 +602,47 @@ def workflow_receiver(api_app, db, webhooks, es, cds_depid):
     return receiver_id
 
 
+@pytest.fixture
+def workflow_receiver_video_failing(api_app, db, webhooks, es, project):
+    """Workflow receiver for video."""
+    _, video, _ = project
+    video_depid = video['_deposit']['id']
+
+    class TestReceiver(CeleryAsyncReceiver):
+        def run(self, event):
+            workflow = chain(
+                sse_simple_add().s(x=1, y=2, deposit_id=video_depid),
+                group(sse_failing_task().s(), sse_success_task().s())
+
+            )
+            event.payload['deposit_id'] = video_depid
+            with db.session.begin_nested():
+                event.response_headers = {}
+                flag_modified(event, 'response_headers')
+                flag_modified(event, 'payload')
+                db.session.expunge(event)
+            db.session.commit()
+            self.persist(
+                event=event, result=workflow.apply_async())
+
+        def _raw_info(self, event):
+            result = self._deserialize_result(event)
+            return (
+                [{'add': result.parent}],
+                [
+                    {'failing': result.children[0]},
+                    {'failing': result.children[1]}
+                ]
+            )
+
+    receiver_id = 'add-receiver-video-failing'
+    from cds.celery import celery
+    celery.flask_app.extensions['invenio-webhooks'].register(
+        receiver_id, TestReceiver)
+    current_webhooks.register(receiver_id, TestReceiver)
+    return receiver_id
+
+
 @pytest.fixture()
 def category_1(api_app, es, indexer, pidstore, cds_jsonresolver):
     """Create a fixture for category."""
