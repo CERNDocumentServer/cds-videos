@@ -508,10 +508,18 @@ class Video(CDSDeposit):
         assert video_new.report_number
         return video_new
 
+    def _clean_tasks(self):
+        """Clean all tasks."""
+        events = get_deposit_events(deposit_id=self['_deposit']['id'])
+        for event in events:
+            event.receiver.delete(event=event)
+
     def delete(self, force=True, pid=None):
         """Delete a video."""
         ref_old = self.ref
         project = self.project
+        # clean tasks
+        self._clean_tasks()
         # delete video
         video_deleted = super(Video, self).delete(force=force, pid=pid)
         # update project

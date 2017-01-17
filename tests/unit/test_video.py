@@ -28,6 +28,11 @@ from __future__ import absolute_import, print_function
 
 import mock
 import pytest
+import json
+from invenio_db import db
+from invenio_webhooks import current_webhooks
+from invenio_webhooks.models import Event
+from mock import MagicMock
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.providers.recordid import RecordIdProvider
@@ -36,6 +41,8 @@ from six import BytesIO
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver)
+
+from helpers import workflow_receiver_video_failing
 
 
 def test_video_resolver(project):
@@ -207,3 +214,30 @@ def test_video_dumps(db, project, video_mp4):
     assert files['frame'][-1]['key'] == 'frame-9.jpeg'
     assert 'video' in files
     assert len(files['video']) == 1
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def test_video_delete_with_workflow(app, users, project, webhooks, es):
+    """Test publish a project with a workflow."""
+    project, video_1, video_2 = project
+    video_1_depid = video_1['_deposit']['id']
+
+    receiver_id = 'test_video_delete_with_workflow'
+    workflow_receiver_video_failing(
+        app, db, video_1, receiver_id=receiver_id)
+
+    mock_delete = MagicMock(return_value=None)
+    current_webhooks.receivers[receiver_id].delete = mock_delete
+
+    headers = [('Content-Type', 'application/json')]
+    payload = json.dumps(dict(somekey='somevalue'))
+    with app.test_request_context(headers=headers, data=payload):
+        event = Event.create(receiver_id=receiver_id)
+        db.session.add(event)
+        event.process()
+    db.session.commit()
+
+    video_1 = video_resolver([video_1_depid])[0]
+    video_1.delete()
+    assert mock_delete.called is True

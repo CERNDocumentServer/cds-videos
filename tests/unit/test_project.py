@@ -46,6 +46,8 @@ from cds.modules.webhooks.status import get_deposit_events
 from invenio_records.models import RecordMetadata
 from invenio_webhooks.models import Event
 
+from helpers import workflow_receiver_video_failing
+
 
 def test_is_deposit():
     """Test is deposit function."""
@@ -428,19 +430,20 @@ def test_project_partial_validation(
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_publish_with_workflow(
-        app, users,
-        project,
-        workflow_receiver_video_failing):
+def test_project_publish_with_workflow(app, users, project, webhooks, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = project
     video_1_depid = video_1['_deposit']['id']
     video_2_depid = video_2['_deposit']['id']
 
+    receiver_id = 'test_project_publish_with_workflow'
+    workflow_receiver_video_failing(
+        app, db, video_1, receiver_id=receiver_id)
+
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
     with app.test_request_context(headers=headers, data=payload):
-        event = Event.create(receiver_id=workflow_receiver_video_failing)
+        event = Event.create(receiver_id=receiver_id)
         db.session.add(event)
         event.process()
     db.session.commit()
