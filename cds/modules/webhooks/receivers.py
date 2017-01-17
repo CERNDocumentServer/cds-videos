@@ -262,12 +262,11 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def run_task(self, event, task_name, *args, **kwargs):
         """Run a task."""
-        event_id = str(event.id)
-        version_id = event.response['version_id']
+        kwargs['event_id'] = str(event.id)
+        kwargs['version_id'] = event.response['version_id']
         payload = deepcopy(event.payload)
         payload.update(**kwargs)
-        return self._tasks[task_name]().si(
-            version_id=version_id, event_id=event_id, *args, **payload)
+        return self._tasks[task_name]().si(*args, **payload)
 
     def clean_task(self, event, task_name, *args, **kwargs):
         """Clean a task."""
@@ -332,7 +331,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
         with db.session.begin_nested():
             if 'version_id' in event.payload:
                 first_step = self.run_task(
-                    event=event, task_name='file_video_metadata_extraction'),
+                    event=event, task_name='file_video_metadata_extraction')
             else:
                 first_step = group(
                     self.run_task(event=event, task_name='file_download'),
@@ -420,7 +419,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def clean(self, event):
         """Delete the event."""
-        ObjectVersionTag.query.filter_by(key='_event_id', value=event.id)
+        with db.session.begin_nested():
+            ObjectVersionTag.query.filter_by(
+                key='_event_id', value=str(event.id)).delete()
 
     def _raw_info(self, event):
         """Get info from the event."""

@@ -38,7 +38,7 @@ import time
 from functools import partial
 
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
-from cds_sorenson.error import SorensonError, InvalidResolutionError
+from cds_sorenson.error import InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app, chain
 from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
 
@@ -243,7 +243,7 @@ class ExtractMetadataTask(AVCTask):
                 ObjectVersionTag.key.in_(self._all_keys)).all():
             db.session.delete(tag)
 
-    def run(self, uri, *args, **kwargs):
+    def run(self, uri=None, *args, **kwargs):
         """Extract metadata from given video file.
 
         All technical metadata, i.e. bitrate, will be translated into
@@ -255,6 +255,7 @@ class ExtractMetadataTask(AVCTask):
         """
         recid = str(PersistentIdentifier.get(
             'depid', self.deposit_id).object_uuid)
+        uri = uri or self.object.file.uri
 
         self._base_payload.update(
             version_id=str(self.object.version_id),
@@ -389,7 +390,7 @@ class TranscodeVideoTask(AVCTask):
         base_name, extension = master_key.rsplit('.', 1)
         return '{0}[{1}].{2}'.format(base_name, preset_quality, extension)
 
-    #FIXME maybe we need to move this part to CDS-Sorenson
+    # FIXME maybe we need to move this part to CDS-Sorenson
     @staticmethod
     def _clean_file_name(uri):
         """Remove file extension from file name.
