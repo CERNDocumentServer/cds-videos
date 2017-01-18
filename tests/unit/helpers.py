@@ -38,6 +38,10 @@ from invenio_db import db
 from cds.modules.webhooks.tasks import AVCTask
 from cds.modules.deposit.api import Category
 from cds.modules.webhooks.tasks import TranscodeVideoTask
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from celery import chain, group
+from sqlalchemy.orm.attributes import flag_modified
+from invenio_webhooks import current_webhooks
 
 
 @shared_task(bind=True)
@@ -149,3 +153,39 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         90 * 2 if frames else 0,
         len(get_available_preset_qualities()) * 4 if transcode else 0,
     ])
+
+
+def workflow_receiver_video_failing(api_app, db, video,
+                                    receiver_id):
+    """Workflow receiver for video."""
+    video_depid = video['_deposit']['id']
+
+    class TestReceiver(CeleryAsyncReceiver):
+        def run(self, event):
+            workflow = chain(
+                sse_simple_add().s(x=1, y=2, deposit_id=video_depid),
+                group(sse_failing_task().s(), sse_success_task().s())
+
+            )
+            event.payload['deposit_id'] = video_depid
+            with db.session.begin_nested():
+                event.response_headers = {}
+                flag_modified(event, 'response_headers')
+                flag_modified(event, 'payload')
+                db.session.expunge(event)
+            db.session.commit()
+            self.persist(
+                event=event, result=workflow.apply_async())
+
+        def _raw_info(self, event):
+            result = self._deserialize_result(event)
+            return (
+                [{'add': result.parent}],
+                [
+                    {'failing': result.children[0]},
+                    {'failing': result.children[1]}
+                ]
+            )
+
+    current_webhooks.register(receiver_id, TestReceiver)
+    return receiver_id
