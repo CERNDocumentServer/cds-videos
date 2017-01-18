@@ -53,8 +53,7 @@ from sqlalchemy.orm.exc import ConcurrentModificationError
 from invenio_indexer.api import RecordIndexer
 from werkzeug.utils import import_string
 
-from .status import get_tasks_status_by_task, get_deposit_events
-from ..deposit.api import cds_resolver, CDSDeposit
+from ..deposit.api import video_resolver, CDSDeposit
 from ..ffmpeg import ff_frames, ff_probe_all
 
 
@@ -130,7 +129,7 @@ class AVCTask(Task):
         with celery_app.flask_app.app_context():
             if 'deposit_id' in self._base_payload \
                     and self._base_payload['deposit_id']:
-                update_deposit_state(
+                update_avc_deposit_state(
                     deposit_id=self._base_payload.get('deposit_id'),
                     event_id=self._base_payload.get('event_id'),
                     sse_channel=self.sse_channel
@@ -568,8 +567,7 @@ def update_record(self, recid, patch, validator=None,
 def get_patch_tasks_status(deposit):
     """Get the patch to apply to update record tasks status."""
     old_status = deposit['_deposit']['state']
-    new_status = get_tasks_status_by_task(
-        get_deposit_events(deposit['_deposit']['id']))
+    new_status = deposit._current_tasks_status()
     # create tasks status patch
     patches = jsonpatch.make_patch(old_status, new_status).patch
     # make it suitable for the deposit
@@ -598,19 +596,29 @@ def spread_deposit_update(id_=None, event_id=None, sse_channel=None):
         RecordIndexer().bulk_index(iter([id_]))
 
 
-def update_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
-                         **kwargs):
+def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
+                             **kwargs):
     """Update deposit state on SSE and ElasticSearch."""
     if deposit_id:
-        # get_record
-        deposit = cds_resolver([deposit_id])[0]
-        # create the patch
-        patch = get_patch_tasks_status(deposit=deposit)
+        # get video
+        video = video_resolver([deposit_id])[0]
+        # create the patch for video
+        video_patch = get_patch_tasks_status(deposit=video)
+        project_patch = None
+        project_id = None
+        if video.project:
+            project_patch = get_patch_tasks_status(deposit=video.project)
+            project_id = video.project.id
         # update record
-        if patch:
+        if video_patch:
             validator = 'invenio_records.validators.PartialDraft4Validator'
             chain(
-                update_record.s(str(deposit.id), patch, validator=validator),
+                update_record.s(recid=str(video.id), patch=video_patch,
+                                validator=validator),
+                spread_deposit_update.s(event_id=str(event_id),
+                                        sse_channel=sse_channel),
+                update_record.si(recid=str(project_id),
+                                 patch=project_patch, validator=validator),
                 spread_deposit_update.s(event_id=str(event_id),
                                         sse_channel=sse_channel)
             ).apply_async()

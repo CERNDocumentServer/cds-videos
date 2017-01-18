@@ -45,7 +45,7 @@ from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
 
 from .status import ComputeGlobalStatus, iterate_result, collect_info
 from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
-    TranscodeVideoTask, update_deposit_state
+    TranscodeVideoTask, update_avc_deposit_state
 
 
 class CeleryAsyncReceiver(Receiver):
@@ -131,7 +131,7 @@ class CeleryAsyncReceiver(Receiver):
 
             db.session.add(event)
         db.session.commit()
-        update_deposit_state(
+        update_avc_deposit_state(
             deposit_id=event.payload.get('deposit_id'),
             event_id=event.id,
             sse_channel=event.payload.get('sse_channel')

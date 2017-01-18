@@ -433,20 +433,51 @@ def test_project_partial_validation(
 def test_project_publish_with_workflow(app, users, project, webhooks, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = project
+    project_depid = project['_deposit']['id']
+    project_id = str(project.id)
     video_1_depid = video_1['_deposit']['id']
+    video_1_id = str(video_1.id)
     video_2_depid = video_2['_deposit']['id']
 
+    sse_channel = 'mychannel'
     receiver_id = 'test_project_publish_with_workflow'
     workflow_receiver_video_failing(
-        app, db, video_1, receiver_id=receiver_id)
+        app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
-    with app.test_request_context(headers=headers, data=payload):
+    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            as mock_indexer, \
+            app.test_request_context(headers=headers, data=payload):
         event = Event.create(receiver_id=receiver_id)
         db.session.add(event)
         event.process()
+
+        # check messages are sent to the sse channel
+        assert mock_sse.called is True
+        args = list(mock_sse.mock_calls[0])[2]
+        assert args['channel'] == sse_channel
+        assert args['type_'] == 'update_deposit'
+        assert args['data']['meta']['payload']['deposit_id'] == video_1_depid
+        args = list(mock_sse.mock_calls[1])[2]
+        assert args['channel'] == sse_channel
+        assert args['type_'] == 'update_deposit'
+        assert args['data']['meta']['payload']['deposit_id'] == project_depid
+
+        # check video and project are indexed
+        assert mock_indexer.called is True
+        myid = next(list(mock_indexer.mock_calls[0])[1][0])
+        assert video_1_id == myid
+        myid = next(list(mock_indexer.mock_calls[1])[1][0])
+        assert project_id == myid
     db.session.commit()
+
+    # check tasks status is propagated to video and project
+    video_1 = video_resolver([video_1_depid])[0]
+    expected = {u'add': u'SUCCESS', u'failing': u'FAILURE'}
+    assert video_1['_deposit']['state'] == expected
+    assert video_1.project['_deposit']['state'] == expected
 
     events = get_deposit_events(deposit_id=video_1_depid)
     assert len(events) == 1
