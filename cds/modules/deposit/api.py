@@ -30,6 +30,7 @@ import os
 import uuid
 
 import datetime
+import itertools
 
 import arrow
 from celery import states
@@ -51,7 +52,7 @@ from invenio_records.api import Record
 
 from .errors import DiscardConflict
 from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
-    iterate_events_results
+    iterate_events_results, get_tasks_status_by_task
 
 
 PRESERVE_FIELDS = (
@@ -410,6 +411,12 @@ class Project(CDSDeposit):
                         category=self['category'],
                         type=self['type']), kwargs
 
+    def _current_tasks_status(self):
+        """Return up-to-date tasks status."""
+        list_events = [get_deposit_events(depid) for depid in self.video_ids]
+        events = list(itertools.chain.from_iterable(list_events))
+        return get_tasks_status_by_task(events)
+
 
 class Video(CDSDeposit):
     """Define API for a video."""
@@ -551,6 +558,11 @@ class Video(CDSDeposit):
         parent_rn = kwargs.pop('parent_report_number')
         parent_name = self.project.sequence_name
         return Sequence(self.sequence_name, **{parent_name: parent_rn}), kwargs
+
+    def _current_tasks_status(self):
+        """Return up-to-date tasks status."""
+        return get_tasks_status_by_task(
+            get_deposit_events(self['_deposit']['id']))
 
 
 class Category(Record):
