@@ -31,6 +31,7 @@ from cds.modules.deposit.minters import catid_minter
 import click
 from cds.modules.deposit.api import Category
 import pkg_resources
+from invenio_sequencegenerator.api import Template
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
 from flask import current_app
@@ -287,3 +288,17 @@ def categories(source):
     indexer = RecordIndexer()
     for cat_id in to_index:
         indexer.index_by_id(cat_id)
+
+
+@fixtures.command()
+@with_appcontext
+def sequence_generator():
+    """Register CDS templates for sequence generation."""
+    with db.session.begin_nested():
+        Template.create(name='project-v1_0_0',
+                        meta_template='{category}-{type}-{year}-{counter}',
+                        start=1)
+        Template.create(name='video-v1_0_0',
+                        meta_template='{project-v1_0_0}-{counter}',
+                        start=1)
+    db.session.commit()
