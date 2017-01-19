@@ -22,4 +22,30 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""CDS deposit."""
+"""CDS tests for Webhook receivers."""
+
+from __future__ import absolute_import, print_function
+
+from invenio_deposit.signals import post_action
+
+from .receivers import index_deposit_after_publish
+
+
+class CDSDepositApp(object):
+    """CDS deposit extension."""
+
+    def __init__(self, app=None):
+        """Extension initialization."""
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        """Flask application initialization."""
+        app.extensions['cds-deposit'] = self
+        self.register_signals(app)
+
+    @staticmethod
+    def register_signals(app):
+        """Register CDS Deposit signals."""
+        post_action.connect(index_deposit_after_publish,
+                            sender=app, weak=False)

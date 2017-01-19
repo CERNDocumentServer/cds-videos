@@ -180,10 +180,12 @@ setup(
             'cds_theme_js = cds.modules.theme.bundles:js',
         ],
         'invenio_base.api_apps': [
+            'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
             #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.apps': [
+            'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
