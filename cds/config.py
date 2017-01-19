@@ -177,6 +177,8 @@ OAISERVER_RECORD_INDEX = 'records'
 RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
 # Endpoints for record API.
+_Record_PID = 'pid(recid,record_class="invenio_records_files.api:Record")'
+_Category_PID = 'pid(catid,record_class="cds.modules.deposit.api:Category")'
 RECORDS_REST_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',
@@ -195,7 +197,7 @@ RECORDS_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/records/',
-        item_route='/record/<pid_value>',
+        item_route='/record/<{0}:pid_value>'.format(_Record_PID),
         default_media_type='application/json',
         max_result_window=10000,
     ),
@@ -217,7 +219,7 @@ RECORDS_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/categories/',
-        item_route='/categories/<pid_value>',
+        item_route='/categories/<{0}:pid_value>'.format(_Category_PID),
         default_media_type='application/json',
         max_result_window=10000,
         suggesters={
