@@ -27,9 +27,10 @@
 from __future__ import absolute_import, print_function
 
 import json
+import mock
 
 from copy import deepcopy
-from cds.modules.deposit.api import project_resolver, video_resolver
+from cds.modules.deposit.api import project_resolver, video_resolver, Project
 from flask import url_for
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
@@ -295,3 +296,87 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         # check database
         project = project_resolver(project_dict['metadata']['_deposit']['id'])
         assert project['title']['title'] == 'my project'
+
+
+def test_publish_project_check_indexed(app, db, es, users, location,
+                                       cds_jsonresolver, project_metadata,
+                                       json_headers, deposit_rest, data_file_1,
+                                       data_file_2, deposit_metadata):
+    """Test create a project and check project and videos are indexed."""
+    with app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # [[ CREATE NEW PROJECT ]]
+        res = client.post(
+            url_for('invenio_deposit_rest.project_list'),
+            data=json.dumps(project_metadata), headers=json_headers)
+
+        assert res.status_code == 201
+        project_dict = json.loads(res.data.decode('utf-8'))
+
+        # [[ ADD A NEW EMPTY VIDEO_1 ]]
+        video_metadata = deepcopy(deposit_metadata)
+        video_metadata.update(
+            _project_id=project_dict['metadata']['_deposit']['id'])
+        res = client.post(
+            url_for('invenio_deposit_rest.video_list'),
+            data=json.dumps(video_metadata), headers=json_headers)
+
+        # check returned value
+        assert res.status_code == 201
+        video_1_dict = json.loads(res.data.decode('utf-8'))
+
+        # [[ ADD A NEW EMPTY VIDEO_2 ]]
+        video_metadata = deepcopy(deposit_metadata)
+        video_metadata.update(
+            _project_id=project_dict['metadata']['_deposit']['id'])
+        res = client.post(
+            url_for('invenio_deposit_rest.video_list'),
+            data=json.dumps(video_metadata), headers=json_headers)
+
+        # check returned value
+        assert res.status_code == 201
+        video_2_dict = json.loads(res.data.decode('utf-8'))
+
+        # get video ids
+        video_ids = [
+            video_1_dict['metadata']['_deposit']['id'],
+            video_2_dict['metadata']['_deposit']['id']
+        ]
+        [video_1, video_2] = video_resolver(video_ids)
+        video_1_id = str(video_1.id)
+        video_2_id = str(video_2.id)
+        # get project id
+        project_depid = project_dict['metadata']['_deposit']['id']
+        project = project_resolver(project_depid)
+        project_id = str(project.id)
+        project = dict(project)
+
+        with mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+                as mock_indexer:
+            # [[ PUBLISH THE PROJECT ]]
+            res = client.post(
+                url_for('invenio_deposit_rest.project_actions',
+                        pid_value=project['_deposit']['id'], action='publish'),
+                headers=json_headers)
+
+            # get project record
+            _, project_record = project_resolver(
+                project_depid).fetch_published()
+            # get video records
+            video_records = video_resolver(Project(data=project).video_ids)
+            assert len(video_records) == 2
+            # check project + videos are indexed
+            assert mock_indexer.called is True
+            ids = list(list(mock_indexer.mock_calls[0])[1][0])
+            assert len(ids) == 3
+            # check video deposit are not indexed
+            assert video_1_id not in ids
+            assert video_2_id not in ids
+            # check project deposit is not indexed
+            assert project_id not in ids
+            # check video records are indexed
+            assert str(video_records[0].id) in ids
+            assert str(video_records[1].id) in ids
+            # check project record is indexed
+            assert str(project_record.id) in ids
