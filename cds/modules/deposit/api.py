@@ -275,14 +275,15 @@ class Project(CDSDeposit):
     sequence_name = 'project-v1_0_0'
     """Sequence identifier."""
 
+    _schema = 'deposits/records/project-v1.0.0.json'
+
     @classmethod
     def create(cls, data, id_=None):
         """Create a deposit.
 
         Adds bucket creation immediately on deposit creation.
         """
-        data['$schema'] = current_jsonschemas.path_to_url(
-            'deposits/records/project-v1.0.0.json')
+        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         data.setdefault('videos', [])
         return super(Project, cls).create(data, id_=id_)
 
@@ -424,6 +425,8 @@ class Video(CDSDeposit):
     sequence_name = 'video-v1_0_0'
     """Sequence identifier."""
 
+    _schema = 'deposits/records/video-v1.0.0.json'
+
     @classmethod
     def create(cls, data, id_=None):
         """Create a deposit.
@@ -431,8 +434,7 @@ class Video(CDSDeposit):
         Adds bucket creation immediately on deposit creation.
         """
         project_id = data.get('_project_id')
-        data['$schema'] = current_jsonschemas.path_to_url(
-            'deposits/records/video-v1.0.0.json')
+        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         project = project_resolver(project_id)
         video_new = super(Video, cls).create(data, id_=id_)
         video_new.project = project
@@ -568,11 +570,12 @@ class Video(CDSDeposit):
 class Category(Record):
     """Define API for a category."""
 
+    _schema = 'categories/category-v1.0.0.json'
+
     @classmethod
     def create(cls, data, id_=None):
         """Create a category."""
-        data['$schema'] = current_jsonschemas.path_to_url(
-            'categories/category-v1.0.0.json')
+        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
 
         data['suggest_name'] = {
             'input': data.get('name', None),

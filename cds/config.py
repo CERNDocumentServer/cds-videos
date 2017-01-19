@@ -476,6 +476,8 @@ DEPOSIT_UI_ENDPOINT_DEFAULT = '{scheme}://{host}/deposit/{pid_value}'
 DEPOSIT_UI_ENDPOINT = '{scheme}://{host}/deposit/{type}/{pid_value}'
 DEPOSIT_RECORDS_API_DEFAULT = '/api/deposits/{pid_value}'
 DEPOSIT_RECORDS_API = '/api/deposits/{type}/{pid_value}'
+# use a custom function to catch record publish signals
+DEPOSIT_REGISTER_SIGNALS = False
 # Deposit rest endpoints
 DEPOSIT_REST_ENDPOINTS = dict(
     depid=dict(
