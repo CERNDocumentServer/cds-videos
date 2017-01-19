@@ -26,4 +26,6 @@ curl -XDELETE localhost:9200/*
 cds db destroy init create
 cds index init
 
+cds fixtures sequence_generator
+
 cds users create test@test.ch -a --password=123456
