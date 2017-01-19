@@ -28,7 +28,9 @@ from __future__ import absolute_import, print_function
 
 from click.testing import CliRunner
 from invenio_records.models import RecordMetadata
-from cds.modules.fixtures.cli import categories as cli_categories
+from invenio_sequencegenerator.models import TemplateDefinition
+from cds.modules.fixtures.cli import categories as cli_categories, \
+    sequence_generator as cli_sequence_generator
 
 
 def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
@@ -41,3 +43,14 @@ def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
     assert len(categories) == 5
     for category in categories:
         assert 'video' in category.json['types']
+
+
+def test_fixture_sequence_generator(app, script_info, db):
+    """Test load sequence generator fixtures."""
+    TemplateDefinition.query.delete()
+    assert len(TemplateDefinition.query.all()) == 0
+    runner = CliRunner()
+    res = runner.invoke(cli_sequence_generator, [], obj=script_info)
+    assert res.exit_code == 0
+    templates = TemplateDefinition.query.all()
+    assert len(templates) == 2
