@@ -7,7 +7,7 @@ function cdsDepositCtrl(
   depositStatuses,
   cdsAPI,
   urlBuilder,
-  typeReducer,
+  typeReducer
 ) {
   var that = this;
   // The Upload Queue
@@ -70,7 +70,7 @@ function cdsDepositCtrl(
         if (videoFile && !videoFile.url) {
           that.stateQueue.PENDING.splice(
             depositStates.indexOf('file_download'),
-            1,
+            1
           );
           that.stateQueue.SUCCESS.push('file_download');
         }
@@ -117,7 +117,7 @@ function cdsDepositCtrl(
           urlBuilder.video({
             deposit: deposit || that.record._deposit.id,
             key: key || that.record._files[0].key,
-          }),
+          })
         );
       }
     };
@@ -126,14 +126,14 @@ function cdsDepositCtrl(
       that.record._files = angular.merge(
         [],
         that.record._files,
-        deposit._files || [],
+        deposit._files || []
       );
 
       // Check for new state
       that.record._deposit.state = angular.merge(
         {},
         that.record._deposit.state,
-        deposit._deposit.state || {},
+        deposit._deposit.state || {}
       );
       that.lastUpdated = new Date();
     };
@@ -163,7 +163,7 @@ function cdsDepositCtrl(
           if (that.presets_finished.length === 1) {
             that.videoPreviewer(
               that.record._deposit.id,
-              that.record._files[0].key,
+              that.record._files[0].key
             );
           }
         } else {
@@ -184,7 +184,7 @@ function cdsDepositCtrl(
     this.sseEventListener = $scope.$on(depositListenerName, function(
       evt,
       type,
-      data,
+      data
     ) {
       $scope.$apply(function() {
         // Handle my state
@@ -202,7 +202,7 @@ function cdsDepositCtrl(
             case 'FAILURE':
               that.stateQueue.STARTED = _.without(
                 that.stateQueue.STARTED,
-                type,
+                type
               );
               that.stateQueue.FAILURE.push(type);
               // On error remove it from the status order
@@ -215,7 +215,7 @@ function cdsDepositCtrl(
               if (type !== 'update_deposit' && type !== 'file_transcode') {
                 that.stateQueue.STARTED = _.without(
                   that.stateQueue.STARTED,
-                  type,
+                  type
                 );
                 that.stateQueue.SUCCESS.push(type);
                 // On success remove it from the status order
@@ -240,7 +240,7 @@ function cdsDepositCtrl(
         $scope.$broadcast(
           depositListenerName + '.' + data.meta.payload.key,
           type,
-          data,
+          data
         );
       }
     });
@@ -327,7 +327,7 @@ function cdsDepositCtrl(
     return this.cdsDepositsCtrl.makeAction(
       url,
       method,
-      cdsAPI.cleanData(that.record),
+      cdsAPI.cleanData(that.record)
     );
   };
 
@@ -343,7 +343,7 @@ function cdsDepositCtrl(
           return that.cdsDepositsCtrl.makeAction(url, action[1], cleanRecord);
         });
       },
-      promises,
+      promises
     );
     return that.cdsDepositsCtrl.chainedActions(promises);
   };

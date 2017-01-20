@@ -7,7 +7,7 @@ function cdsDepositsCtrl(
   depositStates,
   depositSSEEvents,
   cdsAPI,
-  urlBuilder,
+  urlBuilder
 ) {
   var that = this;
   this.edit = false;
@@ -43,7 +43,7 @@ function cdsDepositsCtrl(
       this.edit = true;
       // Fetch the project
       cdsAPI.resolveJSON(this.masterLinks.self).then(function success(
-        response,
+        response
       ) {
         that.addMaster(response.data);
         that.initialized = true;
@@ -81,7 +81,7 @@ function cdsDepositsCtrl(
 
     // SSE stuff - move to somewhere else
     that.sseListener = new EventSource(
-      urlBuilder.sse({ id: that.master.metadata._deposit.id }),
+      urlBuilder.sse({ id: that.master.metadata._deposit.id })
     );
 
     that.sseListener.onerror = function(msg) {
@@ -110,7 +110,7 @@ function cdsDepositsCtrl(
     deposit.metadata._files = files || [];
     this.children.push(deposit);
     this.overallState[deposit.metadata._deposit.id] = angular.copy(
-      that.initState,
+      that.initState
     );
   };
 
@@ -231,7 +231,7 @@ function cdsDepositsCtrl(
               return that.createDeposit(
                 that.childrenInit,
                 that.childrenSchema,
-                { _project_id: master_id },
+                { _project_id: master_id }
               );
             },
             function(response) {
@@ -242,7 +242,7 @@ function cdsDepositsCtrl(
             },
           ]);
         },
-        _promises,
+        _promises
       );
 
       if (_promises.length > 0) {

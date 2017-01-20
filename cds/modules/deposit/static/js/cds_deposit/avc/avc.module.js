@@ -4,7 +4,7 @@ function cdsDepositsConfig(
   depositSSEEventsProvider,
   depositStatusesProvider,
   urlBuilderProvider,
-  typeReducerProvider,
+  typeReducerProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
