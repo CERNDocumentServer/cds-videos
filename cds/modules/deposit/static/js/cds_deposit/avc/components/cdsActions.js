@@ -15,7 +15,7 @@ function cdsActionsCtrl($scope) {
         .makeSingleAction(type, method)
         .then(
           that.cdsDepositCtrl.onSuccessAction,
-          that.cdsDepositCtrl.onErrorAction,
+          that.cdsDepositCtrl.onErrorAction
         )
         .finally(that.postActions);
     };
@@ -28,7 +28,7 @@ function cdsActionsCtrl($scope) {
         .makeMultipleActions(actions)
         .then(
           that.cdsDepositCtrl.onSuccessAction,
-          that.cdsDepositCtrl.onErrorAction,
+          that.cdsDepositCtrl.onErrorAction
         )
         .finally(that.postActions);
     };
