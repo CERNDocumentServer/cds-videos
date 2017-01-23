@@ -507,3 +507,9 @@ def test_project_publish_with_workflow(app, users, project, webhooks, es):
     assert project.status == 'draft'
     assert video_1.status == 'draft'
     assert video_2.status == 'published'
+
+
+def test_project_record_schema(app, db, project):
+    """Test project record schema."""
+    (project, video_1, video_2) = project
+    assert project.record_schema == Project.get_record_schema()

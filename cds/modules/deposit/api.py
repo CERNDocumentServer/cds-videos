@@ -224,6 +224,13 @@ class CDSDeposit(Deposit):
             kwargs['validator'] = PartialDraft4Validator
         return super(CDSDeposit, self).commit(**kwargs)
 
+    @classmethod
+    def get_record_schema(cls):
+        """Get record schema."""
+        prefix = current_app.config['DEPOSIT_JSONSCHEMAS_PREFIX']
+        schema = cls._schema[len(prefix):]
+        return current_jsonschemas.path_to_url(schema)
+
 
 def project_resolver(project_id):
     """Get records from PIDs."""
