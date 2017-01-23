@@ -33,7 +33,7 @@ blueprint = Blueprint(
 
 
 def records_ui_export(pid, record, template=None, **kwargs):
-
+    """Export a record."""
     formats = current_app.config.get('CDS_RECORDS_EXPORTFORMATS')
     fmt = request.view_args.get('format')
 

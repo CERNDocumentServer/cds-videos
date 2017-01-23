@@ -1,0 +1,13 @@
+<smil>
+  <head>
+    <meta base="rtmp://wowza.cern.ch/vod/smil:Video"/>
+  </head>
+  <body>
+    <switch>
+      {% for video in videos %}
+        <video src="{{video['src']}}" system-bitrate="{{video['bit_rate']}}"
+               width="{{video['width']}}" height="{{video['height']}}" />
+      {% endfor %}
+    </switch>
+  </body>
+</smil>

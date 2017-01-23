@@ -25,17 +25,11 @@
 """Test cds package."""
 
 from __future__ import absolute_import, print_function
-from flask import url_for
-from invenio_records_ui import InvenioRecordsUI
-from invenio_pidstore.providers.recordid import RecordIdProvider
-
-import json
-
 
 import mock
-import pytest
 
-from cds.modules.records.views import records_ui_export
+from flask import url_for
+from invenio_pidstore.providers.recordid import RecordIdProvider
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -45,13 +39,25 @@ def test_records_ui_export(app, project_published):
     (project, video_1, video_2) = project_published
     pid = project['_deposit']['pid']['value']
     vid = video_1['_deposit']['pid']['value']
+    with app.test_request_context():
+        url_no_existing_exporter = url_for(
+            'invenio_records_ui.recid_export', pid_value=pid, format='blabla')
+        url_not_valid_type_record = url_for(
+            'invenio_records_ui.recid_export', pid_value=pid, format='smil')
+        url_valid_smil = url_for(
+            'invenio_records_ui.recid_export', pid_value=vid, format='smil')
+        url_valid_json = url_for(
+            'invenio_records_ui.recid_export', pid_value=pid, format='json')
+
     with app.test_client() as client:
         # Test that default view function can deal with multiple parameters.
-        res = client.get('/record/' + pid + '/export/blabla')
+        res = client.get(url_no_existing_exporter)
         assert res.status_code == 404
-        res = client.get('/record/' + vid + '/export/smil')
+        res = client.get(url_not_valid_type_record)
+        assert res.status_code == 400
+        res = client.get(url_valid_smil)
         assert res.status_code == 200
-        res = client.get('/record/' + pid + '/export/json')
+        res = client.get(url_valid_json)
         assert res.status_code == 200
         # Test that actual data has been exported (not blank)
         data_start = res.data.find(b'<pre>') + 5
