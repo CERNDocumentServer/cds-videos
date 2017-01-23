@@ -28,13 +28,11 @@ from __future__ import absolute_import, print_function
 
 import xml.etree.ElementTree as ET
 
-import pytest
-
 from cds.modules.records.serializers.smil import Smil
 
 
 def test_smil_serializer(video_metadata):
-    """Test smil serializer"""
+    """Test smil serializer."""
     rec = video_metadata
     serializer = Smil(record=rec)
     data = serializer.format()
@@ -46,3 +44,13 @@ def test_smil_serializer(video_metadata):
         assert child.attrib["system-bitrate"] == '11915822'
         assert child.attrib["width"] == '4096'
         assert child.attrib["height"] == '2160'
+
+    src1 = video_metadata['_files'][0]['video'][0]['links']['self']
+    src2 = video_metadata['_files'][0]['video'][1]['links']['self']
+    src3 = video_metadata['_files'][0]['video'][2]['links']['self']
+    src4 = video_metadata['_files'][0]['video'][3]['links']['self']
+
+    assert root[1][0][0].attrib['src'] == src1
+    assert root[1][0][1].attrib['src'] == src2
+    assert root[1][0][2].attrib['src'] == src3
+    assert root[1][0][3].attrib['src'] == src4

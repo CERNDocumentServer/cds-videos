@@ -40,7 +40,7 @@ from invenio_records.models import RecordMetadata
 from six import BytesIO
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
-                                     video_resolver)
+                                     video_resolver, Video)
 
 from helpers import workflow_receiver_video_failing
 
@@ -241,3 +241,9 @@ def test_video_delete_with_workflow(app, users, project, webhooks, es):
     video_1 = video_resolver([video_1_depid])[0]
     video_1.delete()
     assert mock_delete.called is True
+
+
+def test_video_record_schema(app, db, project):
+    """Test video record schema."""
+    (project, video_1, video_2) = project
+    assert video_1.record_schema == Video.get_record_schema()

@@ -24,14 +24,9 @@
 
 from __future__ import absolute_import, print_function
 
-import textwrap
-
-import six
-from dateutil.parser import parse as iso2dt
-from flask import current_app
-from slugify import slugify
-import json
-# import xml.dom.minidom as xml_pp
+from flask import render_template
+from cds.modules.deposit.api import Video
+from invenio_rest.errors import RESTValidationError, FieldError
 
 
 class SmilSerializer(object):
@@ -45,6 +40,9 @@ class SmilSerializer(object):
         :param record: Record instance.
         :param links_factory: Factory function for record links.
         """
+        if record['$schema'] != Video.get_record_schema():
+            raise RESTValidationError(errors=[FieldError(
+                str(record.id), 'Unsupported format')])
         return Smil(record=record).format()
 
 
@@ -57,30 +55,29 @@ class Smil(object):
         self.data = ""
 
     def format(self):
-        """Returns the contents of the smil file as a string"""
-        head = ('<smil>\n\t<head>\n\t\t'
-                '<meta base="rtmp://wowza.cern.ch/vod/smil:Video"/>'
-                '\n\t</head>\n\t<body>\n\t\t<switch>')
-        tail = '\n\t\t</switch>\n\t</body>\n</smil>'
-        video_data = self._format_videos(self.record)
-        self.data = head+video_data+tail
-        # xml = xml_pp.parseString(self.data)
-        # self.data = xml.toprettyxml()
-        return self.data
+        """Return the contents of the smil file as a string."""
+        videos_data = self._format_videos(self.record)
+        return render_template('cds_records/video.smil', videos=videos_data)
 
     @staticmethod
     def _format_videos(record):
-        """Formats each video subformat"""
-        output = ''    # Smil string
+        """Format each video subformat."""
+        def get_option(info, key, value):
+            if value:
+                info[key] = value
+            return info
+        videos = []
         for file in record["_files"]:
-            for video in file["video"]:
-                src = video["links"]["self"]
-                bitrate = file["tags"]["bit_rate"]
-                width = file["tags"]["width"]
-                height = file["tags"]["height"]
-                output += ('\n\t\t\t<video src="' + src +
-                           '" system-bitrate="' + bitrate +
-                           '" width="' + width +
-                           '" height="' + height +
-                           '"/>')
-        return output
+            tags = file.get('tags', {})
+            bit_rate = tags.get('bit_rate')
+            width = tags.get('width')
+            height = tags.get('height')
+            for video in file.get('video', []):
+                info = {}
+                info = get_option(
+                    info, 'src', video.get('links', {}).get('self'))
+                info = get_option(info, 'bit_rate', bit_rate)
+                info = get_option(info, 'width', width)
+                info = get_option(info, 'height', height)
+                videos.append(info)
+        return videos
