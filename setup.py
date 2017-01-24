@@ -184,6 +184,9 @@ setup(
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
             #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
+        'invenio_base.api_blueprints': [
+            'cds_records = cds.modules.records.views:blueprint',
+        ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
