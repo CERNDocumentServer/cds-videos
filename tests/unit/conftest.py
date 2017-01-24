@@ -584,7 +584,14 @@ def json_headers(app):
 
 
 @pytest.fixture()
-def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
+def smil_headers(app):
+    """JSON headers."""
+    return [('Content-Type', 'application/smil'),
+            ('Accept', 'application/smil')]
+
+
+@pytest.fixture()
+def project(api_app, deposit_rest, es, cds_jsonresolver, users, location, db,
             deposit_metadata):
     """New project with videos."""
     project_data = {
@@ -614,7 +621,7 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
         },
     }
     project_video_2.update(deposit_metadata)
-    with app.test_request_context():
+    with api_app.test_request_context():
         login_user(User.query.get(users[0]))
 
         # create empty project
@@ -639,10 +646,10 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.fixture()
-def project_published(app, project):
+def project_published(api_app, project):
     """New published project with videos."""
     (project, video_1, video_2) = project
-    with app.test_request_context():
+    with api_app.test_request_context():
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
