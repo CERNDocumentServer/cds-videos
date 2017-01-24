@@ -5,17 +5,19 @@
   {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {%- endblock javascript %}
 
+{%- block page_header %}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_footer %}
+  {% include "cds_home/footer.html" %}
+{%- endblock page_footer %}
+
 {%- block page_body %}
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-          <div id="cds-record">
-            <cds-record-view
-              template="{{ url_for('static', filename='templates/cds_records/detail.default.html') }}"
-              record='{{ record | tojson }}'
-            ></cds-record-view>
-          </div>
-      </div>
-    </div>
+  <div id="cds-record">
+    <cds-record-view
+        template="{{ url_for('static', filename='templates/cds_records/video/detail.html') }}"
+        record='{{ record | tojson }}'
+    ></cds-record-view>
   </div>
 {%- endblock page_body %}

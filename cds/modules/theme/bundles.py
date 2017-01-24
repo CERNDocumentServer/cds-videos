@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -69,7 +69,9 @@ js = NpmBundle(
     npm={
         'almond': '~0.3.1',
         'angular': '~1.4.7',
-        'ng-dialog': '~0.6.0'
+        'ng-dialog': '~0.6.0',
+        'clipboard': '~1.5.16',
+        'ngclipboard': '~1.1.1',
     }
 )
 """Default JavaScript bundle."""

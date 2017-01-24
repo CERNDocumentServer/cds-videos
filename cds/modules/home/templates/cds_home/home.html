@@ -1,104 +1,125 @@
-{%- extends "cds_theme/page.html" %}
-
-{%- block page_header %}
-  {% include "cds_home/header.html" %}
-{%- endblock page_header %}
+{%- extends "cds_home/default.html" %}
 
 {%- block page_body %}
-  <div class="cds-home">
+
+  {% block home_featured_video %}
+  <div id="cds-featured-video" class="cds-home-video-featured bg-n mt--20">
+    <div class="container">
+      <!-- List group -->
+      <invenio-search
+        handle-urls="false"
+        search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
+      >
+        <div class="text-center">
+          <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message="">
+          </invenio-search-loading>
+        </div>
+        <invenio-search-results
+          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
+        </invenio-search-results>
+      </invenio-search>
+    </div>
+  </div>
+  {% endblock home_featured_video %}
+  <!-- Recent videos -->
+  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          <h2 class="cds-home-title text-white text-center">CERN Document Server</h2>
-          <p class="text-center text-white cds-home-headline">  {{ config.FRONTPAGE_SLOGAN }}</p>
-          <form action="{{ url_for('invenio_search_ui.search') }}" class="cds-home-search">
-            <div class="form-group">
-              <input type="text" name="q" class="cds-home-input input-lg form-control" placeholder="{{ _('Type and press enter to search') }}">
-            </div>
-          </form>
+          <!-- Title -->
+          <div class="cds-title-section pt-10 mb-20 l-w">
+            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('RECENT') }}</h2>
+            <p>{{ _('MOST RECENTLY ADDED VIDEOS') }}</p>
+          </div>
+          <!-- Title -->
         </div>
       </div>
+      <!-- List group -->
+      <invenio-search
+        handle-urls="false"
+        search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
+      >
+        <div class="text-center">
+          <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message="">
+          </invenio-search-loading>
+        </div>
+        <invenio-search-results
+          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
+        </invenio-search-results>
+      </invenio-search>
     </div>
   </div>
-  <div id="cds-cards" class="cds-cards cds-content-section">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4">
-          <div id="cds-card-1" class="panel panel-default">
-            <div class="panel-body">
-              <h4> {{ _('Articles & Preprints') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right" aria-hidden="true"><i class="fa fa-angle-right"></i></a></h4>
-            </div>
-            <!-- List group -->
-            <invenio-search
-                search-hidden-params='{{ config.FRONTPAGE_QUERIES[0] | tojson }}'
-              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
-              <div class="text-center">
-                <invenio-search-loading
-                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-                  message="">
-                </invenio-search-loading>
-              </div>
-              <invenio-search-results
-                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
-              </invenio-search-results>
-            </invenio-search>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div id="cds-card-2" class="panel panel-default">
-            <div class="panel-body">
-              <h4>{{ _('Books') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></a></h4>
-            </div>
-            <!-- List group -->
-            <invenio-search
-              search-hidden-params='{{ config.FRONTPAGE_QUERIES[1] | tojson }}'
-              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
-              <div class="text-center">
-                <invenio-search-loading
-                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-                  message="">
-                </invenio-search-loading>
-              </div>
-              <invenio-search-results
-                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
-              </invenio-search-results>
-            </invenio-search>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div id="cds-card-3" class="panel panel-default cds-card-popular">
-            <div class="panel-body text-white">
-             <h4>{{ _('Popular') }} <a href="{{ url_for('invenio_search_ui.search') }}" class="pull-right text-white"><i class="fa fa-angle-right" aria-hidden="true"></i></a></h4>
-            </div>
-            <!-- List group -->
-            <invenio-search
-              search-hidden-params='{{ config.FRONTPAGE_QUERIES[2] | tojson }}'
-              search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}">
-              <div class="text-center">
-                <invenio-search-loading
-                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-                  message="">
-                </invenio-search-loading>
-              </div>
-              <invenio-search-results
-                template="{{ url_for('static', filename='templates/cds_home/home_results.html') }}">
-              </invenio-search-results>
-            </invenio-search>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="cds-event cds-content-section">
+  <!-- Recent videos -->
+
+  <!-- Channels -->
+  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section pt-20 pb-20">
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          <h3 class="cds-home-title text-white">{{ _('Images') }}</h3>
+          <!-- Title -->
+          <div class="cds-title-section pt-10 mb-20">
+            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
+            <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
+          </div>
+          <!-- Title -->
+        </div>
+      </div>
+      <!-- List group -->
+      <div class="row">
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="#">
+            <img class="img-responsive"src='http://placehold.it/400x220' />
+            <p>
+              CHANNEL
+            </p>
+          </a>
         </div>
       </div>
     </div>
-    <div class="cds-event-description text-center">
-      <span class="label label-primary">A Higgs candidate decays into two photons</span>
-    </div>
   </div>
+  <!-- Channels -->
 {%- endblock page_body %}

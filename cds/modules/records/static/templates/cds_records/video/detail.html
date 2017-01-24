@@ -1,0 +1,102 @@
+<div class="cds-detail-video bg-n mt--20 pb-20">
+  <!-- Video Section -->
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Embed Video -->
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" frameborder="0" ng-src="{{ '' | previewIframe: record.recid:record._files[0].key }}" allowfullscreen></iframe>
+        </div>
+        <!-- ./Embed Video -->
+      </div>
+    </div>
+  </div>
+  <!-- /Video Section -->
+
+  <!-- Metadata Section -->
+  <div class="container">
+    <div class="row">
+      <!-- Left Column -->
+      <div class="col-sm-8">
+        <!-- Section -->
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20">
+          <!-- Title -->
+          <div class="cds-detail-title cds-detail-video-title">
+            <h1 class="mb-0 f1"><strong>{{ ::record.title.title }}</strong></h1>
+            <h1 class="cds-detail-secondary-title text-muted mt-0 f1"><em>{{ ::record.title.title }}</em></h1>
+          </div>
+          <!-- /Title -->
+          <!-- Date & Views -->
+          <div class="cds-detail-date cds-detail-video-date my-20">
+            <div class="row">
+              <div class="col-sm-6">
+                {{ ::record.date }} / &copy; Copyright
+              </div>
+              <div class="col-sm-6">
+                <div class="text-right">
+                  300000 views
+              </div>
+              </div>
+            </div>
+          </div>
+          <!-- Date & Views -->
+          <!-- Description -->
+          <div class="cds-detail-description cds-detail-video-description f2">
+            <p>{{ ::record.description.value }}</p>
+          </div>
+          <!-- /Description -->
+          <!-- More -->
+          <div class="cds-detail-more cds-detail-video-more">
+          </div>
+          <!-- More -->
+        </div>
+        <!-- /Section -->
+      </div>
+      <!-- /Left Column -->
+      <!-- Right Column -->
+      <div class="col-sm-4">
+        <!-- Section Download -->
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20 t-b">
+          <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>
+        </div>
+        <!-- /Section Download -->
+        <!-- Section Share -->
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20 t-b">
+          <ng-include src="'/static/templates/cds_records/video/share.html'"></ng-include>
+        </div>
+        <!-- /Section Share -->
+        <!-- Section Technical Metadata -->
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20 t-b">
+          <ng-include src="'/static/templates/cds_records/video/technical_metadata.html'"></ng-include>
+        </div>
+        <!-- /Section Technical Metadata -->
+      </div>
+      <!-- /Right Column -->
+    </div>
+  </div>
+  <!-- /Metadata Section -->
+</div>
+
+<!-- Recent videos -->
+<div id="cds-recent-videos" class="bg-w pt-20 pb-20">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Title -->
+        <div class="cds-title-section pt-10 mb-20 l-b">
+          <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">RELATED</h2>
+        </div>
+        <!-- Title -->
+      </div>
+    </div>
+    <!-- List group -->
+    <invenio-search
+      search-endpoint='/api/records/?featured=1&size=6'
+    >
+      <invenio-search-results
+        template="/templates/cds/video/medium.html">
+      </invenio-search-results>
+    </invenio-search>
+  </div>
+</div>
+<!-- Recent videos -->

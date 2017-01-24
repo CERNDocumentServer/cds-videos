@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015 CERN.
+ * Copyright (C) 2015, 2017 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -25,6 +25,8 @@
 $icon-font-path: "/static/node_modules/bootstrap-sass/assets/fonts/bootstrap/";
 $fa-font-path: "/static/node_modules/font-awesome/fonts/";
 
+// Font family
+@font-family-base: 'PT Sans', sans-serif;
 
 // CDS Custom vars
 $cds-small-spacing: 5px;
@@ -36,9 +38,11 @@ $cds-enormus-spacing: 20px;
 $light-color: #ffffff;
 $primary-color: #0c63aa;
 $primary-color-dark: darken($primary-color, 10%);
-$primary-color-light: #3498db;
+$primary-color-light: lighten($primary-color, 10%);
 $primary-color-text: #212121;
-$accent-color: #03A9F4;
+
+$cds-primary-color: #061723;
+
 $primary-text-color: #212121;
 $secondary-text-color: #727272;
 $divider-color: #B6B6B6;
@@ -52,7 +56,7 @@ $font-size-base: 14px;
 $navbar-height: 60px;
 $navbar-collapse-max-height: 340px;
 
-$navbar-default-bg: $primary-color;
+$navbar-default-bg: $cds-primary-color;
 $navbar-default-border: transparent;
 $navbar-default-color: $primary-color;
 
@@ -65,20 +69,10 @@ $navbar-default-link-active-color: $light-color;
 $navbar-default-link-disabled-color: #ccc;
 $navbar-default-link-disabled-bg: transparent;
 
-// Navbar brand label
-//$navbar-default-brand-color:               $navbar-default-link-color;
-//$navbar-default-brand-hover-color:         darken($navbar-default-brand-color, 10%);
-//$navbar-default-brand-hover-bg:            transparent;
-
 // Navbar toggle
 $navbar-default-toggle-hover-bg: #ddd;
 $navbar-default-toggle-icon-bar-bg: #888;
 $navbar-default-toggle-border-color: #ddd;
-
-$cds-base: #01579B;
-$cds-contrast: #4CAF50;
-$cds-light: #E1F5FE;
-$cds-medium: #039be5;
 
 // Bliax, remove border radius
 $border-radius-small: 0;

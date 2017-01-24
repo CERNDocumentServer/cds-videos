@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2016, 2017 CERN.
+ * Copyright (C) 2017 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,22 +21,50 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-require([
-    'node_modules/angular-loading-bar/build/loading-bar',
-    'node_modules/cds/dist/cds',
-    'node_modules/ng-dialog/js/ngDialog',
-    'js/cds/module',
-    'node_modules/invenio-search-js/dist/invenio-search-js',
-  ], function() {
-    // Bootstrap modules
-    angular.element(document).ready(function() {
-      angular.bootstrap(
-        document.getElementById("cds-record"), [
-         'angular-loading-bar', 'cdsRecord', 'ngDialog', 'cds'
-        ]
-      );
-      angular.bootstrap(
-        document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
-      );
-    });
-});
+// Backgrounds
+
+// Background normal
+.bg-n {
+  background: $cds-primary-color;
+}
+// Background light
+.bg-l {
+  background: $primary-color-light;
+}
+// Background darker
+.bg-d {
+  background: $primary-color-dark;
+}
+// Background gray
+.bg-g {
+  background: gray;
+}
+// Background white
+.bg-w {
+  background: white;
+}
+
+// Text white
+.t-w {
+  color: #fff;
+}
+// Text blue
+.t-b {
+  color: $cds-primary-color;
+}
+
+// Link white
+.l-w {
+  color: #fff;
+  &:hover {
+    color: #fff;
+  }
+}
+
+// Link blue
+.l-b {
+  color: $cds-primary-color;
+  &:hover {
+    color: $cds-primary-color;
+  }
+}

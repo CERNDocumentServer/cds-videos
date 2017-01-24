@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -123,6 +123,13 @@ SEARCH_DOC_TYPE_DEFAULT = None
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # SEARCH UI JS TEMPLATES
 # SEARCH_UI_JSTEMPLATE_RESULTS = 'templates/cds_search_ui/results.html'
+
+# Angular template for featured
+SEARCH_UI_VIDEO_FEATURED = 'templates/cds/video/featured.html'
+# Angular template for medium size (used for recent)
+SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/medium.html'
+# Angular template for small size (used for search results)
+SEARCH_UI_VIDEO_SMALL = 'templates/cds/video/small.html'
 
 ###############################################################################
 # REST API
@@ -270,18 +277,12 @@ RECORDS_REST_SORT_OPTIONS = dict(
             default_order='asc',
             order=1,
         ),
-        controlnumber=dict(
-            title='Control number',
-            fields=['control_number'],
-            default_order='desc',
-            order=2,
-        )
     )
 )
 
 # Default sort for records REST API.
 RECORDS_REST_DEFAULT_SORT = dict(
-    records=dict(query='bestmatch', noquery='-controlnumber'),
+    records=dict(query='bestmatch'),
 )
 
 # Defined facets for records REST API.
@@ -301,6 +302,8 @@ RECORDS_REST_FACETS = dict(
                 field='imprint.complete_date',
                 interval='year',
                 format='yyyy')),
+            category=dict(terms=dict(field='category')),
+            type=dict(terms=dict(field='type')),
         ),
         post_filters=dict(
             authors=terms_filter(
@@ -315,6 +318,8 @@ RECORDS_REST_FACETS = dict(
                 'imprint.complete_date',
                 format='yyyy',
                 end_date_math='/y'),
+            category=terms_filter('category'),
+            type=terms_filter('type'),
         )
     )
 )
@@ -364,6 +369,10 @@ FORMATTER_BADGES_ENABLE = True
 
 # Display a homepage.
 FRONTPAGE_ENDPOINT = 'cds_home.index'
+# Featured query
+FRONTPAGE_FEATURED_QUERY = '/api/records/?featured=1&size=1'
+# Recent videos query
+FRONTPAGE_RECENT_QUERY = '/api/records/?featured=1&size=3'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
     {'size': 5, 'page': 1},
@@ -417,7 +426,7 @@ CERN_APP_CREDENTIALS = dict(
 # The site name
 THEME_SITENAME = _('CERN Document Server')
 # The theme logo.
-THEME_LOGO = 'img/cds.svg'
+THEME_LOGO = False
 # The base template.
 BASE_TEMPLATE = 'cds_theme/page.html'
 # Header template for entire site.

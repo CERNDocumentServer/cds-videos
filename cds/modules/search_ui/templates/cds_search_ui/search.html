@@ -1,45 +1,12 @@
 {% extends "invenio_search_ui/search.html" %}
 
 {%- block page_header %}
-  {% include "cds_search_ui/header.html" %}
-    <div class="cds-top-header">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h2> {{ _('Search') }}</h2>
-                </div>
-            </div>
-        </div>
-    </div>
+  {% include "cds_home/header.html" %}
 {%- endblock page_header %}
 
-{%- block search_pagination_top %}
-     <div class="col-md-6 col-sm-12 text-center">
-        <invenio-search-pagination
-            template="{{ url_for('static', filename='templates/cds_search_ui/pagination.html') }}">
-        </invenio-search-pagination>
-    </div>
-{%- endblock search_pagination_top %}
-
-{%- block search_pagination_bottom %}
-    <div align="center">
-        <invenio-search-pagination
-            template="{{ url_for('static', filename='templates/cds_search_ui/pagination.html') }}">
-        </invenio-search-pagination>
-    </div>
-{%- endblock search_pagination_bottom %}
-
-{%- block search_results %}
-    <invenio-search-results
-        template="{{ url_for('static', filename='templates/cds_search_ui/results.html') }}">
-    </invenio-search-results>
-{%- endblock search_results %}
-
-{%- block search_facets %}
-    <invenio-search-facets
-    template="{{ url_for('static', filename='templates/cds_search_ui/facets.html') }}">
-    </invenio-search-facets>
-{%- endblock search_facets %}
+{%- block page_footer %}
+  {% include "cds_home/footer.html" %}
+{%- endblock page_footer %}
 
 {%- block search_range %}
     <invenio-search-range
@@ -47,3 +14,65 @@
     template="{{ url_for('static', filename='templates/cds_search_ui/range.html') }}">
     </invenio-search-range>
 {%- endblock search_range %}
+
+{%- block page_body %}
+  <div class="bg-n mt--20 py-20">
+    <div class="container search-page cds-search-page">
+      <div class="row">
+        <div class="col-sm-3">
+          {%- block search_facets %}
+            <div class="cds-search-facets bg-w pa-20 pt-30">
+              <invenio-search-facets
+                  template="{{ url_for('static', filename='templates/cds_search_ui/facets.html') }}">
+              </invenio-search-facets>
+            </div>
+          {%- endblock search_facets %}
+        </div>
+        {%- block search_body %}
+          <div class="col-sm-9">
+            {%- block search_header %}
+              <div class="row">
+                {%- block search_count %}
+                  <div class="col-sm-12 text-center t-w pb-20">
+                    <invenio-search-count
+                        template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_COUNT) }}">
+                    </invenio-search-count>
+                  </div>
+                {%- endblock search_count %}
+                {%- block search_pagination_top %}
+                {%- endblock search_pagination_top %}
+              </div>
+            {%- endblock search_header %}
+            {%- block search_error %}
+              <invenio-search-error
+                  template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_ERROR) }}"
+                  message="{{ _('Search failed.') }}">
+              </invenio-search-error>
+            {%- endblock search_error %}
+            {%- block search_loading %}
+              <div class="text-center t-w">
+                <invenio-search-loading
+                    template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                    message="{{ _('Loading...') }}">
+                </invenio-search-loading>
+              </div>
+            {%- endblock search_loading %}
+            {%- block search_results %}
+              <invenio-search-results
+                  template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_SMALL) }}">
+              </invenio-search-results>
+            {%- endblock search_results %}
+            {%- block search_pagination_bottom %}
+              <div class="text-center pt-30 pb-30">
+                <invenio-search-pagination
+                    template="{{ url_for('static', filename='templates/cds_search_ui/pagination.html') }}">
+                </invenio-search-pagination>
+              </div>
+            {%- endblock search_pagination_bottom %}
+          </div>
+        {%- endblock search_body %}
+
+      </div>
+    </div>
+  </div>
+{%- endblock page_body -%}
