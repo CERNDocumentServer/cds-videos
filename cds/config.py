@@ -145,6 +145,10 @@ CDS_RECORDS_EXPORTFORMATS = {
         title='SMIL',
         serializer='cds.modules.records.serializers:smil_v1'
     ),
+    'vtt': dict(
+        title='VTT',
+        serializer='cds.modules.records.serializers:vtt_v1'
+    ),
 }
 
 # Endpoints for records.
@@ -214,6 +218,8 @@ RECORDS_REST_ENDPOINTS = dict(
                                  ':json_v1_response'),
             'application/smil': ('cds.modules.records.serializers'
                                  ':smil_v1_response'),
+            'text/vtt': ('cds.modules.records.serializers'
+                         ':vtt_v1_response'),
         },
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
