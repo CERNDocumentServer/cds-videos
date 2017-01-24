@@ -124,7 +124,8 @@ function cdsDepositCtrl(
     };
 
     this.videoPreviewer = function(deposit, key) {
-      if (that.stateQueue.SUCCESS.indexOf('file_download') > -1 || key) {
+      if (that.record._files[0] &&
+        (that.stateQueue.SUCCESS.indexOf('file_download') > -1 || key)) {
         that.previewer = $sce.trustAsResourceUrl(
           urlBuilder.video({
             deposit: deposit || that.record._deposit.id,

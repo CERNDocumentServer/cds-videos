@@ -11,31 +11,33 @@
           <span class="icon-bar"></span>
         </button>
         {%- block brand %}
-        {%- if config.THEME_LOGO %}
-          <a href="/"><img class="navbar-brand" src="{{ url_for('static', filename=config.THEME_LOGO)}}" alt="{{_(config.THEME_SITENAME)}}" /></a>
-        {%- else %}
-          <a class="navbar-brand" href="/"><i class="fa fa-flask" aria-hidden="true"></i> CDS</a>
-        {%- endif %}
+          {%- if config.THEME_LOGO %}
+            <a href="/"><img class="navbar-brand" src="{{ url_for('static', filename=config.THEME_LOGO)}}" alt="{{_(config.THEME_SITENAME)}}" /></a>
+          {%- else %}
+            <a href="/"><h2 class="l-w"><b>CDS<small class="l-w">video</small></b></h2></a>
+          {%- endif %}
         {%- endblock %}
       </div>
       {%- endblock navbar_header %}
       {%- block navbar_inner %}
       <div id="navbar" class="navbar-collapse collapse">
         {%- block navbar_nav %}
-        {%- if config['THEME_SEARCHBAR'] %}
-        {%- block navbar_search %}
-        <form class="navbar-form navbar-left" action="{{config.THEME_SEARCH_ENDPOINT}}" role="search">
-          <div class="form-group">
-            <div class="input-group">
-              <input type="text" class="form-control" name="q" placeholder="{{_('Search')}}">
-              <div class="input-group-btn">
-                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+          {%- if config['THEME_SEARCHBAR'] %}
+            {%- block navbar_search %}
+              <div class="col-sm-6 col-sm-offset-1">
+                <form class="header-search-form navbar-form navbar-left"
+                      action="{{ config.THEME_SEARCH_ENDPOINT }}"
+                      role="search">
+                  <div class="form-group">
+                    <div class="input-group">
+                      <input type="text" class="form-control" name="q"
+                              placeholder="{{ _('Search') }}">
+                    </div>
+                  </div>
+                </form>
               </div>
-            </div>
-          </div>
-        </form>
-        {%- endblock navbar_search %}
-        {%- endif %}
+            {%- endblock navbar_search %}
+          {%- endif %}
         {%- endblock navbar_nav %}
         {%- block navbar_right %}
           {%- if config['ACCOUNTS'] %}

@@ -24,11 +24,6 @@
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2016</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">2016-03-04</subfield>
-  </datafield>
   <datafield tag="520" ind1=" " ind2=" ">
     <subfield code="a">A method is proposed for calibrating the radius of a rotating coil sensor by relaxing the metrological constraints on alignment and field errors of the reference quadrupole. A coil radius calibration considering a roll-angle misalignment of the measurement bench, the magnet, and the motor-drive unit is analyzed. Then, the error arising from higher-order harmonic field imperfections in the reference quadrupole is assessed. The method is validated by numerical field computation for both the higher-order harmonic errors and the roll-angle misalignment. Finally, an experimental proof-of-principle demonstration is car-ried out in a calibration magnet with sextupole harmonic.</subfield>
   </datafield>
@@ -148,11 +143,6 @@
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">2015-03-25</subfield>
   </datafield>
   <datafield tag="520" ind1=" " ind2=" ">
     <subfield code="a">HOMBPMs (HOM based Beam Position Monitors) are installed at the FLASH facility at DESY, Hamburg. These are aimed at aligning the beam and monitoring the beam position. Over time, the accuracy of beam position prediction is degraded. This is due to instability issues in the 1.3 GHz and 3.9 GHz superconducting cavities and associated electronics. In this paper, we demonstrate for the first time a measurement technique which is stable and can be relied upon over a period of three months with unprecedented resolution (below 4 μm horizontally and 2 μm vertically). We attribute this improvement in stability to a focused campaign on various signal processing and analysis techniques. These techniques include SVD (Singular Value Decomposition), ANN (Artificial Neural Network) and PLS (Partial Least Square). We found the best resolution and computational power using the latter method, PLS. These techniques are directly applicable to the HOMBPM system at the European XFEL that is currently under construction. However, they are in many ways generic and hence applicable to other measurement methods.</subfield>
@@ -333,11 +323,6 @@
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">2015-11-01</subfield>
-  </datafield>
   <datafield tag="520" ind1=" " ind2=" ">
     <subfield code="a">The computation of electromagnetic fields and parameters derived thereof for lossless radio frequency (RF) structures filled with isotropic media is an important task for the design and operation of particle accelerators. Unfortunately, these computations are often highly demanding with regard to computational effort. The entire computational demand of the problem can be reduced using decomposition schemes in order to solve the field problems on standard workstations. This paper presents one of the first detailed comparisons between the recently proposed state-space concatenation approach (SSC) and a direct computation for an accelerator cavity with coupler-elements that break the rotational symmetry.</subfield>
   </datafield>
@@ -473,11 +458,6 @@
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">2015-09-07</subfield>
-  </datafield>
   <datafield tag="520" ind1=" " ind2=" ">
     <subfield code="a">Superconducting radio frequency cavities used for accelerating charged particle beams are commonly used in accelerator facilities around the world. The design and optimization of modern superconducting RF cavities requires intensive numerical simulations. Vast number of operational parameters must be calculated to ensure appropriate functioning of the accelerating structures. In this study, we primarily focus on estimation and behavior of higher order modes in superconducting RF cavities connected in chains. To calculate large RF models the state-space concatenation scheme, an efficient hybrid method, is employed.</subfield>
   </datafield>
@@ -593,11 +573,6 @@
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">2015-07-06</subfield>
   </datafield>
   <datafield tag="520" ind1=" " ind2=" ">
     <subfield code="a">In various applications of computational engineering and accelerator physics, the computation of the electromagnetic behavior of a structure is of crucial importance for the design and operation. The electromagnetic properties of the structure depend on its geometry, which, for real-life radio-frequency (RF) structures, generally deviates from their design values due to fabrication tolerances and operation. To make assessments about the effects of such deviations
@@ -727,11 +702,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">08 Jan 2016</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">6 p</subfield>
@@ -891,11 +861,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
   </datafield>
@@ -1038,11 +1003,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -1189,11 +1149,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
   </datafield>
@@ -1334,11 +1289,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -1490,11 +1440,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -1658,11 +1603,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
   </datafield>
@@ -1786,11 +1726,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -1962,11 +1897,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
   </datafield>
@@ -2110,11 +2040,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
   </datafield>
@@ -2232,11 +2157,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">6 p</subfield>
   </datafield>
@@ -2346,11 +2266,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -2509,11 +2424,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
   </datafield>
@@ -2665,11 +2575,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
   </datafield>
@@ -2813,11 +2718,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
   </datafield>
@@ -2946,11 +2846,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -3101,11 +2996,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">3 p</subfield>
@@ -3326,11 +3216,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
   </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
-  </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
   </datafield>
@@ -3423,11 +3308,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">08 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>
@@ -3549,11 +3429,6 @@ as well as to employ robust optimizations, a so-called uncertainty quantificatio
   </datafield>
   <datafield tag="260" ind1=" " ind2=" ">
     <subfield code="c">2015</subfield>
-  </datafield>
-  <datafield tag="269" ind1=" " ind2=" ">
-    <subfield code="a">Geneva</subfield>
-    <subfield code="b">CERN</subfield>
-    <subfield code="c">03 May 2015</subfield>
   </datafield>
   <datafield tag="300" ind1=" " ind2=" ">
     <subfield code="a">4 p</subfield>

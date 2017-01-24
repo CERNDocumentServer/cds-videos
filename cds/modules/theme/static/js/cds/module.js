@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2016 CERN.
+ * Copyright (C) 2016, 2017 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,7 +21,13 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-var app = angular.module('cds', []);
+var app = angular.module('cds', ['ngclipboard']);
+app.filter('previewIframe', ['$sce', function($sce) {
+  return function(text, id, key) {
+    var _url = '/record/' + id + '/preview/' + key;
+    return $sce.trustAsResourceUrl(_url);
+  };
+}]);
 app.filter('stripTags', function() {
   return function(text) {
     return text ? String(text).replace(/<[^>]+>/gm, '') : '';

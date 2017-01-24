@@ -27,7 +27,8 @@
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_previewer_oplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_previewer_theoplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+
   <script type="text/javascript">
     theoplayer = {
       configuration : {
@@ -46,6 +47,11 @@
 {% block panel %}
   <video class="cds-previewer-video-player"
     src="{{file_url}}"
+    {% if file.record._files %}
+      poster="{{ 'http://placeholdit.imgix.net/~text?txtsize=144&txt=Video%20Preview%20Unavailable&w=1920&h=1080' }}"
+    {% else %}
+      poster="//placeholdit.imgix.net/~text?txtsize=144&txt=Video%20Preview%20Unavailable&w=1920&h=1080"
+    {% endif %}
     controls="controls">
   </video>
 {% endblock %}

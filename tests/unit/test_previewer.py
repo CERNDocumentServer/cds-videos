@@ -36,8 +36,8 @@ from invenio_files_rest.models import ObjectVersion
 from cds.modules.previewer.views import preview_depid
 
 
-def test_video_publish_and_edit(previewer_app, db, project, video):
-    """Test video publish and edit."""
+def test_previewer_on_deposit(previewer_app, db, project, video):
+    """Test video previewer on deposit."""
     (project, video_1, video_2) = project
 
     deposit_video_schema = ('https://cdslabs.cern.ch/schemas/'
@@ -76,7 +76,7 @@ def test_video_publish_and_edit(previewer_app, db, project, video):
         )
         assert url == expected_url_1
 
-        preview = preview_depid(video_1['_deposit']['id'], video_1)
+        preview = preview_depid(video_1.pid, video_1)
 
     assert filename_1 in preview
 
@@ -88,11 +88,11 @@ def test_video_publish_and_edit(previewer_app, db, project, video):
         )
         assert url == expected_url_2
 
-        preview = preview_depid(video_1['_deposit']['id'], video_1)
+        preview = preview_depid(video_1.pid, video_1)
 
         assert 'Cannot preview file' in preview
 
     _url = '/?filename={0}'.format('Doctor Strange')
     with previewer_app.test_request_context(_url):
         with pytest.raises(NotFound):
-            preview_depid(video_1['_deposit']['id'], video_1)
+            preview_depid(video_1.pid, video_1)

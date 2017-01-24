@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015, 2016 CERN.
+ * Copyright (C) 2015, 2016, 2017 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,6 +26,8 @@ require([
     'bootstrap',
     'angular',
     'node_modules/ng-dialog/js/ngDialog',
+    'node_modules/clipboard/dist/clipboard',
+    'node_modules/ngclipboard/dist/ngclipboard',
     'node_modules/d3/d3',
     'node_modules/angular-loading-bar/build/loading-bar',
     'js/cds/module',
@@ -37,17 +39,10 @@ require([
         document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch']
       );
       angular.bootstrap(
-        document.getElementById("cds-card-1"), [ 'invenioSearch']
+        document.getElementById("cds-featured-video"), [ 'cds', 'invenioSearch']
       );
       angular.bootstrap(
-        document.getElementById("cds-card-2"), ['invenioSearch']
+        document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
       );
-      angular.bootstrap(
-        document.getElementById("cds-card-3"), ['invenioSearch']
-      );
-    });
-    $(document).ready(function() {
-      // Focus on home's search input
-      $('.cds-home-input').focus();
     });
 });

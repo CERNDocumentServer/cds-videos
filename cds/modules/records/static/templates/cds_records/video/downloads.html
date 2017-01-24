@@ -1,0 +1,39 @@
+<!-- Download -->
+<div class="cds-detail-title cds-detail-video-title">
+  <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20"><i class="fa fa-download"></i> Download</h3>
+</div>
+<!-- Subformat -->
+<div class="cds-video-subformats mb-20">
+  <h4>Subformats</h4>
+  <div ng-hide="record._files[0].video.length > 0" class="text-center">
+    <p class="text-muted">Not available :(</p>
+  </div>
+  <div ng-show="record._files[0].video.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record._files[0].video">
+      <li>
+        <a ng-href="{{ file.links.self }}">
+          {{ file.tags.preset_quality }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- /Subformat -->
+<!-- Subformat -->
+<div class="cds-video-subformats mb-20">
+  <h4>Addition Files</h4>
+  <div ng-hide="record._files.length > 1" class="text-center">
+    <p class="text-muted">Not available :(</p>
+  </div>
+  <div ng-show="record._files.length > 1" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record._files">
+      <li>
+        <a ng-href="{{ file.links.self }}">
+          {{ file.tags.preset_quality }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- /Subformat -->
+<!-- /Download -->
