@@ -182,8 +182,8 @@ RECORDS_UI_ENDPOINTS = dict(
     recid_export=dict(
         pid_type='recid',
         route='/record/<pid_value>/export/<any({0}):format>'.format(
-                ", ".join(list(CDS_RECORDS_EXPORTFORMATS.keys()))
-            ),
+            ", ".join(list(CDS_RECORDS_EXPORTFORMATS.keys()))
+        ),
         template='cds_records/record_export.html',
         view_imp='cds.modules.records.views.records_ui_export',
         record_class='invenio_records_files.api:Record',
