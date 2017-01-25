@@ -83,6 +83,7 @@ class VideoSchema(StrictKeysSchema):
     schema = fields.Str(attribute="$schema")
     title = fields.Nested(TitleSchema)
     title_translations = fields.Nested(TitleTranslationSchema, many=True)
+    featured = fields.Boolean()
 
     category = fields.Str()
     type = fields.Str()
