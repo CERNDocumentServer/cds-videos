@@ -4,6 +4,10 @@
     "key": "title.title"
   },
   {
+    "title": "featured",
+    "key": "featured"
+  },
+  {
     "title": "Description",
     "key": "description.value",
     "type": "textarea",

@@ -205,6 +205,7 @@ setup(
             'cds_webhooks = cds.modules.webhooks.views:blueprint',
         ],
         'invenio_pidstore.fetchers': [
+            'cds_recid = cds.modules.records.fetchers:recid_fetcher',
             'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
         ],
         'invenio_pidstore.minters': [

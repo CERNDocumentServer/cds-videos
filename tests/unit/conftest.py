@@ -32,7 +32,6 @@ import shutil
 import tempfile
 
 from os.path import dirname, join
-from time import sleep
 
 import requests
 import mock
@@ -47,7 +46,7 @@ from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
 from invenio_sequencegenerator.api import Template
-from cds.modules.deposit.api import Project, Video, video_resolver
+from cds.modules.deposit.api import video_resolver
 from flask_security import login_user
 from invenio_access.models import ActionUsers
 from invenio_accounts.models import User
@@ -594,16 +593,16 @@ def smil_headers(app):
 def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
             deposit_metadata):
     """New project with videos."""
-    return new_project(app, deposit_rest, es, cds_jsonresolver, users, location,
-                       db, deposit_metadata)
+    return new_project(app, deposit_rest, es, cds_jsonresolver, users,
+                       location, db, deposit_metadata)
 
 
 @pytest.fixture()
-def api_project(api_app, deposit_rest, es, cds_jsonresolver, users, location, db,
-                deposit_metadata):
+def api_project(api_app, deposit_rest, es, cds_jsonresolver, users, location,
+                db, deposit_metadata):
     """New project with videos."""
-    return new_project(api_app, deposit_rest, es, cds_jsonresolver, users, location,
-                       db, deposit_metadata)
+    return new_project(api_app, deposit_rest, es, cds_jsonresolver, users,
+                       location, db, deposit_metadata)
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

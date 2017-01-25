@@ -3,6 +3,9 @@
         "video-v1.0.0": {
             "numeric_detection": true,
             "properties": {
+                "featured": {
+                    "type": "boolean"
+                },
                 "copyright": {
                     "type": "object",
                     "properties": {

@@ -29,11 +29,13 @@ from __future__ import absolute_import, print_function
 import json
 import mock
 
+from time import sleep
 from copy import deepcopy
 from cds.modules.deposit.api import project_resolver, video_resolver, Project
 from flask import url_for
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
+from invenio_indexer.api import RecordIndexer
 
 
 def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
@@ -380,3 +382,40 @@ def test_publish_project_check_indexed(app, db, es, users, location,
             assert str(video_records[1].id) in ids
             # check project record is indexed
             assert str(project_record.id) in ids
+
+
+def test_featured_field_is_indexed(app, es, project, users, json_headers):
+    """Test featured field is indexed."""
+    (project, video_1, video_2) = project
+    with app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # [[ PUBLISH THE PROJECT ]]
+        res = client.post(
+            url_for('invenio_deposit_rest.project_actions',
+                    pid_value=project['_deposit']['id'], action='publish'),
+            headers=json_headers)
+
+        RecordIndexer().process_bulk_queue()
+        sleep(2)
+
+        video_1_record = video_resolver([video_1['_deposit']['id']])[0]
+        video_2_record = video_resolver([video_2['_deposit']['id']])[0]
+
+        # search for featured videos
+        url = url_for('invenio_records_rest.recid_list', q='featured:true')
+        res = client.get(url, headers=json_headers)
+
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1
+        assert data['hits']['hits'][0]['id'] == video_1_record['recid']
+
+        # search for not featured videos
+        url = url_for('invenio_records_rest.recid_list', q='featured:false')
+        res = client.get(url, headers=json_headers)
+
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1
+        assert data['hits']['hits'][0]['id'] == video_2_record['recid']
