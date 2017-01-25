@@ -79,11 +79,11 @@ def test_records_ui_export(app, project_published):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_records_rest(api_app, users, video_metadata, project_published,
+def test_records_rest(api_app, users, video_metadata, api_project_published,
                       json_headers, smil_headers, es):
     """Test view."""
     indexer = RecordIndexer()
-    (project, video_1, video_2) = project_published
+    (project, video_1, video_2) = api_project_published
     pid, record_project = project.fetch_published()
     vid, record_video = video_1.fetch_published()
 
