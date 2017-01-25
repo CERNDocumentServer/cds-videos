@@ -76,7 +76,7 @@ from sqlalchemy_utils.functions import create_database, database_exists
 from invenio_files_rest.models import ObjectVersion
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
-    sse_success_task
+    sse_success_task, new_project
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -591,64 +591,40 @@ def smil_headers(app):
 
 
 @pytest.fixture()
-def project(api_app, deposit_rest, es, cds_jsonresolver, users, location, db,
+def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
             deposit_metadata):
     """New project with videos."""
-    project_data = {
-        'title': {
-            'title': 'my project',
-        },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
-    }
-    project_data.update(deposit_metadata)
-    project_video_1 = {
-        'title': {
-            'title': 'video 1',
-        },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
-    }
-    project_video_1.update(deposit_metadata)
-    project_video_2 = {
-        'title': {
-            'title': 'video 2',
-        },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
-    }
-    project_video_2.update(deposit_metadata)
-    with api_app.test_request_context():
-        login_user(User.query.get(users[0]))
+    return new_project(app, deposit_rest, es, cds_jsonresolver, users, location,
+                       db, deposit_metadata)
 
-        # create empty project
-        project = Project.create(project_data).commit()
 
-        # create videos
-        project_video_1['_project_id'] = project['_deposit']['id']
-        project_video_2['_project_id'] = project['_deposit']['id']
-        video_1 = Video.create(project_video_1)
-        video_2 = Video.create(project_video_2)
-
-        # save project and video
-        project.commit()
-        video_1.commit()
-        video_2.commit()
-
-    db.session.commit()
-    sleep(2)
-    return (project, video_1, video_2)
+@pytest.fixture()
+def api_project(api_app, deposit_rest, es, cds_jsonresolver, users, location, db,
+                deposit_metadata):
+    """New project with videos."""
+    return new_project(api_app, deposit_rest, es, cds_jsonresolver, users, location,
+                       db, deposit_metadata)
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.fixture()
-def project_published(api_app, project):
+def project_published(app, project):
     """New published project with videos."""
     (project, video_1, video_2) = project
+    with app.test_request_context():
+        new_project = project.publish()
+        new_videos = video_resolver(new_project.video_ids)
+        assert len(new_videos) == 2
+    return new_project, new_videos[0], new_videos[1]
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.fixture()
+def api_project_published(api_app, api_project):
+    """New published project with videos."""
+    (project, video_1, video_2) = api_project
     with api_app.test_request_context():
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)

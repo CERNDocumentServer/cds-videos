@@ -39,9 +39,13 @@ from cds.modules.webhooks.tasks import AVCTask
 from cds.modules.deposit.api import Category
 from cds.modules.webhooks.tasks import TranscodeVideoTask
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds.modules.deposit.api import Project, Video
 from celery import chain, group
 from sqlalchemy.orm.attributes import flag_modified
 from invenio_webhooks import current_webhooks
+from flask_security import login_user
+from time import sleep
+from invenio_accounts.models import User
 
 
 @shared_task(bind=True)
@@ -191,3 +195,55 @@ def workflow_receiver_video_failing(api_app, db, video,
 
     current_webhooks.register(receiver_id, TestReceiver)
     return receiver_id
+
+
+def new_project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
+                deposit_metadata):
+    """New project with videos."""
+    project_data = {
+        'title': {
+            'title': 'my project',
+        },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
+    }
+    project_data.update(deposit_metadata)
+    project_video_1 = {
+        'title': {
+            'title': 'video 1',
+        },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
+    }
+    project_video_1.update(deposit_metadata)
+    project_video_2 = {
+        'title': {
+            'title': 'video 2',
+        },
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
+    }
+    project_video_2.update(deposit_metadata)
+    with app.test_request_context():
+        login_user(User.query.get(users[0]))
+
+        # create empty project
+        project = Project.create(project_data).commit()
+
+        # create videos
+        project_video_1['_project_id'] = project['_deposit']['id']
+        project_video_2['_project_id'] = project['_deposit']['id']
+        video_1 = Video.create(project_video_1)
+        video_2 = Video.create(project_video_2)
+
+        # save project and video
+        project.commit()
+        video_1.commit()
+        video_2.commit()
+
+    db.session.commit()
+    sleep(2)
+    return (project, video_1, video_2)
