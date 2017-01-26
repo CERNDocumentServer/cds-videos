@@ -44,7 +44,7 @@ from cds.modules.webhooks.tasks import (DownloadTask,
                                         ExtractMetadataTask,
                                         TranscodeVideoTask)
 
-from helpers import transcode_task
+from helpers import get_object_count, transcode_task
 
 
 def test_download_to_object_version(db, bucket):
@@ -201,12 +201,13 @@ def test_video_extract_frames(app, db, bucket, video_mp4):
 
     # Extract frames
     task_s.delay()
-    assert ObjectVersion.query.count() == 91  # master file + frames
+    assert ObjectVersion.query.count() == get_object_count(transcode=False)
 
-    frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
+    frames_and_gif = ObjectVersion.query.join(ObjectVersion.tags).filter(
         ObjectVersionTag.key == 'master',
         ObjectVersionTag.value == version_id).all()
-    assert len(frames) == 90
+    assert len(frames_and_gif) == get_object_count(download=False,
+                                                   transcode=False)
 
     # Undo
     ExtractFramesTask().clean(version_id=version_id)

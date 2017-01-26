@@ -37,6 +37,7 @@ import tempfile
 import time
 from functools import partial
 
+from PIL import Image
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app, chain
@@ -312,7 +313,8 @@ class ExtractFramesTask(AVCTask):
             .filter(
                 tag_alias_1.key == 'master',
                 tag_alias_1.value == version_id) \
-            .filter(tag_alias_2.key == 'type', tag_alias_2.value == 'frame') \
+            .filter(tag_alias_2.key == 'type', (tag_alias_2.value == 'frame')
+                    | (tag_alias_2.value == 'gif-preview')) \
             .all()
         # FIXME do a test for check separately every "undo" when
         # run a AVC workflow
@@ -333,6 +335,7 @@ class ExtractFramesTask(AVCTask):
             default 10.
         """
         output_folder = tempfile.mkdtemp()
+        in_output = partial(os.path.join, output_folder)
 
         # Remove temporary directory on abrupt execution halts.
         self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
@@ -355,6 +358,7 @@ class ExtractFramesTask(AVCTask):
 
             self.update_state(state=STARTED, meta=meta)
 
+        # Generate frames
         ff_frames(
             self.object.file.uri,
             frames_start,
@@ -362,14 +366,28 @@ class ExtractFramesTask(AVCTask):
             frames_gap,
             os.path.join(output_folder, 'frame-%d.jpg'),
             progress_callback=progress_updater)
+        frames = os.listdir(output_folder)
 
-        for filename in os.listdir(output_folder):
+        # Generate GIF for previewing on hover
+        gif_name = 'hover_preview.gif'
+        images = [Image.open(in_output(frame)) for frame in frames]
+        head, tail = images[0], images[1:]
+        head.save(in_output(gif_name), save_all=True,
+                  append_images=tail, duration=500)
+
+        def create_object(key, type_tag):
             obj = ObjectVersion.create(
                 bucket=self.object.bucket,
-                key=filename,
-                stream=open(os.path.join(output_folder, filename), 'rb'))
+                key=key,
+                stream=open(in_output(key), 'rb'))
             ObjectVersionTag.create(obj, 'master', self.obj_id)
-            ObjectVersionTag.create(obj, 'type', 'frame')
+            ObjectVersionTag.create(obj, 'type', type_tag)
+
+        # Create GIF object
+        create_object(gif_name, 'gif-preview')
+
+        # Create frame objects
+        [create_object(filename, 'frame') for filename in frames]
 
         shutil.rmtree(output_folder)
         db.session.commit()
