@@ -60,13 +60,9 @@ def test_smil_serializer(video_metadata):
 def test_vtt_serializer(video_metadata):
     """Test vtt serializer"""
     serializer = VTT(record=video_metadata)
-    data = serializer.format()
-    print (data)
-    # root = ET.fromstring(data)
-    # assert root.tag == 'smil'
-    # assert len(root[1][0]) == 4
-    # for child in root[1][0]:
-    #     assert child.tag == 'video'
-    #     assert child.attrib["system-bitrate"] == '11915822'
-    #     assert child.attrib["width"] == '4096'
-    #     assert child.attrib["height"] == '2160'
+    data = serializer._format_frames(video_metadata)
+    for i in range(10):
+        if i == 9:
+            assert data[i]["end_time"] == VTT.time_format(float(video_metadata['_files'][0]['tags']['duration']))
+        else:
+            assert data[i]["end_time"] == data[i + 1]["start_time"]

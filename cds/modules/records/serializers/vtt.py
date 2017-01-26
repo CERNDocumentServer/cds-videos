@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of Zenodo.
+# This file is part of CDS.
 # Copyright (C) 2015, 2016 CERN.
 #
-# Zenodo is free software: you can redistribute it and/or modify
+# CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Zenodo is distributed in the hope that it will be useful,
+# CDS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Zenodo. If not, see <http://www.gnu.org/licenses/>.
+# along with CDS. If not, see <http://www.gnu.org/licenses/>.
 #
 # In applying this licence, CERN does not waive the privileges and immunities
 # granted to it by virtue of its status as an Intergovernmental Organization
@@ -25,6 +25,9 @@
 from __future__ import absolute_import, print_function
 
 from datetime import datetime
+from flask import render_template
+from cds.modules.deposit.api import Video
+from invenio_rest.errors import RESTValidationError, FieldError
 
 
 class VTTSerializer(object):
@@ -38,6 +41,9 @@ class VTTSerializer(object):
         :param record: Record instance.
         :param links_factory: Factory function for record links.
         """
+        if record['$schema'] != Video.get_record_schema():
+            raise RESTValidationError(errors=[FieldError(
+                str(record.id), 'Unsupported format')])
         return VTT(record=record).format()
 
 
@@ -49,44 +55,47 @@ class VTT(object):
         self.record = record
         self.data = ""
 
-    def format( self ):
-        head = 'WEBVTT\n'
-        thumbnail_data = self._format_frames( self.record )
-        self.data = head+thumbnail_data
-        return self.data
+    def format(self):
+        thumbnail_data = self._format_frames(self.record)
+        return render_template('cds_records/thumbnails.vtt',
+                               frames=thumbnail_data)
 
-    def _format_frames( self , record):
-        output = ''    # VTT string
+    @staticmethod
+    def _format_frames(record):
+        """Select frames and format the start/end times."""
+        thumbnail_data = []
         frames = record["_files"][0]["frame"]
 
-        #sorts frames
-        frames.sort(key = lambda s: s["key"])
-        frames.sort(key = lambda s: len(s["key"]))
+        # sorts frames
+        frames.sort(key=lambda s: s["key"])
+        frames.sort(key=lambda s: len(s["key"]))
 
-        #uses the 5, 15... 95 % frames
-        usedFrames = [frames[int(round(float((10 * n) + 5)*len(frames)/100))-1] for n in range (10)]
+        # uses the 5, 15... 95 % frames
+        used_frames = [frames[int(round(float((10 * n) + 5) *
+                       len(frames)/100))-1] for n in range(10)]
 
         video_duration = float(record["_files"][0]["tags"]["duration"])
-        thumbnail_Duration = round(float(video_duration/10),3)
+        thumbnail_duration = round(float(video_duration/10), 3)
 
         clipstart = 0
-        clipend = clipstart + thumbnail_Duration
-        
+        clipend = clipstart + thumbnail_duration
+
         for i in range(10):
-            start = self.timeFormat(clipstart)
-            end  = self.timeFormat(clipend)
+            start = VTT.time_format(clipstart)
+            end = VTT.time_format(clipend)
             clipstart = clipend
-            clipend += thumbnail_Duration
+            clipend += thumbnail_duration
+            file = used_frames[i]["links"]["self"]
+            info = {}
+            info['start_time'] = start
+            info['end_time'] = end
+            info['file_name'] = file
+            thumbnail_data.append(info)
+        return thumbnail_data
 
-            #00:00.000 --> 00:00.000
-            output += "\n" + start + " --> " + end + "\n"
-
-            #frame_file_name.jpg
-            output += usedFrames[i]["links"]["self"] + "\n"
-
-        return output
-
-    def timeFormat(self, seconds):
+    @staticmethod
+    def time_format(seconds):
+        """Helper function to convert seconds to vtt time format"""
         d = datetime.utcfromtimestamp(seconds)
         s = d.strftime("%M.%S.%f")
         s = s[:-3]

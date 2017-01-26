@@ -45,9 +45,14 @@ from cds.modules.deposit.api import Video
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_records_ui_export(app, project_published):
+def test_records_ui_export(app, project_published, video_metadata):
     """Test view."""
     (project, video_1, video_2) = project_published
+    # index a (update) video
+    _, record_video = video_1.fetch_published()
+    record_video['_files'] = video_metadata['_files']
+    record_video.commit()
+    db.session.commit()
     pid = project['_deposit']['pid']['value']
     vid = video_1['_deposit']['pid']['value']
     with app.test_request_context():
@@ -57,6 +62,8 @@ def test_records_ui_export(app, project_published):
             'invenio_records_ui.recid_export', pid_value=pid, format='smil')
         url_valid_smil = url_for(
             'invenio_records_ui.recid_export', pid_value=vid, format='smil')
+        url_valid_vtt = url_for(
+            'invenio_records_ui.recid_export', pid_value=vid, format='vtt')
         url_valid_json = url_for(
             'invenio_records_ui.recid_export', pid_value=pid, format='json')
 
@@ -67,6 +74,8 @@ def test_records_ui_export(app, project_published):
         res = client.get(url_not_valid_type_record)
         assert res.status_code == 400
         res = client.get(url_valid_smil)
+        assert res.status_code == 200
+        res = client.get(url_valid_vtt)
         assert res.status_code == 200
         res = client.get(url_valid_json)
         assert res.status_code == 200
@@ -80,7 +89,7 @@ def test_records_ui_export(app, project_published):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 def test_records_rest(api_app, users, video_metadata, api_project_published,
-                      json_headers, smil_headers, es):
+                      json_headers, smil_headers, vtt_headers, es):
     """Test view."""
     indexer = RecordIndexer()
     (project, video_1, video_2) = api_project_published
@@ -134,3 +143,10 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
         assert root[1][0][1].attrib['src'] == src2
         assert root[1][0][2].attrib['src'] == src3
         assert root[1][0][3].attrib['src'] == src4
+
+        # try get vtt
+        res = client.get(url, headers=vtt_headers)
+        assert res.status_code == 400
+
+        res = client.get(url2, headers=vtt_headers)
+        assert res.status_code == 200
