@@ -55,7 +55,8 @@ def test_tasks_status(api_app, db, bucket, cds_depid,
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel
+            sse_channel=sse_channel,
+            sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
