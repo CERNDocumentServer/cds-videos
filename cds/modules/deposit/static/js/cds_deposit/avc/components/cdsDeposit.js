@@ -263,7 +263,9 @@ function cdsDepositCtrl(
           that.stateCurrent = that.stateQueue.STARTED[0] || null;
           // Change the Deposit Status
           that.depositStatusCurrent = that.calculateStatus();
-          $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+          if (!that.master) {
+            $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+          }
         }
         // Update the metadata
         that.updateStateReporter(type, data);
