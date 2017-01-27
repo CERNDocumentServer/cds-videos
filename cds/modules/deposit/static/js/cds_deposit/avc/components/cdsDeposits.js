@@ -120,31 +120,24 @@ function cdsDepositsCtrl(
     for (var key in that.overallState) {
       values.push(that.overallState[key]);
     }
-    var finished = false;
     depositStates.forEach(function(i) {
       states[i] = 'PENDING';
 
-      if (!finished) {
-        finished = true;
-
-        var keyIncludes = function(key) {
-          return function(val) {
-            return val[key].includes(i);
-          };
+      var keyIncludes = function(key) {
+        return function(val) {
+          return val[key].includes(i);
         };
+      };
 
-        var allSucceeded = values.every(keyIncludes('SUCCESS'));
-
-        if (allSucceeded) {
-          states[i] = 'SUCCESS';
-          finished = false;
-        } else if (values.some(keyIncludes('FAILURE'))) {
-          states[i] = 'FAILURE';
-        } else if (values.some(keyIncludes('STARTED'))) {
-          states[i] = 'STARTED';
-        }
-        that.state = states[i];
+      if (values.every(keyIncludes('SUCCESS'))) {
+        states[i] = 'SUCCESS';
+      } else if (values.some(keyIncludes('FAILURE'))) {
+        states[i] = 'FAILURE';
+      } else if (values.some(keyIncludes('STARTED'))
+        || values.some(keyIncludes('SUCCESS'))) {
+        states[i] = 'STARTED';
       }
+      that.state = states[i];
     });
     return states;
   };
@@ -325,7 +318,21 @@ function cdsDepositsCtrl(
   };
 
   $scope.$on('cds.deposit.status.changed', function(evt, id, state) {
-    that.overallState[id] = angular.copy(state);
+    that.overallState[id] = that.overallState[id] || {};
+    var thisState = that.overallState[id];
+    for (var key in state) {
+      thisState[key] = _.uniq((thisState[key] || []).concat(state[key]));
+    }
+    var statesOrder = ['PENDING', 'STARTED', 'FAILURE', 'SUCCESS'];
+    statesOrder.forEach(function(curState) {
+      statesOrder.some(function(prevState) {
+        if (prevState == curState) {
+          return true;
+        }
+        thisState[prevState] = _.difference(
+          thisState[prevState], thisState[curState]);
+      });
+    });
     that.aggregatedState = that.getOverallState();
   });
 }
