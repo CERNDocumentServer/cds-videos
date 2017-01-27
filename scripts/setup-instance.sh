@@ -23,8 +23,10 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 curl -XDELETE localhost:9200/*
-cds db destroy init create
+cds db destroy --yes-i-know
+cds db init create
 cds index init
+cds index queue init
 
 cds fixtures sequence_generator
 
