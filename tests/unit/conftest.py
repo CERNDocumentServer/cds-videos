@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -330,16 +330,10 @@ def script_info(app):
     return ScriptInfo(create_app=lambda info: app)
 
 
-@pytest.fixture()
-def video_mp4(datadir):
+@pytest.fixture(params=["mp4", "mov"])
+def video(request, datadir):
     """Get test video file."""
-    return join(datadir, 'test.mp4')
-
-
-@pytest.fixture()
-def video_mov(datadir):
-    """Get test video file."""
-    return join(datadir, 'test.mov')
+    return join(datadir, 'test.{}'.format(request.param))
 
 
 @pytest.fixture()

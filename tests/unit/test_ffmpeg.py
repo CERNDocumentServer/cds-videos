@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -28,53 +28,57 @@ from __future__ import absolute_import
 
 import shutil
 import tempfile
+from math import floor
 from os import listdir
 from os.path import isfile, join, dirname
 import json
 
+import pytest
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
 from cds_sorenson.api import get_available_aspect_ratios
 
 
-def test_ffprobe_mp4(video_mp4):
+def test_ffprobe(video):
     """Test ff_probe wrapper."""
-    assert float(ff_probe(video_mp4, 'duration')) == 60.095
-    assert ff_probe(video_mp4, 'codec_type') == b'video'
-    assert ff_probe(video_mp4, 'codec_name') == b'h264'
-    assert int(ff_probe(video_mp4, 'width')) == 640
-    assert int(ff_probe(video_mp4, 'height')) == 360
-    assert int(ff_probe(video_mp4, 'bit_rate')) == 612177
-    assert ff_probe(video_mp4, 'invalid') == b''
+    expected_info = dict(
+        codec_type=b'video',
+        codec_name=b'h264',
+        duration=60.095,
+        width=640,
+        height=360,
+        bit_rate=612177,
+        invalid=b'',
+    )
+
+    def check_metadata(field_name, convertor=lambda x: x, e=None):
+        expected = expected_info[field_name]
+        actual = convertor(ff_probe(video, field_name))
+        if e is None:
+            assert expected == actual
+        else:
+            assert expected - e < actual < expected + e
+
+    check_metadata('codec_type')
+    check_metadata('codec_name')
+    check_metadata('invalid')
+    check_metadata('width', convertor=int)
+    check_metadata('height', convertor=int)
+    check_metadata('bit_rate', convertor=int)
+    check_metadata('duration', convertor=float, e=0.2)
 
 
-def test_ffprobe_mov(video_mov):
-    """Test ff_probe wrapper."""
-    assert float(ff_probe(video_mov, 'duration')) == 15.459
-    assert ff_probe(video_mov, 'codec_type') == b'video'
-    assert ff_probe(video_mov, 'codec_name') == b'h264'
-    assert int(ff_probe(video_mov, 'width')) == 1280
-    assert int(ff_probe(video_mov, 'height')) == 720
-    assert int(ff_probe(video_mov, 'bit_rate')) == 1301440
-    assert ff_probe(video_mov, 'invalid') == b''
-
-
-def test_ffmpeg_mp4(video_mp4):
-    """Test ffmpeg wrapper for extract frames."""
+@pytest.mark.parametrize('start, end, gap', [
+    (5, 95, 10),  # CDS use-case
+    (4, 93, 12),
+    (0, 100, 1),
+    (90, 100, 2),
+])
+def test_frames(video, start, end, gap):
+    """Test frame extarction."""
     tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    start, end = 5, 95
-    ff_frames(video_mp4, start, end, 1, join(tmp, 'img%d.jpg'))
+    ff_frames(video, start, end, gap, join(tmp, 'img%d.jpg'))
     file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
-    assert file_no == end - start
-    shutil.rmtree(tmp)
-
-
-def test_ffmpeg_mov(video_mov):
-    """Test ffmpeg wrapper for extract frames."""
-    tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    start, end = 5, 95
-    ff_frames(video_mov, start, end, 1, join(tmp, 'img%d.jpg'))
-    file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
-    assert file_no == end - start
+    assert file_no == floor(((end - start) / gap) + 1)
     shutil.rmtree(tmp)
 
 
@@ -94,9 +98,9 @@ def test_ffprobe_all(online_video):
     assert all([key in information['format'] for key in format_keys])
 
 
-def test_aspect_ratio(video_mp4, video_mov, online_video):
+def test_aspect_ratio(video, online_video):
     """Test calculation of video's aspect ratio."""
-    for video in [video_mp4, video_mov, online_video]:
+    for video in [video, online_video]:
         metadata = json.loads(ff_probe_all(video))['streams'][0]
         for aspect_ratio in [ff_probe(video, 'display_aspect_ratio'),
                              metadata['display_aspect_ratio']]:

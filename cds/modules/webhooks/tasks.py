@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -313,15 +313,16 @@ class ExtractFramesTask(AVCTask):
             .filter(
                 tag_alias_1.key == 'master',
                 tag_alias_1.value == version_id) \
-            .filter(tag_alias_2.key == 'type', (tag_alias_2.value == 'frame')
-                    | (tag_alias_2.value == 'gif-preview')) \
+            .filter(tag_alias_2.key == 'type',
+                    (tag_alias_2.value == 'frame') |
+                    (tag_alias_2.value == 'gif-preview')) \
             .all()
         # FIXME do a test for check separately every "undo" when
         # run a AVC workflow
         for slave in slaves:
             dispose_object_version(slave)
 
-    def run(self, frames_start=5, frames_end=95, frames_gap=1,
+    def run(self, frames_start=5, frames_end=95, frames_gap=10,
             *args, **kwargs):
         """Extract images from some frames of the video.
 
