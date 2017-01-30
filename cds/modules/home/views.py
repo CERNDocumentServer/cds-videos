@@ -42,12 +42,6 @@ def init_menu():
         _('Search'),
         order=1,
     )
-    item = current_menu.submenu('main.about')
-    item.register(
-        'cds_home.about',
-        _('About'),
-        order=2,
-    )
     item = current_menu.submenu('main.deposit')
     item.register(
         'invenio_deposit_ui.index',
@@ -62,15 +56,6 @@ def index():
     return render_template(
         'cds_home/home.html',
         title='Home'
-    )
-
-
-@blueprint.route('/about')
-def about():
-    """CDS about page."""
-    return render_template(
-        'cds_home/about.html',
-        title='About'
     )
 
 

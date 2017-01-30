@@ -40,6 +40,7 @@ from invenio_db import db
 from invenio_files_rest.models import (Bucket, FileInstance, Location,
                                        ObjectVersion)
 from invenio_indexer.api import RecordIndexer
+from invenio_pages import Page
 from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
 from invenio_records_files.api import Record as FileRecord
@@ -302,3 +303,50 @@ def sequence_generator():
                         meta_template='{project-v1_0_0}-{counter}',
                         start=1)
     db.session.commit()
+
+
+@fixtures.command()
+@with_appcontext
+def pages():
+    """Register CDS static pages."""
+    def page_data(page):
+        return pkg_resources.resource_stream(
+            'cds.modules.fixtures', join('data/pages', page)
+        ).read().decode('utf8')
+    pages = [
+        Page(url='/about',
+             title='About',
+             description='About',
+             content=page_data('about.html'),
+             template_name='invenio_pages/dynamic.html'),
+        Page(url='/contact',
+             title='Contact',
+             description='Contact',
+             content=page_data('contact.html'),
+             template_name='invenio_pages/dynamic.html'),
+        Page(url='/faq',
+             title='FAQ',
+             description='FAQ',
+             content=page_data('faq.html'),
+             template_name='invenio_pages/dynamic.html'),
+        Page(url='/feedback',
+             title='Feedback',
+             description='Feedback',
+             content=page_data('feedback.html'),
+             template_name='invenio_pages/dynamic.html'),
+        Page(url='/help',
+             title='Help',
+             description='Help',
+             content=page_data('help.html'),
+             template_name='invenio_pages/dynamic.html'),
+        Page(url='/terms',
+             title='Terms of Use',
+             description='Terms of Use',
+             content=page_data('terms_of_use.html'),
+             template_name='invenio_pages/dynamic.html')
+    ]
+    with db.session.begin_nested():
+        Page.query.delete()
+        db.session.add_all(pages)
+    db.session.commit()
+    click.echo('DONE :)')
