@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -182,14 +182,14 @@ def test_delete_video_published(project, force):
     assert {'$reference': video_2_ref} in project_meta.json['videos']
 
 
-def test_video_dumps(db, project, video_mp4):
+def test_video_dumps(db, project, video):
     """Test video dump, in particular file dump."""
     (project, video_1, video_2) = project
     bucket_id = video_1['_buckets']['deposit']
     obj = ObjectVersion.create(
-        bucket=bucket_id, key='master.mp4', stream=open(video_mp4, 'rb'))
+        bucket=bucket_id, key='master.mp4', stream=open(video, 'rb'))
     slave_1 = ObjectVersion.create(
-        bucket=bucket_id, key='slave_1.mp4', stream=open(video_mp4, 'rb'))
+        bucket=bucket_id, key='slave_1.mp4', stream=open(video, 'rb'))
     ObjectVersionTag.create(slave_1, 'master', str(obj.version_id))
     ObjectVersionTag.create(slave_1, 'type', 'video')
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -145,13 +145,13 @@ def test_update_record_retry(app, db):
     assert records[0].json == {'fuu': 'bar'}
 
 
-def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
+def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     """Test metadata extraction video mp4."""
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
     dep_id = str(cds_depid)
-    task_s = ExtractMetadataTask().s(uri=video_mp4,
+    task_s = ExtractMetadataTask().s(uri=video,
                                      version_id=obj_id,
                                      deposit_id=dep_id)
 
@@ -168,7 +168,6 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     tags = ObjectVersion.query.first().get_tags()
     assert tags['duration'] == '60.095000'
     assert tags['bit_rate'] == '612177'
-    assert tags['size'] == '5510872'
     assert tags['avg_frame_rate'] == '288000/12019'
     assert tags['codec_name'] == 'h264'
     assert tags['width'] == '640'
@@ -190,10 +189,10 @@ def test_metadata_extraction_video_mp4(app, db, cds_depid, bucket, video_mp4):
     assert len(tags) == 0
 
 
-def test_video_extract_frames(app, db, bucket, video_mp4):
+def test_video_extract_frames(app, db, bucket, video):
     """Test extract frames from video."""
     obj = ObjectVersion.create(
-        bucket=bucket, key='video.mp4', stream=open(video_mp4, 'rb'))
+        bucket=bucket, key='video.mp4', stream=open(video, 'rb'))
     version_id = str(obj.version_id)
     db.session.commit()
 
