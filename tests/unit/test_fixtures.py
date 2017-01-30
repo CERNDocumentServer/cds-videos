@@ -27,10 +27,12 @@
 from __future__ import absolute_import, print_function
 
 from click.testing import CliRunner
+from invenio_pages import InvenioPages, Page
 from invenio_records.models import RecordMetadata
 from invenio_sequencegenerator.models import TemplateDefinition
 from cds.modules.fixtures.cli import categories as cli_categories, \
-    sequence_generator as cli_sequence_generator
+    sequence_generator as cli_sequence_generator, \
+    pages as cli_pages
 
 
 def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
@@ -54,3 +56,19 @@ def test_fixture_sequence_generator(app, script_info, db):
     assert res.exit_code == 0
     templates = TemplateDefinition.query.all()
     assert len(templates) == 2
+
+
+def test_fixture_pages(app, script_info, db, client):
+    """Test load pages fixtures."""
+    InvenioPages(app)
+    Page.query.delete()
+    assert len(Page.query.all()) == 0
+    about_response = client.get('/about')
+    assert about_response.status_code == 404
+    runner = CliRunner()
+    res = runner.invoke(cli_pages, [], obj=script_info)
+    assert res.exit_code == 0
+    pages = Page.query.all()
+    assert len(pages) == 6
+    about_response = client.get('/about')
+    assert about_response.status_code == 200
