@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -125,9 +125,9 @@ def ff_frames(input_file, start, end, step, output, progress_callback=None):
     """
     duration = float(ff_probe(input_file, 'duration'))
     # Calculate time step
-    start_time = (duration * start / 100)
-    end_time = (duration * end / 100)
     time_step = duration * step / 100
+    start_time = duration * start / 100
+    end_time = duration * (end+1) / 100  # end inclusive
 
     cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(
         input_file, start_time, end_time, time_step, output

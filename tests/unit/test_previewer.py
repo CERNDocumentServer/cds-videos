@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,30 +26,22 @@
 
 from __future__ import absolute_import, print_function
 
-import mock
 import pytest
 
 from flask import url_for
 from werkzeug.exceptions import NotFound
 
 from invenio_files_rest.models import ObjectVersion
-from invenio_pidstore.providers.recordid import RecordIdProvider
 
 from cds.modules.previewer.views import preview_depid
 
 
-def test_video_publish_and_edit(previewer_app, db, project, video_mp4):
+def test_video_publish_and_edit(previewer_app, db, project, video):
     """Test video publish and edit."""
     (project, video_1, video_2) = project
-    video_path_1 = project['videos'][0]['$reference']
-    video_path_2 = project['videos'][1]['$reference']
 
-    deposit_project_schema = ('https://cdslabs.cern.ch/schemas/'
-                              'deposits/records/project-v1.0.0.json')
     deposit_video_schema = ('https://cdslabs.cern.ch/schemas/'
                             'deposits/records/video-v1.0.0.json')
-    record_video_schema = ('https://cdslabs.cern.ch/schemas/'
-                           'records/video-v1.0.0.json')
 
     # check video1 is not published
     assert video_1['_deposit']['status'] == 'draft'
@@ -60,10 +52,10 @@ def test_video_publish_and_edit(previewer_app, db, project, video_mp4):
     filename_2 = 'jessica_jones.harley_quinn'
 
     bucket_id = video_1['_buckets']['deposit']
-    obj = ObjectVersion.create(
-        bucket=bucket_id, key=filename_1, stream=open(video_mp4, 'rb'))
-    obj_2 = ObjectVersion.create(
-        bucket=bucket_id, key=filename_2, stream=open(video_mp4, 'rb'))
+    ObjectVersion.create(bucket=bucket_id, key=filename_1,
+                         stream=open(video, 'rb'))
+    ObjectVersion.create(bucket=bucket_id, key=filename_2,
+                         stream=open(video, 'rb'))
     db.session.commit()
 
     expected_url_1 = '/deposit/{0}/preview/video/{1}'.format(

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -171,9 +171,12 @@ setup(
         'invenio_assets.bundles': [
             'cds_deposit_jquery_js = cds.modules.deposit.bundles:js_jquery',
             'cds_deposit_js = cds.modules.deposit.bundles:js_deposit',
-            'cds_previewer_theoplayer_css = cds.modules.previewer.bundles:theoplayer_css',
-            'cds_previewer_theoplayer_js = cds.modules.previewer.bundles:theoplayer_js',
-            'cds_previewer_video_css = cds.modules.previewer.bundles:video_css',
+            'cds_previewer_theoplayer_css = '
+            'cds.modules.previewer.bundles:theoplayer_css',
+            'cds_previewer_theoplayer_js = '
+            'cds.modules.previewer.bundles:theoplayer_js',
+            'cds_previewer_video_css = '
+            'cds.modules.previewer.bundles:video_css',
             'cds_previewer_video_js = cds.modules.previewer.bundles:video_js',
             'cds_record_js = cds.modules.records.bundles:js',
             'cds_theme_css = cds.modules.theme.bundles:css',
@@ -182,7 +185,7 @@ setup(
         'invenio_base.api_apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
-            #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            # 'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
@@ -191,7 +194,7 @@ setup(
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
-            #'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            # 'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
         ],
@@ -216,7 +219,7 @@ setup(
         ],
         # FIXME removed until proper integration
         # 'invenio_i18n.translations': [
-            # 'messages = cds',
+        #    'messages = cds',
         # ],
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
