@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import xml.etree.ElementTree as ET
 
 from cds.modules.records.serializers.smil import Smil
+from cds.modules.records.serializers.vtt import VTT
 
 
 def test_smil_serializer(video_metadata):
@@ -54,3 +55,14 @@ def test_smil_serializer(video_metadata):
     assert root[1][0][1].attrib['src'] == src2
     assert root[1][0][2].attrib['src'] == src3
     assert root[1][0][3].attrib['src'] == src4
+
+
+def test_vtt_serializer(video_metadata):
+    """Test vtt serializer"""
+    serializer = VTT(record=video_metadata)
+    data = serializer._format_frames(video_metadata)
+    for i in range(10):
+        if i == 9:
+            assert data[i]["end_time"] == VTT.time_format(float(video_metadata['_files'][0]['tags']['duration']))
+        else:
+            assert data[i]["end_time"] == data[i + 1]["start_time"]

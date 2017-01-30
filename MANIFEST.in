@@ -52,6 +52,7 @@ recursive-include cds *.scss
 recursive-include cds *.smil
 recursive-include cds *.svg
 recursive-include cds *.ttf
+recursive-include cds *.vtt
 recursive-include cds *.woff
 recursive-include cds *.xml
 recursive-include docker *

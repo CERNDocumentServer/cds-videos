@@ -20,16 +20,17 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Smil serializer for records."""
+"""VTT serializer for records."""
 
 from __future__ import absolute_import, print_function
 
+from datetime import datetime
 from flask import render_template
 from cds.modules.deposit.api import Video
 from invenio_rest.errors import RESTValidationError, FieldError
 
 
-class SmilSerializer(object):
+class VTTSerializer(object):
     """Smil serializer for records."""
 
     @staticmethod
@@ -43,10 +44,10 @@ class SmilSerializer(object):
         if record['$schema'] != Video.get_record_schema():
             raise RESTValidationError(errors=[FieldError(
                 str(record.id), 'Unsupported format')])
-        return Smil(record=record).format()
+        return VTT(record=record).format()
 
 
-class Smil(object):
+class VTT(object):
     """Smil formatter."""
 
     def __init__(self, record):
@@ -55,29 +56,47 @@ class Smil(object):
         self.data = ""
 
     def format(self):
-        """Return the contents of the smil file as a string."""
-        videos_data = self._format_videos(self.record)
-        return render_template('cds_records/video.smil', videos=videos_data)
+        thumbnail_data = self._format_frames(self.record)
+        return render_template('cds_records/thumbnails.vtt',
+                               frames=thumbnail_data)
 
     @staticmethod
-    def _format_videos(record):
-        """Format each video subformat."""
-        def get_option(info, key, value):
-            if value:
-                info[key] = value
-            return info
-        videos = []
-        for file in record["_files"]:
-            tags = file.get('tags', {})
-            bit_rate = tags.get('bit_rate')
-            width = tags.get('width')
-            height = tags.get('height')
-            for video in file.get('video', []):
-                info = {}
-                info = get_option(
-                    info, 'src', video.get('links', {}).get('self'))
-                info = get_option(info, 'bit_rate', bit_rate)
-                info = get_option(info, 'width', width)
-                info = get_option(info, 'height', height)
-                videos.append(info)
-        return videos
+    def _format_frames(record):
+        """Select frames and format the start/end times."""
+        thumbnail_data = []
+        frames = record["_files"][0]["frame"]
+
+        # sorts frames
+        frames.sort(key=lambda s: s["key"])
+        frames.sort(key=lambda s: len(s["key"]))
+
+        # uses the 5, 15... 95 % frames
+        used_frames = [frames[int(round(float((10 * n) + 5) *
+                       len(frames)/100))-1] for n in range(10)]
+
+        video_duration = float(record["_files"][0]["tags"]["duration"])
+        thumbnail_duration = round(float(video_duration/10), 3)
+
+        clipstart = 0
+        clipend = clipstart + thumbnail_duration
+
+        for i in range(10):
+            start = VTT.time_format(clipstart)
+            end = VTT.time_format(clipend)
+            clipstart = clipend
+            clipend += thumbnail_duration
+            file = used_frames[i]["links"]["self"]
+            info = {}
+            info['start_time'] = start
+            info['end_time'] = end
+            info['file_name'] = file
+            thumbnail_data.append(info)
+        return thumbnail_data
+
+    @staticmethod
+    def time_format(seconds):
+        """Helper function to convert seconds to vtt time format"""
+        d = datetime.utcfromtimestamp(seconds)
+        s = d.strftime("%M.%S.%f")
+        s = s[:-3]
+        return s
