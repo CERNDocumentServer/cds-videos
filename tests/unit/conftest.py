@@ -424,6 +424,68 @@ def video_metadata():
     metadata = {
         "_files": [
             {
+                "frame": [
+                    {
+                        "key": "frame-1.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-1.jpg?versionId=43bfc3ef-6072-4b06-a2ea-b321bdd224e1"
+                        },
+                    },
+                    {
+                        "key": "frame-2.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-2.jpg?versionId=8ed2544a-c841-49a5-914b-8619c321c580"
+                        },
+                    },
+                    {
+                        "key": "frame-3.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-3.jpg?versionId=f04969d4-ab5f-4818-9f06-bea0e3843310"
+                        },
+                    },
+                    {
+                        "key": "frame-4.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-4.jpg?versionId=4528d78c-722a-4b70-8caa-42fdd4393857"
+                        },
+                    },
+                    {
+                        "key": "frame-5.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-5.jpg?versionId=13841296-7d58-49fa-b800-69112ae6953d"
+                        },
+                    },
+                    {
+                        "key": "frame-6.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-6.jpg?versionId=1fbc2a8f-dc42-40f5-ab4c-aaff57c1600e"
+                        },
+                    },
+                    {
+                        "key": "frame-7.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-7.jpg?versionId=d7b5d937-ca26-4d34-b8bc-8e70857c3544"
+                        },
+                    },
+                    {
+                        "key": "frame-8.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-8.jpg?versionId=7f765733-cbbd-47c6-bd60-5b98940e86b6"
+                        },
+                    },
+                    {
+                        "key": "frame-9.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-9.jpg?versionId=ecb09ee8-1c31-47da-a5a0-c9e4906faba2"
+                        },
+                    },
+                    {
+                        "key": "frame-10.jpg",
+                        "links": {
+                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-10.jpg?versionId=4351274e-3639-4ff9-a75f-fdc7c2efa7a1"
+                        },
+                    },
+                ],
                 "tags": {
                     "bit_rate": "11915822",
                     "height": "2160",
@@ -433,7 +495,8 @@ def video_metadata():
                         "6/CERN-MOVIE-2016-066-001/CERN-MOVIE-2016-066-00"
                         "1-11872-kbps-4096x2160-audio-128-kbps-stereo.mp4"
                     ),
-                    "width": "4096"
+                    "width": "4096",
+                    "duration": "100",
                 },
                 "video": [
                     {
@@ -584,9 +647,16 @@ def json_headers(app):
 
 @pytest.fixture()
 def smil_headers(app):
-    """JSON headers."""
+    """SMIL headers."""
     return [('Content-Type', 'application/smil'),
             ('Accept', 'application/smil')]
+
+
+@pytest.fixture()
+def vtt_headers(app):
+    """VTT headers."""
+    return [('Content-Type', 'text/vtt'),
+            ('Accept', 'text/vtt')]
 
 
 @pytest.fixture()

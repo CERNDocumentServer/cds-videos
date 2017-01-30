@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 from .smil import SmilSerializer
+from .vtt import VTTSerializer
 from invenio_records_rest.serializers.response import record_responsify
 
 # Serializers
@@ -34,7 +35,13 @@ from invenio_records_rest.serializers.response import record_responsify
 #: CDS SMIL serializer version 1.0.0
 smil_v1 = SmilSerializer()
 
+#: CDS VTT serializer version 1.0.0
+vtt_v1 = VTTSerializer()
+
 # Records-REST serializers
 # ========================
 #: SMIL record serializer for individual records.
 smil_v1_response = record_responsify(smil_v1, 'application/smil')
+
+#: VTT record serializer for individual records.
+vtt_v1_response = record_responsify(vtt_v1, 'text/vtt')
