@@ -366,7 +366,8 @@ def test_publish_project_check_indexed(app, db, es, users, location,
             _, project_record = project_resolver(
                 project_depid).fetch_published()
             # get video records
-            video_records = video_resolver(Project(data=project).video_ids)
+            video_records = video_resolver(
+                Project(data=project_record).video_ids)
             assert len(video_records) == 2
             # check project + videos are indexed
             assert mock_indexer.called is True
