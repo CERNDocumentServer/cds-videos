@@ -27,12 +27,17 @@
 from __future__ import absolute_import, print_function
 
 from click.testing import CliRunner
+from invenio_deposit import InvenioDepositREST
 from invenio_pages import InvenioPages, Page
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.models import RecordMetadata
+from invenio_records_rest import InvenioRecordsREST
 from invenio_sequencegenerator.models import TemplateDefinition
+from cds.modules.deposit.api import CDSDeposit
 from cds.modules.fixtures.cli import categories as cli_categories, \
     sequence_generator as cli_sequence_generator, \
-    pages as cli_pages
+    pages as cli_pages, \
+    videos as cli_videos
 
 
 def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
@@ -72,3 +77,33 @@ def test_fixture_pages(app, script_info, db, client):
     assert len(pages) == 6
     about_response = client.get('/about')
     assert about_response.status_code == 200
+
+
+def test_fixture_videos(app, script_info, db, location):
+    """Test load video fixtures."""
+    PersistentIdentifier.query.delete()
+    RecordMetadata.query.delete()
+    assert len(PersistentIdentifier.query.all()) == 0
+    runner = CliRunner()
+    res = runner.invoke(cli_videos, [], obj=script_info)
+    assert res.exit_code == 0
+    pids = PersistentIdentifier.query.all()
+    assert len(pids) == 12
+    depids = [pid for pid in pids if pid.pid_type == 'depid']
+    rns = [pid for pid in pids if pid.pid_type == 'rn']
+    recids = [pid for pid in pids if pid.pid_type == 'recid']
+    assert len(depids) == 4
+    assert len(rns) == 4
+    assert len(recids) == 4
+    deposits = CDSDeposit.get_records([pid.object_uuid for pid in depids])
+    for deposit in deposits:
+        if 'videos' in deposit:
+            # Project deposit
+            assert len(deposit['videos']) == 3
+        else:
+            # Video deposit
+            files = next(iter(deposit.files))
+            # Has 5 frames
+            assert len(files['frame']) == 5
+            # Has 3 subformats
+            assert len(files['video']) == 3
