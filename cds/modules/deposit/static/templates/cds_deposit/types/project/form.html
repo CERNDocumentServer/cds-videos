@@ -16,13 +16,13 @@
         sf-model="$ctrl.cdsDepositCtrl.record"
          sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
         ></form>
+      <a ng-init="showDebug=false" ng-click="showDebug=!showDebug">Debug</a>
+      <div ng-show="showDebug">
+        <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>
+        <pre>{{ $ctrl.cdsDepositCtrl.links | json}}</pre>
+        <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
+        <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
+      </div>
     </div>
-  </div>
-  <a ng-init="showDebug=false" ng-click="showDebug=!showDebug">Debug</a>
-  <div ng-show="showDebug">
-    <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>
-    <pre>{{ $ctrl.cdsDepositCtrl.links | json}}</pre>
-    <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
-    <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
   </div>
 </div>

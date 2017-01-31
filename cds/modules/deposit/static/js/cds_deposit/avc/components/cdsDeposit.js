@@ -34,7 +34,13 @@ function cdsDepositCtrl(
   this.previewer = null;
 
   // FIXME Init stateQueue -  maybe ```Object(depositStatuses).keys()```
-  this.stateQueue = { PENDING: [], STARTED: [], FAILURE: [], SUCCESS: [] };
+  this.stateQueue = {
+    PENDING: [],
+    STARTED: [],
+    FAILURE: [],
+    SUCCESS: [],
+    REVOKED: [],
+  };
 
   // Initialize stateOrder
   this.stateOrder = angular.copy(depositStates);

@@ -31,7 +31,13 @@ function cdsDepositsCtrl(
     } catch (error) {}
   };
 
-  this.initState = { PENDING: [], STARTED: [], FAILURE: [], SUCCESS: [] };
+  this.initState = {
+    PENDING: [],
+    STARTED: [],
+    FAILURE: [],
+    SUCCESS: [],
+    REVOKED: [],
+  }
 
   this.overallState = {};
 
