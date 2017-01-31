@@ -23,29 +23,28 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
 
-{%- extends config.PREVIEWER_ABSTRACT_TEMPLATE %}
+{%- extends "cds_previewer/previewer_video.html" %}
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_previewer_oplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_previewer_theoplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  
   <script type="text/javascript">
     theoplayer = {
       configuration : {
         libraryLocation : '/static/js/cds_previewer/theoplayer/',
-        styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css'
+        styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css',
+        socialSharing : 'http://cds.cern.ch'+'{{file_url}}',
       }
     };
     </script>
 {%- endblock javascript %}
 
-{%- block css %}
-  {{ super() }}
-  {% assets "cds_previewer_video_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{%- endblock css %}
-
 {% block panel %}
-  <video class="cds-previewer-video-player"
+  <video class="cds-previewer-video-player theoplayer-show-social-sharing-button"
     src="{{file_url}}"
-    controls="controls">
+    controls="controls"
+    preload = "auto"
+    >
   </video>
 {% endblock %}

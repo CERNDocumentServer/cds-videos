@@ -24,15 +24,6 @@ from __future__ import absolute_import, print_function
 from flask_assets import Bundle
 from invenio_assets import NpmBundle
 
-video_js = Bundle(
-    Bundle(
-        'js/cds_previewer/video.js',
-        filters='requirejs',
-    ),
-    filters='jsmin',
-    output='gen/cds.previewer.%(version)s.js',
-)
-
 theoplayer_js = Bundle(
     # ui-sortable requires jquery to be already loaded
     'js/cds_previewer/theoplayer/theoplayer.loader.js',
@@ -51,3 +42,4 @@ theoplayer_css = Bundle(
     filters='cleancss',
     output='gen/cds.previewer.oplayer.%(version)s.css',
 )
+

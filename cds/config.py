@@ -165,6 +165,12 @@ RECORDS_UI_ENDPOINTS = dict(
         view_imp='invenio_previewer.views.preview',
         record_class='invenio_records_files.api:Record',
     ),
+    recid_embed=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/embed/<filename>',
+        view_imp='cds.modules.previewer.views.embed_video',
+        record_class='invenio_records_files.api:Record',
+    ),
     recid_files=dict(
         pid_type='recid',
         route='/record/<pid_value>/files/<filename>',
@@ -447,6 +453,7 @@ PREVIEWER_PREFERENCE = [
     'pdfjs',
     'ipynb',
     'cds_video',
+    'cds_embed_video',
     'zip',
 ]
 

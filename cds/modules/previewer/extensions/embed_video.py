@@ -46,7 +46,7 @@ def can_preview(file):
 
 def preview(file):
     """Render appropiate template with embed flag."""
-    template = 'cds_previewer/previewer_video.html'
+    template = 'cds_previewer/embedded_video.html'
     return render_template(
         template,
         file=file,
