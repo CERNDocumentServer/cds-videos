@@ -1,16 +1,16 @@
-<div class="text-left">
+<div class="text-right">
   <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'
+    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.depositFormModel.$pristine'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-default btn-sm"
+    class="btn btn-default btn-xs"
     ng-click="$ctrl.actionHandler('self', 'PUT')">
   Save
   </button>
 
   <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'
+    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || !$ctrl.cdsDepositCtrl.depositFormModel.$pristine'
     ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE"
-    class="btn btn-primary btn-sm"
+    class="btn btn-primary btn-xs"
     ng-click="$ctrl.actionMultipleHandler([['self', 'PUT'], ['publish', 'POST']], '/deposit')">
   Publish
   </button>
@@ -18,16 +18,8 @@
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
     ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-success btn-sm"
+    class="btn btn-warning btn-xs"
     ng-click="$ctrl.actionMultipleHandler([['edit', 'POST'], ['self', 'PUT']], '/deposit')">
   Edit
-  </button>
-
-  <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || !$ctrl.cdsDepositCtrl.record._deposit.pid'
-    ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-danger btn-sm"
-    ng-click="$ctrl.actionHandler('discard', 'POST')">
-  Discard
   </button>
 </div>
