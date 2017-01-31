@@ -30,6 +30,7 @@ import time
 import mock
 import pytest
 
+from werkzeug.utils import import_string
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
     Bucket, FileInstance
 from invenio_pidstore.models import PersistentIdentifier
@@ -147,6 +148,12 @@ def test_update_record_retry(app, db):
 
 def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     """Test metadata extraction video mp4."""
+    recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
+    # simulate a no fully filled record
+    record = Record.get_record(recid)
+    del record['date']
+    validator = 'invenio_records.validators.PartialDraft4Validator'
+    record.commit(validator=import_string(validator))
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
@@ -159,7 +166,6 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     task_s.delay()
 
     # Check that deposit's metadata got updated
-    recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
     record = Record.get_record(recid)
     assert 'extracted_metadata' in record['_deposit']
     assert record['_deposit']['extracted_metadata']

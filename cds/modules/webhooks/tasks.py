@@ -283,7 +283,9 @@ class ExtractMetadataTask(AVCTask):
             'path': '/_deposit/extracted_metadata',
             'value': metadata
         }]
-        update_record.s(recid, patch).apply()
+        validator = 'invenio_records.validators.PartialDraft4Validator'
+        update_record.s(
+            recid=recid, patch=patch, validator=validator).apply()
 
         # Update state
         self.update_state(
