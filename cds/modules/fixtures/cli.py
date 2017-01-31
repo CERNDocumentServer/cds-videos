@@ -25,11 +25,11 @@ import simplejson
 import tarfile
 import uuid
 from os import listdir, makedirs
-from os.path import basename, exists, isdir, join, splitext
+from os.path import basename, exists, isdir, join, splitext, dirname
 
 from cds.modules.deposit.minters import catid_minter
 import click
-from cds.modules.deposit.api import Category
+from cds.modules.deposit.api import Category, Video, Project
 import pkg_resources
 from invenio_sequencegenerator.api import Template
 from cds_dojson.marc21 import marc21
@@ -38,7 +38,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
 from invenio_files_rest.models import (Bucket, FileInstance, Location,
-                                       ObjectVersion)
+                                       ObjectVersion, ObjectVersionTag)
 from invenio_indexer.api import RecordIndexer
 from invenio_pages import Page
 from invenio_pidstore import current_pidstore
@@ -313,6 +313,7 @@ def pages():
         return pkg_resources.resource_stream(
             'cds.modules.fixtures', join('data/pages', page)
         ).read().decode('utf8')
+
     pages = [
         Page(url='/about',
              title='About',
@@ -348,5 +349,105 @@ def pages():
     with db.session.begin_nested():
         Page.query.delete()
         db.session.add_all(pages)
+    db.session.commit()
+    click.echo('DONE :)')
+
+
+@fixtures.command()
+@click.option('--video', '-v', default=False)
+@click.option('--frames', '-f', default=False)
+@click.option('--temp', '-t', default='/tmp')
+@click.option('--video-count', '-n', default=3)
+@with_appcontext
+def videos(video, frames, temp, video_count):
+    """Load videos, frames and subformats."""
+    if not video:
+        video = join(dirname(__file__), '..', '..', '..',
+                     'tests', 'data', 'test.mp4')
+    if not frames:
+        frames = pkg_resources.resource_filename(
+            'cds.modules.fixtures', 'data/frames.tar.gz'
+        )
+
+    frame_files = _handle_source(frames, temp)
+    d = current_app.config['FIXTURES_FILES_LOCATION']
+    if not exists(d):
+        makedirs(d)
+
+    project = Project.create(
+        dict(
+            date='2017-01-17',
+            description=dict(value='desc'),
+            title=dict(title='Project'),
+            category='Category',
+            type='Type')
+    )
+    project['_deposit']['owners'] = [1]
+    project['_deposit']['created_by'] = 1
+    project['videos'] = []
+
+    # All deposits created
+    deposits = [project]
+
+    for video_index in range(video_count):
+        with current_app.test_request_context():
+            video_deposit = Video.create(
+                dict(_project_id=str(project['_deposit']['id']),
+                     contributors=[dict(name='contrib', role='Provider')],
+                     copyright=dict(url='copyright'),
+                     date='2017-01-16',
+                     description=dict(value='desc'),
+                     title=dict(title='Video'))
+            )
+        video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
+
+        video_deposit['_deposit'].update(dict(owners=[1], created_by=1))
+
+        with open(video, 'rb') as fp:
+            master_obj = ObjectVersion.create(
+                bucket=video_bucket,
+                key='video{0}.mp4'.format(video_index),
+                stream=fp)
+        ObjectVersionTag.create(master_obj, 'bit_rate', '959963')
+        ObjectVersionTag.create(master_obj, 'codec_name', 'h264')
+        ObjectVersionTag.create(master_obj, 'duration', '62.280000')
+        ObjectVersionTag.create(master_obj, 'nb_frames', '1557')
+        ObjectVersionTag.create(master_obj, 'size', '10498667')
+        ObjectVersionTag.create(master_obj, 'width', '1280')
+        ObjectVersionTag.create(master_obj, 'height', '720')
+        ObjectVersionTag.create(master_obj, 'display_aspect_ratio', '16:9')
+        ObjectVersionTag.create(master_obj, 'avg_frame_rate', '25/1')
+
+        for f in frame_files:
+            with open(join(frames, f), 'rb') as fp:
+                # The filename
+                file_name = basename(f)
+
+                obj = ObjectVersion.create(
+                    bucket=video_bucket,
+                    key=file_name,
+                    stream=fp)
+                ObjectVersionTag.create(obj, 'type', 'frame')
+                ObjectVersionTag.create(obj, 'master', master_obj.version_id)
+
+        for quality in ['360p', '480p', '720p']:
+            with open(video, 'rb') as fp:
+                obj = ObjectVersion.create(
+                    bucket=video_bucket,
+                    key='video{0}[{1}].mp4'.format(video_index, quality),
+                    stream=fp)
+            ObjectVersionTag.create(obj, 'type', 'video')
+            ObjectVersionTag.create(obj, 'master', master_obj.version_id)
+            ObjectVersionTag.create(obj, 'preset_quality', quality)
+
+        deposits.append(video_deposit.commit())
+    project.commit()
+    with current_app.test_request_context():
+        project.publish()
+        indexer = RecordIndexer()
+        # index all published records
+        for deposit in deposits:
+            _, record = deposit.fetch_published()
+            indexer.index(record)
     db.session.commit()
     click.echo('DONE :)')
