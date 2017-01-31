@@ -42,4 +42,3 @@ theoplayer_css = Bundle(
     filters='cleancss',
     output='gen/cds.previewer.oplayer.%(version)s.css',
 )
-
