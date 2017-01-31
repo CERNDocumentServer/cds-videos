@@ -25,6 +25,7 @@ from flask import Blueprint, abort, current_app, request
 
 from invenio_previewer.extensions import default
 from invenio_previewer.proxies import current_previewer
+from invenio_previewer.api import PreviewFile
 
 from .api import CDSPreviewDepositFile
 
@@ -57,6 +58,34 @@ def preview_depid(pid, record, template=None, **kwargs):
 
     for plugin in current_previewer.iter_previewers(
             previewers=[file_previewer] if file_previewer else None):
+        if plugin.can_preview(fileobj):
+            try:
+                return plugin.preview(fileobj)
+            except Exception:
+                current_app.logger.warning(
+                    ('Preview failed for {key}, in {pid_type}:{pid_value}'
+                     .format(key=fileobj.file.key,
+                             pid_type=fileobj.pid.pid_type,
+                             pid_value=fileobj.pid.pid_value)),
+                    exc_info=True)
+    return default.preview(fileobj)
+
+
+def embed_video(pid, record, template=None, **kwargs):
+    """Return embedded player for video file."""
+    fileobj = current_previewer.record_file_factory(
+        pid, record, request.view_args.get(
+            'filename', request.args.get('filename', type=str))
+    )
+    if not fileobj:
+        abort(404)
+
+    file_previewer = 'cds_embed_video'
+
+    # Find a suitable previewer
+    fileobj = PreviewFile(pid, record, fileobj)
+    for plugin in current_previewer.iter_previewers(
+            previewers=[file_previewer]):
         if plugin.can_preview(fileobj):
             try:
                 return plugin.preview(fileobj)

@@ -177,7 +177,6 @@ setup(
             'cds.modules.previewer.bundles:theoplayer_js',
             'cds_previewer_video_css = '
             'cds.modules.previewer.bundles:video_css',
-            'cds_previewer_video_js = cds.modules.previewer.bundles:video_js',
             'cds_record_js = cds.modules.records.bundles:js',
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
@@ -240,6 +239,7 @@ setup(
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video',
+            'cds_embed_video = cds.modules.previewer.extensions.embed_video',
         ],
         'invenio_sse.integrations': [
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
