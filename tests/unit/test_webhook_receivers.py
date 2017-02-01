@@ -42,7 +42,7 @@ from invenio_records.models import RecordMetadata
 from celery import states, chain, group
 from celery.result import AsyncResult
 from invenio_webhooks import current_webhooks
-from cds.modules.deposit.api import video_resolver, cds_resolver
+from cds.modules.deposit.api import video_resolver
 from cds.modules.webhooks.status import _compute_status, collect_info, \
     get_tasks_status_by_task, get_deposit_events, iterate_events_results
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
@@ -51,13 +51,18 @@ from invenio_webhooks.models import Event
 from six import BytesIO
 
 from helpers import failing_task, get_object_count, get_tag_count, \
-    simple_add, mock_current_user, success_task
+    simple_add, mock_current_user, success_task, get_indexed_records_from_mock
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
+def test_download_receiver(api_app, db, bucket, api_project, access_token,
                            json_headers, webhooks):
     """Test downloader receiver."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    video_1_id = str(video_1.id)
+    project_id = str(project.id)
+
     db.session.add(bucket)
     with api_app.test_request_context():
         url = url_for(
@@ -84,7 +89,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         payload = dict(
             uri='http://example.com/test.pdf',
             bucket_id=str(bucket.id),
-            deposit_id=cds_depid,
+            deposit_id=video_1_depid,
             key='test.pdf',
             sse_channel=sse_channel
         )
@@ -125,7 +130,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
                             u'uri_origin': u'http://example.com/test.pdf',
                             u'_event_id': str(tags['_event_id']),
                         },
-                        'deposit_id': cds_depid,
+                        'deposit_id': video_1_depid,
                         'percentage': percentage,
                         'version_id': str(obj.version_id),
                         'size': size,
@@ -133,7 +138,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
                     }
                 }
             }
-        assert mock_sse.call_count == 4
+        assert mock_sse.call_count == 7
         mock_sse.assert_any_call(
             data=set_data(
                 states.STARTED,
@@ -150,7 +155,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
             channel=u'mychannel',
             type_='file_download'
         )
-        deposit = cds_resolver([cds_depid])[0]
+        deposit = video_resolver([video_1_depid])[0]
         mock_sse.assert_any_call(
             channel='mychannel',
             data={
@@ -158,7 +163,7 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
                 'meta': {
                     'payload': {
                         'event_id': str(tags['_event_id']),
-                        'deposit_id': cds_depid,
+                        'deposit_id': video_1_depid,
                         'deposit': deposit,
                     }
                 }
@@ -167,10 +172,9 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
         )
 
         # check ElasticSearch is called
-        args, kwargs = mock_indexer.call_args
-        (arg,) = args
-        deposit_to_index = next(arg)
-        assert str(deposit.id) == deposit_to_index
+        ids = set(get_indexed_records_from_mock(mock_indexer))
+        assert video_1_id in ids
+        assert project_id in ids
         assert deposit['_deposit']['state'] == {
             u'file_download': states.SUCCESS}
 
@@ -195,10 +199,15 @@ def test_download_receiver(api_app, db, bucket, cds_depid, access_token,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
+def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
                                     access_token, json_headers, mock_sorenson,
                                     online_video, webhooks):
     """Test AVCWorkflow receiver."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    video_1_id = str(video_1.id)
+    project_id = str(project.id)
+
     db.session.add(bucket)
     bucket_id = bucket.id
     video_size = 5510872
@@ -220,7 +229,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         payload = dict(
             uri=online_video,
             bucket_id=str(bucket.id),
-            deposit_id=cds_depid,
+            deposit_id=video_1_depid,
             key=master_key,
             sse_channel=sse_channel,
             sleep_time=0,
@@ -255,7 +264,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert all([key in tags for key in metadata_keys])
 
         # Check metadata patch
-        recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
+        recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
         record = Record.get_record(recid)
         assert 'extracted_metadata' in record['_deposit']
         assert all([key in str(record['_deposit']['extracted_metadata'])
@@ -273,7 +282,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
             assert master.file
             assert master.file.size == video_size
 
-        video = video_resolver([cds_depid])[0]
+        video = video_resolver([video_1_depid])[0]
         events = get_deposit_events(video['_deposit']['id'])
 
         # check deposit tasks status
@@ -329,15 +338,15 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         for message in messages:
             assert message in call_args
 
-        deposit = cds_resolver([cds_depid])[0]
+        deposit = video_resolver([video_1_depid])[0]
 
         def filter_events(call_args):
             _, x = call_args
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 1
-        _, kwargs = list_kwargs[0]
+        assert len(list_kwargs) == 20
+        _, kwargs = list_kwargs[18]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
@@ -348,10 +357,9 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         }
 
         # check ElasticSearch is called
-        args, kwargs = mock_indexer.call_args
-        (arg,) = args
-        deposit_to_index = next(arg)
-        assert str(deposit.id) == deposit_to_index
+        ids = set(get_indexed_records_from_mock(mock_indexer))
+        assert video_1_id in ids
+        assert project_id in ids
         assert deposit['_deposit']['state'] == {
             'file_download': states.SUCCESS,
             'file_video_metadata_extraction': states.SUCCESS,
@@ -378,7 +386,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
         assert bucket.size == 0
 
         records = RecordMetadata.query.all()
-        assert len(records) == 1
+        assert len(records) == 3
         record = records[0]
         events = get_deposit_events(record.json['_deposit']['id'])
 
@@ -395,9 +403,14 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, cds_depid,
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_local_file_pass(
-        api_app, db, bucket, cds_depid, access_token, json_headers,
+        api_app, db, bucket, api_project, access_token, json_headers,
         mock_sorenson, online_video, webhooks, local_file):
     """Test AVCWorkflow receiver."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    video_1_id = str(video_1.id)
+    project_id = str(project.id)
+
     db.session.add(bucket)
     bucket_id = bucket.id
     video_size = 5510872
@@ -419,7 +432,7 @@ def test_avc_workflow_receiver_local_file_pass(
         payload = dict(
             uri=online_video,
             bucket_id=str(bucket.id),
-            deposit_id=cds_depid,
+            deposit_id=video_1_depid,
             key=master_key,
             sse_channel=sse_channel,
             sleep_time=0,
@@ -454,7 +467,7 @@ def test_avc_workflow_receiver_local_file_pass(
         assert all([key in tags for key in metadata_keys])
 
         # Check metadata patch
-        recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
+        recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
         record = Record.get_record(recid)
         assert 'extracted_metadata' in record['_deposit']
         assert all([key in str(record['_deposit']['extracted_metadata'])
@@ -472,7 +485,7 @@ def test_avc_workflow_receiver_local_file_pass(
             assert master.file
             assert master.file.size == video_size
 
-        video = video_resolver([cds_depid])[0]
+        video = video_resolver([video_1_depid])[0]
         events = get_deposit_events(video['_deposit']['id'])
 
         # check deposit tasks status
@@ -523,15 +536,15 @@ def test_avc_workflow_receiver_local_file_pass(
         for message in messages:
             assert message in call_args
 
-        deposit = cds_resolver([cds_depid])[0]
+        deposit = video_resolver([video_1_depid])[0]
 
         def filter_events(call_args):
             _, x = call_args
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 1
-        _, kwargs = list_kwargs[0]
+        assert len(list_kwargs) == 18
+        _, kwargs = list_kwargs[16]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
@@ -542,10 +555,9 @@ def test_avc_workflow_receiver_local_file_pass(
         }
 
         # check ElasticSearch is called
-        args, kwargs = mock_indexer.call_args
-        (arg,) = args
-        deposit_to_index = next(arg)
-        assert str(deposit.id) == deposit_to_index
+        ids = set(get_indexed_records_from_mock(mock_indexer))
+        assert video_1_id in ids
+        assert project_id in ids
         assert deposit['_deposit']['state'] == {
             'file_video_metadata_extraction': states.SUCCESS,
             'file_video_extract_frames': states.SUCCESS,
@@ -571,7 +583,7 @@ def test_avc_workflow_receiver_local_file_pass(
         assert bucket.size == 0
 
         records = RecordMetadata.query.all()
-        assert len(records) == 1
+        assert len(records) == 3
         record = records[0]
         events = get_deposit_events(record.json['_deposit']['id'])
 

@@ -27,8 +27,10 @@
 from __future__ import absolute_import, print_function
 
 from invenio_deposit.signals import post_action
+from invenio_indexer.signals import before_record_index
 
 from .receivers import index_deposit_after_publish
+from .indexer import cdsdeposit_indexer_receiver
 
 
 class CDSDepositApp(object):
@@ -49,3 +51,5 @@ class CDSDepositApp(object):
         """Register CDS Deposit signals."""
         post_action.connect(index_deposit_after_publish,
                             sender=app, weak=False)
+        before_record_index.connect(
+            cdsdeposit_indexer_receiver, sender=app, weak=False)

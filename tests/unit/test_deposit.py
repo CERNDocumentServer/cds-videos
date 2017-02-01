@@ -28,29 +28,16 @@ from __future__ import absolute_import, print_function
 
 import json
 
-import mock
 import pytest
 
-from copy import deepcopy
-from cds.modules.deposit.api import CDSDeposit, cds_resolver
-from cds.modules.deposit.permissions import can_edit_deposit
+from cds.modules.deposit.api import Project
 from cds.modules.deposit.views import to_links_js
-from celery import states
-from flask import current_app, g, request, url_for
-from flask_login import login_user
-from flask_principal import Identity
+from flask import current_app, request, url_for
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
-from invenio_db import db
-from jsonschema.exceptions import ValidationError
-from six import BytesIO
-
-from helpers import mock_current_user
 
 from cds.modules.deposit.loaders import project_loader, video_loader
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
-from cds.modules.webhooks.status import get_deposit_events, \
-    get_tasks_status_by_task
 
 
 def test_deposit_link_factory_has_bucket(app, db, es, users, location,
@@ -95,21 +82,10 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
         )
 
 
-def test_cds_deposit(es, location, deposit_metadata):
-    """Test CDS deposit creation."""
-    deposit = CDSDeposit.create(deposit_metadata)
-    id_ = deposit.id
-    db.session.expire_all()
-    deposit = CDSDeposit.get_record(id_)
-    assert deposit['_deposit']['state'] == {}
-    assert len(cds_resolver([deposit['_deposit']['id']])) == 1
-    assert '_buckets' in deposit
-
-
 def test_links_filter(es, location, deposit_metadata):
     """Test Jinja to_links_js filter."""
     assert to_links_js(None) == []
-    deposit = CDSDeposit.create(deposit_metadata)
+    deposit = Project.create(deposit_metadata)
     links = to_links_js(deposit.pid, deposit)
     assert all([key in links for key in ['self', 'edit', 'publish', 'bucket',
                'files', 'html', 'discard']])
@@ -128,20 +104,6 @@ def test_links_filter(es, location, deposit_metadata):
         data = client.get(links_type['html']).get_data().decode('utf-8')
         for key in links_type:
             assert links_type[key] in data
-
-
-def test_permissions(es, location, deposit_metadata):
-    """Test deposit permissions."""
-    deposit = CDSDeposit.create(deposit_metadata)
-    deposit.commit()
-    user = User(email='user@cds.cern', password='123456', active=True)
-    g.identity = Identity(user.id)
-    db.session.add(user)
-    db.session.commit()
-    login_user(user, force=True)
-    assert not can_edit_deposit(deposit)
-    deposit['_deposit']['owners'].append(user.id)
-    assert can_edit_deposit(deposit)
 
 
 def test_validation_missing_fields(es, location):
@@ -179,156 +141,3 @@ def test_validation_unknown_fields(es, location):
         error_body = json.loads(errors.value.get_body())
         assert error_body['status'] == 400
         assert error_body['errors'][0]['field'] == 'desc'
-
-
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_deposit_events_on_download(api_app, webhooks, db, cds_depid, bucket,
-                                    access_token, json_headers):
-    """Test deposit events."""
-    db.session.add(bucket)
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token)
-
-    with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer, \
-            api_app.test_client() as client:
-        file_size = 1024 * 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            bucket_id=str(bucket.id),
-            deposit_id=cds_depid,
-            key='test.pdf')
-
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 201
-
-        file_size = 1024 * 1024 * 6
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 201
-
-        deposit = cds_resolver([cds_depid])[0]
-
-        events = get_deposit_events(deposit['_deposit']['id'])
-
-        assert len(events) == 2
-        assert events[0].payload['deposit_id'] == cds_depid
-        assert events[1].payload['deposit_id'] == cds_depid
-
-        status = get_tasks_status_by_task(events)
-        assert status == {'file_download': states.SUCCESS}
-
-        # check if the states are inside the deposit
-        res = client.get(
-            url_for('invenio_deposit_rest.depid_item', pid_value=cds_depid,
-                    access_token=access_token),
-            headers=json_headers)
-        assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
-
-        # check the record is inside the indexer queue
-        args, kwargs = mock_indexer.call_args
-        (arg,) = args
-        deposit_to_index = next(arg)
-        assert str(deposit.id) == deposit_to_index
-
-
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_deposit_events_on_workflow(webhooks, api_app, db, cds_depid, bucket,
-                                    access_token, json_headers,
-                                    workflow_receiver):
-    """Test deposit events."""
-    receiver_id = workflow_receiver
-    db.session.add(bucket)
-
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id=receiver_id,
-            access_token=access_token)
-
-    with api_app.test_client() as client:
-        # run workflow
-        resp = client.post(url, headers=json_headers, data=json.dumps({}))
-        assert resp.status_code == 500
-        # run again workflow
-        resp = client.post(url, headers=json_headers, data=json.dumps({}))
-        assert resp.status_code == 500
-        # resolve deposit and events
-        deposit = cds_resolver([cds_depid])[0]
-        events = get_deposit_events(deposit['_deposit']['id'])
-        # check events
-        assert len(events) == 2
-        assert events[0].payload['deposit_id'] == cds_depid
-        assert events[1].payload['deposit_id'] == cds_depid
-        # check computed status
-        status = get_tasks_status_by_task(events)
-        assert status['add'] == states.SUCCESS
-        assert status['failing'] == states.FAILURE
-
-        # check every task for every event
-        for event in events:
-            result = event.receiver._deserialize_result(event)
-            assert result.parent.status == states.SUCCESS
-            assert result.children[0].status == states.FAILURE
-            assert result.children[1].status == states.SUCCESS
-
-        # check if the states are inside the deposit
-        res = client.get(
-            url_for('invenio_deposit_rest.depid_item', pid_value=cds_depid,
-                    access_token=access_token),
-            headers=json_headers)
-        assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['add'] == states.SUCCESS
-        assert data['_deposit']['state']['failing'] == states.FAILURE
-
-
-def test_deposit_partial_validation(
-        app, db, cds_jsonresolver_required_fields, deposit_metadata, location):
-    """Test project create/publish with partial validation/validation."""
-    # create a deposit without a required field
-    if 'fuu' in deposit_metadata:
-        del deposit_metadata['fuu']
-    deposit = CDSDeposit.create(deposit_metadata)
-    id_ = deposit.id
-    db.session.expire_all()
-    deposit = CDSDeposit.get_record(id_)
-    assert deposit is not None
-    # if publish, then generate an validation error
-    with pytest.raises(ValidationError):
-        deposit.publish()
-    # patch deposit
-    patch = [{
-        'op': 'replace',
-        'path': '/category',
-        'value': 'bar',
-    }]
-    id_ = deposit.id
-    db.session.expire_all()
-    deposit = CDSDeposit.get_record(id_)
-    deposit.patch(patch).commit()
-    # update deposit
-    copy = deepcopy(deposit)
-    copy['category'] = 'qwerty'
-    id_ = deposit.id
-    db.session.expire_all()
-    deposit = CDSDeposit.get_record(id_)
-    deposit.update(copy)
-    deposit.commit()
