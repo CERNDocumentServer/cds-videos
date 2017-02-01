@@ -131,13 +131,32 @@ class CDSDeposit(Deposit):
     def __init__(self, *args, **kwargs):
         """Init."""
         super(CDSDeposit, self).__init__(*args, **kwargs)
+        self._update_tasks_status()
+        self['_files'] = self._get_files_dump()
+
+    @property
+    def _bucket(self):
+        """Get the bucket object."""
+        records_buckets = RecordsBuckets.query.filter_by(
+            record_id=self.id).first()
+        if records_buckets:
+            return records_buckets.bucket
+
+    def _get_files_dump(self):
+        """Get files without create the record_bucket."""
+        bucket = self._bucket
+        if bucket:
+            return self.files_iter_cls(
+                self, bucket=bucket,
+                file_cls=self.file_cls).dumps()
+        return []
 
     @classmethod
     def get_record(cls, id_, with_deleted=False):
         """Get record instance."""
         deposit = super(CDSDeposit, cls).get_record(
             id_=id_, with_deleted=with_deleted)
-        deposit['_files'] = deposit.files.dumps()
+        #  deposit['_files'] = deposit._get_files_dump()
         return deposit
 
     @classmethod
@@ -145,8 +164,8 @@ class CDSDeposit(Deposit):
         """Get records."""
         deposits = super(CDSDeposit, cls).get_records(
             ids=ids, with_deleted=with_deleted)
-        for deposit in deposits:
-            deposit['_files'] = deposit.files.dumps()
+        #  for deposit in deposits:
+        #      deposit['_files'] = deposit._get_files_dump()
         return deposits
 
     @classmethod
@@ -230,6 +249,27 @@ class CDSDeposit(Deposit):
         prefix = current_app.config['DEPOSIT_JSONSCHEMAS_PREFIX']
         schema = cls._schema[len(prefix):]
         return current_jsonschemas.path_to_url(schema)
+
+    def dumps(self, **kwargs):
+        """Return pure Python dictionary with record metadata."""
+        self._update_tasks_status()
+        data = super(CDSDeposit, self).dumps(**kwargs)
+        return data
+
+    def replace_refs(self):
+        """Replace refs."""
+        self._update_tasks_status()
+        data = super(CDSDeposit, self).replace_refs()
+        return data
+
+    def _update_tasks_status(self):
+        """Update tasks status."""
+        if '_deposit' in self:
+            self['_deposit']['state'] = self._current_tasks_status()
+
+    def _current_tasks_status(self):
+        """."""
+        return {}
 
 
 def project_resolver(project_id):
@@ -369,10 +409,8 @@ class Project(CDSDeposit):
         self._update_videos(refs_old, refs_new)
 
         # Return project with generated report number
-        videos_new = video_resolver(self.video_ids)
-        project_modified = videos_new[0].project
-        assert project_modified.report_number
-        self.report_number = project_modified.report_number
+        self = Project(self.model.json, self.model)
+        assert self.report_number
 
         # publish project
         return super(Project, self).publish(pid=pid, id_=id_)

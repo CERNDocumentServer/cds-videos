@@ -40,7 +40,7 @@ from functools import partial
 from PIL import Image
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError
-from celery import Task, shared_task, current_app as celery_app, chain
+from celery import Task, shared_task, current_app as celery_app
 from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
 
 from invenio_db import db
@@ -54,7 +54,7 @@ from sqlalchemy.orm.exc import ConcurrentModificationError
 from invenio_indexer.api import RecordIndexer
 from werkzeug.utils import import_string
 
-from ..deposit.api import video_resolver, CDSDeposit
+from ..deposit.api import video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
 
 
@@ -599,12 +599,9 @@ def get_patch_tasks_status(deposit):
     return patches
 
 
-@shared_task
-def spread_deposit_update(id_=None, event_id=None, sse_channel=None):
+def spread_deposit_update(deposit=None, event_id=None, sse_channel=None):
     """If record is updated correctly, spread the news."""
-    if id_:
-        # get_record
-        deposit = CDSDeposit.get_record(id_)
+    if deposit:
         # send a message to SSE
         sse_publish_event(
             channel=sse_channel, type_='update_deposit', state=SUCCESS,
@@ -616,7 +613,7 @@ def spread_deposit_update(id_=None, event_id=None, sse_channel=None):
                 }
             })
         # send deposit to the reindex queue
-        RecordIndexer().bulk_index(iter([id_]))
+        RecordIndexer().bulk_index(iter([str(deposit.id)]))
 
 
 def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
@@ -625,26 +622,11 @@ def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
     if deposit_id:
         # get video
         video = video_resolver([deposit_id])[0]
-        # create the patch for video
-        video_patch = get_patch_tasks_status(deposit=video)
-        project_patch = None
-        project_id = None
-        if video.project:
-            project_patch = get_patch_tasks_status(deposit=video.project)
-            project_id = video.project.id
-        # update record
-        if video_patch:
-            validator = 'invenio_records.validators.PartialDraft4Validator'
-            chain(
-                update_record.s(recid=str(video.id), patch=video_patch,
-                                validator=validator),
-                spread_deposit_update.s(event_id=str(event_id),
-                                        sse_channel=sse_channel),
-                update_record.si(recid=str(project_id),
-                                 patch=project_patch, validator=validator),
-                spread_deposit_update.s(event_id=str(event_id),
-                                        sse_channel=sse_channel)
-            ).apply_async()
+        # spread the news
+        spread_deposit_update(deposit=video, event_id=str(event_id),
+                              sse_channel=sse_channel),
+        spread_deposit_update(deposit=video.project, event_id=str(event_id),
+                              sse_channel=sse_channel)
 
 
 def dispose_object_version(object_version):
