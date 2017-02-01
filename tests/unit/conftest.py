@@ -37,7 +37,7 @@ import requests
 import mock
 import pytest
 from cds.factory import create_app
-from cds.modules.deposit.api import CDSDeposit
+from cds.modules.deposit.api import Project
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from celery import chain
 from celery import group
@@ -241,7 +241,7 @@ def cds_depid(api_app, users, db, bucket, deposit_metadata):
     record.update(deposit_metadata)
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
-        deposit = CDSDeposit.create(record)
+        deposit = Project.create(record)
         deposit.commit()
         db.session.commit()
     return deposit['_deposit']['id']
@@ -360,6 +360,22 @@ def cds_jsonresolver_required_fields(app):
         resolver)
     app.extensions['invenio-records'].loader_cls = json_loader_factory(
         resolver)
+
+
+@pytest.yield_fixture()
+def api_cds_jsonresolver_required_fields(api_app):
+    """Configure a jsonresolver for cds-dojson."""
+    resolver = JSONResolver(plugins=['demo.json_resolver_required_fields'])
+    backup_ref = api_app.extensions['invenio-records'].ref_resolver_cls
+    backup_json = api_app.extensions['invenio-records'].loader_cls
+    api_app.extensions[
+        'invenio-records'].ref_resolver_cls = ref_resolver_factory(
+        resolver)
+    api_app.extensions['invenio-records'].loader_cls = json_loader_factory(
+        resolver)
+    yield api_app
+    api_app.extensions['invenio-records'].loader_cls = backup_json
+    api_app.extensions['invenio-records'].ref_resolver_cls = backup_ref
 
 
 @pytest.fixture()

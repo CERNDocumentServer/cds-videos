@@ -36,10 +36,13 @@ from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
 from six import BytesIO
+from cds.modules.deposit.api import video_resolver
+
+from helpers import get_indexed_records_from_mock
 
 
 def check_restart_avc_workflow(api_app, event_id, access_token,
-                               json_headers, data):
+                               json_headers, data, video_id):
     """Try to restart AVC workflow via REST API."""
     with api_app.test_request_context():
         url = url_for(
@@ -73,13 +76,14 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     assert mock_sse.called is True
 
     # check elasticsearch
-    # note: false because the delete doesn't clean event info inside the
-    # deposit and test is in EAGER mode.
-    assert mock_indexer.called is False
+    assert mock_indexer.called is True
+    ids = get_indexed_records_from_mock(mock_indexer)
+    assert len(ids) == 10
+    assert set(ids) == set([video_id])
 
 
 def check_video_transcode(api_app, event_id, access_token,
-                          json_headers, data):
+                          json_headers, data, video_id):
     """Try to delete transcoded file via REST API."""
     # DELETE FIRST TRANSCODED FILE
     task_id = data['global_status'][1][1]['file_transcode']['id']
@@ -147,7 +151,7 @@ def check_video_transcode(api_app, event_id, access_token,
 
 
 def check_video_frames(api_app, event_id, access_token,
-                       json_headers, data):
+                       json_headers, data, video_id):
     """Try to delete video frames via REST API."""
     task_id = data['global_status'][1][0]['file_video_extract_frames']['id']
     with api_app.test_request_context():
@@ -180,7 +184,7 @@ def check_video_frames(api_app, event_id, access_token,
 
 
 def check_video_download(api_app, event_id, access_token,
-                         json_headers, data):
+                         json_headers, data, video_id):
     """Try to delete downloaded files via REST API."""
     task_id = data['global_status'][0][0]['file_download']['id']
     with api_app.test_request_context():
@@ -213,7 +217,7 @@ def check_video_download(api_app, event_id, access_token,
 
 
 def check_video_metadata_extraction(api_app, event_id, access_token,
-                                    json_headers, data):
+                                    json_headers, data, video_id):
     """Try to delete metadata extraction via REST API."""
     task_id = data['global_status'][0][1][
         'file_video_metadata_extraction']['id']
@@ -294,8 +298,9 @@ def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     event_id = data['tags']['_event_id']
+    video_id = str(video_resolver([cds_depid])[0].id)
     ###
-    checker(api_app, event_id, access_token, json_headers, data)
+    checker(api_app, event_id, access_token, json_headers, data, video_id)
 
 
 @mock.patch('flask_login.current_user', mock_current_user)

@@ -31,12 +31,16 @@ import pytest
 import uuid
 import json
 
+from flask import g
+from flask_principal import Identity
 from invenio_db import db
 from copy import deepcopy
 from flask_security import login_user
+from cds.modules.deposit.permissions import can_edit_deposit
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
-                                     is_deposit, record_unbuild_url)
+                                     is_deposit, record_unbuild_url,
+                                     project_resolver)
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -46,7 +50,8 @@ from cds.modules.webhooks.status import get_deposit_events
 from invenio_records.models import RecordMetadata
 from invenio_webhooks.models import Event
 
-from helpers import workflow_receiver_video_failing
+from helpers import workflow_receiver_video_failing, \
+    get_indexed_records_from_mock
 
 
 def test_is_deposit():
@@ -467,10 +472,9 @@ def test_project_publish_with_workflow(app, users, project, webhooks, es):
 
         # check video and project are indexed
         assert mock_indexer.called is True
-        myid = next(list(mock_indexer.mock_calls[0])[1][0])
-        assert video_1_id == myid
-        myid = next(list(mock_indexer.mock_calls[1])[1][0])
-        assert project_id == myid
+        ids = get_indexed_records_from_mock(mock_indexer)
+        assert video_1_id == ids[0]
+        assert project_id == ids[1]
     db.session.commit()
 
     # check tasks status is propagated to video and project
@@ -513,3 +517,68 @@ def test_project_record_schema(app, db, project):
     """Test project record schema."""
     (project, video_1, video_2) = project
     assert project.record_schema == Project.get_record_schema()
+
+
+def test_project_deposit(es, location, deposit_metadata):
+    """Test CDS deposit creation."""
+    deposit = Project.create(deposit_metadata)
+    id_ = deposit.id
+    db.session.expire_all()
+    deposit = Project.get_record(id_)
+    assert deposit['_deposit']['state'] == {}
+    assert project_resolver(deposit['_deposit']['id']) is not None
+    assert '_buckets' in deposit
+
+
+def test_project_permissions(es, location, deposit_metadata):
+    """Test deposit permissions."""
+    deposit = Project.create(deposit_metadata)
+    deposit.commit()
+    user = User(email='user@cds.cern', password='123456', active=True)
+    g.identity = Identity(user.id)
+    db.session.add(user)
+    db.session.commit()
+    login_user(user)
+    assert not can_edit_deposit(deposit)
+    deposit['_deposit']['owners'].append(user.id)
+    assert can_edit_deposit(deposit)
+
+
+def test_deposit_partial_validation(
+        api_app, db, api_cds_jsonresolver_required_fields, deposit_metadata,
+        location):
+    """Test project create/publish with partial validation/validation."""
+    video_1 = deepcopy(deposit_metadata)
+    # create a deposit without a required field
+    if 'fuu' in deposit_metadata:
+        del deposit_metadata['fuu']
+    with api_app.test_request_context():
+        project = Project.create(deposit_metadata)
+        video_1['_project_id'] = project['_deposit']['id']
+        video_1 = Video.create(video_1)
+        video_1.commit()
+        id_ = project.id
+        db.session.expire_all()
+        project = Project.get_record(id_)
+        assert project is not None
+        # if publish, then generate an validation error
+        with pytest.raises(ValidationError):
+            project.publish()
+        # patch project
+        patch = [{
+            'op': 'replace',
+            'path': '/category',
+            'value': 'bar',
+        }]
+        id_ = project.id
+        db.session.expire_all()
+        project = Project.get_record(id_)
+        project.patch(patch).commit()
+        # update project
+        copy = deepcopy(project)
+        copy['category'] = 'qwerty'
+        id_ = project.id
+        db.session.expire_all()
+        project = Project.get_record(id_)
+        project.update(copy)
+        project.commit()

@@ -249,3 +249,12 @@ def new_project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
     db.session.commit()
     sleep(2)
     return project, video_1, video_2
+
+
+def get_indexed_records_from_mock(mock_indexer):
+    """Get indexed records from mock."""
+    indexed = []
+    for call in mock_indexer.call_args_list:
+        ((arg, ), _) = call
+        indexed.append(next(arg))
+    return indexed
