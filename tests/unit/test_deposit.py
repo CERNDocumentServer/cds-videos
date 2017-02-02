@@ -30,11 +30,13 @@ import json
 
 import pytest
 
-from cds.modules.deposit.api import Project
+from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
 from flask import current_app, request, url_for
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
+from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
+from invenio_files_rest.models import ObjectVersion
 
 from cds.modules.deposit.loaders import project_loader, video_loader
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
@@ -141,3 +143,43 @@ def test_validation_unknown_fields(es, location):
         error_body = json.loads(errors.value.get_body())
         assert error_body['status'] == 400
         assert error_body['errors'][0]['field'] == 'desc'
+
+
+def test_publish_process_files(app, db, location):
+    """Test _process_files changing master tags on bucket snapshots."""
+    deposit = CDSDeposit.create(dict(date='1/2/3', category='cat', type='type',
+                                title=dict(title='title'),
+                                report_number=dict(report_number='1234'),
+                                videos=[]))
+    # deposit has no files, so _process_files must yield None
+    with deposit._process_files(None, dict()) as data:
+        assert data is None
+    bucket = deposit.files.bucket
+    master_obj = ObjectVersion.create(
+        bucket=bucket,
+        key='master',
+        _file_id=FileInstance.create())
+    slave_obj_1 = ObjectVersion.create(
+        bucket=bucket,
+        key='slave1',
+        _file_id=FileInstance.create())
+    slave_obj_2 = ObjectVersion.create(
+        bucket=bucket,
+        key='slave2',
+        _file_id=FileInstance.create())
+    ObjectVersionTag.create(slave_obj_1, 'master', master_obj.version_id)
+    ObjectVersionTag.create(slave_obj_1, 'type', 'video')
+    ObjectVersionTag.create(slave_obj_2, 'master', master_obj.version_id)
+    ObjectVersionTag.create(slave_obj_2, 'type', 'video')
+    assert Bucket.query.count() == 1
+    with deposit._process_files(None, dict()):
+        # the snapshot bucket must have been created
+        assert Bucket.query.count() == 2
+        for bucket in Bucket.query.all():
+            master_version = [str(obj.version_id) for obj in bucket.objects
+                              if 'master' not in obj.get_tags()][0]
+            # the master of each slave must be in the same bucket
+            for obj in bucket.objects:
+                if str(obj.version_id) != master_version:
+                    assert obj.get_tags()['master'] == master_version
+                    assert obj.get_tags()['type'] == 'video'
