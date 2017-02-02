@@ -31,13 +31,14 @@ import uuid
 
 import datetime
 import itertools
+from contextlib import contextmanager
 
 import arrow
 from celery import states
 from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
-from invenio_db import db
 
+from invenio_db import db
 from invenio_deposit.api import Deposit, preserve, has_status
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag)
@@ -48,6 +49,7 @@ from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
+from sqlalchemy import func
 from werkzeug.local import LocalProxy
 from invenio_records.api import Record
 
@@ -104,7 +106,7 @@ class CDSFileObject(FileObject):
         for slave in ObjectVersion.query.join(ObjectVersion.tags).filter(
                 ObjectVersionTag.key == 'master',
                 ObjectVersionTag.value == str(self.obj.version_id)
-                ).order_by(ObjectVersion.key):
+                ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
             master_dump.setdefault(
                 slave.get_tags()['type'], []).append(_dumps(slave))
         # Sort slaves by key within their lists
@@ -288,6 +290,34 @@ class CDSDeposit(Deposit):
     def _current_tasks_status(self):
         """."""
         return {}
+
+    @contextmanager
+    def _process_files(self, record_id, data):
+        """Snapshot bucket and add files in record during first publishing."""
+        if self.files:
+            assert not self.files.bucket.locked
+            self.files.bucket.locked = True
+            snapshot = self.files.bucket.snapshot(lock=True)
+            # dict of version_ids in original bucket to version_ids in
+            # snapshot bucket for the each file
+            old_to_new_version = {str(self.files[obj.key]['version_id']):
+                                  str(obj.version_id)
+                                  for obj in snapshot.objects
+                                  if 'master' not in obj.get_tags()}
+            # list of tags with 'master' key
+            slave_tags = [tag for obj in snapshot.objects for tag in obj.tags
+                          if tag.key == 'master']
+            # change master of slave videos to new master object versions
+            for tag in slave_tags:
+                tag.value = old_to_new_version.get(tag.value)
+            db.session.add_all(slave_tags)
+            data['_files'] = self.files.dumps(bucket=snapshot.id)
+            yield data
+            db.session.add(RecordsBuckets(
+                record_id=record_id, bucket_id=snapshot.id
+            ))
+        else:
+            yield
 
 
 def project_resolver(project_id):
