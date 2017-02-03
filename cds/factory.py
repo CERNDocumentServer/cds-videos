@@ -55,7 +55,7 @@ using the environment variable ``APP_STATIC_FOLDER``
 """
 
 create_celery = create_app_factory(
-    'cds_celery',
+    'cds',
     config_loader=conf_loader,
     extension_entry_points=['invenio_base.apps'],
     blueprint_entry_points=['invenio_base.blueprints'],
@@ -66,7 +66,7 @@ create_celery = create_app_factory(
 """Create CLI/Celery application."""
 
 create_api = create_app_factory(
-    'cds_api',
+    'cds',
     config_loader=conf_loader,
     blueprint_entry_points=['invenio_base.api_blueprints'],
     extension_entry_points=['invenio_base.api_apps'],
