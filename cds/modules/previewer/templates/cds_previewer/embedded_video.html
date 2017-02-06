@@ -27,16 +27,56 @@
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_previewer_theoplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-  
+  {% assets "cds_previewer_theoplayer_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+  {% endassets %}
+
   <script type="text/javascript">
     theoplayer = {
       configuration : {
         libraryLocation : '/static/js/cds_previewer/theoplayer/',
         styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css',
-        socialSharing : 'http://cds.cern.ch'+'{{file_url}}',
+        socialSharing : {
+          mail : {
+            body : 'http://cds.cern.ch'+'{{file_url}}'
+          },
+          facebook :  {
+            href : 'http://cds.cern.ch'+'{{file_url}}'
+          },
+          twitter : {
+            url : 'http://cds.cern.ch'+'{{file_url}}'
+          },
+          permalink : {
+            url : 'http://cds.cern.ch'+'{{file_url}}'
+          },
+          iframe : {
+            url : 'http://cds.cern.ch'+'{{file_url}}'
+          }
+        }
       }
     };
+
+    $(window).bind('load', function() {
+      var elem = $('<div class="theoplayer-sharing-button" role="button"><b>&lt;/&gt;</b></div>');
+      var link = $('<div class="theoplayer-sharing-permalink" style="top: 150px"><div class="theoplayer-sharing-permalink-icon" role="button"><b>&lt;/&gt;</b></div></div>');
+      var inputFld = $('<input class="theoplayer-sharing-permalink-content" type="text" readonly="" value="&lt;iframe src=&quot;{{request.base_url}}&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; width=&quot;100%&quot; height=&quot;100%&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;">');
+      var closeBtn = $('<div class="theoplayer-sharing-permalink-button" role="button">×</div>');
+      link.append(inputFld);
+      link.append(closeBtn);
+      inputFld.click(function() {
+        this.select();
+      });
+      closeBtn.click(function() {
+        link.hide();
+      });
+      link.hide();
+      $('.theoplayer-sharing-menu').append(elem);
+      $('.theoplayer-sharing-permalink').after(link);
+      elem.click(function() {
+        link.toggle();
+      });
+    });
     </script>
 {%- endblock javascript %}
 
