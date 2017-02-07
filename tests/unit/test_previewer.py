@@ -100,3 +100,23 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
     # Only preview tag
     ObjectVersionTag.create(obj, 'preview', True)
     assert_preview(expected=filename_1)
+
+
+def test_legacy_embed(previewer_app, db, project, video):
+    """Test backwards-compatibility with legacy embed URL for videos."""
+    project, video_1, _ = project
+    filename = 'test.mp4'
+    bucket_id = video_1['_buckets']['deposit']
+    obj = ObjectVersion.create(bucket=bucket_id, key=filename,
+                               stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'preview', True)
+    video_1 = video_1.publish()
+    assert video_1.status == 'published'
+
+    with previewer_app.test_client() as client:
+        res = client.get('/video/{0}'.format(video_1.report_number))
+        assert res.location.endswith(url_for(
+            'invenio_records_ui.recid_embed',
+            pid_value=video_1['recid'],
+            filename='',
+        ))
