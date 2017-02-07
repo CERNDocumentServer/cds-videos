@@ -71,11 +71,17 @@ current_jsonschemas = LocalProxy(
 class CDSFileObject(FileObject):
     """Wrapper for files."""
 
+    @classmethod
+    def _link(cls, bucket_id, key, _external=True):
+        return url_for('invenio_files_rest.object_api',
+                       bucket_id=bucket_id, key=key, _external=_external)
+
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
         def _dumps(obj):
             return {
                 'key': obj.key,
+                'bucket_id': str(obj.bucket_id),
                 'version_id': str(obj.version_id),
                 'checksum': obj.file.checksum if obj.file else '',
                 'size': obj.file.size if obj.file else 0,

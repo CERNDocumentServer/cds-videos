@@ -15,7 +15,18 @@
                     "type": "object"
                 },
                 "license": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                        "license": {
+                          "type": "string"
+                        },
+                        "material": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                    }
                 },
                 "date": {
                     "type": "string"

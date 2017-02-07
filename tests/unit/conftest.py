@@ -431,14 +431,113 @@ def project_metadata(deposit_metadata):
 def video_metadata():
     """Deposit metadata."""
     metadata = {
+        u'_buckets': {u'deposit': u'14113947-0b79-40a3-b39d-3b118a6ae04c'},
+        u'_deposit': {
+            u'created_by': 1,
+            'pid': {'value': 1},
+            u'extracted_metadata': {
+                u'format': {
+                    u'bit_rate': u'679886',
+                    u'duration': u'60.140000',
+                    u'filename': u'/tmp/2f/4b/e829-29e8-4bf8-802d-ff0089707486/data',
+                    u'format_long_name': u'QuickTime / MOV',
+                    u'format_name': u'mov,mp4,m4a,3gp,3g2,mj2',
+                    u'nb_programs': 0,
+                    u'nb_streams': 2,
+                    u'probe_score': 100,
+                    u'size': u'5111048',
+                    u'start_time': u'0.000000',
+                    u'tags': {u'compatible_brands': u'qt  ',
+                              u'creation_time': u'1970-01-01T00:00:00.000000Z',
+                              u'encoder': u'Lavf52.93.0',
+                              u'major_brand': u'qt  ',
+                              u'minor_version': u'512'}},
+                u'streams': [
+                    {
+                        u'avg_frame_rate': u'288000/12019',
+                        u'bit_rate': u'612177',
+                        u'bits_per_raw_sample': u'8',
+                        u'chroma_location': u'topleft',
+                        u'codec_long_name': u'H.264 / AVC / MPEG-4 AVC / '
+                        'MPEG-4 part 10',
+                        u'codec_name': u'h264',
+                        u'codec_tag': u'0x31637661',
+                        u'codec_tag_string': u'avc1',
+                        u'codec_time_base': u'12019/576000',
+                        u'codec_type': u'video',
+                        u'coded_height': 360,
+                        u'coded_width': 640,
+                        u'color_primaries': u'smpte170m',
+                        u'color_range': u'tv',
+                        u'color_space': u'smpte170m',
+                        u'color_transfer': u'bt709',
+                        u'display_aspect_ratio': u'16:9',
+                        u'disposition': {u'attached_pic': 0,
+                                         u'clean_effects': 0,
+                                         u'comment': 0,
+                                         u'default': 1,
+                                         u'dub': 0,
+                                         u'forced': 0,
+                                         u'hearing_impaired': 0,
+                                         u'karaoke': 0,
+                                         u'lyrics': 0,
+                                         u'original': 0,
+                                         u'timed_thumbnails': 0,
+                                         u'visual_impaired': 0},
+                        u'duration': u'60.095000',
+                        u'duration_ts': 36057,
+                        u'has_b_frames': 0,
+                        u'height': 360,
+                        u'index': 0,
+                        u'is_avc': u'true',
+                        u'level': 30,
+                        u'nal_length_size': u'4',
+                        u'nb_frames': u'1440',
+                        u'pix_fmt': u'yuv420p',
+                        u'profile': u'Constrained Baseline',
+                        u'r_frame_rate': u'24/1',
+                        u'refs': 1,
+                        u'sample_aspect_ratio': u'0:1',
+                        u'start_pts': 0,
+                        u'start_time': u'0.000000',
+                        u'tags': {
+                            u'creation_time': u'1970-01-01T00:00:00.000000Z',
+                            u'handler_name': u'DataHandler',
+                            u'language': u'eng'
+                        },
+                        u'time_base': u'1/600',
+                        u'width': 640
+                    }
+                ]
+            },
+            u'id': u'0c547fefc0664ac9837d6a53a4890730',
+            u'owners': [1],
+            u'state': {'file_transcode': 'FAILURE',
+                       'file_video_extract_frames': 'SUCCESS',
+                       'file_video_metadata_extraction': 'SUCCESS'},
+            u'status': u'draft'
+        },
         "_files": [
             {
+
+                "checksum": "md5:1beda6154605f65a922fdc488c987d83",
+                "completed": True,
                 "frame": [
                     {
+                        "bucket_id": "0692a21c-6864-41cb-8424-b0f83eeb261b",
+                        "checksum": "md5:7b4ba010ee4bd84074208f634fe3a672",
+                        "completed": True,
                         "key": "frame-1.jpg",
                         "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-1.jpg?versionId=43bfc3ef-6072-4b06-a2ea-b321bdd224e1"
+                            "self": "/api/files/0692a21c-6864-41cb-8424-b0f83eeb261b/frame-1.jpg?versionId=7cc97a14-61f3-4902-a3cf-7a22af1859d8"
                         },
+                        "progress": 100,
+                        "size": 22774,
+                        "tags": {
+                            "master": "f333e846-2620-416d-92e2-8137ed772692",
+                            "type": "frame"
+                        },
+                        "version_id": "7cc97a14-61f3-4902-a3cf-7a22af1859d8"
                     },
                     {
                         "key": "frame-2.jpg",
@@ -627,6 +726,48 @@ def video_metadata():
                 ]
             }
         ],
+        'contributors': [
+            {'name': 'paperone', 'role': 'Director'},
+            {'name': 'topolino', 'role': 'Music by'},
+            {'name': 'nonna papera', 'role': 'Producer'},
+            {'name': 'pluto', 'role': 'Director'},
+            {'name': 'zio paperino', 'role': 'Producer'}
+        ],
+        'copyright': {u'url': u'www.copy.right'},
+        "license": [{
+            "license": "GPLv2",
+            "url": "http://license.cern.ch",
+        }],
+        "title": {
+            "title": "My english title"
+        },
+        "keywords": [
+            {
+                "source": "source1",
+                "value": "keyword1",
+            },
+            {
+                "source": "source2",
+                "value": "keyword2",
+            }
+        ],
+        "copyright": {
+            "holder": "CERN",
+            "url": "http://cern.ch",
+            "year": "2017"
+        },
+        'title_translations': [
+            {
+                'language': 'fr',
+                'title': 'My french title',
+            }
+        ],
+        'description_translations': [
+            {
+                'language': 'fr',
+                'value': u'france caption',
+            }
+        ],
     }
     return metadata
 
@@ -659,6 +800,13 @@ def smil_headers(app):
     """SMIL headers."""
     return [('Content-Type', 'application/smil'),
             ('Accept', 'application/smil')]
+
+
+@pytest.fixture()
+def drupal_headers(app):
+    """SMIL headers."""
+    return [('Content-Type', 'x-application/drupal'),
+            ('Accept', 'x-application/drupal')]
 
 
 @pytest.fixture()

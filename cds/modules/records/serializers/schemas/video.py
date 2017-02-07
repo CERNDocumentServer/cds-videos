@@ -25,7 +25,7 @@ from cds.modules.records.serializers.schemas.json.common import \
     StrictKeysSchema, ContributorSchema, KeywordsSchema, DescriptionSchema, \
     BucketSchema, OaiSchema, CreatorSchema, DescriptionTranslationSchema, \
     DepositSchema, TitleTranslationSchema, TitleSchema, AccessSchema, \
-    ReportNumberSchema
+    ReportNumberSchema, LicenseSchema
 from marshmallow import fields
 
 
@@ -78,7 +78,7 @@ class VideoSchema(StrictKeysSchema):
     description_translations = fields.Nested(DescriptionTranslationSchema,
                                              many=True)
     keywords = fields.Nested(KeywordsSchema, many=True)
-    license = fields.Str()
+    license = fields.Nested(LicenseSchema, many=True)
     recid = fields.Number()
     schema = fields.Str(attribute="$schema")
     title = fields.Nested(TitleSchema)
