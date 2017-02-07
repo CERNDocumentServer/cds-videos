@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -37,16 +37,15 @@ def video_resolver_sorted(ids):
 def check_deposit(dep, expected_rn):
     """Check that a deposit has properly generated its report number."""
     assert 'recid' in dep
+    assert dep.report_number == expected_rn
     stored = project_resolver(str(dep['recid'])) \
         if isinstance(dep, Project) else video_resolver([str(dep['recid'])])[0]
-    for rec in [dep, stored]:
-        assert rec.report_number
-        assert rec.report_number == expected_rn
+    assert stored.report_number == expected_rn
 
 
 def test_one_video(app, db, project):
     """Test one video."""
-    check_deposit(project[1].publish(), 'CERN-MOVIE-2016-1-1'.format())
+    check_deposit(project[1].publish(), 'CERN-MOVIE-2016-1-1')
 
 
 def test_only_videos(app, db, project):
