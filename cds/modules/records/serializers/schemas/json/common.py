@@ -25,6 +25,14 @@ from marshmallow import Schema, ValidationError, fields, validates_schema
 from marshmallow.validate import Length
 
 
+class LicenseSchema(Schema):
+    """License schema."""
+
+    license = fields.Str()
+    material = fields.Str()
+    url = fields.Str()
+
+
 class StrictKeysSchema(Schema):
     """Ensure only valid keys exists."""
 

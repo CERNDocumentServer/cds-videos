@@ -156,6 +156,10 @@ CDS_RECORDS_EXPORTFORMATS = {
         title='VTT',
         serializer='cds.modules.records.serializers:vtt_v1'
     ),
+    'drupal': dict(
+        title='Drupal',
+        serializer='cds.modules.records.serializers:drupal_v1'
+    ),
 }
 
 # Endpoints for records.
@@ -233,6 +237,8 @@ RECORDS_REST_ENDPOINTS = dict(
                                  ':smil_v1_response'),
             'text/vtt': ('cds.modules.records.serializers'
                          ':vtt_v1_response'),
+            'x-application/drupal': ('cds.modules.records.serializers'
+                                     ':drupal_v1_response'),
         },
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'

@@ -52,7 +52,18 @@
                     }
                 },
                 "license": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                        "license": {
+                          "type": "string"
+                        },
+                        "material": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                    }
                 },
                 "keywords": {
                     "type": "object",
