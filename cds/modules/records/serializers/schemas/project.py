@@ -44,7 +44,7 @@ class FileSchema(StrictKeysSchema):
     key = fields.Str()
     previewer = fields.Str()
     size = fields.Integer()
-    type = fields.Str()
+    type_ = fields.Str(attribute='type', load_from='type', dump_to='type')
     version_id = fields.Str()
 
 
@@ -65,18 +65,19 @@ class ProjectSchema(StrictKeysSchema):
     type = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
     creator = fields.Nested(CreatorSchema)
-    date = fields.Str()
     description = fields.Nested(DescriptionSchema)
     description_translations = fields.Nested(DescriptionTranslationSchema,
                                              many=True)
     keywords = fields.Nested(KeywordsSchema, many=True)
-    license = fields.Str()
+    license_ = fields.Str(attribute='licence')
     recid = fields.Number()
     schema = fields.Str(attribute='$schema')
     title = fields.Nested(TitleSchema)
     title_translations = fields.Nested(TitleTranslationSchema, many=True)
     videos = fields.Nested(ProjectVideoSchema, many=True)
 
-    category = fields.Str()
-    type = fields.Str()
+    date = fields.Str()
+    category = fields.Str(required=True)
+    type_ = fields.Str(required=True, attribute='type',
+                       load_from='type', dump_to='type')
     report_number = fields.Nested(ReportNumberSchema, many=False)

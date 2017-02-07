@@ -68,6 +68,8 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
             url_for('invenio_deposit_rest.video_list'),
             data=json.dumps({
                 '_project_id': pid,
+                'category': 'CERN',
+                'type': 'MOVIE'
             }), headers=json_headers)
         assert res.status_code == 201
         data = json.loads(res.data.decode('utf-8'))
@@ -108,7 +110,8 @@ def test_links_filter(es, location, deposit_metadata):
 
 def test_validation_missing_fields(es, location):
     """Test validation error due to missing fields."""
-    project_deposit = dict(contributors=[{}], _deposit={'id': None})
+    project_deposit = dict(contributors=[{}], _deposit={'id': None},
+                           category='CERN', type='MOVIE')
     with current_app.test_request_context(
         '/api/deposits/project', method='PUT',
             data=json.dumps(project_deposit), content_type='application/json'):
@@ -130,7 +133,8 @@ def test_validation_missing_fields(es, location):
 
 def test_validation_unknown_fields(es, location):
     """Test validation error due to unknown fields."""
-    json_data = json.dumps({'desc': {}, '_deposit': {'id': None}})
+    json_data = json.dumps({'desc': {}, '_deposit': {'id': None},
+                           'category': 'CERN', 'type': 'Movie'})
     with current_app.test_request_context(
         '/api/deposits/video', method='PUT',
             data=json_data, content_type='application/json'):
