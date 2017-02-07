@@ -100,6 +100,15 @@ Run example development server:
 
 Now you can visit http://localhost:5000/ :)
 
+In order to test the video previewer:
+
+    Add the following to your /etc/hosts file:
+    .. code-block:: console
+    $ 127.0.0.1  localhost.cern.ch
+
+Now you can visit http://localhost.cern.ch:5000/ :)
+
+
 Docker
 ------
 

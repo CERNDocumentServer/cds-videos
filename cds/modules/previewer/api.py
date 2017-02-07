@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,9 +21,21 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, abort, current_app, request
+from flask import current_app, url_for
 
 from invenio_previewer.api import PreviewFile
+
+
+class CDSPreviewRecordFile(PreviewFile):
+    """Preview deposit files implementation."""
+
+    @property
+    def uri(self):
+        """Get file download link."""
+        return url_for(
+            'invenio_records_ui.{0}_files'.format(self.pid.pid_type),
+            pid_value=self.pid.pid_value,
+            filename=self.file.key)
 
 
 class CDSPreviewDepositFile(PreviewFile):

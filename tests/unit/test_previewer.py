@@ -29,70 +29,74 @@ from __future__ import absolute_import, print_function
 import pytest
 
 from flask import url_for
+
 from werkzeug.exceptions import NotFound
 
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
-from cds.modules.previewer.views import preview_depid
+from cds.modules.records.providers import CDSRecordIdProvider
+from werkzeug.utils import import_string
 
 
-def test_previewer_on_deposit(previewer_app, db, project, video):
-    """Test video previewer on deposit."""
-    (project, video_1, video_2) = project
+@pytest.mark.parametrize(
+    'preview_func, publish, endpoint_template, ui_blueprint', [
+        ('preview_recid', True, '/record/{0}/preview/{1}', 'recid_preview'),
+        ('preview_recid_embed', True, '/record/{0}/embed/{1}', 'recid_embed'),
+        ('preview_depid', False, '/deposit/{0}/preview/video/{1}',
+         'video_preview'),
+    ])
+def test_preview_video(previewer_app, db, project, video, preview_func,
+                       publish, endpoint_template, ui_blueprint):
+    """Test record video previewing."""
+    project, video_1, _ = project
+    if publish:
+        video_1 = video_1.publish()
+        assert video_1.status == 'published'
+        pid = CDSRecordIdProvider.get(video_1['recid']).pid
+    else:
+        assert video_1.status == 'draft'
+        pid = video_1['_deposit']['id']
 
-    deposit_video_schema = ('https://cdslabs.cern.ch/schemas/'
-                            'deposits/records/video-v1.0.0.json')
-
-    # check video1 is not published
-    assert video_1['_deposit']['status'] == 'draft'
-    # and the schema is a deposit
-    assert video_1['$schema'] == deposit_video_schema
-
-    filename_1 = 'jessica_jones.mp4'
-    filename_2 = 'jessica_jones.harley_quinn'
-
+    filename_1 = 'test.mp4'
+    filename_2 = 'test.invalid'
     bucket_id = video_1['_buckets']['deposit']
-    ObjectVersion.create(bucket=bucket_id, key=filename_1,
-                         stream=open(video, 'rb'))
+    preview_func = import_string(
+        'cds.modules.previewer.views.{0}'.format(preview_func))
+
+    # Create objects
+    obj = ObjectVersion.create(bucket=bucket_id, key=filename_1,
+                               stream=open(video, 'rb'))
     ObjectVersion.create(bucket=bucket_id, key=filename_2,
                          stream=open(video, 'rb'))
-    db.session.commit()
 
-    expected_url_1 = '/deposit/{0}/preview/video/{1}'.format(
-        video_1['_deposit']['id'],
-        filename_1
-    )
+    def assert_preview(expected=None, exception=None, **query_params):
+        with previewer_app.test_request_context(query_string=query_params):
+            if exception is not None:
+                with pytest.raises(exception):
+                    preview_func(pid, video_1)
+            else:
+                if 'filename' in query_params:
+                    filename = query_params['filename']
+                    try:
+                        pid_value = pid.pid_value
+                    except AttributeError:
+                        pid_value = pid
+                    assert url_for(
+                        'invenio_records_ui.{0}'.format(ui_blueprint),
+                        pid_value=pid_value,
+                        filename=filename,
+                    ) == endpoint_template.format(pid_value, filename)
 
-    expected_url_2 = '/deposit/{0}/preview/video/{1}'.format(
-        video_1['_deposit']['id'],
-        filename_2
-    )
+                assert expected in preview_func(pid, video_1)
 
-    _url = '/?filename={0}'.format(filename_1)
-    with previewer_app.test_request_context(_url):
-        url = url_for(
-            'invenio_records_ui.video_preview',
-            pid_value=video_1['_deposit']['id'], filename=filename_1
-        )
-        assert url == expected_url_1
-
-        preview = preview_depid(video_1.pid, video_1)
-
-    assert filename_1 in preview
-
-    _url = '/?filename={0}'.format(filename_2)
-    with previewer_app.test_request_context(_url):
-        url = url_for(
-            'invenio_records_ui.video_preview',
-            pid_value=video_1['_deposit']['id'], filename=filename_2
-        )
-        assert url == expected_url_2
-
-        preview = preview_depid(video_1.pid, video_1)
-
-        assert 'Cannot preview file' in preview
-
-    _url = '/?filename={0}'.format('Doctor Strange')
-    with previewer_app.test_request_context(_url):
-        with pytest.raises(NotFound):
-            preview_depid(video_1.pid, video_1)
+    # Non-existent filename
+    assert_preview(exception=NotFound, filename='non-existent')
+    # Neither filename nor preview tag: 404
+    assert_preview(exception=NotFound)
+    # Invalid extension
+    assert_preview(expected='Cannot preview file', filename=filename_2)
+    # Only filename
+    assert_preview(expected=filename_1, filename=filename_1)
+    # Only preview tag
+    ObjectVersionTag.create(obj, 'preview', True)
+    assert_preview(expected=filename_1)

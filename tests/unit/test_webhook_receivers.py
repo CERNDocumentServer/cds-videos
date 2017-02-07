@@ -508,7 +508,7 @@ def test_avc_workflow_receiver_local_file_pass(
             assert myinfo[0] == 'file_transcode'
             assert myinfo[1].status == states.SUCCESS
 
-        # check tags
+        # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
 
         # check sse is called

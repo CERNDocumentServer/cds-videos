@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+{# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
 # Copyright (C) 2016 CERN.
@@ -21,35 +21,30 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
+#}
 
-"""Previews simple video files."""
+{%- extends "cds_previewer/previewer_video.html" %}
 
-from __future__ import absolute_import, print_function
+{%- block javascript %}
+  {{ super() }}
+  {% assets "cds_previewer_theoplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  
+  <script type="text/javascript">
+    theoplayer = {
+      configuration : {
+        libraryLocation : '/static/js/cds_previewer/theoplayer/',
+        styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css',
+        socialSharing : 'http://cds.cern.ch'+'{{file_url}}',
+      }
+    };
+    </script>
+{%- endblock javascript %}
 
-from flask import current_app, render_template
-
-previewable_extensions = ['mp4', 'webm']
-
-
-def validate(file):
-    """Validate a simple video file."""
-    return True
-
-
-def can_preview(file):
-    """Determine if the given file can be previewed."""
-    return (
-        file.is_local() and
-        (file.has_extensions('.mp4') or file.has_extensions('.webm')) and
-        validate(file))
-
-
-def preview(file):
-    """Render appropiate template with embed flag."""
-    template = 'cds_previewer/previewer_video.html'
-    return render_template(
-        template,
-        file=file,
-        file_url=file.uri,
-        css_bundles=['cds_previewer_video_css']
-    )
+{% block panel %}
+  <video class="cds-previewer-video-player theoplayer-show-social-sharing-button"
+    src="{{file_url}}"
+    controls="controls"
+    preload = "auto"
+    >
+  </video>
+{% endblock %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -22,11 +22,13 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, abort, current_app, request
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 from invenio_previewer.extensions import default
 from invenio_previewer.proxies import current_previewer
+from invenio_previewer.api import PreviewFile
 
-from .api import CDSPreviewDepositFile
+from .api import CDSPreviewDepositFile, CDSPreviewRecordFile
 
 blueprint = Blueprint(
     'cds_previewer',
@@ -36,25 +38,60 @@ blueprint = Blueprint(
 )
 
 
+def preview_recid(pid, record, template=None, **kwargs):
+    """Preview file for given record."""
+    return preview(pid, record, preview_file_class=CDSPreviewRecordFile)
+
+
 def preview_depid(pid, record, template=None, **kwargs):
     """Preview file for given deposit."""
+    return preview(pid, record, preview_file_class=CDSPreviewDepositFile)
 
-    fileobj = current_previewer.record_file_factory(
-        pid, record, request.view_args.get(
-            'filename', request.args.get('filename', type=str))
-    )
+
+def preview_recid_embed(pid, record, template=None, **kwargs):
+    """Return embedded player for video file."""
+    return preview(pid, record, preview_file_class=CDSPreviewRecordFile,
+                   previewer='cds_embed_video')
+
+
+def preview(pid, record, **kwargs):
+    """Preview file."""
+    # Get filename from request parameters
+    filename = request.view_args.get(
+        'filename', request.args.get('filename', type=str))
+
+    if not filename:
+        # Get filename from 'preview' tag
+        bucket_id = record['_buckets']['deposit']
+        obj = ObjectVersion.get_by_bucket(
+            bucket_id
+        ).join(ObjectVersion.tags).filter(
+            ObjectVersionTag.key == 'preview'
+        ).one_or_none()
+
+        if obj is None:
+            abort(404)
+
+        filename = obj.key
+
+    return _try_previewers(pid, record, filename, **kwargs)
+
+
+def _try_previewers(pid, record, filename, preview_file_class=PreviewFile,
+                    previewer=None, **kwargs):
+    """Try previewing file with all available previewers."""
+    # Get file from record
+    fileobj = current_previewer.record_file_factory(pid, record, filename)
 
     if not fileobj:
         abort(404)
 
     # Try to see if specific previewer is requested?
-    try:
-        file_previewer = fileobj['previewer']
-    except KeyError:
-        file_previewer = None
+    file_previewer = previewer or fileobj.get('previewer')
 
-    fileobj = CDSPreviewDepositFile(pid, record, fileobj)
+    fileobj = preview_file_class(pid, record, fileobj)
 
+    # Try out available previewers
     for plugin in current_previewer.iter_previewers(
             previewers=[file_previewer] if file_previewer else None):
         if plugin.can_preview(fileobj):
