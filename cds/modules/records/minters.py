@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -40,6 +40,7 @@ def recid_minter(record_uuid, data):
 
 def report_number_minter(record_uuid, data, **kwargs):
     """Mint report number."""
+    assert 'report_number' not in data
     provider = CDSReportNumberProvider.create(
         object_type='rec', object_uuid=record_uuid, data=data, **kwargs)
     data['report_number'] = dict(report_number=provider.pid.pid_value)

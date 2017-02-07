@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -36,8 +36,9 @@ import arrow
 from celery import states
 from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
+from invenio_db import db
 
-from invenio_deposit.api import Deposit, preserve
+from invenio_deposit.api import Deposit, preserve, has_status
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag)
 from invenio_pidstore.errors import PIDInvalidAction
@@ -124,6 +125,9 @@ class CDSFilesIterator(FilesIterator):
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
+    sequence_name = None
+    """Sequence identifier (`None` if not applicable)."""
+
     file_cls = CDSFileObject
 
     files_iter_cls = CDSFilesIterator
@@ -169,7 +173,7 @@ class CDSDeposit(Deposit):
         return deposits
 
     @classmethod
-    def create(cls, data, id_=None):
+    def create(cls, data, id_=None, **kwargs):
         """Create a deposit.
 
         Adds bucket creation immediately on deposit creation.
@@ -220,14 +224,22 @@ class CDSDeposit(Deposit):
         """Set new report number."""
         self['report_number'] = dict(report_number=value)
 
-    def generate_report_number(self, **kwargs):
-        """Generate a new report number.
+    def _publish_new(self, id_=None):
+        """Mint report number immediately before first publishing."""
+        id_ = id_ or uuid.uuid4()
+        self.mint_report_number(id_)
+        return super(CDSDeposit, self)._publish_new(id_)
+
+    def mint_report_number(self, id_, **kwargs):
+        """Mint a new report number and update underlying record.
 
         .. note :
             Override in deposit subclass for custom behaviour.
         """
-        self.report_number = report_number_minter(self.id, self, **kwargs)
+        if self.sequence_name:
+            report_number_minter(id_, self, **kwargs)
 
+    @has_status(status='published')
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator of this Deposit class.
 
@@ -235,7 +247,7 @@ class CDSDeposit(Deposit):
             this should return a tuple, consisting of the sequence generator
             and the ``kwargs`` without the keywords used by this method
         """
-        raise NotImplemented
+        raise NotImplementedError()
 
     def commit(self, **kwargs):
         """Set partial validator as default."""
@@ -325,14 +337,14 @@ class Project(CDSDeposit):
     _schema = 'deposits/records/project-v1.0.0.json'
 
     @classmethod
-    def create(cls, data, id_=None):
+    def create(cls, data, id_=None, **kwargs):
         """Create a deposit.
 
         Adds bucket creation immediately on deposit creation.
         """
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         data.setdefault('videos', [])
-        return super(Project, cls).create(data, id_=id_)
+        return super(Project, cls).create(data, id_=id_, **kwargs)
 
     @property
     def video_ids(self):
@@ -387,7 +399,7 @@ class Project(CDSDeposit):
         for index in self._find_refs(refs).keys():
             del self['videos'][index]
 
-    def publish(self, pid=None, id_=None):
+    def publish(self, pid=None, id_=None, **kwargs):
         """Publish a project.
 
         The publishing involve the publication of all the videos inside.
@@ -413,7 +425,7 @@ class Project(CDSDeposit):
         assert self.report_number
 
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_)
+        return super(Project, self).publish(pid=pid, id_=id_, **kwargs)
 
     def discard(self, pid=None):
         """Discard project changes."""
@@ -445,6 +457,20 @@ class Project(CDSDeposit):
             video.delete(force=force)
         return super(Project, self).delete(force=force, pid=pid)
 
+    @has_status(status='draft')
+    def reserve_report_number(self):
+        """Reserve project's report number until first publishing."""
+        report_number_minter(None, self)
+
+    def mint_report_number(self, id_, **kwargs):
+        """Mint project's report number."""
+        assert self.report_number is not None
+        # Register reserved report number
+        pid = PersistentIdentifier.get('rn', self.report_number)
+        pid.assign('rec', id_, overwrite=True)
+        assert pid.register()
+        db.session.commit()
+
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Projects."""
         try:
@@ -473,7 +499,7 @@ class Video(CDSDeposit):
     _schema = 'deposits/records/video-v1.0.0.json'
 
     @classmethod
-    def create(cls, data, id_=None):
+    def create(cls, data, id_=None, **kwargs):
         """Create a deposit.
 
         Adds bucket creation immediately on deposit creation.
@@ -481,7 +507,7 @@ class Video(CDSDeposit):
         project_id = data.get('_project_id')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         project = project_resolver(project_id)
-        video_new = super(Video, cls).create(data, id_=id_)
+        video_new = super(Video, cls).create(data, id_=id_, **kwargs)
         video_new.project = project
         project.commit()
         video_new.commit()
@@ -514,11 +540,6 @@ class Video(CDSDeposit):
         self['_project_id'] = project['_deposit']['id']
         project._add_video(self)
 
-    def _publish_new(self, id_=None):
-        """Generate report number."""
-        self.generate_report_number()
-        return super(Video, self)._publish_new(id_)
-
     def _tasks_global_status(self):
         """Check if all tasks are successfully."""
         global_status = ComputeGlobalStatus()
@@ -526,7 +547,7 @@ class Video(CDSDeposit):
         iterate_events_results(events=events, fun=global_status)
         return global_status.status
 
-    def publish(self, pid=None, id_=None):
+    def publish(self, pid=None, id_=None, **kwargs):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
@@ -537,8 +558,9 @@ class Video(CDSDeposit):
         self['category'] = self.project['category']
         self['type'] = self.project['type']
         # publish the video
-        video_published = super(Video, self).publish(pid=pid, id_=id_)
-        (_, record_new) = self.fetch_published()
+        video_published = super(Video, self).publish(pid=pid, id_=id_,
+                                                     **kwargs)
+        _, record_new = self.fetch_published()
         # update associated project
         video_published.project._update_videos(
             [video_build_url(video_old_id)],
@@ -590,17 +612,20 @@ class Video(CDSDeposit):
         )
         return video_discarded
 
-    def generate_report_number(self, **kwargs):
-        """Generate video's report number."""
-        if not self.project.report_number:
-            self.project.generate_report_number()
-            self.generate_report_number()
-        else:
-            super(Video, self).generate_report_number(
-                parent_report_number=self.project.report_number)
+    def mint_report_number(self, id_, **kwargs):
+        """Mint video's report number.
 
+        Makes sure the parent project's report number has been
+        reserved. If it has not, it is reserved on the spot.
+        """
+        if self.project.report_number is None:
+            self.project.reserve_report_number()
+        super(Video, self).mint_report_number(
+            id_, parent_report_number=self.project.report_number)
+
+    @has_status(status='published')
     def get_report_number_sequence(self, **kwargs):
-        """Get the sequence generator for Videos. """
+        """Get the sequence generator for Videos."""
         assert 'parent_report_number' in kwargs
         parent_rn = kwargs.pop('parent_report_number')
         parent_name = self.project.sequence_name
@@ -618,7 +643,7 @@ class Category(Record):
     _schema = 'categories/category-v1.0.0.json'
 
     @classmethod
-    def create(cls, data, id_=None):
+    def create(cls, data, id_=None, **kwargs):
         """Create a category."""
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
 
@@ -626,4 +651,4 @@ class Category(Record):
             'input': data.get('name', None),
             'payload': {'types': data.get('types', [])}
         }
-        return super(Category, cls).create(data=data, id_=id_)
+        return super(Category, cls).create(data=data, id_=id_, **kwargs)
