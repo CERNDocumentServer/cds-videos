@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -290,9 +290,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 ObjectVersionTag.create(object_version, 'uri_origin',
                                         event.payload['uri'])
                 version_id = str(object_version.version_id)
-            # and a tag associated to him
+            # add tag with corresponding event
             ObjectVersionTag.create(object_version, '_event_id', event_id)
-            # save in response the version_id
+            # add tag for preview
+            ObjectVersionTag.create(object_version, 'preview', True)
             event.response['version_id'] = version_id
         return object_version
 
@@ -415,13 +416,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
             event=event, task_name='file_video_metadata_extraction')
         if 'version_id' not in event.payload:
             self.clean_task(event=event, task_name='file_download')
-        self.clean(event=event)
-
-    def clean(self, event):
-        """Delete the event."""
-        with db.session.begin_nested():
-            ObjectVersionTag.query.filter_by(
-                key='_event_id', value=str(event.id)).delete()
+        else:
+            # Remove tags on pre-existing ObjectVersion
+            object_version = as_object_version(event.payload['version_id'])
+            ObjectVersionTag.query.filter(
+                ObjectVersionTag.object_version == object_version,
+                (ObjectVersionTag.key == '_event_id') |
+                (ObjectVersionTag.key == 'preview')
+            ).delete()
 
     def _raw_info(self, event):
         """Get info from the event."""
