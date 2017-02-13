@@ -21,13 +21,16 @@
 
 from __future__ import absolute_import, print_function
 
+from os.path import relpath, split
+
 from flask import current_app, url_for
+from invenio_files_rest.models import ObjectVersion
 
 from invenio_previewer.api import PreviewFile
 
 
 class CDSPreviewRecordFile(PreviewFile):
-    """Preview deposit files implementation."""
+    """Preview record files implementation."""
 
     @property
     def uri(self):
@@ -36,6 +39,33 @@ class CDSPreviewRecordFile(PreviewFile):
             'invenio_records_ui.{0}_files'.format(self.pid.pid_type),
             pid_value=self.pid.pid_value,
             filename=self.file.key)
+
+    @property
+    def m3u8_uri(self):
+        """Get m3u8 playlist link."""
+        if self.smil_file_object:
+            location_root = self.smil_file_object.bucket.location.uri
+            smil_filepath, smil_filename = split(self.smil_file_object.file.uri)
+            relative_path = relpath(smil_filepath, location_root)
+            return current_app.config['WOWZA_PLAYLIST_URL'].format(
+                filepath=relative_path,
+                filename=smil_filename
+            )
+
+    @property
+    def poster_uri(self):
+        """Get video's poster link."""
+        return url_for(
+            'invenio_records_ui.{0}_files'.format(self.pid.pid_type),
+            pid_value=self.pid.pid_value,
+            filename='frame-1.jpg')
+
+    @property
+    def smil_file_object(self):
+        data = self.file.dumps()
+        if 'smil' in data:
+            smil_info = self.file.dumps()['smil'][0]
+            return ObjectVersion.get(smil_info['bucket_id'], smil_info['key'])
 
 
 class CDSPreviewDepositFile(PreviewFile):

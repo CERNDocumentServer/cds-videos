@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -408,15 +408,12 @@ def videos(video, frames, temp, video_count):
                 bucket=video_bucket,
                 key='video{0}.mp4'.format(video_index),
                 stream=fp)
-        ObjectVersionTag.create(master_obj, 'bit_rate', '959963')
-        ObjectVersionTag.create(master_obj, 'codec_name', 'h264')
-        ObjectVersionTag.create(master_obj, 'duration', '62.280000')
-        ObjectVersionTag.create(master_obj, 'nb_frames', '1557')
-        ObjectVersionTag.create(master_obj, 'size', '10498667')
-        ObjectVersionTag.create(master_obj, 'width', '1280')
-        ObjectVersionTag.create(master_obj, 'height', '720')
-        ObjectVersionTag.create(master_obj, 'display_aspect_ratio', '16:9')
-        ObjectVersionTag.create(master_obj, 'avg_frame_rate', '25/1')
+        tags = [('preview', 'true'), ('bit_rate', '959963'),
+                ('codec_name', 'h264'), ('duration', '62.280000'),
+                ('nb_frames', '1557'), ('size', '10498667'),
+                ('width', '1280'), ('height', '720'),
+                ('display_aspect_ratio', '16:9'), ('avg_frame_rate', '25/1')]
+        [ObjectVersionTag.create(master_obj, key, val) for key, val in tags]
 
         for f in frame_files:
             with open(join(frames, f), 'rb') as fp:
