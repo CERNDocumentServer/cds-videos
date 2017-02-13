@@ -1,7 +1,7 @@
 {# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -23,28 +23,9 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
 
-{%- extends "cds_previewer/previewer_video.html" %}
+{%- extends "cds_previewer/video.html" %}
 
-{%- block javascript %}
-  {{ super() }}
-  {% assets "cds_previewer_theoplayer_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-  
-  <script type="text/javascript">
-    theoplayer = {
-      configuration : {
-        libraryLocation : '/static/js/cds_previewer/theoplayer/',
-        styleSheetURI : '/static/css/cds_previewer/theoplayer/theoplayer.css',
-        socialSharing : 'http://cds.cern.ch'+'{{file_url}}',
-      }
-    };
-    </script>
-{%- endblock javascript %}
-
-{% block panel %}
-  <video class="cds-previewer-video-player theoplayer-show-social-sharing-button"
-    src="{{file_url}}"
-    controls="controls"
-    preload = "auto"
-    >
-  </video>
-{% endblock %}
+{% set theo_config = [('socialSharing', 'http://cds.cern.ch'+'{{file_url}}'),
+                      ('isEmbeddable', 'true')]
+%}
+{% set video_classes = 'theoplayer-show-social-sharing-button' %}

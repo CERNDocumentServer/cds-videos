@@ -242,8 +242,9 @@ setup(
             'downloader = cds.modules.webhooks.receivers:Downloader',
         ],
         'invenio_previewer.previewers': [
-            'cds_video = cds.modules.previewer.extensions.video',
-            'cds_embed_video = cds.modules.previewer.extensions.embed_video',
+            'cds_video = cds.modules.previewer.extensions.video:video',
+            'cds_embed_video = '
+            'cds.modules.previewer.extensions.video:embed_video',
         ],
         'invenio_sse.integrations': [
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',

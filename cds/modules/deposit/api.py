@@ -311,8 +311,8 @@ class CDSDeposit(Deposit):
         """Snapshot bucket and add files in record during first publishing."""
         if self.files:
             assert not self.files.bucket.locked
+            snapshot = self.files.bucket.snapshot()
             self.files.bucket.locked = True
-            snapshot = self.files.bucket.snapshot(lock=True)
             # dict of version_ids in original bucket to version_ids in
             # snapshot bucket for the each file
             old_to_new_version = {str(self.files[obj.key]['version_id']):
@@ -326,7 +326,20 @@ class CDSDeposit(Deposit):
             for tag in slave_tags:
                 tag.value = old_to_new_version.get(tag.value)
             db.session.add_all(slave_tags)
+
+            # Generate SMIL file
             data['_files'] = self.files.dumps(bucket=snapshot.id)
+
+            from cds.modules.records.serializers.smil import generate_smil_file
+            master_video = get_master_object(snapshot)
+            if master_video:
+                generate_smil_file(record_id, data, snapshot, master_video)
+
+            # Update metadata with SMIL file information
+            data['_files'] = self.files.dumps(bucket=snapshot.id)
+
+            snapshot.locked = True
+
             yield data
             db.session.add(RecordsBuckets(
                 record_id=record_id, bucket_id=snapshot.id
@@ -377,6 +390,16 @@ def is_deposit(url):
     """Check if it's a deposit or a record."""
     # TODO can we improve check?
     return 'deposit' in url
+
+
+def get_master_object(bucket):
+    """Get master ObjectVersion from a bucket."""
+    return ObjectVersion.get_by_bucket(bucket).join(
+        ObjectVersionTag
+    ).filter(
+        ObjectVersionTag.key == 'preview',
+        ObjectVersionTag.value == 'true'
+    ).one_or_none()
 
 
 class Project(CDSDeposit):
