@@ -43,9 +43,27 @@ from celery.result import result_from_tuple
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 
-from .status import ComputeGlobalStatus, iterate_result, collect_info
+from .status import ComputeGlobalStatus, iterate_result, collect_info, \
+    GetInfoByID, replace_task_id
 from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
     TranscodeVideoTask, update_avc_deposit_state
+
+
+def build_task_payload(event, task_id):
+    """Build payload for a task."""
+    raw_info = event.receiver._raw_info(event=event)
+    search = GetInfoByID(task_id=task_id)
+    iterate_result(raw_info=raw_info, fun=search)
+    if search.task_name:
+        if isinstance(search.result.info, Exception):
+            payload = search.result.info.message['payload']
+        else:
+            payload = search.result.info['payload']
+        base = {
+            'event': event, 'task_name': search.task_name, 'task_id': task_id
+        }
+        base.update(**payload)
+        return base
 
 
 class CeleryAsyncReceiver(Receiver):
@@ -75,16 +93,18 @@ class CeleryAsyncReceiver(Receiver):
         return result
 
     @classmethod
-    def _serialize_result(cls, event, result):
+    def _serialize_result(cls, event, result, fun=None):
         """Run the task and save the task ids."""
+        fun = fun or (lambda x: x)
         with db.session.begin_nested():
             event.response.update(
                 _tasks={
-                    'result': result.as_tuple(),
+                    'result': fun(result.as_tuple()),
                 }
             )
             if result.parent:
-                event.response['_tasks']['parent'] = result.parent.as_tuple()
+                event.response['_tasks']['parent'] = fun(
+                    result.parent.as_tuple())
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
 
@@ -117,8 +137,6 @@ class CeleryAsyncReceiver(Receiver):
     def persist(self, event, result):
         """Persist event and result after execution."""
         with db.session.begin_nested():
-            self._serialize_result(event=event, result=result)
-
             status = iterate_result(
                 raw_info=self._raw_info(event),
                 fun=lambda task_name, result: {
@@ -136,6 +154,28 @@ class CeleryAsyncReceiver(Receiver):
             event_id=event.id,
             sse_channel=event.payload.get('sse_channel')
         )
+
+    def rerun_task(self, **payload):
+        """Re-run a task."""
+        db.session.expunge(payload['event'])
+        # clean previous task results
+        self.clean_task(**payload)
+        # run task
+        result = self.run_task(**payload).apply_async()
+        # update event information
+        self._update_serialized_result(
+            event=payload['event'], old_task_id=payload['task_id'],
+            task_result=result)
+        self.persist(event=payload['event'],
+                     result=self._deserialize_result(payload['event']))
+
+    def _update_serialized_result(self, event, old_task_id, task_result):
+        """Update task id in global result."""
+        result_deserialized = self._deserialize_result(event)
+        self._serialize_result(
+            event=event, result=result_deserialized,
+            fun=lambda x: replace_task_id(
+                result=x, old_task_id=old_task_id, new_task_id=task_result.id))
 
 
 class Downloader(CeleryAsyncReceiver):
@@ -229,6 +269,8 @@ class Downloader(CeleryAsyncReceiver):
         # 3. update event response
         self._update_event_response(event=event, version_id=version_id)
         # 4. serialize event and result
+        self._serialize_result(event=event, result=result)
+        # 5. persist everything
         super(Downloader, self).persist(event=event, result=result)
 
     def _raw_info(self, event):
@@ -402,6 +444,8 @@ class AVCWorkflow(CeleryAsyncReceiver):
         # 3. update event response
         self._update_event_response(event=event, version_id=version_id)
         # 4. serialize event and result
+        self._serialize_result(event=event, result=result)
+        # 5. persist everything
         super(AVCWorkflow, self).persist(event, result)
 
     def delete(self, event):
