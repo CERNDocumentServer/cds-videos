@@ -168,7 +168,9 @@ class DownloadTask(AVCTask):
             version_id=self.obj_id,
             tags=self.object.get_tags(),
             event_id=self.event_id,
-            deposit_id=self.deposit_id, )
+            deposit_id=self.deposit_id,
+            sse_channel=self.sse_channel,
+        )
 
         # Make HTTP request
         response = requests.get(uri, stream=True)
@@ -262,7 +264,9 @@ class ExtractMetadataTask(AVCTask):
             uri=uri,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
-            event_id=self.event_id, )
+            event_id=self.event_id,
+            sse_channel=self.sse_channel,
+        )
 
         # Extract video's metadata using `ff_probe`
         metadata = json.loads(ff_probe_all(uri))
@@ -348,7 +352,9 @@ class ExtractFramesTask(AVCTask):
             version_id=self.obj_id,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
-            event_id=self.event_id, )
+            event_id=self.event_id,
+            sse_channel=self.sse_channel,
+        )
 
         def progress_updater(seconds, duration):
             """Progress reporter."""
@@ -452,7 +458,9 @@ class TranscodeVideoTask(AVCTask):
             preset_quality=preset_quality,
             tags=self.object.get_tags(),
             deposit_id=self.deposit_id,
-            event_id=self.event_id, )
+            event_id=self.event_id,
+            sse_channel=self.sse_channel,
+        )
 
         # Get master file's bucket_id
         bucket_id = self.object.bucket_id
@@ -486,7 +494,7 @@ class TranscodeVideoTask(AVCTask):
                 self.update_state(
                     state=REVOKED,
                     meta={'payload': {}, 'message': str(e)})
-                return
+                raise
 
             # Set revoke handler, in case of an abrupt execution halt.
             self.set_revoke_handler(partial(stop_encoding, job_id))

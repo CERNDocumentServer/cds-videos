@@ -135,6 +135,7 @@ def test_download_receiver(api_app, db, bucket, api_project, access_token,
                         'version_id': str(obj.version_id),
                         'size': size,
                         'total': total,
+                        'sse_channel': sse_channel,
                     }
                 }
             }
@@ -840,6 +841,7 @@ def test_async_receiver_status_fail(api_app, access_token, u_email,
         def run(self, event):
             assert payload == event.payload
             ctx['myresult'] = workflow.s(**event.payload).apply_async()
+            self._serialize_result(event=event, result=ctx['myresult'])
             super(TestReceiver, self).persist(
                 event=event, result=ctx['myresult'])
 

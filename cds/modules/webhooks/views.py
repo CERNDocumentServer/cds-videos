@@ -26,31 +26,17 @@
 
 from __future__ import absolute_import
 
+from invenio_db import db
 from flask.views import MethodView
 from invenio_webhooks.views import blueprint, error_handler
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
 from invenio_webhooks.views import ReceiverEventResource
 
-from .status import GetInfoByID, iterate_result
+from .receivers import build_task_payload
 
 
-# TODO write tests!
 class TaskResource(MethodView):
     """Task Endpoint."""
-
-    def _get_kwargs(self, event, task_id):
-        """Run."""
-        raw_info = event.receiver._raw_info(event=event)
-        search = GetInfoByID(task_id=task_id)
-        iterate_result(raw_info=raw_info, fun=search)
-        if search.task_name:
-            if isinstance(search.result.info, Exception):
-                payload = search.result.info.message['payload']
-            else:
-                payload = search.result.info['payload']
-            base = {'event': event, 'task_name': search.task_name}
-            base.update(**payload)
-            return base
 
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
@@ -58,9 +44,10 @@ class TaskResource(MethodView):
     def put(self, receiver_id, event_id, task_id):
         """Handle PUT request: restart a task."""
         event = ReceiverEventResource._get_event(receiver_id, event_id)
-        payload = self._get_kwargs(event, task_id)
+        payload = build_task_payload(event, task_id)
         if payload:
-            event.receiver.run_task(**payload)
+            event.receiver.rerun_task(**payload)
+            db.session.commit()
             return '', 204
         return '', 400
 
@@ -70,9 +57,10 @@ class TaskResource(MethodView):
     def delete(self, receiver_id, event_id, task_id):
         """Handle DELETE request: stop and clean a task."""
         event = ReceiverEventResource._get_event(receiver_id, event_id)
-        payload = self._get_kwargs(event, task_id)
+        payload = build_task_payload(event, task_id)
         if payload:
             event.receiver.clean_task(**payload)
+            db.session.commit()
             return '', 204
         return '', 400
 
