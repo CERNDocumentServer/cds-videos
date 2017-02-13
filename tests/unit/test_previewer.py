@@ -29,12 +29,13 @@ from __future__ import absolute_import, print_function
 import pytest
 
 from flask import url_for
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records_files.models import RecordsBuckets
 
 from werkzeug.exceptions import NotFound
 
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
-from cds.modules.records.providers import CDSRecordIdProvider
 from werkzeug.utils import import_string
 
 
@@ -49,14 +50,6 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
                        publish, endpoint_template, ui_blueprint):
     """Test record video previewing."""
     project, video_1, _ = project
-    if publish:
-        video_1 = video_1.publish()
-        assert video_1.status == 'published'
-        pid = CDSRecordIdProvider.get(video_1['recid']).pid
-    else:
-        assert video_1.status == 'draft'
-        pid = video_1['_deposit']['id']
-
     filename_1 = 'test.mp4'
     filename_2 = 'test.invalid'
     bucket_id = video_1['_buckets']['deposit']
@@ -66,8 +59,17 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
     # Create objects
     obj = ObjectVersion.create(bucket=bucket_id, key=filename_1,
                                stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'preview', True)
     ObjectVersion.create(bucket=bucket_id, key=filename_2,
                          stream=open(video, 'rb'))
+
+    if publish:
+        video_1 = video_1.publish()
+        assert video_1.status == 'published'
+        pid, video_1 = video_1.fetch_published()
+    else:
+        assert video_1.status == 'draft'
+        pid = PersistentIdentifier.get('depid', video_1['_deposit']['id'])
 
     def assert_preview(expected=None, exception=None, **query_params):
         with previewer_app.test_request_context(query_string=query_params):
@@ -89,17 +91,15 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
 
                 assert expected in preview_func(pid, video_1)
 
+    success_string = 'theoplayer.onReady'
     # Non-existent filename
     assert_preview(exception=NotFound, filename='non-existent')
-    # Neither filename nor preview tag: 404
-    assert_preview(exception=NotFound)
     # Invalid extension
     assert_preview(expected='Cannot preview file', filename=filename_2)
-    # Only filename
-    assert_preview(expected=filename_1, filename=filename_1)
-    # Only preview tag
-    ObjectVersionTag.create(obj, 'preview', True)
-    assert_preview(expected=filename_1)
+    # Specific filename
+    assert_preview(expected=success_string, filename=filename_1)
+    # No filename (falls back to file with preview tag)
+    assert_preview(expected=success_string)
 
 
 def test_legacy_embed(previewer_app, db, project, video):
@@ -111,7 +111,6 @@ def test_legacy_embed(previewer_app, db, project, video):
                                stream=open(video, 'rb'))
     ObjectVersionTag.create(obj, 'preview', True)
     video_1 = video_1.publish()
-    assert video_1.status == 'published'
 
     with previewer_app.test_client() as client:
         res = client.get('/video/{0}'.format(video_1.report_number))
@@ -120,3 +119,45 @@ def test_legacy_embed(previewer_app, db, project, video):
             pid_value=video_1['recid'],
             filename='',
         ))
+
+
+def test_smil_generation(previewer_app, db, project, video):
+    """Test SMIL file export from video."""
+
+    def create_video_tags(object_version):
+        """Create video tags."""
+        tags = [('width', 10), ('height', 10), ('bit_rate', 10), ('type', 'video')]
+        [ObjectVersionTag.create(object_version, key, val) for key, val in tags]
+
+    project, video_1, _ = project
+    basename = 'test'
+    bucket_id = video_1['_buckets']['deposit']
+    master_obj = ObjectVersion.create(bucket=bucket_id,
+                                      key='{}.mp4'.format(basename),
+                                      stream=open(video, 'rb'))
+    ObjectVersionTag.create(master_obj, 'preview', True)
+    create_video_tags(master_obj)
+    for i in range(4):
+        slave = ObjectVersion.create(bucket=bucket_id,
+                                     key='{0}_{1}.mp4'.format(basename, i),
+                                     stream=open(video, 'rb'))
+        ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
+        create_video_tags(slave)
+
+    video_1.publish()
+    _, video_record = video_1.fetch_published()
+    new_bucket = RecordsBuckets.query.filter_by(
+        record_id=video_record.id).one().bucket_id
+
+    # Check that SMIL file has been properly generated
+    smil_obj = ObjectVersion.get(new_bucket, '{}.smil'.format(basename))
+    assert smil_obj
+    assert ObjectVersionTag.query.filter_by(
+        object_version=smil_obj, key='type', value='smil'
+    ).one_or_none()
+
+    # Check SMIL contents
+    with open(smil_obj.file.uri, 'r') as smil_file:
+        contents = smil_file.read()
+        for suffix in range(4):
+            assert '{0}_{1}.mp4'.format(basename, suffix) in contents

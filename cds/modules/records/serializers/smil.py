@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,9 +24,16 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import render_template
+import shutil
+import tempfile
+
 from cds.modules.deposit.api import Video
+from flask import render_template
+from invenio_db import db
+from invenio_files_rest.models import as_object_version, ObjectVersion, \
+    ObjectVersionTag
 from invenio_rest.errors import RESTValidationError, FieldError
+from os.path import join
 
 
 class SmilSerializer(object):
@@ -52,7 +59,6 @@ class Smil(object):
     def __init__(self, record):
         """Initialize Smil formatter with the specific record."""
         self.record = record
-        self.data = ""
 
     def format(self):
         """Return the contents of the smil file as a string."""
@@ -62,22 +68,42 @@ class Smil(object):
     @staticmethod
     def _format_videos(record):
         """Format each video subformat."""
-        def get_option(info, key, value):
-            if value:
-                info[key] = value
-            return info
+        # TODO add master video to SMIL??
         videos = []
-        for file in record["_files"]:
-            tags = file.get('tags', {})
-            bit_rate = tags.get('bit_rate')
-            width = tags.get('width')
-            height = tags.get('height')
-            for video in file.get('video', []):
-                info = {}
-                info = get_option(
-                    info, 'src', video.get('links', {}).get('self'))
-                info = get_option(info, 'bit_rate', bit_rate)
-                info = get_option(info, 'width', width)
-                info = get_option(info, 'height', height)
+        for file_ in record['_files']:
+            tags = file_.get('tags', {})
+            for video in file_.get('video', []):
+                keys = ['bit_rate', 'width', 'height']
+                info = {key: tags[key] for key in keys if key in tags}
+                assert 'links' in video
+                assert 'self' in video['links']
+                info['src'] = video['links']['self']
                 videos.append(info)
         return videos
+
+
+def generate_smil_file(record_id, record, bucket, master_object):
+    """Generate SMIL file for Video record (on publish)."""
+    output_folder = tempfile.mkdtemp()
+    master_object = as_object_version(master_object)
+
+    # Generate SMIL file
+    master_key = master_object.key
+    smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
+    smil_path = join(output_folder, smil_key)
+    with open(smil_path, 'w') as f:
+        smil_content = SmilSerializer.serialize(record_id, record)
+        f.write(smil_content)
+
+    # Create ObjectVersion for SMIL file
+    with db.session.begin_nested():
+        obj = ObjectVersion.create(
+            bucket=bucket,
+            key=smil_key,
+            stream=open(smil_path, 'rb'))
+        ObjectVersionTag.create(obj, 'master', master_object.version_id)
+        ObjectVersionTag.create(obj, 'type', 'smil')
+
+    # Commit changes
+    shutil.rmtree(output_folder)
+    db.session.commit()

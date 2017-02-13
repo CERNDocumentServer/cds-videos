@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,34 +22,40 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Previews simple video files."""
+"""Previews video files."""
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app, render_template
-
-previewable_extensions = ['mp4', 'webm']
+from flask import render_template
 
 
-def validate(file):
-    """Validate a simple video file."""
-    return True
+class VideoExtension(object):
+    """Previewer extension for videos."""
+
+    previewable_extensions = ['mp4', 'webm']
+
+    def __init__(self, template=None, embed=False):
+        self.embed = embed
+        self.template = template
+
+    @staticmethod
+    def can_preview(file):
+        """Determine if the given file can be previewed."""
+        return file.is_local() and file.has_extensions('.mp4', '.webm')
+
+    def preview(self, file):
+        """Render appropriate template with embed flag."""
+        return render_template(
+            self.template,
+            file=file,
+            video_url=file.uri,
+            m3u8_url=getattr(file, 'm3u8_uri', None),
+            thumbnails_url=None,
+            poster_url=getattr(file, 'poster_uri', None),
+            embed=self.embed,
+            css_bundles=['cds_previewer_video_css'],
+        )
 
 
-def can_preview(file):
-    """Determine if the given file can be previewed."""
-    return (
-        file.is_local() and
-        (file.has_extensions('.mp4') or file.has_extensions('.webm')) and
-        validate(file))
-
-
-def preview(file):
-    """Render appropiate template with embed flag."""
-    template = 'cds_previewer/previewer_video.html'
-    return render_template(
-        template,
-        file=file,
-        file_url=file.uri,
-        css_bundles=['cds_previewer_video_css']
-    )
+video = VideoExtension('cds_previewer/video.html')
+embed_video = VideoExtension('cds_previewer/embedded_video.html', embed=True)

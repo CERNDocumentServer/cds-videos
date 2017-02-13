@@ -76,6 +76,7 @@ def preview(pid, record, **kwargs):
 
     return _try_previewers(pid, record, filename, **kwargs)
 
+
 def _try_previewers(pid, record, filename, preview_file_class=PreviewFile,
                     previewer=None, **kwargs):
     """Try previewing file with all available previewers."""

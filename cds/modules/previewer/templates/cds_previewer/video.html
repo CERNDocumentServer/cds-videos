@@ -1,0 +1,81 @@
+{# -*- coding: utf-8 -*-
+#
+# This file is part of Invenio.
+# Copyright (C) 2017 CERN.
+#
+# Invenio is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
+#}
+
+{%- extends config.PREVIEWER_ABSTRACT_TEMPLATE %}
+
+{# Configuration Variables #}
+{% set theo_config = [] %}
+{% set video_classes = '' %}
+
+{%- block javascript %}
+  {{ super() }}
+  <script type='text/javascript'
+          src='//cdn.theoplayer.com/latest/{{ config.THEO_LICENCE_KEY }}/theoplayer.loader.js'>
+  </script>
+  <script type="text/javascript">
+    theoplayer.onReady = function () {
+      var video = document.createElement('video');
+      video.class = 'video-player {{ video_classes }}';
+      video.controls = 'controls';
+      video.poster = '{{ poster_url }}';
+      document.body.appendChild(video);
+
+      var configuration = {
+        playbackRates: [0.5, 1, 2],
+        {% for key, value in theo_config %}
+          {{ key }}: "{{ value }}",
+        {% endfor %}
+      };
+      var config = {
+        sources: [
+          {
+            {% if m3u8_url %}
+                src: '{{ m3u8_url }}',
+                type: 'application/x-mpegURL'
+            {% else %}
+                src: '{{ video_url }}',
+                type: 'video/mp4'
+            {% endif %}
+          },
+        ],
+        textTracks: [
+          {
+            kind: 'metadata',
+            src: '{{ thumbnails_url }}',
+            label: 'thumbnails',
+            type: 'webvtt',
+          }
+        ]
+      };
+      var player = theoplayer(video, configuration);
+      player.setSource(config)
+    }
+  </script>
+{%- endblock javascript %}
+
+{%- block css %}
+  {{ super() }}
+  {% assets "cds_previewer_video_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+{%- endblock css %}

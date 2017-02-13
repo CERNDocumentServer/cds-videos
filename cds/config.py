@@ -477,6 +477,12 @@ PREVIEWER_PREFERENCE = [
     'cds_embed_video',
     'zip',
 ]
+# Licence key for THEO player
+THEO_LICENCE_KEY = 'CHANGE_ME'
+# Wowza server URL for m3u8 playlist generation
+WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/Video/'
+                      '{filepath}/{filename}/playlist.m3u8')
+
 
 ###############################################################################
 # Logging
