@@ -931,8 +931,9 @@ def workflow_receiver(api_app, db, webhooks, es, cds_depid):
                 flag_modified(event, 'payload')
                 db.session.expunge(event)
             db.session.commit()
-            self.persist(
-                event=event, result=workflow.apply_async())
+            result = workflow.apply_async()
+            self._serialize_result(event=event, result=result)
+            self.persist(event=event, result=result)
 
         def _raw_info(self, event):
             result = self._deserialize_result(event)

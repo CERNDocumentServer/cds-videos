@@ -156,9 +156,28 @@ class GetInfoByID(object):
     def __init__(self, task_id):
         """Init."""
         self._task_id = task_id
+        self.task_name = ''
 
     def __call__(self, task_name, result):
         """Search task name."""
         if result.id == self._task_id:
             self.task_name = task_name
             self.result = result
+
+
+def replace_task_id(result, old_task_id, new_task_id):
+    """Replace task id in a serialized version of results."""
+    try:
+        (head, tail) = result
+        if head == old_task_id:
+            return new_task_id, replace_task_id(tail, old_task_id, new_task_id)
+        else:
+            return [replace_task_id(head, old_task_id, new_task_id),
+                    replace_task_id(tail, old_task_id, new_task_id)]
+    except ValueError:
+        if isinstance(result, list) or isinstance(result, tuple):
+            return [replace_task_id(r, old_task_id, new_task_id)
+                    for r in result]
+        return result
+    except TypeError:
+        return result

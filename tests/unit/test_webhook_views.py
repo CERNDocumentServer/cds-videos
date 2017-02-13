@@ -30,6 +30,7 @@ import json
 import pytest
 
 import mock
+from celery.result import AsyncResult
 from flask import url_for
 from helpers import get_object_count, get_tag_count, mock_current_user
 from invenio_files_rest.models import ObjectVersion, \
@@ -37,6 +38,7 @@ from invenio_files_rest.models import ObjectVersion, \
 from invenio_records.models import RecordMetadata
 from six import BytesIO
 from cds.modules.deposit.api import video_resolver
+from invenio_webhooks.models import Event
 
 from helpers import get_indexed_records_from_mock
 
@@ -82,8 +84,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     assert set(ids) == set([video_id])
 
 
-def check_video_transcode(api_app, event_id, access_token,
-                          json_headers, data, video_id):
+def check_video_transcode_delete(api_app, event_id, access_token,
+                                 json_headers, data, video_id):
     """Try to delete transcoded file via REST API."""
     # DELETE FIRST TRANSCODED FILE
     task_id = data['global_status'][1][1]['file_transcode']['id']
@@ -148,6 +150,52 @@ def check_video_transcode(api_app, event_id, access_token,
     records = RecordMetadata.query.all()
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_deposit']
+
+
+def check_video_transcode_restart(api_app, event_id, access_token,
+                                  json_headers, data, video_id):
+    """Try to delete transcoded file via REST API."""
+    # RESTART FIRST TRANSCODED FILE
+    task_id = data['global_status'][1][1]['file_transcode']['id']
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.task_item',
+            receiver_id='avc',
+            event_id=event_id,
+            task_id=task_id,
+            access_token=access_token
+        )
+    with api_app.test_client() as client, \
+            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+        sse_channel = 'mychannel'
+        payload = dict(
+            sse_channel=sse_channel
+        )
+        resp = client.put(
+            url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 204
+
+        assert mock_sse.called is True
+
+    assert ObjectVersion.query.count() == get_object_count()
+    assert ObjectVersionTag.query.count() == get_tag_count()
+
+    # check extracted metadata is there
+    records = RecordMetadata.query.all()
+    assert len(records) == 1
+    assert 'extracted_metadata' in records[0].json['_deposit']
+
+    # check task id is changed
+    event = Event.query.first()
+    new_task_id = event.response['global_status'][1][1]['file_transcode']['id']
+    assert task_id != new_task_id
+    old_result = AsyncResult(task_id)
+    new_result = AsyncResult(new_task_id)
+    for key in ['tags', 'key', 'deposit_id', 'event_id', 'preset_quality']:
+        assert old_result.result[
+            'payload'][key] == new_result.result['payload'][key]
 
 
 def check_video_frames(api_app, event_id, access_token,
@@ -255,7 +303,8 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     check_video_metadata_extraction,
     check_video_download,
     check_video_frames,
-    check_video_transcode
+    check_video_transcode_delete,
+    check_video_transcode_restart,
 ])
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
