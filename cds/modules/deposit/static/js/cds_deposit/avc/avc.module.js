@@ -3,6 +3,7 @@ function cdsDepositsConfig(
   depositStatesProvider,
   depositSSEEventsProvider,
   depositStatusesProvider,
+  inheritedPropertiesProvider,
   urlBuilderProvider,
   typeReducerProvider
 ) {
@@ -36,6 +37,12 @@ function cdsDepositsConfig(
     REVOKED: 'DEPOSIT_STATE/REVOKED',
   });
 
+  inheritedPropertiesProvider.setValues([
+    'title.title',
+    'description.value',
+    'contributors'
+  ]);
+
   // Initialize url builder
   urlBuilderProvider.setBlueprints({
     iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png',
@@ -59,6 +66,7 @@ cdsDepositsConfig.$inject = [
   'depositStatesProvider',
   'depositSSEEventsProvider',
   'depositStatusesProvider',
+  'inheritedPropertiesProvider',
   'urlBuilderProvider',
   'typeReducerProvider',
 ];
