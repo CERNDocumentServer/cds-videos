@@ -19,6 +19,10 @@
             </div>
             <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
           </div>
+          <br />
+          <div>
+            <button class="btn btn-default btn-xs" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata()">Inherit</button>
+          </div>
           <div class="cds-deposit-box-upload-status">
             <h5>Upload status:</h5>
             <p>{{ $ctrl.cdsDepositCtrl.depositStatusCurrent }}</p>
