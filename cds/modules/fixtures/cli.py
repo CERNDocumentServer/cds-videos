@@ -31,6 +31,7 @@ from cds.modules.deposit.minters import catid_minter
 import click
 from cds.modules.deposit.api import Category, Video, Project
 import pkg_resources
+from cds.modules.ffmpeg import ff_probe
 from invenio_sequencegenerator.api import Template
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
@@ -364,6 +365,7 @@ def videos(video, frames, temp, video_count):
     if not video:
         video = join(dirname(__file__), '..', '..', '..',
                      'tests', 'data', 'test.mp4')
+    video_duration = float(ff_probe(video, 'duration'))
     if not frames:
         frames = pkg_resources.resource_filename(
             'cds.modules.fixtures', 'data/frames.tar.gz'
@@ -406,7 +408,7 @@ def videos(video, frames, temp, video_count):
             created_by=1,
             extracted_metadata=dict(
                 bit_rate='679886',
-                duration='60.140000',
+                duration=video_duration,
                 size='5111048',
                 avg_frame_rate='288000/12019',
                 codec_name='h264',
@@ -424,13 +426,17 @@ def videos(video, frames, temp, video_count):
                 key='video{0}.mp4'.format(video_index),
                 stream=fp)
         tags = [('preview', 'true'), ('bit_rate', '959963'),
-                ('codec_name', 'h264'), ('duration', '62.280000'),
+                ('codec_name', 'h264'), ('duration', video_duration),
                 ('nb_frames', '1557'), ('size', '10498667'),
                 ('width', '1280'), ('height', '720'),
-                ('display_aspect_ratio', '16:9'), ('avg_frame_rate', '25/1')]
+                ('display_aspect_ratio', '16:9'), ('avg_frame_rate', '25/1'),
+                ('media_type', 'video'), ('context_type', 'master')]
         [ObjectVersionTag.create(master_obj, key, val) for key, val in tags]
 
-        for f in frame_files:
+        number_of_frames = len(frame_files)
+        frame_files.sort()
+        frame_files.sort(key=len)
+        for i, f in enumerate(frame_files):
             with open(join(frames, f), 'rb') as fp:
                 # The filename
                 file_name = basename(f)
@@ -439,8 +445,12 @@ def videos(video, frames, temp, video_count):
                     bucket=video_bucket,
                     key=file_name,
                     stream=fp)
-                ObjectVersionTag.create(obj, 'type', 'frame')
+                ObjectVersionTag.create(obj, 'media_type', 'image')
+                ObjectVersionTag.create(obj, 'context_type', 'frame')
                 ObjectVersionTag.create(obj, 'master', master_obj.version_id)
+                ObjectVersionTag.create(
+                    obj, 'timestamp',
+                    (float(i) / number_of_frames) * video_duration)
 
         for quality in ['360p', '480p', '720p']:
             with open(video, 'rb') as fp:
@@ -448,7 +458,8 @@ def videos(video, frames, temp, video_count):
                     bucket=video_bucket,
                     key='video{0}[{1}].mp4'.format(video_index, quality),
                     stream=fp)
-            ObjectVersionTag.create(obj, 'type', 'video')
+            ObjectVersionTag.create(obj, 'media_type', 'video')
+            ObjectVersionTag.create(obj, 'context_type', 'subformat')
             ObjectVersionTag.create(obj, 'master', master_obj.version_id)
             ObjectVersionTag.create(obj, 'preset_quality', quality)
 

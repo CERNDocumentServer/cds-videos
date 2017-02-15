@@ -106,4 +106,4 @@ def test_fixture_videos(app, script_info, db, location):
             # Has 5 frames
             assert len(files['frame']) == 5
             # Has 3 subformats
-            assert len(files['video']) == 3
+            assert len(files['subformat']) == 3

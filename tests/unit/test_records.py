@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test cds package."""
+"""Test records."""
 
 from __future__ import absolute_import, print_function
 
@@ -93,7 +93,7 @@ def test_records_ui_export(app, project_published, video_record_metadata):
 
         res = client.get(url_valid_vtt)
         assert res.status_code == 200
-        assert get_pre(res.data).startswith('WEBVTT') is True
+        assert 'WEBVTT' in res.data.decode('utf-8')
 
         res = client.get(url_valid_json)
         assert res.status_code == 200
@@ -162,8 +162,8 @@ def test_records_rest(api_app, users, video_record_metadata, es,
             assert child.attrib["height"] == '2160'
 
         for i in range(4):
-            src = \
-                video_record_metadata['_files'][0]['video'][i]['links']['self']
+            subformat = video_record_metadata['_files'][0]['subformat']
+            src = subformat[i]['links']['self']
             assert root[1][0][i].attrib['src'] == 'mp4:{}'.format(src)
 
         # try get vtt

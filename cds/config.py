@@ -210,10 +210,18 @@ RECORDS_UI_ENDPOINTS = dict(
     recid_export=dict(
         pid_type='recid',
         route='/record/<pid_value>/export/<any({0}):format>'.format(
-            ", ".join(list(CDS_RECORDS_EXPORTFORMATS.keys()))
+            ", ".join(
+                [k for k in CDS_RECORDS_EXPORTFORMATS.keys() if k != 'vtt']
+            )
         ),
         template='cds_records/record_export.html',
         view_imp='cds.modules.records.views.records_ui_export',
+        record_class='invenio_records_files.api:Record',
+    ),
+    recid_export_vtt=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/export/<any(vtt):format>',
+        view_imp='cds.modules.records.views.records_ui_export_vtt',
         record_class='invenio_records_files.api:Record',
     ),
 )
@@ -491,7 +499,8 @@ THEO_LICENCE_KEY = 'CHANGE_ME'
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/Video/'
                       '{filepath}/{filename}/playlist.m3u8')
-
+# Thumbnail size
+VIDEO_POSTER_SIZE = (180, 180)
 
 ###############################################################################
 # Logging

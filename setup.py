@@ -199,6 +199,7 @@ setup(
             # 'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
+            'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',

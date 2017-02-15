@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test cds package."""
+"""Test deposit."""
 
 from __future__ import absolute_import, print_function
 
@@ -159,18 +159,15 @@ def test_publish_process_files(app, db, location):
         bucket=bucket,
         key='master',
         _file_id=FileInstance.create())
-    slave_obj_1 = ObjectVersion.create(
-        bucket=bucket,
-        key='slave1',
-        _file_id=FileInstance.create())
-    slave_obj_2 = ObjectVersion.create(
-        bucket=bucket,
-        key='slave2',
-        _file_id=FileInstance.create())
-    ObjectVersionTag.create(slave_obj_1, 'master', master_obj.version_id)
-    ObjectVersionTag.create(slave_obj_1, 'type', 'video')
-    ObjectVersionTag.create(slave_obj_2, 'master', master_obj.version_id)
-    ObjectVersionTag.create(slave_obj_2, 'type', 'video')
+    number_of_slaves = 10
+    for i in range(number_of_slaves):
+        slave_obj = ObjectVersion.create(
+            bucket=bucket,
+            key='slave{}.mp4'.format(i + 1),
+            _file_id=FileInstance.create())
+        ObjectVersionTag.create(slave_obj, 'master', master_obj.version_id)
+        ObjectVersionTag.create(slave_obj, 'media_type', 'video')
+        ObjectVersionTag.create(slave_obj, 'context_type', 'subformat')
     assert Bucket.query.count() == 1
     with deposit._process_files(None, dict()):
         # the snapshot bucket must have been created
@@ -182,7 +179,8 @@ def test_publish_process_files(app, db, location):
             for obj in bucket.objects:
                 if str(obj.version_id) != master_version:
                     assert obj.get_tags()['master'] == master_version
-                    assert obj.get_tags()['type'] == 'video'
+                    assert obj.get_tags()['media_type'] == 'video'
+                    assert obj.get_tags()['context_type'] == 'subformat'
 
 
 def test_deposit_access_rights_based_on_user_id(api_app, users, cds_depid,

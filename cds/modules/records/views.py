@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,7 +21,9 @@
 
 from __future__ import absolute_import, print_function
 import six
+from cds.modules.records.serializers import VTTSerializer
 from flask import Blueprint, current_app, render_template, request
+from flask import make_response
 from werkzeug.utils import import_string
 
 blueprint = Blueprint(
@@ -53,3 +55,11 @@ def records_ui_export(pid, record, template=None, **kwargs):
             data=data,
             format_title=formats[fmt]['title']
         )
+
+
+def records_ui_export_vtt(pid, record, **kwargs):
+    """Export a record as a VTT file."""
+    data = VTTSerializer().serialize(pid, record)
+    response = make_response(data)
+    response.headers['Content-Type'] = 'text/vtt'
+    return response
