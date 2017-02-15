@@ -111,26 +111,22 @@ def _patch_aspect_ratio(metadata):
 #
 # Frame extraction
 #
-def ff_frames(input_file, start, end, step, output, progress_callback=None):
+def ff_frames(input_file, start, end, step, duration, output,
+              progress_callback=None):
     """Extract requested frames from video.
 
     :param input_file:
-    :param start: percentage of the video to begin extracting frames.
-    :param end: percentage of the video to stop extracting frames.
-    :param step: percentage between of the video between frames.
+    :param start: time position to begin extracting frames.
+    :param end: time position to stop extracting frames.
+    :param step: time interval between frames.
+    :param duration: total duration of the video
     :param output: output folder and format for the file names as in ``ffmpeg``
     , i.e /path/to/somewhere/frames-%d.jpg
     :param progress_callback: function taking as first parameter the number of
     seconds processed and as second parameter the total duration of the video.
     """
-    duration = float(ff_probe(input_file, 'duration'))
-    # Calculate time step
-    time_step = duration * step / 100
-    start_time = duration * start / 100
-    end_time = duration * (end+1) / 100  # end inclusive
-
     cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(
-        input_file, start_time, end_time, time_step, output
+        input_file, start, end, step, output
     )
 
     thread = pexpect.spawn(cmd)

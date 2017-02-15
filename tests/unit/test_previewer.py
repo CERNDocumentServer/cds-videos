@@ -127,10 +127,11 @@ def test_legacy_embed(previewer_app, db, project, video):
 def test_smil_generation(previewer_app, db, project, video):
     """Test SMIL file export from video."""
 
-    def create_video_tags(object_version):
+    def create_video_tags(obj, context_type):
         """Create video tags."""
-        tags = [('width', 10), ('height', 10), ('bit_rate', 10), ('type', 'video')]
-        [ObjectVersionTag.create(object_version, key, val) for key, val in tags]
+        tags = [('width', 10), ('height', 10), ('bit_rate', 10),
+                ('media_type', 'video'), ('context_type', context_type)]
+        [ObjectVersionTag.create(obj, key, val) for key, val in tags]
 
     project, video_1, _ = project
     basename = 'test'
@@ -139,13 +140,13 @@ def test_smil_generation(previewer_app, db, project, video):
                                       key='{}.mp4'.format(basename),
                                       stream=open(video, 'rb'))
     ObjectVersionTag.create(master_obj, 'preview', True)
-    create_video_tags(master_obj)
+    create_video_tags(master_obj, context_type='master')
     for i in range(4):
         slave = ObjectVersion.create(bucket=bucket_id,
                                      key='{0}_{1}.mp4'.format(basename, i),
                                      stream=open(video, 'rb'))
         ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
-        create_video_tags(slave)
+        create_video_tags(slave, context_type='subformat')
 
     prepare_videos_for_publish(video_1)
     video_1.publish()
@@ -157,7 +158,7 @@ def test_smil_generation(previewer_app, db, project, video):
     smil_obj = ObjectVersion.get(new_bucket, '{}.smil'.format(basename))
     assert smil_obj
     assert ObjectVersionTag.query.filter_by(
-        object_version=smil_obj, key='type', value='smil'
+        object_version=smil_obj, key='context_type', value='playlist'
     ).one_or_none()
 
     # Check SMIL contents
@@ -165,3 +166,25 @@ def test_smil_generation(previewer_app, db, project, video):
         contents = smil_file.read()
         for suffix in range(4):
             assert '{0}_{1}.mp4'.format(basename, suffix) in contents
+
+
+def test_vtt_export(previewer_app, db, project_published,
+                    video_record_metadata):
+    """Test VTT export endpoint."""
+    (project, video_1, video_2) = project_published
+    # index a (update) video
+    _, record_video = video_1.fetch_published()
+    record_video.update(**video_record_metadata)
+    record_video.commit()
+    db.session.commit()
+    vid = video_1['_deposit']['pid']['value']
+    with previewer_app.test_request_context():
+        vtt_url = url_for(
+            'invenio_records_ui.recid_export', pid_value=vid, format='vtt')
+    with previewer_app.test_client() as client:
+        res = client.get(vtt_url)
+        assert res.status_code == 200
+        data = res.data.decode('utf-8')
+        assert 'WEBVTT' in data
+        for i in range(1, 11):
+            assert 'frame-{0}.jpg'.format(i) in data

@@ -27,7 +27,7 @@ from __future__ import absolute_import, print_function
 import shutil
 import tempfile
 
-from cds.modules.deposit.api import Video
+from cds.modules.deposit.api import Video, CDSFilesIterator
 from flask import render_template
 from invenio_db import db
 from invenio_files_rest.models import as_object_version, ObjectVersion, \
@@ -68,18 +68,14 @@ class Smil(object):
     @staticmethod
     def _format_videos(record):
         """Format each video subformat."""
-        # TODO add master video to SMIL??
-        videos = []
-        for file_ in record['_files']:
-            tags = file_.get('tags', {})
-            for video in file_.get('video', []):
-                keys = ['bit_rate', 'width', 'height']
-                info = {key: tags[key] for key in keys if key in tags}
-                assert 'links' in video
-                assert 'self' in video['links']
-                info['src'] = video['links']['self']
-                videos.append(info)
-        return videos
+        master_file = CDSFilesIterator.get_master_video_file(record)
+        tags = master_file.get('tags', {})
+        for video in CDSFilesIterator.get_video_subformats(master_file):
+            keys = ['bit_rate', 'width', 'height']
+            info = {key: tags[key] for key in keys if key in tags}
+            assert video.get('links', {}).get('self')
+            info['src'] = video['links']['self']
+            yield info
 
 
 def generate_smil_file(record_id, record, bucket, master_object):
@@ -102,7 +98,8 @@ def generate_smil_file(record_id, record, bucket, master_object):
             key=smil_key,
             stream=open(smil_path, 'rb'))
         ObjectVersionTag.create(obj, 'master', master_object.version_id)
-        ObjectVersionTag.create(obj, 'type', 'smil')
+        ObjectVersionTag.create(obj, 'context_type', 'playlist')
+        ObjectVersionTag.create(obj, 'media_type', 'text')
 
     # Commit changes
     shutil.rmtree(output_folder)
