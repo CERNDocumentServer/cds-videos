@@ -87,7 +87,7 @@
     <tr ng-show="showFrames">
       <td colspan="4">
         <div class="row cds-deposit-thumbnail-pad">
-          <div class="col-sm-2 cds-deposit-thumbnail-pad" ng-repeat="frame in $ctrl.getFrames()">
+          <div class="cds-deposit-frame-thumbnail" ng-repeat="frame in $ctrl.getFrames()">
             <a ng-href="{{ frame.links.self }}" target="_blank">
               <img ng-if="showFrames" width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
             </a>
