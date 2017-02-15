@@ -26,8 +26,11 @@ from invenio_assets import NpmBundle
 
 js = NpmBundle(
     Bundle(
+        'node_modules/cds/dist/cds.js',
+        'node_modules/angular-strap/dist/angular-strap.js',
+        'node_modules/ngmodal/dist/ng-modal.js',
         'js/cds_records/main.js',
-        filters='requirejs',
+        filters='jsmin',
     ),
     depends=(
         'node_modules/cds/dist/*.js',
@@ -38,6 +41,7 @@ js = NpmBundle(
         'angular': '~1.4.10',
         'angular-loading-bar': '~0.9.0',
         'cds': '^0.1.2',
-        'ng-dialog': '~0.6.0'
+        'ng-dialog': '~0.6.0',
+        'ngmodal': '~2.0.1'
     }
 )
