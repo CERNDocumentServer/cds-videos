@@ -21,22 +21,15 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-require([
-    'node_modules/angular-loading-bar/build/loading-bar',
-    'node_modules/cds/dist/cds',
-    'node_modules/ng-dialog/js/ngDialog',
-    'js/cds/module',
-    'node_modules/invenio-search-js/dist/invenio-search-js',
-  ], function() {
-    // Bootstrap modules
-    angular.element(document).ready(function() {
-      angular.bootstrap(
-        document.getElementById("cds-record"), [
-         'angular-loading-bar', 'cdsRecord', 'ngDialog', 'cds'
-        ]
-      );
-      angular.bootstrap(
-        document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
-      );
-    });
+// Bootstrap modules
+angular.element(document).ready(function() {
+  angular.bootstrap(
+    document.getElementById("cds-record"), [
+      'angular-loading-bar', 'cdsRecord', 'ngDialog', 'cds',
+      'ngModal'
+    ]
+  );
+  angular.bootstrap(
+    document.getElementById("cds-recent-videos"), ['cds', 'invenioSearch']
+  );
 });
