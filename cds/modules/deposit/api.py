@@ -133,7 +133,7 @@ class CDSFileObject(FileObject):
                 ObjectVersionTag.value == str(self.obj.version_id)
                 ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
             master_dump.setdefault(
-                slave.get_tags()['type'], []).append(_dumps(slave))
+                slave.get_tags()['context_type'], []).append(_dumps(slave))
         # Sort slaves by key within their lists
         self.data.update(master_dump)
 
@@ -153,6 +153,25 @@ class CDSFilesIterator(FilesIterator):
             if dump:
                 files.append(dump)
         return files
+
+    @staticmethod
+    def get_master_video_file(record):
+        """Get master video file from a Video record."""
+        return next(
+            f for f in record['_files']
+            if f['media_type'] == 'video' and f['context_type'] == 'master')
+
+    @staticmethod
+    def get_video_subformats(master_file):
+        return [video
+                for video in master_file.get('subformat', [])
+                if video['media_type'] == 'video' and video[
+                    'context_type'] == 'subformat']
+
+    @staticmethod
+    def get_video_frames(master_file):
+        return sorted(master_file.get('frame', []),
+                      key=lambda s: s['tags']['timestamp'])
 
 
 class CDSDeposit(Deposit):

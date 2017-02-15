@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test cds package."""
+"""Test serializers."""
 
 from __future__ import absolute_import, print_function
 
@@ -42,12 +42,13 @@ def test_smil_serializer(video_record_metadata):
     assert len(root[1][0]) == 4
     for child in root[1][0]:
         assert child.tag == 'video'
-        assert child.attrib["system-bitrate"] == '11915822'
-        assert child.attrib["width"] == '4096'
-        assert child.attrib["height"] == '2160'
+        assert child.attrib['system-bitrate'] == '11915822'
+        assert child.attrib['width'] == '4096'
+        assert child.attrib['height'] == '2160'
 
     for i in range(4):
-        src = video_record_metadata['_files'][0]['video'][i]['links']['self']
+        subformat = video_record_metadata['_files'][0]['subformat'][i]
+        src = subformat['links']['self']
         assert root[1][0][i].attrib['src'] == 'mp4:{}'.format(src)
 
 
@@ -59,6 +60,6 @@ def test_vtt_serializer(video_record_metadata):
         if i == 9:
             end_expected = VTT.time_format(float(
                 video_record_metadata['_files'][0]['tags']['duration']))
-            assert data[i]["end_time"] == end_expected
+            assert data[i]['end_time'] == end_expected
         else:
-            assert data[i]["end_time"] == data[i + 1]["start_time"]
+            assert data[i]['end_time'] == data[i + 1]['start_time']

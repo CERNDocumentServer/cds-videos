@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test cds package."""
+"""Test video."""
 
 from __future__ import absolute_import, print_function
 
@@ -205,14 +205,16 @@ def test_video_dumps(db, project, video):
     slave_1 = ObjectVersion.create(
         bucket=bucket_id, key='slave_1.mp4', stream=open(video, 'rb'))
     ObjectVersionTag.create(slave_1, 'master', str(obj.version_id))
-    ObjectVersionTag.create(slave_1, 'type', 'video')
+    ObjectVersionTag.create(slave_1, 'media_type', 'video')
+    ObjectVersionTag.create(slave_1, 'context_type', 'subformat')
 
     for i in reversed(range(10)):
         slave = ObjectVersion.create(
             bucket=bucket_id, key='frame-{0}.jpeg'.format(i),
             stream=BytesIO(b'\x00' * 1024))
         ObjectVersionTag.create(slave, 'master', str(obj.version_id))
-        ObjectVersionTag.create(slave, 'type', 'frame')
+        ObjectVersionTag.create(slave, 'media_type', 'image')
+        ObjectVersionTag.create(slave, 'context_type', 'frame')
 
     db.session.commit()
 
@@ -222,12 +224,10 @@ def test_video_dumps(db, project, video):
     files = files[0]  # only one master file
 
     assert 'frame' in files
-    assert len(files['frame']) == 10
-    # check sorted by key
-    assert files['frame'][0]['key'] == 'frame-0.jpeg'
-    assert files['frame'][-1]['key'] == 'frame-9.jpeg'
-    assert 'video' in files
-    assert len(files['video']) == 1
+    assert [f['key'] for f in files['frame']] == [
+        'frame-{}.jpeg'.format(i) for i in range(10)]
+    assert 'subformat' in files
+    assert len(files['subformat']) == 1
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

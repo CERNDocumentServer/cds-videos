@@ -28,8 +28,10 @@
 from __future__ import absolute_import, print_function
 
 import os
+import random
 import shutil
 import tempfile
+import uuid
 
 from os.path import dirname, join
 
@@ -463,213 +465,80 @@ def video_record_metadata():
                       'file_video_metadata_extraction': 'SUCCESS'},
             'status': 'draft'
         },
-        "_files": [
-            {
-                "checksum": "md5:1beda6154605f65a922fdc488c987d83",
-                "completed": True,
-                "frame": [
-                    {
-                        "bucket_id": "0692a21c-6864-41cb-8424-b0f83eeb261b",
-                        "checksum": "md5:7b4ba010ee4bd84074208f634fe3a672",
-                        "completed": True,
-                        "key": "frame-1.jpg",
-                        "links": {
-                            "self": "/api/files/0692a21c-6864-41cb-8424-b0f83eeb261b/frame-1.jpg?versionId=7cc97a14-61f3-4902-a3cf-7a22af1859d8"
-                        },
-                        "progress": 100,
-                        "size": 22774,
-                        "tags": {
-                            "master": "f333e846-2620-416d-92e2-8137ed772692",
-                            "type": "frame"
-                        },
-                        "version_id": "7cc97a14-61f3-4902-a3cf-7a22af1859d8"
-                    },
-                    {
-                        "key": "frame-2.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-2.jpg?versionId=8ed2544a-c841-49a5-914b-8619c321c580"
-                        },
-                    },
-                    {
-                        "key": "frame-3.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-3.jpg?versionId=f04969d4-ab5f-4818-9f06-bea0e3843310"
-                        },
-                    },
-                    {
-                        "key": "frame-4.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-4.jpg?versionId=4528d78c-722a-4b70-8caa-42fdd4393857"
-                        },
-                    },
-                    {
-                        "key": "frame-5.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-5.jpg?versionId=13841296-7d58-49fa-b800-69112ae6953d"
-                        },
-                    },
-                    {
-                        "key": "frame-6.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-6.jpg?versionId=1fbc2a8f-dc42-40f5-ab4c-aaff57c1600e"
-                        },
-                    },
-                    {
-                        "key": "frame-7.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-7.jpg?versionId=d7b5d937-ca26-4d34-b8bc-8e70857c3544"
-                        },
-                    },
-                    {
-                        "key": "frame-8.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-8.jpg?versionId=7f765733-cbbd-47c6-bd60-5b98940e86b6"
-                        },
-                    },
-                    {
-                        "key": "frame-9.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-9.jpg?versionId=ecb09ee8-1c31-47da-a5a0-c9e4906faba2"
-                        },
-                    },
-                    {
-                        "key": "frame-10.jpg",
-                        "links": {
-                            "self": "/api/files/d2692fc0-a49d-40b9-824f-42099cb98fd3/frame-10.jpg?versionId=4351274e-3639-4ff9-a75f-fdc7c2efa7a1"
-                        },
-                    },
+        '_files': [
+            dict(
+                context_type='master',
+                media_type='video',
+                content_type='mp4',
+                checksum='md5:1beda6154605f65a922fdc488c987d83',
+                completed=True,
+                key='test.mp4',
+                frame=[
+                    dict(
+                        bucket_id='0692a21c-6864-41cb-8424-b0f83eeb261b',
+                        checksum='md5:7b4ba010ee4bd84074208f634fe3a672',
+                        completed=True,
+                        key='frame-{}.jpg'.format(i),
+                        links=dict(
+                            self=('/api/files/0692a21c-6864-41cb-8424-b0f83eeb'
+                                  '261b/frame-{}.jpg?versionId=7cc97a14-61f3-4'
+                                  '902-a3cf-7a22af1859d8'.format(i))),
+                        progress=100,
+                        size=22774,
+                        tags=dict(
+                            master='f333e846-2620-416d-92e2-8137ed772692',
+                            type='frame',
+                            timestamp=(float(i) / 10) * 60.095
+                        ),
+                        version_id='7cc97a14-61f3-4902-a3cf-7a22af1859d8')
+                    for i in range(11)
                 ],
-                "tags": {
-                    "bit_rate": "11915822",
-                    "height": "2160",
-                    "uri_origin": (
-                        "https://mediaarchive.cern.ch/MediaArchive/"
-                        "Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-06"
-                        "6/CERN-MOVIE-2016-066-001/CERN-MOVIE-2016-066-00"
-                        "1-11872-kbps-4096x2160-audio-128-kbps-stereo.mp4"
-                    ),
-                    "width": "4096",
-                    "duration": "100",
-                },
-                "video": [
-                    {
-                        "checksum": "md5:127efd1d7b090924d6c2e46848987b69",
-                        "completed": True,
-                        "key": (
-                            "CERN-MOVIE-2016-066-001-11872-kbps-"
-                            "4096x2160-audio-128-kbps-stereo[240p].mp4"
-                        ),
-                        "links": {
-                            "self": (
-                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
-                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
-                                "-4096x2160-audio-128-kbps-stereo[240p].mp"
-                                "4?versionId=02ff769e-21e0-4a79-93b1-7e82a"
-                                "9e8efe1"
-                            ),
-                        },
-                        "progress": 100,
-                        "size": 4457627,
-                        "tags": {
-                            "_sorenson_job_id":
-                                "1d0ab2fa-e26b-41c1-8fca-45afe2d00b61",
-                            "master":
-                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
-                            "preset_quality": "240p",
-                            "type": "video"
-                        },
-                        "version_id":
-                            "02ff769e-21e0-4a79-93b1-7e82a9e8efe1"
-                    },
-                    {
-                        "checksum": "",
-                        "completed": True,
-                        "key": (
-                            "CERN-MOVIE-2016-066-001-11872-kbps-"
-                            "4096x2160-audio-128-kbps-stereo[360p].mp4"
-                        ),
-                        "links": {
-                            "self": (
-                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
-                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
-                                "-4096x2160-audio-128-kbps-stereo[360p].mp"
-                                "4?versionId=e5f98169-a041-47d0-ae24-f1734"
-                                "44c1147"
-                            ),
-                        },
-                        "progress": 100,
-                        "size": 0,
-                        "tags": {
-                            "_sorenson_job_id":
-                                "8d6f784c-f20f-45e6-a18c-bb1d186f46b0",
-                            "master":
-                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
-                            "preset_quality": "360p",
-                            "type": "video"
-                        },
-                        "version_id":
-                            "e5f98169-a041-47d0-ae24-f173444c1147"
-                    },
-                    {
-                        "checksum": "md5:9999176fd09d9c54ecb56534fae0ff54",
-                        "completed": True,
-                        "key": (
-                            "CERN-MOVIE-2016-066-001-11872-kbps-"
-                            "4096x2160-audio-128-kbps-stereo[480p].mp4"
-                        ),
-                        "links": {
-                            "self": (
-                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
-                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
-                                "-4096x2160-audio-128-kbps-stereo[480p].mp"
-                                "4?versionId=92e6ac64-708a-4075-846a-6e385"
-                                "3707a1a"
-                            ),
-                        },
-                        "progress": 100,
-                        "size": 14382281,
-                        "tags": {
-                            "_sorenson_job_id":
-                                "deb59f6a-5836-4936-9d61-06516a045b03",
-                            "master":
-                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
-                            "preset_quality": "480p",
-                            "type": "video"
-                        },
-                        "version_id":
-                            "92e6ac64-708a-4075-846a-6e3853707a1a"
-                    },
-                    {
-                        "checksum": "md5:fb3d75b05bce32cca582e69316a97918",
-                        "completed": True,
-                        "key": (
-                            "CERN-MOVIE-2016-066-001-11872-kbps-"
-                            "4096x2160-audio-128-kbps-stereo[720p].mp4"
-                        ),
-                        "links": {
-                            "self": (
-                                "/api/files/d2692fc0-a49d-40b9-824f-42099c"
-                                "b98fd3/CERN-MOVIE-2016-066-001-11872-kbps"
-                                "-4096x2160-audio-128-kbps-stereo[720p].mp"
-                                "4?versionId=15d67ae2-f998-4681-9c26-6770a"
-                                "c0e18c4"
-                            ),
-                        },
-                        "progress": 100,
-                        "size": 26662844,
-                        "tags": {
-                            "_sorenson_job_id":
-                                "6c3d597e-3eed-43eb-b8d0-e773f767d853",
-                            "master":
-                                "9e4ce306-077c-463c-8a0e-b368edcdd7c3",
-                            "preset_quality": "720p",
-                            "type": "video"
-                        },
-                        "version_id":
-                            "15d67ae2-f998-4681-9c26-6770ac0e18c4"
-                    }
-                ]
-            }
+                tags=dict(
+                    bit_rate='11915822',
+                    width='4096',
+                    height='2160',
+                    uri_origin=(
+                        'https://mediaarchive.cern.ch/MediaArchive/'
+                        'Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-06'
+                        '6/CERN-MOVIE-2016-066-001/CERN-MOVIE-2016-066-00'
+                        '1-11872-kbps-4096x2160-audio-128-kbps-stereo.mp4'),
+                    duration='60.095',),
+                subformat=[
+                    dict(
+                        context_type='subformat',
+                        media_type='video',
+                        content_type='mp4',
+                        checksum='md5:{:032d}'.format(random.randint(1, 1000)),
+                        completed=True,
+                        key='CERN-MOVIE-2106-test[{}p]'.format(quality),
+                        links=dict(
+                            self='/api/files/...'),
+                        progress=100,
+                        size=4457627,
+                        tags=dict(
+                            _sorenson_job_id=str(uuid.uuid4()),
+                            master=str(uuid.uuid4()),
+                            preset_quality='{}p'.format(quality),),
+                        version_id=str(uuid.uuid4()),)
+                    for quality in enumerate([240, 360, 480, 720])
+                ],
+                playlist=[
+                    dict(
+                        context_type='playlist',
+                        media_type='text',
+                        content_type='smil',
+                        checksum='md5:{:032d}'.format(random.randint(1, 1000)),
+                        completed=True,
+                        key='test.smil',
+                        links=dict(
+                            self='/api/files/...'),
+                        progress=100,
+                        size=12355,
+                        tags=dict(
+                            master=str(uuid.uuid4())),
+                        version_id=str(uuid.uuid4()),)
+                ],
+            )
         ],
         'contributors': [
             {'name': 'paperone', 'role': 'Director'},

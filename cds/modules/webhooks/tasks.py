@@ -369,15 +369,27 @@ class ExtractFramesTask(AVCTask):
 
             self.update_state(state=STARTED, meta=meta)
 
+        # Calculate time positions
+        duration = float(self.object.get_tags()['duration'])
+        time_step = duration * frames_gap / 100
+        start_time = duration * frames_start / 100
+        end_time = duration * (frames_end + 1) / 100  # end inclusive
+
         # Generate frames
         ff_frames(
             self.object.file.uri,
-            frames_start,
-            frames_end,
-            frames_gap,
+            start_time,
+            end_time,
+            time_step,
+            duration,
             os.path.join(output_folder, 'frame-%d.jpg'),
             progress_callback=progress_updater)
-        frames = os.listdir(output_folder)
+
+        def extract_frame_number(frame_file):
+            """Extract frame number from its filename."""
+            return int(frame_file.rsplit('-', 1)[1].split('.', 1)[0])
+
+        frames = sorted(os.listdir(output_folder), key=extract_frame_number)
 
         # Generate GIF for previewing on hover
         gif_name = 'hover_preview.gif'
@@ -386,7 +398,7 @@ class ExtractFramesTask(AVCTask):
         head.save(in_output(gif_name), save_all=True,
                   append_images=tail, duration=500)
 
-        def create_object(key, media_type, context_type):
+        def create_object(key, media_type, context_type, **kwargs):
             obj = ObjectVersion.create(
                 bucket=self.object.bucket,
                 key=key,
@@ -394,12 +406,15 @@ class ExtractFramesTask(AVCTask):
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, 'media_type', media_type)
             ObjectVersionTag.create(obj, 'context_type', context_type)
+            [ObjectVersionTag.create(obj, key, kwargs[key]) for key in kwargs]
 
         # Create GIF object
         create_object(gif_name, 'image', 'frames-preview')
 
         # Create frame objects
-        [create_object(filename, 'image', 'frame') for filename in frames]
+        [create_object(filename, 'image', 'frame',
+                       timestamp=start_time + (i + 1) * time_step)
+         for i, filename in enumerate(frames)]
 
         shutil.rmtree(output_folder)
         db.session.commit()

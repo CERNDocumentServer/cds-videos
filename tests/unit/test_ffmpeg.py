@@ -74,9 +74,16 @@ def test_ffprobe(video):
     (90, 100, 2),
 ])
 def test_frames(video, start, end, gap):
-    """Test frame extarction."""
+    """Test frame extraction."""
+    # Convert percentages to values
+    duration = float(ff_probe(video, 'duration'))
+    time_step = duration * gap / 100
+    start_time = duration * start / 100
+    end_time = duration * (end + 1) / 100  # end inclusive
+
     tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    ff_frames(video, start, end, gap, join(tmp, 'img%d.jpg'))
+    ff_frames(video, start_time, end_time, time_step,
+              duration, join(tmp, 'img%d.jpg'))
     file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
     assert file_no == floor(((end - start) / gap) + 1)
     shutil.rmtree(tmp)

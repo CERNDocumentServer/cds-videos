@@ -61,10 +61,18 @@ class CDSPreviewRecordFile(PreviewFile):
             filename='frame-1.jpg')
 
     @property
+    def thumbnails_uri(self):
+        """Get video's thumbnails' link."""
+        return url_for(
+            'invenio_records_ui.{0}_export'.format(self.pid.pid_type),
+            pid_value=self.pid.pid_value,
+            format='vtt')
+
+    @property
     def smil_file_object(self):
         data = self.file.dumps()
-        if 'smil' in data:
-            smil_info = self.file.dumps()['smil'][0]
+        if 'playlist' in data:
+            smil_info = data['playlist'][0]
             return ObjectVersion.get(smil_info['bucket_id'], smil_info['key'])
 
 

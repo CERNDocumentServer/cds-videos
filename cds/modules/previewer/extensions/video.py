@@ -50,7 +50,7 @@ class VideoExtension(object):
             file=file,
             video_url=file.uri,
             m3u8_url=getattr(file, 'm3u8_uri', None),
-            thumbnails_url=None,
+            thumbnails_url=getattr(file, 'thumbnails_uri', None),
             poster_url=getattr(file, 'poster_uri', None),
             embed=self.embed,
             css_bundles=['cds_previewer_video_css'],

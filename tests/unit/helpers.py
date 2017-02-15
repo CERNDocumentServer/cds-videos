@@ -154,7 +154,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
     return sum([
         5 if download else 0,
         10 if download and metadata else 0,
-        11 * 3 if frames else 0,
+        3 + 10 * 4 if frames else 0,
         len(get_available_preset_qualities()) * 5 if transcode else 0,
     ])
 

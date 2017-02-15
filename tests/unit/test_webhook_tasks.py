@@ -200,6 +200,7 @@ def test_video_extract_frames(app, db, bucket, video):
     """Test extract frames from video."""
     obj = ObjectVersion.create(
         bucket=bucket, key='video.mp4', stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'duration', '60.095000')
     version_id = str(obj.version_id)
     db.session.commit()
 
@@ -219,10 +220,10 @@ def test_video_extract_frames(app, db, bucket, video):
     ExtractFramesTask().clean(version_id=version_id)
 
     assert ObjectVersion.query.count() == 1  # master file
-    frames = ObjectVersion.query.join(ObjectVersion.tags).filter(
+    frames_and_gif = ObjectVersion.query.join(ObjectVersion.tags).filter(
         ObjectVersionTag.key == 'master',
         ObjectVersionTag.value == version_id).all()
-    assert len(frames) == 0
+    assert len(frames_and_gif) == 0
 
 
 def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
