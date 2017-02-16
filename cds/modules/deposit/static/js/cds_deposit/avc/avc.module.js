@@ -4,6 +4,7 @@ function cdsDepositsConfig(
   depositSSEEventsProvider,
   depositStatusesProvider,
   inheritedPropertiesProvider,
+  errorRepresentationsProvider,
   urlBuilderProvider,
   typeReducerProvider
 ) {
@@ -43,6 +44,13 @@ function cdsDepositsConfig(
     'contributors'
   ]);
 
+  errorRepresentationsProvider.setValues({
+    file_download: 'Video file download error',
+    file_transcode: 'Video transcoding error',
+    file_video_extract_frames: 'Video frame extraction error',
+    file_video_metadata_extraction: 'Video metadata extraction error'
+  });
+
   // Initialize url builder
   urlBuilderProvider.setBlueprints({
     iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png',
@@ -67,6 +75,7 @@ cdsDepositsConfig.$inject = [
   'depositSSEEventsProvider',
   'depositStatusesProvider',
   'inheritedPropertiesProvider',
+  'errorRepresentationsProvider',
   'urlBuilderProvider',
   'typeReducerProvider',
 ];
@@ -106,6 +115,14 @@ angular
           }
         });
       },
+    };
+  });
+
+angular
+  .module('cdsDeposit.filters')
+  .filter('errorRepr', function(errorRepresentations) {
+    return function(input) {
+      return errorRepresentations[input] || input;
     };
   });
 

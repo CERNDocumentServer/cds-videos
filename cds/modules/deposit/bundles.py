@@ -79,6 +79,7 @@ js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/providers/depositSSEEvents.js',
     'js/cds_deposit/avc/providers/depositStatuses.js',
     'js/cds_deposit/avc/providers/inheritedProperties.js',
+    'js/cds_deposit/avc/providers/errorRepresentations.js',
     'js/cds_deposit/avc/providers/stateReducer.js',
     'js/cds_deposit/avc/providers/typeReducer.js',
     'js/cds_deposit/avc/providers/urlBuilder.js',
