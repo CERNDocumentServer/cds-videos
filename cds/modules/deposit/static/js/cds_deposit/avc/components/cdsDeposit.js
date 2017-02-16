@@ -5,6 +5,7 @@ function cdsDepositCtrl(
   $sce,
   depositStates,
   depositStatuses,
+  inheritedProperties,
   cdsAPI,
   urlBuilder,
   typeReducer
@@ -91,6 +92,48 @@ function cdsDepositCtrl(
       if (!that.master) {
         $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
       }
+    };
+
+    var accessElement = function(obj, elem, value) {
+      // Find an element inside an object given a path of properties
+      // If value is given, set element to value
+      var lastPart, parentObj = obj;
+      angular.forEach(ObjectPath.parse(elem), function(part) {
+        if (!obj) {
+          return null;
+        }
+        lastPart = part;
+        parentObj = obj;
+        if (!obj[part] && value) {
+          obj[part] = {};
+        }
+        obj = obj[part];
+      });
+      if (value) {
+        parentObj[lastPart] = value;
+      }
+      return obj;
+    };
+
+    var hasNoProperties = function(obj) {
+      return Object.getOwnPropertyNames(obj).length == 0;
+    };
+
+    this.inheritMetadata = function() {
+      var record = that.record;
+      var master = that.cdsDepositsCtrl.master.metadata;
+
+      angular.forEach(inheritedProperties, function(propPath) {
+        var inheritedVal = accessElement(master, propPath);
+        var ownElement = accessElement(record, propPath);
+        if (inheritedVal && !ownElement) {
+          accessElement(record, propPath, inheritedVal);
+        } else if (ownElement instanceof Array &&
+            ownElement.every(hasNoProperties)) {
+          var inheritedArray = angular.copy(inheritedVal);
+          accessElement(record, propPath, inheritedArray);
+        }
+      });
     };
 
     this.initializeStateReported = function() {
@@ -418,6 +461,7 @@ cdsDepositCtrl.$inject = [
   '$sce',
   'depositStates',
   'depositStatuses',
+  'inheritedProperties',
   'cdsAPI',
   'urlBuilder',
   'typeReducer',
