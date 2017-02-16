@@ -38,6 +38,8 @@ from celery import states
 from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
 
+from functools import wraps
+from jsonschema.exceptions import ValidationError
 from invenio_db import db
 from invenio_deposit.api import Deposit, preserve, has_status
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
@@ -68,6 +70,19 @@ PRESERVE_FIELDS = (
 current_jsonschemas = LocalProxy(
     lambda: current_app.extensions['invenio-jsonschemas']
 )
+
+
+def required(fields):
+    """Check required fields."""
+    def check(f):
+        @wraps(f)
+        def wrapper(self, *args, **kwargs):
+            for field in fields:
+                if field not in self:
+                    raise ValidationError('{0} field not found'.format(field))
+            return f(self, *args, **kwargs)
+        return wrapper
+    return check
 
 
 class CDSFileObject(FileObject):
@@ -507,6 +522,7 @@ class Project(CDSDeposit):
         assert pid.register()
         db.session.commit()
 
+    @required(['category', 'type'])
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Projects."""
         try:
@@ -591,8 +607,8 @@ class Video(CDSDeposit):
         if self._tasks_global_status() != states.SUCCESS:
             raise PIDInvalidAction()
         # inherit ``category`` and ``type`` fields from parent project
-        self['category'] = self.project['category']
-        self['type'] = self.project['type']
+        self['category'] = self.project.get('category')
+        self['type'] = self.project.get('type')
         # publish the video
         video_published = super(Video, self).publish(pid=pid, id_=id_,
                                                      **kwargs)

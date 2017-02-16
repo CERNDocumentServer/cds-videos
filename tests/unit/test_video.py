@@ -46,6 +46,7 @@ from invenio_indexer.api import RecordIndexer
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from copy import deepcopy
+from jsonschema.exceptions import ValidationError
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video)
@@ -531,3 +532,36 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         status = data['hits']['hits'][0]['metadata']['_deposit']['state']
         assert status['add'] == states.SUCCESS
         assert status['failing'] == states.FAILURE
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def test_video_publish_with_no_category(project):
+    """Test video publish if category is not set."""
+    (project, video_1, video_2) = project
+    video_1_depid = video_1['_deposit']['id']
+    # test: no category in project
+    category = project['category']
+    del project['category']
+    assert 'type' in project
+    project.commit()
+    db.session.commit()
+    with pytest.raises(ValidationError):
+        video_1.publish()
+    # test: no type in project
+    type_ = project['type']
+    project['category'] = category
+    del project['type']
+    assert 'category' in project
+    project.commit()
+    db.session.commit()
+    video_1 = video_resolver([video_1_depid])[0]
+    with pytest.raises(ValidationError):
+        video_1.publish()
+    # test with category + type
+    project['type'] = type_
+    project.commit()
+    db.session.commit()
+    video_1 = video_resolver([video_1_depid])[0]
+    video_1.publish()
+    assert video_1['_deposit']['status'] == 'published'
