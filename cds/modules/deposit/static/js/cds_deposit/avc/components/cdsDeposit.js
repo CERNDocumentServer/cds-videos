@@ -205,7 +205,7 @@ function cdsDepositCtrl(
       if (evt.currentScope == evt.targetScope) {
         that.alerts = [];
         that.alerts.push({
-          message: response.status || 'Success',
+          message: 'Success!',
           type: 'success'
         });
       }
