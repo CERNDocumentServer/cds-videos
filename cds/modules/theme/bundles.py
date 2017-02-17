@@ -33,6 +33,7 @@ css = Bundle(
     Bundle(
         'node_modules/ng-dialog/css/ngDialog.css',
         'node_modules/ng-dialog/css/ngDialog-theme-default.css',
+        'node_modules/ngmodal/dist/ng-modal.css',
         filters='cleancss',
     ),
     NpmBundle(
@@ -42,6 +43,7 @@ css = Bundle(
             'almond': '~0.3.1',
             'bootstrap-sass': '~3.3.5',
             'font-awesome': '~4.4.0',
+            'ngmodal': '~2.0.1'
         }
     ),
     output='gen/cds.%(version)s.css',
