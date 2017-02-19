@@ -36,16 +36,20 @@ $cds-enormus-spacing: 20px;
 
 // Brand colors CDS
 $light-color: #ffffff;
+$cds-primary-color: #061723;
 $primary-color: #0c63aa;
 $primary-color-dark: darken($primary-color, 10%);
 $primary-color-light: lighten($primary-color, 10%);
 $primary-color-text: #212121;
 
-$cds-primary-color: #061723;
-
 $primary-text-color: #212121;
 $secondary-text-color: #727272;
 $divider-color: #B6B6B6;
+
+// Unicorn colors
+$cds-unicorn-blue: #0ff;
+$cds-unicorn-pink: #f0f;
+$cds-unicorn-color: linear-gradient(-225deg, $cds-unicorn-blue 0%, $cds-unicorn-pink 100%);
 
 // Bootstrap
 $brand-primary: $primary-color;
@@ -71,8 +75,8 @@ $navbar-default-link-disabled-bg: transparent;
 
 // Navbar toggle
 $navbar-default-toggle-hover-bg: #ddd;
-$navbar-default-toggle-icon-bar-bg: #888;
-$navbar-default-toggle-border-color: #ddd;
+$navbar-default-toggle-icon-bar-bg: #fff;
+$navbar-default-toggle-border-color: #fff;
 
 // Bliax, remove border radius
 $border-radius-small: 0;
