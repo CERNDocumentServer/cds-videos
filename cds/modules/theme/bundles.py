@@ -33,11 +33,11 @@ css = Bundle(
     Bundle(
         'node_modules/ng-dialog/css/ngDialog.css',
         'node_modules/ng-dialog/css/ngDialog-theme-default.css',
-        filters='cleancss',
+        filters='cleancssurl',
     ),
     NpmBundle(
         'scss/cds.scss',
-        filters='node-scss, cleancss',
+        filters='node-scss,cleancssurl',
         npm={
             'almond': '~0.3.1',
             'bootstrap-sass': '~3.3.5',

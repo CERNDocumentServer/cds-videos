@@ -361,6 +361,12 @@ def pages():
 @with_appcontext
 def videos(video, frames, temp, video_count):
     """Load videos, frames and subformats."""
+    from invenio_deposit import InvenioDepositREST
+    from invenio_records_rest import InvenioRecordsREST
+
+    InvenioDepositREST(current_app)
+    InvenioRecordsREST(current_app)
+
     if not video:
         video = join(dirname(__file__), '..', '..', '..',
                      'tests', 'data', 'test.mp4')

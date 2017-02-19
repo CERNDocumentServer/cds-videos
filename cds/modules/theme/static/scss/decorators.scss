@@ -21,50 +21,23 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-// Backgrounds
+.bw-0 { border-width: 0; }
+.bw-1 { border-width: 1px; }
+.bw-2 { border-width: 2px; }
+.bw-3 { border-width: 3px; }
+.bw-4 { border-width: 4px; }
+.bw-5 { border-width: 5px; }
 
-// Background normal
-.bg-n {
-  background-color: $cds-primary-color;
-}
-// Background light
-.bg-l {
-  background-color: $primary-color-light;
-}
-// Background darker
-.bg-d {
-  background-color: $primary-color-dark;
-}
-// Background gray
-.bg-g {
-  background-color: gray;
-}
-// Background white
-.bg-w {
-  background-color: white;
-}
+.ba { border-style: solid; }
+.bt { border-top-style: solid; }
+.br { border-right-style: solid; }
+.bb { border-bottom-style: solid; }
+.bl { border-left-style: solid; }
+.bn { border-style: none; }
 
-// Text white
-.t-w {
-  color: #fff;
-}
-// Text blue
-.t-b {
-  color: $cds-primary-color;
-}
-
-// Link white
-.l-w {
-  color: #fff;
-  &:hover {
-    color: #fff;
-  }
-}
-
-// Link blue
-.l-b {
-  color: $cds-primary-color;
-  &:hover {
-    color: $cds-primary-color;
-  }
-}
+.f1 { font-size: 4rem; }
+.f2 { font-size: 3.75rem; }
+.f3 { font-size: 3.25rem; }
+.f4 { font-size: 2.75rem; }
+.f5 { font-size: 2.25rem; }
+.f6 { font-size: 2rem; }
