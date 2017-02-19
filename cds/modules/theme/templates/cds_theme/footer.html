@@ -1,36 +1,36 @@
-<footer class="cds-footer l-w bg-n pb-30 pt-40">
-  <div class="container pt-40">
+<footer class="cds-footer bg-n pt-30">
+  <div class="container">
     <div class="row">
-      <div class="col-sm-2 col-sm-offset-1">
-        <!-- <h1 class="m-0">CDS</h1> -->
-      </div>
-      <div class="col-sm-6">
-        <ul class="list-inline text-center">
-          <li><a class="l-w" href="/about">About</a></li>
-          <li><a class="l-w" href="/contact">Contact</a></li>
-          <li><a class="l-w" href="/faq">FAQ</a></li>
-          <li><a class="l-w" href="/feedback">Feedback</a></li>
-          <li><a class="l-w" href="/help">Help</a></li>
-          <li><a class="l-w" href="/terms">Terms of Use</a></li>
-        </ul>
-      </div>
-      <div class="col-sm-offset-1 col-sm-2">
-      <!--  <img class="cds-image-white" src="{{ url_for('static', filename='img/cern-logo-large.png') }}" /> -->
-      </div>
-      <div class="col-sm-12 pt-10 pb-20">
-        <div class="row">
-          <div class="cds-footer-separator">
-            <div class="col-sm-11">
-              <div class="text-right">
-                <div class="pt-10 pb-10">
-                  <small>{{ _('POWERED BY') }} <a href="//invenio-software.org/" target="_blank">INVENIO</a></small>
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-offset-1 col-sm-1">
-            </div>
+      <div class="col-md-12">
+        <!-- Upper -->
+        <div class="cds-footer-upper px-20 pb-10">
+          <div class="hidden-xs hidden-sm cds-footer-brand">
+            <p class="ma-0 t-w f1">CDS</p>
+          </div>
+          <div class="cds-footer-menu">
+            <ul class="list-inline text-center ma-0">
+              <li><a class="l-w" href="/about">About</a></li>
+              <li><a class="l-w" href="/contact">Contact</a></li>
+              <li><a class="l-w" href="/faq">FAQ</a></li>
+              <li><a class="l-w" href="/feedback">Feedback</a></li>
+              <li><a class="l-w" href="/help">Help</a></li>
+              <li><a class="l-w" href="/terms">Terms of Use</a></li>
+            </ul>
+          </div>
+          <div class="hidden-xs hidden-sm cds-footer-brand text-right">
+            <a href="//home.cern" target="_blank"><img src="{{ url_for('static', filename='img/outline_80_white.png') }}" /></a>
           </div>
         </div>
+        <!-- ./Upper -->
+      </div>
+      <div class="col-md-12">
+        <!-- Lower -->
+        <div class="cds-footer-lower text-right px-10 pt-5 pb-30">
+          <p class="ma-0 t-w cds-power-by-invenio">
+            POWERED BY <a class="l-w" href="//invenio-software.org/" target="_blank">INVENIO</a>
+          </p>
+        </div>
+        <!-- ./Lower -->
       </div>
     </div>
   </div>

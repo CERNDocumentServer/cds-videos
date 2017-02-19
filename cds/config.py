@@ -449,6 +449,12 @@ REQUIREJS_CONFIG = 'js/cds-build.js'
 THEME_BREADCRUMB_ROOT_ENDPOINT = 'cds_home.index'
 # Cover template
 COVER_TEMPLATE = 'cds_theme/page_cover.html'
+# 404 Error
+THEME_404_TEMPLATE = 'cds_theme/error/404.html'
+# 500 Error
+THEME_500_TEMPLATE = 'cds_theme/error/500.html'
+# Error template
+THEME_ERROR_TEMPLATE = 'cds_theme/error/base.html'
 
 ###############################################################################
 # Previewer

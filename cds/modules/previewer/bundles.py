@@ -33,12 +33,12 @@ theoplayer_js = Bundle(
 
 video_css = Bundle(
     'css/cds_previewer/video.css',
-    filters='cleancss',
+    filters='cleancssurl',
     output='gen/cds.previewer.%(version)s.css',
 )
 
 theoplayer_css = Bundle(
     'css/cds_previewer/theoplayer/theoplayer.css',
-    filters='cleancss',
+    filters='cleancssurl',
     output='gen/cds.previewer.oplayer.%(version)s.css',
 )

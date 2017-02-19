@@ -23,8 +23,12 @@
 
 // any variable we need to override
 @import "variables";
-@import "spacing";
+
 @import "colors";
+@import "spacing";
+@import "social";
+@import "decorators";
+@import "mixins";
 
 @import "../node_modules/bootstrap-sass/assets/stylesheets/_bootstrap";
 @import "../node_modules/font-awesome/scss/font-awesome";
@@ -38,10 +42,24 @@ a[ng-click]{
   cursor: pointer;
 }
 
+.flex-container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.flex-item {
+  flex: 1;
+}
+
 .cds-footer-separator {
   width: 100%;
   height: auto;
   border-top: 1px solid #fff;
+}
+
+.cds-navbar-brand {
+  font-size: 25px;
 }
 
 .cds-title-section-decoration {
@@ -121,14 +139,18 @@ a[ng-click]{
     display: none !important;
   }
 }
-
+#invenio-search {
+  invenio-search {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+}
 // login
 
 .cds-login {
-  height: 100%;
-  background: #003973;
-  background: -webkit-linear-gradient(to left, #003973 , #E5E5BE);
-  background: linear-gradient(to left, #003973 , #E5E5BE);
+  height: 100vh;
+  background: $cds-primary-color;
 }
 
 .cds-login .panel {
@@ -358,198 +380,147 @@ a[ng-click]{
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
 
-// Social media buttons
-.resp-sharing-button__link,
-.resp-sharing-button__icon {
-  display: inline-block
+// Footer
+
+.cds-footer-upper {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  align-content: center;
+  border-bottom: 1px solid #fff;
+  width: 100%;
 }
 
-.resp-sharing-button__link {
-  text-decoration: none;
+.cds-footer-menu {
+  flex: 1;
+  flex-grow: 2;
+  align-self:  flex-end;
+  text-align: center;
+  justify-content: space-between;
+}
+
+.cds-footer-brand {
+  flex: 1;
+  flex-grow: 1;
+  align-self: flex-end;
+}
+
+.cds-power-by-invenio {
+  font-size: 12px;
+  a {
+    text-decoration: underline;
+  }
+}
+
+/////////
+
+// Error pages
+.error-page {
+  flex: 1;
+}
+
+.cds-flex-center-content {
+  justify-content: center;
+  align-items: center;
+  flex-direction: row !important;
+}
+
+// 404
+.cds-404 {
+  @extend .cds-flex-center-content;
+  background-image: $cds-unicorn-color;
+}
+
+// 500
+.cds-500 {
+  @extend .cds-flex-center-content;
+  background-image: $cds-unicorn-color;
+}
+
+.glitch {
+  font-size: 160px;
+  cursor: pointer;
+  line-height: 1;
+  font-weight: 700;
+  transform: translate(0%, 0%);
   color: #fff;
-  margin: 0.5em
+  &:before,
+  &:after{
+    display: block;
+    content:attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    opacity: .8;
+  }
+  &:after {
+    color: #f0f;
+    z-index: -2;
+  }
+  &:before {
+    color: #0ff;
+    z-index: -1;
+  }
+  &:hover {
+    &:before {
+      animation: glitch .3s cubic-bezier(.25, .46, .45, .94) both infinite
+    }
+    &:after {
+      animation: glitch .3s cubic-bezier(.25, .46, .45, .94) reverse both infinite
+    }
+  }
+}
+@keyframes glitch {
+    0% {
+        -webkit-transform: translate(0);
+        transform: translate(0)
+    }
+    20% {
+        -webkit-transform: translate(-5px, 5px);
+        transform: translate(-5px, 5px)
+    }
+    40% {
+        -webkit-transform: translate(-5px, -5px);
+        transform: translate(-5px, -5px)
+    }
+    60% {
+        -webkit-transform: translate(5px, 5px);
+        transform: translate(5px, 5px)
+    }
+    80% {
+        -webkit-transform: translate(5px, -5px);
+        transform: translate(5px, -5px)
+    }
+    to {
+        -webkit-transform: translate(0);
+        transform: translate(0)
+    }
 }
 
-.resp-sharing-button {
-  border-radius: 5px;
-  transition: 25ms ease-out;
-  padding: 0.5em 0.75em;
-  font-family: Helvetica Neue,Helvetica,Arial,sans-serif
+/////////
+
+// Navigation
+@media (min-width: $screen-sm-min) {
+  #cds-navbar {
+    display: flex !important;
+  }
+  .cds-navbar-form {
+    flex: 1 1 auto;
+    .form-group {
+      width: 100%;
+      input {
+        width: 90%;
+        border: 1px solid $cds-primary-color;
+        border-radius: 2px;
+      }
+    }
+
+  }
+  .cds-navbar-nav {
+    flex: 0 0 auto;
+  }
 }
-
-.resp-sharing-button__icon svg {
-  width: 1em;
-  height: 1em;
-  margin-right: 0.4em;
-  vertical-align: top
-}
-
-.resp-sharing-button--small svg {
-  margin: 0;
-  vertical-align: middle
-}
-
-/* Non solid icons get a stroke */
-.resp-sharing-button__icon {
-  stroke: #fff;
-  fill: none
-}
-
-/* Solid icons get a fill */
-.resp-sharing-button__icon--solid,
-.resp-sharing-button__icon--solidcircle {
-  fill: #fff;
-  stroke: none
-}
-
-.resp-sharing-button--twitter {
-  background-color: #55acee
-}
-
-.resp-sharing-button--twitter:hover {
-  background-color: #2795e9
-}
-
-.resp-sharing-button--facebook {
-  background-color: #3b5998
-}
-
-.resp-sharing-button--facebook:hover {
-  background-color: #2d4373
-}
-
-.resp-sharing-button--tumblr {
-  background-color: #35465C
-}
-
-.resp-sharing-button--tumblr:hover {
-  background-color: #222d3c
-}
-
-.resp-sharing-button--reddit {
-  background-color: #5f99cf
-}
-
-.resp-sharing-button--reddit:hover {
-  background-color: #3a80c1
-}
-
-.resp-sharing-button--google {
-  background-color: #dd4b39
-}
-
-.resp-sharing-button--google:hover {
-  background-color: #c23321
-}
-
-.resp-sharing-button--linkedin {
-  background-color: #0077b5
-}
-
-.resp-sharing-button--linkedin:hover {
-  background-color: #046293
-}
-
-.resp-sharing-button--email {
-  background-color: #777
-}
-
-.resp-sharing-button--email:hover {
-  background-color: #5e5e5e
-}
-
-.resp-sharing-button--xing {
-  background-color: #1a7576
-}
-
-.resp-sharing-button--xing:hover {
-  background-color: #114c4c
-}
-
-.resp-sharing-button--whatsapp {
-  background-color: #25D366
-}
-
-.resp-sharing-button--whatsapp:hover {
-  background-color: #1da851
-}
-
-.resp-sharing-button--hackernews {
-background-color: #FF6600
-}
-.resp-sharing-button--hackernews:hover, .resp-sharing-button--hackernews:focus {   background-color: #FB6200 }
-
-.resp-sharing-button--vk {
-  background-color: #507299
-}
-
-.resp-sharing-button--vk:hover {
-  background-color: #43648c
-}
-
-.resp-sharing-button--facebook {
-  background-color: #3b5998;
-  border-color: #3b5998;
-}
-
-.resp-sharing-button--facebook:hover,
-.resp-sharing-button--facebook:active {
-  background-color: #2d4373;
-  border-color: #2d4373;
-}
-
-.resp-sharing-button--twitter {
-  background-color: #55acee;
-  border-color: #55acee;
-}
-
-.resp-sharing-button--twitter:hover,
-.resp-sharing-button--twitter:active {
-  background-color: #2795e9;
-  border-color: #2795e9;
-}
-
-.resp-sharing-button--email {
-  background-color: #777777;
-  border-color: #777777;
-}
-
-.resp-sharing-button--email:hover,
-.resp-sharing-button--email:active {
-  background-color: #5e5e5e;
-  border-color: #5e5e5e;
-}
-
-.resp-sharing-button--reddit {
-  background-color: #5f99cf;
-  border-color: #5f99cf;
-}
-
-.resp-sharing-button--reddit:hover,
-.resp-sharing-button--reddit:active {
-  background-color: #3a80c1;
-  border-color: #3a80c1;
-}
-
-
-// Move them to decorators.scss
-.bw-0 { border-width: 0; }
-.bw-1 { border-width: 1px; }
-.bw-2 { border-width: 2px; }
-.bw-3 { border-width: 3px; }
-.bw-4 { border-width: 4px; }
-.bw-5 { border-width: 5px; }
-
-.ba { border-style: solid; }
-.bt { border-top-style: solid; }
-.br { border-right-style: solid; }
-.bb { border-bottom-style: solid; }
-.bl { border-left-style: solid; }
-.bn { border-style: none; }
-
-.f1 { font-size: 3rem; }
-.f2 { font-size: 2.25rem; }
-.f3 { font-size: 1.5rem; }
-.f4 { font-size: 1.25rem; }
-.f5 { font-size: 1rem; }
-.f6 { font-size: .875rem; }

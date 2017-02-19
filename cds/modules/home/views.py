@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -45,8 +45,8 @@ def init_menu():
     item = current_menu.submenu('main.deposit')
     item.register(
         'invenio_deposit_ui.index',
-        _('Deposit'),
-        order=3,
+        _('Upload'),
+        order=2,
     )
 
 
