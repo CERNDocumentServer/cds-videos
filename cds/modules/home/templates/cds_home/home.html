@@ -1,125 +1,126 @@
 {%- extends "cds_home/default.html" %}
 
 {%- block page_body %}
-
-  {% block home_featured_video %}
-  <div id="cds-featured-video" class="cds-home-video-featured bg-n mt--20">
-    <div class="container">
-      <!-- List group -->
-      <invenio-search
-        handle-urls="false"
-        search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
-      >
-        <div class="text-center">
-          <invenio-search-loading
-              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-              message="">
-          </invenio-search-loading>
-        </div>
-        <invenio-search-results
-          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
-        </invenio-search-results>
-      </invenio-search>
-    </div>
-  </div>
-  {% endblock home_featured_video %}
-  <!-- Recent videos -->
-  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <!-- Title -->
-          <div class="cds-title-section pt-10 mb-20 l-w">
-            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('RECENT') }}</h2>
-            <p>{{ _('MOST RECENTLY ADDED VIDEOS') }}</p>
+  <div class="flex-item">
+    {% block home_featured_video %}
+    <div id="cds-featured-video" class="cds-home-video-featured bg-n mt--20">
+      <div class="container">
+        <!-- List group -->
+        <invenio-search
+          handle-urls="false"
+          search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
+        >
+          <div class="text-center">
+            <invenio-search-loading
+                template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                message="">
+            </invenio-search-loading>
           </div>
-          <!-- Title -->
-        </div>
+          <invenio-search-results
+            template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
+          </invenio-search-results>
+        </invenio-search>
       </div>
-      <!-- List group -->
-      <invenio-search
-        handle-urls="false"
-        search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
-      >
-        <div class="text-center">
-          <invenio-search-loading
-              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-              message="">
-          </invenio-search-loading>
-        </div>
-        <invenio-search-results
-          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
-        </invenio-search-results>
-      </invenio-search>
     </div>
-  </div>
-  <!-- Recent videos -->
-
-  <!-- Channels -->
-  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section pt-20 pb-20">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <!-- Title -->
-          <div class="cds-title-section pt-10 mb-20">
-            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
-            <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
+    {% endblock home_featured_video %}
+    <!-- Recent videos -->
+    <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <!-- Title -->
+            <div class="cds-title-section pt-10 mb-20 l-w">
+              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('RECENT') }}</h2>
+              <p>{{ _('MOST RECENTLY ADDED VIDEOS') }}</p>
+            </div>
+            <!-- Title -->
           </div>
-          <!-- Title -->
         </div>
+        <!-- List group -->
+        <invenio-search
+          handle-urls="false"
+          search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
+        >
+          <div class="text-center">
+            <invenio-search-loading
+                template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+                message="">
+            </invenio-search-loading>
+          </div>
+          <invenio-search-results
+            template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
+          </invenio-search-results>
+        </invenio-search>
       </div>
-      <!-- List group -->
-      <div class="row">
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
+    </div>
+    <!-- Recent videos -->
+
+    <!-- Channels -->
+    <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section pt-20 pb-20">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <!-- Title -->
+            <div class="cds-title-section pt-10 mb-20">
+              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
+              <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
+            </div>
+            <!-- Title -->
+          </div>
         </div>
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a class="cds-video-title l-b" href="#">
-            <img class="img-responsive"src='http://placehold.it/400x220' />
-            <p>
-              CHANNEL
-            </p>
-          </a>
+        <!-- List group -->
+        <div class="row">
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a class="cds-video-title l-b" href="#">
+              <img class="img-responsive"src='http://placehold.it/400x220' />
+              <p>
+                CHANNEL
+              </p>
+            </a>
+          </div>
         </div>
       </div>
     </div>
+    <!-- Channels -->
   </div>
-  <!-- Channels -->
 {%- endblock page_body %}
