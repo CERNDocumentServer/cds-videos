@@ -58,6 +58,7 @@ js = NpmBundle(
         'node_modules/ng-dialog/js/ngDialog.js',
         'node_modules/clipboard/dist/clipboard.js',
         'node_modules/ngclipboard/dist/ngclipboard.js',
+        'node_modules/underscore/underscore.js',
         'node_modules/d3/d3.js',
         'node_modules/angular-loading-bar/build/loading-bar.js',
         'js/cds/module.js',
@@ -66,6 +67,8 @@ js = NpmBundle(
         filters='jsmin',
     ),
     depends=(
+        'js/cds_deposit/avc/filters/progressClass.js',
+        'js/cds_deposit/avc/filters/progressIcon.js',
         'js/*.js',
         'js/cds/*.js',
         'node_modules/invenio-search-js/dist/*.js',
@@ -77,6 +80,7 @@ js = NpmBundle(
         'ng-dialog': '~0.6.0',
         'clipboard': '~1.5.16',
         'ngclipboard': '~1.1.1',
+        'underscore': '~1.8.3',
     }
 )
 """Default JavaScript bundle."""

@@ -30,7 +30,9 @@
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_search_ui_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_search_ui_js", "cds_deposit_common_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 {%- endblock javascript %}
 
 {%- block body_inner %}

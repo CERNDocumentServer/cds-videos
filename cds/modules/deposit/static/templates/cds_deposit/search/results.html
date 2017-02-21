@@ -21,6 +21,13 @@
         <p class="list-group-item-text text-muted">
           <small>Created on {{ record.created | date:'medium' }}, last updated on {{ record.updated | date:'medium' }}</small>
         </p>
+        <p>
+          <ul class="list-inline text-left">
+            <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
+              <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
+            </li>
+          </ul>
+        </p>
       </div>
       <div class="clearfix"></div>
     </a>

@@ -129,36 +129,6 @@ function cdsDepositsCtrl(
     );
   };
 
-  this.getOverallState = function() {
-    var states = {};
-    var values = [];
-    that.state = 'PENDING';
-
-    for (var key in that.overallState) {
-      values.push(that.overallState[key]);
-    }
-    depositStates.forEach(function(i) {
-      states[i] = 'PENDING';
-
-      var keyIncludes = function(key) {
-        return function(val) {
-          return val[key].includes(i);
-        };
-      };
-
-      if (values.every(keyIncludes('SUCCESS'))) {
-        states[i] = 'SUCCESS';
-      } else if (values.some(keyIncludes('FAILURE'))) {
-        states[i] = 'FAILURE';
-      } else if (values.some(keyIncludes('STARTED'))
-        || values.some(keyIncludes('SUCCESS'))) {
-        states[i] = 'STARTED';
-      }
-      that.state = states[i];
-    });
-    return states;
-  };
-
   this.isVideoFile = function(key) {
     var videoRegex = /(.*)\.(mp4|mov)$/;
     return key.match(videoRegex);
@@ -334,6 +304,32 @@ function cdsDepositsCtrl(
     });
   };
 
+  var checkStatus = function(task, status) {
+    return function(child) {
+      return child.metadata._deposit.state[task] == status;
+    };
+  };
+
+  var getOverallState = function(children) {
+    var taskStates = {};
+    if (!children) {
+      return;
+    }
+    depositStates.forEach(function(task) {
+      if (children.every(checkStatus(task, 'SUCCESS'))) {
+        taskStates[task] = 'SUCCESS';
+      } else if (children.some(checkStatus(task, 'FAILURE'))) {
+        taskStates[task] = 'FAILURE';
+      } else if (children.some(checkStatus(task, 'STARTED')) ||
+        children.some(checkStatus(task, 'SUCCESS'))) {
+        taskStates[task] = 'STARTED';
+      } else if (!children.every(checkStatus(task, undefined))) {
+        taskStates[task] = 'PENDING';
+      }
+    });
+    return taskStates;
+  };
+
   $scope.$on('cds.deposit.status.changed', function(evt, id, state) {
     that.overallState[id] = that.overallState[id] || {};
     var thisState = that.overallState[id];
@@ -350,7 +346,7 @@ function cdsDepositsCtrl(
           thisState[prevState], thisState[curState]);
       });
     });
-    that.aggregatedState = that.getOverallState();
+    that.aggregatedState = getOverallState(that.children);
   });
 }
 
