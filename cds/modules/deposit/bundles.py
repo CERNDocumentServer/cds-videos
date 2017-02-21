@@ -71,8 +71,9 @@ js_jquery = NpmBundle(
     output='gen/cds.deposit.jquery.deposit.%(version)s.js',
 )
 
-js_cds_deposit = NpmBundle(
+js_deposit_common = Bundle(
     'js/cds_deposit/avc/avc.module.js',
+    'js/cds_deposit/avc/filters/orderTasks.js',
     'js/cds_deposit/avc/filters/progressClass.js',
     'js/cds_deposit/avc/filters/progressIcon.js',
     'js/cds_deposit/avc/filters/toInt.js',
@@ -80,10 +81,15 @@ js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/providers/depositSSEEvents.js',
     'js/cds_deposit/avc/providers/depositStatuses.js',
     'js/cds_deposit/avc/providers/inheritedProperties.js',
-    'js/cds_deposit/avc/providers/errorRepresentations.js',
+    'js/cds_deposit/avc/providers/taskRepresentations.js',
     'js/cds_deposit/avc/providers/stateReducer.js',
     'js/cds_deposit/avc/providers/typeReducer.js',
     'js/cds_deposit/avc/providers/urlBuilder.js',
+    output='gen/cds.deposit.common.%(version)s.js'
+)
+
+js_cds_deposit = NpmBundle(
+    js_deposit_common,
     'js/cds_deposit/avc/factories/states.js',
     'js/cds_deposit/avc/components/cdsActions.js',
     'js/cds_deposit/avc/components/cdsDeposit.js',

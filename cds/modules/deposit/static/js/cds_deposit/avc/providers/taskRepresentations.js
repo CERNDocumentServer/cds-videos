@@ -1,4 +1,4 @@
-function errorRepresentations() {
+function taskRepresentations() {
   var representations = {};
   return {
     setValues: function(values) {
@@ -11,4 +11,4 @@ function errorRepresentations() {
 }
 
 angular.module('cdsDeposit.providers')
-  .provider('errorRepresentations', errorRepresentations);
+  .provider('taskRepresentations', taskRepresentations);
