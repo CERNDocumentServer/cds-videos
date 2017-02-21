@@ -171,6 +171,8 @@ setup(
         'invenio_assets.bundles': [
             'cds_deposit_jquery_js = cds.modules.deposit.bundles:js_jquery',
             'cds_deposit_js = cds.modules.deposit.bundles:js_deposit',
+            'cds_deposit_common_js = '
+            'cds.modules.deposit.bundles:js_deposit_common',
             'cds_previewer_theoplayer_css = '
             'cds.modules.previewer.bundles:theoplayer_css',
             'cds_previewer_theoplayer_js = '

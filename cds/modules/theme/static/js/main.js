@@ -24,7 +24,7 @@
 // Bootstrap modules
 angular.element(document).ready(function() {
   angular.bootstrap(
-    document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch']
+    document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch', 'cdsDeposit.modules']
   );
   angular.bootstrap(
     document.getElementById("cds-featured-video"), [ 'cds', 'invenioSearch']

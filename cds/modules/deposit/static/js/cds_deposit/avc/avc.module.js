@@ -4,7 +4,7 @@ function cdsDepositsConfig(
   depositSSEEventsProvider,
   depositStatusesProvider,
   inheritedPropertiesProvider,
-  errorRepresentationsProvider,
+  taskRepresentationsProvider,
   urlBuilderProvider,
   typeReducerProvider
 ) {
@@ -44,11 +44,11 @@ function cdsDepositsConfig(
     'contributors'
   ]);
 
-  errorRepresentationsProvider.setValues({
-    file_download: 'Video file download error',
-    file_transcode: 'Video transcoding error',
-    file_video_extract_frames: 'Video frame extraction error',
-    file_video_metadata_extraction: 'Video metadata extraction error'
+  taskRepresentationsProvider.setValues({
+    file_download: 'Video file download',
+    file_transcode: 'Video transcoding',
+    file_video_extract_frames: 'Video frame extraction',
+    file_video_metadata_extraction: 'Video metadata extraction'
   });
 
   // Initialize url builder
@@ -75,7 +75,7 @@ cdsDepositsConfig.$inject = [
   'depositSSEEventsProvider',
   'depositStatusesProvider',
   'inheritedPropertiesProvider',
-  'errorRepresentationsProvider',
+  'taskRepresentationsProvider',
   'urlBuilderProvider',
   'typeReducerProvider',
 ];
@@ -92,13 +92,13 @@ angular.module('cdsDeposit.modules', [
   'cdsDeposit.providers',
   'cdsDeposit.factories',
   'cdsDeposit.components',
-]);
+]).config(cdsDepositsConfig);
 
 angular
   .module('cdsDeposit.filters')
-  .filter('errorRepr', function(errorRepresentations) {
+  .filter('taskRepr', function(taskRepresentations) {
     return function(input) {
-      return errorRepresentations[input] || input;
+      return taskRepresentations[input] || input;
     };
   });
 
@@ -120,5 +120,4 @@ angular
     'monospaced.elastic',
     'invenioFiles.filters',
     'afkl.lazyImage',
-  ])
-  .config(cdsDepositsConfig);
+  ]);

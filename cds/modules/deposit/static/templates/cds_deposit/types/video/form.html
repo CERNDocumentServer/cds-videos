@@ -31,7 +31,7 @@
               <!-- FAILURE -->
               <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
                 <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE">
-                    <strong>{{ $ctrl.cdsDepositCtrl.stateReporter[status].message | errorRepr }}</strong>
+                    <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
                 </div>
               </div>
               <!-- PENDING -->
