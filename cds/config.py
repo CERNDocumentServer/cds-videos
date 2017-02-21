@@ -707,7 +707,7 @@ DEPOSIT_FORM_TEMPLATES = {
     'radios': 'radios.html',
     'select': 'select.html',
     'button': 'button.html',
-    'textarea': 'textarea.html'
+    'textarea': 'textarea.html',
 }
 
 # App key for uploading files from dropbox

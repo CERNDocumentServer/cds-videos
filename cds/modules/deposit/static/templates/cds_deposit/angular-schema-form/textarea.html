@@ -1,12 +1,12 @@
 <div class="form-group has-feedback {{ form.htmlClass }} schema-form-textarea"
      ng-class="{'has-error': form.disableErrorState !== true && hasError()}">
-  <label class="control-label col-sm-3 {{ form.labelHtmlClass }}"
-         ng-class="{'sr-only': !showTitle(), 'field-required': form.required}"
+  <label class="control-label {{ form.labelHtmlClass }}"
+         ng-class="{'sr-only': !showTitle(), 'field-required': form.required, 'col-sm-3': !form.aboveTitle}"
          for="{{ form.key.slice(-1)[0] }}">
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>
     {{ form.title }}
   </label>
-  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
+  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle || form.aboveTitle}">
     <textarea
       id="{{ form.key.slice(-1)[0] }}"
       class="form-control {{ form.fieldHtmlClass }}"

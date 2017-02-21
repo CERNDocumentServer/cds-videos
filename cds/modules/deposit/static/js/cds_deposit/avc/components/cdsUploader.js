@@ -232,6 +232,10 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         // Add the files to the queue
         Array.prototype.push.apply(that.queue, _files);
       }
+      // Start upload automatically if the option is selected
+      if (that.autoStartUpload) {
+        that.upload();
+      }
     };
 
     // Prepare file request
@@ -402,7 +406,8 @@ function cdsUploader() {
     bindings: {
       files: '=',
       filterFiles: '=',
-      remoteMasterReceiver: '@?'
+      remoteMasterReceiver: '@?',
+      autoStartUpload: '=?'
     },
     require: {
       cdsDepositCtrl: '^cdsDeposit',

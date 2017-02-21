@@ -2,13 +2,13 @@
   class="form-group {{form.htmlClass}}"
   ng-class="{ '{{'schema-form-' + form.type}}': true, 'has-error': form.disableErrorState !== true && hasError(), 'has-feedback': form.feedback !== false }">
   <label
-    class="col-sm-3 control-label {{ form.labelHtmlClass }}"
+    class="control-label {{ form.labelHtmlClass }}"
     for="{{ form.key.slice(-1)[0] }}"
     ng-if="!form.notitle"
-    ng-class="{'field-required': form.required}">
+    ng-class="{'field-required': form.required, 'col-sm-3': !form.aboveTitle, 'col-sm-12': form.aboveTitle}">
     <i ng-if="form.fa_cls" ng-class="'fa fa-fw ' + form.fa_cls"></i>&nbsp;{{ form.title }}
   </label>
-  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
+  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle || form.aboveTitle}">
     <input
       ng-if="!form.fieldAddonLeft && !form.fieldAddonRight"
       ng-show="form.key"

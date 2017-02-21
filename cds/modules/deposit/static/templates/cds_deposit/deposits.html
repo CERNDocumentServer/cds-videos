@@ -30,7 +30,6 @@
           </div>
         </div>
       </div>
-
       <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
         <cds-remote-uploader
             template="/static/templates/cds_deposit/remote_upload.html"
@@ -60,10 +59,13 @@
       record="$ctrl.master.metadata"
       deposit-form-model="$ctrl.depositForms[0]"
     >
-    <div set-class-when-at-top="status-fix-top" class="cds-deposit-avc-overall-status mb-20 mt--20">
+    <div ng-class="{'status-fix-top': !$ctrl.isOnTop}" class="cds-deposit-avc-overall-status mb-20 mt--20">
       <div class="container">
         <div class="row">
           <div class="col-md-9">
+            <div ng-show="!$ctrl.isOnTop">
+              <p><strong>{{ $ctrl.master.metadata.title.title || 'No project title.' }}</strong></p>
+            </div>
             <ul class="list-inline text-left">
               <li>
                 <i class="fa fa-fw {{ $ctrl.aggregatedState['file_download'] | progressIcon }} {{ $ctrl.aggregatedState['file_download'] | progressClass }}"></i> File download
@@ -110,10 +112,21 @@
             >
               <div class="panel panel-default">
                 <div class="panel-heading">
-                  <cds-actions
-                    template="/static/templates/cds_deposit/types/video/action_delete.html"
-                  >
-                  </cds-actions>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <cds-actions
+                        template="/static/templates/cds_deposit/types/video/action_delete.html"
+                      >
+                      </cds-actions>
+                    </div>
+                    <div class="col-md-6">
+                      <cds-actions
+                        template="/static/templates/cds_deposit/types/video/actions.html"
+                      >
+                      </cds-actions>
+                    </div>
+                  </div>
+
                 </div>
                 <div class="panel-body">
                   <cds-form
@@ -121,6 +134,7 @@
                     form="{{$ctrl.childrenForm}}"
                   >
                   <cds-uploader
+                    auto-start-upload="true"
                     files="child.metadata._files"
                     template="/static/templates/cds_deposit/types/common/uploader.html"
                     remote-master-receiver="/api/hooks/receivers/avc/events/"
@@ -143,6 +157,7 @@
           </div>
           <!-- /ADD children -->
           <cds-uploader
+            auto-start-upload="true"
             files="$ctrl.master.metadata._files"
             template="/static/templates/cds_deposit/types/common/uploader.html"
           >
