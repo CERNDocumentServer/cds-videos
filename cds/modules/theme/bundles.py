@@ -40,7 +40,6 @@ css = Bundle(
         'scss/cds.scss',
         filters='node-scss,cleancssurl',
         npm={
-            'almond': '~0.3.1',
             'bootstrap-sass': '~3.3.5',
             'font-awesome': '~4.4.0',
             'ngmodal': '~2.0.1'
@@ -53,13 +52,18 @@ css = Bundle(
 
 js = NpmBundle(
     Bundle(
-        'node_modules/almond/almond.js',
-        'js/cds-settings.js',
-        filters='uglifyjs',
-    ),
-    Bundle(
+        'node_modules/jquery/jquery.js',
+        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
+        'node_modules/angular/angular.js',
+        'node_modules/ng-dialog/js/ngDialog.js',
+        'node_modules/clipboard/dist/clipboard.js',
+        'node_modules/ngclipboard/dist/ngclipboard.js',
+        'node_modules/d3/d3.js',
+        'node_modules/angular-loading-bar/build/loading-bar.js',
+        'js/cds/module.js',
+        'node_modules/invenio-search-js/dist/invenio-search-js.js',
         'js/main.js',
-        filters='requirejs',
+        filters='jsmin',
     ),
     depends=(
         'js/*.js',
@@ -69,7 +73,6 @@ js = NpmBundle(
     filters='jsmin',
     output='gen/cds.%(version)s.js',
     npm={
-        'almond': '~0.3.1',
         'angular': '~1.4.7',
         'ng-dialog': '~0.6.0',
         'clipboard': '~1.5.16',

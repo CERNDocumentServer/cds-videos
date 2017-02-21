@@ -1,10 +1,22 @@
 <!-- Download -->
 <div class="cds-detail-title cds-detail-video-title">
-  <a ng-click="dialogShown = true">
-    <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20">
-      <i class="fa fa-download"></i> Download
-    </h3>
-  </a>
+  <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20">
+    <i class="fa fa-download"></i> Download
+  </h3>
+</div>
+
+<!-- Master file -->
+<div class="cds-video-master-file mb-20">
+  <h4>Master File</h4>
+  <div>
+    <ul>
+      <li>
+        <a ng-click="dialogShown = true">
+          {{ record._files[0].key }}
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="75%">

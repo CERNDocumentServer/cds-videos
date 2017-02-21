@@ -21,28 +21,15 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-require([
-    'jquery',
-    'bootstrap',
-    'angular',
-    'node_modules/ng-dialog/js/ngDialog',
-    'node_modules/clipboard/dist/clipboard',
-    'node_modules/ngclipboard/dist/ngclipboard',
-    'node_modules/d3/d3',
-    'node_modules/angular-loading-bar/build/loading-bar',
-    'js/cds/module',
-    'node_modules/invenio-search-js/dist/invenio-search-js',
-  ], function() {
-    // Bootstrap modules
-    angular.element(document).ready(function() {
-      angular.bootstrap(
-        document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch']
-      );
-      angular.bootstrap(
-        document.getElementById("cds-featured-video"), [ 'cds', 'invenioSearch']
-      );
-      angular.bootstrap(
-        document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
-      );
-    });
+// Bootstrap modules
+angular.element(document).ready(function() {
+  angular.bootstrap(
+    document.getElementById("invenio-search"), ['cds', 'angular-loading-bar', 'ngDialog', 'invenioSearch']
+  );
+  angular.bootstrap(
+    document.getElementById("cds-featured-video"), [ 'cds', 'invenioSearch']
+  );
+  angular.bootstrap(
+    document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
+  );
 });
