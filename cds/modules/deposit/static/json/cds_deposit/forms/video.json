@@ -1,97 +1,128 @@
-[
-  {
-    "title": "Name",
-    "key": "title.title"
-  },
-  {
-    "title": "Description",
-    "key": "description.value",
-    "type": "textarea",
-    "required": true
-  },
-  {
-    "type": "template",
-    "key": "date",
-    "title": "Date",
-    "placeholder": "eg. 2013-05-08",
-    "templateUrl": "/static/templates/cds_deposit/datepicker.html",
-    "format": "yyyy-MM-dd",
-    "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
-    "fa_cls": "fa-calendar",
-    "required": true
-  },
-  {
-    "title": "License",
-    "key": "license"
-  },
-  {
-    "title": "Copyright URL",
-    "key": "copyright.url"
-  },
-  {
-    "type": "array",
-    "key": "contributors",
-    "title": "Contributors",
-    "description": "",
-    "sortOptions": {
-      "disabled": false,
-      "handle": "i.sort-handle",
-      "cursor": "move",
-      "axis": "y"
+{
+  "basic": [
+    {
+      "title": "Name",
+      "key": "title.title"
     },
-    "add": "Add another contributor",
-    "inline": true,
-    "items": [
-      {
-        "key": "contributors[].name",
-        "placeholder": "Name",
-        "description": "",
-        "notitle": true
+    {
+      "type": "section",
+      "htmlClass": "form-ckeditor",
+      "description": "",
+      "notitle": true,
+      "items": [
+        {
+          "type": "ckeditor",
+          "key": "description.value",
+          "title": "Description",
+          "ckeditor": {
+            "autoParagraph": false,
+            "enterMode": 2,
+            "height": 200,
+            "toolbar": [
+              ["PasteText", "PasteFromWord"],
+              ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
+              ["NumberedList", "BulletedList", "Blockquote"],
+              ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
+              ["Source"], ["Maximize"]
+            ],
+            "disableNativeSpellChecker": false,
+            "removePlugins": "elementspath",
+            "removeButtons": ""
+          },
+          "required": true,
+          "description": "Required.",
+          "minLength": 1
+        }
+      ]
+    },
+    {
+      "type": "template",
+      "key": "date",
+      "placeholder": "eg. 2013-05-08",
+      "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+      "format": "yyyy-MM-dd",
+      "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+      "fa_cls": "fa-calendar",
+      "required": true
+    },
+    {
+      "type": "array",
+      "key": "contributors",
+      "title": "Contributors",
+      "description": "",
+      "sortOptions": {
+        "disabled": false,
+        "handle": "i.sort-handle",
+        "cursor": "move",
+        "axis": "y"
       },
-      {
-        "type": "select",
-        "key": "contributors[].role",
-        "placeholder": "Role",
-        "notitle": true,
-        "titleMap": [
-          {
-            "value":  "Director",
-            "name":  "Director"
-          },
-          {
-            "value":  "Camera operator",
-            "name":  "Camera operator"
-          },
-          {
-            "value":  "Producer",
-            "name":  "Producer"
-          },
-          {
-            "value":  "Music by",
-            "name":  "Music by"
-          },
-          {
-            "value":  "Editor",
-            "name":  "Editor"
-          },
-          {
-            "value":  "Provider",
-            "name":  "Provider"
-          },
-          {
-            "value":  "Translator",
-            "name":  "Translator"
-          },
-          {
-            "value":  "Other",
-            "name":  "Other"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "title": "Mark as featured",
-    "key": "featured"
-  }
-]
+      "add": "Add another contributor",
+      "inline": true,
+      "items": [
+        {
+          "key": "contributors[].name",
+          "placeholder": "Name",
+          "description": "",
+          "notitle": true
+        },
+        {
+          "type": "select",
+          "key": "contributors[].role",
+          "placeholder": "Role",
+          "notitle": true,
+          "titleMap": [
+            {
+              "value":  "Director",
+              "name":  "Director"
+            },
+            {
+              "value":  "Camera operator",
+              "name":  "Camera operator"
+            },
+            {
+              "value":  "Producer",
+              "name":  "Producer"
+            },
+            {
+              "value":  "Music by",
+              "name":  "Music by"
+            },
+            {
+              "value":  "Editor",
+              "name":  "Editor"
+            },
+            {
+              "value":  "Provider",
+              "name":  "Provider"
+            },
+            {
+              "value":  "Translator",
+              "name":  "Translator"
+            },
+            {
+              "value":  "Other",
+              "name":  "Other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Mark as featured",
+      "key": "featured"
+    }
+  ],
+  "licenses": [
+    {
+      "title": "License",
+      "key": "license",
+      "notitle": true
+    },
+    {
+      "title": "Copyright URL",
+      "key": "copyright.url",
+      "placeholder": "Copyright URL",
+      "notitle": true
+    }
+  ]
+}

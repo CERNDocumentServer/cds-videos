@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -40,6 +40,7 @@ js_main = NpmBundle(
     'node_modules/angular-sanitize/angular-sanitize.js',
     'node_modules/underscore/underscore.js',
     'node_modules/angular-elastic/elastic.js',
+    'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
     npm={
         'angular': '~1.5.8',
         'angular-sanitize': '~1.5.8',

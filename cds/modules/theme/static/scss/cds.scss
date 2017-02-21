@@ -474,6 +474,7 @@ a[ng-click]{
     }
   }
 }
+
 @keyframes glitch {
     0% {
         -webkit-transform: translate(0);
@@ -515,7 +516,7 @@ a[ng-click]{
       input {
         width: 90%;
         border: 1px solid $cds-primary-color;
-        border-radius: 2px;
+        border-radius: 3px;
       }
     }
 
