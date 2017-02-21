@@ -262,6 +262,13 @@ function cdsDepositCtrl(
       }
     };
 
+    this.stateCurrentCalculate = function(started) {
+      var current = _.min(started, function(_state) {
+        return _.indexOf(depositStates, _state);
+      });
+      return _.isEmpty(current) ? null : current;
+    };
+
     // Register related events from sse
     var depositListenerName = 'sse.event.' + this.id;
     this.sseEventListener = $scope.$on(depositListenerName, function(
@@ -310,7 +317,7 @@ function cdsDepositCtrl(
               break;
           }
           // The state has been changed update the current
-          that.stateCurrent = that.stateQueue.STARTED[0] || null;
+          that.stateCurrent = that.stateCurrentCalculate(that.stateQueue.STARTED);
           // Change the Deposit Status
           that.depositStatusCurrent = that.calculateStatus();
           if (!that.master) {
@@ -329,6 +336,7 @@ function cdsDepositCtrl(
         );
       }
     });
+
 
     this.successCallback = function(type, data) {
       switch (type) {

@@ -4,6 +4,7 @@ function cdsDepositsCtrl(
   $scope,
   $window,
   $location,
+  $element,
   depositStates,
   depositSSEEvents,
   cdsAPI,
@@ -42,6 +43,16 @@ function cdsDepositsCtrl(
   this.overallState = {};
 
   this.$onInit = function() {
+    // Check the if the app is on top;
+    var $win = angular.element($window);
+    that.isOnTop = true;
+    $win.on('scroll', function(e) {
+      $scope.$apply(function() {
+        var offset = angular.element(e.target).scrollTop();
+        that.isOnTop = offset <= 0;
+      });
+    });
+
     if (this.masterLinks) {
       // Set mode to edit
       this.edit = true;
@@ -349,6 +360,7 @@ cdsDepositsCtrl.$inject = [
   '$scope',
   '$window',
   '$location',
+  '$element',
   'depositStates',
   'depositSSEEvents',
   'cdsAPI',

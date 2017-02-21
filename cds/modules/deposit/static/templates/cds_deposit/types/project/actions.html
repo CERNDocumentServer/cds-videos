@@ -4,7 +4,7 @@
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-default btn-sm"
     ng-click="$ctrl.actionHandler('self', 'PUT')">
-  Save All
+  Save
   </button>
 
   <button
@@ -12,7 +12,7 @@
     ng-disabled="$ctrl.cdsDepositCtrl.depositFormModel.$invalid || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE"
     class="btn btn-primary btn-sm"
     ng-click="$ctrl.actionMultipleHandler([['self', 'PUT'], ['publish', 'POST']], '/deposit')">
-  Publish All
+  Publish
   </button>
 
   <button

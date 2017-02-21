@@ -34,13 +34,13 @@
 <![endif]-->
 {%- endblock browserupgrade %}
 <div class="site-wrapper">
-{%- block flashmessages %}
-{%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}
-{{ flashed_messages() }}
-{%- endblock flashmessages %}
   {% block page_header %}
   {% endblock page_header%}
   {%- block page_body %}
+  {%- block flashmessages %}
+    {%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}
+  {{ flashed_messages() }}
+  {%- endblock flashmessages %}
   <div class="container">
     <div class="row">
       {% block panel %}
