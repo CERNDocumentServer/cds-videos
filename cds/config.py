@@ -526,7 +526,7 @@ DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
 DEPOSIT_UI_JSTEMPLATE_ACTIONS = 'templates/cds_deposit/actions.html'
-DEPOSIT_SEARCH_API = '/api/deposits/'
+DEPOSIT_SEARCH_API = '/api/deposits/project/'
 _CDSDeposit_PID = \
     'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
 _Project_PID = 'pid(depid,record_class="cds.modules.deposit.api:Project")'
@@ -592,7 +592,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_response'),
         },
-        search_class='invenio_deposit.search:DepositSearch',
+        search_class='cds.modules.deposit.search:ProjectSearch',
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_search'),
