@@ -1,4 +1,4 @@
-<div ng-if="!$ctrl.initialized">
+<div ng-if="!$ctrl.initialized && !$ctrl.permissionDenied">
   <div class="container">
     <div class="row">
   <div class="col-md-12">
@@ -167,4 +167,12 @@
       </div>
     </div>
   </cds-deposit>
+</div>
+
+<div ng-if="$ctrl.permissionDenied">
+  <div class="container">
+    <div class="row">
+      <h1>Permission denied</h1>
+    </div>
+  </div>
 </div>
