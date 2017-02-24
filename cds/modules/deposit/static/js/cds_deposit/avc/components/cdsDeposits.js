@@ -68,7 +68,11 @@ function cdsDepositsCtrl(
             that.children.push(response.data);
           }, function error(response) {});
         });
-      }, function error(response) {});
+      }, function error(response) {
+        if (response.status === 403) {
+          that.permissionDenied = true;
+        }
+      });
     }
   };
 
