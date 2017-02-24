@@ -30,7 +30,7 @@
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "invenio_search_ui_search_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_search_ui_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {%- endblock javascript %}
 
 {%- block body_inner %}

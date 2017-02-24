@@ -178,6 +178,7 @@ setup(
             'cds_previewer_video_css = '
             'cds.modules.previewer.bundles:video_css',
             'cds_record_js = cds.modules.records.bundles:js',
+            'cds_search_ui_js = cds.modules.search_ui.bundles:js',
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
         ],
