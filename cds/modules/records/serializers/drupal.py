@@ -20,7 +20,7 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""VTT serializer for records."""
+"""Drupal serializer for records."""
 
 from __future__ import absolute_import, print_function
 
@@ -79,16 +79,17 @@ class VideoDrupal(object):
     @property
     def video_length(self):
         """Get video length."""
-        return self._record['_deposit'].get(
-            'extracted_metadata', {}).get('format', {}).get('duration')
+        return self._record['duration']
 
     @property
     def creation_date(self):
         """Get creation date."""
-        data = self._record.get('_deposit', {}).get('extracted_metadata', {})
-        datetime = data.get(
-            'format', {}).get('tags', {}).get('creation_time', '')
-        return format_datetime(datetime)
+        datetime = self._record.get('_deposit', {}).get(
+            'extracted_metadata', {}).get('tags', {}).get('creation_time', '')
+        try:
+            return format_datetime(datetime)
+        except ValueError:
+            return ''
 
     def contributors(self, name):
         """Get the name of a type of contributors."""

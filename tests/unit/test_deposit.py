@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -42,9 +42,9 @@ from cds.modules.deposit.loaders import project_loader, video_loader
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
 
 
-def test_deposit_link_factory_has_bucket(app, db, es, users, location,
-                                         cds_jsonresolver, json_headers,
-                                         deposit_rest, project_metadata):
+def test_deposit_link_factory_has_bucket(
+        app, db, es, users, location, cds_jsonresolver, json_headers,
+        deposit_rest, project_deposit_metadata):
     """Test bucket link factory retrieval of a bucket."""
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -52,7 +52,7 @@ def test_deposit_link_factory_has_bucket(app, db, es, users, location,
         # Test links for project
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata), headers=json_headers)
         assert res.status_code == 201
         data = json.loads(res.data.decode('utf-8'))
         links = data['links']

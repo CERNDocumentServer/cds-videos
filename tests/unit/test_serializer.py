@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -32,9 +32,9 @@ from cds.modules.records.serializers.smil import Smil
 from cds.modules.records.serializers.vtt import VTT
 
 
-def test_smil_serializer(video_metadata):
+def test_smil_serializer(video_record_metadata):
     """Test smil serializer."""
-    rec = video_metadata
+    rec = video_record_metadata
     serializer = Smil(record=rec)
     data = serializer.format()
     root = ET.fromstring(data)
@@ -47,18 +47,18 @@ def test_smil_serializer(video_metadata):
         assert child.attrib["height"] == '2160'
 
     for i in range(4):
-        src = video_metadata['_files'][0]['video'][i]['links']['self']
+        src = video_record_metadata['_files'][0]['video'][i]['links']['self']
         assert root[1][0][i].attrib['src'] == 'mp4:{}'.format(src)
 
 
-def test_vtt_serializer(video_metadata):
+def test_vtt_serializer(video_record_metadata):
     """Test vtt serializer."""
-    serializer = VTT(record=video_metadata)
-    data = serializer._format_frames(video_metadata)
+    serializer = VTT(record=video_record_metadata)
+    data = serializer._format_frames(video_record_metadata)
     for i in range(10):
         if i == 9:
             end_expected = VTT.time_format(float(
-                video_metadata['_files'][0]['tags']['duration']))
+                video_record_metadata['_files'][0]['tags']['duration']))
             assert data[i]["end_time"] == end_expected
         else:
             assert data[i]["end_time"] == data[i + 1]["start_time"]

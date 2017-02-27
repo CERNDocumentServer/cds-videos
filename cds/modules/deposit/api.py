@@ -197,7 +197,7 @@ class CDSDeposit(Deposit):
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
-        """Create a deposit.
+        """Create a CDS deposit.
 
         Adds bucket creation immediately on deposit creation.
         """
@@ -412,7 +412,7 @@ class Project(CDSDeposit):
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
-        """Create a deposit.
+        """Create a project deposit.
 
         Adds bucket creation immediately on deposit creation.
         """
@@ -575,7 +575,7 @@ class Video(CDSDeposit):
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
-        """Create a deposit.
+        """Create a video deposit.
 
         Adds bucket creation immediately on deposit creation.
         """
@@ -632,6 +632,8 @@ class Video(CDSDeposit):
         # inherit ``category`` and ``type`` fields from parent project
         self['category'] = self.project.get('category')
         self['type'] = self.project.get('type')
+        # generate human-readable duration
+        self.generate_duration()
         # publish the video
         video_published = super(Video, self).publish(pid=pid, id_=id_,
                                                      **kwargs)
@@ -710,6 +712,14 @@ class Video(CDSDeposit):
         """Return up-to-date tasks status."""
         return get_tasks_status_by_task(
             get_deposit_events(self['_deposit']['id']))
+
+    def generate_duration(self):
+        """Generate human-readable duration field."""
+        seconds = float(self['_deposit']['extracted_metadata']['duration'])
+        minutes, seconds = divmod(seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        self['duration'] = '{0:02d}:{1:02d}:{2:06.3f}'.format(
+            int(hours), int(minutes), seconds)
 
 
 class Category(Record):

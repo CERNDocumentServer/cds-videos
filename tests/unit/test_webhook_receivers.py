@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -386,15 +386,13 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
         # and bucket is empty
         assert bucket.size == 0
 
-        records = RecordMetadata.query.all()
-        assert len(records) == 3
-        record = records[0]
+        record = RecordMetadata.query.filter_by(id=video_1_id).one()
         events = get_deposit_events(record.json['_deposit']['id'])
 
         # check metadata patch are deleted
         assert 'extracted_metadata' not in record.json['_deposit']
 
-        # check there are no events
+        # check the corresponding Event persisted after cleaning
         assert len(events) == 1
 
         # check no SSE message and reindexing is fired
@@ -583,15 +581,13 @@ def test_avc_workflow_receiver_local_file_pass(
         # and bucket is empty
         assert bucket.size == 0
 
-        records = RecordMetadata.query.all()
-        assert len(records) == 3
-        record = records[0]
+        record = RecordMetadata.query.filter_by(id=video_1_id).one()
         events = get_deposit_events(record.json['_deposit']['id'])
 
         # check metadata patch are deleted
         assert 'extracted_metadata' not in record.json['_deposit']
 
-        # check there are no events
+        # check the corresponding Event persisted after cleaning
         assert len(events) == 1
 
         # check no SSE message and reindexing is fired
