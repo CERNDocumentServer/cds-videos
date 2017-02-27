@@ -34,6 +34,6 @@ cds fixtures sequence_generator
 cds users create test@test.ch -a --password=123456
 # Create an admin user
 cds users create admin@test.ch -a --password=123456
-flask roles create admin
-flask roles add admin@test.ch admin
-flask access allow superuser-access role admin
+cds roles create admin
+cds roles add admin@test.ch admin
+cds access allow superuser-access role admin
