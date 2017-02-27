@@ -201,15 +201,30 @@
   ],
   "licenses": [
     {
-      "title": "License",
-      "key": "license",
-      "notitle": true
+      "title": "Copyright",
+      "key": "copyright",
+      "items": [
+        {
+          "key": "copyright.holder",
+          "title": "Holder",
+          "type": "string",
+          "onChange": "$ctrl.checkCopyright(modelValue,form)"
+        },
+        {
+          "key": "copyright.year",
+          "title": "Year"
+        },
+        {
+          "key": "copyright.url",
+          "title": "URL"
+        }
+      ]
     },
     {
-      "title": "Copyright URL",
-      "key": "copyright.url",
-      "placeholder": "Copyright URL",
-      "notitle": true
+      "title": "License",
+      "key": "license",
+      "notitle": true,
+      "add": "Add more licenses"
     }
   ]
 }

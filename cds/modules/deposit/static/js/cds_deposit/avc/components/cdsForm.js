@@ -8,6 +8,18 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       that.form = response.data;
     });
 
+    this.checkCopyright = function(value, form) {
+      if (that.cdsDepositCtrl.cdsDepositsCtrl.copyright) {
+        if ((value || '').toLowerCase() ===
+            that.cdsDepositCtrl.cdsDepositsCtrl.copyright.holder.toLowerCase()) {
+          that.cdsDepositCtrl.record.copyright = angular.merge(
+            {},
+            that.cdsDepositCtrl.cdsDepositsCtrl.copyright
+          );
+        }
+      }
+    }
+
     // Add custom templates
     var formTemplates = this.cdsDepositCtrl.cdsDepositsCtrl.formTemplates;
     var formTemplatesBase = this.cdsDepositCtrl.cdsDepositsCtrl.formTemplatesBase;
