@@ -48,8 +48,8 @@ from flask.cli import ScriptInfo
 from invenio_sequencegenerator.api import Template
 from cds.modules.deposit.api import video_resolver
 from flask_security import login_user
-from invenio_access.models import ActionUsers
-from invenio_accounts.models import User
+from invenio_access.models import ActionRoles, ActionUsers
+from invenio_accounts.models import Role, User
 from invenio_db import db as db_
 from invenio_deposit import InvenioDepositREST
 from invenio_deposit.api import Deposit
@@ -202,14 +202,16 @@ def users(app, db):
                                       password='tester2', active=True)
         admin = datastore.create_user(email='admin@inveniosoftware.org',
                                       password='tester3', active=True)
-        # Assign deposit-admin-access to admin only.
-        db.session.add(ActionUsers(
-            action='deposit-admin-access', user=admin
-        ))
+        # Give a superuser role to admin
+        superuser_role = Role(name='superuser')
+        db.session.add(ActionRoles(
+            action='superuser-access', role=superuser_role))
+        datastore.add_role_to_user(admin, superuser_role)
     db.session.commit()
     id_1 = user1.id
     id_2 = user2.id
-    return [id_1, id_2]
+    id_3 = admin.id
+    return [id_1, id_2, id_3]
 
 
 @pytest.fixture()
@@ -241,6 +243,7 @@ def cds_depid(api_app, users, db, bucket, deposit_metadata):
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
         deposit = Project.create(record)
+        deposit['_deposit']['owners'].append('test-egroup@cern.ch')
         deposit.commit()
         db.session.commit()
     return deposit['_deposit']['id']

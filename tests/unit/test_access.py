@@ -31,8 +31,11 @@ import uuid
 from cds.modules.access.access_control import cern_read_factory
 from flask import g
 from flask_principal import RoleNeed, UserNeed
+from flask_security import login_user
+from invenio_accounts.models import User
 from invenio_records.api import Record
 from cds.modules.access.access_control import CERNRecordsSearch
+from cds.modules.records.permissions import has_admin_permission
 
 
 def mock_provides(needs):
@@ -77,3 +80,13 @@ def test_es_filter():
             ]
         }}]}}
     ]
+
+
+def test_not_all_users_are_admins(app, users):
+    """Test that not all the users have admin access."""
+    login_user(User.query.get(users[0]))
+    assert not has_admin_permission()
+
+    # Third user is the admin
+    login_user(User.query.get(users[2]))
+    assert has_admin_permission()
