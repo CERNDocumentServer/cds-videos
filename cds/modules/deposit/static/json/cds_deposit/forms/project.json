@@ -146,7 +146,8 @@
     {
       "title": "License",
       "key": "license",
-      "notitle": true
+      "notitle": true,
+      "add": "Add more licenses"
     }
   ]
 }
