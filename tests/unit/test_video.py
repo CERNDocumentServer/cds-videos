@@ -54,7 +54,7 @@ from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
 
 from helpers import workflow_receiver_video_failing, mock_current_user, \
-    get_indexed_records_from_mock
+    get_indexed_records_from_mock, prepare_videos_for_publish
 
 
 def test_video_resolver(project):
@@ -96,6 +96,7 @@ def test_video_publish_and_edit(project):
     # update video
 
     # [publish the video 1]
+    prepare_videos_for_publish(video_1)
     video_1 = video_1.publish()
 
     project = video_1.project
@@ -174,6 +175,7 @@ def test_delete_video_not_published(project, force):
 def test_delete_video_published(project, force):
     """Test video delete after published."""
     (project, video_1, video_2) = project
+    prepare_videos_for_publish(video_1, video_2)
 
     video_2 = video_2.publish()
 
@@ -267,6 +269,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
                                               json_headers, users):
     """Test deposit events."""
     (project, video_1, video_2) = api_project
+    prepare_videos_for_publish(video_1, video_2)
     project_depid = project['_deposit']['id']
     video_1_depid = video_1['_deposit']['id']
     bucket_id = video_1._bucket.id
@@ -333,7 +336,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         video_edited = deepcopy(deposit)
         del video_edited['_files']
         del video_edited['_deposit']['state']
-        res = client.put(
+        client.put(
             url_for('invenio_deposit_rest.video_item',
                     pid_value=video_1_depid),
             data=json.dumps(video_edited),
@@ -539,6 +542,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
 def test_video_publish_with_no_category(project):
     """Test video publish if category is not set."""
     (project, video_1, video_2) = project
+    prepare_videos_for_publish(video_1, video_2)
     video_1_depid = video_1['_deposit']['id']
     # test: no category in project
     category = project['category']

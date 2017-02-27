@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -36,11 +36,13 @@ from flask import url_for
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
+from helpers import prepare_videos_for_publish
 
 
 def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
-                         project_metadata, json_headers, deposit_rest,
-                         data_file_1, data_file_2, deposit_metadata):
+                         data_file_1, data_file_2, json_headers, deposit_rest,
+                         project_deposit_metadata, video_deposit_metadata,
+                         deposit_metadata):
     """Test project simple workflow."""
     def check_connection(videos, project):
         """check project <---> video connection."""
@@ -59,7 +61,7 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata), headers=json_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -77,7 +79,7 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert project['$schema'] == project_schema
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
-        video_metadata = deepcopy(deposit_metadata)
+        video_metadata = deepcopy(video_deposit_metadata)
         video_metadata.update(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
@@ -181,6 +183,8 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         # [[ PUBLISH VIDEO_1 ]]
         # Not need to send _files
         del video_1_dict['metadata']['_files']
+        # Prepare video for publishing
+        prepare_videos_for_publish(video_1, video_2)
         res = client.post(
             url_for('invenio_deposit_rest.video_actions',
                     pid_value=video_1['_deposit']['id'], action='publish'),
@@ -300,10 +304,9 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         assert project['title']['title'] == 'my project'
 
 
-def test_publish_project_check_indexed(app, db, es, users, location,
-                                       cds_jsonresolver, project_metadata,
-                                       json_headers, deposit_rest, data_file_1,
-                                       data_file_2, deposit_metadata):
+def test_publish_project_check_indexed(
+        app, db, es, users, location, cds_jsonresolver, json_headers,
+        deposit_rest, video_deposit_metadata, project_deposit_metadata):
     """Test create a project and check project and videos are indexed."""
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -311,13 +314,13 @@ def test_publish_project_check_indexed(app, db, es, users, location,
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata), headers=json_headers)
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
-        video_metadata = deepcopy(deposit_metadata)
+        video_metadata = deepcopy(video_deposit_metadata)
         video_metadata.update(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
@@ -329,7 +332,7 @@ def test_publish_project_check_indexed(app, db, es, users, location,
         video_1_dict = json.loads(res.data.decode('utf-8'))
 
         # [[ ADD A NEW EMPTY VIDEO_2 ]]
-        video_metadata = deepcopy(deposit_metadata)
+        video_metadata = deepcopy(video_deposit_metadata)
         video_metadata.update(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
@@ -357,6 +360,7 @@ def test_publish_project_check_indexed(app, db, es, users, location,
         with mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
                 as mock_indexer:
             # [[ PUBLISH THE PROJECT ]]
+            prepare_videos_for_publish(video_1, video_2)
             res = client.post(
                 url_for('invenio_deposit_rest.project_actions',
                         pid_value=project['_deposit']['id'], action='publish'),
@@ -392,7 +396,8 @@ def test_featured_field_is_indexed(app, es, project, users, json_headers):
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ PUBLISH THE PROJECT ]]
-        res = client.post(
+        prepare_videos_for_publish(video_1, video_2)
+        client.post(
             url_for('invenio_deposit_rest.project_actions',
                     pid_value=project['_deposit']['id'], action='publish'),
             headers=json_headers)

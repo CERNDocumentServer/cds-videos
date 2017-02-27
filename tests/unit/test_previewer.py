@@ -31,6 +31,7 @@ import pytest
 from flask import url_for
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
+from helpers import prepare_videos_for_publish
 
 from werkzeug.exceptions import NotFound
 
@@ -64,6 +65,7 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
                          stream=open(video, 'rb'))
 
     if publish:
+        prepare_videos_for_publish(video_1)
         video_1 = video_1.publish()
         assert video_1.status == 'published'
         pid, video_1 = video_1.fetch_published()
@@ -110,6 +112,7 @@ def test_legacy_embed(previewer_app, db, project, video):
     obj = ObjectVersion.create(bucket=bucket_id, key=filename,
                                stream=open(video, 'rb'))
     ObjectVersionTag.create(obj, 'preview', True)
+    prepare_videos_for_publish(video_1)
     video_1 = video_1.publish()
 
     with previewer_app.test_client() as client:
@@ -144,6 +147,7 @@ def test_smil_generation(previewer_app, db, project, video):
         ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
         create_video_tags(slave)
 
+    prepare_videos_for_publish(video_1)
     video_1.publish()
     _, video_record = video_1.fetch_published()
     new_bucket = RecordsBuckets.query.filter_by(
