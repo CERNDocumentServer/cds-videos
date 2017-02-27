@@ -35,7 +35,7 @@ from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
 from invenio_indexer.api import RecordIndexer
 from invenio_db import db
-from cds.modules.webhooks.tasks import AVCTask
+from cds.modules.webhooks.tasks import AVCTask, update_record
 from cds.modules.deposit.api import Category
 from cds.modules.webhooks.tasks import TranscodeVideoTask
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
@@ -259,3 +259,34 @@ def get_indexed_records_from_mock(mock_indexer):
         ((arg, ), _) = call
         indexed.append(next(arg))
     return indexed
+
+
+def prepare_videos_for_publish(*videos):
+    """Prepare video for publishing (i.e. fill extracted metadata)."""
+    metadata_dict = dict(
+        bit_rate='679886',
+        duration='60.140000',
+        size='5111048',
+        avg_frame_rate='288000/12019',
+        codec_name='h264',
+        width='640',
+        height='360',
+        nb_frames='1440',
+        display_aspect_ratio='16:9',
+        color_range='tv',
+    )
+    for video in videos:
+        # Inline update
+        if '_deposit' not in video:
+            video['_deposit'] = {}
+        video['_deposit']['extracted_metadata'] = metadata_dict
+        # DB update
+        update_record(
+            recid=video.id,
+            patch=[{
+                'op': 'add',
+                'path': '/_deposit/extracted_metadata',
+                'value': metadata_dict,
+            }],
+            validator='invenio_records.validators.PartialDraft4Validator'
+        )

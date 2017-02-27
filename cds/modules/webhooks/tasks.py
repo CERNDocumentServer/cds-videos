@@ -285,7 +285,7 @@ class ExtractMetadataTask(AVCTask):
         patch = [{
             'op': 'add',
             'path': '/_deposit/extracted_metadata',
-            'value': metadata
+            'value': extracted_dict
         }]
         validator = 'invenio_records.validators.PartialDraft4Validator'
         update_record.s(

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Test cds package."""
+"""Test project."""
 
 from __future__ import absolute_import, print_function
 
@@ -51,7 +51,7 @@ from invenio_records.models import RecordMetadata
 from invenio_webhooks.models import Event
 
 from helpers import workflow_receiver_video_failing, \
-    get_indexed_records_from_mock
+    get_indexed_records_from_mock, prepare_videos_for_publish
 
 
 def test_is_deposit():
@@ -90,6 +90,7 @@ def test_publish_all_videos(app, project):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # publish project
+    prepare_videos_for_publish(video_1, video_2)
     new_project = project.publish()
     # check project and all video are published
     assert new_project['_deposit']['status'] == 'published'
@@ -110,6 +111,7 @@ def test_publish_one_video(app, project):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # [publish project]
+    prepare_videos_for_publish(video_1, video_2)
     # publish one video
     video_1 = video_1.publish()
     project = video_1.project
@@ -308,6 +310,9 @@ def test_project_delete_one_video_published(app, project, force):
 
     (project, video_1, video_2) = project
 
+    # prepare videos for publishing
+    prepare_videos_for_publish(video_1, video_2)
+
     # publish video_2
     video_2 = video_2.publish()
 
@@ -367,6 +372,7 @@ def test_inheritance(app, project):
     assert 'type' in project
 
     # Publish the video
+    prepare_videos_for_publish(video)
     video = video.publish()
     assert 'category' in video
     assert 'type' in video
@@ -376,16 +382,18 @@ def test_inheritance(app, project):
 
 def test_project_partial_validation(
         app, db, cds_jsonresolver_required_fields, deposit_metadata, location,
-        deposit_rest):
+        deposit_rest, video_deposit_metadata, project_deposit_metadata):
     """Test project create/publish with partial validation/validation."""
     # create a project/video without a required field
     if 'fuu' in deposit_metadata:
         del deposit_metadata['fuu']
-    project_video_1 = deepcopy(deposit_metadata)
-    project = Project.create(deposit_metadata)
+    project_video_1 = deepcopy(video_deposit_metadata)
+    # project_video_1 = deepcopy(video_metadata)
+    project = Project.create(project_deposit_metadata)
     # insert a video
     project_video_1['_project_id'] = project['_deposit']['id']
     video = Video.create(project_video_1)
+    prepare_videos_for_publish(video)
     video_id = video.id
     # check project
     id_ = project.id
@@ -438,6 +446,7 @@ def test_project_partial_validation(
 def test_project_publish_with_workflow(app, users, project, webhooks, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = project
+    prepare_videos_for_publish(video_1, video_2)
     project_depid = project['_deposit']['id']
     project_id = str(project.id)
     video_1_depid = video_1['_deposit']['id']
@@ -546,9 +555,9 @@ def test_project_permissions(es, location, deposit_metadata):
 
 def test_deposit_partial_validation(
         api_app, db, api_cds_jsonresolver_required_fields, deposit_metadata,
-        location):
+        location, video_deposit_metadata):
     """Test project create/publish with partial validation/validation."""
-    video_1 = deepcopy(deposit_metadata)
+    video_1 = deepcopy(video_deposit_metadata)
     # create a deposit without a required field
     if 'fuu' in deposit_metadata:
         del deposit_metadata['fuu']
@@ -556,6 +565,7 @@ def test_deposit_partial_validation(
         project = Project.create(deposit_metadata)
         video_1['_project_id'] = project['_deposit']['id']
         video_1 = Video.create(video_1)
+        prepare_videos_for_publish(video_1)
         video_1.commit()
         id_ = project.id
         db.session.expire_all()

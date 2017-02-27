@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import mock
 import json
 
+import re
 from invenio_indexer.api import RecordIndexer
 from invenio_db import db
 from xml.etree import ElementTree as ET
@@ -41,12 +42,12 @@ from invenio_accounts.testutils import login_user_via_session
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_records_ui_export(app, project_published, video_metadata):
+def test_records_ui_export(app, project_published, video_record_metadata):
     """Test view."""
     (project, video_1, video_2) = project_published
     # index a (update) video
     _, record_video = video_1.fetch_published()
-    record_video.update(**video_metadata)
+    record_video.update(**video_record_metadata)
     record_video.commit()
     db.session.commit()
     pid = project['_deposit']['pid']['value']
@@ -99,9 +100,9 @@ def test_records_ui_export(app, project_published, video_metadata):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_records_rest(api_app, users, video_metadata, api_project_published,
-                      json_headers, smil_headers, vtt_headers, es,
-                      drupal_headers):
+def test_records_rest(api_app, users, video_record_metadata, es,
+                      json_headers, smil_headers, vtt_headers, drupal_headers,
+                      api_project_published):
     """Test view."""
     indexer = RecordIndexer()
     (project, video_1, video_2) = api_project_published
@@ -111,7 +112,7 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
     # index project
     project.indexer.index(record_project)
     # index a (update) video
-    record_video.update(**video_metadata)
+    record_video.update(**video_record_metadata)
     record_video.commit()
     db.session.commit()
     indexer.index(record_video)
@@ -148,7 +149,8 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
             assert child.attrib["height"] == '2160'
 
         for i in range(4):
-            src = video_metadata['_files'][0]['video'][i]['links']['self']
+            src = \
+                video_record_metadata['_files'][0]['video'][i]['links']['self']
             assert root[1][0][i].attrib['src'] == 'mp4:{}'.format(src)
 
         # try get vtt
@@ -166,7 +168,7 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
 
         assert res.status_code == 200
         drupal = json.loads(res.data.decode('utf-8'))
-        thumbnail = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
+        thumbnail = u'http://cds.cern.ch/api/files/123/frame-1.jpg'
         expected = {
             u'entries': [
                 {
@@ -178,17 +180,17 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
                         u'creation_date': u'1970-01-01',
                         u'directors': u'paperone, pluto',
                         u'entry_date': u'2016-12-03',
-                        u'id': u'CERN-MOVIE-2016-1-2',
+                        u'id': u'CERN-MOVIE-2016-1-1',
                         u'keywords': u'keyword1, keyword2',
                         u'license_body': u'GPLv2',
-                        u'license_url': 'http://license.cern.ch',
+                        u'license_url': u'http://license.cern.ch',
                         u'producer': u'nonna papera, zio paperino',
                         u'record_id': 1,
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'My french title',
                         u'type': u'video',
-                        u'video_length': u'60.140000',
+                        u'video_length': u'00:01:00.140',
                     }
                 }
             ]
@@ -210,7 +212,7 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
 
         assert res.status_code == 200
         drupal = json.loads(res.data.decode('utf-8'))
-        thumbnail = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
+        thumbnail = u'http://cds.cern.ch/api/files/123/frame-1.jpg'
         expected = {
             u'entries': [
                 {
@@ -222,19 +224,24 @@ def test_records_rest(api_app, users, video_metadata, api_project_published,
                         u'creation_date': u'1970-01-01',
                         u'directors': u'paperone, pluto',
                         u'entry_date': u'2016-12-03',
-                        u'id': u'CERN-MOVIE-2016-1-2',
+                        u'id': u'CERN-MOVIE-2016-1-1',
                         u'keywords': u'keyword1, keyword2',
                         u'license_body': u'GPLv2',
-                        u'license_url': 'http://license.cern.ch',
+                        u'license_url': u'http://license.cern.ch',
                         u'producer': u'nonna papera, zio paperino',
                         u'record_id': 1,
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'',
                         u'type': u'video',
-                        u'video_length': u'60.140000',
+                        u'video_length': u'00:01:00.140',
                     }
                 }
             ]
         }
         assert expected == drupal
+
+
+def test_video_duration(app, video_published):
+    """Validate calculated duration of video."""
+    assert re.match(r'^\d\d:\d\d:\d\d.\d\d\d$', video_published['duration'])

@@ -401,7 +401,22 @@ def videos(video, frames, temp, video_count):
             )
         video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
 
-        video_deposit['_deposit'].update(dict(owners=[1], created_by=1))
+        video_deposit['_deposit'].update(dict(
+            owners=[1],
+            created_by=1,
+            extracted_metadata=dict(
+                bit_rate='679886',
+                duration='60.140000',
+                size='5111048',
+                avg_frame_rate='288000/12019',
+                codec_name='h264',
+                width=640,
+                height=360,
+                nb_frames='1440',
+                display_aspect_ratio='16:9',
+                color_range='tv',
+            )
+        ))
 
         with open(video, 'rb') as fp:
             master_obj = ObjectVersion.create(

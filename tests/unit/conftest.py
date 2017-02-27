@@ -52,7 +52,6 @@ from invenio_access.models import ActionUsers
 from invenio_accounts.models import User
 from invenio_db import db as db_
 from invenio_deposit import InvenioDepositREST
-from invenio_deposit.api import Deposit
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
@@ -75,7 +74,7 @@ from sqlalchemy_utils.functions import create_database, database_exists
 from invenio_files_rest.models import ObjectVersion
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
-    sse_success_task, new_project
+    sse_success_task, new_project, prepare_videos_for_publish
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -365,7 +364,7 @@ def api_cds_jsonresolver_required_fields(api_app):
 
 @pytest.fixture()
 def deposit_metadata():
-    """Deposit metadata."""
+    """General deposit metadata."""
     return {
         'date': '2016-12-03T00:00:00Z',
         'category': 'CERN',
@@ -374,8 +373,8 @@ def deposit_metadata():
 
 
 @pytest.fixture()
-def project_metadata(deposit_metadata):
-    """Simple project metadata."""
+def project_deposit_metadata(deposit_metadata):
+    """Project deposit metadata."""
     metadata = {
         'title': {
             'title': 'my project',
@@ -414,98 +413,53 @@ def project_metadata(deposit_metadata):
 
 
 @pytest.fixture()
-def video_metadata():
-    """Deposit metadata."""
+def video_deposit_metadata(deposit_metadata):
+    """Video deposit metadata."""
+    metadata = dict(
+        title=dict(title='test video',),
+        description=dict(value='in tempor reprehenderit enim eiusmod',),
+        featured=True,
+    )
+    metadata.update(deposit_metadata)
+    return metadata
+
+
+@pytest.fixture()
+def video_record_metadata():
+    """Video record metadata."""
     metadata = {
-        u'_buckets': {u'deposit': u'14113947-0b79-40a3-b39d-3b118a6ae04c'},
-        u'_deposit': {
-            u'created_by': 1,
+        '_buckets': {'deposit': '14113947-0b79-40a3-b39d-3b118a6ae04c'},
+        '_deposit': {
+            'created_by': 1,
             'pid': {'value': 1},
-            u'extracted_metadata': {
-                u'format': {
-                    u'bit_rate': u'679886',
-                    u'duration': u'60.140000',
-                    u'filename': u'/tmp/2f/4b/e829-29e8-4bf8-802d-ff0089707486/data',
-                    u'format_long_name': u'QuickTime / MOV',
-                    u'format_name': u'mov,mp4,m4a,3gp,3g2,mj2',
-                    u'nb_programs': 0,
-                    u'nb_streams': 2,
-                    u'probe_score': 100,
-                    u'size': u'5111048',
-                    u'start_time': u'0.000000',
-                    u'tags': {u'compatible_brands': u'qt  ',
-                              u'creation_time': u'1970-01-01T00:00:00.000000Z',
-                              u'encoder': u'Lavf52.93.0',
-                              u'major_brand': u'qt  ',
-                              u'minor_version': u'512'}},
-                u'streams': [
-                    {
-                        u'avg_frame_rate': u'288000/12019',
-                        u'bit_rate': u'612177',
-                        u'bits_per_raw_sample': u'8',
-                        u'chroma_location': u'topleft',
-                        u'codec_long_name': u'H.264 / AVC / MPEG-4 AVC / '
-                        'MPEG-4 part 10',
-                        u'codec_name': u'h264',
-                        u'codec_tag': u'0x31637661',
-                        u'codec_tag_string': u'avc1',
-                        u'codec_time_base': u'12019/576000',
-                        u'codec_type': u'video',
-                        u'coded_height': 360,
-                        u'coded_width': 640,
-                        u'color_primaries': u'smpte170m',
-                        u'color_range': u'tv',
-                        u'color_space': u'smpte170m',
-                        u'color_transfer': u'bt709',
-                        u'display_aspect_ratio': u'16:9',
-                        u'disposition': {u'attached_pic': 0,
-                                         u'clean_effects': 0,
-                                         u'comment': 0,
-                                         u'default': 1,
-                                         u'dub': 0,
-                                         u'forced': 0,
-                                         u'hearing_impaired': 0,
-                                         u'karaoke': 0,
-                                         u'lyrics': 0,
-                                         u'original': 0,
-                                         u'timed_thumbnails': 0,
-                                         u'visual_impaired': 0},
-                        u'duration': u'60.095000',
-                        u'duration_ts': 36057,
-                        u'has_b_frames': 0,
-                        u'height': 360,
-                        u'index': 0,
-                        u'is_avc': u'true',
-                        u'level': 30,
-                        u'nal_length_size': u'4',
-                        u'nb_frames': u'1440',
-                        u'pix_fmt': u'yuv420p',
-                        u'profile': u'Constrained Baseline',
-                        u'r_frame_rate': u'24/1',
-                        u'refs': 1,
-                        u'sample_aspect_ratio': u'0:1',
-                        u'start_pts': 0,
-                        u'start_time': u'0.000000',
-                        u'tags': {
-                            u'creation_time': u'1970-01-01T00:00:00.000000Z',
-                            u'handler_name': u'DataHandler',
-                            u'language': u'eng'
-                        },
-                        u'time_base': u'1/600',
-                        u'width': 640
-                    }
-                ]
+            'extracted_metadata': {
+                'bit_rate': '679886',
+                'duration': '60.140000',
+                'size': '5111048',
+                'avg_frame_rate': '288000/12019',
+                'codec_name': 'h264',
+                'width': 640,
+                'height': 360,
+                'nb_frames': '1440',
+                'display_aspect_ratio': '16:9',
+                'color_range': 'tv',
+                'tags': {
+                    'compatible_brands': 'qt  ',
+                    'creation_time': '1970-01-01T00:00:00.000000Z',
+                    'encoder': 'Lavf52.93.0',
+                    'major_brand': 'qt  ',
+                    'minor_version': '512',
+                },
             },
-            u'id': u'0c547fefc0664ac9837d6a53a4890730',
-            u'owners': [1],
-            u'state': {'file_transcode': 'FAILURE',
-                       'file_video_extract_frames': 'SUCCESS',
-                       'file_video_metadata_extraction': 'SUCCESS'},
-            u'status': u'draft'
+            'id': '0c547fefc0664ac9837d6a53a4890730',
+            'owners': [1],
+            'state': {'file_transcode': 'FAILURE',
+                      'file_video_extract_frames': 'SUCCESS',
+                      'file_video_metadata_extraction': 'SUCCESS'},
+            'status': 'draft'
         },
         "_files": [
             {
-
                 "checksum": "md5:1beda6154605f65a922fdc488c987d83",
                 "completed": True,
                 "frame": [
@@ -719,7 +673,7 @@ def video_metadata():
             {'name': 'pluto', 'role': 'Director'},
             {'name': 'zio paperino', 'role': 'Producer'}
         ],
-        'copyright': {u'url': u'www.copy.right'},
+        'copyright': {'url': 'www.copy.right'},
         "license": [{
             "license": "GPLv2",
             "url": "http://license.cern.ch",
@@ -751,7 +705,7 @@ def video_metadata():
         'description_translations': [
             {
                 'language': 'fr',
-                'value': u'france caption',
+                'value': 'france caption',
             }
         ],
     }
@@ -825,6 +779,7 @@ def project_published(app, project):
     """New published project with videos."""
     (project, video_1, video_2) = project
     with app.test_request_context():
+        prepare_videos_for_publish(video_1, video_2)
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
@@ -838,10 +793,19 @@ def api_project_published(api_app, api_project):
     """New published project with videos."""
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
+        prepare_videos_for_publish(video_1, video_2)
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
     return new_project, new_videos[0], new_videos[1]
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@pytest.fixture()
+def video_published(app, project_published):
+    """New published project with videos."""
+    return project_published[1]
 
 
 @pytest.fixture()
