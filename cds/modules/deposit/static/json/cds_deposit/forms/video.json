@@ -37,6 +37,7 @@
     },
     {
       "type": "template",
+      "title": "Date",
       "key": "date",
       "placeholder": "eg. 2013-05-08",
       "templateUrl": "/static/templates/cds_deposit/datepicker.html",
@@ -109,7 +110,8 @@
     },
     {
       "title": "Mark as featured",
-      "key": "featured"
+      "key": "featured",
+      "htmlClass": "row col-sm-9 col-sm-offset-3"
     }
   ],
   "licenses": [
