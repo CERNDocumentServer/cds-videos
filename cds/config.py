@@ -719,6 +719,12 @@ DEPOSIT_FORM_TEMPLATES = {
 # App key for uploading files from dropbox
 DEPOSIT_DROPBOX_APP_KEY = 'CHANGE_ME'
 
+# Default copyright holder & url
+DEPOSIT_AVC_COPYRIGHT = {
+    'holder': 'CERN',
+    'url': 'http://copyright.web.cern.ch',
+}
+
 ###############################################################################
 # SSE
 ###############################################################################

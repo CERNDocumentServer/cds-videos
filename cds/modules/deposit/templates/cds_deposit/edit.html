@@ -1,6 +1,6 @@
 {#
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -61,6 +61,7 @@
       {% else %}
         master-init="/api/deposits/project/"
       {% endif %}
+      copyright='{{ config.DEPOSIT_AVC_COPYRIGHT|tojson }}'
       master-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_DEFAULT_JSONSCHEMA, _external=True) }}"
       master-form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
       dropbox-app-key="{{ config.DEPOSIT_DROPBOX_APP_KEY }}"
