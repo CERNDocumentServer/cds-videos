@@ -220,20 +220,6 @@ def u_email(db, users):
 
 
 @pytest.fixture()
-def depid(app, users, db):
-    """New deposit with files."""
-    record = {
-        'title': {'title': 'fuu'}
-    }
-    with app.test_request_context():
-        login_user(User.query.get(users[0]))
-        deposit = Deposit.create(record)
-        deposit.commit()
-        db.session.commit()
-    return deposit['_deposit']['id']
-
-
-@pytest.fixture()
 def cds_depid(api_app, users, db, bucket, deposit_metadata):
     """New deposit with files."""
     record = {'title': {'title': 'fuu'}}
