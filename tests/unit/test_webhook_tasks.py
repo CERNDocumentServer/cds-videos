@@ -39,6 +39,7 @@ from invenio_records.models import RecordMetadata
 from six import BytesIO, next
 from celery.exceptions import Retry
 from sqlalchemy.orm.exc import ConcurrentModificationError
+from cds_sorenson.error import InvalidResolutionError
 
 from cds.modules.webhooks.tasks import (DownloadTask,
                                         update_record, ExtractFramesTask,
@@ -345,3 +346,26 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     assert new_filenames[1] in keys
     assert filename in keys
     assert bucket.size == (2 * filesize)
+
+
+def test_transcode_no_raise_exception_if_invalid(db, bucket):
+    """Test no raise exception if sorenson raise InvalidResolutionError."""
+    def get_bucket_keys():
+        return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
+
+    filesize = 1024
+    filename = 'test.mp4'
+    preset_qualities = ['480p', '720p']
+
+    (version_id, [task_s1, task_s2]) = transcode_task(
+        bucket=bucket, filesize=filesize, filename=filename,
+        preset_qualities=preset_qualities)
+
+    assert get_bucket_keys() == [filename]
+    assert bucket.size == filesize
+
+    with mock.patch('cds.modules.webhooks.tasks.start_encoding',
+                    side_effect=InvalidResolutionError('fuu', 'test')):
+        # Transcode
+        task = task_s1.delay()
+        assert task.result is None
