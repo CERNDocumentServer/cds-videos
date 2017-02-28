@@ -35,7 +35,7 @@
               <div class="col-sm-6">
                 <div class="text-right">
                   300000 views
-              </div>
+                </div>
               </div>
             </div>
           </div>
@@ -48,7 +48,20 @@
           <!-- More -->
           <div class="cds-detail-more cds-detail-video-more">
           </div>
-          <!-- More -->
+          <!-- /More -->
+          <!-- DOI and report number -->
+          <div class="text-right">
+            <p ng-if="record.doi">
+              <a class="get-badge" ng-href="http://dx.doi.org/{{ ::record.doi }}" target="_blank">
+                <img ng-src="/badge/doi/{{ ::record.doi }}.svg" alt="{{ ::record.doi }}">
+              </a>
+            </p>
+            <p ng-if="record.report_number.report_number">
+              Reference: {{ ::record.report_number.report_number }}
+            </p>
+          </div>
+          <!-- /Report number -->
+          </div>
         </div>
         <!-- /Section -->
       </div>
