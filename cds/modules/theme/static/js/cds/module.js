@@ -22,9 +22,12 @@
 */
 
 var app = angular.module('cds', ['ngclipboard']);
-app.filter('previewIframe', ['$sce', function($sce) {
-  return function(text, id, key) {
+app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
+  return function(text, id, key, external) {
     var _url = '/record/' + id + '/preview/' + key;
+    if (external) {
+      _url = $window.location.origin + _url;
+    }
     return $sce.trustAsResourceUrl(_url);
   };
 }]);
