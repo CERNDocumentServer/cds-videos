@@ -494,7 +494,7 @@ class TranscodeVideoTask(AVCTask):
                 self.update_state(
                     state=REVOKED,
                     meta={'payload': {}, 'message': str(e)})
-                raise
+                return
 
             # Set revoke handler, in case of an abrupt execution halt.
             self.set_revoke_handler(partial(stop_encoding, job_id))
