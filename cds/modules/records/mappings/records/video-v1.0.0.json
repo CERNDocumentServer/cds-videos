@@ -266,6 +266,9 @@
                         }
                     },
                     "type": "object"
+                },
+                "language": {
+                  "type": "string"
                 }
             },
             "date_detection": true

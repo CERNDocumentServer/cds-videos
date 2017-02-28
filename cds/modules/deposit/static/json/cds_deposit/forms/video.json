@@ -36,6 +36,91 @@
       ]
     },
     {
+      "title": "Language",
+      "type": "select",
+      "key": "language",
+      "placeholder": "Language",
+      "notitle": false,
+      "titleMap": [
+        {
+          "value":  "bg",
+          "name":  "Български"
+        },
+        {
+          "value":  "ca",
+          "name":  "Català"
+        },
+        {
+          "value":  "de",
+          "name":  "Deutsch"
+        },
+        {
+          "value":  "el",
+          "name":  "Ελληνικά"
+        },
+        {
+          "value":  "en",
+          "name":  "English"
+        },
+        {
+          "value":  "es",
+          "name":  "Español"
+        },
+        {
+          "value":  "fr",
+          "name": "Français"
+        },
+        {
+          "value":  "hr",
+          "name":  "Hrvatski"
+        },
+        {
+          "value":  "it",
+          "name":  "Italiano"
+        },
+        {
+          "value":  "ja",
+          "name":  "日本語"
+        },
+        {
+          "value":  "ka",
+          "name":  "ქართული"
+        },
+        {
+          "value":  "no",
+          "name":  "Norsk/Bokmål"
+        },
+        {
+          "value":  "pl",
+          "name":  "Polski"
+        },
+        {
+          "value":  "pt",
+          "name":  "Português"
+        },
+        {
+          "value":  "ru",
+          "name":  "Русский"
+        },
+        {
+          "value":  "sk",
+          "name":  "Slovensky"
+        },
+        {
+          "value":  "sv",
+          "name":  "Svenska"
+        },
+        {
+          "value":  "zh_CN",
+          "name":  "中文(简)"
+        },
+        {
+          "value":  "zh_TW",
+          "name":  "中文(繁)"
+        }
+      ]
+    },
+    {
       "type": "template",
       "key": "date",
       "placeholder": "eg. 2013-05-08",
