@@ -42,23 +42,6 @@
                 "$schema": {
                     "type": "string"
                 },
-                "title_translations": {
-                    "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        },
-                        "source": {
-                            "type": "string"
-                        },
-                        "subtitle": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
                 "contributors": {
                     "properties": {
                         "email": {
@@ -202,19 +185,38 @@
                     },
                     "type": "object"
                 },
-                "description_translations": {
-                    "properties": {
-                        "value": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        },
+                "translations": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "object",
+                      "properties": {
                         "source": {
-                            "type": "string"
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
                         }
+                      }
                     },
-                    "type": "object"
+                    "language": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "subtitle": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
                 },
                 "_files": {
                     "properties": {

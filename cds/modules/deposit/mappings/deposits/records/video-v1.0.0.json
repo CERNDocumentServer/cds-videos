@@ -61,23 +61,6 @@
                     },
                     "type": "object"
                 },
-                "title_translations": {
-                    "properties": {
-                        "subtitle": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        },
-                        "source": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
                 "date": {
                     "type": "string"
                 },
@@ -163,19 +146,38 @@
                 "license": {
                     "type": "string"
                 },
-                "description_translations": {
-                    "properties": {
+                "translations": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "object",
+                      "properties": {
                         "source": {
-                            "type": "string"
+                          "type": "string"
                         },
                         "value": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
+                          "type": "string"
                         }
+                      }
                     },
-                    "type": "object"
+                    "language": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "subtitle": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
                 },
                 "creator": {
                     "properties": {
