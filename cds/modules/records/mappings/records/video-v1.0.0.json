@@ -274,6 +274,9 @@
                 },
                 "language": {
                   "type": "string"
+                },
+                "publication_date": {
+                  "type": "string"
                 }
             },
             "date_detection": true

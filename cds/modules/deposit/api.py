@@ -347,6 +347,13 @@ class CDSDeposit(Deposit):
         else:
             yield
 
+    def publish(self, pid=None, id_=None, **kwargs):
+        """Publish a deposit."""
+        if 'publication_date' not in self:
+            now = datetime.datetime.utcnow().date().isoformat()
+            self['publication_date'] = now
+        return super(CDSDeposit, self).publish(pid=pid, id_=id_, **kwargs)
+
 
 def project_resolver(project_id):
     """Get records from PIDs."""

@@ -26,11 +26,14 @@
 
 from __future__ import absolute_import, print_function
 
-from .smil import SmilSerializer
-from .vtt import VTTSerializer
-from .drupal import DrupalSerializer
+from invenio_records_rest.serializers.datacite import DataCite31Serializer
 from invenio_records_rest.serializers.response import record_responsify
 from invenio_records_rest.serializers.schemas.json import RecordSchemaJSONV1
+
+from .drupal import DrupalSerializer
+from .schemas.datacite import DataCiteSchemaV1
+from .smil import SmilSerializer
+from .vtt import VTTSerializer
 
 # Serializers
 # ===========
@@ -44,6 +47,9 @@ vtt_v1 = VTTSerializer()
 #: Drupal JSON serializer
 drupal_v1 = DrupalSerializer(RecordSchemaJSONV1)
 
+#: DataCite serializer
+datacite_v31 = DataCite31Serializer(DataCiteSchemaV1, replace_refs=True)
+
 # Records-REST response serializers
 # ========================
 
@@ -55,3 +61,7 @@ vtt_v1_response = record_responsify(vtt_v1, 'text/vtt')
 
 #: Drupal record serializer for individual records.
 drupal_v1_response = record_responsify(drupal_v1, 'application/json')
+
+#: DataCite v3.1 record serializer for individual records.
+datacite_v31_response = record_responsify(
+    datacite_v31, 'application/x-datacite+xml')

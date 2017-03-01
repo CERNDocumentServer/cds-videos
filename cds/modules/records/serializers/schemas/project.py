@@ -16,12 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
-
 """Project JSON schema."""
 
 from __future__ import absolute_import
 
-from cds.modules.records.serializers.schemas.json.common import \
+from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
     DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
     OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
@@ -74,7 +73,7 @@ class ProjectSchema(StrictKeysSchema):
     title = fields.Nested(TitleSchema)
     videos = fields.Nested(ProjectVideoSchema, many=True)
     translations = fields.Nested(TranslationsSchema, many=True)
-
     category = fields.Str()
     type = fields.Str()
     report_number = fields.Nested(ReportNumberSchema, many=False)
+    publication_date = fields.Str()
