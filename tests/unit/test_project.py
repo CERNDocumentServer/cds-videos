@@ -36,7 +36,7 @@ from flask_principal import Identity
 from invenio_db import db
 from copy import deepcopy
 from flask_security import login_user
-from cds.modules.deposit.permissions import can_edit_deposit
+from cds.modules.records.permissions import has_update_permission
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_resolver, video_build_url,
                                      is_deposit, record_unbuild_url,
@@ -530,18 +530,15 @@ def test_project_deposit(es, location, deposit_metadata):
     assert '_buckets' in deposit
 
 
-def test_project_permissions(es, location, deposit_metadata):
+def test_project_permissions(es, location, deposit_metadata, users):
     """Test deposit permissions."""
     deposit = Project.create(deposit_metadata)
     deposit.commit()
-    user = User(email='user@cds.cern', password='123456', active=True)
-    g.identity = Identity(user.id)
-    db.session.add(user)
-    db.session.commit()
+    user = User.query.get(users[0])
     login_user(user)
-    assert not can_edit_deposit(deposit)
+    assert not has_update_permission(user, deposit)
     deposit['_deposit']['owners'].append(user.id)
-    assert can_edit_deposit(deposit)
+    assert has_update_permission(user, deposit)
 
 
 def test_deposit_partial_validation(
