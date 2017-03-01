@@ -152,10 +152,10 @@ def get_object_count(download=True, frames=True, transcode=True):
 def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
     """Get number of ObjectVersionTags, based on executed tasks."""
     return sum([
-        3 if download else 0,
+        5 if download else 0,
         10 if download and metadata else 0,
-        11 * 2 if frames else 0,
-        len(get_available_preset_qualities()) * 4 if transcode else 0,
+        11 * 3 if frames else 0,
+        len(get_available_preset_qualities()) * 5 if transcode else 0,
     ])
 
 
