@@ -72,6 +72,8 @@ from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
 from invenio_files_rest.models import ObjectVersion
+from invenio_pidstore.models import PersistentIdentifier
+from uuid import uuid4
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
     sse_success_task, new_project, prepare_videos_for_publish
@@ -702,12 +704,17 @@ def video_record_metadata():
                 'title': 'My french title',
             }
         ],
+        'description': {
+            'value': 'in tempor reprehenderit enim eiusmod',
+        },
         'description_translations': [
             {
                 'language': 'fr',
                 'value': 'france caption',
             }
         ],
+        'language': 'en',
+        'publication_date': '2017-03-02',
     }
     return metadata
 
@@ -754,6 +761,13 @@ def vtt_headers(app):
     """VTT headers."""
     return [('Content-Type', 'text/vtt'),
             ('Accept', 'text/vtt')]
+
+
+@pytest.fixture()
+def datacite_headers(app):
+    """Datacite headers."""
+    return [('Content-Type', 'application/x-datacite+xml'),
+            ('Accept', 'application/x-datacite+xml')]
 
 
 @pytest.fixture()
@@ -946,3 +960,11 @@ def local_file(db, bucket, location, online_video):
     version_id = object_version.version_id
     db.session.commit()
     return version_id
+
+
+@pytest.fixture()
+def recid_pid():
+    """PID for minimal record."""
+    return PersistentIdentifier(
+        pid_type='recid', pid_value='123', status='R', object_type='rec',
+        object_uuid=uuid4())

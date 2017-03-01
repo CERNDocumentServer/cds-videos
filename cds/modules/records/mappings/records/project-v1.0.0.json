@@ -243,6 +243,9 @@
                         }
                     },
                     "type": "object"
+                },
+                "publication_date": {
+                  "type": "string"
                 }
             },
             "numeric_detection": true

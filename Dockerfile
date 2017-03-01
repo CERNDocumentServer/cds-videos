@@ -65,8 +65,7 @@ RUN pip install -r requirements.devel.txt --src /code/
 COPY . /code/cds/
 
 # Install CDS
-RUN pip install -e .[all]\
-    && python -O -m compileall .
+RUN pip install -e .[all]
 
 # Install bower dependencies and build assets.
 RUN cds npm \

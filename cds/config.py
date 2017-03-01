@@ -160,6 +160,10 @@ CDS_RECORDS_EXPORTFORMATS = {
         title='Drupal',
         serializer='cds.modules.records.serializers:drupal_v1'
     ),
+    'dcite': dict(
+        title='Datacite XML v3.1',
+        serializer='cds.modules.records.serializers:datacite_v31'
+    )
 }
 
 # Endpoints for records.
@@ -239,6 +243,8 @@ RECORDS_REST_ENDPOINTS = dict(
                          ':vtt_v1_response'),
             'x-application/drupal': ('cds.modules.records.serializers'
                                      ':drupal_v1_response'),
+            'application/x-datacite+xml': (
+                'cds.modules.records.serializers.datacite_v31_response'),
         },
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
