@@ -1,7 +1,7 @@
 {# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,20 +22,38 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
-{%- extends "invenio_accounts/login_user.html" %}
+{% extends config.THEME_BASE_TEMPLATE %}
 
-{%- block form_header %}
-  <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
-{%- endblock form_header %}
+{%- from "invenio_accounts/_macros.html" import render_field, form_errors -%}
+{%- from "cds_theme/_macros.html" import cds_oauth_button %}
 
-{%- block form_outer %}
-  {%- if config.DEBUG -%}
-    {{ super() }}
-  {%- endif -%}
-{%- endblock form_outer %}
-
+{%- block page_header %}{% endblock page_header %}
 {%- block page_body -%}
   <div class="cds-login">
-    {{ super() }}
+    <div class="col-md-4 col-md-offset-4">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
+      {% if config.OAUTHCLIENT_REMOTE_APPS %}
+        {% for name in config.OAUTHCLIENT_REMOTE_APPS.keys() %}
+          {{ cds_oauth_button(name, next=url_for('cds_home.index', _external=True)) }}
+        {% endfor %}
+      {% endif %}
+      {%- if config.DEBUG -%}
+        <h3 align="center">&mdash; OR &mdash;</h3>
+        {%- with form = login_user_form %}
+          <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+          {{form.hidden_tag()}}
+          {{form_errors(form)}}
+          {{ render_field(form.email, icon="fa fa-user", autofocus=True, errormsg=False) }}
+          {{ render_field(form.password, icon="fa fa-lock", errormsg=False) }}
+          <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-sign-in"></i> {{_('Log In')}}</button>
+          </form>
+        {%- endwith %}
+      {%- endif -%}
+    </div>
+    </div>
+    </div>
   </div>
 {%- endblock -%}
+{%- block page_footer %}{%- endblock page_footer %}
