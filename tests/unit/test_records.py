@@ -69,6 +69,9 @@ def test_records_ui_export(app, project_published, video_record_metadata):
         url_valid_drupal_project = url_for(
             'invenio_records_ui.recid_export', pid_value=pid,
             format='drupal')
+        url_valid_datacite_video = url_for(
+            'invenio_records_ui.recid_export', pid_value=vid,
+            format='dcite')
 
     def get_pre(data):
         data = data.decode('utf-8')
@@ -80,29 +83,39 @@ def test_records_ui_export(app, project_published, video_record_metadata):
         # Test that default view function can deal with multiple parameters.
         res = client.get(url_no_existing_exporter)
         assert res.status_code == 404
+
         res = client.get(url_not_valid_type_record)
         assert res.status_code == 400
+
         res = client.get(url_valid_smil)
         assert res.status_code == 200
         assert get_pre(res.data).startswith('&lt;smil&gt;') is True
+
         res = client.get(url_valid_vtt)
         assert res.status_code == 200
         assert get_pre(res.data).startswith('WEBVTT') is True
+
         res = client.get(url_valid_json)
         assert res.status_code == 200
+
         res = client.get(url_valid_drupal)
         assert res.status_code == 200
         assert get_pre(res.data).startswith('{') is True
+
         res = client.get(url_valid_drupal_project)
         assert res.status_code == 200
         assert get_pre(res.data) == '{}'
+
+        res = client.get(url_valid_datacite_video)
+        assert res.status_code == 200
+        assert get_pre(res.data).startswith('&lt;?xml version=')
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 def test_records_rest(api_app, users, video_record_metadata, es,
                       json_headers, smil_headers, vtt_headers, drupal_headers,
-                      api_project_published):
+                      api_project_published, datacite_headers):
     """Test view."""
     indexer = RecordIndexer()
     (project, video_1, video_2) = api_project_published
@@ -196,6 +209,11 @@ def test_records_rest(api_app, users, video_record_metadata, es,
             ]
         }
         assert expected == drupal
+
+        # try get datacite
+        res = client.get(url2, headers=datacite_headers)
+        assert res.status_code == 200
+        assert res.data.decode('utf-8').startswith('<?xml version=')
 
     # test corner cases
     del record_video['title_translations']
