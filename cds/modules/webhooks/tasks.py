@@ -111,9 +111,10 @@ class AVCTask(Task):
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
             # NOTE: workaround to be able to save the meta in case of exception
-            exception = {}
-            exception['exc_message'] = meta
-            exception['exc_type'] = 'TypeError'
+            exception = dict(
+                exc_message=meta,
+                exc_type='TypeError'
+            )
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
             # /NOTE
             self._update_record()
@@ -152,7 +153,8 @@ class DownloadTask(AVCTask):
         self._type = 'file_download'
         self._base_payload = {}  # {'type': self._type}
 
-    def clean(self, version_id, *args, **kwargs):
+    @staticmethod
+    def clean(version_id, *args, **kwargs):
         """Undo download task."""
         # Delete the file and the object version
         dispose_object_version(version_id)
@@ -239,7 +241,7 @@ class ExtractMetadataTask(AVCTask):
         validator = 'invenio_records.validators.PartialDraft4Validator'
         patch_record(recid=recid, patch=patch, validator=validator)
 
-        # 2. delete every tag created
+        # 2. Delete every tag created
         for tag in ObjectVersionTag.query.filter(
                 ObjectVersionTag.version_id == version_id,
                 ObjectVersionTag.key.in_(self._all_keys)).all():
@@ -307,7 +309,8 @@ class ExtractFramesTask(AVCTask):
         self._type = 'file_video_extract_frames'
         self._base_payload = {}  # {'type': self._type}
 
-    def clean(self, version_id, *args, **kwargs):
+    @staticmethod
+    def clean(version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
         # remove all objects version "slave" with type "frame" and,
         # automatically, all tags connected
@@ -319,9 +322,8 @@ class ExtractFramesTask(AVCTask):
             .filter(
                 tag_alias_1.key == 'master',
                 tag_alias_1.value == version_id) \
-            .filter(tag_alias_2.key == 'type',
-                    (tag_alias_2.value == 'frame') |
-                    (tag_alias_2.value == 'gif-preview')) \
+            .filter(tag_alias_2.key == 'context_type',
+                    tag_alias_2.value.in_(['frame', 'frames-preview'])) \
             .all()
         # FIXME do a test for check separately every "undo" when
         # run a AVC workflow
@@ -384,19 +386,20 @@ class ExtractFramesTask(AVCTask):
         head.save(in_output(gif_name), save_all=True,
                   append_images=tail, duration=500)
 
-        def create_object(key, type_tag):
+        def create_object(key, media_type, context_type):
             obj = ObjectVersion.create(
                 bucket=self.object.bucket,
                 key=key,
                 stream=open(in_output(key), 'rb'))
             ObjectVersionTag.create(obj, 'master', self.obj_id)
-            ObjectVersionTag.create(obj, 'type', type_tag)
+            ObjectVersionTag.create(obj, 'media_type', media_type)
+            ObjectVersionTag.create(obj, 'context_type', context_type)
 
         # Create GIF object
-        create_object(gif_name, 'gif-preview')
+        create_object(gif_name, 'image', 'frames-preview')
 
         # Create frame objects
-        [create_object(filename, 'frame') for filename in frames]
+        [create_object(filename, 'image', 'frame') for filename in frames]
 
         shutil.rmtree(output_folder)
         db.session.commit()
@@ -503,7 +506,8 @@ class TranscodeVideoTask(AVCTask):
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
             ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
-            ObjectVersionTag.create(obj, 'type', 'video')
+            ObjectVersionTag.create(obj, 'media_type', 'video')
+            ObjectVersionTag.create(obj, 'context_type', 'subformat')
 
             # Information necessary for monitoring
             job_info = dict(
