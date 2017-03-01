@@ -129,6 +129,7 @@ def test_download_receiver(api_app, db, bucket, api_project, access_token,
                         'tags': {
                             u'uri_origin': u'http://example.com/test.pdf',
                             u'_event_id': str(tags['_event_id']),
+                            u'context_type': u'master',
                         },
                         'deposit_id': video_1_depid,
                         'percentage': percentage,
@@ -741,7 +742,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert 'extracted_metadata' in records[0].json['_deposit']
 
         assert ObjectVersion.query.count() == get_object_count() - i
-        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 4)
+        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 5)
 
     assert ObjectVersion.query.count() == get_object_count(transcode=False)
     assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
@@ -757,7 +758,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert ObjectVersion.query.count() == get_object_count(
             transcode=False) + i
         assert ObjectVersionTag.query.count() == get_tag_count(
-            transcode=False) + (i * 4)
+            transcode=False) + (i * 5)
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()

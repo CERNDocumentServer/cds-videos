@@ -79,7 +79,8 @@ class CeleryAsyncReceiver(Receiver):
     }
     """Mapping of Celery result states to HTTP codes."""
 
-    def has_result(self, event):
+    @staticmethod
+    def has_result(event):
         """Return true if some result are in the event."""
         return '_tasks' in event.response
 
@@ -114,7 +115,8 @@ class CeleryAsyncReceiver(Receiver):
             raw_info=self._raw_info(event),
             fun=lambda task_name, result: result.revoke(terminate=True))
 
-    def delete_task(self, event, task_id):
+    @staticmethod
+    def delete_task(event, task_id):
         """Revoke a specific task."""
         AsyncResult(task_id).revoke(terminate=True)
 
@@ -181,7 +183,8 @@ class CeleryAsyncReceiver(Receiver):
 class Downloader(CeleryAsyncReceiver):
     """Receiver that downloads data from a URL."""
 
-    def _init_object_version(self, event):
+    @staticmethod
+    def _init_object_version(event):
         """Create the version object."""
         event_id = str(event.id)
         with db.session.begin_nested():
@@ -190,9 +193,11 @@ class Downloader(CeleryAsyncReceiver):
             ObjectVersionTag.create(object_version, 'uri_origin',
                                     event.payload['uri'])
             ObjectVersionTag.create(object_version, '_event_id', event_id)
+            ObjectVersionTag.create(object_version, 'context_type', 'master')
         return object_version
 
-    def _workflow(self, event, version_id):
+    @staticmethod
+    def _workflow(event, version_id):
         """Define the workflow."""
         event_id = str(event.id)
         return DownloadTask().s(
@@ -200,7 +205,8 @@ class Downloader(CeleryAsyncReceiver):
             event_id=event_id,
             **event.payload)
 
-    def _update_event_response(self, event, version_id):
+    @staticmethod
+    def _update_event_response(event, version_id):
         """Update event response."""
         event_id = str(event.id)
         object_version = as_object_version(version_id)
@@ -276,14 +282,15 @@ class Downloader(CeleryAsyncReceiver):
     def _raw_info(self, event):
         """Get info from the event."""
         result = self._deserialize_result(event)
-        return {"file_download": result}
+        return {'file_download': result}
 
     def delete(self, event):
         """Delete generated files."""
         super(Downloader, self).delete(event)
         self.clean_task(event=event, task_name='file_download')
 
-    def clean_task(self, event, task_name, *args, **kwargs):
+    @staticmethod
+    def clean_task(event, task_name, *args, **kwargs):
         """Delete everything created by a task."""
         if task_name == 'file_download':
             DownloadTask().clean(version_id=event.response['version_id'])
@@ -317,7 +324,8 @@ class AVCWorkflow(CeleryAsyncReceiver):
         kwargs['deposit_id'] = event.payload['deposit_id']
         return self._tasks[task_name]().clean(*args, **kwargs)
 
-    def _init_object_version(self, event):
+    @staticmethod
+    def _init_object_version(event):
         """Create, if doesn't exists, the version object."""
         event_id = str(event.id)
         with db.session.begin_nested():
@@ -336,10 +344,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
             ObjectVersionTag.create(object_version, '_event_id', event_id)
             # add tag for preview
             ObjectVersionTag.create(object_version, 'preview', True)
+            # add tags for file type
+            ObjectVersionTag.create(object_version, 'media_type', 'video')
+            ObjectVersionTag.create(object_version, 'context_type', 'master')
             event.response['version_id'] = version_id
         return object_version
 
-    def _update_event_response(self, event, version_id):
+    @staticmethod
+    def _update_event_response(event, version_id):
         """Update event response."""
         event_id = str(event.id)
         object_version = as_object_version(version_id)
@@ -465,21 +477,21 @@ class AVCWorkflow(CeleryAsyncReceiver):
             object_version = as_object_version(event.payload['version_id'])
             ObjectVersionTag.query.filter(
                 ObjectVersionTag.object_version == object_version,
-                (ObjectVersionTag.key == '_event_id') |
-                (ObjectVersionTag.key == 'preview')
-            ).delete()
+                ObjectVersionTag.key.in_(['_event_id', 'preview',
+                                          'media_type', 'context_type'])
+            ).delete(synchronize_session=False)
 
     def _raw_info(self, event):
         """Get info from the event."""
         result = self._deserialize_result(event)
         if 'version_id' in event.payload:
-            first_step = [{"file_video_metadata_extraction": result.parent}]
+            first_step = [{'file_video_metadata_extraction': result.parent}]
         else:
             first_step = [
-                {"file_download": result.parent.children[0]},
-                {"file_video_metadata_extraction": result.parent.children[1]}
+                {'file_download': result.parent.children[0]},
+                {'file_video_metadata_extraction': result.parent.children[1]}
             ]
-        second_step = [{"file_video_extract_frames": result.children[0]}]
+        second_step = [{'file_video_extract_frames': result.children[0]}]
         for res in result.children[1:]:
-            second_step.append({"file_transcode": res})
+            second_step.append({'file_transcode': res})
         return first_step, second_step

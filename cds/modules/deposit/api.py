@@ -32,6 +32,7 @@ import uuid
 import datetime
 import itertools
 from contextlib import contextmanager
+from os.path import splitext
 
 import arrow
 from celery import states
@@ -96,15 +97,24 @@ class CDSFileObject(FileObject):
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
         def _dumps(obj):
+            tags = obj.get_tags()
+            # File information
+            content_type = splitext(obj.key)[1][1:].lower()
+            context_type = tags.pop('context_type', '')
+            media_type = tags.pop('media_type', '')
             return {
                 'key': obj.key,
                 'bucket_id': str(obj.bucket_id),
                 'version_id': str(obj.version_id),
                 'checksum': obj.file.checksum if obj.file else '',
                 'size': obj.file.size if obj.file else 0,
+                'file_id': str(obj.file_id),
                 'completed': True,
                 'progress': 100,
-                'tags': obj.get_tags(),
+                'content_type': content_type,
+                'context_type': context_type,
+                'media_type': media_type,
+                'tags': tags,
                 'links': {
                     'self': (
                         current_app.config['DEPOSIT_FILES_API'] +
