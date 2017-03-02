@@ -90,6 +90,39 @@
                         }
                     }
                 },
+                "translations": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "subtitle": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
                 "_files": {
                     "type": "object",
                     "properties": {
@@ -173,20 +206,6 @@
                         }
                     }
                 },
-                "description_translations": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        }
-                    }
-                },
                 "_deposit": {
                     "type": "object",
                     "properties": {
@@ -201,23 +220,6 @@
                         },
                         "extracted_metadata": {
                           "type": "object"
-                        }
-                    }
-                },
-                "title_translations": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "subtitle": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
                         }
                     }
                 },
