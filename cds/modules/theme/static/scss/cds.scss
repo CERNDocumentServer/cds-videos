@@ -161,17 +161,12 @@ a[ng-click]{
 
 .cds-tab-content {
   background-color: #fff;
-
 }
 
 .cds-pills-center {
   display: flex;
   justify-content: center;
   padding-bottom: 10px;
-
-  & > li > a {
-    border-radius: 5px;
-  }
 }
 
 .cds-urls-textarea {
@@ -417,6 +412,15 @@ a[ng-click]{
 /////////
 
 // Error pages
+
+.font-size-fix-on-small-screens {
+  @media (max-width: $screen-sm-min) {
+    p {
+      font-size: 100%;
+    }
+  }
+}
+
 .error-page {
   flex: 1;
 }
@@ -430,12 +434,14 @@ a[ng-click]{
 // 404
 .cds-404 {
   @extend .cds-flex-center-content;
+  @extend .font-size-fix-on-small-screens;
   background-image: $cds-unicorn-color;
 }
 
 // 500
 .cds-500 {
   @extend .cds-flex-center-content;
+  @extend .font-size-fix-on-small-screens;
   background-image: $cds-unicorn-color;
 }
 
