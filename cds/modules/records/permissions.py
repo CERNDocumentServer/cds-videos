@@ -24,10 +24,48 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import g
 from flask_principal import ActionNeed
 from flask_security import current_user
 from invenio_access import DynamicPermission
+from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
+from invenio_records.api import Record
+from invenio_records_files.api import FileObject
+from invenio_records_files.models import RecordsBuckets
+
+from .utils import is_deposit, is_record, get_user_provides
+
+
+def files_permission_factory(obj, action=None):
+    """Permission for files are always based on the type of bucket.
+
+    1. Community bucket: Read access for everyone
+    2. Record bucket: Read access only with open and restricted access.
+    3. Deposit bucket: Read/update with restricted access.
+    4. Any other bucket is restricted to admins only.
+    """
+    # Extract bucket id
+    bucket_id = None
+    if isinstance(obj, Bucket):
+        bucket_id = str(obj.id)
+    elif isinstance(obj, ObjectVersion):
+        bucket_id = str(obj.bucket_id)
+    elif isinstance(obj, MultipartObject):
+        bucket_id = str(obj.bucket_id)
+    elif isinstance(obj, FileObject):
+        bucket_id = str(obj.bucket_id)
+
+    # Retrieve record
+    if bucket_id is not None:
+        # Record or deposit bucket
+        rb = RecordsBuckets.query.filter_by(bucket_id=bucket_id).one_or_none()
+        if rb is not None:
+            record = Record.get_record(rb.record_id)
+            if is_record(record):
+                return RecordFilesPermission.create(record, action)
+            elif is_deposit(record):
+                return DepositFilesPermission.create(record, action)
+
+    return DynamicPermission(ActionNeed('admin-access'))
 
 
 def record_permission_factory(record=None, action=None):
@@ -76,6 +114,80 @@ def deposit_delete_permission_factory(record=None):
 #
 # Permission classes
 #
+class DepositFilesPermission(object):
+    """Permission for files in deposit records (read and update access).
+
+    Read and update access given to owners and administrators.
+    """
+
+    update_actions = [
+        'bucket-read',
+        'bucket-read-versions',
+        'bucket-update',
+        'bucket-listmultiparts',
+        'object-read',
+        'object-read-version',
+        'object-delete',
+        'object-delete-version',
+        'multipart-read',
+        'multipart-delete',
+    ]
+
+    def __init__(self, record, func):
+        """Initialize a file permission object."""
+        self.record = record
+        self.func = func
+
+    def can(self):
+        """Determine access."""
+        return self.func(current_user, self.record)
+
+    @classmethod
+    def create(cls, record, action):
+        """Record and instance."""
+        if action in cls.update_actions:
+            return cls(record, has_update_permission)
+        else:
+            return cls(record, has_admin_permission)
+
+
+class RecordFilesPermission(DepositFilesPermission):
+    """Permission for files in published records (read only access).
+
+    Read access (list and download) granted to:
+
+      1. Everyone if record is open access.
+      2. Owners, token bearers and administrators if embargoed, restricted or
+         closed access
+
+    Read version access granted to:
+
+      1. Administrators only.
+    """
+
+    read_actions = [
+        'bucket-read',
+        'object-read',
+    ]
+
+    admin_actions = [
+        'bucket-read',
+        'bucket-read-versions',
+        'object-read',
+        'object-read-version',
+    ]
+
+    @classmethod
+    def create(cls, record, action):
+        """Create a record files permission."""
+        if action in cls.read_actions:
+            return cls(record, has_read_files_permission)
+        elif action in cls.admin_actions:
+            return cls(record, has_admin_permission)
+        else:
+            return cls(record, deny)
+
+
 class RecordPermission(object):
     """Record permission.
 
@@ -107,7 +219,7 @@ class RecordPermission(object):
         if action in cls.create_actions:
             return cls(record, allow, user)
         elif action in cls.read_actions:
-            return cls(record, allow, user)
+            return cls(record, has_read_record_permission, user)
         elif action in cls.read_files_actions:
             return cls(record, has_read_files_permission, user)
         elif action in cls.update_actions:
@@ -138,11 +250,6 @@ class DepositPermission(RecordPermission):
 #
 # Utility functions
 #
-def _get_user_provides():
-    """Extract the user's provides from g."""
-    return [str(need.value) for need in g.identity.provides]
-
-
 def deny(user, record):
     """Deny access."""
     return False
@@ -154,10 +261,27 @@ def allow(user, record):
 
 
 def has_read_files_permission(user, record):
-    """Check if user has read access to the record."""
+    """Check if user has read access to the record's files."""
     # Allow everyone for now
     # TODO: decide on files access rights
     return True
+
+
+def has_read_record_permission(user, record):
+    """Check if user has read access to the record."""
+    # Allow everyone for public records
+    if '_access' not in record:
+        return True
+
+    # Allow e-group members
+    user_groups = get_user_provides()
+    read_access_groups = record['_access']['read']
+    if not read_access_groups:
+        return True
+    if not set(user_groups).isdisjoint(set(read_access_groups)):
+        return True
+
+    return has_admin_permission()
 
 
 def has_update_permission(user, record):
@@ -170,8 +294,9 @@ def has_update_permission(user, record):
     if user_id in deposit_owners:
         return True
     # Allow e-group members
-    user_groups = _get_user_provides()
-    if set(user_groups).intersection(set(deposit_owners)):
+    user_groups = get_user_provides()
+    # set.isdisjoint() is faster than set.intersection()
+    if not set(user_groups).isdisjoint(set(deposit_owners)):
         return True
 
     return has_admin_permission()
@@ -182,3 +307,4 @@ def has_admin_permission():
     # Allow administrators
     if DynamicPermission(ActionNeed('admin-access')):
         return True
+    return False

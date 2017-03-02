@@ -32,7 +32,7 @@ import pytest
 from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
 from flask import current_app, request, url_for
-from flask_principal import RoleNeed, UserNeed, identity_loaded
+from flask_principal import RoleNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
@@ -215,7 +215,7 @@ def test_deposit_access_rights_based_on_egroup(api_app, users, cds_depid,
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
-        identity.provides = set([RoleNeed('test-egroup@cern.ch')])
+        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[1]).email)

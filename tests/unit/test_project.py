@@ -31,8 +31,6 @@ import pytest
 import uuid
 import json
 
-from flask import g
-from flask_principal import Identity
 from invenio_db import db
 from copy import deepcopy
 from flask_security import login_user

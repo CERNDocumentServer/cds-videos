@@ -36,11 +36,11 @@ from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
-from .modules.access.access_control import CERNRecordsSearch
-from .modules.records.permissions import (deposit_delete_permission_factory,
-                                          deposit_read_permission_factory,
-                                          record_create_permission_factory,
-                                          record_update_permission_factory)
+from cds.modules.records.permissions import (deposit_delete_permission_factory,
+                                             deposit_read_permission_factory,
+                                             record_create_permission_factory,
+                                             record_update_permission_factory)
+from cds.modules.records.search import CERNRecordsSearch
 
 
 # Identity function for string extraction
@@ -350,7 +350,7 @@ RECORDS_VALIDATION_TYPES = dict(
 )
 
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_read_factory'
+    'cds.modules.records.permissions:deposit_read_permission_factory'
 
 # Endpoint and user agent for the cds_recid provider
 RECORDS_ID_PROVIDER_ENDPOINT = \
@@ -360,7 +360,7 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 # Files
 ###############################################################################
 FILES_REST_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_file_factory'
+    'cds.modules.records.permissions:files_permission_factory'
 
 # Files storage
 FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
