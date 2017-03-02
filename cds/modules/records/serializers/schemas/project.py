@@ -22,10 +22,10 @@
 from __future__ import absolute_import
 
 from cds.modules.records.serializers.schemas.json.common import \
-    StrictKeysSchema, AccessSchema, DescriptionSchema, KeywordsSchema, \
-    ContributorSchema, TitleTranslationSchema, OaiSchema, \
-    DescriptionTranslationSchema, DepositSchema, CreatorSchema, TitleSchema, \
-    BucketSchema, ReportNumberSchema, LicenseSchema
+    AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
+    DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
+    OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
+    TranslationsSchema
 from marshmallow import fields
 
 
@@ -67,15 +67,13 @@ class ProjectSchema(StrictKeysSchema):
     creator = fields.Nested(CreatorSchema)
     date = fields.Str()
     description = fields.Nested(DescriptionSchema)
-    description_translations = fields.Nested(DescriptionTranslationSchema,
-                                             many=True)
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)
     recid = fields.Number()
     schema = fields.Str(attribute='$schema')
     title = fields.Nested(TitleSchema)
-    title_translations = fields.Nested(TitleTranslationSchema, many=True)
     videos = fields.Nested(ProjectVideoSchema, many=True)
+    translations = fields.Nested(TranslationsSchema, many=True)
 
     category = fields.Str()
     type = fields.Str()
