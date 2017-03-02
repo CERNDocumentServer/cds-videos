@@ -409,6 +409,21 @@ a[ng-click]{
   }
 }
 
+// Brief
+.cds-video-title {
+  position: relative;
+}
+
+.cds-video-duration {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  padding: 3px;
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, .75);
+  content:attr(data-text);
+}
+
 /////////
 
 // Error pages
