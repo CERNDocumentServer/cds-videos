@@ -161,3 +161,11 @@ class ReportNumberSchema(StrictKeysSchema):
 
     report_number = fields.Str()
     _report_number = fields.Str()
+
+
+class TranslationsSchema(StrictKeysSchema):
+    """Translations schema."""
+
+    title = fields.Nested(TitleSchema)
+    description = fields.Nested(DescriptionSchema)
+    language = fields.Str()
