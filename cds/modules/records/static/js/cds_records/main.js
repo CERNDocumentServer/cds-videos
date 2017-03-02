@@ -26,7 +26,7 @@ angular.element(document).ready(function() {
   angular.bootstrap(
     document.getElementById("cds-record"), [
       'angular-loading-bar', 'cdsRecord', 'ngDialog', 'cds',
-      'ngModal'
+      'ngModal', 'ngclipboard'
     ]
   );
   angular.bootstrap(
