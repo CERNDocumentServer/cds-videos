@@ -40,9 +40,9 @@
 <div class="cds-detail-video-embed">
   <h4>Embed</h4>
   <div class="input-group">
-    <input type="text" class="form-control" value="{{ '' | previewIframe: record.recid:record._files[0].key:true }}">
+    <input id="copyEmbed" type="text" class="form-control" value="{{ '' | previewIframe: record.recid:record._files[0].key:true }}">
     <span class="input-group-btn">
-      <button class="btn btn-default" data-clipboard-text="nice_link" type="button"><i class="fa fa-copy"></i></button>
+      <button ngclipboard class="btn btn-default" data-clipboard-target="#copyEmbed" type="button"><i class="fa fa-copy"></i></button>
     </span>
   </div><!-- /input-group -->
 </div>

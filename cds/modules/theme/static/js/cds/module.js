@@ -28,7 +28,13 @@ app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
     if (external) {
       _url = $window.location.origin + _url;
     }
-    return $sce.trustAsResourceUrl(_url);
+    var iframe = _.template(
+      '<iframe src="<%= src %>" width="560" height="315"' +
+      ' frameborder="0" allowfullscreen></iframe>'
+    );
+    return iframe({
+      src: $sce.trustAsResourceUrl(_url)
+    });
   };
 }]);
 app.filter('stripTags', function() {
