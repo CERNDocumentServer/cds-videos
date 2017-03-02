@@ -86,7 +86,7 @@
         <div class="col-md-12">
           <cds-form
             template="/static/templates/cds_deposit/types/project/form.html"
-            form="{{$ctrl.masterForm}}"
+            form="{{ $ctrl.masterForm || {} }}"
           >
           </cds-form>
           <!-- ADD children -->
@@ -117,12 +117,11 @@
                       </cds-actions>
                     </div>
                   </div>
-
                 </div>
                 <div class="panel-body">
                   <cds-form
                     template="/static/templates/cds_deposit/types/video/form.html"
-                    form="{{$ctrl.childrenForm}}"
+                    form="{{ $ctrl.childrenForm || {} }}"
                   >
                   <cds-uploader
                     auto-start-upload="true"
@@ -168,7 +167,6 @@
     </div>
   </cds-deposit>
 </div>
-
 <div ng-if="$ctrl.permissionDenied">
   <div class="container">
     <div class="row">
