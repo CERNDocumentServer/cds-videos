@@ -99,23 +99,6 @@
                 "recid": {
                     "type": "double"
                 },
-                "title_translations": {
-                    "type": "object",
-                    "properties": {
-                        "subtitle": {
-                            "type": "string"
-                        },
-                        "language": {
-                            "type": "string"
-                        },
-                        "source": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
-                        }
-                    }
-                },
                 "videos": {
                     "type": "object",
                     "properties": {
@@ -138,19 +121,38 @@
                         }
                     }
                 },
-                "description_translations": {
-                    "type": "object",
-                    "properties": {
-                        "value": {
-                            "type": "string"
-                        },
+                "translations": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "object",
+                      "properties": {
                         "source": {
-                            "type": "string"
+                          "type": "string"
                         },
-                        "language": {
-                            "type": "string"
+                        "value": {
+                          "type": "string"
                         }
+                      }
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "subtitle": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      }
                     }
+                  }
                 },
                 "_deposit": {
                     "type": "object",
