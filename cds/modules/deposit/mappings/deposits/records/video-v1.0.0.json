@@ -144,7 +144,18 @@
                     "type": "double"
                 },
                 "license": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                        "license": {
+                          "type": "string"
+                        },
+                        "material": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                    }
                 },
                 "translations": {
                   "type": "object",
