@@ -41,7 +41,7 @@ from cds.modules.records.permissions import (deposit_delete_permission_factory,
                                              record_create_permission_factory,
                                              record_update_permission_factory)
 from cds.modules.records.search import CERNRecordsSearch
-
+from .modules.deposit.facets import created_by_me
 
 # Identity function for string extraction
 def _(x):
@@ -352,10 +352,32 @@ RECORDS_REST_FACETS = dict(
         )
     )
 )
+# Facets for the specific index
+DEPOSIT_PROJECT_FACETS = {
+    'deposits-records-project-v1.0.0': {
+        'aggs': {
+            'status': {
+                'terms': {'field': '_deposit.status'},
+            },
+            'category': {
+                'terms': {'field': 'category'},
+            },
+            'created_by': {
+                'terms': {'field': '_deposit.created_by'},
+            },
+        },
+        'post_filters': {
+            'status': terms_filter('_deposit.status'),
+            'category': terms_filter('category'),
+            'created_by': created_by_me(),
+        },
+    },
+}
 
 # Update facets and sort options with deposit options
 RECORDS_REST_SORT_OPTIONS.update(DEPOSIT_REST_SORT_OPTIONS)
 RECORDS_REST_FACETS.update(DEPOSIT_REST_FACETS)
+RECORDS_REST_FACETS.update(DEPOSIT_PROJECT_FACETS)
 
 # Add tuple as array type on record validation
 # http://python-jsonschema.readthedocs.org/en/latest/validate/#validating-types
