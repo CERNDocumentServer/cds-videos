@@ -497,8 +497,8 @@ PREVIEWER_PREFERENCE = [
 # Licence key for THEO player
 THEO_LICENCE_KEY = 'CHANGE_ME'
 # Wowza server URL for m3u8 playlist generation
-WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/Video/'
-                      '{filepath}/{filename}/playlist.m3u8')
+WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/_definist_/smil:'
+                      '{filepath}/playlist.m3u8')
 # Thumbnail size
 VIDEO_POSTER_SIZE = (180, 180)
 

@@ -462,6 +462,9 @@ def videos(video, frames, temp, video_count):
             ObjectVersionTag.create(obj, 'context_type', 'subformat')
             ObjectVersionTag.create(obj, 'master', master_obj.version_id)
             ObjectVersionTag.create(obj, 'preset_quality', quality)
+            ObjectVersionTag.create(obj, 'width', 1000)
+            ObjectVersionTag.create(obj, 'height', 1000)
+            ObjectVersionTag.create(obj, 'video_bitrate', 123456)
 
         deposits.append(video_deposit.commit())
     project.commit()

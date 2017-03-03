@@ -26,10 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
+import random
 import uuid
 
+import mock
 from cds_sorenson.api import get_available_preset_qualities
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
+from invenio_pidstore.providers.recordid import RecordIdProvider
 from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
@@ -143,9 +146,12 @@ def transcode_task(bucket, filesize, filename, preset_qualities):
 def get_object_count(download=True, frames=True, transcode=True):
     """Get number of ObjectVersions, based on executed tasks."""
     return sum([
+        # Master file
         1 if download else 0,
+        # 10 frames and 1 gif
         11 if frames else 0,
-        len(get_available_preset_qualities()) if transcode else 0,
+        # 1 failed transcoding due to invalid resolution (i.e. 16:9 - 1024p)
+        (len(get_available_preset_qualities()) - 1) if transcode else 0,
     ])
 
 
@@ -155,7 +161,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         5 if download else 0,
         10 if download and metadata else 0,
         3 + 10 * 4 if frames else 0,
-        len(get_available_preset_qualities()) * 5 if transcode else 0,
+        ((len(get_available_preset_qualities()) - 1) * 8) if transcode else 0,
     ])
 
 
@@ -261,7 +267,9 @@ def get_indexed_records_from_mock(mock_indexer):
     return indexed
 
 
-def prepare_videos_for_publish(*videos):
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def prepare_videos_for_publish(videos):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(
         bit_rate='679886',
@@ -290,3 +298,94 @@ def prepare_videos_for_publish(*videos):
             }],
             validator='invenio_records.validators.PartialDraft4Validator'
         )
+
+
+def get_files_metadata(bucket_id):
+    """Return _files data filled with a valid version id."""
+    object_version = ObjectVersion.create(bucket_id, 'test_object_version',
+                                          stream=BytesIO(b'\x00' * 200))
+    object_version_id = str(object_version.version_id)
+    db.session.commit()
+    return [
+        dict(
+            bucket_id=bucket_id,
+            context_type='master',
+            media_type='video',
+            content_type='mp4',
+            checksum=rand_md5(),
+            completed=True,
+            key='test.mp4',
+            frame=[
+                dict(
+                    bucket_id=bucket_id,
+                    checksum=rand_md5(),
+                    completed=True,
+                    key='frame-{}.jpg'.format(i),
+                    links=dict(self='/api/files/...'),
+                    progress=100,
+                    size=123456,
+                    tags=dict(
+                        master=object_version_id,
+                        type='frame',
+                        timestamp=(float(i) / 10) * 60.095
+                    ),
+                    version_id=object_version_id)
+                for i in range(11)
+            ],
+            tags=dict(
+                bit_rate='11915822',
+                width='4096',
+                height='2160',
+                uri_origin='https://test_domain.ch/test.mp4',
+                duration='60.095', ),
+            subformat=[
+                dict(
+                    bucket_id=bucket_id,
+                    context_type='subformat',
+                    media_type='video',
+                    content_type='mp4',
+                    checksum=rand_md5(),
+                    completed=True,
+                    key='test_{}'.format(i),
+                    links=dict(self='/api/files/...'),
+                    progress=100,
+                    size=123456,
+                    tags=dict(
+                        _sorenson_job_id=rand_version_id(),
+                        master=object_version_id,
+                        preset_quality='240p',
+                        width=1000,
+                        height=1000,
+                        video_bitrate=123456, ),
+                    version_id=object_version_id, )
+                for i in range(5)
+            ],
+            playlist=[
+                dict(
+                    bucket_id=bucket_id,
+                    context_type='playlist',
+                    media_type='text',
+                    content_type='smil',
+                    checksum=rand_md5(),
+                    completed=True,
+                    key='test.smil',
+                    links=dict(
+                        self='/api/files/...'),
+                    progress=100,
+                    size=123456,
+                    tags=dict(master=object_version_id),
+                    version_id=object_version_id, )
+            ],
+        )
+    ]
+
+
+#
+# Random generation
+#
+def rand_md5():
+    return 'md5:{:032d}'.format(random.randint(1, 1000000))
+
+
+def rand_version_id():
+    return str(uuid.uuid4())

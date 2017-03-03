@@ -184,7 +184,7 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         # Not need to send _files
         del video_1_dict['metadata']['_files']
         # Prepare video for publishing
-        prepare_videos_for_publish(video_1, video_2)
+        prepare_videos_for_publish([video_1, video_2])
         res = client.post(
             url_for('invenio_deposit_rest.video_actions',
                     pid_value=video_1['_deposit']['id'], action='publish'),
@@ -360,7 +360,7 @@ def test_publish_project_check_indexed(
         with mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
                 as mock_indexer:
             # [[ PUBLISH THE PROJECT ]]
-            prepare_videos_for_publish(video_1, video_2)
+            prepare_videos_for_publish([video_1, video_2])
             res = client.post(
                 url_for('invenio_deposit_rest.project_actions',
                         pid_value=project['_deposit']['id'], action='publish'),
@@ -396,7 +396,7 @@ def test_featured_field_is_indexed(app, es, project, users, json_headers):
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ PUBLISH THE PROJECT ]]
-        prepare_videos_for_publish(video_1, video_2)
+        prepare_videos_for_publish([video_1, video_2])
         client.post(
             url_for('invenio_deposit_rest.project_actions',
                     pid_value=project['_deposit']['id'], action='publish'),

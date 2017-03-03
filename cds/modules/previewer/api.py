@@ -21,12 +21,22 @@
 
 from __future__ import absolute_import, print_function
 
-from os.path import relpath, split
+from os import symlink
+from os.path import exists, join, relpath, split
 
 from flask import current_app, url_for
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import ObjectVersion, as_object_version
 
 from invenio_previewer.api import PreviewFile
+
+
+def get_relative_path(object_version):
+    """Get ObjectVersion's full path relative to its bucket location."""
+    object_version = as_object_version(object_version)
+    location_root = object_version.bucket.location.uri
+    filepath, filename = split(object_version.file.uri)
+    relative_path = relpath(filepath, location_root)
+    return join(relative_path, filename)
 
 
 class CDSPreviewRecordFile(PreviewFile):
@@ -43,14 +53,11 @@ class CDSPreviewRecordFile(PreviewFile):
     @property
     def m3u8_uri(self):
         """Get m3u8 playlist link."""
-        if self.smil_file_object:
-            location_root = self.smil_file_object.bucket.location.uri
-            smil_filepath, smil_filename = split(self.smil_file_object.file.uri)
-            relative_path = relpath(smil_filepath, location_root)
-            return current_app.config['WOWZA_PLAYLIST_URL'].format(
-                filepath=relative_path,
-                filename=smil_filename
-            )
+        smil_obj = self.smil_file_object
+        if smil_obj:
+            wowza_url = current_app.config['WOWZA_PLAYLIST_URL']
+            filepath = get_relative_path(smil_obj)
+            return wowza_url.format(filepath='{0}.smil'.format(filepath))
 
     @property
     def poster_uri(self):

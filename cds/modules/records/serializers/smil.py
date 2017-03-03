@@ -26,14 +26,16 @@ from __future__ import absolute_import, print_function
 
 import shutil
 import tempfile
+from os import symlink
+from os.path import join
 
 from cds.modules.deposit.api import Video, CDSFilesIterator
+from cds.modules.previewer.api import get_relative_path
 from flask import render_template
 from invenio_db import db
 from invenio_files_rest.models import as_object_version, ObjectVersion, \
     ObjectVersionTag
 from invenio_rest.errors import RESTValidationError, FieldError
-from os.path import join
 
 
 class SmilSerializer(object):
@@ -69,13 +71,14 @@ class Smil(object):
     def _format_videos(record):
         """Format each video subformat."""
         master_file = CDSFilesIterator.get_master_video_file(record)
-        tags = master_file.get('tags', {})
         for video in CDSFilesIterator.get_video_subformats(master_file):
-            keys = ['bit_rate', 'width', 'height']
-            info = {key: tags[key] for key in keys if key in tags}
-            assert video.get('links', {}).get('self')
-            info['src'] = video['links']['self']
-            yield info
+            tags = video['tags']
+            yield dict(
+                src=get_relative_path(video['version_id']),
+                width=tags['width'],
+                height=tags['height'],
+                bit_rate=tags['video_bitrate']
+            )
 
 
 def generate_smil_file(record_id, record, bucket, master_object):
@@ -87,9 +90,12 @@ def generate_smil_file(record_id, record, bucket, master_object):
     master_key = master_object.key
     smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
     smil_path = join(output_folder, smil_key)
+    smil_symlink_path = '{0}.smil'.format(smil_path)
     with open(smil_path, 'w') as f:
         smil_content = SmilSerializer.serialize(record_id, record)
         f.write(smil_content)
+    # Create symlink for Wowza server
+    symlink(smil_path, smil_symlink_path)
 
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
