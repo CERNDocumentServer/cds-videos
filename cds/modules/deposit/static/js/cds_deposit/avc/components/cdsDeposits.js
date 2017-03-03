@@ -311,15 +311,6 @@ function cdsDepositsCtrl(
     that.loading = false;
   });
 
-  this.overallStatus = function() {
-    var data = angular.copy(that.initState);
-    angular.forEach(that.overallState, function(value, key) {
-      angular.forEach(value, function(_i, _k) {
-        data[_k] = data[_k].length + _i.length;
-      });
-    });
-  };
-
   var checkStatus = function(task, status) {
     return function(child) {
       return child.metadata._deposit.state[task] == status;
