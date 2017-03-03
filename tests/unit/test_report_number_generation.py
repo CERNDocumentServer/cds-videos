@@ -48,14 +48,14 @@ def check_deposit(dep, expected_rn):
 def test_one_video(app, db, project):
     """Test one video."""
     project, video_1, video_2 = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     check_deposit(video_1.publish(), 'CERN-MOVIE-2016-1-1')
 
 
 def test_only_videos(app, db, project):
     """Test only videos."""
     (project, video_1, video_2) = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     for i, video in enumerate([video_1, video_2]):
         video = video.publish()
         check_deposit(video, 'CERN-MOVIE-2016-1-{}'.format(i + 1))
@@ -64,14 +64,14 @@ def test_only_videos(app, db, project):
 def test_only_project(app, db, project):
     """Test only project."""
     (project, video_1, video_2) = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     check_deposit(project.publish(), 'CERN-MOVIE-2016-1')
 
 
 def test_project_and_videos(app, db, project):
     """Test project and video."""
     (project, video_1, video_2) = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     project = project.publish()
     check_deposit(project, 'CERN-MOVIE-2016-1')
     for i, video in enumerate(video_resolver_sorted(project.video_ids)):
@@ -81,7 +81,7 @@ def test_project_and_videos(app, db, project):
 def test_video_then_project(app, db, project):
     """Test video and then project."""
     (project, video_1, video_2) = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     video_1 = video_1.publish()
     check_deposit(video_1, 'CERN-MOVIE-2016-1-1')
 

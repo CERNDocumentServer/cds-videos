@@ -88,7 +88,7 @@ def test_publish_all_videos(app, project):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # publish project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     new_project = project.publish()
     # check project and all video are published
     assert new_project['_deposit']['status'] == 'published'
@@ -109,7 +109,7 @@ def test_publish_one_video(app, project):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # [publish project]
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     # publish one video
     video_1 = video_1.publish()
     project = video_1.project
@@ -309,7 +309,7 @@ def test_project_delete_one_video_published(app, project, force):
     (project, video_1, video_2) = project
 
     # prepare videos for publishing
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
 
     # publish video_2
     video_2 = video_2.publish()
@@ -370,7 +370,7 @@ def test_inheritance(app, project):
     assert 'type' in project
 
     # Publish the video
-    prepare_videos_for_publish(video)
+    prepare_videos_for_publish([video])
     video = video.publish()
     assert 'category' in video
     assert 'type' in video
@@ -391,7 +391,7 @@ def test_project_partial_validation(
     # insert a video
     project_video_1['_project_id'] = project['_deposit']['id']
     video = Video.create(project_video_1)
-    prepare_videos_for_publish(video)
+    prepare_videos_for_publish([video])
     video_id = video.id
     # check project
     id_ = project.id
@@ -444,7 +444,7 @@ def test_project_partial_validation(
 def test_project_publish_with_workflow(app, users, project, webhooks, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = project
-    prepare_videos_for_publish(video_1, video_2)
+    prepare_videos_for_publish([video_1, video_2])
     project_depid = project['_deposit']['id']
     project_id = str(project.id)
     video_1_depid = video_1['_deposit']['id']
@@ -560,7 +560,7 @@ def test_deposit_partial_validation(
         project = Project.create(deposit_metadata)
         video_1['_project_id'] = project['_deposit']['id']
         video_1 = Video.create(video_1)
-        prepare_videos_for_publish(video_1)
+        prepare_videos_for_publish([video_1])
         video_1.commit()
         id_ = project.id
         db.session.expire_all()

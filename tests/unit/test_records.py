@@ -32,12 +32,13 @@ import json
 import re
 from invenio_indexer.api import RecordIndexer
 from invenio_db import db
-from xml.etree import ElementTree as ET
 from time import sleep
 from flask import url_for
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
+
+from helpers import get_files_metadata
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -113,21 +114,23 @@ def test_records_ui_export(app, project_published, video_record_metadata):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_records_rest(api_app, users, video_record_metadata, es,
-                      json_headers, smil_headers, vtt_headers, drupal_headers,
-                      api_project_published, datacite_headers):
+def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
+                      datacite_headers, json_headers, smil_headers,
+                      drupal_headers, extra_metadata, _deposit_metadata):
     """Test view."""
     indexer = RecordIndexer()
     (project, video_1, video_2) = api_project_published
     pid, record_project = project.fetch_published()
     vid, record_video = video_1.fetch_published()
+    bucket_id = str(video_1['_buckets']['deposit'])
 
     # index project
     project.indexer.index(record_project)
-    # index a (update) video
-    record_video.update(**video_record_metadata)
+    # index video
+    record_video['_files'] = get_files_metadata(bucket_id)
+    record_video['_deposit'].update(_deposit_metadata)
+    record_video.update(extra_metadata)
     record_video.commit()
-    db.session.commit()
     indexer.index(record_video)
     sleep(1)
 
@@ -151,20 +154,6 @@ def test_records_rest(api_app, users, video_record_metadata, es,
 
         res = client.get(url2, headers=smil_headers)
         assert res.status_code == 200
-
-        root = ET.fromstring(res.data.decode('utf-8'))
-        assert root.tag == 'smil'
-        assert len(root[1][0]) == 4
-        for child in root[1][0]:
-            assert child.tag == 'video'
-            assert child.attrib["system-bitrate"] == '11915822'
-            assert child.attrib["width"] == '4096'
-            assert child.attrib["height"] == '2160'
-
-        for i in range(4):
-            subformat = video_record_metadata['_files'][0]['subformat']
-            src = subformat[i]['links']['self']
-            assert root[1][0][i].attrib['src'] == 'mp4:{}'.format(src)
 
         # try get vtt
         res = client.get(url, headers=vtt_headers)
@@ -198,7 +187,7 @@ def test_records_rest(api_app, users, video_record_metadata, es,
                         u'license_body': u'GPLv2',
                         u'license_url': u'http://license.cern.ch',
                         u'producer': u'nonna papera, zio paperino',
-                        u'record_id': 1,
+                        u'record_id': u'1',
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'My french title',
@@ -247,7 +236,7 @@ def test_records_rest(api_app, users, video_record_metadata, es,
                         u'license_body': u'GPLv2',
                         u'license_url': u'http://license.cern.ch',
                         u'producer': u'nonna papera, zio paperino',
-                        u'record_id': 1,
+                        u'record_id': u'1',
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'',
