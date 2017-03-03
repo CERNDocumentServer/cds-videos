@@ -28,10 +28,8 @@
 from __future__ import absolute_import, print_function
 
 import os
-import random
 import shutil
 import tempfile
-import uuid
 
 from os.path import dirname, join
 
@@ -41,6 +39,8 @@ import pytest
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds_sorenson.api import get_preset_id
+from cds_sorenson.error import InvalidResolutionError
 from celery import chain
 from celery import group
 from celery import shared_task
@@ -50,7 +50,7 @@ from flask.cli import ScriptInfo
 from invenio_sequencegenerator.api import Template
 from cds.modules.deposit.api import video_resolver
 from flask_security import login_user
-from invenio_access.models import ActionRoles, ActionUsers
+from invenio_access.models import ActionRoles
 from invenio_accounts.models import Role, User
 from invenio_db import db as db_
 from invenio_deposit import InvenioDepositREST
@@ -78,7 +78,8 @@ from invenio_pidstore.models import PersistentIdentifier
 from uuid import uuid4
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
-    sse_success_task, new_project, prepare_videos_for_publish
+    sse_success_task, new_project, prepare_videos_for_publish, rand_md5, \
+    rand_version_id
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -432,114 +433,124 @@ def video_deposit_metadata(deposit_metadata):
 
 
 @pytest.fixture()
-def video_record_metadata():
+def video_record_metadata(db, project_published, extra_metadata):
     """Video record metadata."""
+    video = project_published[1]
+    bucket_id = video['_buckets']['deposit']
+    # Create video objects in bucket
+    master = 'test.mp4'
+    qualities = [240, 360, 480, 720]
+    filesize = 123456
+    slaves = ['test[{}p]'.format(quality) for quality in qualities]
+    test_stream = BytesIO(b'\x00' * filesize)
+    with db.session.begin_nested():
+        master_id = str(ObjectVersion.create(bucket_id, master,
+                                             stream=test_stream).version_id)
+        slave_ids = [str(ObjectVersion.create(bucket_id, slave,
+                                              stream=test_stream).version_id)
+                     for slave in slaves]
+    db.session.commit()
+
     metadata = {
-        '_buckets': {'deposit': '14113947-0b79-40a3-b39d-3b118a6ae04c'},
-        '_deposit': {
-            'created_by': 1,
-            'pid': {'value': 1},
-            'extracted_metadata': {
-                'bit_rate': '679886',
-                'duration': '60.140000',
-                'size': '5111048',
-                'avg_frame_rate': '288000/12019',
-                'codec_name': 'h264',
-                'width': 640,
-                'height': 360,
-                'nb_frames': '1440',
-                'display_aspect_ratio': '16:9',
-                'color_range': 'tv',
-                'tags': {
-                    'compatible_brands': 'qt  ',
-                    'creation_time': '1970-01-01T00:00:00.000000Z',
-                    'encoder': 'Lavf52.93.0',
-                    'major_brand': 'qt  ',
-                    'minor_version': '512',
-                },
-            },
-            'id': '0c547fefc0664ac9837d6a53a4890730',
-            'owners': [1],
-            'state': {'file_transcode': 'FAILURE',
-                      'file_video_extract_frames': 'SUCCESS',
-                      'file_video_metadata_extraction': 'SUCCESS'},
-            'status': 'draft'
-        },
         '_files': [
             dict(
+                bucket_id=bucket_id,
                 context_type='master',
                 media_type='video',
                 content_type='mp4',
-                checksum='md5:1beda6154605f65a922fdc488c987d83',
+                checksum=rand_md5(),
                 completed=True,
-                key='test.mp4',
+                key=master,
                 frame=[
                     dict(
-                        bucket_id='0692a21c-6864-41cb-8424-b0f83eeb261b',
-                        checksum='md5:7b4ba010ee4bd84074208f634fe3a672',
+                        bucket_id=bucket_id,
+                        checksum=rand_md5(),
                         completed=True,
                         key='frame-{}.jpg'.format(i),
-                        links=dict(
-                            self=('/api/files/0692a21c-6864-41cb-8424-b0f83eeb'
-                                  '261b/frame-{}.jpg?versionId=7cc97a14-61f3-4'
-                                  '902-a3cf-7a22af1859d8'.format(i))),
+                        links=dict(self='/api/files/...'),
                         progress=100,
-                        size=22774,
+                        size=filesize,
                         tags=dict(
-                            master='f333e846-2620-416d-92e2-8137ed772692',
+                            master=master_id,
                             type='frame',
                             timestamp=(float(i) / 10) * 60.095
                         ),
-                        version_id='7cc97a14-61f3-4902-a3cf-7a22af1859d8')
+                        version_id=rand_version_id())
                     for i in range(11)
                 ],
                 tags=dict(
                     bit_rate='11915822',
                     width='4096',
                     height='2160',
-                    uri_origin=(
-                        'https://mediaarchive.cern.ch/MediaArchive/'
-                        'Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-06'
-                        '6/CERN-MOVIE-2016-066-001/CERN-MOVIE-2016-066-00'
-                        '1-11872-kbps-4096x2160-audio-128-kbps-stereo.mp4'),
+                    uri_origin='https://test_domain.ch/test.mp4',
                     duration='60.095',),
                 subformat=[
                     dict(
+                        bucket_id=bucket_id,
                         context_type='subformat',
                         media_type='video',
                         content_type='mp4',
-                        checksum='md5:{:032d}'.format(random.randint(1, 1000)),
+                        checksum=rand_md5(),
                         completed=True,
-                        key='CERN-MOVIE-2106-test[{}p]'.format(quality),
-                        links=dict(
-                            self='/api/files/...'),
+                        key=slaves[i],
+                        links=dict(self='/api/files/...'),
                         progress=100,
-                        size=4457627,
+                        size=filesize,
                         tags=dict(
-                            _sorenson_job_id=str(uuid.uuid4()),
-                            master=str(uuid.uuid4()),
-                            preset_quality='{}p'.format(quality),),
-                        version_id=str(uuid.uuid4()),)
-                    for quality in enumerate([240, 360, 480, 720])
+                            _sorenson_job_id=rand_version_id(),
+                            master=master_id,
+                            preset_quality='{}p'.format(qualities[i]),
+                            width=1000,
+                            height=1000,
+                            video_bitrate=123456, ),
+                        version_id=slave_id,)
+                    for i, slave_id in enumerate(slave_ids)
                 ],
                 playlist=[
                     dict(
+                        bucket_id=bucket_id,
                         context_type='playlist',
                         media_type='text',
                         content_type='smil',
-                        checksum='md5:{:032d}'.format(random.randint(1, 1000)),
+                        checksum=rand_md5(),
                         completed=True,
                         key='test.smil',
                         links=dict(
                             self='/api/files/...'),
                         progress=100,
                         size=12355,
-                        tags=dict(
-                            master=str(uuid.uuid4())),
-                        version_id=str(uuid.uuid4()),)
+                        tags=dict(master=master_id),
+                        version_id=rand_version_id(),)
                 ],
             )
         ],
+    }
+    metadata.update(extra_metadata)
+    metadata.update({k: video[k] for k in video.keys()
+                     if k not in metadata.keys()})
+    return metadata
+
+
+@pytest.fixture()
+def _deposit_metadata():
+    """Extra metadata for record['_deposit']."""
+    return {
+        'extracted_metadata': {
+            'tags': {
+                'compatible_brands': 'qt  ',
+                'creation_time': '1970-01-01T00:00:00.000000Z',
+                'encoder': 'Lavf52.93.0',
+                'major_brand': 'qt  ',
+                'minor_version': '512',
+            },
+        }
+    }
+
+
+@pytest.fixture()
+def extra_metadata():
+    """Extra metadata."""
+    return {
         'contributors': [
             {'name': 'paperone', 'role': 'Director'},
             {'name': 'topolino', 'role': 'Music by'},
@@ -547,28 +558,27 @@ def video_record_metadata():
             {'name': 'pluto', 'role': 'Director'},
             {'name': 'zio paperino', 'role': 'Producer'}
         ],
-        'copyright': {'url': 'www.copy.right'},
-        "license": [{
-            "license": "GPLv2",
-            "url": "http://license.cern.ch",
+        'license': [{
+            'license': 'GPLv2',
+            'url': 'http://license.cern.ch',
         }],
-        "title": {
-            "title": "My english title"
-        },
-        "keywords": [
+        'keywords': [
             {
-                "source": "source1",
-                "value": "keyword1",
+                'source': 'source1',
+                'value': 'keyword1',
             },
             {
-                "source": "source2",
-                "value": "keyword2",
+                'source': 'source2',
+                'value': 'keyword2',
             }
         ],
-        "copyright": {
-            "holder": "CERN",
-            "url": "http://cern.ch",
-            "year": "2017"
+        'copyright': {
+            'holder': 'CERN',
+            'url': 'http://cern.ch',
+            'year': '2017'
+        },
+        'title': {
+            'title': 'My english title'
         },
         'title_translations': [
             {
@@ -576,9 +586,6 @@ def video_record_metadata():
                 'title': 'My french title',
             }
         ],
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
         'description_translations': [
             {
                 'language': 'fr',
@@ -588,7 +595,6 @@ def video_record_metadata():
         'language': 'en',
         'publication_date': '2017-03-02',
     }
-    return metadata
 
 
 @pytest.fixture()
@@ -665,7 +671,7 @@ def project_published(app, project):
     """New published project with videos."""
     (project, video_1, video_2) = project
     with app.test_request_context():
-        prepare_videos_for_publish(video_1, video_2)
+        prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
@@ -679,7 +685,7 @@ def api_project_published(api_app, api_project):
     """New published project with videos."""
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
-        prepare_videos_for_publish(video_1, video_2)
+        prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)
         assert len(new_videos) == 2
@@ -698,8 +704,15 @@ def video_published(app, project_published):
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
     def mocked_encoding(input_file, output_file, preset_name, aspect_ratio):
+        # Check if options are valid
+        try:
+            get_preset_id(preset_name, aspect_ratio)
+        except InvalidResolutionError as e:
+            raise e
+
         shutil.copyfile(input_file, output_file)  # just copy file
         return '1234'
+
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'
     ).start().side_effect = mocked_encoding

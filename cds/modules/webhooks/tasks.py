@@ -38,7 +38,8 @@ import time
 from functools import partial
 
 from PIL import Image
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
+from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding, \
+    get_preset_info
 from cds_sorenson.error import InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app
 from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
@@ -523,6 +524,9 @@ class TranscodeVideoTask(AVCTask):
             ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
             ObjectVersionTag.create(obj, 'media_type', 'video')
             ObjectVersionTag.create(obj, 'context_type', 'subformat')
+            preset_info = get_preset_info(aspect_ratio, preset_quality)
+            [ObjectVersionTag.create(obj, key, preset_info[key])
+             for key in ['video_bitrate', 'width', 'height']]
 
             # Information necessary for monitoring
             job_info = dict(

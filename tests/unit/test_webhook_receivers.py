@@ -215,7 +215,8 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['test[{0}].mp4'.format(quality)
-                  for quality in get_available_preset_qualities()]
+                  for quality in get_available_preset_qualities()
+                  if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -322,6 +323,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
             (sse_channel, states.SUCCESS, 'file_video_metadata_extraction'),
             (sse_channel, states.STARTED, 'file_transcode'),
             (sse_channel, states.SUCCESS, 'file_transcode'),
+            (sse_channel, states.REVOKED, 'file_transcode'),  # ResolutionError
             (sse_channel, states.STARTED, 'file_video_extract_frames'),
             (sse_channel, states.SUCCESS, 'file_video_extract_frames'),
             (sse_channel, states.SUCCESS, 'update_deposit'),
@@ -416,7 +418,8 @@ def test_avc_workflow_receiver_local_file_pass(
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['test[{0}].mp4'.format(quality)
-                  for quality in get_available_preset_qualities()]
+                  for quality in get_available_preset_qualities()
+                  if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -518,6 +521,7 @@ def test_avc_workflow_receiver_local_file_pass(
             (sse_channel, states.SUCCESS, 'file_video_metadata_extraction'),
             (sse_channel, states.STARTED, 'file_transcode'),
             (sse_channel, states.SUCCESS, 'file_transcode'),
+            (sse_channel, states.REVOKED, 'file_transcode'),  # ResolutionError
             (sse_channel, states.STARTED, 'file_video_extract_frames'),
             (sse_channel, states.SUCCESS, 'file_video_extract_frames'),
             (sse_channel, states.SUCCESS, 'update_deposit'),
@@ -730,7 +734,8 @@ def test_avc_workflow_receiver_clean_video_transcode(
     #
     # CLEAN
     #
-    for i, preset_quality in enumerate(get_available_preset_qualities(), 1):
+    presets = [p for p in get_available_preset_qualities() if p != '1024p']
+    for i, preset_quality in enumerate(presets, 1):
         # Clean transcode task for each preset
         event = Event.query.first()
         event.receiver.clean_task(event=event, task_name='file_transcode',
@@ -742,7 +747,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert 'extracted_metadata' in records[0].json['_deposit']
 
         assert ObjectVersion.query.count() == get_object_count() - i
-        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 5)
+        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 8)
 
     assert ObjectVersion.query.count() == get_object_count(transcode=False)
     assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
@@ -750,7 +755,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
     #
     # RUN again
     #
-    for i, preset_quality in enumerate(get_available_preset_qualities(), 1):
+    for i, preset_quality in enumerate(presets, 1):
         event = Event.query.first()
         event.receiver.run_task(event=event, task_name='file_transcode',
                                 preset_quality=preset_quality).apply()
@@ -758,7 +763,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert ObjectVersion.query.count() == get_object_count(
             transcode=False) + i
         assert ObjectVersionTag.query.count() == get_tag_count(
-            transcode=False) + (i * 5)
+            transcode=False) + (i * 8)
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
