@@ -375,6 +375,26 @@ a[ng-click]{
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
 
+.cds-tasks-state-left-border {
+  border-left-width: 3px !important;
+  border-left-style: solid !important;
+}
+
+.cds-tasks-error {
+ border-left-color: $state-danger-text;
+}
+.cds-tasks-success {
+  border-left-color: $state-success-text;
+}
+.cds-tasks-started {
+  border-left-color: $state-warning-text;
+}
+
+.cds-tasks-pending {
+  border-left-color: $gray-light;
+}
+
+
 // Footer
 
 .cds-footer-upper {

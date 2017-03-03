@@ -28,20 +28,13 @@ $fa-font-path: "/static/node_modules/font-awesome/fonts/";
 // Font family
 @font-family-base: 'PT Sans', sans-serif;
 
-// CDS Custom vars
-$cds-small-spacing: 5px;
-$cds-medium-spacing: 10px;
-$cds-large-spacing: 15px;
-$cds-enormus-spacing: 20px;
+// Bootstrap
+$brand-primary: #0c63aa;
 
 // Brand colors CDS
 $light-color: #ffffff;
 $cds-primary-color: #061723;
-$primary-color: #0c63aa;
-$primary-color-dark: darken($primary-color, 10%);
-$primary-color-light: lighten($primary-color, 10%);
 $primary-color-text: #212121;
-
 $primary-text-color: #212121;
 $secondary-text-color: #727272;
 $divider-color: #B6B6B6;
@@ -51,8 +44,10 @@ $cds-unicorn-blue: #0ff;
 $cds-unicorn-pink: #f0f;
 $cds-unicorn-color: linear-gradient(-225deg, $cds-unicorn-blue 0%, $cds-unicorn-pink 100%);
 
-// Bootstrap
-$brand-primary: $primary-color;
+
+$primary-color: $brand-primary;
+$primary-color-dark: darken($primary-color, 10%);
+$primary-color-light: lighten($primary-color, 10%);
 
 $font-size-base: 14px;
 
@@ -69,7 +64,6 @@ $navbar-default-link-color: $light-color;
 $navbar-default-link-hover-color: #ddd;
 $navbar-default-link-hover-bg: transparent;
 $navbar-default-link-active-color: $light-color;
-//$navbar-default-link-active-bg:            darken($navbar-default-bg, 6.5%);
 $navbar-default-link-disabled-color: #ccc;
 $navbar-default-link-disabled-bg: transparent;
 
