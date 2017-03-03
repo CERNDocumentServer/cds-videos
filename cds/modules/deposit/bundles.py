@@ -41,6 +41,7 @@ js_main = NpmBundle(
     'node_modules/underscore/underscore.js',
     'node_modules/angular-elastic/elastic.js',
     'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
+    'node_modules/ngmodal/dist/ng-modal.js',
     npm={
         'angular': '~1.5.8',
         'angular-sanitize': '~1.5.8',
