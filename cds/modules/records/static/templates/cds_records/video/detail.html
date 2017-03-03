@@ -20,20 +20,36 @@
       <div class="col-sm-8">
         <!-- Section -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20">
+          <!-- DOI and report number -->
+          <div class="text-right">
+            <ul class="list-inline">
+              <li ng-if="record.doi">
+                <a class="get-badge" ng-href="http://dx.doi.org/{{ ::record.doi }}" target="_blank">
+                  <img ng-src="/badge/doi/{{ ::record.doi }}.svg" alt="{{ ::record.doi }}" />
+                </a>
+              </li>
+              <li ng-if="record.report_number.report_number">
+                <span class="label label-info">{{ ::record.report_number.report_number }}</span>
+              </li>
+            </ul>
+          </div>
+          <!-- /DOI and report number -->
           <!-- Title -->
           <div class="cds-detail-title cds-detail-video-title">
-            <h1 class="mb-0 f1"><strong>{{ ::record.title.title }}</strong></h1>
-            <h1 class="cds-detail-secondary-title text-muted mt-0 f1"><em>{{ ::record.title.title }}</em></h1>
+            <h1 class="mb-0 f4 fw-n t-b">{{ ::record.title.title }}</h1>
+            <h1 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.title.title }}</em></h1>
           </div>
           <!-- /Title -->
           <!-- Date & Views -->
           <div class="cds-detail-date cds-detail-video-date my-20">
             <div class="row">
               <div class="col-sm-6">
-                {{ ::record.date }} / &copy; Copyright
+                <div class="text-muted f7">
+                  {{ ::record.copyright.year || '2017' }} &copy; {{ ::record.copyright.holder || 'CERN' }}
+                </div>
               </div>
               <div class="col-sm-6">
-                <div class="text-right">
+                <div class="text-right text-muted f7">
                   300000 views
                 </div>
               </div>
@@ -41,26 +57,19 @@
           </div>
           <!-- Date & Views -->
           <!-- Description -->
-          <div class="cds-detail-description cds-detail-video-description f2">
-            <p>{{ ::record.description.value }}</p>
+          <hr />
+          <div class="cds-detail-description cds-detail-video-description t-b">
+            <p class="mb-0"><strong>Uploaded on {{ ::record.date }}</strong></p>
+            <p class="f7 mb-20">{{ ::record.description.value }}</p>
+            <p class="text-muted mt-10 mb-0">
+              <a ng-href="/search?q=_project_id:{{:: record._project_id}}">Other videos in this project</a>
+            </p>
           </div>
           <!-- /Description -->
           <!-- More -->
           <div class="cds-detail-more cds-detail-video-more">
           </div>
           <!-- /More -->
-          <!-- DOI and report number -->
-          <div class="text-right">
-            <p ng-if="record.doi">
-              <a class="get-badge" ng-href="http://dx.doi.org/{{ ::record.doi }}" target="_blank">
-                <img ng-src="/badge/doi/{{ ::record.doi }}.svg" alt="{{ ::record.doi }}">
-              </a>
-            </p>
-            <p ng-if="record.report_number.report_number">
-              Reference: {{ ::record.report_number.report_number }}
-            </p>
-          </div>
-          <!-- /Report number -->
           </div>
         </div>
         <!-- /Section -->

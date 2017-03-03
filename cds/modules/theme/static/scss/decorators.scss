@@ -35,9 +35,32 @@
 .bl { border-left-style: solid; }
 .bn { border-style: none; }
 
-.f1 { font-size: 4rem; }
-.f2 { font-size: 3.75rem; }
-.f3 { font-size: 3.25rem; }
-.f4 { font-size: 2.75rem; }
-.f5 { font-size: 2.25rem; }
-.f6 { font-size: 2rem; }
+// Font weight thin
+.fw-t {
+  font-weight: thin;
+}
+// Font weight normal
+.fw-n {
+  font-weight: normal !important;
+}
+// Font weight bold
+.fw-b {
+  font-weight: bold;
+}
+
+// 64px
+.f1 { font-size: 44px; }
+// 36px
+.f2 { font-size: 36px; }
+// 32px
+.f3 { font-size: 32px; }
+// 28px
+.f4 { font-size: 28px; }
+// 25px
+.f5 { font-size: 25px; }
+// 22px
+.f6 { font-size: 22px; }
+// 20px
+.f7 { font-size: 20px; }
+// 16px
+.f8 { font-size: 16px; }
