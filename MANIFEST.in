@@ -38,6 +38,7 @@ include .jshintignore
 include .jshintrc
 include .coveragerc
 
+recursive-include .github *
 recursive-include cds *.css
 recursive-include cds *.eot
 recursive-include cds *.gz
