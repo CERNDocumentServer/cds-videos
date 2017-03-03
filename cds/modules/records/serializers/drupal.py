@@ -24,15 +24,18 @@
 
 from __future__ import absolute_import, print_function
 
-from dateutil import parser
+import arrow
+from arrow.parser import ParserError
 from invenio_records_rest.serializers.json import JSONSerializer
 from ...deposit.api import Video, Project, CDSFileObject
 
 
 def format_datetime(datetime):
     """Get datetime formatted."""
-    dt = parser.parse(datetime)
-    return dt.strftime('%Y-%m-%d')
+    try:
+        return arrow.get(datetime or '').strftime('%Y-%m-%d')
+    except ParserError:
+        return ''
 
 
 class VideoDrupal(object):
@@ -84,12 +87,7 @@ class VideoDrupal(object):
     @property
     def creation_date(self):
         """Get creation date."""
-        datetime = self._record.get('_deposit', {}).get(
-            'extracted_metadata', {}).get('tags', {}).get('creation_time', '')
-        try:
-            return format_datetime(datetime)
-        except ValueError:
-            return ''
+        return format_datetime(self._record.get('publication_date'))
 
     def contributors(self, name):
         """Get the name of a type of contributors."""
@@ -122,7 +120,7 @@ class VideoDrupal(object):
 
 
 class DrupalSerializer(JSONSerializer):
-    """Smil serializer for records."""
+    """Drupal serializer for records."""
 
     def transform_record(self, pid, record, links_factory=None):
         """Serialize record for drupal."""
