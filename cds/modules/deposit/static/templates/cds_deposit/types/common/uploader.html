@@ -44,9 +44,15 @@
         <span ng-show="f.progress==100 && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
-        <a ng-click="$ctrl.remove(f.key)">
+        <a ng-hide="f.context_type ==='master' || f.progress < 100" ng-click="$ctrl.remove(f.key)">
           <i class="fa fa-trash-o"></i>
         </a>
+        <span ng-show="f.context_type ==='master' || f.progress < 100">
+          <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
+          <modal-dialog show="dialogShown" dialog-title="How to change the file" width="50%">
+            <p class="text-left">If you want to delete the video file you have to delete the whole form by clicking in the trash can on the upper left corner.</p>
+          </modal-dialog>
+        </span>
       </td>
     </tr>
     <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
@@ -55,9 +61,7 @@
     <tr class="warning" ng-show="$ctrl.getSubformats()">
       <td>Extracted subformats</td>
       <td></td>
-      <td class="text-center">
-        <span class="text-success">✓</span>
-      </td>
+      <td class="text-center"></td>
       <td class="text-center">
         <a ng-click="showSubformats = !showSubformats">
           <span ng-show="!showSubformats">Show</span>
@@ -71,16 +75,20 @@
         <span>{{ f.size | bytesToHumanReadable }}</span>
       </td>
       <td class="text-center">
-        <span class="text-success">✓</span>
+        <span ng-show="f.progress < 100 && !f.errored">
+          <span ng-if="f.progress">{{ f.progress + '%' }}</span>
+          <span ng-if="!f.progress"><i class="fa fa-spinner fa-spin"></i></span>
+        </span>
+        <span ng-show="f.processing && !f.errored">Processing...</span>
+        <span ng-show="f.errored" class="text-danger">Error</span>
+        <span ng-show="f.progress==100 && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center"></td>
     </tr>
     <tr class="warning" ng-show="$ctrl.getFrames()">
       <td>Extracted frames</td>
       <td></td>
-      <td class="text-center">
-        <span class="text-success">✓</span>
-      </td>
+      <td></td>
       <td class="text-center">
         <a ng-click="showFrames = !showFrames">
           <span ng-show="!showFrames">Show</span>
@@ -100,19 +108,8 @@
       </td>
     </tr>
   </table>
-  <div class="panel-footer">
-    <div class="text-right">
-      <span class="text-muted" ng-show="$ctrl.loading">
-        <i class="fa fa-spinner fa-pulse fa-fw"></i>
-        <span class="sr-only">Loading...</span>
-      </span>
-      <button class="btn btn-sm btn-default" type="submit" ng-show="$ctrl.invenioFilesBusy" ng-click="$ctrl.cancel()">Cancel</button>
-      <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0 || $ctrl.allFinished()" ng-click="$ctrl.upload()">Start upload</button>
-    </div>
-  </div>
 </div>
 <hr />
-
 <div class="cds-deposit-box">
   <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
     <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
