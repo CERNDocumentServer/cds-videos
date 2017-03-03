@@ -205,6 +205,28 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     // Add any files in the queue that are not completed
     Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
 
+    // Listen for events for transcoding
+    $scope.$on(
+      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.transcoding',
+      function(evt, type, data) {
+        switch(data.state) {
+          case 'FAILURE':
+            // Notify for error
+            _error(data.meta.payload.key);
+            break;
+          case 'STARTED':
+            that.updateSubformat(
+              data.meta.payload.key,
+              {
+                progress: data.meta.payload.percentage || 0,
+                completed: data.meta.payload.percentage === 100
+              },
+            );
+            break;
+        }
+      }
+    )
+
     this.addFiles = function(_files) {
       var existingFiles = that.files.map(function(file) {
         return file.key
@@ -340,6 +362,27 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       data || {}
     );
   }
+  this.findMasterFileIndex = function() {
+    return _.findIndex(that.files, {'context_type': 'master'});
+  }
+  this.updateSubformat = function(key, data) {
+    // Find master
+    var master = that.findMasterFileIndex();
+    if (master > -1) {
+      // Find the index of the subformat
+      var index = _.findIndex(that.files[master].subformat, {'key': key});
+      if (index > 0){
+        if (data.progress) {
+          data.progress = parseInt(data.progress);
+        }
+        this.files[master].subformat[index] = angular.merge(
+          {},
+          this.files[master].subformat[index],
+          data
+        );
+      }
+    }
+  }
 
   this.abort = function() {
     // Abort the upload
@@ -390,7 +433,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
 
   this.getSubformats = function() {
     return (that.files || []).reduce(function (videos, next) {
-      return videos || next.video;
+      return videos || next.subformat;
     }, null);
   };
 

@@ -334,8 +334,15 @@ function cdsDepositCtrl(
           data
         );
       }
+      // Check for errors in the transcoding
+      if (data.meta.payload.key && type === 'file_transcode') {
+        $scope.$broadcast(
+          depositListenerName + '.file.transcoding',
+          type,
+          data
+        )
+      }
     });
-
 
     this.successCallback = function(type, data) {
       switch (type) {
@@ -353,7 +360,11 @@ function cdsDepositCtrl(
       }
     };
 
-    this.failureCallback = function(type, data) {};
+    this.failureCallback = function(type, data) {
+      if (type === 'file_transcode') {
+        // Add restart button
+      }
+    };
 
     this.startedCallback = function(type, data) {};
 
