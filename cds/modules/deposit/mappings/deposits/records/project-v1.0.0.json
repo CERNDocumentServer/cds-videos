@@ -4,7 +4,18 @@
             "numeric_detection": true,
             "properties": {
                 "license": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                        "license": {
+                          "type": "string"
+                        },
+                        "material": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                    }
                 },
                 "_access": {
                     "type": "object",
