@@ -262,9 +262,22 @@ def allow(user, record):
 
 def has_read_files_permission(user, record):
     """Check if user has read access to the record's files."""
-    # Allow everyone for now
     # TODO: decide on files access rights
-    return True
+    # Same permissions as for record itself
+
+    # Allow everyone for public records
+    if '_access' not in record:
+        return True
+
+    # Allow e-group members
+    user_groups = get_user_provides()
+    read_access_groups = record['_access']['read-files']
+    if not read_access_groups:
+        return True
+    if not set(user_groups).isdisjoint(set(read_access_groups)):
+        return True
+
+    return has_admin_permission(user, record)
 
 
 def has_read_record_permission(user, record):
@@ -290,6 +303,9 @@ def has_update_permission(user, record):
     user_id = int(user.get_id()) if user.is_authenticated else None
     if user_id in record.get('owners', []):
         return True
+    # Allow based in the '_access' key
+    if user_id in record.get('_access', {}).get('update', []):
+        return True
     deposit_owners = record.get('_deposit', {}).get('owners', [])
     if user_id in deposit_owners:
         return True
@@ -298,12 +314,20 @@ def has_update_permission(user, record):
     # set.isdisjoint() is faster than set.intersection()
     if not set(user_groups).isdisjoint(set(deposit_owners)):
         return True
+    # Allow based on the '_access' key
+    allowed_users = record.get('_access', {}).get('update', [])
+    if allowed_users and not set(user_groups).isdisjoint(set(allowed_users)):
+        return True
 
     return has_admin_permission()
 
 
-def has_admin_permission():
-    """Check if user has admin access to record."""
+def has_admin_permission(user=None, record=None):
+    """Check if user has admin access to record.
+
+    This function has to accept 2 parameters (as all other has_foo_permissions,
+    to allow for dynamic dispatch.
+    """
     # Allow administrators
     if DynamicPermission(ActionNeed('admin-access')):
         return True

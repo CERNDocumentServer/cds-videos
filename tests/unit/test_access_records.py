@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import pytest
 import uuid
 
 from flask_principal import RoleNeed, identity_loaded
@@ -36,55 +37,58 @@ from cds.modules.records.permissions import (has_admin_permission,
                                              record_permission_factory)
 
 
-def test_record_access(db, users):
+@pytest.mark.parametrize('access,action,is_allowed', [
+    ({'foo': 'bar'}, 'read', True),
+    ({'_access': {'read': [1, 'no-access@cern.ch',
+                  'no-access-either@cern.ch']}}, 'read', True),
+    ({'_access': {'read': [2, 'no-access@cern.ch']}}, 'read', False),
+    ({'_access': {'read': ['test-egroup@cern.ch']}}, 'read', True),
+    ({'_access': {'read': []}}, 'read', True),
+    ({'foo': 'bar'}, 'create', True),
+    ({'_access': {'create': [1, 'no-access@cern.ch',
+                  'no-access-either@cern.ch']}}, 'create', True),
+    ({'_access': {'create': [2, 'no-access@cern.ch']}}, 'create', True),
+    ({'_access': {'create': ['test-egroup@cern.ch']}}, 'create', True),
+    ({'_access': {'create': []}}, 'create', True),
+    ({'foo': 'bar'}, 'read-files', True),
+    ({'_access': {'read-files': [1, 'no-access@cern.ch',
+                  'no-access-either@cern.ch']}}, 'read-files', True),
+    ({'_access': {'read-files': [2, 'no-access@cern.ch']}}, 'read-files',
+        False),
+    ({'_access': {'read-files': ['test-egroup@cern.ch']}}, 'read-files', True),
+    ({'_access': {'read-files': []}}, 'read-files', True),
+    ({'foo': 'bar'}, 'update', False),
+    ({'_access': {'update': [1, 'no-access@cern.ch',
+                  'no-access-either@cern.ch']}}, 'update', True),
+    ({'_access': {'update': [2, 'no-access@cern.ch']}}, 'update', False),
+    ({'_access': {'update': ['test-egroup@cern.ch']}}, 'update', True),
+    ({'_access': {'update': []}}, 'update', False),
+    # Only admin can delete records
+    ({'foo': 'bar'}, 'delete', False),
+])
+def test_record_access(db, users, access, action, is_allowed):
     """Test access control for records."""
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
         identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
 
-    user_id = 1
-    login_user(User.query.get(user_id))
-
-    def check_record(json, action='read', allowed=True):
-        # Create uuid
-        id = uuid.uuid4()
+    def login_and_test(user_id):
+        login_user(User.query.get(user_id))
 
         # Create record
-        record = Record.create(json, id_=id)
+        id = uuid.uuid4()
+        record = Record.create(access, id_=id)
 
         # Check permission factory
         factory = record_permission_factory(record, action)
-        assert factory.can() if allowed else not factory.can()
+        if has_admin_permission():
+            # super user can do EVERYTHING
+            assert factory.can()
+        else:
+            assert factory.can() if is_allowed else not factory.can()
 
-    # Check test records
-    check_record({'foo': 'bar'})
-    check_record({
-        '_access': {
-            'read': [
-                user_id,
-                'no-access@cern.ch',
-                'no-access-either@cern.ch'
-            ]
-        }
-    })
-    check_record({
-        '_access': {
-            'read': [
-                user_id + 1,
-                'no-access@cern.ch'
-            ]
-        }
-    }, allowed=False)
-    check_record({'_access': {'read': ['test-egroup@cern.ch']}})
-    check_record({'_access': {'read': []}})
-
-
-def test_not_all_users_are_admins(app, users):
-    """Test that not all the users have admin access."""
-    login_user(User.query.get(users[0]))
-    assert not has_admin_permission()
-
-    # users[2] is the admin
-    login_user(User.query.get(users[2]))
-    assert has_admin_permission()
+    # Test standard user
+    login_and_test(1)
+    # Now test that super-user can do all actions
+    login_and_test(3)
