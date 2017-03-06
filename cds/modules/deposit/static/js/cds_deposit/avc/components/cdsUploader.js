@@ -362,12 +362,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       data || {}
     );
   }
-  this.findMasterFileIndex = function() {
-    return _.findIndex(that.files, {'context_type': 'master'});
-  }
   this.updateSubformat = function(key, data) {
     // Find master
-    var master = that.findMasterFileIndex();
+    var master = that.cdsDepositCtrl.findMasterFileIndex();
     if (master > -1) {
       // Find the index of the subformat
       var index = _.findIndex(that.files[master].subformat, {'key': key});
