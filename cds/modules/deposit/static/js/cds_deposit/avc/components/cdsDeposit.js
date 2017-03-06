@@ -139,8 +139,7 @@ function cdsDepositCtrl(
     this.initializeStateReported = function() {
       that.stateReporter = {};
       that.presets_finished = [];
-      // FIXME: Get them from the Webhooks
-      that.presets = [ '360p', '720p', '480p', '240p', '1080p', '1024p' ];
+      that.presets = [];
       depositStates.map(function(state) {
         that.stateReporter[state] = {
           status: state,
