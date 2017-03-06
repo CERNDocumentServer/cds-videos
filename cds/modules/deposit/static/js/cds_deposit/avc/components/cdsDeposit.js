@@ -63,6 +63,10 @@ function cdsDepositCtrl(
       that.schema = response.data;
     });
 
+    this.findMasterFileIndex = function() {
+      return _.findIndex(that.record._files, {'context_type': 'master'});
+    };
+
     this.initializeStateQueue = function() {
       if (Object.keys(this.record._deposit.state || {}).length > 0) {
         if (
@@ -79,7 +83,7 @@ function cdsDepositCtrl(
         });
       } else {
         that.stateQueue.PENDING = angular.copy(depositStates);
-        var videoFile = that.record._files[0];
+        var videoFile = that.record._files[that.findMasterFileIndex()];
         if (videoFile && !videoFile.url) {
           that.stateQueue.PENDING.splice(
             depositStates.indexOf('file_download'),
@@ -166,14 +170,28 @@ function cdsDepositCtrl(
     };
 
     this.videoPreviewer = function(deposit, key) {
-      if (that.record._files[0] &&
-        (that.stateQueue.SUCCESS.indexOf('file_download') > -1 || key)) {
-        that.previewer = $sce.trustAsResourceUrl(
-          urlBuilder.video({
-            deposit: deposit || that.record._deposit.id,
-            key: key || that.record._files[0].key,
-          })
-        );
+      var videoUrl;
+      if (deposit && key) {
+        videoUrl = urlBuilder.video({
+          deposit: deposit,
+          key: key,
+        });
+      } else {
+        var videoFile = that.record._files[that.findMasterFileIndex()];
+        if (videoFile && videoFile.subformat) {
+          var finishedSubformats = videoFile.subformat.filter(function(fmt) {
+            return fmt.completed;
+          });
+          if (finishedSubformats[0]) {
+            videoUrl = urlBuilder.video({
+              deposit: that.record._deposit.id,
+              key: finishedSubformats[0].key,
+            });
+          }
+        }
+      }
+      if (videoUrl) {
+        that.previewer = $sce.trustAsResourceUrl(videoUrl);
       }
     };
 
@@ -242,10 +260,10 @@ function cdsDepositCtrl(
             // On success remove it from the status order
             that.stateOrder = _.without(that.stateOrder, type);
           }
-          if (that.presets_finished.length === 1) {
+          if (!that.previewer) {
             that.videoPreviewer(
-              that.record._deposit.id,
-              that.record._files[0].key
+              data.meta.payload.deposit_id,
+              data.meta.payload.key
             );
           }
         } else {
