@@ -26,44 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
-import uuid
-
-from cds.modules.access.access_control import cern_read_factory
 from flask import g
 from flask_principal import RoleNeed, UserNeed
-from invenio_records.api import Record
-from cds.modules.access.access_control import CERNRecordsSearch
+from cds.modules.records.search import CERNRecordsSearch
 
 
 def mock_provides(needs):
     """Mock user provides."""
     g.identity = lambda: None
     g.identity.provides = needs
-
-
-def test_record_access(db):
-    """Test access control for search."""
-    mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
-
-    def check_record(json, allowed=True):
-        # Create uuid
-        id = uuid.uuid4()
-
-        # Create record
-        rec = type('obj', (object,), {'id': id})
-        Record.create(json, id_=id)
-
-        # Check permission factory
-        factory = cern_read_factory(rec)
-        assert factory.can() if allowed else not factory.can()
-
-    # Check test records
-    check_record({'foo': 'bar'})
-    check_record({'_access': {'read': ['test@test.ch', 'groupA', 'groupB']}})
-    check_record({'_access': {'read': ['test2@test2.ch', 'groupC']}}, False)
-    check_record({'_access': {'read': ['groupX']}})
-    check_record({'_access': {'read': ['test@test.ch', 'groupA', 'groupB']}})
-    check_record({'_access': {'read': []}})
 
 
 def test_es_filter():
