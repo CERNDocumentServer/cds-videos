@@ -84,7 +84,10 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
             _subpromise = d.promise;
           }
           _subpromise.then(
-            function success() {;
+            function success(avcResponse) {
+              if (avcResponse) {
+                that.cdsDepositCtrl.presets = avcResponse.data.presets;
+              }
               promise.resolve(response);
             }
           );
@@ -131,6 +134,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     $http(args)
       .then(
         function success(response) {
+          that.cdsDepositCtrl.presets = response.data.presets;
         },
         function error(response) {
           promise.reject(response);
