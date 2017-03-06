@@ -36,8 +36,11 @@ from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
-from .modules.access.access_control import CERNRecordsSearch
-from .modules.deposit.permissions import DepositPermission, can_edit_deposit
+from cds.modules.records.permissions import (deposit_delete_permission_factory,
+                                             deposit_read_permission_factory,
+                                             record_create_permission_factory,
+                                             record_update_permission_factory)
+from cds.modules.records.search import CERNRecordsSearch
 
 
 # Identity function for string extraction
@@ -353,7 +356,7 @@ RECORDS_VALIDATION_TYPES = dict(
 )
 
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_read_factory'
+    'cds.modules.records.permissions:deposit_read_permission_factory'
 
 # Endpoint and user agent for the cds_recid provider
 RECORDS_ID_PROVIDER_ENDPOINT = \
@@ -363,7 +366,7 @@ RECORDS_ID_PROVIDER_ENDPOINT = \
 # Files
 ###############################################################################
 FILES_REST_PERMISSION_FACTORY = \
-    'cds.modules.access.access_control:cern_file_factory'
+    'cds.modules.records.permissions:files_permission_factory'
 
 # Files storage
 FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
@@ -579,12 +582,18 @@ DEPOSIT_REST_ENDPOINTS = dict(
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:deposit_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
-        read_permission_factory_imp=DepositPermission,
+            lambda record: record_create_permission_factory(
+                record=record).can(),
+            write_scope.id),
+        read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: record_update_permission_factory(
+                record=record).can(),
+            write_scope.id),
         delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: deposit_delete_permission_factory(
+                record=record).can(),
+            write_scope.id),
         max_result_window=10000,
     ),
     project=dict(
@@ -618,12 +627,18 @@ DEPOSIT_REST_ENDPOINTS = dict(
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:project_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
-        read_permission_factory_imp=DepositPermission,
+            lambda record: record_create_permission_factory(
+                record=record).can(),
+            write_scope.id),
+        read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: record_update_permission_factory(
+                record=record).can(),
+            write_scope.id),
         delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: deposit_delete_permission_factory(
+                record=record).can(),
+            write_scope.id),
         max_result_window=10000,
     ),
     video=dict(
@@ -657,12 +672,18 @@ DEPOSIT_REST_ENDPOINTS = dict(
         default_media_type='application/json',
         links_factory_imp='cds.modules.deposit.links:video_links_factory',
         create_permission_factory_imp=check_oauth2_scope(
-            lambda x: True, write_scope.id),
-        read_permission_factory_imp=DepositPermission,
+            lambda record: record_create_permission_factory(
+                record=record).can(),
+            write_scope.id),
+        read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: record_update_permission_factory(
+                record=record).can(),
+            write_scope.id),
         delete_permission_factory_imp=check_oauth2_scope(
-            can_edit_deposit, write_scope.id),
+            lambda record: deposit_delete_permission_factory(
+                record=record).can(),
+            write_scope.id),
         max_result_window=10000,
     ),
 )

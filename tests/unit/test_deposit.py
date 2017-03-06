@@ -27,12 +27,12 @@
 from __future__ import absolute_import, print_function
 
 import json
-
 import pytest
 
 from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
 from flask import current_app, request, url_for
+from flask_principal import RoleNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
@@ -183,3 +183,42 @@ def test_publish_process_files(app, db, location):
                 if str(obj.version_id) != master_version:
                     assert obj.get_tags()['master'] == master_version
                     assert obj.get_tags()['type'] == 'video'
+
+
+def test_deposit_access_rights_based_on_user_id(api_app, users, cds_depid,
+                                                deposit_rest):
+    """Test deposit access rights based on user ID.
+
+    Tests that a user can't access a deposit created by a different user.
+    """
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        # User is the creator of the deposit, so everything is fine
+        assert client.get(deposit_url).status_code == 200
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        # User shouldn't have access to this deposit
+        assert client.get(deposit_url).status_code == 403
+
+
+def test_deposit_access_rights_based_on_egroup(api_app, users, cds_depid,
+                                               deposit_rest):
+    """Test deposit access rights based on the e-groups.
+
+    Tests that a user can access a deposit based on the e-group permissions.
+    """
+    @identity_loaded.connect
+    def mock_identity_provides(sender, identity):
+        """Add additional group to the user."""
+        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        assert client.get(deposit_url).status_code == 200

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,35 +22,40 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Utilities for CDS deposit."""
+"""Configuration for records search."""
 
 from __future__ import absolute_import, print_function
 
-from flask import has_request_context
-from flask_security import current_user
+from elasticsearch_dsl.query import Q
+from invenio_search import RecordsSearch
+from invenio_search.api import DefaultFilter
+
+from cds.modules.records.utils import get_user_provides
 
 
-class DepositPermission(object):
-    """CDS deposit edit permission."""
+def cern_filter():
+    """Filter list of results."""
+    # Get CERN user's provides
+    provides = get_user_provides()
 
-    def __init__(self, record, *args, **kwargs):
-        """Initialize a deposit permission object."""
-        self.record = record
+    # Filter for public records
+    public = Q('missing', field='_access.read')
+    # Filter for restricted records, that the user has access to
+    restricted = Q('terms', **{'_access.read': provides})
 
-    def can(self):
-        """Check if the current user has permission to access file.
+    # OR the two filters
+    combined_filter = public | restricted
 
-        This method must align with the search class filtering of records.
-        """
-        if not has_request_context():
-            return True
-        else:
-            uid = getattr(current_user, 'id', 0)
-            if uid in self.record.get('_deposit', {}).get('owners', []):
-                return True
-        return False
+    return Q('bool', filter=[combined_filter])
 
 
-def can_edit_deposit(record):
-    """Check edit deposit permissions."""
-    return DepositPermission(record).can()
+class CERNRecordsSearch(RecordsSearch):
+    """CERN search class."""
+
+    class Meta:
+        """Configuration for CERN search."""
+
+        index = '_all'
+        doc_types = None
+        fields = ('*',)
+        default_filter = DefaultFilter(cern_filter)
