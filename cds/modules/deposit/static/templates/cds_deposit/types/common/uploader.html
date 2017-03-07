@@ -32,7 +32,7 @@
       <th class="text-center">Actions</th>
     </tr>
     <tr class="sel-file" ng-repeat="f in $ctrl.files | orderBy:sortType:sortReverse | filter:fileSearch">
-      <td>{{ f.key | limitTo:30 }} <span ng-show="f.key.length > 30">...</span></td>
+      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
       <td>
         <span ng-show="f.size != undefined">{{ f.size | bytesToHumanReadable }}</span>
         <span ng-show="f.size == undefined">Unknown</span>
@@ -66,7 +66,7 @@
       </td>
     </tr>
     <tr class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
-      <td>{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 50">...</span></td>
+      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
       <td>
         <span>{{ f.size | bytesToHumanReadable }}</span>
       </td>
