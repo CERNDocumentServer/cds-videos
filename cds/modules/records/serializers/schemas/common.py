@@ -109,7 +109,8 @@ class CreatorSchema(StrictKeysSchema):
 class AccessSchema(StrictKeysSchema):
     """Access schema."""
 
-    read = fields.Str()
+    read = fields.List(fields.Raw())
+    update = fields.List(fields.Raw())
 
 
 class ContributorSchema(StrictKeysSchema):

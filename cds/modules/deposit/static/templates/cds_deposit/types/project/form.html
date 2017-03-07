@@ -28,6 +28,7 @@
           <li role="presentation" ng-class="{active: active=='metadata'}"><a ng-click="active='metadata'" role="tab" data-toggle="tab">Basic Info</a></li>
           <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
           <li role="presentation" ng-class="{active: active=='translations'}"><a ng-click="active='translations'" role="tab" data-toggle="tab">Translations</a></li>
+          <li role="presentation" ng-class="{active: active=='access'}"><a ng-click="active='access'" role="tab" data-toggle="tab">Access rights</a></li>
         </ul>
         <!-- Tab panes -->
         <div class="tab-content cds-tab-content pa-20 ">
@@ -77,6 +78,20 @@
                   class="form-horizontal"
                   sf-schema="$ctrl.cdsDepositCtrl.schema"
                   sf-form="$ctrl.form.translations"
+                  sf-model="$ctrl.cdsDepositCtrl.record"
+                  sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+                ></form>
+              </div>
+            </div>
+          </div>
+          <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
+            <div class="row">
+              <div class="col-sm-12">
+                <form
+                  name="$ctrl.cdsDepositCtrl.depositFormModel"
+                  class="form-horizontal"
+                  sf-schema="$ctrl.cdsDepositCtrl.schema"
+                  sf-form="$ctrl.form.access"
                   sf-model="$ctrl.cdsDepositCtrl.record"
                   sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
                 ></form>
