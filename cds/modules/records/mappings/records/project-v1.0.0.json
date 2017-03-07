@@ -108,12 +108,17 @@
                     "type": "double"
                 },
                 "_access": {
+                    "type": "object",
                     "properties": {
                         "read": {
-                            "type": "string"
+                            "type": "string",
+                            "index": "not_analyzed"
+                        },
+                        "update": {
+                            "type": "string",
+                            "index": "not_analyzed"
                         }
-                    },
-                    "type": "object"
+                    }
                 },
                 "category": {
                     "type": "string"
