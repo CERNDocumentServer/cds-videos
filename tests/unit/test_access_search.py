@@ -37,14 +37,16 @@ def mock_provides(needs):
     g.identity.provides = needs
 
 
-def test_es_filter():
+def test_es_filter(users):
     """Test query filter based on CERN groups."""
     mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
     assert CERNRecordsSearch().to_dict()['query']['bool']['filter'] == [
         {'bool': {'filter': [{'bool': {
             'should': [
                 {'missing': {'field': '_access.read'}},
-                {'terms': {'_access.read': ['test@test.ch', 'groupX']}}
+                {'terms': {'_access.read': ['test@test.ch', 'groupX']}},
+                {'terms': {'_access.update': ['test@test.ch', 'groupX']}},
+                {'match': {'_deposit.created_by': 0}}
             ]
         }}]}}
     ]

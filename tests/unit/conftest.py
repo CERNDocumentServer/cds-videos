@@ -233,7 +233,7 @@ def cds_depid(api_app, users, db, bucket, deposit_metadata):
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
         deposit = Project.create(record)
-        deposit['_deposit']['owners'].append('test-egroup@cern.ch')
+        deposit['_access'] = {'update': ['test-egroup@cern.ch']}
         deposit.commit()
         db.session.commit()
     return deposit['_deposit']['id']
