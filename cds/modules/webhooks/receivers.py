@@ -36,6 +36,8 @@ from celery.result import AsyncResult
 from invenio_db import db
 from celery import states
 from flask import url_for
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_records import Record
 from invenio_webhooks.models import Receiver
 from sqlalchemy.orm.attributes import flag_modified
 from celery.result import result_from_tuple
@@ -47,6 +49,15 @@ from .status import ComputeGlobalStatus, iterate_result, collect_info, \
     GetInfoByID, replace_task_id
 from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
     TranscodeVideoTask, update_avc_deposit_state
+
+
+def _update_event_bucket(event):
+    """Update event's payload with correct bucket of deposit."""
+    depid = event.payload['deposit_id']
+    dep_uuid = str(PersistentIdentifier.get('depid', depid).object_uuid)
+    deposit_bucket = Record.get_record(dep_uuid)['_buckets']['deposit']
+    event.payload['bucket_id'] = deposit_bucket
+    flag_modified(event, 'payload')
 
 
 def build_task_payload(event, task_id):
@@ -258,10 +269,12 @@ class Downloader(CeleryAsyncReceiver):
         :func: `~cds.modules.webhooks.tasks.DownloadTask` this
         receiver is using.
         """
-        assert 'bucket_id' in event.payload
         assert 'uri' in event.payload
         assert 'key' in event.payload
         assert 'deposit_id' in event.payload
+
+        # TODO remove field completely when we make sure nothing breaks
+        _update_event_bucket(event)
 
         # 1. create the object version
         object_version = self._init_object_version(event=event)
@@ -442,9 +455,13 @@ class AVCWorkflow(CeleryAsyncReceiver):
           * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
           * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
         """
-        assert ('uri' in event.payload and 'bucket_id' in event.payload and
-                'key' in event.payload) or ('version_id' in event.payload)
         assert 'deposit_id' in event.payload
+        assert (('uri' in event.payload and 'key' in event.payload)
+                or ('version_id' in event.payload))
+
+        # TODO remove field completely when we make sure nothing breaks
+        if 'version_id' not in event.payload:
+            _update_event_bucket(event)
 
         # 1. create the object version if doesn't exist
         object_version = self._init_object_version(event=event)

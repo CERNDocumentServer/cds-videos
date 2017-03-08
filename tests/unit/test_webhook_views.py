@@ -307,11 +307,10 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     check_video_transcode_restart,
 ])
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
+def test_avc_workflow_delete(api_app, db, cds_depid,
                              access_token, json_headers, mock_sorenson,
                              online_video, webhooks, checker):
     """Test AVCWorkflow receiver REST API."""
-    db.session.add(bucket)
     master_key = 'test.mp4'
 
     with api_app.test_request_context():
@@ -327,7 +326,6 @@ def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -353,12 +351,10 @@ def test_avc_workflow_delete(api_app, db, bucket, cds_depid,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_download_workflow_delete(api_app, db, bucket, cds_depid,
-                                  access_token, json_headers, mock_sorenson,
-                                  online_video, webhooks):
+def test_download_workflow_delete(api_app, db, cds_depid, access_token,
+                                  json_headers, mock_sorenson, online_video,
+                                  webhooks):
     """Test Download receiver REST API."""
-    db.session.add(bucket)
-
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -380,7 +376,6 @@ def test_download_workflow_delete(api_app, db, bucket, cds_depid,
 
         payload = dict(
             uri='http://example.com/test.pdf',
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key='test.pdf',
             sse_channel=sse_channel

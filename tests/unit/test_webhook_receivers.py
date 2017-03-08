@@ -55,15 +55,14 @@ from helpers import failing_task, get_object_count, get_tag_count, \
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_download_receiver(api_app, db, bucket, api_project, access_token,
-                           json_headers, webhooks):
+def test_download_receiver(api_app, db, api_project, access_token, webhooks,
+                           json_headers):
     """Test downloader receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     video_1_id = str(video_1.id)
     project_id = str(project.id)
 
-    db.session.add(bucket)
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.event_list',
@@ -88,7 +87,6 @@ def test_download_receiver(api_app, db, bucket, api_project, access_token,
 
         payload = dict(
             uri='http://example.com/test.pdf',
-            bucket_id=str(bucket.id),
             deposit_id=video_1_depid,
             key='test.pdf',
             sse_channel=sse_channel
@@ -201,17 +199,16 @@ def test_download_receiver(api_app, db, bucket, api_project, access_token,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
-                                    access_token, json_headers, mock_sorenson,
-                                    online_video, webhooks):
+def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
+                                    json_headers, mock_sorenson, online_video,
+                                    webhooks):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     video_1_id = str(video_1.id)
     project_id = str(project.id)
 
-    db.session.add(bucket)
-    bucket_id = bucket.id
+    bucket_id = video_1['_buckets']['deposit']
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['test[{0}].mp4'.format(quality)
@@ -230,7 +227,6 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=video_1_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -403,7 +399,7 @@ def test_avc_workflow_receiver_pass(api_app, db, bucket, api_project,
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_local_file_pass(
-        api_app, db, bucket, api_project, access_token, json_headers,
+        api_app, db, api_project, access_token, json_headers,
         mock_sorenson, online_video, webhooks, local_file):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
@@ -411,8 +407,8 @@ def test_avc_workflow_receiver_local_file_pass(
     video_1_id = str(video_1.id)
     project_id = str(project.id)
 
-    db.session.add(bucket)
-    bucket_id = bucket.id
+    bucket_id = ObjectVersion.query.filter_by(
+        version_id=local_file).one().bucket_id
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['test[{0}].mp4'.format(quality)
@@ -431,7 +427,6 @@ def test_avc_workflow_receiver_local_file_pass(
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=video_1_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -598,10 +593,9 @@ def test_avc_workflow_receiver_local_file_pass(
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_download(
-        api_app, db, bucket, cds_depid, access_token, json_headers,
+        api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, webhooks):
     """Test AVCWorkflow receiver."""
-    db.session.add(bucket)
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
@@ -614,7 +608,6 @@ def test_avc_workflow_receiver_clean_download(
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -647,10 +640,9 @@ def test_avc_workflow_receiver_clean_download(
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_video_frames(
-        api_app, db, bucket, cds_depid, access_token, json_headers,
+        api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, webhooks):
     """Test AVCWorkflow receiver."""
-    db.session.add(bucket)
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
@@ -663,7 +655,6 @@ def test_avc_workflow_receiver_clean_video_frames(
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -698,10 +689,9 @@ def test_avc_workflow_receiver_clean_video_frames(
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_video_transcode(
-        api_app, db, bucket, cds_depid, access_token, json_headers,
+        api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, webhooks):
     """Test AVCWorkflow receiver."""
-    db.session.add(bucket)
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
@@ -714,7 +704,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
             sse_channel=sse_channel,
@@ -766,10 +755,9 @@ def test_avc_workflow_receiver_clean_video_transcode(
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_extract_metadata(
-        api_app, db, bucket, cds_depid, access_token, json_headers,
+        api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, webhooks):
     """Test AVCWorkflow receiver."""
-    db.session.add(bucket)
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
@@ -782,7 +770,6 @@ def test_avc_workflow_receiver_clean_extract_metadata(
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
             sse_channel=sse_channel,
