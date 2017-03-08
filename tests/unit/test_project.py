@@ -544,7 +544,7 @@ def test_project_permissions(es, location, deposit_metadata, users):
     user = User.query.get(users[0])
     login_user(user)
     assert not has_update_permission(user, deposit)
-    deposit['_deposit']['owners'].append(user.id)
+    deposit['_access'] = {'update': [user.id]}
     assert has_update_permission(user, deposit)
 
 

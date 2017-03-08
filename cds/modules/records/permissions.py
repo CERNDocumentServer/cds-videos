@@ -260,21 +260,29 @@ def allow(user, record):
     return True
 
 
+def is_public(data, action):
+    """Check if the record is fully public.
+
+    In practice this means that the record doesn't have the ``access`` key or
+    the action is not inside access or is empty.
+    """
+    return not '_access' in data or not data.get('_access', {}).get(action)
+
+
 def has_read_files_permission(user, record):
     """Check if user has read access to the record's files."""
     # TODO: decide on files access rights
     # Same permissions as for record itself
 
     # Allow everyone for public records
-    if '_access' not in record:
+    if is_public(record, 'read-files'):
         return True
 
     # Allow e-group members
-    user_groups = get_user_provides()
+    user_provides = get_user_provides()
     read_access_groups = record['_access']['read-files']
-    if not read_access_groups:
-        return True
-    if not set(user_groups).isdisjoint(set(read_access_groups)):
+
+    if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
 
     return has_admin_permission(user, record)
@@ -283,15 +291,14 @@ def has_read_files_permission(user, record):
 def has_read_record_permission(user, record):
     """Check if user has read access to the record."""
     # Allow everyone for public records
-    if '_access' not in record:
+    if is_public(record, 'read'):
         return True
 
     # Allow e-group members
-    user_groups = get_user_provides()
+    user_provides = get_user_provides()
     read_access_groups = record['_access']['read']
-    if not read_access_groups:
-        return True
-    if not set(user_groups).isdisjoint(set(read_access_groups)):
+
+    if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
 
     return has_admin_permission()
@@ -299,24 +306,18 @@ def has_read_record_permission(user, record):
 
 def has_update_permission(user, record):
     """Check if user has update access to the record."""
-    # Allow owners
     user_id = int(user.get_id()) if user.is_authenticated else None
-    if user_id in record.get('owners', []):
+
+    # Allow owners
+    deposit_creator = record.get('_deposit', {}).get('created_by', -1)
+    if user_id == deposit_creator:
         return True
+
     # Allow based in the '_access' key
-    if user_id in record.get('_access', {}).get('update', []):
-        return True
-    deposit_owners = record.get('_deposit', {}).get('owners', [])
-    if user_id in deposit_owners:
-        return True
-    # Allow e-group members
-    user_groups = get_user_provides()
+    user_provides = get_user_provides()
     # set.isdisjoint() is faster than set.intersection()
-    if not set(user_groups).isdisjoint(set(deposit_owners)):
-        return True
-    # Allow based on the '_access' key
     allowed_users = record.get('_access', {}).get('update', [])
-    if allowed_users and not set(user_groups).isdisjoint(set(allowed_users)):
+    if allowed_users and not set(user_provides).isdisjoint(set(allowed_users)):
         return True
 
     return has_admin_permission()
