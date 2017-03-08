@@ -109,7 +109,7 @@ class CDSFileObject(FileObject):
                 'checksum': obj.file.checksum if obj.file else '',
                 'size': obj.file.size if obj.file else 0,
                 'file_id': str(obj.file_id),
-                'completed': True,
+                'completed': obj.file is not None,
                 'progress': 100,
                 'content_type': content_type,
                 'context_type': context_type,
