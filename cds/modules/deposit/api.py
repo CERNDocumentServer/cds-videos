@@ -233,9 +233,7 @@ class CDSDeposit(Deposit):
         if '_deposit' not in data:
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
-        bucket = Bucket.create(
-            default_location=Location.get_default()
-        )
+        bucket = Bucket.create(default_location=Location.get_default())
         data['_buckets'] = {'deposit': str(bucket.id)}
         data['_deposit']['state'] = {}
         deposit = super(CDSDeposit, cls).create(
