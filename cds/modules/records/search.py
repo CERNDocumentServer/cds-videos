@@ -27,24 +27,29 @@
 from __future__ import absolute_import, print_function
 
 from elasticsearch_dsl.query import Q
+from flask_login import current_user
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 
-from cds.modules.records.utils import get_user_provides
+from .utils import get_user_provides
 
 
 def cern_filter():
     """Filter list of results."""
+    # TODO: Send empty query for admins
     # Get CERN user's provides
     provides = get_user_provides()
 
     # Filter for public records
     public = Q('missing', field='_access.read')
     # Filter for restricted records, that the user has access to
-    restricted = Q('terms', **{'_access.read': provides})
+    read_restricted = Q('terms', **{'_access.read': provides})
+    write_restricted = Q('terms', **{'_access.update': provides})
+    # Filter records where the user is owner
+    owner = Q('match', **{'_deposit.created_by': getattr(current_user, 'id', 0)})
 
     # OR the two filters
-    combined_filter = public | restricted
+    combined_filter = public | read_restricted | write_restricted | owner
 
     return Q('bool', filter=[combined_filter])
 
