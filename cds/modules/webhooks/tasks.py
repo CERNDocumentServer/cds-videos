@@ -89,8 +89,7 @@ class AVCTask(Task):
             the channel is extracted from the ``sse_channel`` keyword
             argument.
         """
-        arg_list = [
-            'sse_channel', 'event_id', 'deposit_id', 'bucket_id', 'key']
+        arg_list = ['sse_channel', 'event_id', 'deposit_id', 'key']
         kwargs = self._extract_call_arguments(arg_list, **kwargs)
 
         with self.app.flask_app.app_context():
@@ -161,7 +160,7 @@ class DownloadTask(AVCTask):
         dispose_object_version(version_id)
 
     def run(self, uri, **kwargs):
-        r"""Download file from a URL.
+        """Download file from a URL.
 
         :param self: reference to instance of task base class
         :param uri: URL of the file to download.
