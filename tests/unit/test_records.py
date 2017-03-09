@@ -38,7 +38,7 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 
-from helpers import get_files_metadata
+from helpers import get_files_metadata, get_json, assert_hits_len
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -252,3 +252,18 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
 def test_video_duration(app, video_published):
     """Validate calculated duration of video."""
     assert re.match(r'^\d\d:\d\d:\d\d.\d\d\d$', video_published['duration'])
+
+
+def test_videos_search(records_rest_app, indexed_videos):
+    """Test that searching for videos returns correct number of results."""
+    with records_rest_app.test_client() as client:
+        search_url = url_for('invenio_records_rest.recid_list')
+        # Get a query with only one record
+        res = client.get(search_url, query_string={'q': 'video'})
+        assert_hits_len(res, 3)
+        assert res.status_code == 200
+
+        # Also make sure that there is no "Project" in the results
+        res = client.get(search_url, query_string={'q': 'Project'})
+        assert_hits_len(res, 0)
+        assert res.status_code == 200

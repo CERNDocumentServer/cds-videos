@@ -60,7 +60,7 @@ class CERNRecordsSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = '_all'
+        index = 'records-video-v1.0.0'
         doc_types = None
         fields = ('*',)
         default_filter = DefaultFilter(cern_filter)
