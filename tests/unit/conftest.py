@@ -27,6 +27,7 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 import os
 import shutil
 import tempfile
@@ -39,6 +40,7 @@ import pytest
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds.modules.records.search import CERNRecordsSearch
 from cds_sorenson.api import get_preset_id
 from cds_sorenson.error import InvalidResolutionError
 from celery import chain
@@ -57,6 +59,7 @@ from invenio_deposit import InvenioDepositREST
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
+from invenio_indexer.api import RecordIndexer
 from invenio_oauth2server.models import Token
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.providers.recordid import RecordIdProvider
@@ -75,11 +78,13 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
 from invenio_files_rest.models import ObjectVersion
 from invenio_pidstore.models import PersistentIdentifier
+from time import sleep
 from uuid import uuid4
 
-from helpers import create_category, sse_simple_add, sse_failing_task, \
-    sse_success_task, new_project, prepare_videos_for_publish, rand_md5, \
-    rand_version_id, create_keyword
+from helpers import (create_category, create_record, sse_simple_add,
+                     sse_failing_task, sse_success_task, new_project,
+                     prepare_videos_for_publish, rand_md5, rand_version_id,
+                     create_keyword)
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -874,3 +879,30 @@ def recid_pid():
     return PersistentIdentifier(
         pid_type='recid', pid_value='123', status='R', object_type='rec',
         object_uuid=uuid4())
+
+
+@pytest.yield_fixture(scope='session')
+def test_videos_project():
+    """Load test JSON records containing videos and a project."""
+    with open(join(dirname(__file__), '../data/test_videos_projects.json')) as fp:
+        records = json.load(fp)
+    yield records
+
+
+@pytest.yield_fixture()
+def test_video_records(db, test_videos_project):
+    """Load test videos and project records."""
+    result = []
+    for r in test_videos_project:
+        result.append(create_record(r))
+    db.session.commit()
+    yield result
+
+
+@pytest.yield_fixture()
+def indexed_videos(es, indexer, test_video_records):
+    """Get a function to wait for records to be flushed to index."""
+    RecordIndexer().bulk_index([record.id for _, record in test_video_records])
+    RecordIndexer().process_bulk_queue()
+    sleep(2)
+    yield test_video_records

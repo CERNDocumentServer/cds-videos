@@ -244,7 +244,6 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_type='recid',
         pid_minter='cds_recid',
         pid_fetcher='cds_recid',
-        search_index='records',
         search_type=None,
         search_class=CERNRecordsSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
