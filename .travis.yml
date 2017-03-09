@@ -36,7 +36,7 @@ before_install:
 - wget -O - https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
   | tar --strip-components 1 -xJ -C /tmp/ffmpeg && export PATH=$PATH:/tmp/ffmpeg
 - travis_retry pip install --upgrade pip setuptools py
-- travis_retry pip install twine wheel coveralls requirements-builder
+- travis_retry pip install twine wheel coveralls 'requirements-builder==0.2.2'
 - "./scripts/setup-npm.sh"
 - cat requirements.pinned.txt > .travis-production-requirements.txt
 - requirements-builder --level=pypi setup.py > .travis-release-requirements.txt
