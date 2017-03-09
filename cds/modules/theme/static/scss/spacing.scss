@@ -208,6 +208,31 @@
 
 // p - padding
 
+// 0px
+.pa-0 {
+  padding: 0px;
+}
+.pl-0 {
+  padding-left: 0px;
+}
+.pr-0 {
+  padding-right: 0px;
+}
+.pt-0 {
+  padding-top: 0px;
+}
+.pb-0 {
+  padding-bottom: 0px;
+}
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
 // 5px
 .pa-5 {
   padding: 5px;
