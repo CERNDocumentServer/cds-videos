@@ -163,6 +163,7 @@ class CDSFilesIterator(FilesIterator):
 
     @staticmethod
     def get_video_subformats(master_file):
+        """Get list of video subformats."""
         return [video
                 for video in master_file.get('subformat', [])
                 if video['media_type'] == 'video' and video[
@@ -170,6 +171,7 @@ class CDSFilesIterator(FilesIterator):
 
     @staticmethod
     def get_video_frames(master_file):
+        """Get sorted list of video frames."""
         return sorted(master_file.get('frame', []),
                       key=lambda s: s['tags']['timestamp'])
 
@@ -577,7 +579,6 @@ class Project(CDSDeposit):
         pid = PersistentIdentifier.get('rn', self.report_number)
         pid.assign('rec', id_, overwrite=True)
         assert pid.register()
-        db.session.commit()
 
     @required(['category', 'type'])
     def get_report_number_sequence(self, **kwargs):
