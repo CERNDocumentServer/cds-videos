@@ -79,7 +79,7 @@ from uuid import uuid4
 
 from helpers import create_category, sse_simple_add, sse_failing_task, \
     sse_success_task, new_project, prepare_videos_for_publish, rand_md5, \
-    rand_version_id
+    rand_version_id, create_keyword
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -823,6 +823,26 @@ def category_2(api_app, es, indexer, pidstore, cds_jsonresolver):
         '_record_type': ['video'],
     }
     return create_category(api_app=api_app, db=db_, data=data)
+
+
+@pytest.fixture()
+def keyword_1(api_app, es, indexer, pidstore, cds_jsonresolver):
+    """Create a fixture for keyword."""
+    data = {
+        'key_id': '1',
+        'name': '13 TeV',
+    }
+    return create_keyword(api_app=api_app, db=db_, data=data)
+
+
+@pytest.fixture()
+def keyword_2(api_app, es, indexer, pidstore, cds_jsonresolver):
+    """Create a fixture for keyword."""
+    data = {
+        'key_id': '2',
+        'name': 'Accelerating News',
+    }
+    return create_keyword(api_app=api_app, db=db_, data=data)
 
 
 @pytest.fixture(autouse=True)

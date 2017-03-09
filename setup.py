@@ -214,9 +214,11 @@ setup(
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',
             'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
+            'cds_kwid = cds.modules.records.fetchers:kwid_fetcher',
         ],
         'invenio_pidstore.minters': [
             'cds_catid = cds.modules.deposit.minters:catid_minter',
+            'cds_kwid = cds.modules.records.minters:kwid_minter',
             'cds_report_number = '
             'cds.modules.records.minters:report_number_minter',
             'cds_recid = cds.modules.records.minters:cds_record_minter',
@@ -229,6 +231,7 @@ setup(
             'records = cds.modules.records.mappings',
             'deposits = cds.modules.deposit.mappings',
             'categories = cds.modules.deposit.mappings',
+            'keywords = cds.modules.records.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',

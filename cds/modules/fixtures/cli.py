@@ -28,8 +28,10 @@ from os import listdir, makedirs
 from os.path import basename, exists, isdir, join, splitext, dirname
 
 from cds.modules.deposit.minters import catid_minter
+from cds.modules.records.minters import kwid_minter
 import click
 from cds.modules.deposit.api import Category, Video, Project
+from cds.modules.records.api import Keyword
 import pkg_resources
 from cds.modules.ffmpeg import ff_probe
 from invenio_sequencegenerator.api import Template
@@ -477,3 +479,32 @@ def videos(video, frames, temp, video_count):
             indexer.index(record)
     db.session.commit()
     click.echo('DONE :)')
+
+
+@fixtures.command()
+@click.option('--source', '-s', default=False)
+@with_appcontext
+def keywords(source):
+    """Load keywords."""
+    if not source:
+        source = pkg_resources.resource_filename(
+            'cds.modules.fixtures', 'data/keywords.json'
+        )
+
+    with open(source, 'r') as fp:
+        keywords = simplejson.load(fp)
+
+    # save in db
+    to_index = []
+    with db.session.begin_nested():
+        for data in keywords:
+            kw_id = uuid.uuid4()
+            kwid_minter(kw_id, data)
+            keyword = Keyword.create(data)
+            to_index.append(keyword.id)
+    db.session.commit()
+
+    # index them
+    indexer = RecordIndexer()
+    for kw_id in to_index:
+        indexer.index_by_id(kw_id)

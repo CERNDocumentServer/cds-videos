@@ -42,6 +42,7 @@ from cds.modules.records.permissions import (deposit_delete_permission_factory,
 from cds.modules.records.search import CERNRecordsSearch
 from .modules.deposit.facets import created_by_me
 
+
 # Identity function for string extraction
 def _(x):
     """Identity function."""
@@ -237,6 +238,7 @@ RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 # Endpoints for record API.
 _Record_PID = 'pid(recid,record_class="invenio_records_files.api:Record")'
 _Category_PID = 'pid(catid,record_class="cds.modules.deposit.api:Category")'
+_Keyword_PID = 'pid(kwid,record_class="cds.modules.records.api:Keyword")'
 RECORDS_REST_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',
@@ -270,7 +272,7 @@ RECORDS_REST_ENDPOINTS = dict(
     catid=dict(
         default_endpoint_prefix=True,
         pid_type='catid',
-        pid_minter='cds_recid',
+        pid_minter='cds_catid',
         pid_fetcher='cds_catid',
         search_index='categories',
         search_type=None,
@@ -286,6 +288,35 @@ RECORDS_REST_ENDPOINTS = dict(
         },
         list_route='/categories/',
         item_route='/categories/<{0}:pid_value>'.format(_Category_PID),
+        default_media_type='application/json',
+        max_result_window=10000,
+        suggesters={
+            'suggest-name': {
+                'completion': {
+                    'field': 'suggest_name',
+                }
+            }
+        },
+    ),
+    kwid=dict(
+        default_endpoint_prefix=True,
+        pid_type='kwid',
+        pid_minter='cds_kwid',
+        pid_fetcher='cds_kwid',
+        search_index='keywords',
+        search_type=None,
+        search_class=CERNRecordsSearch,
+        search_factory_imp='invenio_records_rest.query.es_search_factory',
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_search'),
+        },
+        list_route='/keywords/',
+        item_route='/keywords/<{0}:pid_value>'.format(_Keyword_PID),
         default_media_type='application/json',
         max_result_window=10000,
         suggesters={
