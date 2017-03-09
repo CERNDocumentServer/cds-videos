@@ -30,12 +30,8 @@ import json
 from subprocess import check_output
 
 import pexpect
-
-
-#
-# Metadata extraction
-#
 from cds_sorenson.api import get_available_aspect_ratios
+from flask import current_app
 
 
 def ff_probe(input_filename, field):
@@ -128,6 +124,9 @@ def ff_frames(input_file, start, end, step, duration, output,
     cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(
         input_file, start, end, step, output
     )
+
+    if current_app.config.get('USE_EOS', False):
+        cmd = 'bash -c "eosfusebind && {}"'.format(cmd)
 
     thread = pexpect.spawn(cmd)
 
