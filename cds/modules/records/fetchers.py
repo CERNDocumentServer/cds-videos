@@ -30,7 +30,7 @@ from invenio_pidstore.fetchers import FetchedPID
 
 
 def recid_fetcher(record_uuid, data):
-    """Fetch PID from category record."""
+    """Fetch PID from record."""
     return FetchedPID(
         provider=None,
         pid_type='recid',

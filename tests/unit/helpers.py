@@ -26,13 +26,17 @@
 
 from __future__ import absolute_import, print_function
 
+import copy
+import json
 import random
 import uuid
 
 import mock
 from cds_sorenson.api import get_available_preset_qualities
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
+from invenio_pidstore import current_pidstore
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_records import Record
 from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
@@ -138,6 +142,27 @@ def create_keyword(api_app, db, data):
     indexer.index_by_id(keyword.id)
 
     return keyword
+
+
+def create_record(data):
+    """Create a test record."""
+    with db.session.begin_nested():
+        data = copy.deepcopy(data)
+        rec_uuid = uuid.uuid4()
+        pid = current_pidstore.minters['cds_recid'](rec_uuid, data)
+        record = Record.create(data, id_=rec_uuid)
+    return pid, record
+
+
+def get_json(response):
+    """Get JSON from response."""
+    return json.loads(response.get_data(as_text=True))
+
+
+def assert_hits_len(res, hit_length):
+    """Assert number of hits."""
+    assert res.status_code == 200
+    assert len(get_json(res)['hits']['hits']) == hit_length
 
 
 def mock_current_user(*args2, **kwargs2):
