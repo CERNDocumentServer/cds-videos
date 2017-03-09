@@ -100,3 +100,14 @@ def is_local_doi(doi):
         if doi.startswith('{0}/'.format(p)):
             return True
     return False
+
+
+def kwid_minter(record_uuid, data):
+    """Mint category identifiers."""
+    return PersistentIdentifier.create(
+        'kwid',
+        data['key_id'],
+        object_type='rec',
+        object_uuid=record_uuid,
+        status=PIDStatus.REGISTERED
+    )

@@ -116,7 +116,7 @@ def test_validation_missing_fields(es, location):
             data=json.dumps(project_deposit), content_type='application/json'):
             with pytest.raises(MarshmallowErrors) as errors:
                 project_loader()
-            assert '400: Bad Request' in str(errors.value)
+            assert '400 Bad Request' in str(errors.value)
 
             error_body = json.loads(errors.value.get_body())
             assert error_body['status'] == 400
@@ -138,7 +138,7 @@ def test_validation_unknown_fields(es, location):
             data=json_data, content_type='application/json'):
         with pytest.raises(MarshmallowErrors) as errors:
             video_loader()
-        assert '400: Bad Request' in str(errors.value)
+        assert '400 Bad Request' in str(errors.value)
 
         error_body = json.loads(errors.value.get_body())
         assert error_body['status'] == 400

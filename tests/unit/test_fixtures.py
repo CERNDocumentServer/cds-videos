@@ -34,8 +34,21 @@ from invenio_sequencegenerator.models import TemplateDefinition
 from cds.modules.deposit.api import CDSDeposit
 from cds.modules.fixtures.cli import categories as cli_categories, \
     sequence_generator as cli_sequence_generator, \
-    pages as cli_pages, \
-    videos as cli_videos
+    pages as cli_pages, videos as cli_videos, keywords as cli_keywords
+
+
+def test_fixture_keywords(app, script_info, db, es, cds_jsonresolver):
+    """Test load category fixtures."""
+    assert len(RecordMetadata.query.all()) == 0
+    runner = CliRunner()
+    res = runner.invoke(cli_keywords, [], obj=script_info)
+    assert res.exit_code == 0
+    keywords = RecordMetadata.query.all()
+    assert len(keywords) == 5
+    for keyword in keywords:
+        assert 'input' in keyword.json['suggest_name']
+        assert 'name' in keyword.json['suggest_name']['payload']
+        assert 'key_id' in keyword.json['suggest_name']['payload']
 
 
 def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):

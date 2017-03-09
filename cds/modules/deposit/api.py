@@ -53,8 +53,8 @@ from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from sqlalchemy import func
-from werkzeug.local import LocalProxy
 from invenio_records.api import Record
+from invenio_jsonschemas import current_jsonschemas
 
 from .errors import DiscardConflict
 from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
@@ -66,10 +66,6 @@ PRESERVE_FIELDS = (
     '_buckets',
     '_files',
     'videos',
-)
-
-current_jsonschemas = LocalProxy(
-    lambda: current_app.extensions['invenio-jsonschemas']
 )
 
 

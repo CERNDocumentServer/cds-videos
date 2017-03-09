@@ -22,26 +22,30 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Persistent identifier fetcher."""
+"""Record API."""
 
 from __future__ import absolute_import, print_function
 
-from invenio_pidstore.fetchers import FetchedPID
+from invenio_records.api import Record
+from invenio_jsonschemas import current_jsonschemas
 
 
-def recid_fetcher(record_uuid, data):
-    """Fetch PID from category record."""
-    return FetchedPID(
-        provider=None,
-        pid_type='recid',
-        pid_value=str(data['recid'])
-    )
+class Keyword(Record):
 
+    """Define API for a keywords."""
 
-def kwid_fetcher(record_uuid, data):
-    """Fetch PID from keyword record."""
-    return FetchedPID(
-        provider=None,
-        pid_type='kwid',
-        pid_value=str(data['key_id'])
-    )
+    _schema = 'keywords/keyword-v1.0.0.json'
+
+    @classmethod
+    def create(cls, data, id_=None, **kwargs):
+        """Create a category."""
+        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+
+        key_id = data.get('key_id', None)
+        name = data.get('name', None)
+
+        data['suggest_name'] = {
+            'input': name,
+            'payload': {'key_id': key_id, 'name': name},
+        }
+        return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
