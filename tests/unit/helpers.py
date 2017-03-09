@@ -36,6 +36,8 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
+from cds.modules.records.minters import kwid_minter
+from cds.modules.records.api import Keyword
 from invenio_indexer.api import RecordIndexer
 from invenio_db import db
 from cds.modules.webhooks.tasks import AVCTask, update_record
@@ -121,6 +123,21 @@ def create_category(api_app, db, data):
     indexer.index_by_id(category.id)
 
     return category
+
+
+def create_keyword(api_app, db, data):
+    """Create a fixture for keyword."""
+    with db.session.begin_nested():
+        record_id = uuid.uuid4()
+        kwid_minter(record_id, data)
+        keyword = Keyword.create(data)
+
+    db.session.commit()
+
+    indexer = RecordIndexer()
+    indexer.index_by_id(keyword.id)
+
+    return keyword
 
 
 def mock_current_user(*args2, **kwargs2):
