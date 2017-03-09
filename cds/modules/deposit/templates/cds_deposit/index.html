@@ -122,6 +122,7 @@
                   sort-key="sort"
                   available-options='{{ sort_options|format_sortoptions|safe }}'
                   template="{{ url_for('static', filename='templates/invenio_deposit/selectbox.html') }}"
+                  default-sort-by="{{ config.get('RECORDS_REST_DEFAULT_SORT', {}).get(config.get('DEPOSIT_UI_SEARCH_INDEX'), {}).get('noquery') }}"
                   >
                 </invenio-search-select-box>
                 {%- endblock search_sort_select %}
