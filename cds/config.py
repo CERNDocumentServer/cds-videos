@@ -357,9 +357,13 @@ RECORDS_REST_SORT_OPTIONS = dict(
 )
 
 # Default sort for records REST API.
-RECORDS_REST_DEFAULT_SORT = dict(
-    records=dict(query='bestmatch'),
-)
+RECORDS_REST_DEFAULT_SORT = {
+    'records': dict(query='bestmatch'),
+    'deposits-records-project-v1.0.0': dict(
+        query='bestmatch',
+        noquery='mostrecent'
+    )
+}
 
 # Defined facets for records REST API.
 RECORDS_REST_FACETS = dict(
@@ -443,6 +447,25 @@ RECORD_VIDEOS_FACETS = {
             'type': terms_filter('type'),
         },
     }
+}
+
+# Deposit search index.
+DEPOSIT_UI_SEARCH_INDEX = 'deposits-records-project-v1.0.0'
+
+# Options for sorting deposits.
+DEPOSIT_REST_SORT_OPTIONS = {
+    'deposits-records-project-v1.0.0': dict(
+        bestmatch=dict(
+            fields=['-_score'],
+            title='Best match',
+            default_order='asc',
+            order=2
+        ),
+        mostrecent=dict(
+            fields=['-_updated'],
+            title='Most recent',
+            default_order='asc', order=1
+        )),
 }
 
 # Update facets and sort options with deposit options
