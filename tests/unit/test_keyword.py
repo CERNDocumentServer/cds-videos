@@ -44,7 +44,8 @@ def test_load_jsonschema_category(api_app, json_headers):
 
 
 def test_get_keyword_from_url(api_app, db, es, indexer, pidstore,
-                              cds_jsonresolver, json_headers, keyword_1):
+                              cds_jsonresolver, json_headers, keyword_1,
+                              keyword_3_deleted):
     """Load jsonschema for keyword."""
     sleep(3)
 
@@ -63,7 +64,7 @@ def test_get_keyword_from_url(api_app, db, es, indexer, pidstore,
 
 def test_suggest_keyword_from_url(api_app, db, es, indexer, pidstore,
                                   cds_jsonresolver, json_headers, keyword_1,
-                                  keyword_2):
+                                  keyword_2, keyword_3_deleted):
     """Load jsonschema for keyword."""
     sleep(3)
 
