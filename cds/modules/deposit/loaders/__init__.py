@@ -26,7 +26,10 @@ from cds.modules.records.serializers.schemas.project import ProjectSchema
 from cds.modules.records.serializers.schemas.video import VideoSchema
 
 
-# Loader for project schema.
+# Loaders for project schema.
 project_loader = marshmallow_loader(ProjectSchema)
-# Loader for video schema.
+partial_project_loader = marshmallow_loader(ProjectSchema, partial=True)
+
+# Loaders for video schema.
 video_loader = marshmallow_loader(VideoSchema)
+partial_video_loader = marshmallow_loader(VideoSchema, partial=True)

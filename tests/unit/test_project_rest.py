@@ -39,10 +39,11 @@ from invenio_indexer.api import RecordIndexer
 from helpers import prepare_videos_for_publish
 
 
-def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
-                         data_file_1, data_file_2, json_headers, deposit_rest,
-                         project_deposit_metadata, video_deposit_metadata,
-                         deposit_metadata):
+def test_simple_workflow(
+        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        data_file_1, data_file_2,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        deposit_metadata, project_deposit_metadata, video_deposit_metadata):
     """Test project simple workflow."""
     def check_connection(videos, project):
         """check project <---> video connection."""
@@ -61,7 +62,8 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata),
+            headers=json_partial_project_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -84,7 +86,8 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -119,7 +122,8 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -305,8 +309,9 @@ def test_simple_workflow(app, db, es, users, location, cds_jsonresolver,
 
 
 def test_publish_project_check_indexed(
-        app, db, es, users, location, cds_jsonresolver, json_headers,
-        deposit_rest, video_deposit_metadata, project_deposit_metadata):
+        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        video_deposit_metadata, project_deposit_metadata):
     """Test create a project and check project and videos are indexed."""
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -314,7 +319,8 @@ def test_publish_project_check_indexed(
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata),
+            headers=json_partial_project_headers)
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
@@ -325,7 +331,8 @@ def test_publish_project_check_indexed(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -337,7 +344,8 @@ def test_publish_project_check_indexed(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         # check returned value
         assert res.status_code == 201
@@ -361,7 +369,7 @@ def test_publish_project_check_indexed(
                 as mock_indexer:
             # [[ PUBLISH THE PROJECT ]]
             prepare_videos_for_publish([video_1, video_2])
-            res = client.post(
+            client.post(
                 url_for('invenio_deposit_rest.project_actions',
                         pid_value=project['_deposit']['id'], action='publish'),
                 headers=json_headers)

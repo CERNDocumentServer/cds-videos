@@ -686,7 +686,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Project',
         record_loaders={
-            'application/json': 'cds.modules.deposit.loaders:project_loader'
+            'application/json': 'cds.modules.deposit.loaders:project_loader',
+            'application/vnd.project.partial+json':
+                'cds.modules.deposit.loaders:partial_project_loader',
         },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'
@@ -731,7 +733,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Video',
         record_loaders={
-            'application/json': 'cds.modules.deposit.loaders:video_loader'
+            'application/json': 'cds.modules.deposit.loaders:video_loader',
+            'application/vnd.video.partial+json':
+                'cds.modules.deposit.loaders:partial_video_loader'
         },
         files_serializers={
             'application/json': ('invenio_deposit.serializers'

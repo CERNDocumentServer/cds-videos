@@ -3,7 +3,8 @@
     "leftColumn": [
       {
         "title": "Name",
-        "key": "title.title"
+        "key": "title.title",
+        "required": false
       },
       {
         "type": "template",
@@ -14,7 +15,7 @@
         "format": "yyyy-MM-dd",
         "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
         "fa_cls": "fa-calendar",
-        "required": true
+        "required": false
       },
       {
         "type": "section",
@@ -41,9 +42,9 @@
               "removePlugins": "elementspath",
               "removeButtons": ""
             },
-            "required": true,
             "description": "Required.",
-            "minLength": 1
+            "minLength": 1,
+            "required": false
           }
         ]
       }
@@ -51,7 +52,6 @@
     "rightColumn": [
       {
         "key": "category",
-        "required": true,
         "placeholder": "Category",
         "title": "Category",
         "type": "strapselect",
@@ -61,11 +61,11 @@
         "options": {
           "url": "/api/categories",
           "asyncCallback": "$ctrl.autocompleteCategories"
-        }
+        },
+        "required": false
       },
       {
         "key": "type",
-        "required": true,
         "placeholder": "Type",
         "title": "Type",
         "type": "strapselect",
@@ -76,7 +76,8 @@
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
-        }
+        },
+        "required": false
       },
       {
         "type": "array",

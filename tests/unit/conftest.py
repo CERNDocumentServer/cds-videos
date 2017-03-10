@@ -626,6 +626,20 @@ def json_headers(app):
 
 
 @pytest.fixture()
+def json_partial_project_headers(app):
+    """JSON headers for partial project deposits."""
+    return [('Content-Type', 'application/vnd.project.partial+json'),
+            ('Accept', 'application/json')]
+
+
+@pytest.fixture()
+def json_partial_video_headers(app):
+    """JSON headers for partial video deposits."""
+    return [('Content-Type', 'application/vnd.video.partial+json'),
+            ('Accept', 'application/json')]
+
+
+@pytest.fixture()
 def smil_headers(app):
     """SMIL headers."""
     return [('Content-Type', 'application/smil'),

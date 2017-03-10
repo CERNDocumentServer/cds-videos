@@ -3,6 +3,7 @@ function cdsDepositsConfig(
   depositStatesProvider,
   depositSSEEventsProvider,
   depositStatusesProvider,
+  depositActions,
   inheritedPropertiesProvider,
   taskRepresentationsProvider,
   urlBuilderProvider,
@@ -37,6 +38,9 @@ function cdsDepositsConfig(
     SUCCESS: 'DEPOSIT_STATE/SUCCESS',
     REVOKED: 'DEPOSIT_STATE/REVOKED',
   });
+
+  // Deposit actions' information
+  depositActions.setValues(['project', 'video'])
 
   inheritedPropertiesProvider.setValues([
     'title.title',
@@ -74,6 +78,7 @@ cdsDepositsConfig.$inject = [
   'depositStatesProvider',
   'depositSSEEventsProvider',
   'depositStatusesProvider',
+  'depositActionsProvider',
   'inheritedPropertiesProvider',
   'taskRepresentationsProvider',
   'urlBuilderProvider',
