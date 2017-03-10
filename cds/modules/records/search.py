@@ -30,8 +30,10 @@ from elasticsearch_dsl.query import Q
 from flask_login import current_user
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
+from invenio_search.utils import schema_to_index
 
 from .utils import get_user_provides
+from .api import Keyword
 
 
 def cern_filter():
@@ -46,7 +48,8 @@ def cern_filter():
     read_restricted = Q('terms', **{'_access.read': provides})
     write_restricted = Q('terms', **{'_access.update': provides})
     # Filter records where the user is owner
-    owner = Q('match', **{'_deposit.created_by': getattr(current_user, 'id', 0)})
+    owner = Q('match',
+              **{'_deposit.created_by': getattr(current_user, 'id', 0)})
 
     # OR all the filters
     combined_filter = public | read_restricted | write_restricted | owner
@@ -64,3 +67,41 @@ class CERNRecordsSearch(RecordsSearch):
         doc_types = None
         fields = ('*',)
         default_filter = DefaultFilter(cern_filter)
+
+
+class KeywordSearch(RecordsSearch):
+    """Keyword search class.
+
+    It retrieves all keywords (including the deleted).
+    """
+
+    class Meta:
+        """Configuration for CERN search."""
+
+        index = schema_to_index(Keyword._schema)[0]
+        doc_types = None
+        fields = ('*',)
+
+
+class NotDeletedKeywordSearch(RecordsSearch):
+    """Keyword search class.
+
+    It retrieves all keywords except for the deleted ones.
+    """
+
+    class Meta:
+        """Configuration for CERN search."""
+
+        index = schema_to_index(Keyword._schema)[0]
+        doc_types = None
+        fields = ('*',)
+        default_filter = DefaultFilter(
+            Q('bool', filter=[Q('match', deleted=False)])
+        )
+
+
+def query_to_objects(query, cls):
+    """Get record object as result of elasticsearch query."""
+    results = query.scan()
+    ids = [res.meta.id for res in results]
+    return cls.get_records(ids)

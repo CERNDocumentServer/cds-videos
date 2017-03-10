@@ -40,7 +40,6 @@ import pytest
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.records.search import CERNRecordsSearch
 from cds_sorenson.api import get_preset_id
 from cds_sorenson.error import InvalidResolutionError
 from celery import chain
@@ -837,7 +836,7 @@ def keyword_1(api_app, es, indexer, pidstore, cds_jsonresolver):
         'key_id': '1',
         'name': '13 TeV',
     }
-    return create_keyword(api_app=api_app, db=db_, data=data)
+    return create_keyword(data=data)
 
 
 @pytest.fixture()
@@ -847,7 +846,18 @@ def keyword_2(api_app, es, indexer, pidstore, cds_jsonresolver):
         'key_id': '2',
         'name': 'Accelerating News',
     }
-    return create_keyword(api_app=api_app, db=db_, data=data)
+    return create_keyword(data=data)
+
+
+@pytest.fixture()
+def keyword_3_deleted(api_app, es, indexer, pidstore, cds_jsonresolver):
+    """Create a fixture for keyword."""
+    data = {
+        'key_id': '3',
+        'name': 'Deleted Keyword',
+        'deleted': True
+    }
+    return create_keyword(data=data)
 
 
 @pytest.fixture(autouse=True)
@@ -884,7 +894,8 @@ def recid_pid():
 @pytest.yield_fixture(scope='session')
 def test_videos_project():
     """Load test JSON records containing videos and a project."""
-    with open(join(dirname(__file__), '../data/test_videos_projects.json')) as fp:
+    with open(join(dirname(__file__),
+                   '../data/test_videos_projects.json')) as fp:
         records = json.load(fp)
     yield records
 
@@ -906,3 +917,16 @@ def indexed_videos(es, indexer, test_video_records):
     RecordIndexer().process_bulk_queue()
     sleep(2)
     yield test_video_records
+
+
+@pytest.fixture()
+def cern_keywords():
+    """Cern fixtures."""
+    return {
+        "tags": [
+            {"id": "751", "name": "13 TeV"},
+            {"id": "856", "name": "Accelerating News"},
+            {"id": "97", "name": "accelerator"},
+            {"id": "14", "name": "AEGIS"},
+        ]
+    }

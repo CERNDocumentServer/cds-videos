@@ -32,6 +32,7 @@ import random
 import uuid
 
 import mock
+from invenio_db import db
 from cds_sorenson.api import get_available_preset_qualities
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_pidstore import current_pidstore
@@ -129,11 +130,9 @@ def create_category(api_app, db, data):
     return category
 
 
-def create_keyword(api_app, db, data):
+def create_keyword(data):
     """Create a fixture for keyword."""
     with db.session.begin_nested():
-        record_id = uuid.uuid4()
-        kwid_minter(record_id, data)
         keyword = Keyword.create(data)
 
     db.session.commit()
@@ -305,7 +304,8 @@ def get_indexed_records_from_mock(mock_indexer):
     indexed = []
     for call in mock_indexer.call_args_list:
         ((arg, ), _) = call
-        indexed.append(next(arg))
+        for id_ in arg:
+            indexed.append(id_)
     return indexed
 
 

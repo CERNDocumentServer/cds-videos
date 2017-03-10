@@ -26,8 +26,12 @@
 
 from __future__ import absolute_import, print_function
 
+import uuid
+
 from invenio_records.api import Record
 from invenio_jsonschemas import current_jsonschemas
+
+from .minters import kwid_minter
 
 
 class Keyword(Record):
@@ -43,6 +47,11 @@ class Keyword(Record):
 
         key_id = data.get('key_id', None)
         name = data.get('name', None)
+        data.setdefault('deleted', False)
+
+        if not id_:
+            record_id = uuid.uuid4()
+            kwid_minter(record_id, data)
 
         data['suggest_name'] = {
             'input': name,
