@@ -47,9 +47,9 @@ from cds.modules.deposit.tasks import datacite_register
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite(
-        datacite_mock, app, deposit_metadata, users, json_headers,
-        deposit_rest, video_deposit_metadata, project_deposit_metadata,
-        location, cds_jsonresolver):
+        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite."""
     # test: enable datacite registration
     app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
@@ -61,7 +61,7 @@ def test_video_publish_registering_the_datacite(
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
             data=json.dumps(project_deposit_metadata),
-            headers=json_headers)
+            headers=json_partial_project_headers)
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
@@ -72,7 +72,8 @@ def test_video_publish_registering_the_datacite(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
@@ -106,9 +107,9 @@ def test_video_publish_registering_the_datacite(
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_if_fail(
-        datacite_mock, app, deposit_metadata, users, json_headers,
-        deposit_rest, video_deposit_metadata, project_deposit_metadata,
-        location, cds_jsonresolver):
+        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite."""
     # test: enable datacite registration
     app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
@@ -120,7 +121,7 @@ def test_video_publish_registering_the_datacite_if_fail(
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
             data=json.dumps(project_deposit_metadata),
-            headers=json_headers)
+            headers=json_partial_project_headers)
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
@@ -131,7 +132,8 @@ def test_video_publish_registering_the_datacite_if_fail(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
@@ -160,9 +162,9 @@ def test_video_publish_registering_the_datacite_if_fail(
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_not_local(
-        datacite_mock, app, deposit_metadata, users, json_headers,
-        deposit_rest, video_deposit_metadata, project_deposit_metadata,
-        location, cds_jsonresolver):
+        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite not local."""
     # test: enable datacite registration
     app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
@@ -174,7 +176,7 @@ def test_video_publish_registering_the_datacite_not_local(
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
             data=json.dumps(project_deposit_metadata),
-            headers=json_headers)
+            headers=json_partial_project_headers)
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
@@ -185,7 +187,8 @@ def test_video_publish_registering_the_datacite_not_local(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata), headers=json_headers)
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
 
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))

@@ -76,7 +76,5 @@ class ProjectSchema(StrictKeysSchema):
     title = fields.Nested(TitleSchema)
     videos = fields.Nested(ProjectVideoSchema, many=True)
     translations = fields.Nested(TranslationsSchema, many=True)
-    category = fields.Str()
-    type = fields.Str()
     report_number = fields.Nested(ReportNumberSchema, many=False)
     publication_date = fields.Str()

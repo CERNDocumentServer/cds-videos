@@ -1,10 +1,19 @@
 function cdsAPI($q, $http) {
-  function action(url, method, payload) {
-    return $http({
+
+  function action(url, method, payload, mimetype) {
+    requestConfig = {
       url: url,
       method: method,
       data: payload
-    });
+    };
+
+    if (mimetype) {
+      requestConfig.headers = {
+        'Content-Type': mimetype
+      }
+    }
+
+    return $http(requestConfig);
   }
 
   function chainedActions(promises) {

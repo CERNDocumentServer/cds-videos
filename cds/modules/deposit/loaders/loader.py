@@ -27,9 +27,9 @@ from flask import request
 from invenio_rest.errors import RESTValidationError
 
 
-def marshmallow_loader(schema_class):
+def marshmallow_loader(schema_class, partial=False):
     def schema_loader():
-        result = schema_class().load(request.get_json())
+        result = schema_class(partial=partial).load(request.get_json())
         if result.errors:
             raise MarshmallowErrors(result.errors)
         return request.get_json()

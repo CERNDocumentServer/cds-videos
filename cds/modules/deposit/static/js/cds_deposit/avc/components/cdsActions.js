@@ -7,12 +7,12 @@ function cdsActionsCtrl($scope) {
       that.cdsDepositCtrl.loading = false;
     };
 
-    this.actionHandler = function(type, method) {
+    this.actionHandler = function(action) {
       // Start loading
       $scope.$emit('cds.deposit.loading.start');
       that.cdsDepositCtrl.loading = true;
       return that.cdsDepositCtrl
-        .makeSingleAction(type, method)
+        .makeSingleAction(action)
         .then(
           that.cdsDepositCtrl.onSuccessAction,
           that.cdsDepositCtrl.onErrorAction
@@ -34,7 +34,7 @@ function cdsActionsCtrl($scope) {
     };
 
     this.deleteDeposit = function() {
-      that.actionHandler('self', 'DELETE').then(function() {
+      that.actionHandler('DELETE').then(function() {
         var children = that.cdsDepositCtrl.cdsDepositsCtrl.children;
         for (var i in children) {
           if (children[i].metadata._deposit.id == that.cdsDepositCtrl.id) {

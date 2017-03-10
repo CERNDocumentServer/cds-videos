@@ -6,6 +6,7 @@ function cdsDepositsCtrl(
   $location,
   $element,
   depositStates,
+  depositActions,
   depositSSEEvents,
   cdsAPI,
   urlBuilder
@@ -187,7 +188,7 @@ function cdsDepositsCtrl(
     var createMaster;
 
     if (!this.initialized) {
-      createMaster = this.initDeposit(_files.project);
+      createMaster = this.initProject(_files.project);
     } else {
       Array.prototype.push.apply(that.master.metadata._files, _files.project);
       createMaster = $q.resolve();
@@ -227,6 +228,7 @@ function cdsDepositsCtrl(
               return that.createDeposit(
                 that.childrenInit,
                 that.childrenSchema,
+                'video',
                 { _project_id: master_id }
               );
             },
@@ -264,7 +266,7 @@ function cdsDepositsCtrl(
     });
   };
 
-  this.initDeposit = function(files) {
+  this.initProject = function(files) {
     var prevFiles = [];
     files = _.reject(files, function(file) {
       if (prevFiles.includes(file.key)) {
@@ -274,7 +276,7 @@ function cdsDepositsCtrl(
       return false;
     });
     return this
-      .createDeposit(this.masterInit, this.masterSchema)
+      .createDeposit(this.masterInit, this.masterSchema, 'project')
       .then(function(response) {
         // Create the master
         that.addMaster(response.data, files);
@@ -286,13 +288,17 @@ function cdsDepositsCtrl(
       });
   };
 
-  this.createDeposit = function(url, schema, extra) {
+  this.createDeposit = function(url, schema, depositType, extra) {
     var data = angular.merge({}, { $schema: schema }, extra || {});
-    return this.makeAction(url, 'POST', data);
+    return this.makeAction(url, depositType, 'CREATE', data);
   };
 
-  this.makeAction = function(url, method, payload) {
-    return cdsAPI.action(url, method, payload);
+  this.makeAction = function(url, depositType, action, payload) {
+    var { method, mimetype, preprocess } = depositActions[depositType][action];
+    if (preprocess) {
+      payload = preprocess(payload);
+    }
+    return cdsAPI.action(url, method, payload, mimetype);
   };
 
   this.chainedActions = function(promises) {
@@ -379,6 +385,7 @@ cdsDepositsCtrl.$inject = [
   '$location',
   '$element',
   'depositStates',
+  'depositActions',
   'depositSSEEvents',
   'cdsAPI',
   'urlBuilder',

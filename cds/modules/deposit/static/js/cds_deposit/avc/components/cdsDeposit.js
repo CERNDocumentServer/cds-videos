@@ -5,6 +5,7 @@ function cdsDepositCtrl(
   $sce,
   depositStates,
   depositStatuses,
+  depositActions,
   inheritedProperties,
   cdsAPI,
   urlBuilder,
@@ -33,6 +34,12 @@ function cdsDepositCtrl(
   this.noValidateFields = ['description.value'];
 
   this.previewer = null;
+
+  Object.defineProperty(this, 'depositType', {
+    get: function() {
+      return that.master ? 'project' : 'video';
+    }
+  })
 
   // FIXME Init stateQueue -  maybe ```Object(depositStatuses).keys()```
   this.stateQueue = {
@@ -434,9 +441,10 @@ function cdsDepositCtrl(
     };
   };
 
-  this.guessEndpoint = function(endpoint) {
-    if (Object.keys(that.links).indexOf(endpoint) > -1) {
-      return that.links[endpoint];
+  this.guessEndpoint = function(action) {
+    var link = depositActions[that.depositType][action].link
+    if (Object.keys(that.links).indexOf(link) > -1) {
+      return that.links[link];
     }
     return endpoint;
   };
@@ -446,12 +454,11 @@ function cdsDepositCtrl(
   };
 
   // Do a single action at once
-  this.makeSingleAction = function(endpoint, method, redirect) {
-    // Guess the endpoint
-    var url = this.guessEndpoint(endpoint);
+  this.makeSingleAction = function(action, redirect) {
     return this.cdsDepositsCtrl.makeAction(
-      url,
-      method,
+      that.guessEndpoint(action),
+      that.depositType,
+      action,
       cdsAPI.cleanData(that.record)
     );
   };
@@ -463,9 +470,13 @@ function cdsDepositCtrl(
     angular.forEach(
       actions,
       function(action, index) {
-        var url = that.guessEndpoint(action[0]);
         this.push(function() {
-          return that.cdsDepositsCtrl.makeAction(url, action[1], cleanRecord);
+          return that.cdsDepositsCtrl.makeAction(
+            that.guessEndpoint(action),
+            that.depositType,
+            action,
+            cleanRecord
+          );
         });
       },
       promises
@@ -497,6 +508,7 @@ cdsDepositCtrl.$inject = [
   '$sce',
   'depositStates',
   'depositStatuses',
+  'depositActions',
   'inheritedProperties',
   'cdsAPI',
   'urlBuilder',
@@ -507,7 +519,7 @@ cdsDepositCtrl.$inject = [
  * @ngdoc component
  * @name cdsDeposit
  * @description
- *   Hendles the actions and SSE events for each ``deposit_id``. For each
+ *   Handles the actions and SSE events for each ``deposit_id``. For each
  *   ``children`` a new ``cds-deposit`` directive will be generated.
  * @attr {String} index - The deposit index in the list of deposits.
  * @attr {Boolean} master - If this deposit is the ``master``.

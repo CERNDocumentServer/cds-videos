@@ -38,13 +38,15 @@ from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
 from invenio_files_rest.models import ObjectVersion
 
-from cds.modules.deposit.loaders import project_loader, video_loader
+from cds.modules.deposit.loaders import partial_project_loader, \
+    partial_video_loader, project_loader, video_loader
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
 
 
 def test_deposit_link_factory_has_bucket(
-        app, db, es, users, location, cds_jsonresolver, json_headers,
-        deposit_rest, project_deposit_metadata):
+        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        video_deposit_metadata, project_deposit_metadata):
     """Test bucket link factory retrieval of a bucket."""
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -52,7 +54,8 @@ def test_deposit_link_factory_has_bucket(
         # Test links for project
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata), headers=json_headers)
+            data=json.dumps(project_deposit_metadata),
+            headers=json_partial_project_headers)
         assert res.status_code == 201
         data = json.loads(res.data.decode('utf-8'))
         links = data['links']
@@ -62,15 +65,14 @@ def test_deposit_link_factory_has_bucket(
             .format(
                 host=request.host,
                 scheme=request.scheme,
-                pid_value=pid,
-        )
+                pid_value=pid)
 
         # Test links for videos
         res = client.post(
             url_for('invenio_deposit_rest.video_list'),
             data=json.dumps({
                 '_project_id': pid,
-            }), headers=json_headers)
+            }), headers=json_partial_video_headers)
         assert res.status_code == 201
         data = json.loads(res.data.decode('utf-8'))
         links = data['links']
@@ -80,8 +82,7 @@ def test_deposit_link_factory_has_bucket(
             .format(
                 host=request.host,
                 scheme=request.scheme,
-                pid_value=pid,
-        )
+                pid_value=pid)
 
 
 def test_links_filter(es, location, deposit_metadata):
