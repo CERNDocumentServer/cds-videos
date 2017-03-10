@@ -82,6 +82,7 @@ js_deposit_common = Bundle(
     'js/cds_deposit/avc/providers/depositStates.js',
     'js/cds_deposit/avc/providers/depositSSEEvents.js',
     'js/cds_deposit/avc/providers/depositStatuses.js',
+    'js/cds_deposit/avc/providers/depositActions.js',
     'js/cds_deposit/avc/providers/inheritedProperties.js',
     'js/cds_deposit/avc/providers/taskRepresentations.js',
     'js/cds_deposit/avc/providers/stateReducer.js',
