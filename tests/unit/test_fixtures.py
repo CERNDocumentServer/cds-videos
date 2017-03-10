@@ -26,6 +26,8 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+import mock
 from click.testing import CliRunner
 from invenio_pages import InvenioPages, Page
 from invenio_pidstore.models import PersistentIdentifier
@@ -37,18 +39,26 @@ from cds.modules.fixtures.cli import categories as cli_categories, \
     pages as cli_pages, videos as cli_videos, keywords as cli_keywords
 
 
-def test_fixture_keywords(app, script_info, db, es, cds_jsonresolver):
+def test_fixture_keywords(app, script_info, db, es, cds_jsonresolver,
+                          cern_keywords):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()
-    res = runner.invoke(cli_keywords, [], obj=script_info)
+    return_value = type('test', (object, ), {
+        'text': json.dumps(cern_keywords)}
+    )
+    with mock.patch('requests.get', return_value=return_value):
+        res = runner.invoke(cli_keywords, [], obj=script_info)
     assert res.exit_code == 0
     keywords = RecordMetadata.query.all()
-    assert len(keywords) == 5
+    assert len(keywords) == 4
     for keyword in keywords:
         assert 'input' in keyword.json['suggest_name']
         assert 'name' in keyword.json['suggest_name']['payload']
         assert 'key_id' in keyword.json['suggest_name']['payload']
+        assert 'deleted' in keyword.json
+        assert 'name' in keyword.json
+        assert 'key_id' in keyword.json
 
 
 def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):

@@ -35,13 +35,14 @@ from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
-from cds.modules.records.permissions import (deposit_delete_permission_factory,
-                                             deposit_read_permission_factory,
-                                             record_create_permission_factory,
-                                             record_read_permission_factory,
-                                             record_update_permission_factory)
-from cds.modules.records.search import CERNRecordsSearch
+
 from .modules.deposit.facets import created_by_me
+from .modules.records.permissions import (deposit_delete_permission_factory,
+                                          deposit_read_permission_factory,
+                                          record_create_permission_factory,
+                                          record_read_permission_factory,
+                                          record_update_permission_factory)
+from .modules.records.search import CERNRecordsSearch, NotDeletedKeywordSearch
 
 
 # Identity function for string extraction
@@ -81,6 +82,14 @@ CELERYBEAT_SCHEDULE = {
     'indexer': {
         'task': 'invenio_indexer.tasks.process_bulk_queue',
         'schedule': timedelta(minutes=5),
+    },
+    'keywords': {
+        'task': 'cds.modules.records.tasks.keywords_harvesting',
+        'schedule': timedelta(days=1),
+    },
+    'sessions': {
+        'task': 'invenio_accounts.tasks.clean_session_table',
+        'schedule': timedelta(days=1),
     },
 }
 
@@ -307,7 +316,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher='cds_kwid',
         search_index='keywords',
         search_type=None,
-        search_class=CERNRecordsSearch,
+        search_class=NotDeletedKeywordSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
@@ -831,3 +840,8 @@ DEPOSIT_AVC_COPYRIGHT = {
 # SSE
 ###############################################################################
 SSE_REDIS_URL = 'redis://localhost:6379/1'
+
+###############################################################################
+# Keywords
+###############################################################################
+CDS_KEYWORDS_HARVESTER_URL = 'http://home.cern/api/tags-json-feed'

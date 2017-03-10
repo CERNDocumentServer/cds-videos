@@ -28,10 +28,8 @@ from os import listdir, makedirs
 from os.path import basename, exists, isdir, join, splitext, dirname
 
 from cds.modules.deposit.minters import catid_minter
-from cds.modules.records.minters import kwid_minter
 import click
 from cds.modules.deposit.api import Category, Video, Project
-from cds.modules.records.api import Keyword
 import pkg_resources
 from cds.modules.ffmpeg import ff_probe
 from invenio_sequencegenerator.api import Template
@@ -48,6 +46,7 @@ from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
 from invenio_records_files.api import Record as FileRecord
 from invenio_records_files.models import RecordsBuckets
+from cds.modules.records.tasks import keywords_harvesting
 
 
 def _handle_source(source, temp):
@@ -482,29 +481,11 @@ def videos(video, frames, temp, video_count):
 
 
 @fixtures.command()
-@click.option('--source', '-s', default=False)
+@click.option('--url', '-u')
 @with_appcontext
-def keywords(source):
+def keywords(url):
     """Load keywords."""
-    if not source:
-        source = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/keywords.json'
-        )
+    if url:
+        current_app.config['CDS_KEYWORDS_HARVESTER_URL'] = url
 
-    with open(source, 'r') as fp:
-        keywords = simplejson.load(fp)
-
-    # save in db
-    to_index = []
-    with db.session.begin_nested():
-        for data in keywords:
-            kw_id = uuid.uuid4()
-            kwid_minter(kw_id, data)
-            keyword = Keyword.create(data)
-            to_index.append(keyword.id)
-    db.session.commit()
-
-    # index them
-    indexer = RecordIndexer()
-    for kw_id in to_index:
-        indexer.index_by_id(kw_id)
+    keywords_harvesting.s().apply()
