@@ -66,6 +66,10 @@ a[ng-click]{
   display: inline-block;
 }
 
+.cds-footer-brand {
+  line-height: 30px !important;
+}
+
 /////////
 
 // /record/{recid}
@@ -554,17 +558,59 @@ a[ng-click]{
   #cds-navbar {
     display: flex !important;
   }
-  .cds-navbar-form {
+  .cds-navbar-form-wrapper {
     flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+  }
+  .cds-active-search {
+    background-color: #fff !important;
+    i {
+      color: $cds-primary-color;
+    }
+  }
+  .cds-navbar-form {
+    transition: all 250ms ease;
+    background-color: $cds-navbar-form-bg;
+    border-radius: 3px;
+    max-width: 600px;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    .cds-navbar-form-icon {
+      flex: 1 1 auto;
+    }
     .form-group {
+      margin: 0;
+      flex: 1 1 auto;
       width: 100%;
       input {
-        width: 90%;
-        border: 1px solid $cds-primary-color;
+        margin-bottom: 0;
+        height: 46px;
+        width: 100%;
         border-radius: 3px;
+        border: 0;
+        background: transparent;
+        &:focus, &:active {
+          border: 0 !important;
+          box-shadow: none!important;
+        }
       }
     }
-
+    ::-webkit-input-placeholder{
+      color: #fff;
+    }
+    ::-moz-placeholder {
+      color: #fff;
+    }
+    :focus::-webkit-input-placeholder{
+      color: $cds-primary-color;
+    }
+    :focus::-moz-placeholder  {
+      color: $cds-primary-color;
+    }
   }
   .cds-navbar-nav {
     flex: 0 0 auto;

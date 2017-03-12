@@ -8,7 +8,7 @@ function progressIcon() {
       case "FAILURE":
         return "fa-times";
       case "PENDING":
-        return "fa-circle";
+        return "fa-circle-thin";
     }
   };
 }

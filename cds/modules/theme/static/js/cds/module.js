@@ -42,3 +42,12 @@ app.filter('stripTags', function() {
     return text ? String(text).replace(/<[^>]+>/gm, '') : '';
   }
 });
+app.filter('toMinutes', function() {
+  return function(seconds) {
+    try {
+      return new Date(seconds * 1000).toISOString().substr(11, 8);
+    } catch(error) {
+      return seconds
+    }
+  }
+});

@@ -33,3 +33,12 @@ angular.element(document).ready(function() {
     document.getElementById("cds-recent-videos"), [ 'cds', 'invenioSearch']
   );
 });
+
+$(document).ready(function() {
+  $('#cds-navbar-form-input').focus(function() {
+    $(".cds-navbar-form").addClass('cds-active-search');
+  })
+  .blur(function() {
+    $(".cds-navbar-form").removeClass('cds-active-search');
+  });
+});
