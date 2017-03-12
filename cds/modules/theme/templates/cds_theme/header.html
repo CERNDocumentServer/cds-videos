@@ -14,7 +14,7 @@
           {%- if config.THEME_LOGO %}
             <a href="/"><img class="navbar-brand" src="{{ url_for('static', filename=config.THEME_LOGO)}}" alt="{{_(config.THEME_SITENAME)}}" /></a>
           {%- else %}
-            <a class="cds-navbar-brand navbar-brand l-w" href="/"><b>CDS<small class="l-w">video</small></b></a>
+            <a class="cds-navbar-brand navbar-brand l-w" href="/"><b>CDS</b> <small class="l-w">video</small></a>
           {%- endif %}
         {%- endblock %}
       </div>
@@ -24,14 +24,18 @@
         {%- block navbar_nav %}
           {%- if config['THEME_SEARCHBAR'] %}
             {%- block navbar_search %}
-                <form class="cds-navbar-form navbar-form"
-                      action="{{ config.THEME_SEARCH_ENDPOINT }}"
-                      role="search">
-                  <div class="form-group">
-                      <input type="text" class="form-control" name="q"
-                              placeholder="{{ _('Search') }}">
-                  </div>
-                </form>
+            <div class="cds-navbar-form-wrapper">
+              <form class="cds-navbar-form navbar-form"
+                    action="{{ config.THEME_SEARCH_ENDPOINT }}"
+                    role="search">
+                    <div class="hidden-xs hidden-sm cds-navbar-form-icon">
+                      <i class="t-w fa fa-search"></i>
+                    </div>
+                <div class="form-group">
+                  <input id="cds-navbar-form-input" type="text" class="form-control" name="q" placeholder="{{ _('Search') }}">
+                </div>
+              </form>
+            </div>
             {%- endblock navbar_search %}
           {%- endif %}
         {%- endblock navbar_nav %}

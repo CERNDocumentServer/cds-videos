@@ -5,7 +5,6 @@
   {% assets "cds_search_ui_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {%- endblock javascript %}
 
-
 {%- block page_header %}
   {% include "cds_home/header.html" %}
 {%- endblock page_header %}
@@ -22,7 +21,7 @@
 {%- endblock search_range %}
 
 {%- block page_body %}
-  <div class="bg-n flex-item mt--20 py-20">
+  <div class="flex-item mt--20 py-20">
     <div class="container flex-item search-page cds-search-page">
       <div class="row">
         <div class="col-sm-3">
@@ -37,7 +36,7 @@
             {%- block search_header %}
               <div class="row">
                 {%- block search_count %}
-                  <div class="col-sm-12 text-center t-w pb-20">
+                  <div class="col-sm-12 text-center pb-20">
                     <invenio-search-count
                         template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_COUNT) }}">
                     </invenio-search-count>

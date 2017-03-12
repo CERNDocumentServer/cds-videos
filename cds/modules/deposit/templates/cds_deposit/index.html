@@ -63,10 +63,10 @@
 <div class="container search-page flex-item">
   {%- block search_body %}
     <div class="row">
-      <div class="col-md-8 col-sm-8 col-xs-8">
+      <div class="col-sm-offset-3 col-sm-9">
         <div class="row">
           {%- block search_bar %}
-          <div class="col-md-8">
+          <div class="col-sm-8">
             <invenio-search-bar
             template="{{ url_for('static', filename='templates/invenio_deposit/searchbar.html') }}"
             placeholder="{{ _('Search uploads...') }}">
@@ -74,22 +74,22 @@
           </div>
           {%- endblock search_bar %}
           {%- block search_loading %}
-          <div class="col-md-4">
+          <div class="col-sm-2">
             <invenio-search-loading
               template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
               message="{{ _('Loading...') }}">
             </invenio-search-loading>
           </div>
           {%- endblock search_loading %}
+          {%- block new_upload %}
+          <div class="col-sm-2">
+            <a class="btn btn-success btn-block" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
+              <i class="pull-left glyphicon glyphicon-upload"></i> {{ _('New Upload') }}
+            </a>
+          </div>
+          {%- endblock new_upload %}
         </div>
       </div>
-      {%- block new_upload %}
-      <div class="col-md-offset-2 col-md-2 col-sm-4 col-xs-4">
-        <a class="btn btn-success btn-block" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
-          <i class="pull-left glyphicon glyphicon-upload"></i> {{ _('New Upload') }}
-        </a>
-      </div>
-      {%- endblock new_upload %}
     </div>
     {%- block search_error %}
     <invenio-search-error

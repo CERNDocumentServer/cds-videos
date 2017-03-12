@@ -220,7 +220,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
               {
                 progress: data.meta.payload.percentage || 0,
                 completed: data.meta.payload.percentage === 100
-              },
+              }
             );
             break;
         }
