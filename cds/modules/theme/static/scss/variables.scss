@@ -43,7 +43,7 @@ $divider-color: #B6B6B6;
 $cds-unicorn-blue: #0ff;
 $cds-unicorn-pink: #f0f;
 $cds-unicorn-color: linear-gradient(-225deg, $cds-unicorn-blue 0%, $cds-unicorn-pink 100%);
-
+$cds-navbar-form-bg: #0f3b59;
 
 $primary-color: $brand-primary;
 $primary-color-dark: darken($primary-color, 10%);
@@ -52,7 +52,7 @@ $primary-color-light: lighten($primary-color, 10%);
 $font-size-base: 14px;
 
 // Navbar colors
-$navbar-height: 60px;
+$navbar-height: 64px;
 $navbar-collapse-max-height: 340px;
 
 $navbar-default-bg: $cds-primary-color;
@@ -73,6 +73,6 @@ $navbar-default-toggle-icon-bar-bg: #fff;
 $navbar-default-toggle-border-color: #fff;
 
 // Bliax, remove border radius
-$border-radius-small: 0;
-$border-radius-base: 0;
-$border-radius-large: 0;
+$border-radius-small: 3;
+$border-radius-base: 3;
+$border-radius-large: 3;

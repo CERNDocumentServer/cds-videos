@@ -41,7 +41,7 @@ css = Bundle(
         filters='node-scss,cleancssurl',
         npm={
             'bootstrap-sass': '~3.3.5',
-            'font-awesome': '~4.4.0',
+            'font-awesome': '~4.7.0',
             'ngmodal': '~2.0.1'
         }
     ),
