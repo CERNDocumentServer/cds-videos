@@ -31,8 +31,10 @@ import pytest
 
 import mock
 from celery.result import AsyncResult
+from celery import states
 from flask import url_for
-from helpers import get_object_count, get_tag_count, mock_current_user
+from helpers import get_object_count, get_tag_count, mock_current_user, \
+    workflow_receiver_video_failing
 from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
@@ -425,3 +427,90 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
         assert str(obj.version_id) == data['version_id']
         assert obj.file
         assert obj.file.size == file_size
+
+
+def test_webhooks_feedback(api_app, cds_depid, access_token, json_headers):
+    """Test webhooks feedback."""
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id='downloader',
+            access_token=access_token
+        )
+
+    with mock.patch('requests.get') as mock_request, \
+            api_app.test_client() as client, \
+            mock.patch('invenio_sse.ext._SSEState.publish'), \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+        sse_channel = 'mychannel'
+        file_size = 1024
+        mock_request.return_value = type(
+            'Response', (object, ), {
+                'raw': BytesIO(b'\x00' * file_size),
+                'headers': {'Content-Length': file_size}
+            })
+
+        payload = dict(
+            uri='http://example.com/test.pdf',
+            deposit_id=cds_depid,
+            key='test.pdf',
+            sse_channel=sse_channel
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 201
+        data = json.loads(resp.data.decode('utf-8'))
+
+        # check feedback url
+        event_id = data['tags']['_event_id']
+        with api_app.test_request_context():
+            url = url_for('invenio_webhooks.event_feedback_item',
+                          event_id=event_id, access_token=access_token,
+                          receiver_id='downloader')
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 200
+        data = json.loads(resp.data.decode('utf-8'))
+        assert 'id' in data
+        assert data['name'] == 'file_download'
+        assert data['status'] == states.SUCCESS
+        assert data['info']['payload']['deposit_id'] == cds_depid
+
+
+def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
+                                   json_headers, api_project):
+    """Test webhooks feedback with a failing task."""
+    (project, video_1, video_2) = api_project
+    sse_channel = 'mychannel'
+    receiver_id = 'test_feedback_with_workflow'
+    workflow_receiver_video_failing(
+        api_app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
+
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id=receiver_id,
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client:
+        # run workflow
+        resp = client.post(url, headers=json_headers, data=json.dumps({}))
+        assert resp.status_code == 500
+        #  data = json.loads(resp.data.decode('utf-8'))
+
+        # check feedback url
+        event_id = resp.headers['X-Hub-Delivery']
+        #  event_id = data['tags']['_event_id']
+        with api_app.test_request_context():
+            url = url_for('invenio_webhooks.event_feedback_item',
+                          event_id=event_id, access_token=access_token,
+                          receiver_id=receiver_id)
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 200
+        data = json.loads(resp.data.decode('utf-8'))
+        assert 'id' in data[0][0]
+        assert data[0][0]['name'] == 'add'
+        assert data[0][0]['status'] == states.SUCCESS
+        assert 'id' in data[1][0]
+        assert data[1][0]['name'] == 'failing'
+        assert data[1][0]['status'] == states.FAILURE

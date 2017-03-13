@@ -83,7 +83,7 @@ class sse_failing_task(AVCTask):
         """Set Fail."""
         self.update_state(
             state=states.FAILURE,
-            meta={'exc_type': 'fuu', 'exc_message': 'fuu'})
+            meta={'exc_type': 'Exception', 'exc_message': {'hello': 'world'}})
 
 
 class sse_success_task(AVCTask):

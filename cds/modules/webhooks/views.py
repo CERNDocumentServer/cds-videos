@@ -33,6 +33,7 @@ from invenio_oauth2server import require_api_auth, require_oauth_scopes
 from invenio_webhooks.views import ReceiverEventResource
 
 from .receivers import build_task_payload
+from .status import iterate_result, collect_info, ResultEncoder
 
 
 class TaskResource(MethodView):
@@ -65,10 +66,44 @@ class TaskResource(MethodView):
         return '', 400
 
 
+class EventFeedbackResource(MethodView):
+    """Event informations."""
+
+    @require_api_auth()
+    @require_oauth_scopes('webhooks:event')
+    @error_handler
+    def get(self, receiver_id, event_id):
+        """Handle GET request: get more informations."""
+        event = ReceiverEventResource._get_event(receiver_id, event_id)
+        raw_info = event.receiver._raw_info(event=event)
+
+        def collect(task_name, result):
+            if isinstance(result.info, Exception):
+                (args,) = result.info.args
+                return {
+                    'id': result.id,
+                    'status': result.status,
+                    'info': args,
+                    'name': task_name
+                }
+            else:
+                return collect_info(task_name, result)
+
+        result = iterate_result(
+            raw_info=raw_info, fun=collect)
+        return ResultEncoder().encode(result), 200
+
+
 task_item = TaskResource.as_view('task_item')
+event_feedback_item = EventFeedbackResource.as_view('event_feedback_item')
 
 blueprint.add_url_rule(
     '/hooks/receivers/<string:receiver_id>/events/<string:event_id>'
     '/tasks/<string:task_id>',
     view_func=task_item,
+)
+
+blueprint.add_url_rule(
+    '/hooks/receivers/<string:receiver_id>/events/<string:event_id>/feedback',
+    view_func=event_feedback_item,
 )
