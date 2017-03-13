@@ -26,8 +26,6 @@
 
 from __future__ import absolute_import
 
-import json
-
 from copy import deepcopy
 
 from cds_sorenson.api import get_available_preset_qualities
@@ -46,7 +44,7 @@ from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_object_version)
 
 from .status import ComputeGlobalStatus, iterate_result, collect_info, \
-    GetInfoByID, replace_task_id
+    GetInfoByID, replace_task_id, ResultEncoder
 from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
     TranscodeVideoTask, update_avc_deposit_state
 
@@ -144,7 +142,7 @@ class CeleryAsyncReceiver(Receiver):
         return (
             CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(
                 global_status.status),
-            json.dumps(info)
+            ResultEncoder().encode(info)
         )
 
     def persist(self, event, result):
