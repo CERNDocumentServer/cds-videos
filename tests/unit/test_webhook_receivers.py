@@ -890,27 +890,24 @@ def test_collect_info():
 
     info = collect_info('mytask', result)
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '3'
+    assert info['info'] == 3
     assert 'id' in info
     assert info['name'] == 'mytask'
-    assert info['result'] == '3'
 
     result = chain(simple_add.s(1, 2), simple_add.s(3)).apply_async()
 
     # check first task
     info = collect_info('mytask', result.parent)
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '3'
+    assert info['info'] == 3
     assert 'id' in info
     assert info['name'] == 'mytask'
-    assert info['result'] == '3'
     # check second task
     info = collect_info('mytask2', result)
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '6'
+    assert info['info'] == 6
     assert 'id' in info
     assert info['name'] == 'mytask2'
-    assert info['result'] == '6'
 
     result = chain(
         simple_add.s(1, 2),
@@ -919,24 +916,21 @@ def test_collect_info():
 
     info = collect_info('mytask', result.parent)
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '3'
+    assert info['info'] == 3
     assert 'id' in info
     assert info['name'] == 'mytask'
-    assert info['result'] == '3'
 
     info = collect_info('mytask2', result.children[0])
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '6'
+    assert info['info'] == 6
     assert 'id' in info
     assert info['name'] == 'mytask2'
-    assert info['result'] == '6'
 
     info = collect_info('mytask3', result.children[1])
     assert info['status'] == states.SUCCESS
-    assert info['info'] == '7'
+    assert info['info'] == 7
     assert 'id' in info
     assert info['name'] == 'mytask3'
-    assert info['result'] == '7'
 
     fail = AsyncResult(result.children[2].id)
     info = collect_info('mytask4', fail)

@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import
 
+import json
 import sqlalchemy
 
 from celery import states
@@ -109,13 +110,22 @@ class ComputeGlobalStatus(object):
         return _compute_status(self._statuses)
 
 
+class ResultEncoder(json.JSONEncoder):
+    """Celery task result encoder."""
+
+    def default(self, obj):
+        """Encode the result."""
+        if isinstance(obj, Exception):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 def collect_info(task_name, result):
     """Collect information from a celery result."""
     return {
         'id': result.id,
         'status': result.status,
-        'info': str(result.info),
-        'result': str(result.result),
+        'info': result.info,
         'name': task_name
     }
 
