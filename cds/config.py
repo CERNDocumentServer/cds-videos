@@ -38,6 +38,7 @@ from invenio_records_rest.facets import range_filter, terms_filter
 from cds.modules.records.permissions import (deposit_delete_permission_factory,
                                              deposit_read_permission_factory,
                                              record_create_permission_factory,
+                                             record_read_permission_factory,
                                              record_update_permission_factory)
 from cds.modules.records.search import CERNRecordsSearch
 from .modules.deposit.facets import created_by_me
@@ -267,6 +268,7 @@ RECORDS_REST_ENDPOINTS = dict(
         item_route='/record/<{0}:pid_value>'.format(_Record_PID),
         default_media_type='application/json',
         max_result_window=10000,
+        read_permission_factory_imp=record_read_permission_factory,
     ),
     catid=dict(
         default_endpoint_prefix=True,
@@ -296,6 +298,7 @@ RECORDS_REST_ENDPOINTS = dict(
                 }
             }
         },
+        read_permission_factory_imp=record_read_permission_factory,
     ),
     kwid=dict(
         default_endpoint_prefix=True,
@@ -325,6 +328,7 @@ RECORDS_REST_ENDPOINTS = dict(
                 }
             }
         },
+        read_permission_factory_imp=record_read_permission_factory,
     ),
 )
 
