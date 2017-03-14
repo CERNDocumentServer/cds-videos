@@ -172,6 +172,10 @@ function cdsDepositsCtrl(
   };
 
   this.addFiles = function(files, filesQueue) {
+    // Do nothing if files array is empty
+    if (!files) {
+      return;
+    }
     // Filter files by videos and project
     var _files = this.filterOutFiles(files);
     var createMaster;
@@ -201,8 +205,12 @@ function cdsDepositsCtrl(
         .filter(function(key) {
           return key != undefined;
         });
-      _files.videos = _.reject(_files.videos, function(file) {
-        return uploadedVideos.includes(file.key);
+      var videoKeys = _.keys(_files.videos).map(function (name) {
+        return _files.videos[name].key;
+      });
+      that.duplicateVideos = _.intersection(videoKeys, uploadedVideos);
+      _files.videos = _.omit(_files.videos, function (val) {
+        return that.duplicateVideos.includes(val.key)
       });
       // for each files create child
       angular.forEach(

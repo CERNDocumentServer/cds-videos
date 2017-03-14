@@ -143,3 +143,13 @@
     </div>
   </div>
 </div>
+<div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
+  <p>
+    Multiple files with the same filename are not allowed:
+  </p>
+  <ul>
+    <li ng-repeat="file in $ctrl.duplicateFiles">
+      {{ file }}
+    </li>
+  </ul>
+</div>

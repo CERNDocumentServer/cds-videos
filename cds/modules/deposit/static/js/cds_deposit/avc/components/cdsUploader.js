@@ -228,6 +228,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     )
 
     this.addFiles = function(_files) {
+      // Do nothing if files array is empty
+      if (!_files) {
+        return;
+      }
+
       var existingFiles = that.files.map(function(file) {
         return file.key
       });
@@ -238,8 +243,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       });
 
       // Exclude files that already exist
+      that.duplicateFiles = [];
+
       _files = _.reject(_files, function(file) {
         if (existingFiles.includes(file.key)) {
+          that.duplicateFiles.push(file.key);
           return true;
         }
         existingFiles.push(file.key);

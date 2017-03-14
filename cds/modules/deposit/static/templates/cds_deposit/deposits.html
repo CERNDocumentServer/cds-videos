@@ -162,6 +162,16 @@
               <div class="dropbox-upload"></div>
             </cds-remote-uploader>
           </cds-uploader>
+          <div ng-if="$ctrl.duplicateVideos.length" class="alert alert-danger">
+            <p>
+              Multiple deposits with the same filename are not allowed:
+            </p>
+            <ul>
+              <li ng-repeat="file in $ctrl.duplicateVideos">
+                {{ file }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
