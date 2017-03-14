@@ -48,7 +48,7 @@ def cern_filter():
     # Filter records where the user is owner
     owner = Q('match', **{'_deposit.created_by': getattr(current_user, 'id', 0)})
 
-    # OR the two filters
+    # OR all the filters
     combined_filter = public | read_restricted | write_restricted | owner
 
     return Q('bool', filter=[combined_filter])
