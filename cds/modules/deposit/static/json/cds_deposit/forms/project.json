@@ -263,20 +263,11 @@
   ],
   "access": [
     {
-      "type": "array",
       "key": "_access.update",
       "title": "Update access for the project",
       "description": "",
       "add": "Add another person/e-group",
-      "inline": true,
-      "items": [
-        {
-          "key": "_access.update[]",
-          "placeholder": "E-mail",
-          "description": "",
-          "notitle": true
-        }
-      ]
+      "inline": true
     }
   ]
 }
