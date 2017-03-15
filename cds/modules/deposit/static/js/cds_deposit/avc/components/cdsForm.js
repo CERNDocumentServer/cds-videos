@@ -59,6 +59,38 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   }
 
+  this.autocompleteAuthors = function(options, query) {
+    // If the query string is empty and there's already a value set on the
+    // model, this means that the form was just loaded and is trying to
+    // display this value.
+    // This also happens when the user clicks on a suggestion or on the
+    // suggestion field. In this case, return the previous suggestions.
+    if (query === '' && that.lastAuthorSuggestions) {
+      var defer = $q.defer();
+      defer.resolve(that.lastAuthorSuggestions);
+      return defer.promise;
+    }
+    if (query) {
+      // Parse the url parameters
+      return $http.get(options.url, {
+        params: angular.merge({
+          query: query
+        }, options.extraParams)
+      }).then(function(data) {
+        that.lastAuthorSuggestions = {
+          data: data.data.map(function (author) {
+            var fullName = author.lastname + ' ' + author.firstname;
+            return {
+              text: fullName,
+              value: fullName
+            };
+          }).slice(0, 20)
+        };
+        return that.lastAuthorSuggestions;
+      });
+    }
+  };
+
   this.types = $q.defer();
 
   this.autocompleteCategories = function(options, query) {
