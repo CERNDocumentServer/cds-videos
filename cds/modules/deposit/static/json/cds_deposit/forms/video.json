@@ -145,11 +145,19 @@
       "add": "Add another contributor",
       "inline": true,
       "items": [
+
         {
+          "type": "uiselect",
           "key": "contributors[].name",
-          "placeholder": "Name",
-          "description": "",
-          "notitle": true
+          "notitle": true,
+          "placeholder": "Author name",
+          "options": {
+            "asyncCallback": "$ctrl.autocompleteAuthors",
+            "url": "//cds.cern.ch/submit/get_authors",
+            "extraParams": {
+              "relative_curdir": "cdslabs/videos"
+            }
+          }
         },
         {
           "type": "select",
