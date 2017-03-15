@@ -102,6 +102,29 @@ angular
     };
   });
 
+
+angular.module('schemaForm')
+  .controller('invenioDynamicSelectController', ['$scope', '$controller',
+    function ($scope, $controller) {
+      $controller('dynamicSelectController', {$scope: $scope});
+      // If it is ui-select inside an array...
+      if ($scope.modelArray) {
+        $scope.$watchCollection('modelArray', function (newValue) {
+          // If this is not the initial setting of the element...
+          if (!angular.equals($scope.select_model, {})) {
+            // Get the element's correct value from the array model
+            var value = $scope.modelArray[$scope.arrayIndex][$scope.form.key.slice(-1)[0]];
+            // Set ui-select's model to the correct value if needed
+            if ($scope.insideModel !== value) {
+              $scope.insideModel = value;
+              var query = $scope.$eval($scope.form.options.processQuery || 'query', {query: value});
+              $scope.populateTitleMap($scope.form, query);
+              $scope.select_model.selected = $scope.find_in_titleMap(value);
+            }
+          }
+        });
+      }
+    }]);
 // Initialize the module
 angular
   .module('cdsDeposit', [
