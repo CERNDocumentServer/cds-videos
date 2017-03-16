@@ -20,14 +20,16 @@
 
 from __future__ import absolute_import
 
-from marshmallow import fields
+from marshmallow import fields, post_load
+from invenio_jsonschemas import current_jsonschemas
 
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
-    DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
+    DepositSchema, DescriptionSchema, LicenseSchema, \
     OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
-    TranslationsSchema
+    TranslationsSchema, KeywordsSchema
 from .doi import DOI
+from ....deposit.api import Video
 
 
 class VideoDepositSchema(DepositSchema):
@@ -83,10 +85,16 @@ class VideoSchema(StrictKeysSchema):
     language = fields.Str()
     license = fields.Nested(LicenseSchema, many=True)
     recid = fields.Number()
-    schema = fields.Str(attribute="$schema")
+    schema = fields.Str(attribute="$schema", dump_to='$schema')
     title = fields.Nested(TitleSchema)
     translations = fields.Nested(TranslationsSchema, many=True)
     category = fields.Str()
     type = fields.Str()
     report_number = fields.Nested(ReportNumberSchema, many=False)
     publication_date = fields.Str()
+
+    @post_load(pass_many=False)
+    def post_load(self, data):
+        """Post load."""
+        data['$schema'] = current_jsonschemas.path_to_url(Video._schema)
+        return data
