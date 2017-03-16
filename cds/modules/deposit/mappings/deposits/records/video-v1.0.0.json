@@ -66,10 +66,10 @@
                 },
                 "keywords": {
                     "properties": {
-                        "source": {
+                        "key_id": {
                             "type": "string"
                         },
-                        "value": {
+                        "name": {
                             "type": "string"
                         }
                     },

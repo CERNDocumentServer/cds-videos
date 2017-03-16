@@ -76,6 +76,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-sse.git#egg=invenio-sse
 -e git+https://github.com/inveniosoftware/invenio-theme.git#egg=invenio-theme
 -e git+https://github.com/inveniosoftware/invenio-userprofiles.git#egg=invenio-userprofiles
+-e git+https://github.com/inveniosoftware/jsonresolver.git@#egg=jsonresolver
 # FIXME wait for PR#50
 # -e git+https://github.com/inveniosoftware/invenio-webhooks.git#egg=invenio-webhooks
 -e git+https://github.com/hachreak/invenio-webhooks.git@fix_json#egg=invenio-webhooks

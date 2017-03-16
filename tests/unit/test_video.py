@@ -30,23 +30,26 @@ import mock
 import pytest
 import json
 
-from time import sleep
 from celery import states
-from invenio_db import db
+from copy import deepcopy
+from elasticsearch_dsl.query import Q
 from flask import url_for
-from invenio_webhooks import current_webhooks
-from invenio_webhooks.models import Event
-from mock import MagicMock
+from flask_security import login_user
+from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
+from invenio_db import db
+from invenio_deposit.search import DepositSearch
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
+from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records.models import RecordMetadata
-from six import BytesIO
-from invenio_indexer.api import RecordIndexer
-from invenio_accounts.testutils import login_user_via_session
-from invenio_accounts.models import User
-from copy import deepcopy
+from invenio_webhooks import current_webhooks
+from invenio_webhooks.models import Event
 from jsonschema.exceptions import ValidationError
+from mock import MagicMock
+from six import BytesIO
+from time import sleep
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video)
@@ -336,11 +339,12 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         video_edited = deepcopy(deposit)
         del video_edited['_files']
         del video_edited['_deposit']['state']
-        client.put(
+        res = client.put(
             url_for('invenio_deposit_rest.video_item',
                     pid_value=video_1_depid),
             data=json.dumps(video_edited),
             headers=json_headers)
+        assert res.status_code == 200
 
         # check if the tasks states and files are inside elasticsearch
         # -> check video
@@ -382,8 +386,8 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_video_events_on_download(api_app, webhooks, db, api_project,
-                                  access_token, json_headers):
+def test_video_events_on_download_create(api_app, webhooks, db, api_project,
+                                         access_token, json_headers):
     """Test deposit events."""
     (project, video_1, video_2) = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -569,3 +573,47 @@ def test_video_publish_with_no_category(project):
     video_1 = video_resolver([video_1_depid])[0]
     video_1.publish()
     assert video_1['_deposit']['status'] == 'published'
+
+
+def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
+    """Tet video keywords."""
+    (project, video_1, video_2) = api_project
+    # login owner
+    login_user(User.query.filter_by(id=users[0]).first())
+
+    assert video_1['keywords'] == []
+
+    # try to add keywords
+    video_1.add_keyword(keyword_1)
+    video_1.add_keyword(keyword_2)
+    video_1.add_keyword(keyword_1)
+    assert video_1['keywords'] == [
+        {'$ref': keyword_1.ref},
+        {'$ref': keyword_2.ref},
+    ]
+    video_1.commit()
+    sleep(2)
+
+    # check elasticsearch
+    result = DepositSearch().filter(
+        Q('match', **{'_deposit.id': video_1['_deposit']['id']})
+    ).params(version=True).execute().to_dict()['hits']['hits'][0]
+    kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
+    kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
+    assert kw_expect == kw_result
+
+    # try to remove a key
+    video_1.remove_keyword(keyword_1)
+    assert video_1['keywords'] == [
+        {'$ref': keyword_2.ref},
+    ]
+    video_1.commit()
+    sleep(2)
+
+    # check elasticsearch
+    result = DepositSearch().filter(
+        Q('match', **{'_deposit.id': video_1['_deposit']['id']})
+    ).params(version=True).execute().to_dict()['hits']['hits'][0]
+    kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
+    kw_expect = {k['key_id']: k['name'] for k in [keyword_2]}
+    assert kw_expect == kw_result

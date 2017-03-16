@@ -252,6 +252,9 @@ setup(
         'invenio_sse.integrations': [
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
         ],
+        'invenio_records.jsonresolver': [
+            'keywords = cds.modules.records.jsonresolver',
+        ]
     },
     extras_require=extras_require,
     install_requires=install_requires,

@@ -31,12 +31,12 @@ import json
 import os
 import shutil
 import tempfile
-
-from os.path import dirname, join
-
 import requests
 import mock
 import pytest
+import jsonresolver
+
+from os.path import dirname, join
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
@@ -69,9 +69,6 @@ from invenio_search import InvenioSearch, current_search, current_search_client
 from invenio_webhooks import InvenioWebhooks
 from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import CeleryReceiver
-from jsonresolver import JSONResolver
-from jsonresolver.contrib.jsonref import json_loader_factory
-from jsonresolver.contrib.jsonschema import ref_resolver_factory
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
@@ -79,11 +76,12 @@ from invenio_files_rest.models import ObjectVersion
 from invenio_pidstore.models import PersistentIdentifier
 from time import sleep
 from uuid import uuid4
+from werkzeug.routing import Rule
 
 from helpers import (create_category, create_record, sse_simple_add,
                      sse_failing_task, sse_success_task, new_project,
                      prepare_videos_for_publish, rand_md5, rand_version_id,
-                     create_keyword)
+                     create_keyword, endpoint_get_schema)
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -348,37 +346,24 @@ def online_video():
 @pytest.fixture()
 def cds_jsonresolver(app):
     """Configure a jsonresolver for cds-dojson."""
-    resolver = JSONResolver(plugins=['demo.json_resolver'])
-    app.extensions['invenio-records'].ref_resolver_cls = ref_resolver_factory(
-        resolver)
-    app.extensions['invenio-records'].loader_cls = json_loader_factory(
-        resolver)
+    @jsonresolver.hookimpl
+    def jsonresolver_loader(url_map):
+        url_map.add(Rule(
+            '/schemas/<path:path>', endpoint=endpoint_get_schema,
+            host='cdslabs.cern.ch'
+        ))
 
 
 @pytest.fixture()
-def cds_jsonresolver_required_fields(app):
+def api_cds_jsonresolver(api_app):
     """Configure a jsonresolver for cds-dojson."""
-    resolver = JSONResolver(plugins=['demo.json_resolver_required_fields'])
-    app.extensions['invenio-records'].ref_resolver_cls = ref_resolver_factory(
-        resolver)
-    app.extensions['invenio-records'].loader_cls = json_loader_factory(
-        resolver)
-
-
-@pytest.yield_fixture()
-def api_cds_jsonresolver_required_fields(api_app):
-    """Configure a jsonresolver for cds-dojson."""
-    resolver = JSONResolver(plugins=['demo.json_resolver_required_fields'])
-    backup_ref = api_app.extensions['invenio-records'].ref_resolver_cls
-    backup_json = api_app.extensions['invenio-records'].loader_cls
-    api_app.extensions[
-        'invenio-records'].ref_resolver_cls = ref_resolver_factory(
-        resolver)
-    api_app.extensions['invenio-records'].loader_cls = json_loader_factory(
-        resolver)
-    yield api_app
-    api_app.extensions['invenio-records'].loader_cls = backup_json
-    api_app.extensions['invenio-records'].ref_resolver_cls = backup_ref
+    @jsonresolver.hookimpl
+    def jsonresolver_loader(url_map):
+        url_map.add(Rule(
+            '/schemas/<path:path>',
+            endpoint=endpoint_get_schema,
+            host='cdslabs.cern.ch'
+        ))
 
 
 @pytest.fixture()
@@ -682,7 +667,8 @@ def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
 
 
 @pytest.fixture()
-def api_project(api_app, deposit_rest, es, cds_jsonresolver, users, location,
+def api_project(api_app, deposit_rest, es,  # cds_jsonresolver,
+                users, location,
                 db, deposit_metadata):
     """New project with videos."""
     return new_project(api_app, deposit_rest, es, cds_jsonresolver, users,
@@ -850,7 +836,7 @@ def category_2(api_app, es, indexer, pidstore, cds_jsonresolver):
 
 
 @pytest.fixture()
-def keyword_1(api_app, es, indexer, pidstore, cds_jsonresolver):
+def keyword_1(api_app, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '1',
@@ -860,7 +846,7 @@ def keyword_1(api_app, es, indexer, pidstore, cds_jsonresolver):
 
 
 @pytest.fixture()
-def keyword_2(api_app, es, indexer, pidstore, cds_jsonresolver):
+def keyword_2(api_app, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '2',
@@ -870,7 +856,7 @@ def keyword_2(api_app, es, indexer, pidstore, cds_jsonresolver):
 
 
 @pytest.fixture()
-def keyword_3_deleted(api_app, es, indexer, pidstore, cds_jsonresolver):
+def keyword_3_deleted(api_app, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '3',

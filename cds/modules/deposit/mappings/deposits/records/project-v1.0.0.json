@@ -44,10 +44,10 @@
                 "keywords": {
                     "type": "object",
                     "properties": {
-                        "value": {
+                        "key_id": {
                             "type": "string"
                         },
-                        "source": {
+                        "name": {
                             "type": "string"
                         }
                     }

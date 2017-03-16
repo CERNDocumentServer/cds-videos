@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 from invenio_records_rest.serializers.datacite import DataCite31Serializer
 from invenio_records_rest.serializers.response import record_responsify
 from invenio_records_rest.serializers.schemas.json import RecordSchemaJSONV1
+from invenio_records_rest.serializers.json import JSONSerializer
 
 from .drupal import DrupalSerializer
 from .schemas.datacite import DataCiteSchemaV1
@@ -50,8 +51,11 @@ drupal_v1 = DrupalSerializer(RecordSchemaJSONV1)
 #: DataCite serializer
 datacite_v31 = DataCite31Serializer(DataCiteSchemaV1, replace_refs=True)
 
+#: CDSDeposit serializer
+cdsdeposit_json_v1 = JSONSerializer(RecordSchemaJSONV1, replace_refs=True)
+
 # Records-REST response serializers
-# ========================
+# =================================
 
 #: SMIL record serializer for individual records.
 smil_v1_response = record_responsify(smil_v1, 'application/smil')
@@ -65,3 +69,7 @@ drupal_v1_response = record_responsify(drupal_v1, 'application/json')
 #: DataCite v3.1 record serializer for individual records.
 datacite_v31_response = record_responsify(
     datacite_v31, 'application/x-datacite+xml')
+
+#: CDSDeposit record serializer for individual records.
+cdsdeposit_json_v1_response = record_responsify(cdsdeposit_json_v1,
+                                                'application/json')

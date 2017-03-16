@@ -24,6 +24,8 @@ from __future__ import absolute_import
 from marshmallow import Schema, ValidationError, fields, validates_schema
 from marshmallow.validate import Length
 
+from ...api import Keyword
+
 
 class LicenseSchema(Schema):
     """License schema."""
@@ -50,11 +52,15 @@ class StrictKeysSchema(Schema):
                                           field_names=[key])
 
 
-class KeywordsSchema(StrictKeysSchema):
+class KeywordsSchema(Schema):
     """Keywords schema."""
 
-    source = fields.Str()
-    value = fields.Str()
+    key_id = fields.Method(deserialize='get_keywords_refs',
+                           attribute='$ref')
+
+    def get_keywords_refs(self, obj):
+        """Get keywords references."""
+        return Keyword.get_ref(id_=obj)
 
 
 class OaiSchema(StrictKeysSchema):

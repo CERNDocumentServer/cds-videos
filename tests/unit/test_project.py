@@ -47,6 +47,9 @@ from cds.modules.deposit.errors import DiscardConflict
 from cds.modules.webhooks.status import get_deposit_events
 from invenio_records.models import RecordMetadata
 from invenio_webhooks.models import Event
+from time import sleep
+from invenio_deposit.search import DepositSearch
+from elasticsearch_dsl.query import Q
 
 from helpers import workflow_receiver_video_failing, \
     get_indexed_records_from_mock, prepare_videos_for_publish
@@ -378,67 +381,6 @@ def test_inheritance(app, project):
     assert video['type'] == project['type']
 
 
-def test_project_partial_validation(
-        app, db, cds_jsonresolver_required_fields, deposit_metadata, location,
-        deposit_rest, video_deposit_metadata, project_deposit_metadata):
-    """Test project create/publish with partial validation/validation."""
-    # create a project/video without a required field
-    if 'fuu' in deposit_metadata:
-        del deposit_metadata['fuu']
-    project_video_1 = deepcopy(video_deposit_metadata)
-    # project_video_1 = deepcopy(video_metadata)
-    project = Project.create(project_deposit_metadata)
-    # insert a video
-    project_video_1['_project_id'] = project['_deposit']['id']
-    video = Video.create(project_video_1)
-    prepare_videos_for_publish([video])
-    video_id = video.id
-    # check project
-    id_ = project.id
-    db.session.expire_all()
-    project = Project.get_record(id_)
-    assert project is not None
-    # if publish, then generate an validation error
-    with pytest.raises(ValidationError):
-        project.publish()
-    # patch project
-    patch = [{
-        'op': 'replace',
-        'path': '/category',
-        'value': 'bar',
-    }]
-    id_ = project.id
-    db.session.expire_all()
-    project = Project.get_record(id_)
-    project.patch(patch).commit()
-    # update project
-    copy = deepcopy(project)
-    copy['category'] = 'qwerty'
-    id_ = project.id
-    db.session.expire_all()
-    project = Project.get_record(id_)
-    project.update(copy)
-    project.commit()
-    # patch video
-    patch = [{
-        'op': 'replace',
-        'path': '/category',
-        'value': 'bar',
-    }]
-    id_ = video_id
-    db.session.expire_all()
-    video = Video.get_record(id_)
-    video.patch(patch).commit()
-    # update video
-    copy = deepcopy(video)
-    copy['category'] = 'qwerty'
-    id_ = video_id
-    db.session.expire_all()
-    video = Video.get_record(id_)
-    video.update(copy)
-    video.commit()
-
-
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 def test_project_publish_with_workflow(app, users, project, webhooks, es):
@@ -548,14 +490,14 @@ def test_project_permissions(es, location, deposit_metadata, users):
     assert has_update_permission(user, deposit)
 
 
-def test_deposit_partial_validation(
-        api_app, db, api_cds_jsonresolver_required_fields, deposit_metadata,
+def test_project_partial_validation(
+        api_app, db, api_cds_jsonresolver, deposit_metadata,
         location, video_deposit_metadata):
     """Test project create/publish with partial validation/validation."""
     video_1 = deepcopy(video_deposit_metadata)
     # create a deposit without a required field
-    if 'fuu' in deposit_metadata:
-        del deposit_metadata['fuu']
+    if 'category' in deposit_metadata:
+        del deposit_metadata['category']
     with api_app.test_request_context():
         project = Project.create(deposit_metadata)
         video_1['_project_id'] = project['_deposit']['id']
@@ -571,7 +513,7 @@ def test_deposit_partial_validation(
             project.publish()
         # patch project
         patch = [{
-            'op': 'replace',
+            'op': 'add',
             'path': '/category',
             'value': 'bar',
         }]
@@ -586,4 +528,47 @@ def test_deposit_partial_validation(
         db.session.expire_all()
         project = Project.get_record(id_)
         project.update(copy)
+        # assert not raise a validation exception
         project.commit()
+
+
+def test_project_keywords(es, project, keyword_1, keyword_2, users):
+    """Tet project keywords."""
+    (project, video_1, video_2) = project
+    # login owner
+    login_user(User.query.filter_by(id=users[0]).first())
+
+    assert project['keywords'] == []
+
+    project.add_keyword(keyword_1)
+    project.add_keyword(keyword_2)
+    project.add_keyword(keyword_1)
+    assert project['keywords'] == [
+        {'$ref': keyword_1.ref},
+        {'$ref': keyword_2.ref},
+    ]
+    project.commit()
+    sleep(2)
+
+    # check elasticsearch
+    result = DepositSearch().filter(
+        Q('match', **{'_deposit.id': project['_deposit']['id']})
+    ).params(version=True).execute().to_dict()['hits']['hits'][0]
+    kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
+    kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
+    assert kw_expect == kw_result
+
+    project.remove_keyword(keyword_1)
+    assert project['keywords'] == [
+        {'$ref': keyword_2.ref},
+    ]
+    project.commit()
+    sleep(2)
+
+    # check elasticsearch
+    result = DepositSearch().filter(
+        Q('match', **{'_deposit.id': project['_deposit']['id']})
+    ).params(version=True).execute().to_dict()['hits']['hits'][0]
+    kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
+    kw_expect = {k['key_id']: k['name'] for k in [keyword_2]}
+    assert kw_expect == kw_result
