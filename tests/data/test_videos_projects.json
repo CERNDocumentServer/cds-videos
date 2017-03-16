@@ -63,6 +63,7 @@
     },
     "type": "Type",
     "$schema": "https://cdslabs.cern.ch/schemas/records/project-v1.0.0.json",
-    "category": "Category"
+    "category": "Category",
+    "publication_date": "2017-03-09"
   }
 ]

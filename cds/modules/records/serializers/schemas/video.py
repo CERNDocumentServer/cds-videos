@@ -35,6 +35,7 @@ from ....deposit.api import Video
 class VideoDepositSchema(DepositSchema):
     """Project Deposit Schema."""
 
+    id = fields.Str(required=True)
     state = fields.Raw()
     extracted_metadata = fields.Raw()
 
@@ -68,28 +69,29 @@ class VideoFileSchema(StrictKeysSchema):
 class VideoSchema(StrictKeysSchema):
     """Video schema."""
 
+    _deposit = fields.Nested(VideoDepositSchema, required=True)
+    title = fields.Nested(TitleSchema, required=True)
+    description = fields.Nested(DescriptionSchema, required=True)
+    date = fields.Str(required=True)
+    category = fields.Str(required=True)
+    type = fields.Str(required=True)
+
+    recid = fields.Number()
     _access = fields.Nested(AccessSchema)
     _buckets = fields.Nested(BucketSchema)
-    _deposit = fields.Nested(VideoDepositSchema)
     _oai = fields.Nested(OaiSchema)
     _project_id = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
     copyright = fields.Nested(CopyrightSchema)
     creator = fields.Nested(CreatorSchema)
-    date = fields.Str()
-    description = fields.Nested(DescriptionSchema)
     doi = DOI()
     duration = fields.Str()
     featured = fields.Boolean()
     keywords = fields.Nested(KeywordsSchema, many=True)
     language = fields.Str()
     license = fields.Nested(LicenseSchema, many=True)
-    recid = fields.Number()
     schema = fields.Str(attribute="$schema", dump_to='$schema')
-    title = fields.Nested(TitleSchema)
     translations = fields.Nested(TranslationsSchema, many=True)
-    category = fields.Str()
-    type = fields.Str()
     report_number = fields.Nested(ReportNumberSchema, many=False)
     publication_date = fields.Str()
 

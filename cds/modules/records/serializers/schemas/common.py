@@ -127,7 +127,7 @@ class ContributorSchema(StrictKeysSchema):
     email = fields.Str()
     ids = fields.Nested(IdsSchema, many=True)
     name = fields.Str(required=True)
-    role = fields.Str()
+    role = fields.Str(required=True)
 
 
 class TitleTranslationSchema(StrictKeysSchema):
