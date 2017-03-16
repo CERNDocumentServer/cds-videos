@@ -363,121 +363,125 @@ def pages():
 @with_appcontext
 def videos(video, frames, temp, video_count):
     """Load videos, frames and subformats."""
-    if not video:
-        video = join(dirname(__file__), '..', '..', '..',
-                     'tests', 'data', 'test.mp4')
-    video_duration = float(ff_probe(video, 'duration'))
-    if not frames:
-        frames = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/frames.tar.gz'
+    with current_app.wsgi_app.mounts['/api'].app_context():
+        if not video:
+            video = join(dirname(__file__), '..', '..', '..',
+                         'tests', 'data', 'test.mp4')
+        video_duration = float(ff_probe(video, 'duration'))
+        if not frames:
+            frames = pkg_resources.resource_filename(
+                'cds.modules.fixtures', 'data/frames.tar.gz'
+            )
+
+        frame_files = _handle_source(frames, temp)
+        d = current_app.config['FIXTURES_FILES_LOCATION']
+        if not exists(d):
+            makedirs(d)
+
+        project = Project.create(
+            dict(
+                date='2017-01-17',
+                description=dict(value='desc'),
+                title=dict(title='Project'),
+                category='Category',
+                type='Type')
         )
+        project['_deposit']['owners'] = [1]
+        project['_deposit']['created_by'] = 1
+        project['videos'] = []
 
-    frame_files = _handle_source(frames, temp)
-    d = current_app.config['FIXTURES_FILES_LOCATION']
-    if not exists(d):
-        makedirs(d)
+        # All deposits created
+        deposits = [project]
 
-    project = Project.create(
-        dict(
-            date='2017-01-17',
-            description=dict(value='desc'),
-            title=dict(title='Project'),
-            category='Category',
-            type='Type')
-    )
-    project['_deposit']['owners'] = [1]
-    project['_deposit']['created_by'] = 1
-    project['videos'] = []
+        for video_index in range(video_count):
+            with current_app.test_request_context():
+                video_deposit = Video.create(
+                    dict(_project_id=str(project['_deposit']['id']),
+                         contributors=[dict(name='contrib', role='Provider')],
+                         copyright=dict(url='copyright'),
+                         date='2017-01-16',
+                         description=dict(value='desc'),
+                         title=dict(title='Video'))
+                )
+            video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
 
-    # All deposits created
-    deposits = [project]
+            video_deposit['_deposit'].update(dict(
+                owners=[1],
+                created_by=1,
+                extracted_metadata=dict(
+                    bit_rate='679886',
+                    duration=video_duration,
+                    size='5111048',
+                    avg_frame_rate='288000/12019',
+                    codec_name='h264',
+                    width=640,
+                    height=360,
+                    nb_frames='1440',
+                    display_aspect_ratio='16:9',
+                    color_range='tv',
+                )
+            ))
 
-    for video_index in range(video_count):
-        with current_app.test_request_context():
-            video_deposit = Video.create(
-                dict(_project_id=str(project['_deposit']['id']),
-                     contributors=[dict(name='contrib', role='Provider')],
-                     copyright=dict(url='copyright'),
-                     date='2017-01-16',
-                     description=dict(value='desc'),
-                     title=dict(title='Video'))
-            )
-        video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
-
-        video_deposit['_deposit'].update(dict(
-            owners=[1],
-            created_by=1,
-            extracted_metadata=dict(
-                bit_rate='679886',
-                duration=video_duration,
-                size='5111048',
-                avg_frame_rate='288000/12019',
-                codec_name='h264',
-                width=640,
-                height=360,
-                nb_frames='1440',
-                display_aspect_ratio='16:9',
-                color_range='tv',
-            )
-        ))
-
-        with open(video, 'rb') as fp:
-            master_obj = ObjectVersion.create(
-                bucket=video_bucket,
-                key='video{0}.mp4'.format(video_index),
-                stream=fp)
-        tags = [('preview', 'true'), ('bit_rate', '959963'),
-                ('codec_name', 'h264'), ('duration', video_duration),
-                ('nb_frames', '1557'), ('size', '10498667'),
-                ('width', '1280'), ('height', '720'),
-                ('display_aspect_ratio', '16:9'), ('avg_frame_rate', '25/1'),
-                ('media_type', 'video'), ('context_type', 'master')]
-        [ObjectVersionTag.create(master_obj, key, val) for key, val in tags]
-
-        number_of_frames = len(frame_files)
-        frame_files.sort()
-        frame_files.sort(key=len)
-        for i, f in enumerate(frame_files):
-            with open(join(frames, f), 'rb') as fp:
-                # The filename
-                file_name = basename(f)
-
-                obj = ObjectVersion.create(
-                    bucket=video_bucket,
-                    key=file_name,
-                    stream=fp)
-                ObjectVersionTag.create(obj, 'media_type', 'image')
-                ObjectVersionTag.create(obj, 'context_type', 'frame')
-                ObjectVersionTag.create(obj, 'master', master_obj.version_id)
-                ObjectVersionTag.create(
-                    obj, 'timestamp',
-                    (float(i) / number_of_frames) * video_duration)
-
-        for quality in ['360p', '480p', '720p']:
             with open(video, 'rb') as fp:
-                obj = ObjectVersion.create(
+                master_obj = ObjectVersion.create(
                     bucket=video_bucket,
-                    key='video{0}[{1}].mp4'.format(video_index, quality),
+                    key='video{0}.mp4'.format(video_index),
                     stream=fp)
-            ObjectVersionTag.create(obj, 'media_type', 'video')
-            ObjectVersionTag.create(obj, 'context_type', 'subformat')
-            ObjectVersionTag.create(obj, 'master', master_obj.version_id)
-            ObjectVersionTag.create(obj, 'preset_quality', quality)
-            ObjectVersionTag.create(obj, 'width', 1000)
-            ObjectVersionTag.create(obj, 'height', 1000)
-            ObjectVersionTag.create(obj, 'video_bitrate', 123456)
+            tags = [('preview', 'true'), ('bit_rate', '959963'),
+                    ('codec_name', 'h264'), ('duration', video_duration),
+                    ('nb_frames', '1557'), ('size', '10498667'),
+                    ('width', '1280'), ('height', '720'),
+                    ('display_aspect_ratio', '16:9'),
+                    ('avg_frame_rate', '25/1'),
+                    ('media_type', 'video'), ('context_type', 'master')]
+            [ObjectVersionTag.create(master_obj, key, val)
+             for key, val in tags]
 
-        deposits.append(video_deposit.commit())
-    project.commit()
-    with current_app.test_request_context():
-        project.publish()
-        indexer = RecordIndexer()
-        # index all published records
-        for deposit in deposits:
-            _, record = deposit.fetch_published()
-            indexer.index(record)
-    db.session.commit()
-    click.echo('DONE :)')
+            number_of_frames = len(frame_files)
+            frame_files.sort()
+            frame_files.sort(key=len)
+            for i, f in enumerate(frame_files):
+                with open(join(frames, f), 'rb') as fp:
+                    # The filename
+                    file_name = basename(f)
+
+                    obj = ObjectVersion.create(
+                        bucket=video_bucket,
+                        key=file_name,
+                        stream=fp)
+                    ObjectVersionTag.create(obj, 'media_type', 'image')
+                    ObjectVersionTag.create(obj, 'context_type', 'frame')
+                    ObjectVersionTag.create(
+                        obj, 'master', master_obj.version_id)
+                    ObjectVersionTag.create(
+                        obj, 'timestamp',
+                        (float(i) / number_of_frames) * video_duration)
+
+            for quality in ['360p', '480p', '720p']:
+                with open(video, 'rb') as fp:
+                    obj = ObjectVersion.create(
+                        bucket=video_bucket,
+                        key='video{0}[{1}].mp4'.format(video_index, quality),
+                        stream=fp)
+                ObjectVersionTag.create(obj, 'media_type', 'video')
+                ObjectVersionTag.create(obj, 'context_type', 'subformat')
+                ObjectVersionTag.create(obj, 'master', master_obj.version_id)
+                ObjectVersionTag.create(obj, 'preset_quality', quality)
+                ObjectVersionTag.create(obj, 'width', 1000)
+                ObjectVersionTag.create(obj, 'height', 1000)
+                ObjectVersionTag.create(obj, 'video_bitrate', 123456)
+
+            deposits.append(video_deposit.commit())
+        project.commit()
+        with current_app.test_request_context():
+            project.publish()
+            indexer = RecordIndexer()
+            # index all published records
+            for deposit in deposits:
+                _, record = deposit.fetch_published()
+                indexer.index(record)
+        db.session.commit()
+        click.echo('DONE :)')
 
 
 @fixtures.command()

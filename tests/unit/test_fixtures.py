@@ -100,7 +100,7 @@ def test_fixture_pages(app, script_info, db, client):
     assert about_response.status_code == 200
 
 
-def test_fixture_videos(app, deposit_rest, script_info, db, location):
+def test_fixture_videos(app, script_info, db, location):
     """Test load video fixtures."""
     PersistentIdentifier.query.delete()
     RecordMetadata.query.delete()
