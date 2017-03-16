@@ -134,8 +134,14 @@ function cdsDepositsCtrl(
   };
 
   this.isVideoFile = function(key) {
-    var videoRegex = /(.*)\.(mp4|mov)$/;
-    return key.match(videoRegex);
+    var videoExtensions = (that.videoExtensions || 'mp4,mov').split(',');
+    var fileKey = null;
+    videoExtensions.forEach(function(ext) {
+      if (key.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+        fileKey = key.slice(0, key.lastIndexOf('.'));
+      }
+    });
+    return fileKey;
   };
 
   this.filterOutFiles = function(files) {
@@ -148,7 +154,7 @@ function cdsDepositsCtrl(
       var name;
       // If match we have a video
       if (match) {
-        name = match[1];
+        name = match;
         _files.videos[name] = file;
         _files.videoFiles[name] = [];
       } else {
@@ -398,6 +404,8 @@ function cdsDeposits() {
       dropboxAppKey: '@',
       // Default cern copyright
       copyright: '=?',
+      // Accepted video file extensions
+      videoExtensions: '@?',
     },
     controller: cdsDepositsCtrl,
     templateUrl: function($element, $attrs) {
