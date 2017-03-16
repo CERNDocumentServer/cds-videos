@@ -31,7 +31,9 @@ Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
--e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+# FIXME wait for PR#56
+#-e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+-e git+https://github.com/omelkonian/cds-dojson.git@data-model-update#egg=cds-dojson
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
@@ -44,7 +46,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
 -e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db
-# FIXME waiting for PR#157
+# FIXME wait for PR#157
 # -e git+https://github.com/inveniosoftware/invenio-deposit.git@create_validator#egg=invenio-deposit
 -e git+https://github.com/hachreak/invenio-deposit.git@create_validator#egg=invenio-deposit
 # FIXME wait for PR#132
@@ -59,7 +61,7 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
 -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
-# FIXME wait for pr#122
+# FIXME wait for PR#122
 #-e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/hachreak/invenio-oauthclient.git@#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages

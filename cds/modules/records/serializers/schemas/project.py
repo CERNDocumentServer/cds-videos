@@ -35,6 +35,7 @@ from ....deposit.api import Project
 class ProjectDepositSchema(DepositSchema):
     """Project Deposit Schema."""
 
+    id = fields.Str(required=True)
     state = fields.Raw()
 
 
@@ -60,22 +61,23 @@ class ProjectVideoSchema(StrictKeysSchema):
 class ProjectSchema(StrictKeysSchema):
     """Project schema."""
 
+    _deposit = fields.Nested(ProjectDepositSchema, required=True)
+    title = fields.Nested(TitleSchema, required=True)
+    description = fields.Nested(DescriptionSchema, required=True)
+    date = fields.Date(required=True)
+    category = fields.Str(required=True)
+    type = fields.Str(required=True)
+
+    recid = fields.Number()
     _access = fields.Nested(AccessSchema)
     _buckets = fields.Nested(BucketSchema)
-    _deposit = fields.Nested(ProjectDepositSchema)
     _oai = fields.Nested(OaiSchema)
-    category = fields.Str()
-    type = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
     creator = fields.Nested(CreatorSchema)
-    date = fields.Str()
-    description = fields.Nested(DescriptionSchema)
     doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)
-    recid = fields.Number()
     schema = fields.Str(attribute='$schema', dump_to='$schema')
-    title = fields.Nested(TitleSchema)
     videos = fields.Nested(ProjectVideoSchema, many=True)
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.Nested(ReportNumberSchema, many=False)
