@@ -38,7 +38,7 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from helpers import prepare_videos_for_publish
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
-from cds.modules.deposit.api import video_resolver
+from cds.modules.deposit.api import video_resolver, project_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
 
@@ -164,13 +164,16 @@ def test_video_publish_registering_the_datacite_if_fail(
 def test_video_publish_registering_the_datacite_not_local(
         datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
-        deposit_metadata, video_deposit_metadata, project_deposit_metadata):
+        deposit_metadata, video_deposit_metadata, project_deposit_metadata,
+        keyword_1, keyword_2):
     """Test video publish registering the datacite not local."""
     # test: enable datacite registration
     app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
 
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        project_deposit_metadata['keywords'] = [copy.deepcopy(keyword_2)]
 
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
@@ -180,9 +183,14 @@ def test_video_publish_registering_the_datacite_not_local(
 
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode('utf-8'))
+        assert project_dict['metadata']['keywords'][0] == keyword_2
+        project_depid = project_dict['metadata']['_deposit']['id']
+        project = project_resolver(project_depid)
+        assert project['keywords'] == [{'$ref': keyword_2.ref}]
 
-        # [[ ADD A NEW EMPTY VIDEO_1 ]]
+        # [[ ADD A NEW VIDEO_1 ]]
         video_metadata = copy.deepcopy(video_deposit_metadata)
+        video_metadata['keywords'] = [copy.deepcopy(keyword_1)]
         video_metadata.update(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
@@ -192,8 +200,10 @@ def test_video_publish_registering_the_datacite_not_local(
 
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
+        assert video_1_dict['metadata']['keywords'][0] == keyword_1
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
         [video_1] = video_resolver([video_1_depid])
+        assert video_1['keywords'] == [{'$ref': keyword_1.ref}]
         video_1['doi'] = '10.1123/doi'
         prepare_videos_for_publish([video_1])
 
@@ -203,3 +213,34 @@ def test_video_publish_registering_the_datacite_not_local(
             pid_value='123', record_uuid=str(video_1.id)).apply()
 
         assert datacite_mock.called is False
+
+
+def test_video_keywords_serializer(api_app, es, api_project, keyword_1,
+                                   keyword_2, users, json_headers):
+    """Tet video keywords serializer."""
+    (project, video_1, video_2) = api_project
+    # login owner
+    user = User.query.filter_by(id=users[0]).first()
+
+    assert video_1['keywords'] == []
+
+    # try to add keywords
+    video_1.add_keyword(keyword_1)
+    video_1.add_keyword(keyword_2)
+    video_1.commit()
+
+    # check serializer
+    with api_app.test_client() as client:
+        login_user_via_session(client, user)
+
+        vid = video_1['_deposit']['id']
+        url = url_for('invenio_deposit_rest.video_item', pid_value=vid)
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+
+        # check keywords
+        data = json.loads(res.data.decode('utf-8'))
+        kw_result = {k['key_id']: k['name']
+                     for k in data['metadata']['keywords']}
+        kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
+        assert kw_expect == kw_result

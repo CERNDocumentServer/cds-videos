@@ -30,8 +30,9 @@ import copy
 import json
 import random
 import uuid
-
 import mock
+import pkg_resources
+
 from invenio_db import db
 from cds_sorenson.api import get_available_preset_qualities
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
@@ -41,10 +42,8 @@ from invenio_records import Record
 from six import BytesIO
 from celery import shared_task, states
 from cds.modules.deposit.minters import catid_minter
-from cds.modules.records.minters import kwid_minter
 from cds.modules.records.api import Keyword
 from invenio_indexer.api import RecordIndexer
-from invenio_db import db
 from cds.modules.webhooks.tasks import AVCTask, update_record
 from cds.modules.deposit.api import Category
 from cds.modules.webhooks.tasks import TranscodeVideoTask
@@ -71,8 +70,10 @@ def success_task(self, *args, **kwargs):
 
 
 class sse_failing_task(AVCTask):
+    """Failing celery tasks with sse channel."""
 
     def __init__(self):
+        """init."""
         self._type = 'simple_failure'
         self._base_payload = {}
 
@@ -431,3 +432,10 @@ def rand_md5():
 
 def rand_version_id():
     return str(uuid.uuid4())
+
+
+def endpoint_get_schema(path):
+    """Get schema for jsonschemas."""
+    with open(pkg_resources.resource_filename(
+            'cds_dojson.schemas', path), 'r') as f:
+        return json.load(f)

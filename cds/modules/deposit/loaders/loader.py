@@ -28,11 +28,13 @@ from invenio_rest.errors import RESTValidationError
 
 
 def marshmallow_loader(schema_class, partial=False):
+    """Marshmallow loader."""
     def schema_loader():
-        result = schema_class(partial=partial).load(request.get_json())
+        request_json = request.get_json()
+        result = schema_class(partial=partial).load(request_json)
         if result.errors:
             raise MarshmallowErrors(result.errors)
-        return request.get_json()
+        return result.data
     return schema_loader
 
 

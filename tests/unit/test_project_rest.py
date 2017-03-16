@@ -40,7 +40,7 @@ from helpers import prepare_videos_for_publish
 
 
 def test_simple_workflow(
-        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
         data_file_1, data_file_2,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, project_deposit_metadata, video_deposit_metadata):
@@ -56,7 +56,7 @@ def test_simple_workflow(
     video_schema = ('https://cdslabs.cern.ch/schemas/'
                     'deposits/records/video-v1.0.0.json')
 
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
@@ -309,11 +309,11 @@ def test_simple_workflow(
 
 
 def test_publish_project_check_indexed(
-        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         video_deposit_metadata, project_deposit_metadata):
     """Test create a project and check project and videos are indexed."""
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
@@ -397,10 +397,11 @@ def test_publish_project_check_indexed(
             assert str(project_record.id) in ids
 
 
-def test_featured_field_is_indexed(app, es, project, users, json_headers):
+def test_featured_field_is_indexed(api_app, es, api_project, users,
+                                   json_headers):
     """Test featured field is indexed."""
-    (project, video_1, video_2) = project
-    with app.test_client() as client:
+    (project, video_1, video_2) = api_project
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ PUBLISH THE PROJECT ]]
@@ -433,3 +434,34 @@ def test_featured_field_is_indexed(app, es, project, users, json_headers):
         data = json.loads(res.data.decode('utf-8'))
         assert len(data['hits']['hits']) == 1
         assert data['hits']['hits'][0]['id'] == video_2_record['recid']
+
+
+def test_project_keywords_serializer(api_app, es, api_project, keyword_1,
+                                     keyword_2, users, json_headers):
+    """Tet video keywords serializer."""
+    (project, video_1, video_2) = api_project
+    # login owner
+    user = User.query.filter_by(id=users[0]).first()
+
+    assert project['keywords'] == []
+
+    # try to add keywords
+    project.add_keyword(keyword_1)
+    project.add_keyword(keyword_2)
+    project.commit()
+
+    # check serializer
+    with api_app.test_client() as client:
+        login_user_via_session(client, user)
+
+        pid = project['_deposit']['id']
+        url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+
+        # check keywords
+        data = json.loads(res.data.decode('utf-8'))
+        kw_result = {k['key_id']: k['name']
+                     for k in data['metadata']['keywords']}
+        kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
+        assert kw_expect == kw_result

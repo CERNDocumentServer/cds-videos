@@ -231,6 +231,7 @@ class CDSDeposit(Deposit):
         bucket = Bucket.create(default_location=Location.get_default())
         data['_buckets'] = {'deposit': str(bucket.id)}
         data['_deposit']['state'] = {}
+        data.setdefault('keywords', [])
         deposit = super(CDSDeposit, cls).create(
             data, id_=id_, validator=PartialDraft4Validator)
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
@@ -317,6 +318,7 @@ class CDSDeposit(Deposit):
         """Replace refs."""
         self._update_tasks_status()
         data = super(CDSDeposit, self).replace_refs()
+        data['_files'] = self._get_files_dump()
         return data
 
     def _update_tasks_status(self):
@@ -375,6 +377,24 @@ class CDSDeposit(Deposit):
             now = datetime.datetime.utcnow().date().isoformat()
             self['publication_date'] = now
         return super(CDSDeposit, self).publish(pid=pid, id_=id_, **kwargs)
+
+    def has_keyword(self, keyword):
+        """Check if the video has the kwyword."""
+        kw_ref = keyword.ref
+        return any(keyword['$ref'] == kw_ref
+                   for keyword in self['keywords'])
+
+    def add_keyword(self, keyword):
+        """Add a new keyword."""
+        if not self.has_keyword(keyword):
+            self['keywords'].append({'$ref': keyword.ref})
+
+    def remove_keyword(self, keyword):
+        """Remove a keyword."""
+        ref = keyword.ref
+        self['keywords'] = list(filter(
+            lambda x: x['$ref'] != ref, self['keywords']
+        ))
 
 
 def project_resolver(project_id):
@@ -618,7 +638,7 @@ class Video(CDSDeposit):
 
     @property
     def ref(self):
-        """Get video id."""
+        """Get video url (for the record if it's published)."""
         if self.status == 'published':
             return record_build_url(self['recid'])
         else:

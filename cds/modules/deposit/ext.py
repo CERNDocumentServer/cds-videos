@@ -51,9 +51,10 @@ class CDSDepositApp(object):
     def register_signals(app):
         """Register CDS Deposit signals."""
         # index records after published
+        # note: if publish a project -> index also videos
         post_action.connect(index_deposit_after_publish,
                             sender=app, weak=False)
-        # if publish a project -> index also videos
+        # if it's a project/video, expands informations before index
         before_record_index.connect(
             cdsdeposit_indexer_receiver, sender=app, weak=False)
         # register Datacite after publish record

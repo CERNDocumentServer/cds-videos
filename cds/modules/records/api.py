@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import uuid
+import os
 
 from invenio_records.api import Record
 from invenio_jsonschemas import current_jsonschemas
@@ -42,7 +43,7 @@ class Keyword(Record):
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
-        """Create a category."""
+        """Create a keyword."""
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
 
         key_id = data.get('key_id', None)
@@ -50,11 +51,26 @@ class Keyword(Record):
         data.setdefault('deleted', False)
 
         if not id_:
-            record_id = uuid.uuid4()
-            kwid_minter(record_id, data)
+            id_ = uuid.uuid4()
+            kwid_minter(id_, data)
 
         data['suggest_name'] = {
             'input': name,
             'payload': {'key_id': key_id, 'name': name},
         }
         return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
+
+    @property
+    def ref(self):
+        """Get the url."""
+        return Keyword.get_ref(self['key_id'])
+
+    @classmethod
+    def get_id(cls, ref):
+        """Get the ID from the reference."""
+        return os.path.basename(ref)
+
+    @classmethod
+    def get_ref(cls, id_):
+        """Get reference from an ID."""
+        return 'https://cds.cern.ch/api/keywords/{0}'.format(str(id_))
