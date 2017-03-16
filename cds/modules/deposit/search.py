@@ -21,14 +21,39 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Configuration for deposit search."""
 
-from elasticsearch_dsl import TermsFacet
+from __future__ import absolute_import, print_function
+
+from elasticsearch_dsl.query import Q
+from flask import g
+from flask_login import current_user
+from invenio_access.permissions import DynamicPermission, superuser_access
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 
-from ..records.search import cern_filter
+from ..records.utils import get_user_provides
+
+
+def cern_filter():
+    """Filter list of results."""
+    # Send empty query for admins
+    if DynamicPermission(superuser_access).allows(g.identity):
+        return Q()
+
+    # Get CERN user's provides
+    provides = get_user_provides()
+
+    # Filter for restricted records, that the user has access to
+    write_restricted = Q('terms', **{'_access.update': provides})
+    # Filter records where the user is owner
+    owner = Q('match', **
+              {'_deposit.created_by': getattr(current_user, 'id', 0)})
+
+    # OR all the filters
+    combined_filter = write_restricted | owner
+
+    return Q('bool', filter=[combined_filter])
 
 
 class ProjectSearch(RecordsSearch):
@@ -40,7 +65,4 @@ class ProjectSearch(RecordsSearch):
         index = 'deposits-records-project-v1.0.0'
         doc_types = None
         fields = ('*', )
-        facets = {
-            'status': TermsFacet(field='_deposit.status'),
-        }
         default_filter = DefaultFilter(cern_filter)

@@ -26,8 +26,16 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import g
+import json
+from time import sleep
+
+from flask_principal import RoleNeed, identity_loaded
+from flask import g, url_for
 from flask_principal import RoleNeed, UserNeed
+from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
+from invenio_indexer.api import RecordIndexer
+
 from cds.modules.records.search import CERNRecordsSearch
 
 
@@ -50,3 +58,60 @@ def test_es_filter(users):
             ]
         }}]}}
     ]
+
+
+def test_deposit_search(deposit_rest, db, es, users, project, json_headers):
+    """Test deposit filters and access rights."""
+    RecordIndexer().bulk_index([r.id for r in project])
+    RecordIndexer().process_bulk_queue()
+    sleep(2)
+
+    with deposit_rest.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        url = url_for('invenio_deposit_rest.project_list', q='')
+        res = client.get(url, headers=json_headers)
+
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1
+
+    @identity_loaded.connect
+    def mock_identity_provides(sender, identity):
+        """Add additional group to the user."""
+        identity.provides |= set([RoleNeed(User.query.get(users[1]).email)])
+
+    with deposit_rest.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        url = url_for('invenio_deposit_rest.project_list', q='')
+        res = client.get(url, headers=json_headers)
+
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 0
+
+        # Add user2 as editor for this deposit
+        proj = project[0]
+        proj['_access'] = {'update': [User.query.get(users[1]).email]}
+        proj.commit()
+        RecordIndexer().index(proj)
+        sleep(2)
+
+        res = client.get(url, headers=json_headers)
+
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1
+
+    # Admin always has access
+    @identity_loaded.connect
+    def mock_identity_provides_superadmin(sender, identity):
+        """Add additional group to the user."""
+        identity.provides |= set([RoleNeed('superuser')])
+
+    with deposit_rest.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[2]).email)
+        url = url_for('invenio_deposit_rest.project_list', q='')
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1

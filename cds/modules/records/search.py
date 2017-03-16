@@ -27,7 +27,9 @@
 from __future__ import absolute_import, print_function
 
 from elasticsearch_dsl.query import Q
+from flask import g
 from flask_login import current_user
+from invenio_access.permissions import DynamicPermission, superuser_access
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 
@@ -36,7 +38,10 @@ from .utils import get_user_provides
 
 def cern_filter():
     """Filter list of results."""
-    # TODO: Send empty query for admins
+    # Send empty query for admins
+    if DynamicPermission(superuser_access).allows(g.identity):
+        return Q()
+
     # Get CERN user's provides
     provides = get_user_provides()
 
