@@ -317,8 +317,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     this.upload = function() {
       if (that.queue.length > 0) {
         // FIXME: LOADING
-        // Start loading
-        $scope.$emit('cds.deposit.loading.start');
         // Start local loading
         that.cdsDepositCtrl.loading = true;
         that.loading = true;
@@ -333,7 +331,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           ).finally(
             function done() {
               // FIXME: LOADING
-              $scope.$emit('cds.deposit.loading.stop');
               that.cdsDepositCtrl.loading = false;
               that.loading = false;
             }
