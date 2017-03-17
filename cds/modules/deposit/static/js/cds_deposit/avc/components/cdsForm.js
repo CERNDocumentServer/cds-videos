@@ -60,16 +60,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   this.autocompleteAuthors = function(options, query) {
-    // If the query string is empty and there's already a value set on the
-    // model, this means that the form was just loaded and is trying to
-    // display this value.
-    // This also happens when the user clicks on a suggestion or on the
-    // suggestion field. In this case, return the previous suggestions.
-    if (query === '' && that.lastAuthorSuggestions) {
-      var defer = $q.defer();
-      defer.resolve(that.lastAuthorSuggestions);
-      return defer.promise;
-    }
     if (query) {
       // Parse the url parameters
       return $http.get(options.url, {
@@ -88,6 +78,15 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         };
         return that.lastAuthorSuggestions;
       });
+    } else {
+      // If the query string is empty and there's already a value set on the
+      // model, this means that the form was just loaded and is trying to
+      // display this value.
+      // This also happens when the user clicks on a suggestion or on the
+      // suggestion field. In this case, return the previous suggestions.
+      var defer = $q.defer();
+      defer.resolve(that.lastAuthorSuggestions || { data: [] });
+      return defer.promise;
     }
   };
 
