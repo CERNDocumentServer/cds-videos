@@ -79,7 +79,7 @@ function cdsDepositsCtrl(
 
   this.addMaster = function(deposit, files) {
     if (!this.initialized) {
-      if (deposit.metadata._files === undefined) {
+      if (_.isEmpty(deposit.metadata._files)) {
         deposit.metadata._files = files || [];
       }
       this.master = deposit;
@@ -146,7 +146,7 @@ function cdsDepositsCtrl(
   };
 
   this.filterOutFiles = function(files) {
-    // Logic to separated
+    // Logic to separate
     var _files = { project: [], videos: {}, videoFiles: {} };
     angular.forEach(files, function(file, index) {
       var match = that.isVideoFile(file.name);
