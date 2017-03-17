@@ -26,13 +26,40 @@
 from __future__ import absolute_import, print_function
 
 from elasticsearch_dsl.query import Q
-from flask import g
+from flask import current_app, g, request
 from flask_login import current_user
 from invenio_access.permissions import DynamicPermission, superuser_access
+from invenio_records_rest.errors import InvalidQueryRESTError
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 
 from ..records.utils import get_user_provides
+from .facets import deposit_facets_factory
+
+
+def deposit_search_factory(self, search):
+    """Replace default search factory to use custom facet factory."""
+    from invenio_records_rest.sorter import default_sorter_factory
+    query_string = request.values.get('q', '')
+    query_parser = Q('query_string',
+                     query=query_string) if query_string else Q()
+
+    try:
+        search = search.query(query_parser)
+    except SyntaxError:
+        current_app.logger.debug(
+            "Failed parsing query: {0}".format(request.values.get('q', '')),
+            exc_info=True)
+        raise InvalidQueryRESTError()
+
+    search_index = search._index[0]
+    search, urlkwargs = deposit_facets_factory(search, search_index)
+    search, sortkwargs = default_sorter_factory(search, search_index)
+    for key, value in sortkwargs.items():
+        urlkwargs.add(key, value)
+
+    urlkwargs.add('q', query_string)
+    return search, urlkwargs
 
 
 def cern_filter():
@@ -48,7 +75,7 @@ def cern_filter():
     write_restricted = Q('terms', **{'_access.update': provides})
     # Filter records where the user is owner
     owner = Q('match', **
-              {'_deposit.created_by': getattr(current_user, 'id', 0)})
+              {'_deposit.created_by': getattr(current_user, 'id', -1)})
 
     # OR all the filters
     combined_filter = write_restricted | owner

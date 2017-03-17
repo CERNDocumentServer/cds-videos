@@ -21,20 +21,51 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Facets for deposit search."""
 
-from elasticsearch_dsl import Q, TermsFacet
+from flask import current_app
 from flask_login import current_user
+from invenio_records_rest.facets import _post_filter, _query_filter
+from werkzeug.datastructures import MultiDict
 
 
-def created_by_me():
-    """Filter for created by me deposits.
+def created_by_me_aggs():
+    """Include only my deposits in the aggregation."""
+    return {
+        'terms': {
+            'field': '_deposit.created_by',
+            'include': [getattr(current_user, 'id', -1)]
+        }
+    }
 
-    :returns: Function that returns the Match query.
+
+def _aggregations(search, definitions):
+    """Add aggregations to query.
+
+    Same as in ``invenio-records-rest`` but allows callables.
     """
-    def inner(values):
-        return Q(
-            'match', **{'_deposit.created_by': getattr(current_user, 'id', 0)}
-        )
-    return inner
+    if definitions:
+        for name, agg in definitions.items():
+            search.aggs[name] = agg if not callable(agg) else agg()
+    return search
+
+
+def deposit_facets_factory(search, index):
+    """Replace default search factory to use custom facet generator."""
+    urlkwargs = MultiDict()
+
+    facets = current_app.config['RECORDS_REST_FACETS'].get(index)
+
+    if facets is not None:
+        # Aggregations.
+        search = _aggregations(search, facets.get("aggs", {}))
+
+        # Query filter
+        search, urlkwargs = _query_filter(search, urlkwargs,
+                                          facets.get("filters", {}))
+
+        # Post filter
+        search, urlkwargs = _post_filter(search, urlkwargs,
+                                         facets.get("post_filters", {}))
+
+    return (search, urlkwargs)
