@@ -95,10 +95,11 @@
         "items": [
           {
             "type": "uiselect",
-            "key": "contributors[].name",
+            "key": "contributors[]",
             "notitle": true,
             "placeholder": "Author name",
             "options": {
+              "mergeObjects": true,
               "asyncCallback": "$ctrl.autocompleteAuthors",
               "url": "//cds.cern.ch/submit/get_authors",
               "extraParams": {
