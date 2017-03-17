@@ -36,7 +36,7 @@ from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_records_rest.facets import range_filter, terms_filter
 
-from .modules.deposit.facets import created_by_me
+from .modules.deposit.facets import created_by_me_aggs
 from .modules.records.permissions import (deposit_delete_permission_factory,
                                           deposit_read_permission_factory,
                                           record_create_permission_factory,
@@ -406,14 +406,12 @@ DEPOSIT_PROJECT_FACETS = {
             'category': {
                 'terms': {'field': 'category'},
             },
-            'created_by': {
-                'terms': {'field': '_deposit.created_by'},
-            },
+            'created_by': created_by_me_aggs,
         },
         'post_filters': {
             'status': terms_filter('_deposit.status'),
             'category': terms_filter('category'),
-            'created_by': created_by_me(),
+            'created_by': terms_filter('_deposit.created_by'),
         },
     },
 }
@@ -685,6 +683,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         pid_fetcher='deposit',
         default_endpoint_prefix=False,
         record_class='cds.modules.deposit.api:Project',
+        search_factory_imp='cds.modules.deposit.search:deposit_search_factory',
         record_loaders={
             'application/json': 'cds.modules.deposit.loaders:project_loader',
             'application/vnd.project.partial+json':

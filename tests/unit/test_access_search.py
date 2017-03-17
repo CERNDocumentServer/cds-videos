@@ -29,9 +29,8 @@ from __future__ import absolute_import, print_function
 import json
 from time import sleep
 
-from flask_principal import RoleNeed, identity_loaded
 from flask import g, url_for
-from flask_principal import RoleNeed, UserNeed
+from flask_principal import RoleNeed, UserNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
@@ -60,7 +59,7 @@ def test_es_filter(users):
     ]
 
 
-def test_deposit_search(deposit_rest, db, es, users, project, json_headers):
+def test_deposit_search(deposit_rest, es, users, project, json_headers):
     """Test deposit filters and access rights."""
     RecordIndexer().bulk_index([r.id for r in project])
     RecordIndexer().process_bulk_queue()
