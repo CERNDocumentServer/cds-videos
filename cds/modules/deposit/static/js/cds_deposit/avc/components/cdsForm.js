@@ -69,10 +69,30 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       }).then(function(data) {
         that.lastAuthorSuggestions = {
           data: data.data.map(function (author) {
-            var fullName = author.lastname + ' ' + author.firstname;
+            var fullName = (author.lastname || '') + ', ' +
+                           (author.firstname || '');
+            var valueObj = {
+              name: fullName
+            };
+
+            if (author.affiliation) {
+              valueObj.affiliations = [author.affiliation];
+            }
+            if (author.email) {
+              valueObj.email = author.email;
+            }
+            valueObj.ids = _.reduce({
+              cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
+            }, function(acc, newName, oldName) {
+              if (author.hasOwnProperty(oldName)) {
+                acc.push({ value: author[oldName], source: newName });
+              }
+              return acc;
+            }, []);
+
             return {
               text: fullName,
-              value: fullName
+              value: valueObj
             };
           }).slice(0, 20)
         };
