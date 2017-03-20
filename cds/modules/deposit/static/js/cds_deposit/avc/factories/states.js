@@ -1,16 +1,14 @@
 function cdsAPI($q, $http) {
 
-  function action(url, method, payload, mimetype) {
+  function action(url, method, payload, headers) {
     requestConfig = {
       url: url,
       method: method,
       data: payload
     };
 
-    if (mimetype) {
-      requestConfig.headers = {
-        'Content-Type': mimetype
-      }
+    if (headers) {
+      requestConfig.headers = headers
     }
 
     return $http(requestConfig);

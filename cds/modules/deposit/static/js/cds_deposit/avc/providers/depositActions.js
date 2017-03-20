@@ -3,17 +3,24 @@ function depositActions() {
   return {
     setValues: function(depositTypes, extraActions) {
       actions = depositTypes.reduce(function(obj, depositType) {
+        mimetype = 'application/vnd.' + depositType + '.partial+json',
         obj[depositType] = Object.assign({
           CREATE: {
             method: 'POST',
             link: 'self',
-            mimetype: 'application/vnd.' + depositType + '.partial+json',
+            headers: {
+                'Content-Type': mimetype,
+                'Accept': mimetype
+            },
             preprocess: sanitizeData
           },
           SAVE_PARTIAL: {
             method: 'PUT',
             link: 'self',
-            mimetype: 'application/vnd.' + depositType + '.partial+json',
+            headers: {
+                'Content-Type': mimetype,
+                'Accept': mimetype
+            },
             preprocess: sanitizeData
           },
           SAVE: {
