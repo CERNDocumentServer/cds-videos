@@ -294,7 +294,7 @@ function cdsDepositsCtrl(
   };
 
   this.makeAction = function(url, depositType, action, payload) {
-    var { method, mimetype, preprocess } = depositActions[depositType][action];
+    var { method, headers, preprocess } = depositActions[depositType][action];
     if (preprocess) {
       payload = preprocess(payload);
     }
