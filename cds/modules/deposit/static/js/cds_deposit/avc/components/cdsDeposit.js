@@ -489,8 +489,11 @@ function cdsDepositCtrl(
     that.postSuccessProcess(response);
     // Inform the parents
     $scope.$emit('cds.deposit.success', response);
-    // Make the form pristine again
+    // Make the forms pristine again
     that.depositFormModel.$setPristine();
+    if (that.depositFormModelB) {
+      that.depositFormModelB.$setPristine();
+    }
   };
 
   this.onErrorAction = function(response) {
