@@ -12,6 +12,9 @@ function cdsDepositCtrl(
   typeReducer
 ) {
   var that = this;
+
+  this.depositFormModels = [];
+
   // The Upload Queue
   this.filesQueue = [];
 
@@ -490,7 +493,7 @@ function cdsDepositCtrl(
     // Inform the parents
     $scope.$emit('cds.deposit.success', response);
     // Make the form pristine again
-    that.depositFormModel.$setPristine();
+    _.invoke(that.depositFormModels, '$setPristine');
   };
 
   this.onErrorAction = function(response) {
@@ -499,6 +502,20 @@ function cdsDepositCtrl(
     // Inform the parents
     $scope.$emit('cds.deposit.error', response);
   };
+
+  // Form status
+  this.isPristine = function() {
+    return that.depositFormModels.every(_.property('$pristine'))
+  }
+
+  this.isDirty = function() {
+    return that.depositFormModels.some(_.property('$dirty'))
+  }
+
+  this.isInvalid = function() {
+    return that.depositFormModels.some(_.property('$invalid'))
+  }
+
 }
 
 cdsDepositCtrl.$inject = [
@@ -528,7 +545,6 @@ cdsDepositCtrl.$inject = [
  * @attr {String} schema - The URI for the deposit type schema.
  * @attr {Object} links - The deposit action links (i.e. ``self``).
  * @attr {Object} record - The record metadata.
- * @attr {Object} depositFormModel - The angular-schema-form model to be used.
  * @example
  *  Example:
  *  <cds-deposit
@@ -537,7 +553,6 @@ cdsDepositCtrl.$inject = [
  *   update-record-after-success="true"
  *   schema="{{ $ctrl.masterSchema }}"
  *   record="$ctrl.master.metadata"
- *   deposit-form-model="$ctrl.depositForms[0]"
  *  ></cds-deposit>
  */
 function cdsDeposit() {
@@ -554,8 +569,6 @@ function cdsDeposit() {
       schema: '@',
       record: '=',
       links: '=',
-      // The form model
-      depositFormModel: '=?',
     },
     require: { cdsDepositsCtrl: '^cdsDeposits' },
     controller: cdsDepositCtrl,
