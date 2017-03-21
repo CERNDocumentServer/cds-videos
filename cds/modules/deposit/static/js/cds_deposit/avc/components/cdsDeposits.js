@@ -14,8 +14,6 @@ function cdsDepositsCtrl(
   var that = this;
   this.edit = false;
 
-  // The deposit forms
-  this.depositForms = [];
   // The master deposit
   this.master = {};
   // The children deposit

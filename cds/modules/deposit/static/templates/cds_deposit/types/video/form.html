@@ -79,30 +79,29 @@
                 </li>
               </ul>
               <!-- Tab panes -->
-              <div class="tab-content cds-tab-content pa-20 ">
+              <div class="tab-content cds-tab-content pa-20">
                 <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
                   <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModel"
+                    name="$ctrl.cdsDepositCtrl.depositFormModels[0]"
                     class="form-horizontal"
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.basic"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
-                    ></form>
-
+                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }">
+                  </form>
                 </div>
                 <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
                   <div ng-transclude></div>
                 </div>
                 <div ng-show="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
                   <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModelB"
+                    name="$ctrl.cdsDepositCtrl.depositFormModels[1]"
                     class="form-horizontal"
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.licenses"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
-                    ></form>
+                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }">
+                  </form>
                 </div>
                 <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
 
