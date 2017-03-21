@@ -57,7 +57,6 @@
       update-record-after-success="true"
       schema="{{ $ctrl.masterSchema }}"
       record="$ctrl.master.metadata"
-      deposit-form-model="$ctrl.depositForms[0]"
     >
     <div ng-class="{'status-fix-top': !$ctrl.isOnTop}" class="cds-deposit-avc-overall-status mb-20 mt--20">
       <div class="container">
@@ -99,7 +98,6 @@
               links="child.links"
               schema="{{ $ctrl.childrenSchema }}"
               record="child.metadata"
-              deposit-form-model="$ctrl.depositForms[$index + 1]"
             >
               <div class="panel panel-default">
                 <div class="panel-heading">
