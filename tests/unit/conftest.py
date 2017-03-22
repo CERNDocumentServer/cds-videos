@@ -327,10 +327,16 @@ def script_info(app):
     return ScriptInfo(create_app=lambda info: app)
 
 
-@pytest.fixture(params=["mp4", "mov"])
+@pytest.fixture(params=['test.mp4', 'test.mov'])
 def video(request, datadir):
     """Get test video file."""
-    return join(datadir, 'test.{}'.format(request.param))
+    return join(datadir, request.param)
+
+
+@pytest.fixture(params=['test.mp4', 'test_small.mp4', 'test.mov'])
+def video_with_small(request, datadir):
+    """Get test video file (including small one)."""
+    return join(datadir, request.param)
 
 
 @pytest.fixture()

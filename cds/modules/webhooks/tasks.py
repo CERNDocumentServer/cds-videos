@@ -38,8 +38,8 @@ import time
 from functools import partial
 
 from PIL import Image
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding, \
-    get_preset_info
+from cds_sorenson.api import get_encoding_status, get_preset_info, \
+    start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app
 from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
@@ -358,22 +358,24 @@ class ExtractFramesTask(AVCTask):
             sse_channel=self.sse_channel,
         )
 
-        def progress_updater(seconds, duration):
-            """Progress reporter."""
-            meta = dict(
-                payload=dict(
-                    size=duration,
-                    percentage=(seconds or 0.0) / duration * 100, ),
-                message='Extracting frames {0} of {1} seconds'.format(
-                    seconds, duration), )
-
-            self.update_state(state=STARTED, meta=meta)
-
         # Calculate time positions
         duration = float(self.object.get_tags()['duration'])
         time_step = duration * frames_gap / 100
         start_time = duration * frames_start / 100
-        end_time = duration * (frames_end + 1) / 100  # end inclusive
+        end_time = (duration * frames_end / 100) + 0.01
+
+        number_of_frames = ((frames_end - frames_start) / frames_gap) + 1
+
+        def progress_updater(current_frame):
+            """Progress reporter."""
+            meta = dict(
+                payload=dict(
+                    size=duration,
+                    percentage=current_frame / number_of_frames * 100, ),
+                message='Extracting frames [{0} out of {1}]'.format(
+                    current_frame, number_of_frames), )
+
+            self.update_state(state=STARTED, meta=meta)
 
         # Generate frames
         ff_frames(
@@ -382,7 +384,7 @@ class ExtractFramesTask(AVCTask):
             end_time,
             time_step,
             duration,
-            os.path.join(output_folder, 'frame-%d.jpg'),
+            os.path.join(output_folder, 'frame-{:d}.jpg'),
             progress_callback=progress_updater)
 
         def extract_frame_number(frame_file):
