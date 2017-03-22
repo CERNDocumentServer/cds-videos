@@ -2,6 +2,7 @@ function cdsDepositCtrl(
   $scope,
   $q,
   $timeout,
+  $interval,
   $sce,
   depositStates,
   depositStatuses,
@@ -38,6 +39,9 @@ function cdsDepositCtrl(
 
   this.previewer = null;
 
+  // Failed subformats
+  this.failedSubformatKeys = [];
+
   Object.defineProperty(this, 'depositType', {
     get: function() {
       return that.master ? 'project' : 'video';
@@ -66,7 +70,7 @@ function cdsDepositCtrl(
     } catch (error) {}
   };
 
-  // The deposit can have the follwoing depositStates
+  // The deposit can have the following depositStates
   this.$onInit = function() {
     // Resolve the record schema
     this.cdsDepositsCtrl.JSONResolver(this.schema).then(function(response) {
@@ -91,6 +95,7 @@ function cdsDepositCtrl(
             that.stateOrder = _.without(that.stateOrder, key);
           }
         });
+
       } else {
         that.stateQueue.PENDING = angular.copy(depositStates);
         var videoFile = that.record._files[that.findMasterFileIndex()];
@@ -105,6 +110,10 @@ function cdsDepositCtrl(
 
       if (!that.master) {
         $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+      }
+      if (this.record._deposit.
+          state['file_video_metadata_extraction'] == 'FAILURE') {
+        that.failedMetadataExtractionEvent = true;
       }
     };
 
@@ -147,6 +156,87 @@ function cdsDepositCtrl(
           var inheritedArray = angular.copy(inheritedVal);
           accessElement(record, propPath, inheritedArray);
         }
+      });
+    };
+
+    this.getTaskFeedback = function(eventId, taskName, taskStatus) {
+      var url = urlBuilder.taskFeedback({ eventId: eventId });
+      return cdsAPI.action(url, 'GET').then(function(data) {
+        data = _.flatten(data.data, true);
+        if (taskName || taskStatus) {
+          return data.filter(function (taskInfo) {
+            return (!taskName || taskInfo.name == taskName) &&
+              (!taskStatus || taskInfo.status == taskStatus);
+          });
+        } else {
+          return data;
+        }
+      });
+    };
+
+    this.restartEvent = function(eventId, taskId) {
+      var url = urlBuilder.restartEvent({ taskId: taskId, eventId: eventId });
+      return cdsAPI.action(url, 'PUT');
+    };
+
+    this.restartMetadataExtraction = function() {
+      var metadataFailureIndex = that.stateQueue.FAILURE.
+        indexOf('file_video_metadata_extraction');
+      if (metadataFailureIndex > -1) {
+        that.stateQueue.FAILURE.splice(metadataFailureIndex, 1);
+        that.stateQueue.STARTED.push('file_video_metadata_extraction');
+        that.record._deposit.state.file_video_metadata_extraction = 'STARTED';
+        $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+      }
+      var eventId = that.record._files[that.findMasterFileIndex()].
+        tags._event_id;
+      that.getTaskFeedback(eventId, 'file_video_metadata_extraction',
+        'FAILURE').then(function(data) {
+        that.failedMetadataExtractionEvent = null;
+        data.forEach(function(taskInfo) {
+          var eventId = taskInfo.info.payload.event_id;
+          var taskId = taskInfo.id;
+          that.restartEvent(eventId, taskId).catch(function() {
+            that.failedMetadataExtractionEvent = true;
+          });
+        });
+      });
+    };
+
+    this.restartFailedSubformats = function(subformatKeys) {
+      var eventId = that.record._files[that.findMasterFileIndex()].
+        tags._event_id;
+      that.failedSubformatKeys = _.difference(that.failedSubformatKeys,
+                                              subformatKeys);
+      that.record._files[that.findMasterFileIndex()].subformat.forEach(
+        function(subformat) {
+          if (subformatKeys.includes(subformat.key)) {
+            subformat.errored = false;
+            subformat.progress = 0;
+          }
+        });
+      var transcodeFailureIndex = that.stateQueue.FAILURE.
+                                  indexOf('file_transcode');
+      if (transcodeFailureIndex > -1) {
+        that.stateQueue.FAILURE.splice(transcodeFailureIndex, 1);
+        that.stateQueue.STARTED.push('file_transcode');
+        that.record._deposit.state.file_transcode = 'STARTED';
+        $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+      }
+      that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
+        .then(function(data) {
+        data.filter(function(taskInfo) {
+          return subformatKeys.includes(taskInfo.info.payload.key);
+        }).forEach(function(taskInfo) {
+          var eventId = taskInfo.info.payload.event_id;
+          var taskId = taskInfo.id;
+          that.restartEvent(eventId, taskId).catch(function() {
+            var key = taskInfo.info.payload.key;
+            if (!that.failedSubformatKeys.includes(key)) {
+              that.failedSubformatKeys.push(key);
+            }
+          });
+        });
       });
     };
 
@@ -205,7 +295,41 @@ function cdsDepositCtrl(
       }
     };
 
+    this.subformatSortByKey = function(sub1, sub2) {
+      var lengthDiff = sub1.key.length - sub2.key.length;
+      if (lengthDiff != 0) {
+        return lengthDiff;
+      } else {
+        return sub1.key.localeCompare(sub2.key);
+      }
+    };
+
+    this.updateSubformatsList = function(fileOld, fileNew) {
+      var subformatsOld = fileOld.subformat || [];
+      var subformatsNew = fileNew.subformat || [];
+
+      var keys1 = subformatsOld.map(_.property('key'));
+      var keys2 = subformatsNew.map(_.property('key'));
+      _.difference(keys2, keys1).forEach(function (newSubformat) {
+        subformatsOld.push({key: newSubformat})
+      });
+
+      subformatsNew = subformatsNew.sort(that.subformatSortByKey);
+      subformatsOld = subformatsOld.sort(that.subformatSortByKey);
+      for (var i in subformatsNew) {
+        if (subformatsNew[i].progress < subformatsOld.progress) {
+          delete subformatsNew[i].progress;
+        }
+      }
+
+      fileOld.subformat = subformatsOld;
+      fileNew.subformat = subformatsNew;
+    };
+
     this.updateDeposit = function(deposit) {
+      for (var i in that.record._files) {
+        that.updateSubformatsList(that.record._files[i], deposit._files[i]);
+      }
       that.record._files = angular.merge(
         [],
         that.record._files,
@@ -219,6 +343,38 @@ function cdsDepositCtrl(
         deposit._deposit.state || {}
       );
       that.lastUpdated = new Date();
+    };
+
+    this.fetchSubformatStatuses = function() {
+      var masterIndex = that.findMasterFileIndex();
+      if (masterIndex > -1) {
+        var masterFile = that.record._files[masterIndex];
+        var tags = masterFile.tags;
+        if (tags && tags._event_id) {
+          var eventId = tags._event_id;
+          that.getTaskFeedback(eventId, 'file_transcode')
+            .then(function(data) {
+              data.filter(function(taskInfo) {
+                return taskInfo.status == 'FAILURE';
+              }).forEach(function (taskInfo) {
+                taskInfo.info.payload.errored = true;
+                var key = taskInfo.info.payload.key;
+                if (!that.failedSubformatKeys.includes(key)) {
+                  that.failedSubformatKeys.push(key);
+                }
+              });
+              var subformatsNew = {
+                subformat: data.map(function(task) {
+                  var payload = task.info.payload;
+                  payload.progress = payload.percentage;
+                  return payload;
+                })
+              };
+              that.updateSubformatsList(masterFile, subformatsNew);
+              angular.merge(masterFile, subformatsNew);
+            });
+        }
+      }
     };
 
     // cdsDeposit events
@@ -258,6 +414,9 @@ function cdsDepositCtrl(
     that.stateCurrent = that.stateQueue.STARTED[0] || null;
     // Check for previewer
     that.videoPreviewer();
+    // Update subformat statuses
+    that.fetchSubformatStatuses();
+    $interval(that.fetchSubformatStatuses, 30000);
 
     // Calculate the transcode
     this.updateStateReporter = function(type, data) {
@@ -361,6 +520,14 @@ function cdsDepositCtrl(
           type,
           data
         );
+      }
+      // Check for errors in metadata extraction
+      if (type === 'file_video_metadata_extraction') {
+        $scope.$broadcast(
+          depositListenerName + '.file.metadata_extraction',
+          type,
+          data
+        )
       }
       // Check for errors in the transcoding
       if (data.meta.payload.key && type === 'file_transcode') {
@@ -522,6 +689,7 @@ cdsDepositCtrl.$inject = [
   '$scope',
   '$q',
   '$timeout',
+  '$interval',
   '$sce',
   'depositStates',
   'depositStatuses',

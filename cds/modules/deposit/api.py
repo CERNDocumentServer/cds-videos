@@ -106,7 +106,6 @@ class CDSFileObject(FileObject):
                 'size': obj.file.size if obj.file else 0,
                 'file_id': str(obj.file_id),
                 'completed': obj.file is not None,
-                'progress': 100 if obj.file is not None else '',
                 'content_type': content_type,
                 'context_type': context_type,
                 'media_type': media_type,

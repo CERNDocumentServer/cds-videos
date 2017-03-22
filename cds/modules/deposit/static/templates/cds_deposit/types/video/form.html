@@ -30,10 +30,26 @@
             <div class="col-sm-12">
               <!-- FAILURE -->
               <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
-                <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE">
+                <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
                     <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
                 </div>
               </div>
+
+              <!-- Failed transcodings -->
+              <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
+                <div class="pull-left">
+                  <b>Failed transcodings:</b>
+                  <ul>
+                    <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
+                      {{ key }}
+                    </li>
+                  </ul>
+                </div>
+                <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
+                  <i class="fa fa-undo"></i>
+                </button>
+              </div>
+
               <!-- PENDING -->
               <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
                 <div class="progress">
