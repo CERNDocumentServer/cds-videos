@@ -27,9 +27,11 @@
 from __future__ import absolute_import
 
 import json
-from subprocess import check_output
+from itertools import takewhile, count
+from os.path import devnull
+from subprocess import check_output, check_call
 
-import pexpect
+from cds.modules.ffmpeg.errors import FrameExtractionInvalidArguments
 from cds_sorenson.api import get_available_aspect_ratios
 from flask import current_app
 
@@ -111,34 +113,37 @@ def ff_frames(input_file, start, end, step, duration, output,
               progress_callback=None):
     """Extract requested frames from video.
 
-    :param input_file:
-    :param start: time position to begin extracting frames.
-    :param end: time position to stop extracting frames.
-    :param step: time interval between frames.
-    :param duration: total duration of the video
-    :param output: output folder and format for the file names as in ``ffmpeg``
-    , i.e /path/to/somewhere/frames-%d.jpg
-    :param progress_callback: function taking as first parameter the number of
-    seconds processed and as second parameter the total duration of the video.
+    :param input_file: the input video file
+    :param start: time position to begin extracting frames
+    :param end: time position to stop extracting frames
+    :param step: time interval between frames
+    :param duration: the total duration of the video
+    :param output: output folder and format for the file names as in Python
+    string templates (i.e /path/to/somewhere/frames-{:02d}.jpg)
+    :param progress_callback: function taking as parameter the index of the
+    currently processed frame
+    :raises subprocess.CalledProcessError: if any error occurs in the execution
+    of the ``ffmpeg`` command
     """
-    cmd = 'ffmpeg -i {0} -ss {1} -to {2} -vf fps=1/{3} {4}'.format(
-        input_file, start, end, step, output
-    )
+    # Check the validity of the arguments
+    if not all([0 < start < duration, 0 < end < duration, 0 < step < duration,
+                start < end, (end - start) % step < 0.05]):
+        raise FrameExtractionInvalidArguments()
 
-    if current_app.config.get('USE_EOS', False):
-        cmd = 'bash -c "eosfusebind && {}"'.format(cmd)
+    # Iterate over requested timestamps
+    timestamps = takewhile(lambda t: t <= end, count(start, step))
+    for i, timestamp in enumerate(timestamps):
+        # Construct ffmpeg command
+        cmd = 'ffmpeg -accurate_seek -ss {0} -i {1} -vframes 1 {2}'.format(
+            timestamp, input_file, output.format(i + 1))
 
-    thread = pexpect.spawn(cmd)
+        # Wrap command with EOS environment
+        if current_app.config.get('USE_EOS', False):
+            cmd = 'bash -c "eosfusebind && {}"'.format(cmd)
 
-    regex = thread.compile_pattern_list(
-        [pexpect.EOF, 'time=(\d\d:\d\d:\d\d).\d\d']
-    )
-    while True:
-        index = thread.expect_list(regex, timeout=None)
-        if index == 0:
-            break
-        elif progress_callback:
-            progress_callback(sum(
-                int(amount) * 60 ** power for power, amount in
-                enumerate(reversed(thread.match.group(1).split(b':')))
-            ), duration)
+        # Run ffmpeg command
+        with open(devnull, 'wb') as null:
+            check_call(cmd, shell=True, stdout=null, stderr=null)
+
+        # Report progress
+        progress_callback(i + 1)

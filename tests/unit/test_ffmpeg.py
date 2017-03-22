@@ -28,13 +28,13 @@ from __future__ import absolute_import
 
 import shutil
 import tempfile
-from math import floor
 from os import listdir
 from os.path import isfile, join, dirname
 import json
 
 import pytest
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from cds.modules.ffmpeg.errors import FrameExtractionInvalidArguments
 from cds_sorenson.api import get_available_aspect_ratios
 
 
@@ -67,25 +67,49 @@ def test_ffprobe(video):
     check_metadata('duration', convertor=float, e=0.2)
 
 
-@pytest.mark.parametrize('start, end, gap', [
-    (5, 95, 10),  # CDS use-case
-    (4, 93, 12),
-    (0, 100, 1),
-    (90, 100, 2),
+@pytest.mark.parametrize('start, end, step, error', [
+    (5, 95, 10, None),  # CDS use-case
+    (4, 88, 12, None),
+    (1, 89, 1, None),
+    (90, 98, 2, None),
+    (0, 100, 1, FrameExtractionInvalidArguments),
+    (5, 10, 2, FrameExtractionInvalidArguments),
 ])
-def test_frames(video, start, end, gap):
+def test_frames(video_with_small, start, end, step, error):
     """Test frame extraction."""
-    # Convert percentages to values
-    duration = float(ff_probe(video, 'duration'))
-    time_step = duration * gap / 100
-    start_time = duration * start / 100
-    end_time = duration * (end + 1) / 100  # end inclusive
-
+    frame_indices = []
     tmp = tempfile.mkdtemp(dir=dirname(__file__))
-    ff_frames(video, start_time, end_time, time_step,
-              duration, join(tmp, 'img%d.jpg'))
-    file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
-    assert file_no == floor(((end - start) / gap) + 1)
+
+    # Convert percentages to values
+    duration = float(ff_probe(video_with_small, 'duration'))
+    time_step = duration * step / 100
+    start_time = duration * start / 100
+    end_time = (duration * end / 100) + 0.01
+
+    arguments = dict(
+        input_file=video_with_small,
+        start=start_time,
+        end=end_time,
+        step=time_step,
+        duration=duration,
+        output=join(tmp, 'img{0:02d}.jpg'),
+        progress_callback=lambda i: frame_indices.append(i))
+
+    # Extract frames
+    if error:
+        with pytest.raises(error):
+            ff_frames(**arguments)
+    else:
+        ff_frames(**arguments)
+
+        # Check that progress updates are complete
+        expected_file_no = ((end - start) / step) + 1
+        assert frame_indices == range(1, expected_file_no + 1)
+
+        # Check number of generated files
+        file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
+        assert file_no == expected_file_no
+
     shutil.rmtree(tmp)
 
 
