@@ -60,6 +60,19 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   }
 
   /*
+   * Updates the file with the error
+   */
+  function _subformatError(key) {
+    that.updateSubformat(
+      key,
+      {
+        errored: true,
+        progress: 0
+      }
+    );
+  }
+
+  /*
    * Uploads a local file
    */
   function _local(upload) {
@@ -205,6 +218,18 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     // Add any files in the queue that are not completed
     Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
 
+    // Listen for events for metadata extraction
+    $scope.$on(
+      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.metadata_extraction',
+      function(evt, type, data) {
+        switch(data.state) {
+          case 'FAILURE':
+            that.cdsDepositCtrl.failedMetadataExtractionEvent = true;
+            break;
+        }
+      }
+    )
+
     // Listen for events for transcoding
     $scope.$on(
       'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.transcoding',
@@ -212,14 +237,20 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         switch(data.state) {
           case 'FAILURE':
             // Notify for error
-            _error(data.meta.payload.key);
+            _subformatError(data.meta.payload.key);
+            var failedSubformats = that.cdsDepositCtrl.failedSubformatKeys;
+            if (!failedSubformats.includes(data.meta.payload.key)) {
+              failedSubformats.push(data.meta.payload.key);
+            }
             break;
           case 'STARTED':
+          case 'SUCCESS':
             that.updateSubformat(
               data.meta.payload.key,
               {
                 progress: data.meta.payload.percentage || 0,
-                completed: data.meta.payload.percentage === 100
+                completed: data.meta.payload.percentage === 100,
+                errored: false,
               }
             );
             break;
@@ -357,31 +388,37 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
 
   this.updateFile = function(key, data, force) {
     var index = this.findFileIndex(that.files, key);
-    if (force === true) {
-      this.files[index] = angular.copy(data);
-      return;
-    }
+    if (index != -1) {
+      if (force === true) {
+        this.files[index] = angular.copy(data);
+        return;
+      }
 
-    angular.merge(
-      this.files[index],
-      data || {}
-    );
+      angular.merge(
+        this.files[index],
+        data || {}
+      );
+    }
   }
+
   this.updateSubformat = function(key, data) {
     // Find master
     var master = that.cdsDepositCtrl.findMasterFileIndex();
     if (master > -1) {
       // Find the index of the subformat
-      var index = _.findIndex(that.files[master].subformat, {'key': key});
-      if (index > 0){
-        if (data.progress) {
-          data.progress = parseInt(data.progress);
-        }
-        this.files[master].subformat[index] = angular.merge(
+      var subformats = that.files[master].subformat;
+      var index = _.findIndex(subformats, {'key': key});
+      if (index > -1 && !subformats[index].errored) {
+        subformats[index] = angular.merge(
           {},
-          this.files[master].subformat[index],
+          subformats[index],
           data
         );
+      } else {
+        subformats.push(angular.merge(
+          { key: key },
+          data
+        ));
       }
     }
   }

@@ -181,7 +181,6 @@ def test_simple_workflow(
         assert myfile['completed'] is True
         assert 'version_id' in myfile
         assert myfile['key'] == 'test.json'
-        assert myfile['progress'] == 100
         assert myfile['size'] == 24
 
         # [[ PUBLISH VIDEO_1 ]]

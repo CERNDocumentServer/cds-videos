@@ -41,7 +41,7 @@
         <span ng-show="f.progress < 100 && !f.errored">{{ f.progress }} %</span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.progress==100 && !f.errored" class="text-success">✓</span>
+        <span ng-show="(f.completed || f.progress==100) && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.context_type ==='master' || f.progress < 100" ng-click="$ctrl.remove(f.key)">
@@ -83,7 +83,13 @@
         <span ng-show="f.errored" class="text-danger">Error</span>
         <span ng-show="f.progress==100 && !f.errored" class="text-success">✓</span>
       </td>
-      <td ng-show="f" class="text-center"></td>
+      <td ng-show="f" class="text-center">
+        <span ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.includes(f.key)">
+          <a ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats([f.key])">
+            <i class="fa fa-undo"></i>
+          </a>
+        </span>
+      </td>
     </tr>
     <tr class="warning" ng-show="$ctrl.getFrames()">
       <td>Extracted frames</td>
