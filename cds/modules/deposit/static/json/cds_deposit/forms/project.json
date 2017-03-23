@@ -51,6 +51,18 @@
     ],
     "rightColumn": [
       {
+        "title": "Keywords",
+        "type": "uiselectmultiple",
+        "key": "keywords[]",
+        "notitle": false,
+        "placeholder": "Keywords",
+        "options": {
+          "mergeObjects": true,
+          "asyncCallback": "$ctrl.autocompleteKeywords",
+          "url": "/api/keywords/_suggest"
+        }
+      },
+      {
         "key": "category",
         "placeholder": "Category",
         "title": "Category",
