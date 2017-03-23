@@ -112,6 +112,41 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   this.types = $q.defer();
 
+  this.autocompleteKeywords = function(options, query) {
+    if (query) {
+      // Parse the url parameters
+      return $http.get(options.url, {
+        params: {
+          "suggest-name": query
+        }
+      }).then(function(data) {
+        console.log(data.data);
+        console.log(data.data['suggest-name']);
+        that.lastKeywordSuggestions = {
+          data: data.data['suggest-name'][0]['options'].map(function(keyword) {
+            var name = keyword['payload'].name;
+            var value = keyword['payload'].key_id;
+
+            return {
+              text: name,
+              value: value
+            };
+          }).slice(0, 20)
+        };
+        return that.lastKeywordSuggestions;
+      });
+    } else {
+      // If the query string is empty and there's already a value set on the
+      // model, this means that the form was just loaded and is trying to
+      // display this value.
+      // This also happens when the user clicks on a suggestion or on the
+      // suggestion field. In this case, return the previous suggestions.
+      var defer = $q.defer();
+      defer.resolve(that.lastKeywordSuggestions || { data: [] });
+      return defer.promise;
+    }
+  };
+
   this.autocompleteCategories = function(options, query) {
     if (!that.categories) {
       that.categories = $http.get(options.url).then(function(data) {
