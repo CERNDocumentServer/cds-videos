@@ -258,7 +258,6 @@
         {
           "key": "copyright.holder",
           "title": "Holder",
-          "type": "string",
           "onChange": "$ctrl.checkCopyright(modelValue,form)"
         },
         {

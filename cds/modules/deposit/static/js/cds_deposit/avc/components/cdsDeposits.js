@@ -9,7 +9,8 @@ function cdsDepositsCtrl(
   depositActions,
   depositSSEEvents,
   cdsAPI,
-  urlBuilder
+  urlBuilder,
+  localStorageService
 ) {
   var that = this;
   this.edit = false;
@@ -136,7 +137,7 @@ function cdsDepositsCtrl(
   };
 
   this.isVideoFile = function(key) {
-    var videoExtensions = (that.videoExtensions || 'mp4,mov').split(',');
+    var videoExtensions = (that.videoExtensions || 'mp4,mkv,mov').split(',');
     var fileKey = null;
     videoExtensions.forEach(function(ext) {
       if (key.toLowerCase().endsWith('.' + ext.toLowerCase())) {
@@ -230,10 +231,17 @@ function cdsDepositsCtrl(
                 that.childrenInit,
                 that.childrenSchema,
                 'video',
-                { _project_id: master_id }
+                {
+                  _project_id: master_id,
+                  title: { title: key }
+                }
               );
             },
             function(response) {
+              // Map from deposit IDs to video basenames (local storage)
+              videoId = response.data.metadata._deposit.id
+              localStorageService.set(videoId, {'basename': key})
+
               var _f = [];
               _f.push(file);
               _f = _f.concat(_files.videoFiles[key] || []);
@@ -390,6 +398,7 @@ cdsDepositsCtrl.$inject = [
   'depositSSEEvents',
   'cdsAPI',
   'urlBuilder',
+  'localStorageService',
 ];
 
 function cdsDeposits() {

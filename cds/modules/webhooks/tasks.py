@@ -297,7 +297,9 @@ class ExtractMetadataTask(AVCTask):
         self.update_state(
             state=SUCCESS,
             meta=dict(
-                payload=dict(tags=tags,),
+                payload=dict(
+                    tags=tags,
+                    extracted_metadata=extracted_dict,),
                 message='Attached video metadata'))
 
 

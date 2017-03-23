@@ -4,6 +4,23 @@
     {{ alert.message }}
   </div>
 </div>
+<div class="alert alert-warning alert-dismissible" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
+  <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  Extracted metadata can be used to automatically fill part of the form.
+  <button ng-click="metadataModal = true" class="btn-default">Fill</button>
+</div>
+<modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="75%">
+  <ul>
+    <li ng-repeat="(key,value) in $ctrl.cdsDepositCtrl.getMetadataToDisplay()">
+      <strong>{{key}}</strong> {{value}}
+    </li>
+  </ul>
+  <p class="pull-right">
+    <button class="btn btn-success" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(true) ; $parent.hideModal()">Yes</button>
+    <button class="btn btn-danger" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
+  </p>
+</modal-dialog>
+
 
 <div>
   <div class="row">

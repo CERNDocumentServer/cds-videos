@@ -10,8 +10,10 @@ function cdsDepositCtrl(
   inheritedProperties,
   cdsAPI,
   urlBuilder,
-  typeReducer
+  typeReducer,
+  localStorageService
 ) {
+
   var that = this;
 
   this.depositFormModels = [];
@@ -34,6 +36,9 @@ function cdsDepositCtrl(
   // Alerts
   this.alerts = [];
 
+  // Metadata information to automatically fill form
+  this.metadataToFill = false;
+
   // Ignore server validation errors for the following fields
   this.noValidateFields = ['description.value'];
 
@@ -42,6 +47,7 @@ function cdsDepositCtrl(
   // Failed subformats
   this.failedSubformatKeys = [];
 
+  // Deposit type property
   Object.defineProperty(this, 'depositType', {
     get: function() {
       return that.master ? 'project' : 'video';
@@ -64,6 +70,9 @@ function cdsDepositCtrl(
 
   this.$onDestroy = function() {
     try {
+      // Clear local storage
+      that.cleanLocalStorage();
+
       // Destroy listener
       that.sseEventListener();
       $interval.cancel(that.fetchStatusInterval);
@@ -362,6 +371,68 @@ function cdsDepositCtrl(
       }
     };
 
+    // Update deposit based on extracted metadata from task
+    this.fillMetadata = function(answer) {
+      if (answer) {
+        angular.merge(that.record, that.metadataToFill);
+        that.makeSingleAction('SAVE_PARTIAL');
+      }
+      that.setOnLocalStorage('prompted', true);
+      that.metadataToFill = false;
+      return;
+    };
+
+    // Get metadata to automatically fill form from extracted metadata
+    this.getMetadataToFill = function(metadata) {
+      // Return if we have already prompted the user
+      if (that.getFromLocalStorage('prompted')) {
+        return false;
+      }
+
+      // Get extracted metadata
+      var allMetadata = metadata || that.getFromLocalStorage('metadata');
+
+      // No metadata extracted yet
+      if (!allMetadata) {
+        return false;
+      }
+
+      var metadataToFill = {};
+
+      // Title
+      var defaultTitle = that.getFromLocalStorage('basename');
+      if ((that.record.title) && (that.record.title.title === defaultTitle) &&
+          (allMetadata.title)) {
+        metadataToFill.title = {title: allMetadata.title};
+      }
+
+      // Do not prompt user when there is no metadata to fill in
+      if (_.isEmpty(metadataToFill)) {
+        return false;
+      }
+
+      return metadataToFill;
+    };
+
+    // Pre-fill changes to display to the user
+    this.getMetadataToDisplay = function() {
+        var toDisplay = {};
+        if (that.metadataToFill.title) {
+            toDisplay.Name = that.metadataToFill.title.title;
+        }
+        return toDisplay;
+    };
+
+    // Check if extracted metadata is available for automatic form fill
+    if (!this.master) {
+      this.metadataToFill = that.getMetadataToFill();
+    }
+
+    // Clean storage if published
+    if (this.record._deposit.status == 'published') {
+      this.cleanLocalStorage();
+    }
+
     // cdsDeposit events
 
     // Success message
@@ -465,12 +536,15 @@ function cdsDepositCtrl(
     ) {
       // Handle my state
       $scope.$apply(function() {
-        if (type === 'update_deposit') {
-          that.updateDeposit(data.meta.payload.deposit);
-        } else if (!(type === 'file_transcode' && data.state === 'SUCCESS')) {
+        if (!(type === 'file_transcode' && data.state === 'SUCCESS') &&
+            type !== 'update_deposit') {
           if (!['SUCCESS', 'FAILURE'].includes(that.taskState[type])) {
             that.taskState[type] = data.state;
           }
+        }
+
+        if (data.state === 'SUCCESS') {
+          that.successCallback(type, data);
         }
       });
       // The state has been changed update the current
@@ -504,6 +578,27 @@ function cdsDepositCtrl(
         )
       }
     });
+
+    this.successCallback = function(type, data) {
+      switch (type) {
+        case 'file_download':
+          // Add the previewer
+          /*that.videoPreviewer(
+            data.meta.payload.deposit_id,
+            data.meta.payload.key
+          );*/
+          break;
+        case 'update_deposit':
+          // Update deposit
+          that.updateDeposit(data.meta.payload.deposit);
+          break;
+        case 'file_video_metadata_extraction':
+          var allMetadata = data.meta.payload.extracted_metadata
+          that.setOnLocalStorage('metadata', allMetadata);
+          that.metadataToFill = that.getMetadataToFill(allMetadata);
+          break;
+      }
+    };
 
     this.displayFailure = function() {
       return that.depositStatusCurrent === that.depositStatuses.FAILURE;
@@ -631,6 +726,25 @@ function cdsDepositCtrl(
     return that.depositFormModels.some(_.property('$invalid'))
   }
 
+  // Local storage
+  this.getFromLocalStorage = function(key) {
+    try {
+      return localStorageService.get(that.id)[key];
+    } catch (error) {
+      return null;
+    }
+  };
+
+  this.setOnLocalStorage = function(key, value) {
+    var current_info = localStorageService.get(that.id);
+    current_info[key] = value;
+    localStorageService.set(that.id, current_info);
+  };
+
+  this.cleanLocalStorage = function() {
+    localStorageService.remove(that.id);
+  }
+
 }
 
 cdsDepositCtrl.$inject = [
@@ -646,6 +760,7 @@ cdsDepositCtrl.$inject = [
   'cdsAPI',
   'urlBuilder',
   'typeReducer',
+  'localStorageService'
 ];
 
 /**
