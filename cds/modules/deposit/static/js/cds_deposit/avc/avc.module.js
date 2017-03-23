@@ -20,6 +20,7 @@ function cdsDepositsConfig(
   localStorageServiceProvider.setPrefix('cdsDeposit');
 
   var mainStatuses = [
+    'file_upload',
     'file_download',
     'file_video_metadata_extraction',
     'file_video_extract_frames',
@@ -55,6 +56,7 @@ function cdsDepositsConfig(
   ]);
 
   taskRepresentationsProvider.setValues({
+    file_upload: 'Video file upload',
     file_download: 'Video file download',
     file_transcode: 'Video transcoding',
     file_video_extract_frames: 'Video frame extraction',

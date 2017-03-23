@@ -19,6 +19,19 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     }
   }
 
+  function updateMasterFileUpload(state, percentage) {
+    var masterFile = that.cdsDepositCtrl.findMasterFile();
+    if (!masterFile) {
+      that.cdsDepositCtrl.stateCurrent = 'file_upload';
+      that.cdsDepositCtrl.updateStateReporter('file_upload', {
+        payload: {
+          percentage: percentage || 0
+        }
+      }, state);
+      that.cdsDepositCtrl.calculateCurrentState();
+    }
+  }
+
   /*
    * Updates the file with the success
    */
@@ -31,12 +44,14 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       data,
       true
     );
+    updateMasterFileUpload('SUCCESS', 100);
   }
 
   /*
    * Updates the file with the percentage
    */
   function _progress(key, percentage) {
+    updateMasterFileUpload('STARTED', percentage);
     that.updateFile(
       key,
       {
@@ -78,9 +93,15 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   function _local(upload) {
     var promise = $q.defer();
     var args = that.prepareUpload(upload);
+    var deposit = that.cdsDepositCtrl;
+    deposit.record._deposit.state.file_upload = 'STARTED';
+    $scope.$emit('cds.deposit.status.changed', deposit.id, deposit.stateQueue);
     Upload.http(args)
       .then(
         function success(response) {
+          deposit.record._deposit.state.file_upload = 'SUCCESS';
+          $scope.$emit('cds.deposit.status.changed', deposit.id,
+                       deposit.stateQueue);
           _success(
             response.config.data.key,
             response.data
@@ -107,6 +128,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           );
         },
         function error(response) {
+          updateMasterFileUpload('FAILURE');
+          $scope.$emit('cds.deposit.status.changed', deposit.id,
+                       deposit.stateQueue);
           promise.reject(response);
         },
         function progress(evt) {
