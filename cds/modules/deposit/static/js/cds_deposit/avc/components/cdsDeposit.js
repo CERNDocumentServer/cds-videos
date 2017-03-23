@@ -171,14 +171,16 @@ function cdsDepositCtrl(
       that.processSubformats();
       that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
         .then(function(data) {
-          data.filter(function(taskInfo) {
+          var restartEvents = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
-          }).forEach(function(taskInfo) {
+          }).map(function(taskInfo) {
             var eventId = taskInfo.info.payload.event_id;
             var taskId = taskInfo.id;
-            that.restartEvent(eventId, taskId);
+            return that.restartEvent(eventId, taskId);
           });
-          that.fetchCurrentStatuses();
+          $q.all(restartEvents).then(function() {
+            that.fetchCurrentStatuses();
+          });
       });
     };
 
@@ -187,11 +189,15 @@ function cdsDepositCtrl(
       that.presets = [];
       depositStates.forEach(function(state) {
         that.stateReporter[state] = {
-          status: state,
+          status: 'PENDING',
           message: state,
           payload: { percentage: 0 },
         };
       });
+      _.forEach(that.record._deposit.state, function(value, state) {
+        that.stateReporter[state].status = value;
+      });
+      that.calculateCurrentState();
     };
 
     that.processSubformats = function() {
@@ -199,8 +205,9 @@ function cdsDepositCtrl(
       if (masterFile && masterFile.subformat) {
         var subformats = masterFile.subformat;
         // Sort by key length and key
-        subformats = _.chain(subformats).sortBy('key')
-          .sortBy(function(subformat) {
+        subformats = _.chain(subformats).filter(function(subformat) {
+            return subformat.hasOwnProperty('key');
+          }).sortBy('key').sortBy(function(subformat) {
             return subformat.key.length;
           }).value();
         masterFile.subformat = subformats;
@@ -310,6 +317,7 @@ function cdsDepositCtrl(
               });
               masterFile.subformat = subformatsNew;
               that.processSubformats();
+              that.calculateCurrentState();
             });
         }
       }
@@ -365,6 +373,51 @@ function cdsDepositCtrl(
             toDisplay.Name = that.metadataToFill.title.title;
         }
         return toDisplay;
+    };
+
+    // Calculate the transcode
+    this.updateStateReporter = function(type, data, status) {
+      if (data && status && !data.status) {
+        data.status = status;
+      }
+      if (type === 'file_transcode') {
+        if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
+          that.videoPreviewer(
+            data.payload.deposit_id,
+            data.payload.key
+          );
+        }
+      } else {
+        if (that.stateReporter[type].status != data.status) {
+          $scope.$broadcast('cds.deposit.task', type, data.status, data);
+        }
+        that.stateReporter[type] = angular.copy(data);
+      }
+    };
+
+    this.calculateCurrentState = function() {
+      // The state has been changed update the current
+      var stateCurrent = null;
+      depositStates.forEach(function(task) {
+        var state = that.record._deposit.state[task];
+        if ((state == 'STARTED' || state == 'PENDING') && !stateCurrent) {
+          stateCurrent = task;
+        }
+      });
+      that.stateCurrent = stateCurrent;
+      // Change the Deposit Status
+      var values = _.values(that.record._deposit.state);
+      if (!values.length) {
+        that.depositStatusCurrent = null;
+      } else if (values.includes('FAILURE')) {
+        that.depositStatusCurrent = depositStatuses.FAILURE;
+      } else if (values.includes('STARTED')) {
+        that.depositStatusCurrent = depositStatuses.STARTED;
+      } else if (!values.includes('PENDING')) {
+        that.depositStatusCurrent = depositStatuses.SUCCESS;
+      } else {
+        that.depositStatusCurrent = depositStatuses.STARTED;
+      }
     };
 
     // Check if extracted metadata is available for automatic form fill
@@ -428,48 +481,6 @@ function cdsDepositCtrl(
         that.metadataToFill = that.getMetadataToFill(allMetadata);
       }
     });
-
-    // Calculate the transcode
-    this.updateStateReporter = function(type, data, status) {
-      if (data && status && !data.status) {
-        data.status = status;
-      }
-      if (type === 'file_transcode') {
-        if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
-          that.videoPreviewer(
-            data.payload.deposit_id,
-            data.payload.key
-          );
-        }
-      } else {
-        if (that.stateReporter[type].status != data.status) {
-          $scope.$broadcast('cds.deposit.task', type, data.status, data);
-        }
-        that.stateReporter[type] = angular.copy(data);
-      }
-    };
-
-    this.stateCurrentCalculate = function(started) {
-      var currentState = null;
-      depositStates.forEach(function(task) {
-       if (that.record._deposit.state[task] == 'STARTED' && !currentState) {
-         currentState = task;
-       }
-      });
-      return currentState;
-    };
-
-    that.calculateStatus = function() {
-      var values = _.values(that.record._deposit.state);
-      if (values.includes('FAILURE')) {
-        return depositStatuses.FAILURE;
-      } else if (values.includes('STARTED')) {
-        return depositStatuses.STARTED;
-      } else {
-        return depositStatuses.SUCCESS;
-      }
-    };
-
     // Register related events from sse
     var depositListenerName = 'sse.event.' + this.id;
     this.sseEventListener = $scope.$on(depositListenerName, function(
@@ -511,10 +522,8 @@ function cdsDepositCtrl(
           that.updateStateReporter(type, data.meta, data.state);
         }
       });
-      // The state has been changed update the current
-      that.stateCurrent = that.stateCurrentCalculate();
-      // Change the Deposit Status
-      that.depositStatusCurrent = that.calculateStatus();
+      // Update deposit current state
+      that.calculateCurrentState();
     });
 
     this.displayFailure = function() {
