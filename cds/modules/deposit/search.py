@@ -41,8 +41,15 @@ def deposit_search_factory(self, search):
     """Replace default search factory to use custom facet factory."""
     from invenio_records_rest.sorter import default_sorter_factory
     query_string = request.values.get('q', '')
-    query_parser = Q('query_string',
-                     query=query_string) if query_string else Q()
+
+    query_parser = Q(
+        'query_string',
+        # Make each term fuzzy
+        query=' '.join(['{}~'.format(w) for w in query_string.split()]),
+        # Fuzziness parameters
+        fuzzy_prefix_length=1,
+        fuzziness=6,
+    ) if query_string else Q()
 
     try:
         search = search.query(query_parser)
