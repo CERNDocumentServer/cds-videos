@@ -26,7 +26,11 @@
 
 from __future__ import absolute_import, print_function
 
+import pytest
 
+
+# FIXME see cds#618 comments
+@pytest.mark.skip(reason='see cds#618 comments')
 def test_celery():
     """Test celery application."""
     from cds.celery import celery
