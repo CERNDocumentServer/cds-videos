@@ -103,8 +103,8 @@ def test_frames(video_with_small, start, end, step, error):
         ff_frames(**arguments)
 
         # Check that progress updates are complete
-        expected_file_no = ((end - start) / step) + 1
-        assert frame_indices == range(1, expected_file_no + 1)
+        expected_file_no = int(((end - start) / step) + 1)
+        assert frame_indices == list(range(1, expected_file_no + 1))
 
         # Check number of generated files
         file_no = len([f for f in listdir(tmp) if isfile(join(tmp, f))])
