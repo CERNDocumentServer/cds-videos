@@ -43,16 +43,44 @@
       </div>
   </a>
 </div>
-<div ng-if="vm.invenioSearchResults.hits.total == 0">
+
+<div ng-if="vm.invenioSearchResults.hits.total == 0 && vm.invenioSearchArgs.q">
   <div class="list-group">
     <div class="list-group-item">
-      <div align="center">
-        <h1>No uploads</h1>
-        <p>Get started by making your first deposit</p>
-        <a class="btn btn-success" href="/deposit/new">
-            <i class="glyphicon glyphicon-upload"></i>
-            New Upload
-        </a>
+      <div class="text-center">
+        <h3>No results found for <em>'{{ vm.invenioSearchArgs.q }}'</em></h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div ng-if="vm.invenioSearchResults.hits.total == 0 && !vm.invenioSearchArgs.q && vm.invenioSearchResults.aggregations.status.buckets.length == 0">
+  <div class="list-group">
+    <div class="list-group-item">
+      <div class="jumbotron" align="center" class="hidden-sm hidden-xs">
+        <h1>Get started!</h1>
+        <p>Make your first upload.</p>
+        <h1>
+          <a class="btn btn-success btn-lg" href="/deposit/new">
+            <i class="fa fa-upload"></i> New Upload
+          </a>
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div ng-if="vm.invenioSearchResults.hits.total == 0 && !vm.invenioSearchArgs.q && vm.invenioSearchResults.aggregations.status.buckets.length != 0">
+  <div class="list-group">
+    <div class="list-group-item">
+      <div class="jumbotron" align="center" class="hidden-sm hidden-xs">
+        <h1>Get started!</h1>
+        <p>Upload a new video.</p>
+        <h1>
+          <a class="btn btn-success btn-lg" href="/deposit/new">
+            <i class="fa fa-upload"></i> New Upload
+          </a>
+        </h1>
       </div>
     </div>
   </div>

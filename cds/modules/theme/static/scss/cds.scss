@@ -150,6 +150,13 @@ a[ng-click]{
     flex-direction: column;
   }
 }
+#cds-deposit-index {
+  invenio-search {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+}
 // login
 
 .cds-login {
