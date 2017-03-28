@@ -34,6 +34,7 @@ from invenio_deposit.config import (DEPOSIT_REST_FACETS,
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
+from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 
 from .modules.deposit.facets import created_by_me_aggs
@@ -340,6 +341,8 @@ RECORDS_REST_ENDPOINTS = dict(
         read_permission_factory_imp=record_read_permission_factory,
     ),
 )
+
+RECORDS_REST_ENDPOINTS.update(OPENDEFINITION_REST_ENDPOINTS)
 
 # Sort options records REST API.
 RECORDS_REST_SORT_OPTIONS = dict(
@@ -849,3 +852,8 @@ SSE_REDIS_URL = 'redis://localhost:6379/1'
 # Keywords
 ###############################################################################
 CDS_KEYWORDS_HARVESTER_URL = 'http://home.cern/api/tags-json-feed'
+
+# OpenDefinition
+# ==============
+#: Hostname for OpenAIRE's grant resolver.
+OPENDEFINITION_JSONRESOLVER_HOST = 'cds.cern.ch'

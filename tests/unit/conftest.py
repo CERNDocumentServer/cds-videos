@@ -936,3 +936,49 @@ def cern_keywords():
             {"id": "14", "name": "AEGIS"},
         ]
     }
+
+
+@pytest.fixture()
+def licenses():
+    """List of licenses."""
+    return {
+        "AAL": {
+            "domain_content": False,
+            "domain_data": False,
+            "domain_software": True,
+            "family": "",
+            "id": "AAL",
+            "maintainer": "",
+            "od_conformance": "not reviewed",
+            "osd_conformance": "approved",
+            "status": "active",
+            "title": "Attribution Assurance Licenses",
+            "url": "http://www.opensource.org/licenses/AAL"
+        },
+        "AFL-3.0": {
+            "domain_content": True,
+            "domain_data": False,
+            "domain_software": True,
+            "family": "",
+            "id": "AFL-3.0",
+            "maintainer": "Lawrence Rosen",
+            "od_conformance": "not reviewed",
+            "osd_conformance": "approved",
+            "status": "active",
+            "title": "Academic Free License 3.0",
+            "url": "http://www.opensource.org/licenses/AFL-3.0"
+        },
+        "AGPL-3.0": {
+            "domain_content": False,
+            "domain_data": False,
+            "domain_software": True,
+            "family": "",
+            "id": "AGPL-3.0",
+            "maintainer": "Free Software Foundation",
+            "od_conformance": "not reviewed",
+            "osd_conformance": "approved",
+            "status": "active",
+            "title": "GNU Affero General Public License v3",
+            "url": "http://www.opensource.org/licenses/AGPL-3.0"
+        }
+    }

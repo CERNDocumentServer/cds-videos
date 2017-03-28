@@ -1,0 +1,15 @@
+{
+  "CERN": {
+      "domain_content": true,
+      "domain_data": true,
+      "domain_software": true,
+      "family": "",
+      "id": "CERN",
+      "maintainer": "CERN",
+      "od_conformance": "not reviewed",
+      "osd_conformance": "not reviewed",
+      "status": "active",
+      "title": "CERN License",
+      "url": "http://copyright.web.cern.ch"
+    }
+}

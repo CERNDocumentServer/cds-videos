@@ -232,6 +232,11 @@ class CDSDeposit(Deposit):
         data['_buckets'] = {'deposit': str(bucket.id)}
         data['_deposit']['state'] = {}
         data.setdefault('keywords', [])
+        data.setdefault('license', [{
+            'license': 'CERN',
+            'material': '',
+            'url': 'http://copyright.web.cern.ch',
+        }])
         deposit = super(CDSDeposit, cls).create(
             data, id_=id_, validator=PartialDraft4Validator)
         RecordsBuckets.create(record=deposit.model, bucket=bucket)

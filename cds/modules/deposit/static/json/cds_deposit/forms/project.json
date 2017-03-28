@@ -165,10 +165,39 @@
   },
   "licenses": [
     {
-      "title": "License",
+      "type": "array",
       "key": "license",
-      "notitle": true,
-      "add": "Add more licenses"
+      "title": "Licenses",
+      "description": "",
+      "sortOptions": {
+        "disabled": false,
+        "handle": "i.sort-handle",
+        "cursor": "move",
+        "axis": "y"
+      },
+      "add": "Add another license",
+      "inline": true,
+      "items": [
+        {
+          "type": "uiselect",
+          "key": "license[].license",
+          "notitle": true,
+          "placeholder": "License name",
+          "options": {
+            "mergeObjects": true,
+            "asyncCallback": "$ctrl.autocompleteLicenses",
+            "url": "/api/licenses/_suggest"
+          }
+        },
+        {
+          "key": "license[].material",
+          "placeholder": "Material"
+        },
+        {
+          "key": "license[].url",
+          "placeholder": "Url"
+        }
+      ]
     }
   ],
   "translations": [

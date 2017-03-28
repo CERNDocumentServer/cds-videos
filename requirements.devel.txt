@@ -44,6 +44,9 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
 -e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db
+# Waiting PR invenio-opendefinition#19
+# -e git+https://github.com/inveniosoftware/invenio-opendefinition.git#egg=invenio-opendefinition
+-e git+https://github.com/hachreak/invenio-opendefinition.git@fix_import#egg=invenio-opendefinition
 # FIXME wait for PR#157
 # -e git+https://github.com/inveniosoftware/invenio-deposit.git@create_validator#egg=invenio-deposit
 -e git+https://github.com/hachreak/invenio-deposit.git@create_validator#egg=invenio-deposit

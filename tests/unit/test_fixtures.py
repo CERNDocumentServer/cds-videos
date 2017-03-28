@@ -36,7 +36,33 @@ from invenio_sequencegenerator.models import TemplateDefinition
 from cds.modules.deposit.api import CDSDeposit
 from cds.modules.fixtures.cli import categories as cli_categories, \
     sequence_generator as cli_sequence_generator, \
-    pages as cli_pages, videos as cli_videos, keywords as cli_keywords
+    pages as cli_pages, videos as cli_videos, keywords as cli_keywords, \
+    licenses as cli_licenses
+
+
+def test_fixture_licenses(app, script_info, db, es, cds_jsonresolver,
+                          licenses):
+    """Test load category fixtures."""
+    assert len(RecordMetadata.query.all()) == 0
+    runner = CliRunner()
+
+    class TestRequest(object):
+        def json(self):
+            return licenses
+    return_value = TestRequest()
+
+    with mock.patch('requests.get', return_value=return_value):
+        res = runner.invoke(cli_licenses, [], obj=script_info)
+    assert res.exit_code == 0
+    licenses_db = RecordMetadata.query.all()
+    assert len(licenses_db) == 4
+    for license in licenses_db:
+        assert 'id' in license.json
+        assert 'title' in license.json
+        assert 'url' in license.json
+    ids = set([license.json['id'] for license in licenses_db])
+    assert len(ids) == 4
+    assert 'CERN' in ids
 
 
 def test_fixture_keywords(app, script_info, db, es, cds_jsonresolver,
