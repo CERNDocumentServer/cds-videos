@@ -111,6 +111,7 @@ install_requires = [
     'invenio-migrator>=1.0.0a7',
     'invenio-oauth2server>=1.0.0a12',
     'invenio-oauthclient>=1.0.0a10',
+    'invenio-opendefinition>=1.0.0a3',
     'invenio-pages>=1.0.0a3',
     'invenio-pidstore>=1.0.0a9',
     'invenio-previewer>=1.0.0a8',

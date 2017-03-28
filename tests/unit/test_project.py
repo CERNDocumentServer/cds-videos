@@ -175,6 +175,13 @@ def test_add_video(api_app, deposit_rest, es, cds_jsonresolver, users,
     # create empty project
     project = Project.create(project_data).commit()
 
+    # check default project license
+    assert project['license'] == [{
+        'license': 'CERN',
+        'material': '',
+        'url': 'http://copyright.web.cern.ch',
+    }]
+
     # check project <--/--> video
     assert project['videos'] == []
 
@@ -186,6 +193,13 @@ def test_add_video(api_app, deposit_rest, es, cds_jsonresolver, users,
         '_project_id': project['_deposit']['id'],
     }
     video_1 = Video.create(project_video_1)
+
+    # check default video license
+    assert video_1['license'] == [{
+        'license': 'CERN',
+        'material': '',
+        'url': 'http://copyright.web.cern.ch',
+    }]
 
     # check project <----> video
     assert project._find_refs([video_1.ref])

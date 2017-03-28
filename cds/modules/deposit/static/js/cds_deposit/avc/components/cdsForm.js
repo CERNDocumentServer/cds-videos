@@ -59,6 +59,37 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   }
 
+  this.autocompleteLicenses = function(options, query) {
+    if (query) {
+      // Parse the url parameters
+      return $http.get(options.url, {
+        params: {"text": query}
+      }).then(function(data) {
+        that.lastLicenseSuggestions = {
+          data: data.data['text'][0]['options'].map(function(license) {
+            var value = license['payload'].id;
+            var text = value;
+
+            return {
+              text: text,
+              value: value
+            };
+          }).slice(0, 20)
+        };
+        return that.lastLicenseSuggestions;
+      });
+    } else {
+      // If the query string is empty and there's already a value set on the
+      // model, this means that the form was just loaded and is trying to
+      // display this value.
+      // This also happens when the user clicks on a suggestion or on the
+      // suggestion field. In this case, return the previous suggestions.
+      var defer = $q.defer();
+      defer.resolve(that.lastLicenseSuggestions || { data: [] });
+      return defer.promise;
+    }
+  };
+
   this.autocompleteAuthors = function(options, query) {
     if (query) {
       // Parse the url parameters
@@ -120,8 +151,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
           "suggest-name": query
         }
       }).then(function(data) {
-        console.log(data.data);
-        console.log(data.data['suggest-name']);
         that.lastKeywordSuggestions = {
           data: data.data['suggest-name'][0]['options'].map(function(keyword) {
             var name = keyword['payload'].name;

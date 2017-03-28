@@ -46,7 +46,20 @@ from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
 from invenio_records_files.api import Record as FileRecord
 from invenio_records_files.models import RecordsBuckets
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_opendefinition.tasks import harvest_licenses, \
+    import_licenses_from_json
 from cds.modules.records.tasks import keywords_harvesting
+
+
+def _load_json_source(filename):
+    """Load json fixture."""
+    source = pkg_resources.resource_filename(
+        'cds.modules.fixtures', 'data/{0}'.format(filename)
+    )
+    with open(source, 'r') as fp:
+        content = simplejson.load(fp)
+    return content
 
 
 def _handle_source(source, temp):
@@ -492,4 +505,21 @@ def keywords(url):
     if url:
         current_app.config['CDS_KEYWORDS_HARVESTER_URL'] = url
 
+    click.echo("Sending to index...")
     keywords_harvesting.s().apply()
+
+
+@fixtures.command()
+@with_appcontext
+def licenses():
+    """Load Licenses."""
+    # harvest licenses
+    harvest_licenses()
+    # load cds licenses
+    import_licenses_from_json(_load_json_source('licenses.json'))
+    db.session.commit()
+    # index all licenses
+    query = (str(x[0]) for x in PersistentIdentifier.query.filter_by(
+        pid_type='od_lic').values(PersistentIdentifier.object_uuid))
+    click.echo("Sending to index...")
+    RecordIndexer().bulk_index(query)
