@@ -244,8 +244,9 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
         def run(self):
             from invenio_sse import current_sse
             with app.app_context():
-                current_sse._pubsub.subscribe(sse_channel)
-                messages = current_sse._pubsub.listen()
+                pubsub = current_sse._redis.pubsub()
+                pubsub.subscribe(sse_channel)
+                messages = pubsub.listen()
                 next(messages)  # Skip subscribe message
                 self._return = next(messages)['data'].decode('utf-8')
 
