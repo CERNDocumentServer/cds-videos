@@ -32,7 +32,7 @@ from flask import render_template
 class VideoExtension(object):
     """Previewer extension for videos."""
 
-    previewable_extensions = ['mp4', 'webm']
+    previewable_extensions = ['mp4', 'webm', 'mov']
 
     def __init__(self, template=None, embed=False):
         self.embed = embed
@@ -41,7 +41,7 @@ class VideoExtension(object):
     @staticmethod
     def can_preview(file):
         """Determine if the given file can be previewed."""
-        return file.is_local() and file.has_extensions('.mp4', '.webm')
+        return file.is_local() and file.has_extensions('.mp4', '.webm', '.mov')
 
     def preview(self, file):
         """Render appropriate template with embed flag."""
