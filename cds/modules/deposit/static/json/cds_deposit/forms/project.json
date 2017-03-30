@@ -51,18 +51,6 @@
     ],
     "rightColumn": [
       {
-        "title": "Keywords",
-        "type": "uiselectmultiple",
-        "key": "keywords[]",
-        "notitle": false,
-        "placeholder": "Keywords",
-        "options": {
-          "mergeObjects": true,
-          "asyncCallback": "$ctrl.autocompleteKeywords",
-          "url": "/api/keywords/_suggest"
-        }
-      },
-      {
         "key": "category",
         "placeholder": "Category",
         "title": "Category",
@@ -90,6 +78,18 @@
           "asyncCallback": "$ctrl.autocompleteType"
         },
         "required": false
+      },
+      {
+        "title": "Keywords",
+        "key": "keywords",
+        "type": "uiselectmultiple",
+        "notitle": false,
+        "placeholder": "Keywords",
+        "options": {
+          "mergeObjects": true,
+          "asyncCallback": "$ctrl.autocompleteKeywords",
+          "url": "/api/keywords/_suggest"
+        }
       },
       {
         "type": "array",
@@ -167,7 +167,7 @@
     {
       "type": "array",
       "key": "license",
-      "title": "Licenses",
+      "notitle": true,
       "description": "",
       "sortOptions": {
         "disabled": false,
@@ -181,7 +181,8 @@
         {
           "type": "uiselect",
           "key": "license[].license",
-          "notitle": true,
+          "notitle": false,
+          "title": "License",
           "placeholder": "License name",
           "options": {
             "mergeObjects": true,
@@ -191,7 +192,8 @@
         },
         {
           "key": "license[].material",
-          "placeholder": "Material"
+          "placeholder": "Material",
+          "title": "Material"
         },
         {
           "key": "license[].url",

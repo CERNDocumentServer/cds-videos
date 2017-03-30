@@ -85,7 +85,19 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       // This also happens when the user clicks on a suggestion or on the
       // suggestion field. In this case, return the previous suggestions.
       var defer = $q.defer();
-      defer.resolve(that.lastLicenseSuggestions || { data: [] });
+      defer.resolve(
+        that.lastLicenseSuggestions ||
+        {
+          data: _.map(
+            that.cdsDepositCtrl.record.license || [],
+            function(_license) {
+              return {
+                text: _license.license, value: _license.license
+              }
+            }
+          )
+        }
+      );
       return defer.promise;
     }
   };
@@ -136,7 +148,19 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       // This also happens when the user clicks on a suggestion or on the
       // suggestion field. In this case, return the previous suggestions.
       var defer = $q.defer();
-      defer.resolve(that.lastAuthorSuggestions || { data: [] });
+      defer.resolve(
+        that.lastAuthorSuggestions ||
+        {
+          data: _.map(
+            that.cdsDepositCtrl.record.contributors || [],
+            function(_contributor) {
+              return {
+                text: _contributor.name, value: _contributor
+              }
+            }
+          )
+        }
+      );
       return defer.promise;
     }
   };
@@ -152,17 +176,33 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         }
       }).then(function(data) {
         that.lastKeywordSuggestions = {
-          data: data.data['suggest-name'][0]['options'].map(function(keyword) {
-            var name = keyword['payload'].name;
-            var value = keyword['payload'].key_id;
-
+          data: data.data['suggest-name'][0]['options'].concat(that.cdsDepositCtrl.record.keywords || []).map(function(keyword) {
+            var name = (keyword.payload) ? keyword.payload.name : keyword.name;
+            var key_id = (keyword.payload) ? keyword.payload.key_id : keyword.key_id;
             return {
-              text: name,
-              value: value
+              name: name,
+              value: {
+                name: name,
+                key_id: key_id
+              }
             };
           }).slice(0, 20)
         };
+
+
+        console.log('HELLO', that.lastKeywordSuggestions);
         return that.lastKeywordSuggestions;
+        return { data : angular.merge(
+          {},
+          that.lastKeywordSuggestions.data,
+          _.map(
+            that.cdsDepositCtrl.record.keywords || [],
+            function(_keyword) {
+              return {
+                name: _keyword.name, value: _keyword,
+              }
+            })
+        )}
       });
     } else {
       // If the query string is empty and there's already a value set on the
@@ -171,7 +211,15 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       // This also happens when the user clicks on a suggestion or on the
       // suggestion field. In this case, return the previous suggestions.
       var defer = $q.defer();
-      defer.resolve(that.lastKeywordSuggestions || { data: [] });
+      defer.resolve(
+        that.lastKeywordSuggestions || {data:  _.map(
+          that.cdsDepositCtrl.record.keywords || [],
+          function(_keyword) {
+            return {
+              name: _keyword.name, value: _keyword
+            }
+          })}
+      );
       return defer.promise;
     }
   };

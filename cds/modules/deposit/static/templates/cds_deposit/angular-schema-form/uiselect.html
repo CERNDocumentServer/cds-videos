@@ -17,9 +17,9 @@
       ng-model="select_model.selected"
       ng-if="!(form.options.tagging||false)"
       ng-disabled="form.disabled"
-      on-select="$$value$$ = form.options.mergeObjects ? ($$value$$ | mergeObjects:($item.value)) : $item.value">
+      on-select="$$value$$=$item.value">
       <ui-select-match placeholder="{{form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">
-        {{select_model.selected.name}}
+        {{select_model.selected.name ? select_model.selected.name : $$value$$.name}}
       </ui-select-match>
       <ui-select-choices
         refresh="populateTitleMap(form, $select.search)"
