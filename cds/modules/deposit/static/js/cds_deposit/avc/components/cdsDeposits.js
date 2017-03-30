@@ -296,7 +296,7 @@ function cdsDepositsCtrl(
     if (preprocess) {
       payload = preprocess(payload);
     }
-    return cdsAPI.action(url, method, payload, mimetype);
+    return cdsAPI.action(url, method, payload, headers);
   };
 
   this.chainedActions = function(promises) {
