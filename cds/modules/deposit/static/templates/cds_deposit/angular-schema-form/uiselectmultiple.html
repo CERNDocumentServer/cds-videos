@@ -7,11 +7,12 @@
     ng-show="showTitle()">
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>&nbsp;{{ form.title }}
   </label>
+
   <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
     <ui-select multiple sortable-options="{{form.sortableOptions}}" ng-model="internalModel" theme="bootstrap"
                on-select="$$value$$.push($item.value)" on-remove="$$value$$.splice($$value$$.indexOf($item.value), 1)"
                class="{{form.options.uiClass}}" ng-disabled="form.disabled">
-      <ui-select-match placeholder="{{form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">{{$item.name}}</ui-select-match>
+      <ui-select-match placeholder="{{form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">{{ (!$item) ? $$value$$[$index].name : $item.name}}</ui-select-match>
       <ui-select-choices repeat="item in form.titleMap | propsFilter: {name: $select.search}"
          refresh="populateTitleMap(form, $select.search)"
          refresh-delay="form.options.refreshDelay"

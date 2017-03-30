@@ -241,7 +241,7 @@ function cdsDepositsCtrl(
                     {},
                     that.copyright,
                     {
-                      year: new Date().getFullYear()
+                      year: new Date().getFullYear().toString()
                     }
                   );
                 }

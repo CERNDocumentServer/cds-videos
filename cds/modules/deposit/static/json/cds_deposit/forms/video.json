@@ -37,12 +37,11 @@
     },
     {
       "title": "Keywords",
+      "key": "keywords",
       "type": "uiselectmultiple",
-      "key": "keywords[]",
       "notitle": false,
       "placeholder": "Keywords",
       "options": {
-        "mergeObjects": true,
         "asyncCallback": "$ctrl.autocompleteKeywords",
         "url": "/api/keywords/_suggest"
       }
@@ -157,7 +156,6 @@
       "add": "Add another contributor",
       "inline": true,
       "items": [
-
         {
           "type": "uiselect",
           "key": "contributors[]",
@@ -244,7 +242,7 @@
     {
       "type": "array",
       "key": "license",
-      "title": "Licenses",
+      "notitle": true,
       "description": "",
       "sortOptions": {
         "disabled": false,
@@ -258,7 +256,8 @@
         {
           "type": "uiselect",
           "key": "license[].license",
-          "notitle": true,
+          "notitle": false,
+          "title": "License",
           "placeholder": "License name",
           "options": {
             "mergeObjects": true,
@@ -268,6 +267,7 @@
         },
         {
           "key": "license[].material",
+          "placeholder": "Material",
           "placeholder": "Material"
         },
         {
