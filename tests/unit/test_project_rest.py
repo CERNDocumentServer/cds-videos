@@ -117,7 +117,7 @@ def test_simple_workflow(
         assert video_1_dict['metadata']['_files'] == []
 
         # [[ ADD A NEW EMPTY VIDEO_2 ]]
-        video_metadata = deepcopy(deposit_metadata)
+        video_metadata = deepcopy(video_deposit_metadata)
         video_metadata.update(
             _project_id=project_dict['metadata']['_deposit']['id'])
         res = client.post(
