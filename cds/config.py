@@ -699,6 +699,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         record_serializers={
             'application/json': ('cds.modules.records.serializers'
                                  ':cdsdeposit_json_v1_response'),
+            'application/vnd.project.partial+json': (
+                'cds.modules.records.serializers'
+                ':cdsdeposit_json_v1_response'),
         },
         search_class='cds.modules.deposit.search:ProjectSearch',
         search_serializers={
@@ -746,6 +749,9 @@ DEPOSIT_REST_ENDPOINTS = dict(
         record_serializers={
             'application/json': ('cds.modules.records.serializers'
                                  ':cdsdeposit_json_v1_response'),
+            'application/vnd.video.partial+json': (
+                'cds.modules.records.serializers'
+                ':cdsdeposit_json_v1_response'),
         },
         search_class='invenio_deposit.search:DepositSearch',
         search_serializers={
