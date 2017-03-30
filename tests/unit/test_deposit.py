@@ -39,11 +39,11 @@ from invenio_files_rest.models import ObjectVersion
 
 
 def test_deposit_link_factory_has_bucket(
-        app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         video_deposit_metadata, project_deposit_metadata):
     """Test bucket link factory retrieval of a bucket."""
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # Test links for project

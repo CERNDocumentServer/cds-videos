@@ -31,9 +31,7 @@ Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
-# FIXME wait for PR#56
-#-e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
--e git+https://github.com/omelkonian/cds-dojson.git@data-model-update#egg=cds-dojson
+-e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
