@@ -90,12 +90,10 @@ def generate_smil_file(record_id, record, bucket, master_object):
     master_key = master_object.key
     smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
     smil_path = join(output_folder, smil_key)
-    smil_symlink_path = '{0}.smil'.format(smil_path)
+
     with open(smil_path, 'w') as f:
         smil_content = SmilSerializer.serialize(record_id, record)
         f.write(smil_content)
-    # Create symlink for Wowza server
-    symlink(smil_path, smil_symlink_path)
 
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
@@ -106,6 +104,9 @@ def generate_smil_file(record_id, record, bucket, master_object):
         ObjectVersionTag.create(obj, 'master', master_object.version_id)
         ObjectVersionTag.create(obj, 'context_type', 'playlist')
         ObjectVersionTag.create(obj, 'media_type', 'text')
+
+    # Create symlink for Wowza server
+    symlink(obj.file.uri, '{0}.smil'.format(obj.file.uri))
 
     # Commit changes
     shutil.rmtree(output_folder)
