@@ -47,11 +47,11 @@
 <!-- Subformat -->
 <div class="cds-video-subformats mb-20">
   <h4>Subformats</h4>
-  <div ng-hide="record._files[0].video.length > 0" class="text-center">
+  <div ng-hide="record._files[0].subformat.length > 0" class="text-center">
     <p class="text-muted">Not available :(</p>
   </div>
-  <div ng-show="record._files[0].video.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record._files[0].video">
+  <div ng-show="record._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record._files[0].subformat">
       <li>
         <a ng-href="{{ file.links.self }}">
           {{ file.tags.preset_quality }}

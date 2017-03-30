@@ -399,6 +399,7 @@ RECORDS_REST_FACETS = dict(
         )
     )
 )
+
 # Facets for the specific index
 DEPOSIT_PROJECT_FACETS = {
     'deposits-records-project-v1.0.0': {
@@ -419,11 +420,36 @@ DEPOSIT_PROJECT_FACETS = {
     },
 }
 
+RECORD_VIDEOS_FACETS = {
+    'records-video-v1.0.0': {
+        'aggs': {
+            'contributors': {
+                'terms': {'field': 'contributors.name'},
+            },
+            'license': {
+                'terms': {'field': 'license.license'},
+            },
+            'category': {
+                'terms': {'field': 'category'},
+            },
+            'type': {
+                'terms': {'field': 'type'},
+            },
+        },
+        'post_filters': {
+            'license': terms_filter('license.license'),
+            'category': terms_filter('category'),
+            'contributors': terms_filter('contributors.name'),
+            'type': terms_filter('type'),
+        },
+    }
+}
+
 # Update facets and sort options with deposit options
 RECORDS_REST_SORT_OPTIONS.update(DEPOSIT_REST_SORT_OPTIONS)
 RECORDS_REST_FACETS.update(DEPOSIT_REST_FACETS)
 RECORDS_REST_FACETS.update(DEPOSIT_PROJECT_FACETS)
-
+RECORDS_REST_FACETS.update(RECORD_VIDEOS_FACETS)
 # Add tuple as array type on record validation
 # http://python-jsonschema.readthedocs.org/en/latest/validate/#validating-types
 RECORDS_VALIDATION_TYPES = dict(
