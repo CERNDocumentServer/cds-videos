@@ -81,7 +81,7 @@
         </span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.progress==100 && !f.errored" class="text-success">✓</span>
+        <span ng-show="(f.progress==100 || f.completed) && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.includes(f.key)">
