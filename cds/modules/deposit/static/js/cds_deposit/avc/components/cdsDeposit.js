@@ -327,9 +327,14 @@ function cdsDepositCtrl(
     };
 
     this.updateDeposit = function(deposit) {
-      for (var i in that.record._files) {
-        that.updateSubformatsList(that.record._files[i], deposit._files[i]);
+      try {
+        for (var i in that.record._files) {
+          that.updateSubformatsList(that.record._files[i], deposit._files[i]);
+        }
+      } catch(error) {
+        // Report
       }
+
       that.record._files = angular.merge(
         [],
         that.record._files,

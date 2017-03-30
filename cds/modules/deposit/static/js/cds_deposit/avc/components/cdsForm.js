@@ -189,8 +189,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
           }).slice(0, 20)
         };
 
-
-        console.log('HELLO', that.lastKeywordSuggestions);
         return that.lastKeywordSuggestions;
         return { data : angular.merge(
           {},

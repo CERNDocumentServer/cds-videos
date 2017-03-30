@@ -72,7 +72,7 @@
     <tr class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
       <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
       <td>
-        <span>{{ f.size | bytesToHumanReadable }}</span>
+      
       </td>
       <td class="text-center">
         <span ng-show="f.progress < 100 && !f.errored">
