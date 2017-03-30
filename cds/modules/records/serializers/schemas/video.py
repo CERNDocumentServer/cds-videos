@@ -23,13 +23,14 @@ from __future__ import absolute_import
 from marshmallow import fields, post_load
 from invenio_jsonschemas import current_jsonschemas
 
+from ....deposit.api import Video
+from ..fields.datetime import DateString
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
     DepositSchema, DescriptionSchema, LicenseSchema, \
     OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
     TranslationsSchema, KeywordsSchema
 from .doi import DOI
-from ....deposit.api import Video
 
 
 class VideoDepositSchema(DepositSchema):
@@ -72,7 +73,7 @@ class VideoSchema(StrictKeysSchema):
     _deposit = fields.Nested(VideoDepositSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
     description = fields.Nested(DescriptionSchema, required=True)
-    date = fields.Str(required=True)
+    date = DateString(required=True)
     category = fields.Str(required=True)
     type = fields.Str(required=True)
 
