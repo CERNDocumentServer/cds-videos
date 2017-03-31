@@ -218,18 +218,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     // Add any files in the queue that are not completed
     Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
 
-    // Listen for events for metadata extraction
-    $scope.$on(
-      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.metadata_extraction',
-      function(evt, type, data) {
-        switch(data.state) {
-          case 'FAILURE':
-            that.cdsDepositCtrl.failedMetadataExtractionEvent = true;
-            break;
-        }
-      }
-    )
-
     // Listen for events for transcoding
     $scope.$on(
       'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.transcoding',
@@ -403,10 +391,10 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
 
   this.updateSubformat = function(key, data) {
     // Find master
-    var master = that.cdsDepositCtrl.findMasterFileIndex();
-    if (master > -1) {
+    var master = that.cdsDepositCtrl.findMasterFile();
+    if (master) {
       // Find the index of the subformat
-      var subformats = that.files[master].subformat;
+      var subformats = master.subformat;
       var index = _.findIndex(subformats, {'key': key});
       if (index > -1 && !subformats[index].errored) {
         subformats[index] = angular.merge(
@@ -465,15 +453,11 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   };
 
   this.getFrames = function() {
-    return (that.files || []).reduce(function (frames, next) {
-      return frames || next.frame;
-    }, null);
+    return (that.cdsDepositCtrl.findMasterFile() || {}).frame;
   };
 
   this.getSubformats = function() {
-    return (that.files || []).reduce(function (videos, next) {
-      return videos || next.subformat;
-    }, null);
+    return (that.cdsDepositCtrl.findMasterFile() || {}).subformat;
   };
 
   this.allFinished = function() {
