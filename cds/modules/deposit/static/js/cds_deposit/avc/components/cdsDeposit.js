@@ -57,8 +57,8 @@ function cdsDepositCtrl(
     REVOKED: [],
   };
 
-  // Initialize stateOrder
-  this.stateOrder = angular.copy(depositStates);
+  this.taskState = {};
+
   // Initilize stateCurrent
   this.stateCurrent = {};
 
@@ -77,44 +77,12 @@ function cdsDepositCtrl(
       that.schema = response.data;
     });
 
-    this.findMasterFileIndex = function() {
-      return _.findIndex(that.record._files, {'context_type': 'master'});
+    this.findMasterFile = function() {
+      return _.find(that.record._files, {'context_type': 'master'});
     };
 
     this.initializeStateQueue = function() {
-      if (Object.keys(this.record._deposit.state || {}).length > 0) {
-        if (
-          !Object.keys(this.record._deposit.state).includes('file_download')
-        ) {
-          that.stateQueue.SUCCESS.push('file_download');
-        }
-        angular.forEach(this.record._deposit.state, function(value, key) {
-          that.stateQueue[value].push(key);
-          // Remove it from the state order if
-          if ([ 'SUCCESS', 'FAILURE' ].indexOf(value) > -1) {
-            that.stateOrder = _.without(that.stateOrder, key);
-          }
-        });
-
-      } else {
-        that.stateQueue.PENDING = angular.copy(depositStates);
-        var videoFile = that.record._files[that.findMasterFileIndex()];
-        if (videoFile && !videoFile.url) {
-          that.stateQueue.PENDING.splice(
-            depositStates.indexOf('file_download'),
-            1
-          );
-          that.stateQueue.SUCCESS.push('file_download');
-        }
-      }
-
-      if (!that.master) {
-        $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
-      }
-      if (this.record._deposit.
-          state['file_video_metadata_extraction'] == 'FAILURE') {
-        that.failedMetadataExtractionEvent = true;
-      }
+      that.taskState = this.record._deposit.state;
     };
 
     function accessElement(obj, elem, value) {
@@ -180,49 +148,36 @@ function cdsDepositCtrl(
     };
 
     this.restartMetadataExtraction = function() {
-      var metadataFailureIndex = that.stateQueue.FAILURE.
-        indexOf('file_video_metadata_extraction');
-      if (metadataFailureIndex > -1) {
-        that.stateQueue.FAILURE.splice(metadataFailureIndex, 1);
-        that.stateQueue.STARTED.push('file_video_metadata_extraction');
-        that.record._deposit.state.file_video_metadata_extraction = 'STARTED';
-        $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
-      }
-      var eventId = that.record._files[that.findMasterFileIndex()].
-        tags._event_id;
-      that.getTaskFeedback(eventId, 'file_video_metadata_extraction',
-        'FAILURE').then(function(data) {
-        that.failedMetadataExtractionEvent = null;
-        data.forEach(function(taskInfo) {
-          var eventId = taskInfo.info.payload.event_id;
-          var taskId = taskInfo.id;
-          that.restartEvent(eventId, taskId).catch(function() {
-            that.failedMetadataExtractionEvent = true;
+      var master = that.findMasterFile();
+      if (master) {
+        that.taskState.file_video_metadata_extraction = 'STARTED';
+        var eventId = master.tags._event_id;
+        that.getTaskFeedback(eventId, 'file_video_metadata_extraction',
+          'FAILURE').then(function (data) {
+          data.forEach(function (taskInfo) {
+            var eventId = taskInfo.info.payload.event_id;
+            var taskId = taskInfo.id;
+            that.restartEvent(eventId, taskId).catch(function () {
+              that.taskState.file_video_metadata_extraction = 'FAILURE';
+            });
           });
         });
-      });
+      }
     };
 
     this.restartFailedSubformats = function(subformatKeys) {
-      var eventId = that.record._files[that.findMasterFileIndex()].
-        tags._event_id;
+      var master = that.findMasterFile();
+      var eventId = master.tags._event_id;
       that.failedSubformatKeys = _.difference(that.failedSubformatKeys,
                                               subformatKeys);
-      that.record._files[that.findMasterFileIndex()].subformat.forEach(
+      master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
             subformat.errored = false;
             subformat.progress = 0;
           }
         });
-      var transcodeFailureIndex = that.stateQueue.FAILURE.
-                                  indexOf('file_transcode');
-      if (transcodeFailureIndex > -1) {
-        that.stateQueue.FAILURE.splice(transcodeFailureIndex, 1);
-        that.stateQueue.STARTED.push('file_transcode');
-        that.record._deposit.state.file_transcode = 'STARTED';
-        $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
-      }
+      that.taskState.file_transcode = 'STARTED';
       that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
         .then(function(data) {
         data.filter(function(taskInfo) {
@@ -255,16 +210,13 @@ function cdsDepositCtrl(
 
     // Calculate the overall total status
     this.calculateStatus = function() {
-      if (that.stateQueue.FAILURE.length > 0) {
+      if (that.stateQueue.FAILURE.length) {
         return depositStatuses.FAILURE;
-      } else if (that.stateQueue.STARTED.length > 0) {
+      } else if (that.stateQueue.STARTED.length) {
         return depositStatuses.STARTED;
-      } else if (that.stateQueue.SUCCESS.length > 0) {
-        if (that.stateQueue.SUCCESS.length === depositStates.length) {
-          // We are done - stop listening - stop sse
-          return depositStatuses.SUCCESS;
-        }
-        return depositStatuses.STARTED;
+      } else if (that.stateQueue.SUCCESS.length === depositStates.length) {
+        // We are done - stop listening - stop sse
+        return depositStatuses.SUCCESS;
       }
       return depositStatuses.PENDING;
     };
@@ -277,9 +229,9 @@ function cdsDepositCtrl(
           key: key,
         });
       } else {
-        var videoFile = that.record._files[that.findMasterFileIndex()];
-        if (videoFile && videoFile.subformat) {
-          var finishedSubformats = videoFile.subformat.filter(function(fmt) {
+        var master = that.findMasterFile();
+        if (master && master.subformat) {
+          var finishedSubformats = master.subformat.filter(function(fmt) {
             return fmt.completed;
           });
           if (finishedSubformats[0]) {
@@ -351,9 +303,8 @@ function cdsDepositCtrl(
     };
 
     this.fetchSubformatStatuses = function() {
-      var masterIndex = that.findMasterFileIndex();
-      if (masterIndex > -1) {
-        var masterFile = that.record._files[masterIndex];
+      var masterFile = that.findMasterFile();
+      if (masterFile) {
         var tags = masterFile.tags;
         if (tags && tags._event_id) {
           var eventId = tags._event_id;
@@ -409,6 +360,24 @@ function cdsDepositCtrl(
       }
     });
 
+    this.refreshStateQueue = function() {
+      var oldKeys = Object.keys(that.stateQueue);
+      that.stateQueue = {};
+      _.forEach(that.taskState, function(val, key) {
+        that.stateQueue[val] = that.stateQueue[val] || [];
+        that.stateQueue[val].push(key);
+      });
+      oldKeys.forEach(function(key) {
+        that.stateQueue[key] = that.stateQueue[key] || [];
+      });
+      depositStates.forEach(function(state) {
+        if (!that.taskState[state]) {
+          that.stateQueue.PENDING.push(state);
+        }
+      });
+      $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
+    };
+
     // Initialize state the queue
     this.initializeStateQueue();
     // Initialize state reporter
@@ -422,6 +391,7 @@ function cdsDepositCtrl(
     // Update subformat statuses
     that.fetchSubformatStatuses();
     $interval(that.fetchSubformatStatuses, 30000);
+    $scope.$watch('$ctrl.taskState', that.refreshStateQueue, true);
 
     // Calculate the transcode
     this.updateStateReporter = function(type, data) {
@@ -429,10 +399,7 @@ function cdsDepositCtrl(
         if (data.state === 'SUCCESS') {
           that.presets_finished.push(data.meta.payload.preset_quality);
           if (that.presets_finished.length === that.presets.length) {
-            that.stateQueue.STARTED = _.without(that.stateQueue.STARTED, type);
-            that.stateQueue.SUCCESS.push(type);
-            // On success remove it from the status order
-            that.stateOrder = _.without(that.stateOrder, type);
+            that.taskState.file_transcode = 'SUCCESS';
           }
           if (!that.previewer) {
             that.videoPreviewer(
@@ -467,57 +434,20 @@ function cdsDepositCtrl(
       type,
       data
     ) {
+      // Handle my state
       $scope.$apply(function() {
-        // Handle my state
-        if (that.stateQueue[data.state].indexOf(type) === -1) {
-          var index = that.stateQueue.PENDING.indexOf(type);
-          if (index > -1) {
-            that.stateQueue.PENDING.splice(index, 1);
-          }
-          switch (data.state) {
-            case 'STARTED':
-              that.stateQueue.STARTED.push(type);
-              // Callback on started
-              that.startedCallback(type, data);
-              break;
-            case 'FAILURE':
-              that.stateQueue.STARTED = _.without(
-                that.stateQueue.STARTED,
-                type
-              );
-              that.stateQueue.FAILURE.push(type);
-              // On error remove it from the status order
-              that.stateOrder = _.without(that.stateOrder, type);
-              // Callback on failure
-              that.failureCallback(type, data);
-              break;
-            case 'SUCCESS':
-              // FIXME: Better handling
-              if (type !== 'update_deposit' && type !== 'file_transcode') {
-                that.stateQueue.STARTED = _.without(
-                  that.stateQueue.STARTED,
-                  type
-                );
-                that.stateQueue.SUCCESS.push(type);
-                // On success remove it from the status order
-                that.stateOrder = _.without(that.stateOrder, type);
-              }
-              // FIXME: Add me later
-              // typeReducer.SUCCESS.call(that, type, data)
-              that.successCallback(type, data);
-              break;
-          }
-          // The state has been changed update the current
-          that.stateCurrent = that.stateCurrentCalculate(that.stateQueue.STARTED);
-          // Change the Deposit Status
-          that.depositStatusCurrent = that.calculateStatus();
-          if (!that.master) {
-            $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
-          }
+        if (type === 'update_deposit') {
+          that.updateDeposit(data.meta.payload.deposit);
+        } else if (!(type === 'file_transcode' && data.state === 'SUCCESS')) {
+          that.taskState[type] = data.state;
         }
-        // Update the metadata
-        that.updateStateReporter(type, data);
       });
+      // The state has been changed update the current
+      that.stateCurrent = that.stateCurrentCalculate(that.stateQueue.STARTED);
+      // Change the Deposit Status
+      that.depositStatusCurrent = that.calculateStatus();
+      // Update the metadata
+      that.updateStateReporter(type, data);
 
       if (data.meta.payload.key && type === 'file_download') {
         $scope.$broadcast(
@@ -543,30 +473,6 @@ function cdsDepositCtrl(
         )
       }
     });
-
-    this.successCallback = function(type, data) {
-      switch (type) {
-        case 'file_download':
-          // Add the previewer
-          /*that.videoPreviewer(
-            data.meta.payload.deposit_id,
-            data.meta.payload.key
-          );*/
-          break;
-        case 'update_deposit':
-          // Update deposit
-          that.updateDeposit(data.meta.payload.deposit);
-          break;
-      }
-    };
-
-    this.failureCallback = function(type, data) {
-      if (type === 'file_transcode') {
-        // Add restart button
-      }
-    };
-
-    this.startedCallback = function(type, data) {};
 
     this.displayFailure = function() {
       return that.depositStatusCurrent === that.depositStatuses.FAILURE;
