@@ -128,12 +128,10 @@
                   <hr />
 
                   -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
                   -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />
                   -- STATUS: {{$ctrl.cdsDepositCtrl.depositStatusCurrent}} -- <br />
-                  -- State reporterd $ctrl.cdsDepositCtrl.stateReporter -- <br />
+                  -- State reporterd {{ $ctrl.cdsDepositCtrl.stateReporter }} -- <br />
                   -- State current {{ $ctrl.cdsDepositCtrl.stateCurrent }} -- <br />
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
                   <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
                   <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
                   <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}
