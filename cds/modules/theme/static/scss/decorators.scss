@@ -37,7 +37,7 @@
 
 // Font weight thin
 .fw-t {
-  font-weight: thin;
+  font-weight: thin !important;
 }
 // Font weight normal
 .fw-n {
@@ -45,22 +45,28 @@
 }
 // Font weight bold
 .fw-b {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 // 64px
-.f1 { font-size: 44px; }
+.f1 { font-size: 44px !important; }
 // 36px
-.f2 { font-size: 36px; }
+.f2 { font-size: 36px !important; }
 // 32px
-.f3 { font-size: 32px; }
+.f3 { font-size: 32px !important; }
 // 28px
-.f4 { font-size: 28px; }
+.f4 { font-size: 28px !important; }
 // 25px
-.f5 { font-size: 25px; }
+.f5 { font-size: 25px !important; }
 // 22px
-.f6 { font-size: 22px; }
+.f6 { font-size: 22px !important; }
 // 20px
-.f7 { font-size: 20px; }
+.f7 { font-size: 20px !important; }
 // 16px
-.f8 { font-size: 16px; }
+.f8 { font-size: 16px !important; }
+// 14px
+.f9 { font-size: 14px !important; }
+
+.b-r-3 {
+  border-radius: 3px !important;
+}

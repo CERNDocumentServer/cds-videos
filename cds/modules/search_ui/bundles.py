@@ -30,11 +30,13 @@ from invenio_assets import NpmBundle
 
 js = NpmBundle(
     'node_modules/d3/d3.js',
+    'node_modules/angular-loading-bar/build/loading-bar.js',
     'node_modules/invenio-search-js/dist/invenio-search-js.js',
     filters='jsmin',
     depends=('node_modules/invenio-search-js/dist/*.js', 'node_modules/d3/*'),
     output='gen/cds.search.%(version)s.js',
     npm={
+        'angular-loading-bar': '~0.9.0',
         'd3': '^3.5.17',
         'invenio-search-js': '~0.2.0',
     },

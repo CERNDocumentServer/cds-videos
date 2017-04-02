@@ -37,6 +37,18 @@ app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
     });
   };
 }]);
+app.directive('errSrc', function() {
+  // Replace 404 images with an error
+  return {
+    link: function(scope, element, attrs) {
+      element.bind('error', function() {
+        if (attrs.src != attrs.errSrc) {
+          attrs.$set('src', attrs.errSrc);
+        }
+      });
+    }
+  }
+});
 app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
   return function(text, id, key, external) {
     var _url = '/record/' + id + '/preview/' + key;

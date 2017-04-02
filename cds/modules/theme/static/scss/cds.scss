@@ -70,6 +70,10 @@ a[ng-click]{
   line-height: 30px !important;
 }
 
+.cds-border {
+  border: 1px $bg-gray solid !important
+}
+
 /////////
 
 // /record/{recid}
@@ -103,6 +107,12 @@ a[ng-click]{
   .ngdialog-content {
     width: 60%;
   }
+}
+
+.ac-container .ac-menu .ac-menu-item {
+  border-bottom: 1px solid $bg-gray;
+  margin: 0;
+  padding: 5px;
 }
 
 /////////
@@ -157,6 +167,34 @@ a[ng-click]{
     flex-direction: column;
   }
 }
+.cds-facets {
+    border-color: $bg-gray;
+}
+.cds-facets-item-link {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 3px;
+  width: 100%;
+  color: $gray;
+  &:hover {
+    background-color: $bg-gray;
+    color: $gray;
+    text-decoration: none!important;
+  }
+  &.cds-facets-item-link-checked {
+    background: $primary-color;
+    color: #fff;
+    &:hover {
+      background: $primary-color;
+      color: #fff;
+      text-decoration: none!important;
+    }
+  }
+}
+
+
+
 // login
 
 .cds-login {
@@ -570,6 +608,9 @@ a[ng-click]{
     flex: 1 1 auto;
     display: flex;
     align-items: center;
+    invenio-search-bar {
+      width: 100%;
+    }
   }
   .cds-active-search {
     background-color: #fff !important;

@@ -1,36 +1,14 @@
-{#
-# This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
-#
-# Invenio is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 2 of the
-# License, or (at your option) any later version.
-#
-# Invenio is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Invenio; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
-#
-# In applying this license, CERN does not
-# waive the privileges and immunities granted to it by virtue of its status
-# as an Intergovernmental Organization or submit itself to any jurisdiction.
-#}
-
-{%- extends config.DEPOSIT_BASE_TEMPLATE %}
+{%- extends "cds_theme/page.html" %}
+{%- set title = '%s | %s'|format(_('Deposits'), config.THEME_SITENAME) or 'CDS' -%}
 
 {%- block css %}
-    {{ super() }}
-    {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+  {{ super() }}
+  {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {%- endblock css %}
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_search_ui_js", "cds_deposit_js" %}
+  {% assets "cds_theme_js", "cds_search_ui_js", "cds_deposit_js" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
   <script>
@@ -41,7 +19,7 @@
           'angular-loading-bar',
           'ngDialog',
           'invenioSearch',
-          'cdsDeposit'
+          'cdsDeposit',
         ]
       );
     });
@@ -62,14 +40,19 @@
 </div>
 {%- endblock body_inner %}
 
+{%- block page_header %}
+  {%- set suggest_app = false -%}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
 {%- block page_body %}
 <div class="container search-page flex-item">
   {%- block search_body %}
     <div class="row">
-      <div class="col-sm-offset-3 col-sm-9">
+      <div class="col-md-offset-3 col-md-9">
         <div class="row">
           {%- block search_bar %}
-          <div class="col-sm-8">
+          <div class="col-md-8">
             <invenio-search-bar
             template="{{ url_for('static', filename='templates/invenio_deposit/searchbar.html') }}"
             placeholder="{{ _('Search uploads...') }}">
@@ -77,7 +60,7 @@
           </div>
           {%- endblock search_bar %}
           {%- block search_loading %}
-          <div class="col-sm-2">
+          <div class="col-md-2">
             <invenio-search-loading
               template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
               message="{{ _('Loading...') }}">
@@ -85,7 +68,7 @@
           </div>
           {%- endblock search_loading %}
           {%- block new_upload %}
-          <div class="col-sm-2">
+          <div class="col-md-2">
             <a class="btn btn-success btn-block" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
               <i class="pull-left glyphicon glyphicon-upload"></i> {{ _('New Upload') }}
             </a>
@@ -101,14 +84,14 @@
     </invenio-search-error>
     {%- endblock search_error %}
     <div class="row">
-      <div class="col-sm-3">
+      <div class="col-md-3">
           {%- block search_facets %}
           <invenio-search-facets
           template="{{ url_for('static', filename='templates/cds_deposit/search/facets.html') }}">
           </invenio-search-facets>
           {%- endblock search_facets %}
-      </div><!-- ./col-sm-3 -->
-      <div class="col-sm-9">
+      </div><!-- ./col-md-3 -->
+      <div class="col-md-9">
         <div class="panel panel-default deposit-panel">
           <div class="panel-heading">
             {%- block search_sort %}
@@ -152,9 +135,8 @@
           </invenio-search-pagination>
         </div>
         {%- endblock search_pagination_bottom %}
-      </div> <!-- ./col-sm-9 -->
+      </div> <!-- ./col-md-9 -->
     </div> <!-- ./row -->
-
   {%- endblock search_body %}
 </div>
 {%- endblock page_body -%}

@@ -1,5 +1,5 @@
 {%- extends config.RECORDS_UI_BASE_TEMPLATE %}
-
+{%- set title = '%s | %s'|format(record.title.title, config.THEME_SITENAME) or 'CDS' -%}
 {%- block javascript %}
   {{ super() }}
   {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}

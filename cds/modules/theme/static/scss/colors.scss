@@ -37,7 +37,7 @@
 }
 // Background gray
 .bg-g {
-  background-color: gray;
+  background-color: $gray;
 }
 // Background white
 .bg-w {
@@ -67,4 +67,9 @@
   &:hover {
     color: $cds-primary-color;
   }
+}
+
+// Border grey
+.bc-g {
+  border-color: $gray !important;
 }
