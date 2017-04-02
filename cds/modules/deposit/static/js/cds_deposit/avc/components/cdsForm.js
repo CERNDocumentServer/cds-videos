@@ -27,11 +27,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       if (formTemplatesBase.substr(formTemplatesBase.length -1) !== '/') {
         formTemplatesBase = formTemplatesBase + '/';
       }
-
       angular.forEach(formTemplates, function(value, key) {
         schemaFormDecorators
-        .decorator()[key.replace('_', '-')]
-        .template = formTemplatesBase + value;
+          .decorator()[key.replace('_', '-')]
+          .template = formTemplatesBase + value;
       });
     }
   };

@@ -34,6 +34,65 @@ angular.element(document).ready(function() {
   );
 });
 
+var app = angular.module('cdsSuggest', ['ngSanitize', 'MassAutoComplete', 'LocalStorageModule']);
+app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageService) {
+  $scope.dirty = {};
+  var url = '/api/records/';
+  function onAttach() {
+    $scope.focused = true;
+  }
+  function suggest_state_remote(term) {
+    var deferred = $q.defer();
+    $http({
+      method: 'GET',
+      url: url,
+      params: {
+        q: term
+      }
+    }).then(function(response) {
+      var results = localStorageService.get('cds.search.history') || [];
+      if (response.data.hits.hits) {
+        angular.forEach(response.data.hits.hits, function(value, index) {
+          results.push({
+            label: value.metadata.title.title,
+            value: value.metadata.title.title
+          })
+        });
+      }
+      results.reverse();
+      deferred.resolve(results);
+    });
+    return deferred.promise;
+  }
+  function onSelect(selected) {
+    if (selected){
+      try {
+        var searches = localStorageService.get('cds.search.history') || [];
+        var exists = _.findWhere(searches, {value: selected.value});
+        if (exists === undefined) {
+          if (searches.length > 4){
+            searches.pop();
+          }
+          selected.label = '<i class="fa fa-history text-primary pr-5"></i> ' + selected.label;
+          searches.push(selected);
+          localStorageService.set('cds.search.history', searches);
+        }
+      } catch(error) {
+        // Error no worries..
+      }
+    }
+  }
+  $scope.updateHistory = function() {
+    onSelect({label: $scope.dirty.value, value: $scope.dirty.value});
+  }
+  $scope.autocomplete_options = {
+    suggest: suggest_state_remote,
+    on_attach: onAttach,
+    on_select: onSelect,
+  };
+});
+
+
 $(document).ready(function() {
   $('#cds-navbar-form-input').focus(function() {
     $(".cds-navbar-form").addClass('cds-active-search');

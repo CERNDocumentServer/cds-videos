@@ -23,20 +23,35 @@
       <div id="cds-navbar" class="cds-navbar-collapse navbar-collapse collapse">
         {%- block navbar_nav %}
           {%- if config['THEME_SEARCHBAR'] %}
-            {%- block navbar_search %}
             <div class="cds-navbar-form-wrapper">
-              <form class="cds-navbar-form navbar-form"
-                    action="{{ config.THEME_SEARCH_ENDPOINT }}"
-                    role="search">
-                    <div class="hidden-xs hidden-sm cds-navbar-form-icon">
-                      <i class="t-w fa fa-search"></i>
-                    </div>
-                <div class="form-group">
-                  <input id="cds-navbar-form-input" type="text" class="form-control" name="q" placeholder="{{ _('Search') }}">
-                </div>
-              </form>
+              {%- block navbar_search %}
+                {%- if suggest_app %}
+                  <form name='cdsSearchFormSuggest'
+                        ng-app="cdsSuggest"
+                        ng-submit="updateHistory()"
+                        ng-controller="mainCtrl"
+                        ng-class="{'cds-active-search': focused || dirty.value}"
+                        class="cds-navbar-form navbar-form"
+                        action="{{ config.THEME_SEARCH_ENDPOINT }}"
+                        role="search"
+                  >
+                {%- else %}
+                  <form class="cds-navbar-form navbar-form" action="{{ config.THEME_SEARCH_ENDPOINT }}" role="search">
+                {%- endif %}
+                  <div class="hidden-xs hidden-sm cds-navbar-form-icon">
+                    <i class="t-w fa fa-search"></i>
+                  </div>
+                  <div mass-autocomplete class="form-group">
+                    <input
+                      autocomplete="off"
+                      ng-model="dirty.value"
+                      mass-autocomplete-item="autocomplete_options"
+                      id="cds-navbar-form-input"
+                      type="text" class="form-control" name="q" placeholder="{{ _('Search CDS') }}">
+                  </div>
+                </form>
+              {%- endblock navbar_search %}
             </div>
-            {%- endblock navbar_search %}
           {%- endif %}
         {%- endblock navbar_nav %}
         {%- block navbar_right %}

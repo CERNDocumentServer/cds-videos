@@ -3,6 +3,6 @@
 {%- block navbar_search %}
   <invenio-search-bar
     template="{{ url_for('static', filename='templates/cds_search_ui/searchbar.html') }}"
-    placeholder="{{ search_input_placeholder|default(_('Search')) }}">
+    placeholder="{{ search_input_placeholder|default(_('Search CDS')) }}">
   </invenio-search-bar>
-  {%- endblock navbar_search %}
+{%- endblock navbar_search %}

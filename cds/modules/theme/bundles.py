@@ -34,6 +34,9 @@ css = Bundle(
         'node_modules/ng-dialog/css/ngDialog.css',
         'node_modules/ng-dialog/css/ngDialog-theme-default.css',
         'node_modules/ngmodal/dist/ng-modal.css',
+        'node_modules/ui-select/dist/select.css',
+        'node_modules/angular-loading-bar/build/loading-bar.css',
+        'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
         filters='cleancssurl',
     ),
     NpmBundle(
@@ -63,6 +66,9 @@ js = NpmBundle(
         'node_modules/angular-loading-bar/build/loading-bar.js',
         'js/cds/module.js',
         'node_modules/invenio-search-js/dist/invenio-search-js.js',
+        'node_modules/angular-sanitize/angular-sanitize.js',
+        'node_modules/angular-mass-autocomplete/massautocomplete.js',
+        'node_modules/angular-local-storage/dist/angular-local-storage.js',
         'js/main.js',
         filters='jsmin',
     ),
@@ -81,6 +87,8 @@ js = NpmBundle(
         'clipboard': '~1.5.16',
         'ngclipboard': '~1.1.1',
         'underscore': '~1.8.3',
+        'angular-mass-autocomplete': '~0.5.0',
+        'angular-local-storage': '~0.5.2',
     }
 )
 """Default JavaScript bundle."""

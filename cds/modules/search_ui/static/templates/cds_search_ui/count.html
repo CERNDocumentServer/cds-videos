@@ -1,0 +1,18 @@
+<div ng-show="vm.invenioSearchResults.hits.total === 0">
+  <div class="well">
+    <div class="text-center mb-20">
+      <i class="fa fa-search f2"></i>
+    </div>
+    <p class="f5">
+      No results for found for <em>"{{vm.userQuery}}"</em>
+    </p>
+  </div>
+</div>
+<div ng-show="vm.invenioSearchResults.hits.total > 0">
+  <ng-pluralize
+   count="vm.invenioSearchResults.hits.total"
+   when="{'0': 'No results',
+   'one': 'Found 1 result',
+   'other': 'Found {} results'}">
+  </ng-pluralize>
+</div>

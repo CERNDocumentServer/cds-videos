@@ -1,7 +1,11 @@
 <div class="row">
   <div class="col-sm-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <a ng-mouseover="show=true" ng-mouseleave="show=false" class="cds-transition cds-video-title cds-video-title-with-play-button l-w" target="_self" ng-href="/record/{{ ::record.id }}">
-      <img class="img-responsive" ng-src="/api/iiif/v2/{{record.metadata._buckets.deposit}}:{{record.metadata._files[0].frame[0].key}}/full/400,220/0/default.png" />
+      <img
+        class="img-responsive"
+        ng-src="/api/iiif/v2/{{record.metadata._buckets.deposit}}:{{record.metadata._files[0].frame[0].key}}/full/400,220/0/default.png"
+        err-src="//unsplash.it/1024/576>?random&blur"
+      />
       <p>
         {{ ::record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
       </p>

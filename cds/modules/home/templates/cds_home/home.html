@@ -70,54 +70,16 @@
         </div>
         <!-- List group -->
         <div class="row">
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive"src='http://placehold.it/400x220' />
-              <p>
-                CHANNEL
-              </p>
-            </a>
-          </div>
+          {% for item in range(0, 6) %}
+            <div class="col-md-4">
+              <a class="cds-video-title l-b" href="#">
+                <img class="img-responsive" src='//unsplash.it/1024/576>?random&blur' />
+                <p>
+                  CHANNEL
+                </p>
+              </a>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>

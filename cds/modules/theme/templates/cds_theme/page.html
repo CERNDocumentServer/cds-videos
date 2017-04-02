@@ -1,4 +1,5 @@
 {%- set title = '%s | %s'|format(_(title), config.THEME_SITENAME) or 'CDS' -%}
+{%- set suggest_app = true -%}
 {%- set body_css_classes = ['flex-container'] -%}
 <!DOCTYPE html>
 <html{% if html_css_classes %} class="{{ html_css_classes|join(' ') }}"{% endif %} lang="{{ current_i18n.locale.language|safe }}" dir="{{ current_i18n.locale.text_direction }}">
