@@ -1,7 +1,7 @@
-<ul class="pagination pagination-sm" ng-if="vm.invenioSearchResults.hits.total">
+<ul class="pagination" ng-if="vm.invenioSearchResults.hits.total">
   <li ng-class="paginationHelper.getPrevClass()">
     <a href="#" ng-click="paginationHelper.changePage(paginationHelper.previous())" aria-label="Previous">
-      <span aria-hidden="true">previous</span>
+      <span aria-hidden="true">Previous</span>
     </a>
   </li>
   <li ng-class="paginationHelper.getPageClass(page.value)" ng-repeat="page in paginatePages">
@@ -9,7 +9,7 @@
   </li>
   <li ng-class="paginationHelper.getNextClass()">
     <a href="#" ng-click="paginationHelper.changePage(paginationHelper.next())" aria-label="Next">
-      <span aria-hidden="true">next</span>
+      <span aria-hidden="true">Next</span>
     </a>
   </li>
 </ul>

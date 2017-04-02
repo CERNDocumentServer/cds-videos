@@ -2,18 +2,18 @@
   ng-init="focused=false"
   class="cds-navbar-form navbar-form"
   role="search"
-  ng-class="{'cds-active-search': vm.userQuery || focused}"
+  ng-class="{'cds-active-search': vm.userQuery !== '' || focused}"
 >
   <div class="hidden-xs hidden-sm cds-navbar-form-icon">
     <i class="t-w fa fa-search"></i>
   </div>
+  <span class="label label-primary">Deposit</span>
   <div class="form-group">
     <input
       id="cds-navbar-form-input"
       type="text"
       class="form-control"
       placeholder="{{placeholder}}"
-      autocomplete="off"
       ng-model="vm.userQuery"
       ng-focus="focused=true"
       ng-blur="focused=false"

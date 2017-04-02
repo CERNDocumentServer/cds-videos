@@ -11,17 +11,15 @@
       target="_self" ng-href="/deposit/{{ record.metadata._deposit.id }}">
       <div class="row">
         <div class="col-sm-7">
-          <h4 class="t-b mt-0">
-            <b>{{ record.metadata.title.title || 'No title' }}</b>
-          </h4>
-          <p>
+          <div class="t-b mt-0">
+            <span class="f8 fw-b mr-5">{{ record.metadata.title.title || 'No title' }}</span>
+            <span ng-show="record.metadata.category" class="label label-sm label-default">{{record.metadata.category}}</span>
+            <span ng-show="record.metadata.type" class="label label-sm label-warning">{{record.metadata.type}}</span>
+          </div>
+          <p class="f8 mt-5 mb-5">
             {{ record.metadata.description.value | stripTags }}
           </p>
-          <ul class="list-inline">
-            <li><span ng-show="record.metadata.category" class="label label-default">{{record.metadata.category}}</span></li>
-            <li><span ng-show="record.metadata.type" class="label label-warning">{{record.metadata.type}}</span></li>
-          </ul>
-          <p class="list-group-item-text text-muted">
+          <p class="list-group-item-text text-muted f9">
             <small>Created on {{ record.created | date:'medium' }}, last updated on {{ record.updated | date:'medium' }}</small>
           </p>
         </div>
@@ -47,9 +45,13 @@
 <div ng-if="vm.invenioSearchResults.hits.total == 0 && vm.invenioSearchArgs.q">
   <div class="list-group">
     <div class="list-group-item">
-      <div class="text-center">
-        <h3>No results found for <em>'{{ vm.invenioSearchArgs.q }}'</em></h3>
-      </div>
+      <div ng-show="vm.invenioSearchResults.hits.total === 0">
+        <div class="text-center mt-30 mb-30">
+          <i class="fa fa-search f2"></i>
+        </div>
+        <p class="f5 text-center">
+          no projects for found for <em>"{{ vm.invenioSearchArgs.q }}"</em>
+        </p>
     </div>
   </div>
 </div>
