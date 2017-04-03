@@ -620,8 +620,14 @@ function cdsDepositCtrl(
     var link = depositActions[that.depositType][action].link
     if (Object.keys(that.links).indexOf(link) > -1) {
       return that.links[link];
+    } else {
+      if (that.record._deposit.status === 'published' && !that.master) {
+        return urlBuilder.actionVideo({
+          deposit: that.record._deposit.id,
+          action: action.toLowerCase()
+        });
+      }
     }
-    return endpoint;
   };
 
   this.dismissAlert = function(alert) {

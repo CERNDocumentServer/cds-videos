@@ -102,9 +102,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   };
 
   this.autocompleteAuthors = function(options, query) {
+    var defer = $q.defer();
     if (query) {
       // Parse the url parameters
-      return $http.get(options.url, {
+      $http.get(options.url, {
         params: angular.merge({
           query: query
         }, options.extraParams)
@@ -131,22 +132,16 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
               }
               return acc;
             }, []);
-
             return {
               text: fullName,
+              name: fullName,
               value: valueObj
             };
           }).slice(0, 20)
         };
-        return that.lastAuthorSuggestions;
+        defer.resolve(that.lastAuthorSuggestions);
       });
     } else {
-      // If the query string is empty and there's already a value set on the
-      // model, this means that the form was just loaded and is trying to
-      // display this value.
-      // This also happens when the user clicks on a suggestion or on the
-      // suggestion field. In this case, return the previous suggestions.
-      var defer = $q.defer();
       defer.resolve(
         that.lastAuthorSuggestions ||
         {
@@ -154,14 +149,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
             that.cdsDepositCtrl.record.contributors || [],
             function(_contributor) {
               return {
-                text: _contributor.name, value: _contributor
+                text: _contributor.name, value: _contributor, name: _contributor.name
               }
             }
           )
         }
       );
-      return defer.promise;
     }
+    return defer.promise;
   };
 
   this.types = $q.defer();

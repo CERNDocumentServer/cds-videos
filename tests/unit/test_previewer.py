@@ -81,7 +81,7 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
         assert smil_obj
 
         wowza_url = previewer_app.config['WOWZA_PLAYLIST_URL'].format(
-            filepath='{}.smil'.format(get_relative_path(smil_obj)))
+            filepath=get_relative_path(smil_obj))
         success_list.append(wowza_url)
     else:
         assert video_1.status == 'draft'

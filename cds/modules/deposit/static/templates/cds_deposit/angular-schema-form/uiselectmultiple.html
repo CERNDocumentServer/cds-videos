@@ -1,14 +1,12 @@
 <div class="form-group" ng-class="{'has-error': hasError(), 'has-success': hasSuccess(), 'has-feedback': form.feedback !== false}"
         ng-controller="dynamicSelectController" ng-init="$$value$$=$$value$$||[];uiMultiSelectInitInternalModel($$value$$)">
   <label
-    class="control-label col-sm-3"
+    class="control-label"
     for="{{ form.key.slice(-1)[0] }}"
     ng-class="{'sr-only': !showTitle(), 'field-required': form.required}"
     ng-show="showTitle()">
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>&nbsp;{{ form.title }}
   </label>
-
-  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
     <ui-select multiple sortable-options="{{form.sortableOptions}}" ng-model="internalModel" theme="bootstrap"
                on-select="$$value$$.push($item.value)" on-remove="$$value$$.splice($$value$$.indexOf($item.value), 1)"
                class="{{form.options.uiClass}}" ng-disabled="form.disabled">
@@ -26,5 +24,4 @@
     <div class="help-block"
       ng-show="(hasError() && errorMessage(schemaError())) || form.description"
       ng-bind-html="(hasError() && errorMessage(schemaError())) || form.description"></div>
-  </div>
 </div>

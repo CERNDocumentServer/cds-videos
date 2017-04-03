@@ -3,7 +3,7 @@
     <h2 class="text-capitalize f9 mt-5"><b>{{ key }}</b></h2>
     <ul class="list-unstyled" ng-repeat="item in value.buckets">
       <li class="cds-facets-item">
-        <a class="cds-facets-item-link" ng-class="{'cds-facets-item-link-checked': handler[key].indexOf(item.key) > -1}" ng-click="handleClick(key, item.key)">{{ key === 'created_by' ? 'Me' : item.key }} <span class="cds-facets-item-link-counter pull-right fw-b"><span ng-show="handler[key].indexOf(item.key) > -1"><i class="fa fa-remove"></i></span><span ng-hide="handler[key].indexOf(item.key) > -1">{{item.doc_count }}</span></a>
+        <a class="cds-facets-item-link" ng-class="{'cds-facets-item-link-checked': handler[key].indexOf(item.key) > -1}" ng-click="handleClick(key, item.key)">{{ key === 'created_by' ? 'me' : item.key }} <span class="cds-facets-item-link-counter pull-right fw-b"><span ng-show="handler[key].indexOf(item.key) > -1"><i class="fa fa-remove"></i></span><span ng-hide="handler[key].indexOf(item.key) > -1">{{item.doc_count }}</span></a>
       </li>
     </ul>
   </div>

@@ -72,11 +72,11 @@
     <tr class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
       <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
       <td>
-      
+
       </td>
       <td class="text-center">
         <span ng-show="f.progress < 100 && !f.errored">
-          <span ng-if="f.progress">{{ f.progress + '%' }}</span>
+          <span ng-if="f.progress">{{ f.progress | toInt }} %</span>
           <span ng-if="!f.progress"><i class="fa fa-spinner fa-spin"></i></span>
         </span>
         <span ng-show="f.processing && !f.errored">Processing...</span>

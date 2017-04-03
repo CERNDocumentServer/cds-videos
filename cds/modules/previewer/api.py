@@ -57,7 +57,7 @@ class CDSPreviewRecordFile(PreviewFile):
         if smil_obj:
             wowza_url = current_app.config['WOWZA_PLAYLIST_URL']
             filepath = get_relative_path(smil_obj)
-            return wowza_url.format(filepath='{0}.smil'.format(filepath))
+            return wowza_url.format(filepath='{0}'.format(filepath))
 
     @property
     def poster_uri(self):
