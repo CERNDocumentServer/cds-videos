@@ -31,6 +31,7 @@ import copy
 import json
 import pytest
 
+from flask_principal import RoleNeed, identity_loaded
 from invenio_db import db
 from celery.exceptions import Retry
 from flask import url_for
@@ -47,14 +48,14 @@ from cds.modules.deposit.tasks import datacite_register
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite(
-        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        datacite_mock, api_app, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite."""
     # test: enable datacite registration
-    app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
+    api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
 
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
@@ -86,7 +87,7 @@ def test_video_publish_registering_the_datacite(
 
         # [[ REGISTER DATACITE ]]
         datacite_register_after_publish(
-            sender=app, action='publish', deposit=video_1)
+            sender=api_app, action='publish', deposit=video_1)
 
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 1
@@ -95,7 +96,7 @@ def test_video_publish_registering_the_datacite(
 
         # [[ UPDATE DATACITE ]]
         datacite_register_after_publish(
-            sender=app, action='publish', deposit=video_1)
+            sender=api_app, action='publish', deposit=video_1)
 
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 2
@@ -107,14 +108,14 @@ def test_video_publish_registering_the_datacite(
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_if_fail(
-        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        datacite_mock, api_app, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite."""
     # test: enable datacite registration
-    app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
+    api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
 
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
@@ -162,15 +163,15 @@ def test_video_publish_registering_the_datacite_if_fail(
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_not_local(
-        datacite_mock, app, users, deposit_rest, location, cds_jsonresolver,
+        datacite_mock, api_app, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, video_deposit_metadata, project_deposit_metadata,
         keyword_1, keyword_2):
     """Test video publish registering the datacite not local."""
     # test: enable datacite registration
-    app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
+    api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
 
-    with app.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         project_deposit_metadata['keywords'] = [copy.deepcopy(keyword_2)]
@@ -244,3 +245,85 @@ def test_video_keywords_serializer(api_app, es, api_project, keyword_1,
                      for k in data['metadata']['keywords']}
         kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
         assert kw_expect == kw_result
+
+
+@mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
+def test_video_access_rights_based_on_user_id(
+        mock_datacite, api_app, users, api_project):
+    """Test video access rights based on user ID.
+
+    Tests that a user can't access a deposit created by a different user.
+    """
+    (project, video_1, video_2) = api_project
+    cds_depid = video_1['_deposit']['id']
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        deposit_url = url_for('invenio_deposit_rest.video_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.video_actions',
+                              pid_value=cds_depid, action='publish')
+        # check anonymous don't have access
+        assert client.get(deposit_url).status_code == 401
+        assert client.post(publish_url).status_code == 401
+        # User is the creator of the deposit, so everything is fine
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        publish_url = url_for('invenio_deposit_rest.video_actions',
+                              pid_value=cds_depid, action='publish')
+        deposit_url = url_for('invenio_deposit_rest.video_item',
+                              pid_value=cds_depid)
+        # User shouldn't have access to this deposit
+        assert client.get(deposit_url).status_code == 403
+        assert client.post(publish_url).status_code == 403
+
+
+@mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
+def test_video_access_rights_based_on_egroup(
+        mock_datacite, api_app, users, api_project):
+    """Test video access rights based on the e-groups.
+
+    Tests that a user can access a deposit based on the e-group permissions.
+    """
+    (project, video_1, video_2) = api_project
+    cds_depid = video_1['_deposit']['id']
+
+    @identity_loaded.connect
+    def mock_identity_provides(sender, identity):
+        """Add additional group to the user."""
+        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
+
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        video_1['_access'] = {'update': ['test-egroup@cern.ch']}
+        video_1.commit()
+        db.session.commit()
+        login_user_via_session(client,
+                               email=User.query.get(users[1]).email)
+        deposit_url = url_for('invenio_deposit_rest.video_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.video_actions',
+                              pid_value=cds_depid, action='publish')
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202
+
+
+@mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
+def test_video_access_rights_based_admin(
+        mock_datacite, api_app, users, api_project):
+    """Test video access rights based on the admin."""
+    (project, video_1, video_2) = api_project
+    cds_depid = video_1['_deposit']['id']
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        login_user_via_session(client,
+                               email=User.query.get(users[2]).email)
+        deposit_url = url_for('invenio_deposit_rest.video_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.video_actions',
+                              pid_value=cds_depid, action='publish')
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202

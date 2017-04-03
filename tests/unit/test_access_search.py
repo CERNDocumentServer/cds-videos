@@ -44,7 +44,7 @@ def mock_provides(needs):
     g.identity.provides = needs
 
 
-def test_es_filter(users):
+def test_es_filter(es, users):
     """Test query filter based on CERN groups."""
     mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
     assert CERNRecordsSearch().to_dict()['query']['bool']['filter'] == [
@@ -59,13 +59,13 @@ def test_es_filter(users):
     ]
 
 
-def test_deposit_search(deposit_rest, es, users, project, json_headers):
+def test_deposit_search(api_app, es, users, api_project, json_headers):
     """Test deposit filters and access rights."""
-    RecordIndexer().bulk_index([r.id for r in project])
+    RecordIndexer().bulk_index([r.id for r in api_project])
     RecordIndexer().process_bulk_queue()
     sleep(2)
 
-    with deposit_rest.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
         url = url_for('invenio_deposit_rest.project_list', q='')
         res = client.get(url, headers=json_headers)
@@ -79,7 +79,7 @@ def test_deposit_search(deposit_rest, es, users, project, json_headers):
         """Add additional group to the user."""
         identity.provides |= set([RoleNeed(User.query.get(users[1]).email)])
 
-    with deposit_rest.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[1]).email)
         url = url_for('invenio_deposit_rest.project_list', q='')
         res = client.get(url, headers=json_headers)
@@ -89,7 +89,7 @@ def test_deposit_search(deposit_rest, es, users, project, json_headers):
         assert len(data['hits']['hits']) == 0
 
         # Add user2 as editor for this deposit
-        proj = project[0]
+        proj = api_project[0]
         proj['_access'] = {'update': [User.query.get(users[1]).email]}
         proj.commit()
         RecordIndexer().index(proj)
@@ -107,7 +107,7 @@ def test_deposit_search(deposit_rest, es, users, project, json_headers):
         """Add additional group to the user."""
         identity.provides |= set([RoleNeed('superuser')])
 
-    with deposit_rest.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[2]).email)
         url = url_for('invenio_deposit_rest.project_list', q='')
         res = client.get(url, headers=json_headers)

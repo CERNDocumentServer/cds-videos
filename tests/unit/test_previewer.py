@@ -39,6 +39,7 @@ from werkzeug.exceptions import NotFound
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 from werkzeug.utils import import_string
+from helpers import new_project
 
 
 @pytest.mark.parametrize(
@@ -48,9 +49,13 @@ from werkzeug.utils import import_string
         ('preview_depid', False, '/deposit/{0}/preview/video/{1}',
          'video_preview'),
     ])
-def test_preview_video(previewer_app, db, project, video, preview_func,
+def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
+                       location, deposit_metadata, video, preview_func,
                        publish, endpoint_template, ui_blueprint):
     """Test record video previewing."""
+    project = new_project(previewer_app, es, cds_jsonresolver, users,
+                          location, db, deposit_metadata)
+
     project, video_1, _ = project
     basename = 'test'
     filename_1 = '{}.mp4'.format(basename)
@@ -118,9 +123,9 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
     assert_preview(expected=success_list)
 
 
-def test_legacy_embed(previewer_app, db, project, video):
+def test_legacy_embed(previewer_app, db, api_project, video):
     """Test backwards-compatibility with legacy embed URL for videos."""
-    project, video_1, _ = project
+    project, video_1, _ = api_project
     filename = 'test.mp4'
     bucket_id = video_1['_buckets']['deposit']
     obj = ObjectVersion.create(bucket=bucket_id, key=filename,
@@ -138,9 +143,8 @@ def test_legacy_embed(previewer_app, db, project, video):
         ))
 
 
-def test_smil_generation(previewer_app, db, project, video):
+def test_smil_generation(previewer_app, db, api_project, video):
     """Test SMIL file export from video."""
-
     def create_video_tags(obj, context_type):
         """Create video tags."""
         tags = [('width', 1000), ('height', 1000),
@@ -148,7 +152,7 @@ def test_smil_generation(previewer_app, db, project, video):
                 ('media_type', 'video'), ('context_type', context_type)]
         [ObjectVersionTag.create(obj, key, val) for key, val in tags]
 
-    project, video_1, _ = project
+    project, video_1, _ = api_project
     basename = 'test'
     bucket_id = video_1['_buckets']['deposit']
     master_obj = ObjectVersion.create(bucket=bucket_id,

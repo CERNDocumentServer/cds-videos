@@ -52,9 +52,9 @@ from invenio_sequencegenerator.api import Template
 from cds.modules.deposit.api import video_resolver
 from flask_security import login_user
 from invenio_access.models import ActionRoles
+from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
 from invenio_db import db as db_
-from invenio_deposit import InvenioDepositREST
 from invenio_files_rest.models import Location, Bucket
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
@@ -63,12 +63,11 @@ from invenio_oauth2server.models import Token
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_previewer import InvenioPreviewer
-from invenio_records_rest import InvenioRecordsREST
-from invenio_records_rest.utils import PIDConverter
 from invenio_search import InvenioSearch, current_search, current_search_client
 from invenio_webhooks import InvenioWebhooks
 from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import CeleryReceiver
+from invenio_deposit.permissions import action_admin_access
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
@@ -161,11 +160,30 @@ def celery_not_fail_on_eager_app(app):
     shutil.rmtree(instance_path)
 
 
+@pytest.fixture()
+def previewer_deposit(app):
+    """."""
+    # FIXME workaround for previewer tests because they require app and api_app
+    from invenio_records_rest import InvenioRecordsREST
+    from invenio_deposit import InvenioDepositREST
+    from invenio_records_rest.utils import PIDConverter
+    backup = app.debug
+    app.debug = False
+    if 'invenio-records-rest' not in app.extensions:
+        InvenioRecordsREST(app)
+    if 'invenio-deposit-rest' not in app.extensions:
+        InvenioDepositREST(app)
+        app.url_map.converters['pid'] = PIDConverter
+    app.debug = backup
+    return app
+
+
 @pytest.yield_fixture()
 def api_app(app):
     """Flask API application fixture."""
     api_app = app.wsgi_app.mounts['/api']
-    with api_app.app_context():
+    #  with app.app_context():
+    with api_app.test_request_context():
         yield api_app
 
 
@@ -207,18 +225,27 @@ def users(app, db):
                                       password='tester', active=True)
         user2 = datastore.create_user(email='test@inveniosoftware.org',
                                       password='tester2', active=True)
-        admin = datastore.create_user(email='admin@inveniosoftware.org',
-                                      password='tester3', active=True)
-        # Give a superuser role to admin
-        superuser_role = Role(name='superuser')
+        admin = datastore.create_user(
+            email='admin@inveniosoftware.org',
+            password='tester3', active=True)
+        superadmin = datastore.create_user(
+            email='superadmin@inveniosoftware.org',
+            password='tester4', active=True)
+        # Give a admin role to admin
+        admin_role = Role(name='admin')
         db.session.add(ActionRoles(
-            action='superuser-access', role=superuser_role))
-        datastore.add_role_to_user(admin, superuser_role)
+            action=action_admin_access.value, role=admin_role))
+        datastore.add_role_to_user(admin, admin_role)
+        # Give a superadmin role to superadmin
+        superadmin_role = Role(name='superadmin')
+        db.session.add(ActionRoles(
+            action=superuser_access.value, role=superadmin_role))
+        datastore.add_role_to_user(superadmin, superadmin_role)
     db.session.commit()
     id_1 = user1.id
     id_2 = user2.id
-    id_3 = admin.id
-    return [id_1, id_2, id_3]
+    id_4 = admin.id
+    return [id_1, id_2, id_4]
 
 
 @pytest.fixture()
@@ -281,23 +308,6 @@ def indexer(app):
 
 
 @pytest.fixture()
-def records_rest_app(app):
-    """Init deposit REST API."""
-    if 'invenio-records-rest' not in app.extensions:
-        InvenioRecordsREST(app)
-    return app
-
-
-@pytest.fixture()
-def deposit_rest(app, records_rest_app):
-    """Init deposit REST API."""
-    if 'invenio-deposit-rest' not in app.extensions:
-        InvenioDepositREST(app)
-        app.url_map.converters['pid'] = PIDConverter
-    return app
-
-
-@pytest.fixture()
 def webhooks(app):
     """Init webhooks API."""
     if 'invenio-webhooks' not in app.extensions:
@@ -306,7 +316,7 @@ def webhooks(app):
 
 
 @pytest.fixture()
-def previewer_app(app):
+def previewer_app(app, previewer_deposit):
     """Init deposit REST API."""
     if 'invenio-previewer' not in app.extensions:
         InvenioPreviewer(app)
@@ -659,29 +669,19 @@ def datacite_headers(app):
 
 
 @pytest.fixture()
-def project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
-            deposit_metadata):
+def api_project(api_app, es, users, location, db, deposit_metadata):
     """New project with videos."""
-    return new_project(app, deposit_rest, es, cds_jsonresolver, users,
-                       location, db, deposit_metadata)
-
-
-@pytest.fixture()
-def api_project(api_app, deposit_rest, es,  # cds_jsonresolver,
-                users, location,
-                db, deposit_metadata):
-    """New project with videos."""
-    return new_project(api_app, deposit_rest, es, cds_jsonresolver, users,
+    return new_project(api_app, es, cds_jsonresolver, users,
                        location, db, deposit_metadata)
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.fixture()
-def project_published(app, project):
+def project_published(api_app, api_project):
     """New published project with videos."""
-    (project, video_1, video_2) = project
-    with app.test_request_context():
+    (project, video_1, video_2) = api_project
+    with api_app.test_request_context():
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = video_resolver(new_project.video_ids)

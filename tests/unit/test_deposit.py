@@ -31,7 +31,6 @@ import json
 from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
 from flask import current_app, request, url_for
-from flask_principal import RoleNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
@@ -39,7 +38,7 @@ from invenio_files_rest.models import ObjectVersion
 
 
 def test_deposit_link_factory_has_bucket(
-        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         video_deposit_metadata, project_deposit_metadata):
     """Test bucket link factory retrieval of a bucket."""
@@ -80,7 +79,7 @@ def test_deposit_link_factory_has_bucket(
                 pid_value=pid)
 
 
-def test_links_filter(es, location, deposit_metadata):
+def test_links_filter(app, es, location, deposit_metadata):
     """Test Jinja to_links_js filter."""
     assert to_links_js(None) == []
     deposit = Project.create(deposit_metadata)
@@ -98,13 +97,13 @@ def test_links_filter(es, location, deposit_metadata):
     assert links_type['edit'] == self_url_type + '/actions/edit'
     assert links_type['publish'] == self_url_type + '/actions/publish'
     assert links_type['files'] == self_url_type + '/files'
-    with current_app.test_client() as client:
+    with app.test_client() as client:
         data = client.get(links_type['html']).get_data().decode('utf-8')
         for key in links_type:
             assert links_type[key] in data
 
 
-def test_publish_process_files(app, db, location):
+def test_publish_process_files(api_app, db, location):
     """Test _process_files changing master tags on bucket snapshots."""
     deposit = CDSDeposit.create(dict(date='1/2/3', category='cat', type='type',
                                 title=dict(title='title'),
@@ -140,42 +139,3 @@ def test_publish_process_files(app, db, location):
                     assert obj.get_tags()['master'] == master_version
                     assert obj.get_tags()['media_type'] == 'video'
                     assert obj.get_tags()['context_type'] == 'subformat'
-
-
-def test_deposit_access_rights_based_on_user_id(api_app, users, cds_depid,
-                                                deposit_rest):
-    """Test deposit access rights based on user ID.
-
-    Tests that a user can't access a deposit created by a different user.
-    """
-    with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[0]).email)
-        deposit_url = url_for('invenio_deposit_rest.project_item',
-                              pid_value=cds_depid)
-        # User is the creator of the deposit, so everything is fine
-        assert client.get(deposit_url).status_code == 200
-
-    with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[1]).email)
-        deposit_url = url_for('invenio_deposit_rest.project_item',
-                              pid_value=cds_depid)
-        # User shouldn't have access to this deposit
-        assert client.get(deposit_url).status_code == 403
-
-
-def test_deposit_access_rights_based_on_egroup(api_app, users, cds_depid,
-                                               deposit_rest):
-    """Test deposit access rights based on the e-groups.
-
-    Tests that a user can access a deposit based on the e-group permissions.
-    """
-    @identity_loaded.connect
-    def mock_identity_provides(sender, identity):
-        """Add additional group to the user."""
-        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
-
-    with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[1]).email)
-        deposit_url = url_for('invenio_deposit_rest.project_item',
-                              pid_value=cds_depid)
-        assert client.get(deposit_url).status_code == 200
