@@ -3,7 +3,7 @@
   <body>
     <switch>
       {% for video in videos %}
-        <video src="mp4:{{video['src']}}" system-bitrate="{{video['bit_rate']}}" width="{{video['width']}}" height="{{video['height']}}" />
+        <video src="mp4:path{{video['src']}}" system-bitrate="{{video['bit_rate']}}" width="{{video['width']}}" height="{{video['height']}}" />
       {% endfor %}
     </switch>
   </body>
