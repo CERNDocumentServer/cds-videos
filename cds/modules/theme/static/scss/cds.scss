@@ -42,6 +42,10 @@ a[ng-click]{
   cursor: pointer;
 }
 
+i.sort-handle {
+  cursor: move;
+}
+
 .flex-container {
   display: flex;
   min-height: 100vh;

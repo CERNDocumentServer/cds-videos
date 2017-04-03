@@ -1,11 +1,10 @@
 <div class="form-group {{form.htmlClass}} schema-form-select"
      ng-class="{'has-error': form.disableErrorState !== true && hasError(), 'has-feedback': form.feedback !== false}">
-  <label class="control-label col-sm-3 {{form.labelHtmlClass}}"
+  <label class="control-label {{form.labelHtmlClass}}"
          ng-show="showTitle()"
          ng-class="{'field-required': form.required}">
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>{{form.title}}
   </label>
-  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
     <select ng-model="$$value$$"
             ng-model-options="form.ngModelOptions"
             ng-disabled="form.readonly"
@@ -16,5 +15,4 @@
             name="{{ form.key.slice(-1)[0] }}">
     </select>
     <div class="help-block" sf-message="form.description"></div>
-  </div>
 </div>

@@ -8,7 +8,6 @@
       "type": "section",
       "htmlClass": "form-ckeditor",
       "description": "",
-      "notitle": true,
       "items": [
         {
           "type": "ckeditor",
@@ -39,7 +38,6 @@
       "title": "Keywords",
       "key": "keywords",
       "type": "uiselectmultiple",
-      "notitle": false,
       "placeholder": "Keywords",
       "options": {
         "asyncCallback": "$ctrl.autocompleteKeywords",
@@ -51,7 +49,6 @@
       "type": "select",
       "key": "language",
       "placeholder": "Language",
-      "notitle": false,
       "titleMap": [
         {
           "value":  "bg",
@@ -136,7 +133,7 @@
       "title": "Date",
       "key": "date",
       "placeholder": "eg. 2013-05-08",
-      "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+      "templateUrl": "/static/templates/cds_deposit/angular-schema-form/datepicker.html",
       "format": "yyyy-MM-dd",
       "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
       "fa_cls": "fa-calendar",
@@ -159,8 +156,8 @@
         {
           "type": "uiselect",
           "key": "contributors[]",
-          "notitle": true,
           "placeholder": "Author name",
+          "title": "Name",
           "options": {
             "mergeObjects": true,
             "asyncCallback": "$ctrl.autocompleteAuthors",
@@ -174,7 +171,7 @@
           "type": "select",
           "key": "contributors[].role",
           "placeholder": "Role",
-          "notitle": true,
+          "title": "Role",
           "titleMap": [
             {
               "value":  "Director",
@@ -214,31 +211,10 @@
     },
     {
       "title": "Mark as featured",
-      "key": "featured",
-      "htmlClass": "row col-sm-9 col-sm-offset-3"
+      "key": "featured"
     }
   ],
   "licenses": [
-    {
-      "title": "Copyright",
-      "key": "copyright",
-      "items": [
-        {
-          "key": "copyright.holder",
-          "title": "Holder",
-          "type": "string",
-          "onChange": "$ctrl.checkCopyright(modelValue,form)"
-        },
-        {
-          "key": "copyright.year",
-          "title": "Year"
-        },
-        {
-          "key": "copyright.url",
-          "title": "URL"
-        }
-      ]
-    },
     {
       "type": "array",
       "key": "license",
@@ -256,7 +232,6 @@
         {
           "type": "uiselect",
           "key": "license[].license",
-          "notitle": false,
           "title": "License",
           "placeholder": "License name",
           "options": {
@@ -273,6 +248,26 @@
         {
           "key": "license[].url",
           "placeholder": "Url"
+        }
+      ]
+    },
+    {
+      "title": "Copyright",
+      "key": "copyright",
+      "items": [
+        {
+          "key": "copyright.holder",
+          "title": "Holder",
+          "type": "string",
+          "onChange": "$ctrl.checkCopyright(modelValue,form)"
+        },
+        {
+          "key": "copyright.year",
+          "title": "Year"
+        },
+        {
+          "key": "copyright.url",
+          "title": "URL"
         }
       ]
     }

@@ -26,8 +26,30 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import url_for
+
 
 def test_version():
     """Test version import."""
     from cds import __version__
     assert __version__
+
+
+def test_home(app):
+    """Test homepage."""
+    with app.test_client() as client:
+        res = client.get(
+            url_for('cds_home.index')
+        )
+
+        assert res.status_code == 200
+
+
+def test_ping(app):
+    """Test homepage."""
+    with app.test_client() as client:
+        res = client.get(
+            url_for('cds_home.ping')
+        )
+
+        assert res.status_code == 200

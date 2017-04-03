@@ -4,13 +4,13 @@
   ng-model="$$value$$"
   ng-model-options="form.ngModelOptions">
   <label
-    class="control-label col-sm-3"
+    class="control-label"
     for="{{ form.key.slice(-1)[0] }}"
     ng-class="{'sr-only': !showTitle(), 'field-required': form.required}"
     ng-show="showTitle()">
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>&nbsp;{{ form.title }}
   </label>
-  <div ng-class="{'col-sm-9': !form.notitle, 'col-sm-12': form.notitle}">
+
     <ul class="list-unstyled" ng-model="modelArray" ui-sortable="form.sortOptions">
       <li
         class="{{ form.fieldHtmlClass }} list-group-item"
@@ -49,5 +49,4 @@
         <i class="fa fa-plus"></i>&nbsp;{{ form.add || 'Add'}}
       </a>
     </div>
-  </div>
 </div>
