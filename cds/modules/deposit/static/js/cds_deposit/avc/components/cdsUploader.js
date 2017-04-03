@@ -26,6 +26,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     // Add the necessary flags
     data.progress = 100;
     data.completed = true;
+    if (!(data.tags && data.tags.uri_origin)) {
+      that.cdsDepositCtrl.taskState.file_download = 'SUCCESS';
+    }
     that.updateFile(
       key,
       data,
@@ -402,7 +405,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           subformats[index],
           data
         );
-      } else {
+      } else if (index == -1) {
         subformats.push(angular.merge(
           { key: key },
           data
