@@ -66,7 +66,8 @@ function cdsDepositCtrl(
     try {
       // Destroy listener
       that.sseEventListener();
-      $timout.cancel(that.autoUpdateTimeout);
+      $interval.cancel(that.fetchStatusInterval);
+      $timeout.cancel(that.autoUpdateTimeout);
     } catch (error) {}
   };
 
@@ -82,7 +83,7 @@ function cdsDepositCtrl(
     };
 
     this.initializeStateQueue = function() {
-      that.taskState = this.record._deposit.state;
+      that.taskState = that.record._deposit.state;
     };
 
     function accessElement(obj, elem, value) {
@@ -170,6 +171,9 @@ function cdsDepositCtrl(
       var eventId = master.tags._event_id;
       that.failedSubformatKeys = _.difference(that.failedSubformatKeys,
                                               subformatKeys);
+      if (!that.failedSubformatKeys.length) {
+        that.taskState.file_transcode = 'STARTED';
+      }
       master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
@@ -177,7 +181,6 @@ function cdsDepositCtrl(
             subformat.progress = 0;
           }
         });
-      that.taskState.file_transcode = 'STARTED';
       that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
         .then(function(data) {
         data.filter(function(taskInfo) {
@@ -199,7 +202,7 @@ function cdsDepositCtrl(
       that.stateReporter = {};
       that.presets_finished = [];
       that.presets = [];
-      depositStates.map(function(state) {
+      depositStates.forEach(function(state) {
         that.stateReporter[state] = {
           status: state,
           message: state,
@@ -248,6 +251,9 @@ function cdsDepositCtrl(
     };
 
     this.subformatSortByKey = function(sub1, sub2) {
+      if (!(sub1.key && sub2.key)) {
+        return 0;
+      }
       var lengthDiff = sub1.key.length - sub2.key.length;
       if (lengthDiff != 0) {
         return lengthDiff;
@@ -264,6 +270,9 @@ function cdsDepositCtrl(
       var keys2 = subformatsNew.map(_.property('key'));
       _.difference(keys2, keys1).forEach(function (newSubformat) {
         subformatsOld.push({key: newSubformat})
+      });
+      _.difference(keys1, keys2).forEach(function (oldSubformat) {
+        subformatsNew.push({key: oldSubformat})
       });
 
       subformatsNew = subformatsNew.sort(that.subformatSortByKey);
@@ -295,32 +304,45 @@ function cdsDepositCtrl(
 
       // Check for new state
       that.record._deposit.state = angular.merge(
-        {},
         that.record._deposit.state,
         deposit._deposit.state || {}
       );
       that.lastUpdated = new Date();
     };
 
-    this.fetchSubformatStatuses = function() {
+    // Refresh tasks from feedback endpoint
+    this.fetchCurrentStatuses = function() {
       var masterFile = that.findMasterFile();
       if (masterFile) {
         var tags = masterFile.tags;
         if (tags && tags._event_id) {
           var eventId = tags._event_id;
-          that.getTaskFeedback(eventId, 'file_transcode')
+          that.getTaskFeedback(eventId)
             .then(function(data) {
-              data.filter(function(taskInfo) {
-                return taskInfo.status == 'FAILURE';
-              }).forEach(function (taskInfo) {
-                taskInfo.info.payload.errored = true;
-                var key = taskInfo.info.payload.key;
-                if (!that.failedSubformatKeys.includes(key)) {
-                  that.failedSubformatKeys.push(key);
+              var subformatTasks = data.filter(function(task) {
+                return task.name === 'file_transcode'
+              });
+              // Mark all the failed subformat tasks
+              subformatTasks.forEach(function(task) {
+                if (task.status === 'FAILURE') {
+                  task.info.payload.errored = true;
+                  var key = task.info.payload.key;
+                  if (!that.failedSubformatKeys.includes(key)) {
+                    that.failedSubformatKeys.push(key);
+                  }
                 }
               });
+              // Drop all finished subformats
+              that.presets_finished.splice(0, that.presets_finished.length);
+              // Update the state reporter with all the new info
+              data.forEach(function(task) {
+                that.updateStateReporter(task.name, {
+                  state: task.status,
+                  meta: task.info
+                });
+              });
               var subformatsNew = {
-                subformat: data.map(function(task) {
+                subformat: subformatTasks.map(function(task) {
                   var payload = task.info.payload;
                   payload.progress = payload.percentage;
                   return payload;
@@ -375,6 +397,7 @@ function cdsDepositCtrl(
           that.stateQueue.PENDING.push(state);
         }
       });
+      angular.merge(that.record._deposit.state, that.taskState);
       $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
     };
 
@@ -389,8 +412,8 @@ function cdsDepositCtrl(
     // Check for previewer
     that.videoPreviewer();
     // Update subformat statuses
-    that.fetchSubformatStatuses();
-    $interval(that.fetchSubformatStatuses, 30000);
+    that.fetchCurrentStatuses();
+    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 30000);
     $scope.$watch('$ctrl.taskState', that.refreshStateQueue, true);
 
     // Calculate the transcode
@@ -407,14 +430,13 @@ function cdsDepositCtrl(
               data.meta.payload.key
             );
           }
-        } else {
-          that.stateReporter[type] = angular.merge(that.stateReporter[type], {
-            payload: {
-              percentage: that.presets_finished.length / that.presets.length *
-                100,
-            },
-          });
         }
+        that.stateReporter[type] = angular.merge(that.stateReporter[type], {
+          payload: {
+            percentage: that.presets_finished.length / that.presets.length *
+              100,
+          },
+        });
       } else {
         that.stateReporter[type] = angular.copy(data.meta);
       }
@@ -439,7 +461,9 @@ function cdsDepositCtrl(
         if (type === 'update_deposit') {
           that.updateDeposit(data.meta.payload.deposit);
         } else if (!(type === 'file_transcode' && data.state === 'SUCCESS')) {
-          that.taskState[type] = data.state;
+          if (!['SUCCESS', 'FAILURE'].includes(that.taskState[type])) {
+            that.taskState[type] = data.state;
+          }
         }
       });
       // The state has been changed update the current

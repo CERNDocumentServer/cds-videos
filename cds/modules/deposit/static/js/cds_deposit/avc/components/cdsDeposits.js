@@ -94,7 +94,10 @@ function cdsDepositsCtrl(
       var data = JSON.parse(evt.data || '{}');
       var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
       console.info('RECEIVED', evt.type, data);
-      $scope.$broadcast(deposit_, evt.type, data);
+      if (evt.type != 'file_transcode') {
+        // Ignore file_transcode events for now
+        $scope.$broadcast(deposit_, evt.type, data);
+      }
     };
 
     // SSE stuff - move to somewhere else
