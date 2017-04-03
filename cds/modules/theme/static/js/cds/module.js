@@ -58,6 +58,11 @@ app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
     return $sce.trustAsResourceUrl(_url)
   };
 }]);
+app.filter('toInt', function() {
+  return function(text) {
+    return text ? parseInt(text) : text;
+  }
+});
 app.filter('stripTags', function() {
   return function(text) {
     return text ? String(text).replace(/<[^>]+>/gm, '') : '';

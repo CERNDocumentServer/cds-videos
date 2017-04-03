@@ -11,9 +11,9 @@
         "key": "date",
         "title": "Date",
         "placeholder": "eg. 2013-05-08",
-        "templateUrl": "/static/templates/cds_deposit/datepicker.html",
+        "templateUrl": "/static/templates/cds_deposit/angular-schema-form/datepicker.html",
         "format": "yyyy-MM-dd",
-        "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
+        "description": "Required. Format: YYYY-MM-DD. In case your upload was already p ublished elsewhere, please use the date of first publication.",
         "fa_cls": "fa-calendar",
         "required": false
       },
@@ -21,7 +21,7 @@
         "type": "section",
         "htmlClass": "form-ckeditor",
         "description": "",
-        "notitle": true,
+
         "items": [
           {
             "type": "ckeditor",
@@ -55,8 +55,6 @@
         "placeholder": "Category",
         "title": "Category",
         "type": "strapselect",
-        "labelHtmlClass": "col-sm-3",
-        "fieldHtmlClass": "col-sm-9",
         "htmlClass": "cds-deposit-strap-select",
         "options": {
           "url": "/api/categories",
@@ -69,8 +67,6 @@
         "placeholder": "Type",
         "title": "Type",
         "type": "strapselect",
-        "labelHtmlClass": "col-sm-3",
-        "fieldHtmlClass": "col-sm-9",
         "htmlClass": "cds-deposit-strap-select",
         "options": {
           "filterTriggers": ["model.category"],
@@ -108,7 +104,7 @@
           {
             "type": "uiselect",
             "key": "contributors[]",
-            "notitle": true,
+            "title": "Name",
             "placeholder": "Author name",
             "options": {
               "mergeObjects": true,
@@ -123,7 +119,7 @@
             "type": "select",
             "key": "contributors[].role",
             "placeholder": "Role",
-            "notitle": true,
+            "title": "Role",
             "titleMap": [
               {
                 "value":  "Director",

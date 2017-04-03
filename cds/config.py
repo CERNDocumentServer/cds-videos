@@ -414,11 +414,19 @@ DEPOSIT_PROJECT_FACETS = {
             'category': {
                 'terms': {'field': 'category'},
             },
+            'transcode': {
+                'terms': {'field': '_deposit.state.file_transcode'},
+            },
+            'frames': {
+                'terms': {'field': '_deposit.state.file_video_extract_frames'},
+            },
             'created_by': created_by_me_aggs,
         },
         'post_filters': {
             'status': terms_filter('_deposit.status'),
             'category': terms_filter('category'),
+            'transcode': terms_filter('_deposit.state.file_transcode'),
+            'frames': terms_filter('_deposit.state.file_video_extract_frames'),
             'created_by': terms_filter('_deposit.created_by'),
         },
     },
@@ -616,7 +624,7 @@ THEO_LICENCE_KEY = 'CHANGE_ME'
 WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/_definist_/smil:'
                       '{filepath}/playlist.m3u8')
 # Thumbnail size
-VIDEO_POSTER_SIZE = (180, 180)
+VIDEO_POSTER_SIZE = (180, 101)
 
 ###############################################################################
 # Logging

@@ -2,13 +2,12 @@
   class="form-group schema-form-radios {{ form.htmlClass }}"
   ng-class="{'has-error': form.disableErrorState !== true && hasError()}">
   <label
-    class="control-label col-sm-3 {{ form.labelHtmlClass }}"
+    class="control-label {{ form.labelHtmlClass }}"
     ng-model="$$value$$"
     ng-model-options="form.ngModelOptions"
     schema-validate="form"
     ng-class="{'field-required': form.required}"
     ng-show="showTitle()">{{ form.title }}</label>
-  <div class="col-sm-9">
     <div class="radio" ng-repeat="item in form.titleMap">
       <label>
         <input
@@ -24,5 +23,4 @@
       </label>
     </div>
     <div class="help-block" sf-message="form.description"></div>
-  </div>
 </div>

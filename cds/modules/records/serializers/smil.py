@@ -26,7 +26,6 @@ from __future__ import absolute_import, print_function
 
 import shutil
 import tempfile
-from os import symlink
 from os.path import join
 
 from cds.modules.deposit.api import Video, CDSFilesIterator
@@ -104,9 +103,6 @@ def generate_smil_file(record_id, record, bucket, master_object):
         ObjectVersionTag.create(obj, 'master', master_object.version_id)
         ObjectVersionTag.create(obj, 'context_type', 'playlist')
         ObjectVersionTag.create(obj, 'media_type', 'text')
-
-    # Create symlink for Wowza server
-    symlink(obj.file.uri, '{0}.smil'.format(obj.file.uri))
 
     # Commit changes
     shutil.rmtree(output_folder)

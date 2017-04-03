@@ -67,7 +67,7 @@ js_dependecies_schema_form = NpmBundle(
 )
 
 js_jquery = NpmBundle(
-    js_dependencies_jquery,
+    'node_modules/jqueryui/jquery-ui.js',
     filters='jsmin',
     output='gen/cds.deposit.jquery.deposit.%(version)s.js',
 )

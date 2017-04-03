@@ -36,12 +36,6 @@ blueprint = Blueprint(
 @blueprint.before_app_first_request
 def init_menu():
     """Initialize menu before first request."""
-    item = current_menu.submenu('main.search')
-    item.register(
-        'invenio_search_ui.search',
-        _('Search'),
-        order=1,
-    )
     item = current_menu.submenu('main.deposit')
     item.register(
         'invenio_deposit_ui.index',
