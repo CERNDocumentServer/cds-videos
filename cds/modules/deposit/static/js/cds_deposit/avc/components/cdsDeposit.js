@@ -84,6 +84,14 @@ function cdsDepositCtrl(
 
     this.initializeStateQueue = function() {
       that.taskState = that.record._deposit.state;
+      if (!_.isEmpty(that.record._deposit.state)) {
+        var inter = _.intersection(depositStates, Object.keys(that.record._deposit.state));
+        // Make sure that 'file_download' is not on the list
+        if (inter.indexOf('file_download') === -1) {
+          that.taskState.file_download = 'SUCCESS';
+          that.refreshStateQueue();
+        }
+      }
     };
 
     function accessElement(obj, elem, value) {
@@ -213,6 +221,7 @@ function cdsDepositCtrl(
 
     // Calculate the overall total status
     this.calculateStatus = function() {
+      console.log()
       if (that.stateQueue.FAILURE.length) {
         return depositStatuses.FAILURE;
       } else if (that.stateQueue.STARTED.length) {
@@ -226,23 +235,17 @@ function cdsDepositCtrl(
 
     this.videoPreviewer = function(deposit, key) {
       var videoUrl;
-      if (deposit && key) {
-        videoUrl = urlBuilder.video({
-          deposit: deposit,
-          key: key,
+
+      var master = that.findMasterFile();
+      if (master && master.subformat) {
+        var finishedSubformats = master.subformat.filter(function(fmt) {
+          return fmt.completed && !_.isEmpty(fmt.checksum);
         });
-      } else {
-        var master = that.findMasterFile();
-        if (master && master.subformat) {
-          var finishedSubformats = master.subformat.filter(function(fmt) {
-            return fmt.completed;
+        if (finishedSubformats[0]) {
+          videoUrl = urlBuilder.video({
+            deposit: that.record._deposit.id,
+            key: finishedSubformats[0].key,
           });
-          if (finishedSubformats[0]) {
-            videoUrl = urlBuilder.video({
-              deposit: that.record._deposit.id,
-              key: finishedSubformats[0].key,
-            });
-          }
         }
       }
       if (videoUrl) {
@@ -307,6 +310,10 @@ function cdsDepositCtrl(
         that.record._deposit.state,
         deposit._deposit.state || {}
       );
+
+      if (_.isEmpty(that.previewer)) {
+        that.videoPreviewer();
+      }
       that.lastUpdated = new Date();
     };
 
@@ -405,15 +412,15 @@ function cdsDepositCtrl(
     this.initializeStateQueue();
     // Initialize state reporter
     this.initializeStateReported();
-    // Set the deposit State
-    this.depositStatusCurrent = this.calculateStatus();
     // Set stateCurrent - If null -> Waiting SSE events
     that.stateCurrent = that.stateQueue.STARTED[0] || null;
     // Check for previewer
     that.videoPreviewer();
+    // Set the deposit State
+    this.depositStatusCurrent = this.calculateStatus();
     // Update subformat statuses
     that.fetchCurrentStatuses();
-    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 30000);
+    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
     $scope.$watch('$ctrl.taskState', that.refreshStateQueue, true);
 
     // Calculate the transcode
@@ -424,7 +431,7 @@ function cdsDepositCtrl(
           if (that.presets_finished.length === that.presets.length) {
             that.taskState.file_transcode = 'SUCCESS';
           }
-          if (!that.previewer) {
+          if (_.isEmpty(that.previewer)) {
             that.videoPreviewer(
               data.meta.payload.deposit_id,
               data.meta.payload.key

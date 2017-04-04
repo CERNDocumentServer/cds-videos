@@ -8,11 +8,11 @@
 <!-- Subformat -->
 <div class="cds-video-subformats mb-20">
   <h4>Subformats</h4>
-  <div ng-hide="record._files[0].subformat.length > 0" class="text-center">
+  <div ng-hide="record.metadata._files[0].subformat.length > 0" class="text-center">
     <p class="text-muted">Not available :(</p>
   </div>
-  <div ng-show="record._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record._files[0].subformat">
+  <div ng-show="record.metadata._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record.metadata._files[0].subformat">
       <li>
         <a ng-href="{{ file.links.self }}">
           {{ file.tags.preset_quality }} ({{ file.size | bytesToHumanReadable}})
@@ -23,13 +23,13 @@
 </div>
 <!-- /Subformat -->
 <!-- Subformat -->
-<div ng-if="record._files.length > 1" class="cds-video-subformats mb-20">
+<div ng-if="record.metadata._files.length > 1" class="cds-video-subformats mb-20">
   <h4>Addition Files</h4>
-  <div ng-hide="record._files.length > 1" class="text-center">
+  <div ng-hide="record.metadata._files.length > 1" class="text-center">
     <p class="text-muted">Not available.</p>
   </div>
-  <div ng-show="record._files.length > 1" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record._files">
+  <div ng-show="record.metadata._files.length > 1" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record.metadata._files">
       <li>
         <a ng-href="{{ file.links.self }}">
           {{ file.tags.preset_quality }}
@@ -63,7 +63,7 @@
     <p>Copyright abuse should be reported using the contact form.</p>
   </div>
   <p class="pull-right">
-    <a ng-href="{{ record._files[0].links.self }}" download>
+    <a ng-href="{{ record.metadata._files[0].links.self }}" download>
       <button class="btn btn-success" ng-click="$parent.hideModal()">Agree</button>
     </a>
     <button class="btn btn-danger" ng-click="$parent.hideModal()">Refuse</button>

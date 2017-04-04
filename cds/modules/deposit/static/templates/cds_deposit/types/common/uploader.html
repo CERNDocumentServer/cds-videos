@@ -69,19 +69,15 @@
         </a>
       </td>
     </tr>
-    <tr class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
+    <tr ng-if="f.key" class="sel-file" ng-repeat="f in $ctrl.getSubformats()" ng-show="showSubformats">
       <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
       <td>
-
       </td>
       <td class="text-center">
-        <span ng-show="f.progress < 100 && !f.completed && !f.errored">
-          <span ng-if="f.progress">{{ f.progress | toInt }} %</span>
-          <span ng-if="!f.progress"><i class="fa fa-spinner fa-spin"></i></span>
-        </span>
-        <span ng-show="f.processing && !f.errored">Processing...</span>
+        <span ng-if="f.progress < 100 && !f.completed">{{ f.progress | toInt }} %</span>
+        <span ng-if="(f.progress == 100 || !f.progress) && f.progress !==0 && !f.completed"><i class="fa fa-spinner fa-spin"></i></span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.progress==100 || f.completed) && !f.errored" class="text-success">✓</span>
+        <span ng-show="((f.progress==100 || !f.progress ) && f.completed) && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.includes(f.key)">
@@ -114,6 +110,16 @@
       </td>
     </tr>
   </table>
+
+  <div ng-if="$ctrl.cdsDepositCtrl.master" class="panel-footer">
+   <div class="text-right">
+     <span class="text-muted" ng-show="$ctrl.loading">
+       <i class="fa fa-spinner fa-pulse fa-fw"></i>
+       <span class="sr-only">Loading...</span>
+     </span>
+     <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0 || $ctrl.allFinished()" ng-click="$ctrl.upload()">Start upload</button>
+   </div>
+ </div>
 </div>
 <hr />
 <div class="cds-deposit-box">
