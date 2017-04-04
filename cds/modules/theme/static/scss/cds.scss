@@ -119,6 +119,44 @@ i.sort-handle {
   padding: 5px;
 }
 
+// Tags
+
+.cds-tags ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cds-tags ul li {
+  display: inline-block;
+  margin: 0 .3em .3em 0;
+  padding: 0;
+}
+
+.cds-tags ul li a {
+  display: inline-block;
+  max-width: 200px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 1em;
+  background-color: #fff;
+  border: 1px solid $bg-gray;
+  border-radius: 3px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: $gray;
+  font-size: 13px;
+  text-decoration: none;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+.cds-tags ul li a:hover {
+  background-color: $primary-color;
+  border: 1px solid $primary-color;
+  color: #fff;
+}
+
 /////////
 
 // /search

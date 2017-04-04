@@ -54,6 +54,9 @@ datacite_v31 = DataCite31Serializer(DataCiteSchemaV1, replace_refs=True)
 #: CDSDeposit serializer
 cdsdeposit_json_v1 = JSONSerializer(RecordSchemaJSONV1, replace_refs=True)
 
+#: CDS JSON serializer v1
+json_v1 = JSONSerializer(RecordSchemaJSONV1, replace_refs=True)
+
 # Records-REST response serializers
 # =================================
 
@@ -73,3 +76,6 @@ datacite_v31_response = record_responsify(
 #: CDSDeposit record serializer for individual records.
 cdsdeposit_json_v1_response = record_responsify(cdsdeposit_json_v1,
                                                 'application/json')
+
+#: JSON response bunlider
+json_v1_response = record_responsify(json_v1, 'application/json')

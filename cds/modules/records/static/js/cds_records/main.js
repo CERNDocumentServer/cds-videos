@@ -26,10 +26,7 @@ angular.element(document).ready(function() {
   angular.bootstrap(
     document.getElementById("cds-record"), [
       'angular-loading-bar', 'cdsRecord', 'ngDialog', 'cds',
-      'ngModal', 'ngclipboard'
+      'ngModal', 'ngclipboard', 'invenioFiles.filters'
     ]
-  );
-  angular.bootstrap(
-    document.getElementById("cds-recent-videos"), ['cds', 'invenioSearch']
   );
 });
