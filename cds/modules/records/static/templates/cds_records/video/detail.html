@@ -27,7 +27,7 @@
                 <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
               </li>
               <li class="pr-0" ng-if="record.report_number.report_number">
-                <span class="label label-info">{{ ::record.report_number.report_number }}</span>
+                <ng-include src="'/static/templates/cds_records/report_number.html'"></ng-include>
               </li>
             </ul>
           </div>
