@@ -7,7 +7,7 @@
   </div>
   <div ng-show="record._files[0].tags" class="cds-detail-download-box cds-detail-video-download-box cds-transition">
     <ul ng-repeat="(key, value) in record._files[0].tags">
-      <li ng-hide="$index > 2 && !technicalExpand" ><b>{{ key }}:</b> {{ value }} {{ $index }}</li>
+      <li ng-hide="$index > 2 && !technicalExpand" ><b>{{ key }}:</b> {{ value }}</li>
     </ul>
   </div>
   <div class="text-right">
