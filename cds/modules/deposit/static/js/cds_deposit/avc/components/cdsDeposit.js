@@ -224,28 +224,23 @@ function cdsDepositCtrl(
       return depositStatuses.PENDING;
     };
 
-    this.videoPreviewer = function(deposit, key) {
-      var videoUrl;
-      if (deposit && key) {
-        videoUrl = urlBuilder.video({
-          deposit: deposit,
-          key: key,
-        });
-      } else {
+    this.videoPreviewer = function(fileId) {
+      if (!fileId) {
         var master = that.findMasterFile();
         if (master && master.subformat) {
           var finishedSubformats = master.subformat.filter(function(fmt) {
             return fmt.completed;
           });
           if (finishedSubformats[0]) {
-            videoUrl = urlBuilder.video({
-              deposit: that.record._deposit.id,
-              key: finishedSubformats[0].key,
-            });
+            fileId = finishedSubformats[0].file_id;
           }
         }
       }
-      if (videoUrl) {
+      if (fileId) {
+        var id0 = fileId.slice(0, 2);
+        var id1 = fileId.slice(2, 4);
+        var id2 = fileId.slice(4);
+        var videoUrl = urlBuilder.previewUrl({ id0: id0, id1: id1, id2: id2 });
         that.previewer = $sce.trustAsResourceUrl(videoUrl);
       }
     };
@@ -291,6 +286,9 @@ function cdsDepositCtrl(
       try {
         for (var i in that.record._files) {
           that.updateSubformatsList(that.record._files[i], deposit._files[i]);
+        }
+        if (!that.previewer) {
+          that.videoPreviewer();
         }
       } catch(error) {
         // Report
@@ -426,8 +424,7 @@ function cdsDepositCtrl(
           }
           if (!that.previewer) {
             that.videoPreviewer(
-              data.meta.payload.deposit_id,
-              data.meta.payload.key
+              data.meta.payload.file_instance
             );
           }
         }

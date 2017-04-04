@@ -60,6 +60,8 @@ function cdsDepositsConfig(
     iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png',
     sse: '/api/deposits/project/<%=id%>/sse',
     video: '/deposit/<%=deposit%>/preview/video/<%=key%>',
+    previewUrl: 'https://wowzaqaedge.cern.ch/cdseos/_definist_/mp4:' +
+    '<%=id0%>/<%=id1%>/<%=id2%>/data/playlist.m3u8',
     restartEvent: '/hooks/receivers/avc/events/<%=eventId%>/tasks/<%=taskId%>',
     taskFeedback: '/hooks/receivers/avc/events/<%=eventId%>/feedback',
     actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>'
