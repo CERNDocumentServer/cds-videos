@@ -17,6 +17,7 @@
               <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
               <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
             </div>
+
             <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
           </div>
           <br />
@@ -34,7 +35,6 @@
                     <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
                 </div>
               </div>
-
               <!-- Failed transcodings -->
               <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
                 <div class="pull-left">
@@ -127,11 +127,6 @@
                   File transcode: {{$ctrl.cdsDepositCtrl.stateReporter['file_transcode']}} <br />
                   <hr />
 
-                  -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
-                  -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />
-                  -- STATUS: {{$ctrl.cdsDepositCtrl.depositStatusCurrent}} -- <br />
-                  -- State reporterd {{ $ctrl.cdsDepositCtrl.stateReporter }} -- <br />
-                  -- State current {{ $ctrl.cdsDepositCtrl.stateCurrent }} -- <br />
                   <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
                   <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
                   <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}

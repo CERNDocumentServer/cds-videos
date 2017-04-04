@@ -55,6 +55,7 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
     basename = 'test'
     filename_1 = '{}.mp4'.format(basename)
     filename_2 = '{}.invalid'.format(basename)
+    deposit_filename = 'playlist.m3u8'
     bucket_id = video_1['_buckets']['deposit']
     preview_func = import_string(
         'cds.modules.previewer.views.{0}'.format(preview_func))
@@ -86,7 +87,7 @@ def test_preview_video(previewer_app, db, project, video, preview_func,
     else:
         assert video_1.status == 'draft'
         pid = PersistentIdentifier.get('depid', video_1['_deposit']['id'])
-        success_list.append(filename_1)
+        success_list.append(deposit_filename)
 
     def assert_preview(expected=None, exception=None, **query_params):
         with previewer_app.test_request_context(query_string=query_params):
