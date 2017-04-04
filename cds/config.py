@@ -202,6 +202,12 @@ RECORDS_UI_ENDPOINTS = dict(
         view_imp='cds.modules.previewer.views.preview_recid_embed',
         record_class='invenio_records_files.api:Record',
     ),
+    recid_embed_default=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/embed',
+        view_imp='cds.modules.previewer.views.preview_recid_embed',
+        record_class='invenio_records_files.api:Record',
+    ),
     recid_files=dict(
         pid_type='recid',
         route='/record/<pid_value>/files/<filename>',
