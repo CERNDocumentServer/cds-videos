@@ -508,10 +508,10 @@ FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
 # Formatter
 ###############################################################################
 #: List of allowed titles in badges.
-FORMATTER_BADGES_ALLOWED_TITLES = ['DOI', 'doi']
+FORMATTER_BADGES_ALLOWED_TITLES = ['DOI', 'doi', 'RN', 'rn']
 
 #: Mapping of titles.
-FORMATTER_BADGES_TITLE_MAPPING = {'doi': 'DOI'}
+FORMATTER_BADGES_TITLE_MAPPING = {'doi': 'DOI', 'rn': 'RN'}
 
 # Enable badges
 FORMATTER_BADGES_ENABLE = True
