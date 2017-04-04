@@ -8,7 +8,7 @@
                  'cds-tasks-started': state === 'DEPOSIT_STATE/STARTED' && record.metadata._deposit.status === 'draft',
                  'cds-deposit-published': record.metadata._deposit.status === 'published'
                }"
-      target="_self" ng-href="/deposit/{{ record.metadata._deposit.id }}">
+      target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
       <div class="row">
         <div class="col-sm-7">
           <div class="t-b mt-0">
