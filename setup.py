@@ -249,6 +249,8 @@ setup(
             'cds_video = cds.modules.previewer.extensions.video:video',
             'cds_embed_video = '
             'cds.modules.previewer.extensions.video:embed_video',
+            'cds_deposit_video = '
+            'cds.modules.previewer.extensions.video:deposit_video',
         ],
         'invenio_sse.integrations': [
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
