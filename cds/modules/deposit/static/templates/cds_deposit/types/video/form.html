@@ -85,8 +85,8 @@
                 <li role="presentation" ng-class="{active: active=='files'}"><a ng-click="active='files'" role="tab" data-toggle="tab">Files</a></li>
                 <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
                 <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug (for @drjova)</a></li>
-                <li role="presentation" class="dropdown pull-right">
-                  <a class="dropdown-toggle" title="More options" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
+                  <a class="dropdown-toggle" title="More options" data-toggle="dropdown" ng-click="openDropdown=!openDropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-cog"></i>
                   </a>
                   <ul class="dropdown-menu">

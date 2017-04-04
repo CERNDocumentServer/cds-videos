@@ -1,18 +1,17 @@
-<div class="cds-detail-video bg-n mt--20 pb-20">
+<div ng-init="record=record.metadata.metadata" class="cds-detail-video bg-n mt--20 pb-20">
   <!-- Video Section -->
   <div class="container">
     <div class="row">
       <div class="col-md-12">
         <!-- Embed Video -->
-        <div class="embed-responsive embed-responsive-16by9">
-          <iframe class="embed-responsive-item" frameborder="0" ng-src="{{ '' | previewIframeSrc: record.recid:record._files[0].key }}" allowfullscreen></iframe>
+        <div ng-if="record.metadata._deposit.pid.value" class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" frameborder="0" ng-src="{{ '' | previewIframeSrc: record.metadata._deposit.pid.value:record.metadata._files[0].key }}" allowfullscreen></iframe>
         </div>
         <!-- ./Embed Video -->
       </div>
     </div>
   </div>
   <!-- /Video Section -->
-
   <!-- Metadata Section -->
   <div class="container">
     <div class="row">
@@ -23,10 +22,10 @@
           <!-- DOI and report number -->
           <div class="text-right">
             <ul class="list-inline">
-              <li ng-if="record.doi">
+              <li ng-if="record.metadata.doi">
                 <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
               </li>
-              <li class="pr-0" ng-if="record.report_number.report_number">
+              <li class="pr-0" ng-if="record.metadata.report_number.report_number">
                 <ng-include src="'/static/templates/cds_records/report_number.html'"></ng-include>
               </li>
             </ul>
@@ -34,8 +33,8 @@
           <!-- /DOI and report number -->
           <!-- Title -->
           <div class="cds-detail-title cds-detail-video-title">
-            <h1 class="mb-0 f4 fw-n t-b">{{ ::record.title.title }}</h1>
-            <h1 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.title.title }}</em></h1>
+            <h1 class="mb-0 f4 fw-n t-b">{{ ::record.metadata.title.title }}</h1>
+            <h1 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h1>
           </div>
           <!-- /Title -->
           <!-- Date & Views -->
@@ -43,7 +42,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="text-muted f8">
-                  {{ ::record.copyright.year || '2017' }} &copy; {{ ::record.copyright.holder || 'CERN' }}
+                  {{ ::record.metadata.copyright.year || '2017' }} &copy; {{ ::record.metadata.copyright.holder || 'CERN' }}
                 </div>
               </div>
               <div class="col-sm-6">
@@ -57,15 +56,23 @@
           <!-- Description -->
           <hr />
           <div class="cds-detail-description cds-detail-video-description t-b">
-            <p class="mb-20"><strong>Uploaded on {{ ::record.date }}</strong></p>
-            <p class="f7 mb-20">{{ ::record.description.value }}</p>
+            <p class="mb-20"><strong>Uploaded on {{ ::record.metadata.date }}</strong></p>
+            <p class="f7 mb-20">{{ ::record.metadata.description.value }}</p>
             <p class="text-muted mt-10 mb-0">
-              <a ng-href="/search?q=_project_id:{{:: record._project_id}}">Other videos in this project</a>
+              <a ng-href="/search?q=_project_id:{{:: record.metadata._project_id}}">Other videos in this project</a>
             </p>
           </div>
           <!-- /Description -->
           <!-- More -->
-          <div class="cds-detail-more cds-detail-video-more">
+          <div ng-if="record.metadata.keywords.length > 0" class="cds-detail-more cds-detail-video-more">
+            <hr />
+            <div class="cds-tags">
+              <ul>
+                <li ng-repeat="keyword in record.metadata.keywords">
+                  <a ng-href="/search?q={{ keyword.name }}">{{ keyword.name }}</a>
+                </li>
+              </ul>
+            </div>
           </div>
           <!-- /More -->
           </div>
@@ -95,27 +102,3 @@
   </div>
   <!-- /Metadata Section -->
 </div>
-
-<!-- Recent videos -->
-<div id="cds-recent-videos" class="bg-w pt-20 pb-20">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <!-- Title -->
-        <div class="cds-title-section pt-10 mb-20 l-b">
-          <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">RELATED</h2>
-        </div>
-        <!-- Title -->
-      </div>
-    </div>
-    <!-- List group -->
-    <invenio-search
-      search-endpoint='/api/records/?featured=1&size=6'
-    >
-      <invenio-search-results
-        template="/templates/cds/video/medium.html">
-      </invenio-search-results>
-    </invenio-search>
-  </div>
-</div>
-<!-- Recent videos -->

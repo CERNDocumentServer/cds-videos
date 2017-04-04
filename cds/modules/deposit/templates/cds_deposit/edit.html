@@ -12,12 +12,12 @@
 
 {%- block javascript %}
   {{ super() }}
+
   <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"></script>
   <script type="text/javascript">
     // CKEDITOR static location
     window.CKEDITOR_BASEPATH = '{{url_for("static", filename="node_modules/ckeditor/", _external=True)}}';
   </script>
-
   {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
@@ -28,7 +28,7 @@
     });
   $(document).ready(function() {
     $('.dropdown-toggle').dropdown();
-  })
+  });
   </script>
 {%- endblock javascript %}
 

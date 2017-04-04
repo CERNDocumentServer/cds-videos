@@ -141,7 +141,7 @@ SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # Angular template for featured
 SEARCH_UI_VIDEO_FEATURED = 'templates/cds/video/featured.html'
 # Angular template for medium size (used for recent)
-SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/medium.html'
+SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/featured-medium.html'
 # Angular template for small size (used for search results)
 SEARCH_UI_VIDEO_SMALL = 'templates/cds/video/small.html'
 
@@ -259,7 +259,7 @@ RECORDS_REST_ENDPOINTS = dict(
         search_class=CERNRecordsSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
-            'application/json': ('invenio_records_rest.serializers'
+            'application/json': ('cds.modules.records.serializers'
                                  ':json_v1_response'),
             'application/smil': ('cds.modules.records.serializers'
                                  ':smil_v1_response'),

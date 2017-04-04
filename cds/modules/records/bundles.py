@@ -28,6 +28,7 @@ js = NpmBundle(
     Bundle(
         'node_modules/cds/dist/cds.js',
         'node_modules/angular-strap/dist/angular-strap.js',
+        'node_modules/invenio-files-js/dist/invenio-files-js.js',
         'node_modules/ngmodal/dist/ng-modal.js',
         'js/cds_records/main.js',
         filters='jsmin',
@@ -40,7 +41,7 @@ js = NpmBundle(
     npm={
         'angular': '~1.4.10',
         'angular-loading-bar': '~0.9.0',
-        'cds': '^0.1.2',
+        'cds': '~0.1.4',
         'ng-dialog': '~0.6.0',
         'ngmodal': '~2.0.1'
     }
