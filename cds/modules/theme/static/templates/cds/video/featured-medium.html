@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-sm-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
-    <a class="cds-transition cds-video-title cds-video-title-with-play-button l-b" target="_self" ng-href="/record/{{ ::record.id }}">
+    <a ng-mouseover="show=true" ng-mouseleave="show=false" class="cds-transition cds-video-title cds-video-title-with-play-button l-w" target="_self" ng-href="/record/{{ ::record.id }}">
       <img
         class="img-responsive"
         ng-src="/api/iiif/v2/{{record.metadata._buckets.deposit}}:{{record.metadata._files[0].frame[0].key}}/full/400,220/0/default.png"
@@ -10,5 +10,8 @@
         {{ ::record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
       </p>
     </a>
+    <p ng-class="{'cds-visibility-visible': show, 'cds-visibility-hidden': !show}" class="cds-transition t-w">
+      {{ ::record.metadata.description.value | limitTo: 60 }}
+    </p>
   </div>
 </div>

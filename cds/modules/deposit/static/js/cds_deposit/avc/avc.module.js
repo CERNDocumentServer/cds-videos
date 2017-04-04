@@ -45,7 +45,7 @@ function cdsDepositsConfig(
   inheritedPropertiesProvider.setValues([
     'title.title',
     'description.value',
-    'contributors'
+    'contributors',
   ]);
 
   taskRepresentationsProvider.setValues({

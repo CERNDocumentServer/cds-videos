@@ -17,7 +17,36 @@
   <div id="cds-record">
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/video/detail.html') }}"
-        record='{{ record | tojson }}'
+        record='/api/record/{{record._deposit.pid.value}}'
     ></cds-record-view>
   </div>
+  <!-- Recent videos -->
+  <div id="cds-recent-videos" class="bg-w pt-20 pb-20">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Title -->
+          <div class="cds-title-section pt-10 mb-20 l-b">
+            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">RELATED</h2>
+          </div>
+          <!-- Title -->
+        </div>
+      </div>
+      <!-- List group -->
+      <invenio-search
+        search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
+      >
+        <div class="text-center">
+          <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message="">
+          </invenio-search-loading>
+        </div>
+        <invenio-search-results
+          template="{{ url_for('static', filename='templates/cds/video/medium.html') }}">
+        </invenio-search-results>
+      </invenio-search>
+    </div>
+  </div>
+  <!-- Recent videos -->
 {%- endblock page_body %}
