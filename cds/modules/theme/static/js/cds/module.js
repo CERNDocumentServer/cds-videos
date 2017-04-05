@@ -23,8 +23,8 @@
 
 var app = angular.module('cds', ['ngclipboard']);
 app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
-  return function(text, id, key, external) {
-    var _url = '/record/' + id + '/preview/' + key;
+  return function(text, reportNumber, external) {
+    var _url = '/video/' + reportNumber;
     if (external) {
       _url = $window.location.origin + _url;
     }
