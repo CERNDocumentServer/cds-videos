@@ -15,7 +15,7 @@
     <ul ng-repeat="file in record.metadata._files[0].subformat">
       <li>
         <a ng-href="{{ file.links.self }}">
-          {{ file.tags.preset_quality }} ({{ file.size | bytesToHumanReadable}})
+          {{ file.tags.preset_quality }} ({{ file.size | bytesToHumanReadable }})
         </a>
       </li>
     </ul>
@@ -42,7 +42,7 @@
 <hr />
 <!-- Master file -->
 <div class="cds-video-master-file mb-20">
-  <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file</a>
+  <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file ({{ record.metadata._files[0].size | bytesToHumanReadable }})</a>
 </div>
 
 <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="75%">
