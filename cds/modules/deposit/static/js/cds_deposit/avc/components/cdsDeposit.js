@@ -221,7 +221,6 @@ function cdsDepositCtrl(
 
     // Calculate the overall total status
     this.calculateStatus = function() {
-      console.log()
       if (that.stateQueue.FAILURE.length) {
         return depositStatuses.FAILURE;
       } else if (that.stateQueue.STARTED.length) {
@@ -416,13 +415,13 @@ function cdsDepositCtrl(
     that.stateCurrent = that.stateQueue.STARTED[0] || null;
     // Check for previewer
     that.videoPreviewer();
-    // Set the deposit State
-    this.depositStatusCurrent = this.calculateStatus();
     // Update subformat statuses
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
     $scope.$watch('$ctrl.taskState', that.refreshStateQueue, true);
 
+    // Set the deposit State
+    this.depositStatusCurrent = this.calculateStatus();
     // Calculate the transcode
     this.updateStateReporter = function(type, data) {
       if (type === 'file_transcode') {
