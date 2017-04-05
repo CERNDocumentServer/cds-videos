@@ -5,18 +5,44 @@
   </h3>
 </div>
 
-<!-- Master file -->
-<div class="cds-video-master-file mb-20">
-  <h4>Master File</h4>
-  <div>
-    <ul>
+<!-- Subformat -->
+<div class="cds-video-subformats mb-20">
+  <h4>Subformats</h4>
+  <div ng-hide="record.metadata._files[0].subformat.length > 0" class="text-center">
+    <p class="text-muted">Not available :(</p>
+  </div>
+  <div ng-show="record.metadata._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record.metadata._files[0].subformat">
       <li>
-        <a ng-click="dialogShown = true">
-          {{ record._files[0].key }}
+        <a ng-href="{{ file.links.self }}">
+          {{ file.tags.preset_quality }} ({{ file.size | bytesToHumanReadable}})
         </a>
       </li>
     </ul>
   </div>
+</div>
+<!-- /Subformat -->
+<!-- Subformat -->
+<div ng-if="record.metadata._files.length > 1" class="cds-video-subformats mb-20">
+  <h4>Addition Files</h4>
+  <div ng-hide="record.metadata._files.length > 1" class="text-center">
+    <p class="text-muted">Not available.</p>
+  </div>
+  <div ng-show="record.metadata._files.length > 1" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in record.metadata._files">
+      <li>
+        <a ng-href="{{ file.links.self }}">
+          {{ file.tags.preset_quality }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- /Subformat -->
+<hr />
+<!-- Master file -->
+<div class="cds-video-master-file mb-20">
+  <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file</a>
 </div>
 
 <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="75%">
@@ -37,45 +63,10 @@
     <p>Copyright abuse should be reported using the contact form.</p>
   </div>
   <p class="pull-right">
-    <a ng-href="{{ record._files[0].links.self }}" download>
+    <a ng-href="{{ record.metadata._files[0].links.self }}" download>
       <button class="btn btn-success" ng-click="$parent.hideModal()">Agree</button>
     </a>
     <button class="btn btn-danger" ng-click="$parent.hideModal()">Refuse</button>
   </p>
 </modal-dialog>
-
-<!-- Subformat -->
-<div class="cds-video-subformats mb-20">
-  <h4>Subformats</h4>
-  <div ng-hide="record._files[0].subformat.length > 0" class="text-center">
-    <p class="text-muted">Not available :(</p>
-  </div>
-  <div ng-show="record._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record._files[0].subformat">
-      <li>
-        <a ng-href="{{ file.links.self }}">
-          {{ file.tags.preset_quality }}
-        </a>
-      </li>
-    </ul>
-  </div>
-</div>
-<!-- /Subformat -->
-<!-- Subformat -->
-<div class="cds-video-subformats mb-20">
-  <h4>Addition Files</h4>
-  <div ng-hide="record._files.length > 1" class="text-center">
-    <p class="text-muted">Not available.</p>
-  </div>
-  <div ng-show="record._files.length > 1" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record._files">
-      <li>
-        <a ng-href="{{ file.links.self }}">
-          {{ file.tags.preset_quality }}
-        </a>
-      </li>
-    </ul>
-  </div>
-</div>
-<!-- /Subformat -->
 <!-- /Download -->

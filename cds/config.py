@@ -141,7 +141,7 @@ SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # Angular template for featured
 SEARCH_UI_VIDEO_FEATURED = 'templates/cds/video/featured.html'
 # Angular template for medium size (used for recent)
-SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/medium.html'
+SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/featured-medium.html'
 # Angular template for small size (used for search results)
 SEARCH_UI_VIDEO_SMALL = 'templates/cds/video/small.html'
 
@@ -265,7 +265,7 @@ RECORDS_REST_ENDPOINTS = dict(
         search_class=CERNRecordsSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
-            'application/json': ('invenio_records_rest.serializers'
+            'application/json': ('cds.modules.records.serializers'
                                  ':json_v1_response'),
             'application/smil': ('cds.modules.records.serializers'
                                  ':smil_v1_response'),
@@ -623,12 +623,15 @@ PREVIEWER_PREFERENCE = [
     'cds_video',
     'cds_embed_video',
     'zip',
+    'cds_deposit_video',
 ]
 # Licence key for THEO player
 THEO_LICENCE_KEY = 'CHANGE_ME'
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cdseos/_definist_/smil:'
                       '{filepath}/playlist.m3u8')
+WOWZA_VIDEO_URL = ('https://wowzaqaedge.cern.ch/cdseos/_definist_/mp4:'
+                                            '%s/playlist.m3u8')
 # Thumbnail size
 VIDEO_POSTER_SIZE = (180, 101)
 

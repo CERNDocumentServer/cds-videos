@@ -59,3 +59,4 @@ class VideoExtension(object):
 
 video = VideoExtension('cds_previewer/video.html')
 embed_video = VideoExtension('cds_previewer/embedded_video.html', embed=True)
+deposit_video = VideoExtension('cds_previewer/deposit_video.html')

@@ -45,7 +45,8 @@ def preview_recid(pid, record, template=None, **kwargs):
 
 def preview_depid(pid, record, template=None, **kwargs):
     """Preview file for given deposit."""
-    return preview(pid, record, preview_file_class=CDSPreviewDepositFile)
+    return preview(pid, record, preview_file_class=CDSPreviewDepositFile,
+                   previewer='cds_deposit_video')
 
 
 def preview_recid_embed(pid, record, template=None, **kwargs):

@@ -17,6 +17,7 @@
               <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
               <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
             </div>
+
             <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
           </div>
           <br />
@@ -34,7 +35,6 @@
                     <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
                 </div>
               </div>
-
               <!-- Failed transcodings -->
               <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
                 <div class="pull-left">
@@ -85,8 +85,8 @@
                 <li role="presentation" ng-class="{active: active=='files'}"><a ng-click="active='files'" role="tab" data-toggle="tab">Files</a></li>
                 <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
                 <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug (for @drjova)</a></li>
-                <li role="presentation" class="dropdown pull-right">
-                  <a class="dropdown-toggle" title="More options" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
+                  <a class="dropdown-toggle" title="More options" data-toggle="dropdown" ng-click="openDropdown=!openDropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-cog"></i>
                   </a>
                   <ul class="dropdown-menu">
@@ -127,13 +127,6 @@
                   File transcode: {{$ctrl.cdsDepositCtrl.stateReporter['file_transcode']}} <br />
                   <hr />
 
-                  -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
-                  -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />
-                  -- STATUS: {{$ctrl.cdsDepositCtrl.depositStatusCurrent}} -- <br />
-                  -- State reporterd $ctrl.cdsDepositCtrl.stateReporter -- <br />
-                  -- State current {{ $ctrl.cdsDepositCtrl.stateCurrent }} -- <br />
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
                   <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
                   <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
                   <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}
