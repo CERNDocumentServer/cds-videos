@@ -33,6 +33,8 @@ from time import sleep
 from copy import deepcopy
 from cds.modules.deposit.api import project_resolver, video_resolver, Project
 from flask import url_for
+from flask_principal import RoleNeed, identity_loaded
+from invenio_db import db
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
@@ -40,7 +42,7 @@ from helpers import prepare_videos_for_publish
 
 
 def test_simple_workflow(
-        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver,
         data_file_1, data_file_2,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, project_deposit_metadata, video_deposit_metadata):
@@ -308,7 +310,7 @@ def test_simple_workflow(
 
 
 def test_publish_project_check_indexed(
-        api_app, db, es, users, location, cds_jsonresolver, deposit_rest,
+        api_app, db, es, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         video_deposit_metadata, project_deposit_metadata):
     """Test create a project and check project and videos are indexed."""
@@ -464,3 +466,79 @@ def test_project_keywords_serializer(api_app, es, api_project, keyword_1,
                      for k in data['metadata']['keywords']}
         kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
         assert kw_expect == kw_result
+
+
+def test_project_access_rights_based_on_user_id(api_app, users, api_project):
+    """Test project access rights based on user ID.
+
+    Tests that a user can't access a deposit created by a different user.
+    """
+    (project, video_1, video_2) = api_project
+    cds_depid = project['_deposit']['id']
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.project_actions',
+                              pid_value=cds_depid, action='publish')
+        # check anonymous don't have access
+        assert client.get(deposit_url).status_code == 401
+        assert client.post(publish_url).status_code == 401
+        # User is the creator of the deposit, so everything is fine
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.project_actions',
+                              pid_value=cds_depid, action='publish')
+        # User shouldn't have access to this deposit
+        assert client.get(deposit_url).status_code == 403
+        assert client.post(publish_url).status_code == 403
+
+
+def test_project_access_rights_based_on_egroup(api_app, users, api_project):
+    """Test project access rights based on the e-groups.
+
+    Tests that a user can access a deposit based on the e-group permissions.
+    """
+    (project, video_1, video_2) = api_project
+    cds_depid = project['_deposit']['id']
+
+    @identity_loaded.connect
+    def mock_identity_provides(sender, identity):
+        """Add additional group to the user."""
+        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
+
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        project['_access'] = {'update': ['test-egroup@cern.ch']}
+        project.commit()
+        db.session.commit()
+        login_user_via_session(client,
+                               email=User.query.get(users[1]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.project_actions',
+                              pid_value=cds_depid, action='publish')
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202
+
+
+def test_project_access_rights_based_admin(api_app, users, api_project):
+    """Test project access rights based on the admin."""
+    (project, video_1, video_2) = api_project
+    cds_depid = project['_deposit']['id']
+    with api_app.test_client() as client:
+        prepare_videos_for_publish([video_1, video_2])
+        login_user_via_session(client,
+                               email=User.query.get(users[2]).email)
+        deposit_url = url_for('invenio_deposit_rest.project_item',
+                              pid_value=cds_depid)
+        publish_url = url_for('invenio_deposit_rest.project_actions',
+                              pid_value=cds_depid, action='publish')
+        assert client.get(deposit_url).status_code == 200
+        assert client.post(publish_url).status_code == 202

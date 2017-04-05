@@ -246,7 +246,7 @@ def workflow_receiver_video_failing(api_app, db, video,
     return receiver_id
 
 
-def new_project(app, deposit_rest, es, cds_jsonresolver, users, location, db,
+def new_project(app, es, cds_jsonresolver, users, location, db,
                 deposit_metadata):
     """New project with videos."""
     project_data = {
