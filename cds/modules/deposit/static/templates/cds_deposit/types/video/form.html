@@ -17,7 +17,8 @@
               <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
               <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
             </div>
-            <iframe ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+
+            <iframe allowfullscreen="" ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
           </div>
           <br />
           <div class="cds-deposit-box-upload-status">
@@ -34,7 +35,6 @@
                     <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
                 </div>
               </div>
-
               <!-- Failed transcodings -->
               <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
                 <div class="pull-left">
@@ -61,10 +61,10 @@
               <!-- STARTED -->
               <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
                 <div class="progress">
-                    <div ng-hide="$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                    <div ng-hide="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                       {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }}
                     </div>
-                    <div ng-show="$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage > 0" class="progress-bar text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage}}%;">
+                    <div ng-show="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage || 100}}%;">
                       {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
                     </div>
                 </div>
@@ -127,13 +127,6 @@
                   File transcode: {{$ctrl.cdsDepositCtrl.stateReporter['file_transcode']}} <br />
                   <hr />
 
-                  -- IS READY TO PUBLISH - {{ $ctrl.cdsDepositCtrl.isReadyToPublish() }}
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
-                  -- UPDATED: {{$ctrl.cdsDepositCtrl.lastUpdated}} -- <br />
-                  -- STATUS: {{$ctrl.cdsDepositCtrl.depositStatusCurrent}} -- <br />
-                  -- State reporterd $ctrl.cdsDepositCtrl.stateReporter -- <br />
-                  -- State current {{ $ctrl.cdsDepositCtrl.stateCurrent }} -- <br />
-                  -- Staqte order {{ $ctrl.cdsDepositCtrl.stateOrder }} -- <br />
                   <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
                   <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
                   <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}

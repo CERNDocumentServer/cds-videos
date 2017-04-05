@@ -59,6 +59,7 @@ from invenio_jsonschemas import current_jsonschemas
 from .errors import DiscardConflict
 from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
     iterate_events_results, get_tasks_status_by_task
+from ..records.minters import is_local_doi
 
 
 PRESERVE_FIELDS = (
@@ -399,6 +400,14 @@ class CDSDeposit(Deposit):
         self['keywords'] = list(filter(
             lambda x: x['$ref'] != ref, self['keywords']
         ))
+
+    def is_published(self):
+        """Check if deposit is published."""
+        return self['_deposit'].get('pid') is not None
+
+    def has_minted_doi(self):
+        """Check if deposit has a minted DOI."""
+        return is_local_doi(self['doi']) if self.is_published() else False
 
 
 def project_resolver(project_id):
