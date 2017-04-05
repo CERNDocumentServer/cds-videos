@@ -244,3 +244,97 @@ def test_video_keywords_serializer(api_app, es, api_project, keyword_1,
                      for k in data['metadata']['keywords']}
         kw_expect = {k['key_id']: k['name'] for k in [keyword_1, keyword_2]}
         assert kw_expect == kw_result
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+@mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
+def test_video_publish_edit_publish_again(
+        datacite_mock, api_app, users, location, cds_jsonresolver,
+        json_headers, json_partial_project_headers, json_partial_video_headers,
+        deposit_metadata, video_deposit_metadata, project_deposit_metadata):
+    """Test video publish registering the datacite not local."""
+    # test: enable datacite registration
+    api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = True
+    api_app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = '10.5072'
+
+    with api_app.test_request_context():
+        with api_app.test_client() as client:
+            login_user_via_session(client, email=User.query.get(users[0]).email)
+
+            # [[ CREATE NEW PROJECT ]]
+            res = client.post(
+                url_for('invenio_deposit_rest.project_list'),
+                data=json.dumps(project_deposit_metadata),
+                headers=json_partial_project_headers)
+
+            assert res.status_code == 201
+            project_dict = json.loads(res.data.decode('utf-8'))
+
+            # [[ ADD A NEW VIDEO_1 ]]
+            video_metadata = copy.deepcopy(video_deposit_metadata)
+            video_metadata.update(
+                _project_id=project_dict['metadata']['_deposit']['id'])
+            res = client.post(
+                url_for('invenio_deposit_rest.video_list'),
+                data=json.dumps(video_metadata),
+                headers=json_partial_video_headers)
+
+            assert res.status_code == 201
+            video_1_dict = json.loads(res.data.decode('utf-8'))
+            video_1_depid = video_1_dict['metadata']['_deposit']['id']
+            [video_1] = video_resolver([video_1_depid])
+            prepare_videos_for_publish([video_1])
+
+            # [[ PUBLISH VIDEO ]]
+            res = client.post(
+                url_for('invenio_deposit_rest.video_actions',
+                        pid_value=video_1['_deposit']['id'], action='publish'),
+                headers=json_headers)
+            assert res.status_code == 202
+            datacite_register.s(
+                pid_value='123', record_uuid=str(video_1.id)).apply()
+
+            # [[ EDIT VIDEO ]]
+            res = client.post(
+                url_for('invenio_deposit_rest.video_actions',
+                        pid_value=video_1['_deposit']['id'], action='edit'),
+                headers=json_headers)
+
+            # [[ MODIFY DOI -> SAVE ]]
+            [video_1] = video_resolver([video_1_depid])
+            video_1_dict = copy.deepcopy(video_1)
+            #  old_doi = video_1_dict['doi']
+            video_1_dict['doi'] = '10.1123/doi'
+            del video_1_dict['_files']
+            res = client.put(
+                url_for('invenio_deposit_rest.video_item',
+                        pid_value=video_1['_deposit']['id']),
+                data=json.dumps(video_1_dict),
+                headers=json_headers)
+            # check returned value
+            assert res.status_code == 400
+            data = json.loads(res.data.decode('utf-8'))
+            assert data['errors'] == [
+                {"field": "doi",
+                 "message": "The DOI cannot be changed."}
+            ]
+
+            [video_1] = video_resolver([video_1_depid])
+            #  video_1['doi'] = old_doi
+            video_1_dict = copy.deepcopy(video_1)
+            del video_1_dict['_files']
+            res = client.put(
+                url_for('invenio_deposit_rest.video_item',
+                        pid_value=video_1['_deposit']['id']),
+                data=json.dumps(video_1_dict),
+                headers=json_headers)
+            # check returned value
+            assert res.status_code == 200
+
+            # [[ PUBLISH VIDEO ]]
+            res = client.post(
+                url_for('invenio_deposit_rest.video_actions',
+                        pid_value=video_1['_deposit']['id'], action='publish'),
+                headers=json_headers)
+            assert res.status_code == 202
