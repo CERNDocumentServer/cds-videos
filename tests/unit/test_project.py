@@ -61,18 +61,18 @@ def test_is_deposit():
     assert is_deposit('/record/1') is False
 
 
-def test_record_unbuild_url(deposit_rest):
+def test_record_unbuild_url(api_app):
     """Test record unbuild url."""
     assert '1' == record_unbuild_url('/deposits/video/1')
     assert '1' == record_unbuild_url('/record/1')
 
 
-def test_record_build_url(deposit_rest):
+def test_record_build_url(api_app):
     """Test record build url."""
     assert '/record/1' == record_build_url(1)
 
 
-def test_video_build_url(deposit_rest):
+def test_video_build_url(api_app):
     """Test deposit build url."""
     assert '/deposits/video/1' == video_build_url(1)
     assert '/deposits/video/1' == video_build_url('1')
@@ -82,9 +82,9 @@ def test_video_build_url(deposit_rest):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_publish_all_videos(app, project):
+def test_publish_all_videos(api_app, api_project):
     """Test video publish."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
 
     # check video1 is not published
     assert video_1['_deposit']['status'] == 'draft'
@@ -103,9 +103,9 @@ def test_publish_all_videos(app, project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_publish_one_video(app, project):
+def test_publish_one_video(api_app, api_project):
     """Test video publish."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
 
     # check video1 is not published
     assert video_1['_deposit']['status'] == 'draft'
@@ -126,9 +126,9 @@ def test_publish_one_video(app, project):
         assert video['_deposit']['status'] == 'published'
 
 
-def test_find_refs(project):
+def test_find_refs(api_project):
     """Test find refs."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     assert project._find_refs([video_1.ref]) == {0: video_1.ref}
     assert project._find_refs([video_2.ref]) == {1: video_2.ref}
     assert project._find_refs([video_1.ref, video_2.ref]) == \
@@ -136,9 +136,9 @@ def test_find_refs(project):
     assert project._find_refs(['not-found']) == {}
 
 
-def test_update_videos(project):
+def test_update_videos(api_project):
     """Test update videos."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     new_ref_2 = '/deposit/456'
     project._update_videos([video_2.ref], [new_ref_2])
     assert project['videos'] == [
@@ -148,9 +148,9 @@ def test_update_videos(project):
         {'$reference': video_1.ref}, {'$reference': new_ref_2}]
 
 
-def test_delete_videos(project):
+def test_delete_videos(api_project):
     """Test update videos."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     project._delete_videos([video_2.ref])
     assert project['videos'] == [{'$reference': video_1.ref}]
     project._delete_videos(['not-found'])
@@ -159,7 +159,7 @@ def test_delete_videos(project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_add_video(api_app, deposit_rest, es, cds_jsonresolver, users,
+def test_add_video(api_app, es, cds_jsonresolver, users,
                    location, deposit_metadata):
     """Test add video."""
     project_data = {
@@ -276,9 +276,9 @@ def test_project_edit(app, project_published):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
-def test_project_delete_not_published(app, project, force):
+def test_project_delete_not_published(api_app, api_project, force):
     """Test project delete when all is not published."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
 
     project_id = project.id
     video_1_id = video_1.id
@@ -304,7 +304,7 @@ def test_project_delete_not_published(app, project, force):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False])  # , True])
-def test_project_delete_one_video_published(app, project, force):
+def test_project_delete_one_video_published(api_app, api_project, force):
     """Test project delete when one video is published."""
     def check_project(number_of_videos, video_2_status, video_1_ref,
                       video_2_ref, project_id):
@@ -323,7 +323,7 @@ def test_project_delete_one_video_published(app, project, force):
         assert video_1.status == 'draft'
         assert video_2.status == video_2_status
 
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
 
     # prepare videos for publishing
     prepare_videos_for_publish([video_1, video_2])
@@ -380,9 +380,9 @@ def test_project_delete_one_video_published(app, project, force):
     #  project.delete(force=force)
 
 
-def test_inheritance(app, project):
+def test_inheritance(api_app, api_project):
     """Test that videos inherit the proper fields from parent project."""
-    (project, video, _) = project
+    (project, video, _) = api_project
     assert 'category' in project
     assert 'type' in project
 
@@ -397,9 +397,10 @@ def test_inheritance(app, project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_publish_with_workflow(app, users, project, webhooks, es):
+def test_project_publish_with_workflow(
+        api_app, users, api_project, es):
     """Test publish a project with a workflow."""
-    project, video_1, video_2 = project
+    project, video_1, video_2 = api_project
     prepare_videos_for_publish([video_1, video_2])
     project_depid = project['_deposit']['id']
     project_id = str(project.id)
@@ -410,14 +411,14 @@ def test_project_publish_with_workflow(app, users, project, webhooks, es):
     sse_channel = 'mychannel'
     receiver_id = 'test_project_publish_with_workflow'
     workflow_receiver_video_failing(
-        app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
+        api_app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
     with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
             mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
             as mock_indexer, \
-            app.test_request_context(headers=headers, data=payload):
+            api_app.test_request_context(headers=headers, data=payload):
         event = Event.create(receiver_id=receiver_id)
         db.session.add(event)
         event.process()
@@ -476,9 +477,9 @@ def test_project_publish_with_workflow(app, users, project, webhooks, es):
     assert video_2.status == 'published'
 
 
-def test_project_record_schema(app, db, project):
+def test_project_record_schema(api_app, db, api_project):
     """Test project record schema."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     assert project.record_schema == Project.get_record_schema()
 
 
@@ -546,9 +547,9 @@ def test_project_partial_validation(
         project.commit()
 
 
-def test_project_keywords(es, project, keyword_1, keyword_2, users):
+def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     """Tet project keywords."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     # login owner
     login_user(User.query.filter_by(id=users[0]).first())
 

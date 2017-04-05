@@ -40,6 +40,7 @@ from invenio_records_rest.facets import range_filter, terms_filter
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.records.permissions import (deposit_delete_permission_factory,
                                           deposit_read_permission_factory,
+                                          deposit_update_permission_factory,
                                           record_create_permission_factory,
                                           record_read_permission_factory,
                                           record_update_permission_factory)
@@ -788,7 +789,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
             write_scope.id),
         read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_update_permission_factory(
+            lambda record: deposit_update_permission_factory(
                 record=record).can(),
             write_scope.id),
         delete_permission_factory_imp=check_oauth2_scope(
@@ -838,7 +839,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
             write_scope.id),
         read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_update_permission_factory(
+            lambda record: deposit_update_permission_factory(
                 record=record).can(),
             write_scope.id),
         delete_permission_factory_imp=check_oauth2_scope(

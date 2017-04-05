@@ -24,13 +24,13 @@
 
 from __future__ import absolute_import, print_function
 
-from flask_principal import ActionNeed
 from flask_security import current_user
 from invenio_access import DynamicPermission
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records.api import Record
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
+from invenio_deposit.permissions import action_admin_access
 
 from .utils import is_deposit, is_record, get_user_provides
 
@@ -65,7 +65,7 @@ def files_permission_factory(obj, action=None):
             elif is_deposit(record):
                 return DepositFilesPermission.create(record, action)
 
-    return DynamicPermission(ActionNeed('admin-access'))
+    return DynamicPermission(action_admin_access).can()
 
 
 def record_permission_factory(record=None, action=None):
@@ -106,8 +106,13 @@ def deposit_read_permission_factory(record=None):
         return RecordPermission.create(record=record, action='read')
 
 
+def deposit_update_permission_factory(record=None):
+    """Deposit permission factory."""
+    return DepositPermission.create(record=record, action='update')
+
+
 def deposit_delete_permission_factory(record=None):
-    """Record permission factory."""
+    """Deposit permission factory."""
     return DepositPermission.create(record=record, action='delete')
 
 
@@ -242,6 +247,8 @@ class DepositPermission(RecordPermission):
         """Create a deposit permission."""
         if action in cls.read_actions:
             return cls(record, has_update_permission, user)
+        if action in cls.update_actions:
+            return cls(record, has_update_permission, user)
         elif action in cls.delete_actions:
             return cls(record, has_update_permission, user)
         return super(DepositPermission, cls).create(record, action, user=user)
@@ -266,7 +273,7 @@ def is_public(data, action):
     In practice this means that the record doesn't have the ``access`` key or
     the action is not inside access or is empty.
     """
-    return not '_access' in data or not data.get('_access', {}).get(action)
+    return '_access' not in data or not data.get('_access', {}).get(action)
 
 
 def has_read_files_permission(user, record):
@@ -330,6 +337,4 @@ def has_admin_permission(user=None, record=None):
     to allow for dynamic dispatch.
     """
     # Allow administrators
-    if DynamicPermission(ActionNeed('admin-access')):
-        return True
-    return False
+    return DynamicPermission(action_admin_access).can()

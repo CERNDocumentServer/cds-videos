@@ -34,20 +34,20 @@ from invenio_indexer.api import RecordIndexer
 from helpers import new_project
 
 
-def test_aggregations(app, deposit_rest, es, cds_jsonresolver, users, location,
+def test_aggregations(api_app, es, cds_jsonresolver, users, location,
                       db, deposit_metadata, json_headers):
     """Test deposit search aggregations."""
-    project_1, _, _ = new_project(app, deposit_rest, es, cds_jsonresolver,
+    project_1, _, _ = new_project(api_app, es, cds_jsonresolver,
                                   users, location, db, deposit_metadata)
     _users = [users[1]]
-    project_2, _, _ = new_project(app, deposit_rest, es, cds_jsonresolver,
+    project_2, _, _ = new_project(api_app, es, cds_jsonresolver,
                                   _users, location, db, deposit_metadata)
 
     RecordIndexer().bulk_index([project_1.id, project_2.id])
     RecordIndexer().process_bulk_queue()
     sleep(2)
 
-    with deposit_rest.test_client() as client:
+    with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
         url = url_for('invenio_deposit_rest.project_list', q='')
         res = client.get(url, headers=json_headers)

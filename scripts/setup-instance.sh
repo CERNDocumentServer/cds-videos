@@ -36,6 +36,7 @@ cds users create test@test.ch -a --password=123456
 cds users create admin@test.ch -a --password=123456
 cds roles create admin
 cds roles add admin@test.ch admin
+cds access allow deposit-admin-access role admin
 cds access allow superuser-access role admin
 
 # Create a default files location
