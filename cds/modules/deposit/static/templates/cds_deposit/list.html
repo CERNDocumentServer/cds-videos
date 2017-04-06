@@ -61,7 +61,7 @@
           <span ng-show="f.size == undefined">Unknown</span>
       </td>
       <td class="text-center">
-        <span ng-show="f.progress < 100 && !f.errored">{{ f.progress }} %</span>
+        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
         <span ng-show="f.errored" class="text-danger">Error</span>
         <span ng-show="f.completed" class="text-success"><i class="fa fa-check"></i></span>
