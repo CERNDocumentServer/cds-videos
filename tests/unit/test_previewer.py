@@ -138,9 +138,8 @@ def test_legacy_embed(previewer_app, db, api_project, video):
     with previewer_app.test_client() as client:
         res = client.get('/video/{0}'.format(video_1.report_number))
         assert res.location.endswith(url_for(
-            'invenio_records_ui.recid_embed',
+            'invenio_records_ui.recid_embed_default',
             pid_value=video_1['recid'],
-            filename='',
         ))
 
 
