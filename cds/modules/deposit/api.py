@@ -67,6 +67,11 @@ PRESERVE_FIELDS = (
     '_buckets',
     '_files',
     'videos',
+    'recid',
+    'report_number',
+    'publication_date',
+    '_project_id',
+    'doi',
 )
 
 
