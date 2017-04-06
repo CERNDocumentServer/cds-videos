@@ -1,7 +1,11 @@
 <div class="row">
   <div class="col-md-12">
     <div class="embed-responsive embed-responsive-16by9" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
-      <iframe class="embed-responsive-item" frameborder="0" ng-src="{{ '' | previewIframeSrc: record.id:record.metadata._files[0].key }}" allowfullscreen></iframe>
+      <iframe class="embed-responsive-item"
+              frameborder="0"
+              ng-src="{{ '' | previewIframeSrc: record.id:(record | findMaster).key}}"
+              allowfullscreen>
+      </iframe>
     </div>
   </div>
 </div>

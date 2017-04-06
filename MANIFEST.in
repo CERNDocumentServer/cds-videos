@@ -41,6 +41,7 @@ include .coveragerc
 recursive-include .github *
 recursive-include cds *.css
 recursive-include cds *.eot
+recursive-include cds *.gif
 recursive-include cds *.gz
 recursive-include cds *.html
 recursive-include cds *.jpg

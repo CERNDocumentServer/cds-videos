@@ -5,7 +5,11 @@
       <div class="col-md-12">
         <!-- Embed Video -->
         <div ng-if="record.metadata._deposit.pid.value" class="embed-responsive embed-responsive-16by9">
-          <iframe class="embed-responsive-item" frameborder="0" ng-src="{{ '' | previewIframeSrc: record.metadata._deposit.pid.value:record.metadata._files[0].key }}" allowfullscreen></iframe>
+          <iframe class="embed-responsive-item"
+                  frameborder="0"
+                  ng-src="{{ '' | previewIframeSrc: record.metadata._deposit.pid.value:(record | findMaster).key }}"
+                  allowfullscreen>
+          </iframe>
         </div>
         <!-- ./Embed Video -->
       </div>

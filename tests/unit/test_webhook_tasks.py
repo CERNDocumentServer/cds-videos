@@ -46,7 +46,7 @@ from cds.modules.webhooks.tasks import (DownloadTask,
                                         ExtractMetadataTask,
                                         TranscodeVideoTask)
 
-from helpers import get_object_count, transcode_task
+from helpers import add_video_tags, get_object_count, transcode_task
 
 
 def test_download_to_object_version(db, bucket):
@@ -200,7 +200,7 @@ def test_video_extract_frames(app, db, bucket, video):
     """Test extract frames from video."""
     obj = ObjectVersion.create(
         bucket=bucket, key='video.mp4', stream=open(video, 'rb'))
-    ObjectVersionTag.create(obj, 'duration', '60.095000')
+    add_video_tags(obj)
     version_id = str(obj.version_id)
     db.session.commit()
 

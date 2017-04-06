@@ -35,9 +35,11 @@ import shutil
 import signal
 import tempfile
 import time
-from functools import partial
 
 from PIL import Image
+from flask_iiif.utils import create_gif_from_frames
+from functools import partial
+
 from cds_sorenson.api import get_encoding_status, get_preset_info, \
     start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError
@@ -354,6 +356,7 @@ class ExtractFramesTask(AVCTask):
         """
         output_folder = tempfile.mkdtemp()
         in_output = partial(os.path.join, output_folder)
+        object_tags = self.object.get_tags()
 
         # Remove temporary directory on abrupt execution halts.
         self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
@@ -361,14 +364,14 @@ class ExtractFramesTask(AVCTask):
 
         self._base_payload.update(
             version_id=self.obj_id,
-            tags=self.object.get_tags(),
+            tags=object_tags,
             deposit_id=self.deposit_id,
             event_id=self.event_id,
             sse_channel=self.sse_channel,
         )
 
         # Calculate time positions
-        duration = float(self.object.get_tags()['duration'])
+        duration = float(object_tags['duration'])
         time_step = duration * frames_gap / 100
         start_time = duration * frames_start / 100
         end_time = (duration * frames_end / 100) + 0.01
@@ -386,30 +389,8 @@ class ExtractFramesTask(AVCTask):
 
             self.update_state(state=STARTED, meta=meta)
 
-        # Generate frames
-        ff_frames(
-            self.object.file.uri,
-            start_time,
-            end_time,
-            time_step,
-            duration,
-            os.path.join(output_folder, 'frame-{:d}.jpg'),
-            progress_callback=progress_updater)
-
-        def extract_frame_number(frame_file):
-            """Extract frame number from its filename."""
-            return int(frame_file.rsplit('-', 1)[1].split('.', 1)[0])
-
-        frames = sorted(os.listdir(output_folder), key=extract_frame_number)
-
-        # Generate GIF for previewing on hover
-        gif_name = 'hover_preview.gif'
-        images = [Image.open(in_output(frame)) for frame in frames]
-        head, tail = images[0], images[1:]
-        head.save(in_output(gif_name), save_all=True,
-                  append_images=tail, duration=500)
-
-        def create_object(key, media_type, context_type, **kwargs):
+        def create_object(key, media_type, context_type, **tags):
+            """Create object versions with given type and tags."""
             obj = ObjectVersion.create(
                 bucket=self.object.bucket,
                 key=key,
@@ -417,16 +398,29 @@ class ExtractFramesTask(AVCTask):
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, 'media_type', media_type)
             ObjectVersionTag.create(obj, 'context_type', context_type)
-            [ObjectVersionTag.create(obj, key, kwargs[k]) for k in kwargs]
+            [ObjectVersionTag.create(obj, key, tags[key]) for key in tags]
 
-        # Create GIF object
-        create_object(gif_name, 'image', 'frames-preview')
+        # Generate frames
+        ff_frames(input_file=self.object.file.uri,
+                  start=start_time, end=end_time, step=time_step,
+                  duration=duration, progress_callback=progress_updater,
+                  output=os.path.join(output_folder, 'frame-{:d}.jpg'))
 
-        # Create frame objects
+        frames = sorted(
+            os.listdir(output_folder),
+            key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
+
         [create_object(filename, 'image', 'frame',
                        timestamp=start_time + (i + 1) * time_step)
          for i, filename in enumerate(frames)]
 
+        # Generate GIF images
+        gif_filename = 'frames.gif'
+        frames = [Image.open(in_output(f)) for f in frames]
+        create_gif_from_frames(frames).save(in_output(gif_filename))
+        create_object(gif_filename, 'image', 'frames-preview')
+
+        # Cleanup
         shutil.rmtree(output_folder)
         db.session.commit()
 
