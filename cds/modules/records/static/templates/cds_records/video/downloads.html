@@ -8,11 +8,11 @@
 <!-- Subformat -->
 <div class="cds-video-subformats mb-20">
   <h4>Subformats</h4>
-  <div ng-hide="record.metadata._files[0].subformat.length > 0" class="text-center">
+  <div ng-hide="(record | findMaster).subformat.length > 0" class="text-center">
     <p class="text-muted">Not available :(</p>
   </div>
-  <div ng-show="record.metadata._files[0].subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
-    <ul ng-repeat="file in record.metadata._files[0].subformat">
+  <div ng-show="(record | findMaster).subformat.length > 0" class="cds-detail-download-box cds-detail-video-download-box">
+    <ul ng-repeat="file in (record | findMaster).subformat">
       <li>
         <a ng-href="{{ file.links.self }}">
           {{ file.tags.preset_quality }} ({{ file.size | bytesToHumanReadable }})
@@ -42,7 +42,7 @@
 <hr />
 <!-- Master file -->
 <div class="cds-video-master-file mb-20">
-  <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file ({{ record.metadata._files[0].size | bytesToHumanReadable }})</a>
+  <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
 </div>
 
 <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="75%">
@@ -63,7 +63,7 @@
     <p>Copyright abuse should be reported using the contact form.</p>
   </div>
   <p class="pull-right">
-    <a ng-href="{{ record.metadata._files[0].links.self }}" download>
+    <a ng-href="{{ (record | findMaster).links.self }}" download>
       <button class="btn btn-success" ng-click="$parent.hideModal()">Agree</button>
     </a>
     <button class="btn btn-danger" ng-click="$parent.hideModal()">Refuse</button>

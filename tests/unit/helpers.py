@@ -52,6 +52,7 @@ from cds.modules.deposit.api import Project, Video
 from celery import chain, group
 from sqlalchemy.orm.attributes import flag_modified
 from invenio_webhooks import current_webhooks
+from flask import current_app
 from flask_security import login_user
 from time import sleep
 from invenio_accounts.models import User
@@ -190,7 +191,7 @@ def get_object_count(download=True, frames=True, transcode=True):
     return sum([
         # Master file
         1 if download else 0,
-        # 10 frames and 1 gif
+        # 10 frames + 1 GIF
         11 if frames else 0,
         # 1 failed transcoding due to invalid resolution (i.e. 16:9 - 1024p)
         (len(get_available_preset_qualities()) - 1) if transcode else 0,
@@ -202,7 +203,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
     return sum([
         5 if download else 0,
         10 if download and metadata else 0,
-        3 + 10 * 4 if frames else 0,
+        ((10 * 4) + 3) if frames else 0,
         ((len(get_available_preset_qualities()) - 1) * 8) if transcode else 0,
     ])
 
@@ -421,6 +422,14 @@ def get_files_metadata(bucket_id):
             ],
         )
     ]
+
+
+def add_video_tags(video_object):
+    """Add standard technical metadata tags to a video."""
+    ObjectVersionTag.create(video_object, 'duration', '60.095000')
+    ObjectVersionTag.create(video_object, 'width', '640')
+    ObjectVersionTag.create(video_object, 'height', '360')
+    ObjectVersionTag.create(video_object, 'display_aspect_ratio', '16:9')
 
 
 #
