@@ -376,6 +376,10 @@ def pages():
 @with_appcontext
 def videos(video, frames, temp, video_count):
     """Load videos, frames and subformats."""
+    def create_tags(video_obj, **tags):
+        """Create multiple tags for a single object version."""
+        [ObjectVersionTag.create(video_obj, tag, tags[tag]) for tag in tags]
+
     with current_app.wsgi_app.mounts['/api'].app_context():
         if not video:
             video = join(dirname(__file__), '..', '..', '..',
@@ -422,34 +426,28 @@ def videos(video, frames, temp, video_count):
                 owners=[1],
                 created_by=1,
                 extracted_metadata=dict(
-                    bit_rate='679886',
-                    duration=video_duration,
-                    size='5111048',
-                    avg_frame_rate='288000/12019',
-                    codec_name='h264',
-                    width=640,
-                    height=360,
-                    nb_frames='1440',
-                    display_aspect_ratio='16:9',
-                    color_range='tv',
+                    display_aspect_ratio='16:9', duration=video_duration,
+                    bit_rate='679886', avg_frame_rate='288000/12019',
+                    nb_frames='1440', size='5111048',
+                    codec_name='h264', color_range='tv',
+                    width=640, height=360,
                 )
             ))
 
+            # Master video
             with open(video, 'rb') as fp:
                 master_obj = ObjectVersion.create(
                     bucket=video_bucket,
                     key='video{0}.mp4'.format(video_index),
                     stream=fp)
-            tags = [('preview', 'true'), ('bit_rate', '959963'),
-                    ('codec_name', 'h264'), ('duration', video_duration),
-                    ('nb_frames', '1557'), ('size', '10498667'),
-                    ('width', '1280'), ('height', '720'),
-                    ('display_aspect_ratio', '16:9'),
-                    ('avg_frame_rate', '25/1'),
-                    ('media_type', 'video'), ('context_type', 'master')]
-            [ObjectVersionTag.create(master_obj, key, val)
-             for key, val in tags]
+            create_tags(
+                master_obj, display_aspect_ratio='16:9', bit_rate='959963',
+                codec_name='h264', duration=video_duration, nb_framesr='1557',
+                size='10498667', media_type='video', context_type='master',
+                avg_frame_rate='25/1', width='1280', height='720')
+            master_id = str(master_obj.version_id)
 
+            # Slave videos
             number_of_frames = len(frame_files)
             frame_files.sort()
             frame_files.sort(key=len)
@@ -462,13 +460,9 @@ def videos(video, frames, temp, video_count):
                         bucket=video_bucket,
                         key=file_name,
                         stream=fp)
-                    ObjectVersionTag.create(obj, 'media_type', 'image')
-                    ObjectVersionTag.create(obj, 'context_type', 'frame')
-                    ObjectVersionTag.create(
-                        obj, 'master', master_obj.version_id)
-                    ObjectVersionTag.create(
-                        obj, 'timestamp',
-                        (float(i) / number_of_frames) * video_duration)
+                timestamp = (float(i) / number_of_frames) * video_duration
+                create_tags(obj, master=master_id, media_type='image',
+                            context_type='frame', timestamp=timestamp)
 
             for quality in ['360p', '480p', '720p']:
                 with open(video, 'rb') as fp:
@@ -476,13 +470,22 @@ def videos(video, frames, temp, video_count):
                         bucket=video_bucket,
                         key='video{0}[{1}].mp4'.format(video_index, quality),
                         stream=fp)
-                ObjectVersionTag.create(obj, 'media_type', 'video')
-                ObjectVersionTag.create(obj, 'context_type', 'subformat')
-                ObjectVersionTag.create(obj, 'master', master_obj.version_id)
-                ObjectVersionTag.create(obj, 'preset_quality', quality)
-                ObjectVersionTag.create(obj, 'width', 1000)
-                ObjectVersionTag.create(obj, 'height', 1000)
-                ObjectVersionTag.create(obj, 'video_bitrate', 123456)
+                create_tags(obj, master=master_id, media_type='video',
+                            context_type='subformat', preset_quality=quality,
+                            width=1000, height=1000, video_bitrate=123456)
+
+            # Gif preview
+            gif = pkg_resources.resource_filename('cds.modules.fixtures',
+                                                  'data/frames.gif')
+
+            with open(gif, 'rb') as fp:
+                obj = ObjectVersion.create(
+                    bucket=video_bucket,
+                    key=basename(gif),
+                    stream=fp
+                )
+                create_tags(obj, master=master_id,
+                            media_type='image', context_type='frame-preview')
 
             deposits.append(video_deposit.commit())
         project.commit()

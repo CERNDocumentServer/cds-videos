@@ -3,8 +3,11 @@
     <a class="cds-video-title l-b" target="_self" ng-href="/record/{{ ::record.id }}">
       <img
         class="img-responsive"
-        ng-src="/api/iiif/v2/{{record.metadata._buckets.deposit}}:{{record.metadata._files[0].frame[0].key}}/full/330,190/0/default.png"
+        ng-src="{{ record | iiif:gif:[330,190] }}"
         err-src="//unsplash.it/1024/576>?random&blur"
+        ng-init="gif=false"
+        ng-mouseover="gif=true"
+        ng-mouseleave="gif=false"
       />
       <span ng-hide="!record.metadata._deposit.extracted_metadata.duration" class="cds-video-duration">{{ ::record.metadata._deposit.extracted_metadata.duration | toMinutes }}</span>
       <p>

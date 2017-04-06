@@ -445,11 +445,11 @@ i.sort-handle {
   position: relative;
   display: inline-block;
   &::before {
-    visibility: hidden;
     content: "\f01d";
     font-family: FontAwesome;
     font-size: 40px;
-    width: 100%;
+    width: 90%;
+    margin-left: 5%;
     font-style: normal;
     font-weight: normal;
     text-decoration: none;
@@ -458,11 +458,6 @@ i.sort-handle {
     position: absolute;
     top: 25%;
     text-align: center;
-  }
-  &:hover{
-    &::before {
-      visibility: visible;
-    }
   }
 }
 

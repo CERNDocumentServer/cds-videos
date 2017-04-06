@@ -2,15 +2,17 @@
   <div class="cds-detail-title cds-detail-video-title">
     <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20"><i class="fa fa-cogs"></i> Technical Metadata</h3>
   </div>
-  <div ng-hide="record.metadata._files[0].tags" class="text-center">
+  <div ng-hide="(record | findMaster).tags" class="text-center">
     <p class="text-muted">Not available :(</p>
   </div>
-  <div ng-show="record.metadata._files[0].tags" class="cds-detail-download-box cds-detail-video-download-box cds-transition">
-    <ul ng-repeat="(key, value) in record.metadata._files[0].tags">
+  <div ng-show="(record | findMaster).tags" class="cds-detail-download-box cds-detail-video-download-box cds-transition">
+    <ul ng-repeat="(key, value) in (record | findMaster).tags">
       <li ng-hide="$index > 2 && !technicalExpand" ><b>{{ key }}:</b> {{ value }}</li>
     </ul>
   </div>
   <div class="text-right">
-    <a ng-click="technicalExpand=!technicalExpand"><i class="fa fa-2x" ng-class="{'fa-angle-up': technicalExpand, 'fa-angle-down': !technicalExpand}"> </i></a>
+    <a ng-click="technicalExpand=!technicalExpand">
+      <i class="fa fa-2x" ng-class="{'fa-angle-up': technicalExpand, 'fa-angle-down': !technicalExpand}"> </i>
+    </a>
   </div>
 </div>

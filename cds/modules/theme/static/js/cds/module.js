@@ -78,3 +78,45 @@ app.filter('toMinutes', function() {
     }
   }
 });
+
+// Find master video file in record's files
+app.filter('findMaster', function() {
+  return function(record) {
+    return _.find(record.metadata._files, function (file) {
+        return file.context_type === 'master';
+    })
+  }
+});
+
+// Find first frame of master video file
+app.filter('findPoster', function() {
+  return function(masterFile) {
+    return _.find(masterFile['frame'], function (frame) {
+        return frame.key === 'frame-1.jpg'
+    })
+  }
+});
+
+// Find gif animation of master video file's frames
+app.filter('findGif', function() {
+  return function(masterFile) {
+    return _.find(masterFile['frame-preview'], function (gif) {
+        return gif.key === 'frames.gif'
+    })
+  }
+});
+
+// Get FlaskIIIF resize link
+app.filter('iiif', function($filter) {
+  return function(record, showGif, size) {
+    var masterFile = $filter('findMaster')(record);
+    return _.template(
+      "/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
+    )({
+      deposit: record.metadata._buckets.deposit,
+      key: ($filter(showGif ? 'findGif' : 'findPoster')(masterFile)).key,
+      size: size.join(','),
+      ext: showGif ? 'gif' : 'png',
+    });
+  }
+});
