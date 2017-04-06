@@ -31,6 +31,7 @@ import copy
 import json
 import pytest
 
+from time import sleep
 from flask_principal import RoleNeed, identity_loaded
 from invenio_db import db
 from celery.exceptions import Retry
@@ -39,6 +40,7 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from helpers import prepare_videos_for_publish
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
+from invenio_indexer.api import RecordIndexer
 from cds.modules.deposit.api import video_resolver, project_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
@@ -328,12 +330,12 @@ def test_video_access_rights_based_admin(
         assert client.get(deposit_url).status_code == 200
         assert client.post(publish_url).status_code == 202
 
-        
+
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_edit_publish_again(
-        datacite_mock, api_app, users, location, cds_jsonresolver,
+        datacite_mock, es, api_app, users, location, cds_jsonresolver,
         json_headers, json_partial_project_headers, json_partial_video_headers,
         deposit_metadata, video_deposit_metadata, project_deposit_metadata):
     """Test video publish registering the datacite not local."""
@@ -343,7 +345,8 @@ def test_video_publish_edit_publish_again(
 
     with api_app.test_request_context():
         with api_app.test_client() as client:
-            login_user_via_session(client, email=User.query.get(users[0]).email)
+            login_user_via_session(client,
+                                   email=User.query.get(users[0]).email)
 
             # [[ CREATE NEW PROJECT ]]
             res = client.post(
@@ -407,6 +410,12 @@ def test_video_publish_edit_publish_again(
             #  video_1['doi'] = old_doi
             video_1_dict = copy.deepcopy(video_1)
             del video_1_dict['_files']
+            # try to modify preserved fields
+            video_1_dict['recid'] = 12323233
+            video_1_dict['report_number']['report_number'] = 'fuuu barrrr'
+            video_1_dict['publication_date'] = '2000-12-03'
+            video_1_dict['_project_id'] = '1234567'
+            # do the call
             res = client.put(
                 url_for('invenio_deposit_rest.video_item',
                         pid_value=video_1['_deposit']['id']),
@@ -414,6 +423,13 @@ def test_video_publish_edit_publish_again(
                 headers=json_headers)
             # check returned value
             assert res.status_code == 200
+            # check preserved fields
+            [video_1_new] = video_resolver([video_1_depid])
+            assert video_1_new['recid'] == video_1['recid']
+            assert video_1_new['report_number'] == video_1['report_number']
+            assert video_1_new[
+                'publication_date'] == video_1['publication_date']
+            assert video_1_new['_project_id'] == video_1['_project_id']
 
             # [[ PUBLISH VIDEO ]]
             res = client.post(
@@ -421,3 +437,13 @@ def test_video_publish_edit_publish_again(
                         pid_value=video_1['_deposit']['id'], action='publish'),
                 headers=json_headers)
             assert res.status_code == 202
+
+            # check indexed record
+            RecordIndexer().process_bulk_queue()
+            sleep(2)
+            res = client.get(url_for('invenio_records_rest.recid_list',
+                                     headers=json_headers))
+            assert res.status_code == 200
+            data = json.loads(res.data.decode('utf-8'))
+            for hit in data['hits']['hits']:
+                assert isinstance(hit['id'], int)

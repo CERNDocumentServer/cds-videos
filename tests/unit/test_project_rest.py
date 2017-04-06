@@ -258,6 +258,16 @@ def test_simple_workflow(
             video_resolver(video_ids),
             project_resolver(project_dict['metadata']['_deposit']['id']))
 
+        # check indexed record
+        RecordIndexer().process_bulk_queue()
+        sleep(2)
+        res = client.get(url_for('invenio_records_rest.recid_list',
+                                 headers=json_headers))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        for hit in data['hits']['hits']:
+            assert isinstance(hit['id'], int)
+
         # [[ EDIT THE PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_actions',
@@ -274,9 +284,17 @@ def test_simple_workflow(
         assert project['_deposit']['status'] == 'draft'
 
         # [[ MODIFY PROJECT ]]
+        project_before = project_resolver(
+            project_dict['metadata']['_deposit']['id'])
         project_dict['metadata']['title']['title'] = 'new project title'
         # Not need to send _files
         del project_dict['metadata']['_files']
+        # try to modify preserved fields
+        project_dict['metadata']['recid'] = 12323233
+        project_dict['metadata'][
+            'report_number']['report_number'] = 'fuuu barrrr'
+        project_dict['metadata']['publication_date'] = '2000-12-03'
+        # do the call
         res = client.put(
             url_for('invenio_deposit_rest.project_item',
                     pid_value=project_dict['metadata']['_deposit']['id']),
@@ -293,6 +311,11 @@ def test_simple_workflow(
         # check database
         project = project_resolver(project_dict['metadata']['_deposit']['id'])
         assert project['title']['title'] == 'new project title'
+        # check preserved fields
+        assert project_before['recid'] == project['recid']
+        assert project_before['report_number'] == project['report_number']
+        assert project_before[
+            'publication_date'] == project['publication_date']
 
         # [[ DISCARD PROJECT ]]
         res = client.post(
