@@ -38,7 +38,7 @@ blueprint = Blueprint(
 
 
 # /record/<pid_value>/embed/<filename>
-# /video/<report_number>/
+# /video/<report_number>
 @blueprint.route('/video/<report_number>')
 def video_embed_alias(report_number):
     """Redirect from the old video embed URL to the new one."""
@@ -52,6 +52,5 @@ def video_embed_alias(report_number):
         object_uuid=object_uuid
     ).one().pid_value
     return redirect(url_for(
-        'invenio_records_ui.recid_embed',
-        pid_value=recid,
-        filename=''), code=301)
+        'invenio_records_ui.recid_embed_default',
+        pid_value=recid), code=301)
