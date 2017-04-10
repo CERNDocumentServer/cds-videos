@@ -1,27 +1,27 @@
 [
   {
     "name": "CERN",
-    "types": ["footage", "video"],
+    "types": ["FOOTAGE", "VIDEO"],
     "_record_type": ["PROJECT"]
   },
   {
     "name": "ATLAS",
-    "types": ["video"],
+    "types": ["VIDEO"],
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "CMS",
-    "types": ["video"],
+    "types": ["VIDEO"],
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "OPEN",
-    "types": ["video"],
+    "types": ["VIDEO"],
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "SCADA",
-    "types": ["video"],
+    "types": ["VIDEO"],
     "_record_type":  ["PROJECT"]
   }
 ]

@@ -312,10 +312,10 @@ def sequence_generator():
     """Register CDS templates for sequence generation."""
     with db.session.begin_nested():
         Template.create(name='project-v1_0_0',
-                        meta_template='{category}-{type}-{year}-{counter}',
+                        meta_template='{category}-{type}-{year}-{counter:03d}',
                         start=1)
         Template.create(name='video-v1_0_0',
-                        meta_template='{project-v1_0_0}-{counter}',
+                        meta_template='{project-v1_0_0}-{counter:03d}',
                         start=1)
     db.session.commit()
 
