@@ -82,6 +82,7 @@
         "notitle": false,
         "placeholder": "Keywords",
         "options": {
+          "refreshDelay": 100,
           "mergeObjects": true,
           "asyncCallback": "$ctrl.autocompleteKeywords",
           "url": "/api/keywords/_suggest"
@@ -107,6 +108,7 @@
             "title": "Name",
             "placeholder": "Author name",
             "options": {
+              "refreshDelay": 100,
               "mergeObjects": true,
               "asyncCallback": "$ctrl.autocompleteAuthors",
               "url": "//cds.cern.ch/submit/get_authors",
@@ -181,6 +183,7 @@
           "title": "License",
           "placeholder": "License name",
           "options": {
+            "refreshDelay": 100,
             "mergeObjects": true,
             "asyncCallback": "$ctrl.autocompleteLicenses",
             "url": "/api/licenses/_suggest"
