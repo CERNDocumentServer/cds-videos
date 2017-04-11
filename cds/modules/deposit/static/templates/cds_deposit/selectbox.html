@@ -1,5 +1,10 @@
-<select class="form-control" name="select-{{ data.sortParameter }}" ng-model="data.selectedOption" ng-change="handleFieldChange()">
-  <option ng-repeat="option in data.availableOptions.options"
-   value="{{ option.value }}"
-   ng-selected="isSelected(option.value)">{{ option.title }}</option>
-</select>
+<div class="btn-group">
+  <button type="button" class="btn cds-select-btn btn-default dropdown-toggle text-capitalize" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Sort: {{ data.selectedOption || 'Select'}} {{ selected }}<span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li ng-repeat="option in data.availableOptions.options track by $index">
+      <a ng-click="data.selectedOption=option.value;handleFieldChange();">{{ option.title }}</a>
+    </li>
+  </ul>
+</div>

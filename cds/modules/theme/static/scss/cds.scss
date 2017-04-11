@@ -119,6 +119,10 @@ i.sort-handle {
   padding: 5px;
 }
 
+.w-100 {
+  width: 100%;
+}
+
 // Tags
 
 .cds-tags ul {
@@ -466,27 +470,47 @@ i.sort-handle {
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
 
-.cds-tasks-state-left-border {
+.cds-deposit-media-list-border,
+.cds-tasks-state-border {
   border-left-width: 3px !important;
   border-left-style: solid !important;
+  border-top: 1px solid $bg-gray;
+  border-bottom: 1px solid $bg-gray;
+  border-right: 1px solid $bg-gray;
+}
+
+.cds-select-btn {
+  min-width: 134px;
+}
+
+.cds-deposit-media-list {
+  &:hover{
+    background-color: lighten($bg-gray, 5%);
+  }
+  .media-heading {
+    display: block;
+  }
+  .media-right {
+    min-width: 100px;
+  }
 }
 
 .cds-tasks-error {
- border-left-color: $state-danger-text;
+ border-left-color: $state-danger-text !important;
 }
 .cds-tasks-success {
-  border-left-color: $state-success-text;
+  border-left-color: $state-success-text !important;
 }
 .cds-tasks-started {
-  border-left-color: $state-warning-text;
+  border-left-color: $state-warning-text !important;
 }
 
 .cds-tasks-pending {
-  border-left-color: $gray-light;
+  border-left-color: $gray-light !important;
 }
 
 .cds-deposit-published {
-  border-left-color: $primary-color;
+  border-left-color: $primary-color !important;
 }
 
 
