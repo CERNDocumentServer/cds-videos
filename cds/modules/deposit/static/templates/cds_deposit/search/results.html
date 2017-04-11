@@ -1,45 +1,56 @@
 <div ng-if="vm.invenioSearchResults.hits.total != 0">
-  <a class="list-group-item cds-tasks-state-left-border"
-      ng-init="state = (record.metadata._deposit.state | overallState)"
-      ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index"
-      ng-class="{'cds-tasks-error': state === 'DEPOSIT_STATE/FAILURE' && record.metadata._deposit.status === 'draft',
-                 'cds-tasks-success': state === 'DEPOSIT_STATE/SUCCESS'&& record.metadata._deposit.status === 'draft',
-                 'cds-tasks-pending': state === 'DEPOSIT_STATE/PENDING' && record.metadata._deposit.status === 'draft',
-                 'cds-tasks-started': state === 'DEPOSIT_STATE/STARTED' && record.metadata._deposit.status === 'draft',
-                 'cds-deposit-published': record.metadata._deposit.status === 'published'
-               }"
-      target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
-      <div class="row">
-        <div class="col-sm-7">
-          <div class="t-b mt-0">
-            <span class="f8 fw-b mr-5">{{ record.metadata.title.title || 'No project title' }}</span>
+  <ul class="cds-deposit-media-list media-list" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index" ng-init="state = (record.metadata._deposit.state | overallState)">
+    <li id="depoost_{{ record.metadata._deposit.id  }}" class="media mb-10 pa-5 cds-deposit-media-list-border"
+        ng-class="{'cds-tasks-error': state === 'DEPOSIT_STATE/FAILURE' && record.metadata._deposit.status === 'draft',
+               'cds-tasks-success': state === 'DEPOSIT_STATE/SUCCESS'&& record.metadata._deposit.status === 'draft',
+               'cds-tasks-pending': state === 'DEPOSIT_STATE/PENDING' && record.metadata._deposit.status === 'draft',
+               'cds-tasks-started': state === 'DEPOSIT_STATE/STARTED' && record.metadata._deposit.status === 'draft',
+               'cds-deposit-published': record.metadata._deposit.status === 'published'
+             }"
+    >
+      <div class="media-left">
+        <i class="fa pl-5"
+          ng-class="{'fa-remove text-danger': state === 'DEPOSIT_STATE/FAILURE' && record.metadata._deposit.status === 'draft',
+               'fa-check text-success': state === 'DEPOSIT_STATE/SUCCESS'&& record.metadata._deposit.status === 'draft',
+               'fa-circle-thin text-muted': state === 'DEPOSIT_STATE/PENDING' && record.metadata._deposit.status === 'draft',
+               'fa-spinner fa-spin text-warning': state === 'DEPOSIT_STATE/STARTED' && record.metadata._deposit.status === 'draft',
+               'fa-check text-primary': record.metadata._deposit.status === 'published'
+             }"
+        ></i>
+     </div>
+     <div class="media-body">
+       <a class="media-heading f8 fw-b" target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
+         {{ record.metadata.title.title }}
+       </a>
+       <p class="f8 mt-5 text-muted">
+         <div class="pull-right px-20">
+           <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
+             <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
+               <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
+             </li>
+           </ul>
+         </div>
+        {{ record.metadata.description.value | stripTags }}
+       </p>
+       <ul class="list-inline pull-left w-100 text-muted">
+         <li class="f9">
+           <small><i class="fa fa-video-camera"></i> {{ record.metadata.videos.length }}</small>
+         </li>
+         <li class="f9">
+            <small><i class="fa fa-calendar"></i> {{ record.created | date:'dd/MM/yyyy' }}</small>
+         </li>
+         <li class="f9">
             <span ng-show="record.metadata.category" class="label label-sm label-default">{{record.metadata.category}}</span>
             <span ng-show="record.metadata.type" class="label label-sm label-warning">{{record.metadata.type}}</span>
-          </div>
-          <p class="f8 mt-5 mb-5">
-            {{ record.metadata.description.value | stripTags }}
-          </p>
-          <p class="list-group-item-text text-muted f9">
-            <small>Created on {{ record.created | date:'medium' }}, last updated on {{ record.updated | date:'medium' }}</small>
-          </p>
-        </div>
-        <div class="col-sm-3">
-          <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
-            <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
-              <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
-            </li>
-          </ul>
-        </div>
-        <div class="col-sm-2">
-          <div class="text-right" ng-if="record.metadata._deposit.status === 'draft'">
-            <small><i class="fa fa-edit"></i> Draft</small>
-          </div>
-          <div class="text-right" ng-if="record.metadata._deposit.status === 'published'">
-            <small><i class="fa fa-check text-primary"></i> Published</small>
-          </div>
-        </div>
-      </div>
-  </a>
+         </li>
+       </ul>
+     </div>
+     <div class="media-right media-object text-right">
+        <small ng-if="record.metadata._deposit.status === 'draft'"><i class="fa fa-edit"></i> Draft</small>
+        <small ng-if="record.metadata._deposit.status === 'published'"><i class="fa fa-check text-primary"></i> Published</small>
+     </div>
+    </li>
+  </ul>
 </div>
 
 <div ng-if="vm.invenioSearchResults.hits.total == 0 && vm.invenioSearchArgs.q">

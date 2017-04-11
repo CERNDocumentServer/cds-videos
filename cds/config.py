@@ -474,12 +474,19 @@ DEPOSIT_REST_SORT_OPTIONS = {
             fields=['-_score'],
             title='Best match',
             default_order='asc',
-            order=2
+            order=3
         ),
-        mostrecent=dict(
+        newest=dict(
             fields=['-_updated'],
-            title='Most recent',
-            default_order='asc', order=1
+            title='Newest',
+            default_order='asc', order=1,
+
+        ),
+        oldest=dict(
+            fields=['-_updated'],
+            title='Oldest',
+            default_order='asc', order=2,
+
         )),
 }
 
