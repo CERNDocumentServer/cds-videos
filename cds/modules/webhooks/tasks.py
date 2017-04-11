@@ -43,6 +43,7 @@ from cds_sorenson.api import get_encoding_status, get_preset_info, \
 from cds_sorenson.error import InvalidResolutionError
 from celery import Task, shared_task, current_app as celery_app
 from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
+from celery.exceptions import Ignore
 
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
@@ -106,17 +107,23 @@ class AVCTask(Task):
         sse_publish_event(channel=self.sse_channel, type_=self._type,
                           state=state, meta=meta)
 
+    def _meta_exception_envelope(self, exc):
+        """Create a envelope for exceptions.
+
+        NOTE: workaround to be able to save the payload in celery in case of
+        exceptions.
+        """
+        meta = dict(message=str(exc), payload=self._base_payload)
+        return dict(
+            exc_message=meta,
+            exc_type=exc.__class__.__name__
+        )
+
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """When an error occurs, attach useful information to the state."""
         with celery_app.flask_app.app_context():
-            meta = dict(message=str(exc), payload=self._base_payload)
-            # NOTE: workaround to be able to save the meta in case of exception
-            exception = dict(
-                exc_message=meta,
-                exc_type='TypeError'
-            )
+            exception = self._meta_exception_envelope(exc=exc)
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
-            # /NOTE
             self._update_record()
 
     def on_success(self, exc, task_id, *args, **kwargs):
@@ -408,7 +415,7 @@ class ExtractFramesTask(AVCTask):
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, 'media_type', media_type)
             ObjectVersionTag.create(obj, 'context_type', context_type)
-            [ObjectVersionTag.create(obj, key, kwargs[key]) for key in kwargs]
+            [ObjectVersionTag.create(obj, key, kwargs[k]) for k in kwargs]
 
         # Create GIF object
         create_object(gif_name, 'image', 'frames-preview')
@@ -511,10 +518,11 @@ class TranscodeVideoTask(AVCTask):
                 job_id = start_encoding(input_file, output_file,
                                         preset_quality, aspect_ratio)
             except InvalidResolutionError as e:
+                exception = self._meta_exception_envelope(exc=e)
                 self.update_state(
                     state=REVOKED,
-                    meta={'payload': {}, 'message': str(e)})
-                return
+                    meta=exception)
+                raise Ignore()
 
             # Set revoke handler, in case of an abrupt execution halt.
             self.set_revoke_handler(partial(stop_encoding, job_id))

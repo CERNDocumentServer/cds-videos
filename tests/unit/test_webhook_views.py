@@ -82,7 +82,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     # check elasticsearch
     assert mock_indexer.called is True
     ids = get_indexed_records_from_mock(mock_indexer)
-    assert len(ids) == 10
+    assert len(ids) == 9
     assert set(ids) == set([video_id])
 
 
