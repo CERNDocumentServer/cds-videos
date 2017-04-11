@@ -37,7 +37,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
 from six import BytesIO, next
-from celery.exceptions import Retry
+from celery.exceptions import Retry, Ignore
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from cds_sorenson.error import InvalidResolutionError
 
@@ -350,8 +350,8 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     assert bucket.size == (2 * filesize)
 
 
-def test_transcode_no_raise_exception_if_invalid(db, bucket):
-    """Test no raise exception if sorenson raise InvalidResolutionError."""
+def test_transcode_ignore_exception_if_invalid(db, bucket):
+    """Test ignore exception if sorenson raise InvalidResolutionError."""
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
@@ -370,4 +370,4 @@ def test_transcode_no_raise_exception_if_invalid(db, bucket):
                     side_effect=InvalidResolutionError('fuu', 'test')):
         # Transcode
         task = task_s1.delay()
-        assert task.result is None
+        isinstance(task.result, Ignore)
