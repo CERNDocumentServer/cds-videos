@@ -345,8 +345,8 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 20
-        _, kwargs = list_kwargs[18]
+        assert len(list_kwargs) == 18
+        _, kwargs = list_kwargs[16]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
@@ -502,9 +502,11 @@ def test_avc_workflow_receiver_local_file_pass(
         assert info[0][1].status == states.SUCCESS
         assert info[1][0] == 'file_video_extract_frames'
         assert info[1][1].status == states.SUCCESS
-        for myinfo in info[2:]:
-            assert myinfo[0] == 'file_transcode'
-            assert myinfo[1].status == states.SUCCESS
+        transocode_tasks = info[2:]
+        statuses = [task[1].status for task in info[2:]]
+        assert len(transocode_tasks) == len(statuses)
+        assert [states.SUCCESS, states.SUCCESS, states.SUCCESS, states.SUCCESS,
+                states.SUCCESS, states.REVOKED] == statuses
 
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
@@ -542,8 +544,8 @@ def test_avc_workflow_receiver_local_file_pass(
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 18
-        _, kwargs = list_kwargs[16]
+        assert len(list_kwargs) == 16
+        _, kwargs = list_kwargs[14]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
