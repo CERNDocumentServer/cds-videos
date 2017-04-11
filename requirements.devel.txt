@@ -31,10 +31,20 @@ Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
 psycopg2 >= 2.6.1 # dependency of invenio-db
 SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 
+-r requirements.topical.branches.txt
+
+# -e git+https://github.com/inveniosoftware/invenio-deposit.git@create_validator#egg=invenio-deposit
+# -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
+# -e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
+# -e git+https://github.com/inveniosoftware/invenio-webhooks.git#egg=invenio-webhooks
+# FIXME removed until proper integration
+#-e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
+
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
+-e git+https://github.com/inveniosoftware/flask-iiif.git#egg=flask-iiif
 -e git+https://github.com/inveniosoftware/invenio-access.git#egg=invenio-access
 -e git+https://github.com/inveniosoftware/invenio-accounts.git#egg=invenio-accounts
 -e git+https://github.com/inveniosoftware/invenio-admin.git#egg=invenio-admin
@@ -44,27 +54,14 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
 -e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db
-# Waiting PR invenio-opendefinition#19
-# -e git+https://github.com/inveniosoftware/invenio-opendefinition.git#egg=invenio-opendefinition
--e git+https://github.com/hachreak/invenio-opendefinition.git@fix_import#egg=invenio-opendefinition
-# FIXME wait for PR#157
-# -e git+https://github.com/inveniosoftware/invenio-deposit.git@create_validator#egg=invenio-deposit
--e git+https://github.com/hachreak/invenio-deposit.git@create_validator#egg=invenio-deposit
-# FIXME wait for PR#132
-# -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
--e git+https://github.com/egabancho/invenio-files-rest.git@object-version-tags#egg=invenio-files-rest
 -e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter
-# FIXME removed until proper integration
-# -e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
 -e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
 -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
-# FIXME wait for PR#122
-#-e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
--e git+https://github.com/hachreak/invenio-oauthclient.git@#egg=invenio-oauthclient
+-e git+https://github.com/inveniosoftware/invenio-opendefinition.git#egg=invenio-opendefinition
 -e git+https://github.com/inveniosoftware/invenio-pages.git#egg=invenio-pages
 -e git+https://github.com/inveniosoftware/invenio-pidstore.git#egg=invenio-pidstore
 -e git+https://github.com/inveniosoftware/invenio-previewer.git#egg=invenio-previewer
@@ -80,6 +77,3 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-theme.git#egg=invenio-theme
 -e git+https://github.com/inveniosoftware/invenio-userprofiles.git#egg=invenio-userprofiles
 -e git+https://github.com/inveniosoftware/jsonresolver.git@#egg=jsonresolver
-# FIXME wait for PR#50
-# -e git+https://github.com/inveniosoftware/invenio-webhooks.git#egg=invenio-webhooks
--e git+https://github.com/hachreak/invenio-webhooks.git@fix_json#egg=invenio-webhooks
