@@ -479,10 +479,10 @@ def video_record_metadata(db, project_published, extra_metadata):
                         tags=dict(
                             master=master_id,
                             type='frame',
-                            timestamp=(float(i) / 10) * 60.095
+                            timestamp=(float(i) / 11) * 60.095
                         ),
                         version_id=rand_version_id())
-                    for i in range(11)
+                    for i in range(1, 11)
                 ],
                 tags=dict(
                     bit_rate='11915822',
