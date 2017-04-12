@@ -66,33 +66,29 @@ class VTT(object):
     @staticmethod
     def _format_frames(record):
         """Select frames and format the start/end times."""
-        thumbnail_data = []
         master_file = CDSFilesIterator.get_master_video_file(record)
-        frames = CDSFilesIterator.get_video_frames(master_file)
+        frames = [{
+            'time': float(f['tags']['timestamp']),
+            'bid': f['bucket_id'],
+            'key': f['key']
+        } for f in CDSFilesIterator.get_video_frames(master_file)]
 
-        last_timestamp = float(master_file['tags']['duration'])
-        for frame in frames[::-1]:
-            timestamp = float(frame['tags']['timestamp'])
-            start = VTT.time_format(timestamp)
-            end = VTT.time_format(last_timestamp)
-            thumbnail_size = current_app.config['VIDEO_POSTER_SIZE']
-            file_name = url_for(
-                'iiifimageapi',
-                version='v2',
-                uuid='{0}:{1}'.format(frame['bucket_id'], frame['key']),
-                region='full',
-                size='{0[0]},{0[1]}'.format(thumbnail_size),
-                rotation='0',
-                quality='default',
-                image_format='png',
-                _external=True)
-            info = dict(
-                start_time=start,
-                end_time=end,
-                file_name=file_name)
-            thumbnail_data.append(info)
-            last_timestamp = timestamp
-        return thumbnail_data[::-1]
+        last_time = float(master_file['tags']['duration'])
+        poster_size = current_app.config['VIDEO_POSTER_SIZE']
+        frames_tail = frames[1:] + [{'time': last_time}]
+        return [{
+            'start_time': VTT.time_format(f['time'] if i > 0 else 0.0),
+            'end_time': VTT.time_format(next_f['time']),
+            'file_name': VTT.resize_link(f, poster_size),
+        } for i, (f, next_f) in enumerate(zip(frames, frames_tail))]
+
+    @staticmethod
+    def resize_link(frame, size):
+        return url_for('iiifimageapi', version='v2',
+                       uuid='{0}:{1}'.format(frame['bid'], frame['key']),
+                       region='full', size='{0[0]},{0[1]}'.format(size),
+                       rotation='0', quality='default',
+                       image_format='png', _external=True)
 
     @staticmethod
     def time_format(seconds):
