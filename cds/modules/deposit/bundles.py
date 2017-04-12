@@ -102,10 +102,12 @@ js_cds_deposit = NpmBundle(
     'js/cds_deposit/avc/components/cdsUploader.js',
     'js/cds_deposit/avc/components/cdsRemoteUploader.js',
     'node_modules/angular-lazy-image/release/lazy-image.js',
+    'node_modules/angular-local-storage/dist/angular-local-storage.js',
     npm={
         'angular-schema-form': '~0.8.13',
         'angular-schema-form-bootstrap': '~0.2.0',
         'angular-lazy-image': '~0.3.2',
+        'angular-local-storage': '~0.5.2',
         'objectpath': '~1.2.1',
         'tv4': '~1.2.7',
     }

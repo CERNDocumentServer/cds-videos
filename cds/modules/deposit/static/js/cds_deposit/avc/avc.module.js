@@ -7,13 +7,17 @@ function cdsDepositsConfig(
   inheritedPropertiesProvider,
   taskRepresentationsProvider,
   urlBuilderProvider,
-  typeReducerProvider
+  typeReducerProvider,
+  localStorageServiceProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
     requireBase: false,
     rewriteLinks: false,
   });
+
+  // Local storage configuration
+  localStorageServiceProvider.setPrefix('cdsDeposit');
 
   var mainStatuses = [
     'file_download',
@@ -86,6 +90,7 @@ cdsDepositsConfig.$inject = [
   'taskRepresentationsProvider',
   'urlBuilderProvider',
   'typeReducerProvider',
+  'localStorageServiceProvider',
 ];
 
 // Register modules
@@ -100,6 +105,7 @@ angular.module('cdsDeposit.modules', [
   'cdsDeposit.providers',
   'cdsDeposit.factories',
   'cdsDeposit.components',
+  'LocalStorageModule',
 ]).config(cdsDepositsConfig);
 
 angular
