@@ -54,13 +54,19 @@ def test_vtt_serializer(video_record_metadata):
     """Test vtt serializer."""
     serializer = VTT(record=video_record_metadata)
     data = serializer._format_frames(video_record_metadata)
-    for i in range(10):
-        if i == 9:
-            end_expected = VTT.time_format(float(
-                video_record_metadata['_files'][0]['tags']['duration']))
-            assert data[i]['end_time'] == end_expected
-        else:
-            assert data[i]['end_time'] == data[i + 1]['start_time']
+    start_times, end_times = [[info[key] for info in data]
+                              for key in ['start_time', 'end_time']]
+
+    # Check first and last timestamp
+    assert start_times[0] == '00:00.000'
+    assert end_times[-1] == VTT.time_format(
+        float(video_record_metadata['_files'][0]['tags']['duration']))
+
+    # Check that timestamps are ascending
+    assert all([sorted(l) == l for l in [start_times, end_times]])
+
+    # Check that there are no time gaps between frames
+    assert start_times[1:] == end_times[:-1]
 
 
 def test_drupal_serializer(video_record_metadata, deposit_metadata):

@@ -174,7 +174,7 @@ class CDSFilesIterator(FilesIterator):
     def get_video_frames(master_file):
         """Get sorted list of video frames."""
         return sorted(master_file.get('frame', []),
-                      key=lambda s: s['tags']['timestamp'])
+                      key=lambda s: float(s['tags']['timestamp']))
 
 
 class CDSDeposit(Deposit):
