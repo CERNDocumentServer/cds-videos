@@ -119,11 +119,11 @@ function cdsDepositCtrl(
       return Object.getOwnPropertyNames(obj).length == 0;
     };
 
-    this.inheritMetadata = function() {
+    this.inheritMetadata = function(specific) {
       var record = that.record;
       var master = that.cdsDepositsCtrl.master.metadata;
-
-      angular.forEach(inheritedProperties, function(propPath) {
+      var paths = (specific !== undefined ) ? specific : inheritedProperties;
+      angular.forEach(paths, function(propPath) {
         var inheritedVal = accessElement(master, propPath);
         var ownElement = accessElement(record, propPath);
         if (inheritedVal && !ownElement) {

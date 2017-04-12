@@ -20,7 +20,7 @@
      </div>
      <div class="media-body">
        <a class="media-heading f8 fw-b" target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
-         {{ record.metadata.title.title }}
+         {{ record.metadata.title.title || 'No project title'}}
        </a>
        <p class="f8 mt-5 text-muted">
          <div class="pull-right px-20">
@@ -30,7 +30,7 @@
              </li>
            </ul>
          </div>
-        {{ record.metadata.description.value | stripTags }}
+        {{ (record.metadata.description.value | stripTags)  || 'No project description'}}
        </p>
        <ul class="list-inline pull-left w-100 text-muted">
          <li class="f9">
@@ -53,7 +53,8 @@
   </ul>
 </div>
 
-<div ng-if="vm.invenioSearchResults.hits.total == 0 && vm.invenioSearchArgs.q">
+
+<div ng-if="vm.invenioSearchResults.hits.total === 0 && vm.invenioSearchArgs.q">
   <div class="list-group">
     <div class="list-group-item">
       <div ng-show="vm.invenioSearchResults.hits.total === 0">
@@ -63,23 +64,18 @@
         <p class="f5 text-center">
           no projects for found for <em>"{{ vm.invenioSearchArgs.q }}"</em>
         </p>
+      </div>
     </div>
   </div>
 </div>
 
-<div ng-if="vm.invenioSearchResults.hits.total == 0 && !vm.invenioSearchArgs.q && vm.invenioSearchResults.aggregations.status.buckets.length == 0">
-  <div class="list-group">
-    <div class="list-group-item">
-      <div class="jumbotron" align="center" class="hidden-sm hidden-xs">
-        <h1>Get started!</h1>
-        <p>Make your first upload.</p>
-        <h1>
-          <a class="btn btn-success btn-lg" href="/deposit/new">
-            <i class="fa fa-upload"></i> New Upload
-          </a>
-        </h1>
-      </div>
-    </div>
+<div ng-if="vm.invenioSearchResults.hits.total === 0 && !vm.invenioSearchArgs.q && vm.invenioSearchResults.aggregations.status.buckets.length === 0">
+  <div class="jumbotron" align="center" class="hidden-sm hidden-xs">
+    <h1>Get started!</h1>
+    <p>Make your first upload.</p>
+    <a class="btn btn-success btn-lg mt-20" href="/deposit/new">
+      <i class="fa fa-upload"></i> New Upload
+    </a>
   </div>
 </div>
 
