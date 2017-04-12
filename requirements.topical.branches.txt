@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2015 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,22 +22,17 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-curl -XDELETE localhost:9200/*
-cds db destroy --yes-i-know
-cds db init create
-cds index init
-cds index queue init
+# Topical branches pending integration in inveniosoftware/*
 
-cds fixtures sequence_generator
 
-# Create a test user
-cds users create test@test.ch -a --password=123456
-# Create an admin user
-cds users create admin@test.ch -a --password=123456
-cds roles create admin
-cds roles add admin@test.ch admin
-cds access allow deposit-admin-access role admin
-cds access allow superuser-access role admin
+# FIXME wait for PR#166
+-e git+https://github.com/inveniosoftware/invenio-deposit.git@cds-create-validator#egg=invenio-deposit
 
-# Create a default files location
-cds files location default /tmp --default
+# FIXME wait for PR#147
+-e git+https://github.com/inveniosoftware/invenio-files-rest.git@cds-object-version-tags#egg=invenio-files-rest
+
+# FIXME wait for PR#127
+-e git+https://github.com/inveniosoftware/invenio-oauthclient.git@cds-api-app#egg=invenio-oauthclient
+
+# FIXME wait for PR#53
+-e git+https://github.com/inveniosoftware/invenio-webhooks.git@cds#egg=invenio-webhooks

@@ -24,5 +24,6 @@
 #}
 {%- extends "cds_previewer/video.html" %}
 
+{% set theo_config = [('isEmbeddable', 'true')] %}
 {%- set path = file.file.obj.file.uri | replace('/eos/workspace/c/cds/sorenson_public/', '') %}
 {%- set m3u8_url = config.WOWZA_VIDEO_URL | format(path) %}

@@ -96,7 +96,7 @@ def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
     categories = RecordMetadata.query.all()
     assert len(categories) == 5
     for category in categories:
-        assert 'video' in category.json['types']
+        assert 'VIDEO' in category.json['types']
 
 
 def test_fixture_sequence_generator(app, script_info, db):

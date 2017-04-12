@@ -60,9 +60,9 @@ from helpers import workflow_receiver_video_failing, mock_current_user, \
     get_indexed_records_from_mock, prepare_videos_for_publish
 
 
-def test_video_resolver(project):
+def test_video_resolver(api_project):
     """Test vide resolver."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     videos = video_resolver(
         [video_1['_deposit']['id'], video_2['_deposit']['id']])
     original = [video_1.id, video_2.id]
@@ -74,9 +74,9 @@ def test_video_resolver(project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_video_publish_and_edit(project):
+def test_video_publish_and_edit(api_project):
     """Test video publish and edit."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     video_path_1 = project['videos'][0]['$reference']
     video_path_2 = project['videos'][1]['$reference']
 
@@ -149,9 +149,9 @@ def test_video_publish_and_edit(project):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
-def test_delete_video_not_published(project, force):
+def test_delete_video_not_published(api_project, force):
     """Test video delete when draft."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
 
     project_id = project.id
     video_1_ref = video_1.ref
@@ -175,9 +175,9 @@ def test_delete_video_not_published(project, force):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
-def test_delete_video_published(project, force):
+def test_delete_video_published(api_project, force):
     """Test video delete after published."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
 
     video_2 = video_2.publish()
@@ -199,9 +199,9 @@ def test_delete_video_published(project, force):
     assert {'$reference': video_2_ref} in project_meta.json['videos']
 
 
-def test_video_dumps(db, project, video):
+def test_video_dumps(db, api_project, video):
     """Test video dump, in particular file dump."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     bucket_id = video_1['_buckets']['deposit']
     obj = ObjectVersion.create(
         bucket=bucket_id, key='master.mp4', stream=open(video, 'rb'))
@@ -235,21 +235,21 @@ def test_video_dumps(db, project, video):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_video_delete_with_workflow(app, users, project, webhooks, es):
+def test_video_delete_with_workflow(api_app, users, api_project, webhooks, es):
     """Test publish a project with a workflow."""
-    project, video_1, video_2 = project
+    project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
 
     receiver_id = 'test_video_delete_with_workflow'
     workflow_receiver_video_failing(
-        app, db, video_1, receiver_id=receiver_id)
+        api_app, db, video_1, receiver_id=receiver_id)
 
     mock_delete = MagicMock(return_value=None)
     current_webhooks.receivers[receiver_id].delete = mock_delete
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
-    with app.test_request_context(headers=headers, data=payload):
+    with api_app.test_request_context(headers=headers, data=payload):
         event = Event.create(receiver_id=receiver_id)
         db.session.add(event)
         event.process()
@@ -260,9 +260,9 @@ def test_video_delete_with_workflow(app, users, project, webhooks, es):
     assert mock_delete.called is True
 
 
-def test_video_record_schema(app, db, project):
+def test_video_record_schema(app, db, api_project):
     """Test video record schema."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     assert video_1.record_schema == Video.get_record_schema()
 
 
@@ -543,9 +543,9 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_video_publish_with_no_category(project):
+def test_video_publish_with_no_category(api_project):
     """Test video publish if category is not set."""
-    (project, video_1, video_2) = project
+    (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     video_1_depid = video_1['_deposit']['id']
     # test: no category in project
