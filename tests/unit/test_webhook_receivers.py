@@ -116,7 +116,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
         # check sse is called
         assert mock_sse.called
 
-        def set_data(state, message, size, total, percentage):
+        def set_data(state, message, size, total, percentage, type_):
             return {
                 'state': state,
                 'meta': {
@@ -135,6 +135,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
                         'size': size,
                         'total': total,
                         'sse_channel': sse_channel,
+                        'type': type_
                     }
                 }
             }
@@ -143,14 +144,15 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
             data=set_data(
                 states.STARTED,
                 'Downloading {} of {}'.format(file_size, file_size),
-                file_size, file_size, 100
+                file_size, file_size, 100, 'file_download'
             ),
             channel=u'mychannel',
             type_='file_download'
         )
         mock_sse.assert_any_call(
             data=set_data(
-                states.SUCCESS, str(obj.version_id), file_size, file_size, 100
+                states.SUCCESS, str(obj.version_id), file_size, file_size, 100,
+                'file_download'
             ),
             channel=u'mychannel',
             type_='file_download'
@@ -211,7 +213,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     bucket_id = video_1['_buckets']['deposit']
     video_size = 5510872
     master_key = 'test.mp4'
-    slave_keys = ['test[{0}].mp4'.format(quality)
+    slave_keys = ['slave_{0}.mp4'.format(quality)
                   for quality in get_available_preset_qualities()
                   if quality != '1024p']
     with api_app.test_request_context():
@@ -413,7 +415,7 @@ def test_avc_workflow_receiver_local_file_pass(
         version_id=local_file).one().bucket_id
     video_size = 5510872
     master_key = 'test.mp4'
-    slave_keys = ['test[{0}].mp4'.format(quality)
+    slave_keys = ['slave_{0}.mp4'.format(quality)
                   for quality in get_available_preset_qualities()
                   if quality != '1024p']
     with api_app.test_request_context():

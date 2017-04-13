@@ -74,12 +74,6 @@ class AVCTask(Task):
 
     abstract = True
 
-    def __init__(self, type_):
-        """Constructor."""
-        super(AVCTask, self).__init__()
-        self._base_payload = {'type': type_}
-        self._type = type_
-
     def _extract_call_arguments(self, arg_list, **kwargs):
         for name in arg_list:
             setattr(self, name, kwargs.pop(name, None))
@@ -99,6 +93,7 @@ class AVCTask(Task):
             self.object = as_object_version(kwargs.pop('version_id', None))
             if self.object:
                 self.obj_id = str(self.object.version_id)
+            self.set_base_payload()
             return self.run(*args, **kwargs)
 
     def update_state(self, task_id=None, state=None, meta=None):
@@ -153,6 +148,22 @@ class AVCTask(Task):
             handler()
         signal.signal(signal.SIGTERM, _handler)
 
+    def set_base_payload(self, payload=None):
+        """Set default base payload."""
+        self._base_payload = {
+            'deposit_id': self.deposit_id,
+            'event_id': self.event_id,
+            'sse_channel': self.sse_channel,
+            'type': self._type,
+        }
+        if self.object:
+            self._base_payload.update(
+                tags=self.object.get_tags(),
+                version_id=str(self.object.version_id)
+            )
+        if payload:
+            self._base_payload.update(**payload)
+
 
 class DownloadTask(AVCTask):
     """Download task."""
@@ -160,7 +171,6 @@ class DownloadTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_download'
-        self._base_payload = {}  # {'type': self._type}
 
     @staticmethod
     def clean(version_id, *args, **kwargs):
@@ -174,14 +184,7 @@ class DownloadTask(AVCTask):
         :param self: reference to instance of task base class
         :param uri: URL of the file to download.
         """
-        self._base_payload.update(
-            key=self.object.key,
-            version_id=self.obj_id,
-            tags=self.object.get_tags(),
-            event_id=self.event_id,
-            deposit_id=self.deposit_id,
-            sse_channel=self.sse_channel,
-        )
+        self._base_payload.update(key=self.object.key)
 
         # Make HTTP request
         response = requests.get(uri, stream=True)
@@ -221,7 +224,6 @@ class ExtractMetadataTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_video_metadata_extraction'
-        self._base_payload = {}  # {'type': self._type}
         format_keys = [
             'duration',
             'bit_rate',
@@ -270,14 +272,7 @@ class ExtractMetadataTask(AVCTask):
             'depid', self.deposit_id).object_uuid)
         uri = uri or self.object.file.uri
 
-        self._base_payload.update(
-            version_id=str(self.object.version_id),
-            uri=uri,
-            tags=self.object.get_tags(),
-            deposit_id=self.deposit_id,
-            event_id=self.event_id,
-            sse_channel=self.sse_channel,
-        )
+        self._base_payload.update(uri=uri)
 
         # Extract video's metadata using `ff_probe`
         metadata = json.loads(ff_probe_all(uri))
@@ -318,7 +313,6 @@ class ExtractFramesTask(AVCTask):
     def __init__(self):
         """Init."""
         self._type = 'file_video_extract_frames'
-        self._base_payload = {}  # {'type': self._type}
 
     @staticmethod
     def clean(version_id, *args, **kwargs):
@@ -356,22 +350,13 @@ class ExtractFramesTask(AVCTask):
         """
         output_folder = tempfile.mkdtemp()
         in_output = partial(os.path.join, output_folder)
-        object_tags = self.object.get_tags()
 
         # Remove temporary directory on abrupt execution halts.
         self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
                                                       ignore_errors=True))
 
-        self._base_payload.update(
-            version_id=self.obj_id,
-            tags=object_tags,
-            deposit_id=self.deposit_id,
-            event_id=self.event_id,
-            sse_channel=self.sse_channel,
-        )
-
         # Calculate time positions
-        duration = float(object_tags['duration'])
+        duration = float(self._base_payload['tags']['duration'])
         time_step = duration * frames_gap / 100
         start_time = duration * frames_start / 100
         end_time = (duration * frames_end / 100) + 0.01
@@ -398,7 +383,7 @@ class ExtractFramesTask(AVCTask):
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, 'media_type', media_type)
             ObjectVersionTag.create(obj, 'context_type', context_type)
-            [ObjectVersionTag.create(obj, key, tags[key]) for key in tags]
+            [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
 
         # Generate frames
         ff_frames(input_file=self.object.file.uri,
@@ -436,8 +421,7 @@ class TranscodeVideoTask(AVCTask):
     @staticmethod
     def _build_slave_key(preset_quality, master_key):
         """Build the object version key connected with the transcoding."""
-        base_name, extension = master_key.rsplit('.', 1)
-        return '{0}[{1}].{2}'.format(base_name, preset_quality, extension)
+        return 'slave_{0}.mp4'.format(preset_quality)
 
     # FIXME maybe we need to move this part to CDS-Sorenson
     @staticmethod
@@ -476,14 +460,7 @@ class TranscodeVideoTask(AVCTask):
         :param sleep_time: time interval between requests for the Sorenson
             status.
         """
-        self._base_payload.update(
-            version_id=str(self.object.version_id),
-            preset_quality=preset_quality,
-            tags=self.object.get_tags(),
-            deposit_id=self.deposit_id,
-            event_id=self.event_id,
-            sse_channel=self.sse_channel,
-        )
+        self._base_payload.update(preset_quality=preset_quality)
 
         # Get master file's bucket_id
         bucket_id = self.object.bucket_id
@@ -515,9 +492,7 @@ class TranscodeVideoTask(AVCTask):
                                         preset_quality, aspect_ratio)
             except InvalidResolutionError as e:
                 exception = self._meta_exception_envelope(exc=e)
-                self.update_state(
-                    state=REVOKED,
-                    meta=exception)
+                self.update_state(state=REVOKED, meta=exception)
                 raise Ignore()
 
             # Set revoke handler, in case of an abrupt execution halt.
@@ -542,15 +517,17 @@ class TranscodeVideoTask(AVCTask):
                 version_id=str(obj.version_id),
                 key=obj_key,
                 tags=obj.get_tags(),
-                percentage=0, )
+                percentage=0,
+            )
 
         db.session.commit()
 
         self.update_state(
             state=STARTED,
             meta=dict(
-                payload=dict(job_info=job_info),
-                message='Started transcoding.'))
+                payload=dict(**job_info),
+                message='Started transcoding.')
+        )
 
         status = ''
         # Monitor job and report accordingly
