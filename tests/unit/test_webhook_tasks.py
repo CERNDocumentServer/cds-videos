@@ -274,7 +274,7 @@ def test_transcode(db, bucket, mock_sorenson):
     filesize = 1024
     filename = 'test.mp4'
     preset_quality = '480p'
-    new_filename = 'test[{0}].mp4'.format(preset_quality)
+    new_filename = 'slave_{0}.mp4'.format(preset_quality)
     obj = ObjectVersion.create(bucket, key=filename,
                                stream=BytesIO(b'\x00' * filesize))
     ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
@@ -317,7 +317,7 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     filesize = 1024
     filename = 'test.mp4'
     preset_qualities = ['480p', '720p']
-    new_filenames = ['test[{0}].mp4'.format(p) for p in preset_qualities]
+    new_filenames = ['slave_{0}.mp4'.format(p) for p in preset_qualities]
 
     (version_id, [task_s1, task_s2]) = transcode_task(
         bucket=bucket, filesize=filesize, filename=filename,
