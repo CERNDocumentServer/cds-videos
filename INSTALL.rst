@@ -19,6 +19,16 @@ Prepare the environment
     system requirements using the `Invenio scripts <https://github.com/inveniosoftware/invenio/tree/master/scripts>`_
 
 
+Be sure to have the following installed
+
+.. code-block:: console
+
+    $ sudo apt-get install libpq-dev python-dev
+    
+    or, if you use Python3
+    
+    $ sudo apt-get install libpq-dev python3-dev
+
 Install production like setup
 
 .. code-block:: console
