@@ -31,7 +31,8 @@ import mock
 
 from time import sleep
 from copy import deepcopy
-from cds.modules.deposit.api import project_resolver, video_resolver, Project
+from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
+    deposit_videos_resolver, Project, Video, record_video_resolver
 from flask import url_for
 from flask_principal import RoleNeed, identity_loaded
 from invenio_db import db
@@ -49,7 +50,7 @@ def test_simple_workflow(
     """Test project simple workflow."""
     def check_connection(videos, project):
         """check project <---> video connection."""
-        assert all({"$reference": video.ref} in project['videos']
+        assert all({"$ref": video.ref} in project['videos']
                    for video in videos)
         assert len(videos) == len(project['videos'])
 
@@ -79,7 +80,7 @@ def test_simple_workflow(
                    if key not in ['html', 'bucket'])
         # check database
         project_id = project_dict['metadata']['_deposit']['id']
-        project = project_resolver(project_id)
+        project = project_resolver.resolve(project_id)[1]
         assert project['$schema'] == project_schema
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
@@ -102,10 +103,12 @@ def test_simple_workflow(
         video_ids = [
             video_1_dict['metadata']['_deposit']['id']
         ]
-        [video_1] = video_resolver(video_ids)
+        [video_1] = deposit_videos_resolver(video_ids)
         check_connection(
             [video_1],
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
         assert video_1['$schema'] == video_schema
 
         # [[ GET THE VIDEO 1 ]]
@@ -139,10 +142,12 @@ def test_simple_workflow(
             video_1_dict['metadata']['_deposit']['id'],
             video_2_dict['metadata']['_deposit']['id']
         ]
-        [video_1, video_2] = video_resolver(video_ids)
+        [video_1, video_2] = deposit_videos_resolver(video_ids)
         check_connection(
             [video_1, video_2],
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
         assert video_2['$schema'] == video_schema
 
         # [[ ADD A FILE INSIDE VIDEO_1 ]]
@@ -159,16 +164,18 @@ def test_simple_workflow(
         assert file_1['filename'] == 'test.json'
         assert file_1['id']
         # check database: connection project <---> videos
-        [video_1] = video_resolver(
-            [video_1_dict['metadata']['_deposit']['id']])
+        video_1 = deposit_video_resolver(
+            video_1_dict['metadata']['_deposit']['id'])
         assert video_1['_files'][0]['key'] == 'test.json'
         video_ids = [
             video_1_dict['metadata']['_deposit']['id'],
             video_2_dict['metadata']['_deposit']['id']
         ]
         check_connection(
-            video_resolver(video_ids),
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            deposit_videos_resolver(video_ids),
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
 
         # [[ GET THE VIDEO 1 ]]
         res = client.get(video_1_dict['links']['self'], headers=json_headers)
@@ -207,8 +214,10 @@ def test_simple_workflow(
             video_2_dict['metadata']['_deposit']['id']
         ]
         check_connection(
-            video_resolver(video_ids),
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            deposit_videos_resolver(video_ids),
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
 
         # [[ ADD A VIDEO INSIDE VIDEO_2 ]]
         res = client.post(
@@ -223,16 +232,18 @@ def test_simple_workflow(
         assert file_2['filesize'] == 26
         assert file_2['filename'] == 'test2.json'
         # check connection project <---> videos
-        [video_2] = video_resolver(
-            [video_2_dict['metadata']['_deposit']['id']])
+        video_2 = deposit_video_resolver(
+            video_2_dict['metadata']['_deposit']['id'])
         assert video_2['_files'][0]['key'] == 'test2.json'
         video_ids = [
             video_1_dict['metadata']['_deposit']['id'],
             video_2_dict['metadata']['_deposit']['id']
         ]
         check_connection(
-            video_resolver(video_ids),
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            deposit_videos_resolver(video_ids),
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
 
         # [[ PUBLISH THE PROJECT ]]
         res = client.post(
@@ -240,23 +251,27 @@ def test_simple_workflow(
                     pid_value=project['_deposit']['id'], action='publish'),
             headers=json_headers)
 
+        video_1 = deposit_video_resolver(
+            video_1_dict['metadata']['_deposit']['id'])
+        video_1 = Video.get_record(video_1.fetch_published()[1].id)
+        video_2 = deposit_video_resolver(
+            video_2_dict['metadata']['_deposit']['id'])
+        video_2 = Video.get_record(video_2.fetch_published()[1].id)
+        record_videos = [video_1, video_2]
+
         # check returned value
         assert res.status_code == 202
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['_deposit']['status'] == 'published'
         assert project_dict['metadata']['recid'] == 3
-        assert project_dict['metadata']['videos'][0] == {
-            '$reference': '/record/1'}
-        assert project_dict['metadata']['videos'][1] == {
-            '$reference': '/record/2'}
+        assert project_dict['metadata']['videos'][0] == record_videos[0]
+        assert project_dict['metadata']['videos'][1] == record_videos[1]
         # check database: connection project <---> videos
-        video_ids = [
-            video_1_dict['metadata']['_deposit']['id'],
-            video_2_dict['metadata']['_deposit']['id']
-        ]
         check_connection(
-            video_resolver(video_ids),
-            project_resolver(project_dict['metadata']['_deposit']['id']))
+            record_videos,
+            project_resolver.resolve(
+                project_dict['metadata']['_deposit']['id'])[1]
+        )
 
         # check indexed record
         RecordIndexer().process_bulk_queue()
@@ -280,12 +295,13 @@ def test_simple_workflow(
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['_deposit']['status'] == 'draft'
         # check database
-        project = project_resolver(project_dict['metadata']['_deposit']['id'])
+        project = project_resolver.resolve(
+            project_dict['metadata']['_deposit']['id'])[1]
         assert project['_deposit']['status'] == 'draft'
 
         # [[ MODIFY PROJECT ]]
-        project_before = project_resolver(
-            project_dict['metadata']['_deposit']['id'])
+        project_before = project_resolver.resolve(
+            project_dict['metadata']['_deposit']['id'])[1]
         project_dict['metadata']['title']['title'] = 'new project title'
         # Not need to send _files
         del project_dict['metadata']['_files']
@@ -308,8 +324,11 @@ def test_simple_workflow(
         assert all(link.startswith('http://localhost/deposits/project')
                    for (key, link) in project_dict['links'].items()
                    if key not in ['html', 'bucket'])
+        assert video_1 == project_dict['metadata']['videos'][0]
+        assert video_2 == project_dict['metadata']['videos'][1]
         # check database
-        project = project_resolver(project_dict['metadata']['_deposit']['id'])
+        project = project_resolver.resolve(
+            project_dict['metadata']['_deposit']['id'])[1]
         assert project['title']['title'] == 'new project title'
         # check preserved fields
         assert project_before['recid'] == project['recid']
@@ -328,7 +347,8 @@ def test_simple_workflow(
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['title']['title'] == 'my project'
         # check database
-        project = project_resolver(project_dict['metadata']['_deposit']['id'])
+        project = project_resolver.resolve(
+            project_dict['metadata']['_deposit']['id'])[1]
         assert project['title']['title'] == 'my project'
 
 
@@ -380,12 +400,12 @@ def test_publish_project_check_indexed(
             video_1_dict['metadata']['_deposit']['id'],
             video_2_dict['metadata']['_deposit']['id']
         ]
-        [video_1, video_2] = video_resolver(video_ids)
+        [video_1, video_2] = deposit_videos_resolver(video_ids)
         video_1_id = str(video_1.id)
         video_2_id = str(video_2.id)
         # get project id
         project_depid = project_dict['metadata']['_deposit']['id']
-        project = project_resolver(project_depid)
+        project = project_resolver.resolve(project_depid)[1]
         project_id = str(project.id)
         project = dict(project)
 
@@ -399,11 +419,11 @@ def test_publish_project_check_indexed(
                 headers=json_headers)
 
             # get project record
-            _, project_record = project_resolver(
-                project_depid).fetch_published()
+            _, project_record = project_resolver.resolve(
+                project_depid)[1].fetch_published()
             # get video records
-            video_records = video_resolver(
-                Project(data=project_record).video_ids)
+            video_records = [record_video_resolver(id_)
+                             for id_ in Project(data=project_record).video_ids]
             assert len(video_records) == 2
             # check project + videos are indexed
             assert mock_indexer.called is True
@@ -438,8 +458,8 @@ def test_featured_field_is_indexed(api_app, es, api_project, users,
         RecordIndexer().process_bulk_queue()
         sleep(2)
 
-        video_1_record = video_resolver([video_1['_deposit']['id']])[0]
-        video_2_record = video_resolver([video_2['_deposit']['id']])[0]
+        video_1_record = deposit_video_resolver(video_1['_deposit']['id'])
+        video_2_record = deposit_video_resolver(video_2['_deposit']['id'])
 
         # search for featured videos
         url = url_for('invenio_records_rest.recid_list', q='featured:true')

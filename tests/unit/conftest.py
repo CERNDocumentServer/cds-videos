@@ -49,7 +49,6 @@ from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
 from invenio_sequencegenerator.api import Template
-from cds.modules.deposit.api import video_resolver
 from flask_security import login_user
 from invenio_access.models import ActionRoles
 from invenio_access.permissions import superuser_access
@@ -76,6 +75,8 @@ from invenio_pidstore.models import PersistentIdentifier
 from time import sleep
 from uuid import uuid4
 from werkzeug.routing import Rule
+from cds.modules.records.resolver import record_resolver
+from cds.modules.deposit.api import Video
 
 from helpers import (create_category, create_record, sse_simple_add,
                      sse_failing_task, sse_success_task, new_project,
@@ -684,9 +685,12 @@ def project_published(api_app, api_project):
     with api_app.test_request_context():
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
-        new_videos = video_resolver(new_project.video_ids)
+        new_videos = [record_resolver.resolve(id_)[1]
+                      for id_ in new_project.video_ids]
         assert len(new_videos) == 2
-    return new_project, new_videos[0], new_videos[1]
+    return (new_project,
+            Video.get_record(new_videos[0].id),
+            Video.get_record(new_videos[1].id))
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -698,9 +702,12 @@ def api_project_published(api_app, api_project):
     with api_app.test_request_context():
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
-        new_videos = video_resolver(new_project.video_ids)
+        new_videos = [record_resolver.resolve(id_)[1]
+                      for id_ in new_project.video_ids]
         assert len(new_videos) == 2
-    return new_project, new_videos[0], new_videos[1]
+    return (new_project,
+            Video.get_record(new_videos[0].id),
+            Video.get_record(new_videos[1].id))
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from marshmallow import fields, post_load
 from invenio_jsonschemas import current_jsonschemas
 
-from ....deposit.api import Project
+from ....deposit.api import Project, deposit_video_resolver
 from ..fields.datetime import DateString
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
@@ -53,12 +53,6 @@ class FileSchema(StrictKeysSchema):
     version_id = fields.Str()
 
 
-class ProjectVideoSchema(StrictKeysSchema):
-    """Video schema."""
-
-    reference = fields.Str(attribute='$reference')
-
-
 class ProjectSchema(StrictKeysSchema):
     """Project schema."""
 
@@ -79,7 +73,7 @@ class ProjectSchema(StrictKeysSchema):
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)
     schema = fields.Str(attribute='$schema', dump_to='$schema')
-    videos = fields.Nested(ProjectVideoSchema, many=True)
+    videos = fields.Method(deserialize='get_videos_refs')
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.Nested(ReportNumberSchema, many=False)
     publication_date = fields.Str()
@@ -89,3 +83,9 @@ class ProjectSchema(StrictKeysSchema):
         """Post load."""
         data['$schema'] = current_jsonschemas.path_to_url(Project._schema)
         return data
+
+    def get_videos_refs(self, obj):
+        """Get videos references."""
+        return [Project.build_video_ref(
+            deposit_video_resolver(o['_deposit']['id'])
+        ) for o in obj]

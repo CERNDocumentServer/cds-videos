@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,20 +26,18 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_records_files.api import Record
-from invenio_pidstore.resolver import Resolver
-from functools import partial
+import jsonresolver
 
-from .api import Keyword
+from .api import deposit_video_resolver, deposit_project_resolver
 
 
-keyword_resolver = Resolver(
-    pid_type='kwid', object_type='rec',
-    getter=partial(Keyword.get_record, with_deleted=True)
-)
+@jsonresolver.route('/api/deposits/project/<path:path>', host='cds.cern.ch')
+def deposit_project_jsonresolver(path):
+    """Create a nested JSON."""
+    return deposit_project_resolver(path)
 
 
-record_resolver = Resolver(
-    pid_type='recid', object_type='rec',
-    getter=partial(Record.get_record, with_deleted=True)
-)
+@jsonresolver.route('/api/deposits/video/<path:path>', host='cds.cern.ch')
+def deposit_video_jsonresolver(path):
+    """Create a nested JSON."""
+    return deposit_video_resolver(path)

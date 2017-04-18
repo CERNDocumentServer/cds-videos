@@ -36,9 +36,11 @@ from copy import deepcopy
 from flask_security import login_user
 from cds.modules.records.permissions import has_update_permission
 from cds.modules.deposit.api import (record_build_url, Project, Video,
-                                     video_resolver, video_build_url,
+                                     video_build_url,
                                      is_deposit, record_unbuild_url,
-                                     project_resolver)
+                                     deposit_project_resolver,
+                                     record_video_resolver,
+                                     deposit_video_resolver)
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -57,26 +59,28 @@ from helpers import workflow_receiver_video_failing, \
 
 def test_is_deposit():
     """Test is deposit function."""
-    assert is_deposit('/api/deposit/1') is True
-    assert is_deposit('/record/1') is False
+    assert is_deposit('https://cds.cern.ch/api/deposits/project/1') is True
+    assert is_deposit('https://cds.cern.ch/api/record/1') is False
 
 
 def test_record_unbuild_url(api_app):
     """Test record unbuild url."""
-    assert '1' == record_unbuild_url('/deposits/video/1')
-    assert '1' == record_unbuild_url('/record/1')
+    assert '1' == record_unbuild_url(
+        'https://cds.cern.ch/api/deposits/video/1')
+    assert '1' == record_unbuild_url('https://cds.cern.ch/api/record/1')
 
 
 def test_record_build_url(api_app):
     """Test record build url."""
-    assert '/record/1' == record_build_url(1)
+    assert 'https://cds.cern.ch/api/record/1' == record_build_url(1)
 
 
 def test_video_build_url(api_app):
     """Test deposit build url."""
-    assert '/deposits/video/1' == video_build_url(1)
-    assert '/deposits/video/1' == video_build_url('1')
-    assert '/deposits/video/95b0716a-c726-4481-96fe-2aa02c72cd41' == \
+    assert 'https://cds.cern.ch/api/deposits/video/1' == video_build_url(1)
+    assert 'https://cds.cern.ch/api/deposits/video/1' == video_build_url('1')
+    assert ('https://cds.cern.ch/api/deposits/video/'
+            '95b0716a-c726-4481-96fe-2aa02c72cd41') == \
         video_build_url(uuid.UUID('95b0716a-c726-4481-96fe-2aa02c72cd41'))
 
 
@@ -95,7 +99,7 @@ def test_publish_all_videos(api_app, api_project):
     new_project = project.publish()
     # check project and all video are published
     assert new_project['_deposit']['status'] == 'published'
-    videos = video_resolver(new_project.video_ids)
+    videos = [record_video_resolver(id_) for id_ in new_project.video_ids]
     assert len(videos) == 2
     for video in videos:
         assert video['_deposit']['status'] == 'published'
@@ -120,7 +124,7 @@ def test_publish_one_video(api_app, api_project):
     project = project.publish()
     # check project and all video are published
     assert project['_deposit']['status'] == 'published'
-    videos = video_resolver(project.video_ids)
+    videos = [record_video_resolver(id_) for id_ in project.video_ids]
     assert len(videos) == 2
     for video in videos:
         assert video['_deposit']['status'] == 'published'
@@ -142,19 +146,19 @@ def test_update_videos(api_project):
     new_ref_2 = '/deposit/456'
     project._update_videos([video_2.ref], [new_ref_2])
     assert project['videos'] == [
-        {'$reference': video_1.ref}, {'$reference': new_ref_2}]
+        {'$ref': video_1.ref}, {'$ref': new_ref_2}]
     project._update_videos(['not-found'], ['ref-not-found'])
     assert project['videos'] == [
-        {'$reference': video_1.ref}, {'$reference': new_ref_2}]
+        {'$ref': video_1.ref}, {'$ref': new_ref_2}]
 
 
 def test_delete_videos(api_project):
     """Test update videos."""
     (project, video_1, video_2) = api_project
     project._delete_videos([video_2.ref])
-    assert project['videos'] == [{'$reference': video_1.ref}]
+    assert project['videos'] == [{'$ref': video_1.ref}]
     project._delete_videos(['not-found'])
-    assert project['videos'] == [{'$reference': video_1.ref}]
+    assert project['videos'] == [{'$ref': video_1.ref}]
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -249,9 +253,10 @@ def test_project_edit(app, project_published):
     new_project.update(title={'title': 'My project'})
 
     # Edit videos inside project (change video titles)
-    videos = video_resolver(new_project.video_ids)
+    videos = [record_video_resolver(id_) for id_ in new_project.video_ids]
     assert len(videos) == 2
     for i, video in enumerate(videos):
+        #  video = Video.get_record(video.id)
         assert video.status == 'published'
         new_video = video.edit()
         assert new_video.status == 'draft'
@@ -262,7 +267,8 @@ def test_project_edit(app, project_published):
     new_project.publish()
 
     # Check that everything is published
-    videos = video_resolver(new_project.video_ids)
+    videos = [record_video_resolver(id_)
+              for id_ in new_project.video_ids]
     assert new_project.status == 'published'
     assert all(video.status == 'published' for video in videos)
 
@@ -315,8 +321,8 @@ def test_project_delete_one_video_published(api_app, api_project, force):
         assert video_1_meta.json is not None
         assert video_2_meta.json is not None
 
-        assert {'$reference': video_1_ref} in project_meta.json['videos']
-        assert {'$reference': video_2_ref} in project_meta.json['videos']
+        assert {'$ref': video_1_ref} in project_meta.json['videos']
+        assert {'$ref': video_2_ref} in project_meta.json['videos']
         assert len(project_meta.json['videos']) == number_of_videos
 
         assert project.status == 'draft'
@@ -442,7 +448,7 @@ def test_project_publish_with_workflow(
     db.session.commit()
 
     # check tasks status is propagated to video and project
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     expected = {u'add': u'SUCCESS', u'failing': u'FAILURE'}
     assert video_1['_deposit']['state'] == expected
     assert video_1.project['_deposit']['state'] == expected
@@ -454,14 +460,14 @@ def test_project_publish_with_workflow(
     assert video_1.status == 'draft'
     assert video_2.status == 'draft'
 
-    video_2 = video_resolver([video_2_depid])[0]
+    video_2 = deposit_video_resolver(video_2_depid)
     video_2.publish()
 
     assert project.status == 'draft'
     assert video_1.status == 'draft'
     assert video_2.status == 'published'
 
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     with pytest.raises(PIDInvalidAction):
         video_1.publish()
 
@@ -490,7 +496,7 @@ def test_project_deposit(es, location, deposit_metadata):
     db.session.expire_all()
     deposit = Project.get_record(id_)
     assert deposit['_deposit']['state'] == {}
-    assert project_resolver(deposit['_deposit']['id']) is not None
+    assert deposit_project_resolver(deposit['_deposit']['id']) is not None
     assert '_buckets' in deposit
 
 

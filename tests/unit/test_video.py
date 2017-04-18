@@ -52,7 +52,9 @@ from six import BytesIO
 from time import sleep
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
-                                     video_resolver, Video)
+                                     video_resolver, Video,
+                                     record_video_resolver,
+                                     deposit_video_resolver)
 from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
@@ -64,8 +66,8 @@ from helpers import workflow_receiver_video_failing, mock_current_user, \
 def test_video_resolver(api_project):
     """Test vide resolver."""
     (project, video_1, video_2) = api_project
-    videos = video_resolver(
-        [video_1['_deposit']['id'], video_2['_deposit']['id']])
+    videos = [video_resolver.resolve(video_1['_deposit']['id'])[1],
+              video_resolver.resolve(video_2['_deposit']['id'])[1]]
     original = [video_1.id, video_2.id]
     original.sort()
     resolved = [videos[0].id, videos[1].id]
@@ -78,8 +80,8 @@ def test_video_resolver(api_project):
 def test_video_publish_and_edit(api_project):
     """Test video publish and edit."""
     (project, video_1, video_2) = api_project
-    video_path_1 = project['videos'][0]['$reference']
-    video_path_2 = project['videos'][1]['$reference']
+    video_path_1 = project['videos'][0]['$ref']
+    video_path_2 = project['videos'][1]['$ref']
 
     deposit_project_schema = ('https://cdslabs.cern.ch/schemas/'
                               'deposits/records/project-v1.0.0.json')
@@ -117,17 +119,18 @@ def test_video_publish_and_edit(api_project):
     assert video_2['$schema'] == deposit_video_schema
     assert project['$schema'] == deposit_project_schema
     # check video recid is inside the list
-    assert any(video_ref['$reference'] == record_path_1
+    assert any(video_ref['$ref'] == record_path_1
                for video_ref in project['videos']) is True
     # and there is not the old id (when the video was a deposit)
-    assert any(video_ref['$reference'] == video_path_1
+    assert any(video_ref['$ref'] == video_path_1
                for video_ref in project['videos']) is False
     # and still exists video 2 deposit id
-    assert any(video_ref['$reference'] == video_path_2
+    assert any(video_ref['$ref'] == video_path_2
                for video_ref in project['videos']) is True
 
     # [edit the video 1]
-    [video_1_v2] = video_resolver([record_video_1['_deposit']['id']])
+    video_1_v2 = record_video_resolver(
+        record_video_1['_deposit']['pid']['value'])
     video_1_v2 = video_1_v2.edit()
 
     # check video1 is not published
@@ -139,11 +142,11 @@ def test_video_publish_and_edit(api_project):
     assert video_2['$schema'] == deposit_video_schema
     assert project['$schema'] == deposit_project_schema
     # check video1 v1 recid is NOT inside the list
-    assert any(video_ref['$reference'] == record_path_1
+    assert any(video_ref['$ref'] == record_path_1
                for video_ref in project['videos']) is False
     # check video1 v2 is inside the list
     video_path_1_v2 = video_build_url(video_1_v2['_deposit']['id'])
-    assert any(video_ref['$reference'] == video_path_1_v2
+    assert any(video_ref['$ref'] == video_path_1_v2
                for video_ref in project['videos']) is True
 
 
@@ -164,7 +167,7 @@ def test_delete_video_not_published(api_project, force):
     video_2.delete(force=force)
 
     project_meta = RecordMetadata.query.filter_by(id=project_id).first()
-    assert [{'$reference': video_1_ref}] == project_meta.json['videos']
+    assert [{'$ref': video_1_ref}] == project_meta.json['videos']
 
     video_2_meta = RecordMetadata.query.filter_by(id=video_2_id).first()
     if force:
@@ -197,7 +200,7 @@ def test_delete_video_published(api_project, force):
     assert video_2_meta.json is not None
 
     project_meta = RecordMetadata.query.filter_by(id=project_id).first()
-    assert {'$reference': video_2_ref} in project_meta.json['videos']
+    assert {'$ref': video_2_ref} in project_meta.json['videos']
 
 
 def test_video_dumps(db, api_project, video):
@@ -256,7 +259,7 @@ def test_video_delete_with_workflow(api_app, users, api_project, webhooks, es):
         event.process()
     db.session.commit()
 
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     video_1.delete()
     assert mock_delete.called is True
 
@@ -308,7 +311,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         RecordIndexer().process_bulk_queue()
         sleep(2)
 
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
         file_dumps = deposit._get_files_dump()
         assert len(file_dumps) == 1
 
@@ -371,7 +374,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         RecordIndexer().process_bulk_queue()
         sleep(2)
 
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
 
         # check if the files are inside elasticsearch
         # -> check video deposit
@@ -432,7 +435,7 @@ def test_video_events_on_download_create(api_app, webhooks, db, api_project,
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
         assert resp.status_code == 201
 
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
 
         events = get_deposit_events(deposit['_deposit']['id'])
 
@@ -489,7 +492,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         resp = client.post(url, headers=json_headers, data=json.dumps({}))
         assert resp.status_code == 500
         # resolve deposit and events
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
         events = get_deposit_events(deposit['_deposit']['id'])
         # check events
         assert len(events) == 2
@@ -564,14 +567,14 @@ def test_video_publish_with_no_category(api_project):
     assert 'category' in project
     project.commit()
     db.session.commit()
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     with pytest.raises(ValidationError):
         video_1.publish()
     # test with category + type
     project['type'] = type_
     project.commit()
     db.session.commit()
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     video_1.publish()
     assert video_1['_deposit']['status'] == 'published'
 
@@ -638,7 +641,7 @@ def test_deposit_vtt_tags(api_app, db, api_project):
         stream=BytesIO(b'hello'))
     # publish the video
     prepare_videos_for_publish([video_1])
-    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = deposit_video_resolver(video_1_depid)
     video_1 = video_1.publish()
 
     # check tags
@@ -661,7 +664,7 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     #  video_1 = video_1.edit()
 
     #  # try to delete the old vtt file and substitute with a new one
-    #  video_1 = video_resolver([video_1_depid])[0]
+    #  video_1 = deposit_video_resolver(video_1_depid)
     #  ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
     #  obj2 = ObjectVersion.create(
     #      video_1._bucket, key="test_en.vtt", stream=BytesIO(b'hello'))
