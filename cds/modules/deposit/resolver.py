@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,13 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
-import jsonresolver
+from invenio_pidstore.resolver import Resolver
+from functools import partial
 
-from .resolver import keyword_resolver
+from .api import Video, Project
 
 
-@jsonresolver.route('/api/keywords/<path:path>', host='cds.cern.ch')
-def keyword_jsonresolver(path):
-    """Create a nested JSON."""
-    _, kw = keyword_resolver.resolve(path)
-    return kw
+deposit_resolver = Resolver(
+    pid_type='depid', object_type='rec',
+    getter=partial(Project.get_record, with_deleted=True)
+)

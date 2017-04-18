@@ -26,22 +26,31 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.deposit.api import video_resolver, project_resolver, Project
+from cds.modules.deposit.api import \
+    Project, deposit_videos_resolver, record_video_resolver, \
+    record_project_resolver
 
 from helpers import prepare_videos_for_publish
 
 
 def video_resolver_sorted(ids):
     """Return videos with ascending RN order."""
-    return sorted(video_resolver(ids), key=lambda x: x.report_number)
+    return sorted(deposit_videos_resolver(ids), key=lambda x: x.report_number)
+
+
+def record_video_resolver_sorted(ids):
+    """Return videos with ascending RN order."""
+    return sorted([record_video_resolver(id_) for id_ in ids],
+                  key=lambda x: x.report_number)
 
 
 def check_deposit(dep, expected_rn):
     """Check that a deposit has properly generated its report number."""
     assert 'recid' in dep
     assert dep.report_number == expected_rn
-    stored = project_resolver(str(dep['recid'])) \
-        if isinstance(dep, Project) else video_resolver([str(dep['recid'])])[0]
+    stored = record_project_resolver(str(dep['recid'])) \
+        if isinstance(dep, Project) \
+        else record_video_resolver(str(dep['recid']))
     assert stored.report_number == expected_rn
 
 
@@ -74,7 +83,7 @@ def test_project_and_videos(db, api_project):
     prepare_videos_for_publish([video_1, video_2])
     project = project.publish()
     check_deposit(project, 'CERN-MOVIE-2016-1')
-    for i, video in enumerate(video_resolver_sorted(project.video_ids)):
+    for i, video in enumerate(record_video_resolver_sorted(project.video_ids)):
         check_deposit(video, 'CERN-MOVIE-2016-1-{}'.format(i + 1))
 
 
@@ -89,5 +98,5 @@ def test_video_then_project(db, api_project):
     project = project.publish()
     check_deposit(project, 'CERN-MOVIE-2016-1')
 
-    video_2 = video_resolver_sorted(project.video_ids)[1]
+    video_2 = record_video_resolver_sorted(project.video_ids)[1]
     check_deposit(video_2, 'CERN-MOVIE-2016-1-2')

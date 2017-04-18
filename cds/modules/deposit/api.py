@@ -46,6 +46,8 @@ from invenio_db import db
 from invenio_deposit.api import Deposit, preserve, has_status
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag)
+from invenio_pidstore.resolver import Resolver
+from functools import partial
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.validators import PartialDraft4Validator
@@ -58,6 +60,7 @@ from invenio_records.api import Record
 from invenio_jsonschemas import current_jsonschemas
 
 from .errors import DiscardConflict
+from ..records.resolver import record_resolver
 from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
     iterate_events_results, get_tasks_status_by_task
 from ..records.minters import is_local_doi
@@ -331,9 +334,14 @@ class CDSDeposit(Deposit):
 
     def replace_refs(self):
         """Replace refs."""
-        self._update_tasks_status()
+        files = self['_files']
         data = super(CDSDeposit, self).replace_refs()
-        data['_files'] = self._get_files_dump()
+        # NOTE: inside replace_refs() is passing through the Video init but
+        #       loosing the model parameter.
+        #       It means that the files list looks empty because will not
+        #       find the associated bucket.
+        #       To fix it, we make a backup and restore the files list.
+        data['_files'] = files
         return data
 
     def _update_tasks_status(self):
@@ -420,36 +428,16 @@ class CDSDeposit(Deposit):
         return is_local_doi(self['doi']) if self.is_published() else False
 
 
-def project_resolver(project_id):
-    """Get records from PIDs."""
-    pid = PersistentIdentifier.query.filter_by(
-        pid_value=project_id
-    ).one().object_uuid
-    return Project.get_record(pid)
-
-
-def cds_resolver(ids):
-    """Get records from PIDs."""
-    pids = [p.object_uuid for p in PersistentIdentifier.query.filter(
-        PersistentIdentifier.pid_value.in_(ids)).all()]
-    return CDSDeposit.get_records(pids)
-
-
-def video_resolver(ids):
-    """Get records from PIDs."""
-    pids = [p.object_uuid for p in PersistentIdentifier.query.filter(
-        PersistentIdentifier.pid_value.in_(ids)).all()]
-    return Video.get_records(pids)
-
-
+# TODO move inside Video class
 def video_build_url(video_id):
     """Build video url."""
-    return url_for('invenio_deposit_rest.video_item', pid_value=video_id)
+    return 'https://cds.cern.ch/api/deposits/video/{0}'.format(str(video_id))
 
 
+# TODO move inside Video class
 def record_build_url(video_id):
     """Build video url."""
-    return url_for('invenio_records_rest.recid_item', pid_value=str(video_id))
+    return 'https://cds.cern.ch/api/record/{0}'.format(str(video_id))
 
 
 def record_unbuild_url(url):
@@ -503,20 +491,30 @@ class Project(CDSDeposit):
 
         :returns: A list of video ids.
         """
-        return [record_unbuild_url(ref) for ref in self.video_refs]
+        if len(self['videos']) > 0 and self['videos'][0].get('$ref', ''):
+            return [record_unbuild_url(ref) for ref in self._video_refs]
+
+        #  return []
+        ids = []
+        for video in self['videos']:
+            if Video(video).is_published():
+                ids.append(video['_deposit'].get('pid'))
+            else:
+                ids.append(video['_deposit']['id'])
+        return ids
 
     @property
-    def video_refs(self):
+    def _video_refs(self):
         """Get all video refs.
 
         :returns: A list of video references.
         """
-        return [video['$reference'] for video in self['videos']]
+        return [video['$ref'] for video in self.get('videos', [])]
 
     def _find_refs(self, refs):
         """Find index of references."""
         result = {}
-        for (key, value) in enumerate(self.video_refs):
+        for (key, value) in enumerate(self._video_refs):
             try:
                 refs.index(value)
                 result[key] = value
@@ -530,10 +528,10 @@ class Project(CDSDeposit):
         :param old_refs: List contains the video references to substitute.
         :param new_refs: List contains the new video references
         """
-        for (key, value) in enumerate(self.video_refs):
+        for (key, value) in enumerate(self._video_refs):
             try:
                 index = old_refs.index(value)
-                self['videos'][key] = {'$reference': new_refs[index]}
+                self['videos'][key] = {'$ref': new_refs[index]}
             except ValueError:
                 pass
 
@@ -553,7 +551,7 @@ class Project(CDSDeposit):
         :returns: The new project version.
         """
         # get reference of all deposit still not published
-        refs_old = [video_ref for video_ref in self.video_refs
+        refs_old = [video_ref for video_ref in self._video_refs
                     if is_deposit(video_ref)]
 
         # extract the PIDs from them
@@ -561,7 +559,7 @@ class Project(CDSDeposit):
 
         # publish them and get the new PID
         refs_new = [record_build_url(video.publish().commit()['recid'])
-                    for video in video_resolver(ids_old)]
+                    for video in deposit_videos_resolver(ids_old)]
 
         # update project video references
         self._update_videos(refs_old, refs_new)
@@ -588,14 +586,14 @@ class Project(CDSDeposit):
         indices = self._find_refs([video_ref])
         if indices:
             # update video refs
-            self['videos'][indices[video_ref]] = {'$reference': video_ref}
+            self['videos'][indices[video_ref]] = {'$ref': video_ref}
         else:
             # add new one
-            self['videos'].append({'$reference': video_ref})
+            self['videos'].append({'$ref': video_ref})
 
     def delete(self, force=True, pid=None):
         """Delete a project."""
-        videos = video_resolver(self.video_ids)
+        videos = deposit_videos_resolver(self.video_ids)
         # check if I can delete all videos
         if any(video['_deposit'].get('pid') for video in videos):
             raise PIDInvalidAction()
@@ -635,6 +633,15 @@ class Project(CDSDeposit):
         events = list(itertools.chain.from_iterable(list_events))
         return get_tasks_status_by_task(events)
 
+    @classmethod
+    def build_video_ref(cls, video):
+        """Build the video reference."""
+        if video.is_published():
+            url = record_build_url(video['_deposit']['pid']['value'])
+        else:
+            url = video_build_url(video['_deposit']['id'])
+        return {'$ref': url}
+
 
 class Video(CDSDeposit):
     """Define API for a video."""
@@ -652,7 +659,7 @@ class Video(CDSDeposit):
         """
         project_id = data.get('_project_id')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
-        project = project_resolver(project_id)
+        project = deposit_project_resolver(project_id)
         video_new = super(Video, cls).create(data, id_=id_, **kwargs)
         video_new.project = project
         project.commit()
@@ -818,6 +825,45 @@ class Video(CDSDeposit):
                     obj, 'context_type', 'subtitle')
                 ObjectVersionTag.create_or_update(
                     obj, 'media_type', 'subtitle')
+
+
+project_resolver = Resolver(
+    pid_type='depid', object_type='rec',
+    getter=partial(Project.get_record, with_deleted=True)
+)
+
+
+video_resolver = Resolver(
+    pid_type='depid', object_type='rec',
+    getter=partial(Video.get_record, with_deleted=True)
+)
+
+
+def deposit_project_resolver(project_id):
+    """Resolve project."""
+    _, deposit = project_resolver.resolve(project_id)
+    return deposit
+
+
+def deposit_video_resolver(video_id):
+    """Resolve video."""
+    _, deposit = video_resolver.resolve(video_id)
+    return deposit
+
+
+def deposit_videos_resolver(video_ids):
+    """Resolve videos."""
+    return [deposit_video_resolver(id_) for id_ in video_ids]
+
+
+def record_video_resolver(video_id):
+    """Get the video deposit from the record."""
+    return Video.get_record(record_resolver.resolve(video_id)[1].id)
+
+
+def record_project_resolver(video_id):
+    """Get the video deposit from the record."""
+    return Project.get_record(record_resolver.resolve(video_id)[1].id)
 
 
 class Category(Record):

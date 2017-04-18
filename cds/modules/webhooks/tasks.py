@@ -58,7 +58,7 @@ from sqlalchemy.orm.exc import ConcurrentModificationError
 from invenio_indexer.api import RecordIndexer
 from werkzeug.utils import import_string
 
-from ..deposit.api import video_resolver
+from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
 
 
@@ -635,7 +635,7 @@ def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
     """Update deposit state on SSE and ElasticSearch."""
     if deposit_id:
         # get video
-        video = video_resolver([deposit_id])[0]
+        video = deposit_video_resolver(deposit_id)
         # spread the news
         spread_deposit_update(deposit=video, event_id=str(event_id),
                               sse_channel=sse_channel),
