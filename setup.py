@@ -256,7 +256,9 @@ setup(
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
         ],
         'invenio_records.jsonresolver': [
-            'keywords = cds.modules.records.jsonresolver',
+            'keywords = cds.modules.records.jsonresolver.keywords',
+            'records = cds.modules.records.jsonresolver.records',
+            'deposits = cds.modules.deposit.jsonresolver',
         ]
     },
     extras_require=extras_require,

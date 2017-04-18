@@ -41,7 +41,8 @@ from helpers import prepare_videos_for_publish
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
-from cds.modules.deposit.api import video_resolver, project_resolver
+from cds.modules.deposit.api import deposit_video_resolver, \
+    deposit_project_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
 
@@ -81,7 +82,7 @@ def test_video_publish_registering_the_datacite(
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
-        [video_1] = video_resolver([video_1_depid])
+        video_1 = deposit_video_resolver(video_1_depid)
         prepare_videos_for_publish([video_1])
 
         # [[ PUBLISH VIDEO ]]
@@ -141,7 +142,7 @@ def test_video_publish_registering_the_datacite_if_fail(
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
-        [video_1] = video_resolver([video_1_depid])
+        video_1 = deposit_video_resolver(video_1_depid)
         prepare_videos_for_publish([video_1])
 
         # [[ PUBLISH VIDEO ]]
@@ -188,7 +189,7 @@ def test_video_publish_registering_the_datacite_not_local(
         project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['keywords'][0] == keyword_2
         project_depid = project_dict['metadata']['_deposit']['id']
-        project = project_resolver(project_depid)
+        project = deposit_project_resolver(project_depid)
         assert project['keywords'] == [{
             '$ref': keyword_2.ref,
             'name': keyword_2['name'],
@@ -208,7 +209,7 @@ def test_video_publish_registering_the_datacite_not_local(
         video_1_dict = json.loads(res.data.decode('utf-8'))
         assert video_1_dict['metadata']['keywords'][0] == keyword_1
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
-        [video_1] = video_resolver([video_1_depid])
+        video_1 = deposit_video_resolver(video_1_depid)
         assert video_1['keywords'] == [{
             '$ref': keyword_1.ref,
             'name': keyword_1['name'],
@@ -375,7 +376,7 @@ def test_video_publish_edit_publish_again(
             assert res.status_code == 201
             video_1_dict = json.loads(res.data.decode('utf-8'))
             video_1_depid = video_1_dict['metadata']['_deposit']['id']
-            [video_1] = video_resolver([video_1_depid])
+            video_1 = deposit_video_resolver(video_1_depid)
             prepare_videos_for_publish([video_1])
 
             # [[ PUBLISH VIDEO ]]
@@ -394,7 +395,7 @@ def test_video_publish_edit_publish_again(
                 headers=json_headers)
 
             # [[ MODIFY DOI -> SAVE ]]
-            [video_1] = video_resolver([video_1_depid])
+            video_1 = deposit_video_resolver(video_1_depid)
             video_1_dict = copy.deepcopy(video_1)
             #  old_doi = video_1_dict['doi']
             video_1_dict['doi'] = '10.1123/doi'
@@ -412,7 +413,7 @@ def test_video_publish_edit_publish_again(
                  "message": "The DOI cannot be changed."}
             ]
 
-            [video_1] = video_resolver([video_1_depid])
+            video_1 = deposit_video_resolver(video_1_depid)
             #  video_1['doi'] = old_doi
             video_1_dict = copy.deepcopy(video_1)
             del video_1_dict['_files']
@@ -430,7 +431,7 @@ def test_video_publish_edit_publish_again(
             # check returned value
             assert res.status_code == 200
             # check preserved fields
-            [video_1_new] = video_resolver([video_1_depid])
+            video_1_new = deposit_video_resolver(video_1_depid)
             assert video_1_new['recid'] == video_1['recid']
             assert video_1_new['report_number'] == video_1['report_number']
             assert video_1_new[

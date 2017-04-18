@@ -42,7 +42,7 @@ from invenio_records.models import RecordMetadata
 from celery import states, chain, group
 from celery.result import AsyncResult
 from invenio_webhooks import current_webhooks
-from cds.modules.deposit.api import video_resolver
+from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.webhooks.status import _compute_status, collect_info, \
     get_tasks_status_by_task, get_deposit_events, iterate_events_results
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
@@ -158,7 +158,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
             channel=u'mychannel',
             type_='file_download'
         )
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
         mock_sse.assert_any_call(
             channel='mychannel',
             data={
@@ -284,7 +284,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             assert master.file
             assert master.file.size == video_size
 
-        video = video_resolver([video_1_depid])[0]
+        video = deposit_video_resolver(video_1_depid)
         events = get_deposit_events(video['_deposit']['id'])
 
         # check deposit tasks status
@@ -341,7 +341,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         for message in messages:
             assert message in call_args
 
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
 
         def filter_events(call_args):
             _, x = call_args
@@ -486,7 +486,7 @@ def test_avc_workflow_receiver_local_file_pass(
             assert master.file
             assert master.file.size == video_size
 
-        video = video_resolver([video_1_depid])[0]
+        video = deposit_video_resolver(video_1_depid)
         events = get_deposit_events(video['_deposit']['id'])
 
         # check deposit tasks status
@@ -540,7 +540,7 @@ def test_avc_workflow_receiver_local_file_pass(
         for message in messages:
             assert message in call_args
 
-        deposit = video_resolver([video_1_depid])[0]
+        deposit = deposit_video_resolver(video_1_depid)
 
         def filter_events(call_args):
             _, x = call_args

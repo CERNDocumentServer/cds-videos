@@ -39,7 +39,7 @@ from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
 from six import BytesIO
-from cds.modules.deposit.api import video_resolver
+from cds.modules.deposit.api import deposit_video_resolver
 from invenio_webhooks.models import Event
 
 from helpers import get_indexed_records_from_mock
@@ -347,7 +347,7 @@ def test_avc_workflow_delete(api_app, db, cds_depid,
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     event_id = data['tags']['_event_id']
-    video_id = str(video_resolver([cds_depid])[0].id)
+    video_id = str(deposit_video_resolver(cds_depid).id)
     ###
     checker(api_app, event_id, access_token, json_headers, data, video_id)
 
