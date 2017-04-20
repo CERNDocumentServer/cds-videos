@@ -14,9 +14,10 @@
 {%- endblock page_footer %}
 
 {%- block page_body %}
+  {% set type = 'video' if record._project_id else 'project'%}
   <div id="cds-record">
     <cds-record-view
-        template="{{ url_for('static', filename='templates/cds_records/video/detail.html') }}"
+        template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record._deposit.pid.value}}'
     ></cds-record-view>
   </div>

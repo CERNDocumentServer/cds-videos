@@ -47,6 +47,12 @@ $cds-unicorn-pink: #f0f;
 $cds-unicorn-color: linear-gradient(-225deg, $cds-unicorn-blue 0%, $cds-unicorn-pink 100%);
 $cds-navbar-form-bg: #0f3b59;
 
+// Contrast colors
+$cds-contrast-color-1: #F9E791;
+$cds-contrast-color-2: #7EC8EF;
+$cds-contrast-color-3: #F57365;
+$cds-contrast-color-4: #1D69A5;
+
 $primary-color: $brand-primary;
 $primary-color-dark: darken($primary-color, 10%);
 $primary-color-light: lighten($primary-color, 10%);
