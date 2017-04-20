@@ -1,0 +1,10 @@
+<div ng-if="record.metadata.keywords.length === 0">
+  <hr />
+  <div class="cds-tags">
+    <ul>
+      <li ng-repeat="keyword in record.metadata.keywords">
+        <a ng-href='/search?q="{{ keyword.name }}"'>{{ keyword }}</a>
+      </li>
+    </ul>
+  </div>
+</div>
