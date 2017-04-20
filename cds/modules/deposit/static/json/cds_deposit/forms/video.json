@@ -220,7 +220,12 @@
     {
       "title": "Feature this video on the home page",
       "key": "featured"
+    },
+    {
+      "title": "This video is 360",
+      "key": "vr"
     }
+
   ],
   "licenses": [
     {

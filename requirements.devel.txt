@@ -40,7 +40,10 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 # FIXME removed until proper integration
 #-e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 
--e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+# FIXME wait for PR#62
+#-e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
+-e git+https://github.com/omelkonian/cds-dojson.git@vr-flag#egg=cds-dojson
+
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
 -e git+https://github.com/inveniosoftware/flask-celeryext.git#egg=flask-celeryext
