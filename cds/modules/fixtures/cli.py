@@ -403,8 +403,7 @@ def videos(video, frames, temp, video_count):
                 description=dict(value='desc'),
                 title=dict(title='Project'),
                 category='Category',
-                type='Type')
-        )
+                type='Type'))
         project['_deposit']['owners'] = [1]
         project['_deposit']['created_by'] = 1
         project['videos'] = []
@@ -420,8 +419,7 @@ def videos(video, frames, temp, video_count):
                          copyright=dict(url='copyright'),
                          date='2017-01-16',
                          description=dict(value='desc'),
-                         title=dict(title='Video'))
-                )
+                         title=dict(title='Video')))
             video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
 
             video_deposit['_deposit'].update(dict(
@@ -432,9 +430,7 @@ def videos(video, frames, temp, video_count):
                     bit_rate='679886', avg_frame_rate='288000/12019',
                     nb_frames='1440', size='5111048',
                     codec_name='h264', color_range='tv',
-                    width=640, height=360,
-                )
-            ))
+                    width=640, height=360,)))
 
             # Master video
             with open(video, 'rb') as fp:
@@ -479,12 +475,25 @@ def videos(video, frames, temp, video_count):
                 obj = ObjectVersion.create(
                     bucket=video_bucket,
                     key=basename(gif),
-                    stream=fp
-                )
+                    stream=fp)
                 create_tags(obj, master=master_id,
                             media_type='image', context_type='frame-preview')
 
+            # Subtitles
+            for lang in ['en', 'fr']:
+                subtitle = pkg_resources.resource_filename(
+                    'cds.modules.fixtures', 'data/test_{0}.vtt'.format(lang))
+                with open(subtitle, 'rb') as fp:
+                    obj = ObjectVersion.create(
+                        bucket=video_bucket,
+                        key='video{0}_{1}.vtt'.format(video_index, lang),
+                        stream=fp)
+                    create_tags(
+                        obj, language=lang, context_type='subtitle',
+                        content_type='vtt', media_type='subtitle')
+
             deposits.append(video_deposit.commit())
+
         project.commit()
         with current_app.test_request_context():
             project.publish()
