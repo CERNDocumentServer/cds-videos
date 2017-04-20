@@ -90,6 +90,11 @@ class CDSPreviewRecordFile(PreviewFile):
             smil_info = data['playlist'][0]
             return ObjectVersion.get(smil_info['bucket_id'], smil_info['key'])
 
+    @property
+    def vr(self):
+        """Get video's VR flag."""
+        return self.record.get('vr')
+
 
 class CDSPreviewDepositFile(PreviewFile):
     """Preview deposit files implementation."""
