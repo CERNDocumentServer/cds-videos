@@ -37,8 +37,10 @@
           <!-- /DOI and report number -->
           <!-- Title -->
           <div class="cds-detail-title cds-detail-video-title">
-            <h1 class="mb-0 f4 fw-n t-b">{{ ::record.metadata.title.title }}</h1>
-            <h1 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h1>
+            <hgroup>
+              <h1 class="mb-0 f4 fw-n t-b">{{ ::record.metadata.title.title }}</h1>
+              <h2 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h2>
+            </hgroup>
           </div>
           <!-- /Title -->
           <!-- Date & Views -->
@@ -68,15 +70,8 @@
           </div>
           <!-- /Description -->
           <!-- More -->
-          <div ng-if="record.metadata.keywords.length > 0" class="cds-detail-more cds-detail-video-more">
-            <hr />
-            <div class="cds-tags">
-              <ul>
-                <li ng-repeat="keyword in record.metadata.keywords">
-                  <a ng-href='/search?q="{{ keyword.name }}"'>{{ keyword.name }}</a>
-                </li>
-              </ul>
-            </div>
+          <div class="cds-detail-more cds-detail-video-more">
+            <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
           </div>
           <!-- /More -->
           </div>

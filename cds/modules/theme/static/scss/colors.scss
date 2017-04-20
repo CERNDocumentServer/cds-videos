@@ -43,7 +43,19 @@
 .bg-w {
   background-color: white;
 }
-
+// Background contrast
+.bg-c-1 {
+  background-color: $cds-contrast-color-1 !important;
+}
+.bg-c-2 {
+  background-color: $cds-contrast-color-2 !important;
+}
+.bg-c-3 {
+  background-color: $cds-contrast-color-3 !important;
+}
+.bg-c-4 {
+  background-color: $cds-contrast-color-4 !important;
+}
 // Text white
 .t-w {
   color: #fff;
