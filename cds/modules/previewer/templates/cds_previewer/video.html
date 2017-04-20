@@ -32,8 +32,11 @@
 {%- block javascript %}
   {{ super() }}
   <script type='text/javascript'
-          src='//cdn.theoplayer.com/latest/{{ config.THEO_LICENCE_KEY }}/theoplayer.loader.js'>
+          src='//cdn.theoplayer.com/1.6.102/{{ config.THEO_LICENCE_KEY }}/theoplayer.js'>
   </script>
+  {% if vr %}
+  <script type='text/javascript' src='//cdn.theoplayer.com/theoplayer.vr.js'></script>
+  {% endif %}
   <script type="text/javascript">
     theoplayer.onReady = function () {
       var video = document.createElement('video');
@@ -49,6 +52,13 @@
         {% endfor %}
       };
       var config = {
+        {% if vr %}
+          configuration: {
+            vr: {
+              360: true
+            }
+          },
+        {% endif %}
         sources: [
           {
             {% if m3u8_url %}
@@ -85,5 +95,7 @@
 
 {%- block css %}
   {{ super() }}
-  {% assets "cds_previewer_video_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+  {% assets "cds_previewer_video_css" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet">
+  {% endassets %}
 {%- endblock css %}

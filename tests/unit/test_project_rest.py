@@ -442,9 +442,9 @@ def test_publish_project_check_indexed(
             assert str(project_record.id) in ids
 
 
-def test_featured_field_is_indexed(api_app, es, api_project, users,
-                                   json_headers):
-    """Test featured field is indexed."""
+def test_boolean_fields_are_indexed(api_app, es, api_project, users,
+                                    json_headers):
+    """Test boolean fields (i.e. featured and vr) are indexed."""
     (project, video_1, video_2) = api_project
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -462,23 +462,22 @@ def test_featured_field_is_indexed(api_app, es, api_project, users,
         video_1_record = deposit_video_resolver(video_1['_deposit']['id'])
         video_2_record = deposit_video_resolver(video_2['_deposit']['id'])
 
-        # search for featured videos
-        url = url_for('invenio_records_rest.recid_list', q='featured:true')
-        res = client.get(url, headers=json_headers)
+        def assert_get_video(query, video_record):
+            url = url_for('invenio_records_rest.recid_list', q=query)
+            res = client.get(url, headers=json_headers)
+            assert res.status_code == 200
+            data = json.loads(res.data.decode('utf-8'))
+            assert len(data['hits']['hits']) == 1
+            assert data['hits']['hits'][0]['id'] == video_record['recid']
 
-        assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 1
-        assert data['hits']['hits'][0]['id'] == video_1_record['recid']
-
-        # search for not featured videos
-        url = url_for('invenio_records_rest.recid_list', q='featured:false')
-        res = client.get(url, headers=json_headers)
-
-        assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 1
-        assert data['hits']['hits'][0]['id'] == video_2_record['recid']
+        # Featured
+        assert_get_video('featured:true', video_1_record)
+        # Not featured
+        assert_get_video('featured:false', video_2_record)
+        # VR
+        assert_get_video('vr:true', video_1_record)
+        # Not VR
+        assert_get_video('vr:false', video_2_record)
 
 
 def test_project_keywords_serializer(api_app, es, api_project, keyword_1,

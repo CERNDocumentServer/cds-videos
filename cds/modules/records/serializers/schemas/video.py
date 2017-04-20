@@ -86,6 +86,7 @@ class VideoSchema(StrictKeysSchema):
     copyright = fields.Nested(CopyrightSchema)
     creator = fields.Nested(CreatorSchema)
     doi = DOI()
+    vr = fields.Boolean()
     duration = fields.Str()
     featured = fields.Boolean()
     keywords = fields.Nested(KeywordsSchema, many=True)

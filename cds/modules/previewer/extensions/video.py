@@ -54,6 +54,7 @@ class VideoExtension(object):
             poster_url=getattr(file, 'poster_uri', None),
             subtitles=getattr(file, 'subtitles', []),
             embed=self.embed,
+            vr=getattr(file, 'vr', False),
             css_bundles=['cds_previewer_video_css'],
         )
 

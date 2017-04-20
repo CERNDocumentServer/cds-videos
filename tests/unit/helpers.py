@@ -265,6 +265,7 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
             'value': 'in tempor reprehenderit enim eiusmod',
         },
         'featured': True,
+        'vr': True,
     }
     project_video_1.update(deposit_metadata)
     project_video_2 = {
@@ -275,6 +276,7 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
             'value': 'in tempor reprehenderit enim eiusmod',
         },
         'featured': False,
+        'vr': False,
     }
     project_video_2.update(deposit_metadata)
     with app.test_request_context():
