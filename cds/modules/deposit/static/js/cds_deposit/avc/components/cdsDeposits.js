@@ -141,42 +141,47 @@ function cdsDepositsCtrl(
     var fileKey = null;
     videoExtensions.forEach(function(ext) {
       if (key.toLowerCase().endsWith('.' + ext.toLowerCase())) {
-        fileKey = key.slice(0, key.lastIndexOf('.'));
+        fileKey = that.extractBasename(key);
       }
     });
     return fileKey;
   };
 
+  this.extractBasename = function(key) {
+    return key.slice(0, key.lastIndexOf('.'));
+  }
+
   this.filterOutFiles = function(files) {
-    // Logic to separate
-    var _files = { project: [], videos: {}, videoFiles: {} };
-    angular.forEach(files, function(file, index) {
-      var match = that.isVideoFile(file.name);
-      // Grrrrr
-      file.key = file.name;
-      var name;
-      // If match we have a video
-      if (match) {
-        name = match;
-        _files.videos[name] = file;
-        _files.videoFiles[name] = [];
-      } else {
-        // If it's not a video then is a video related file or project
-        name = file.name.split('.')[0];
-        var keys = Object.keys(_files.videos);
-        var _isVideoFile = false;
-        angular.forEach(keys, function(key, index) {
-          if (name.startsWith(key)) {
-            _isVideoFile = true;
-          }
-        });
-        if (_isVideoFile) {
-          _files.videoFiles[name].push(file);
-        } else {
-          _files.project.push(file);
-        }
-      }
+    // Separate videos from other files
+    var [videos, other] = _.partition(files, function(f) {
+      return that.isVideoFile(f.name);
     });
+
+    // Index videos by their key
+    var videos = _.indexBy(videos, function(video) {
+      return that.isVideoFile(video.name);
+    });
+    var videoKeys = _.keys(videos);
+
+    var _files = {
+      project: [],
+      videos: videos,
+      videoFiles: _.mapObject(videos, _.constant([]))
+    };
+
+    angular.forEach(other, function(file, index) {
+      file.key = file.name;
+      var basename = that.extractBasename(file.name);
+
+      // Check if file is related to a video (i.e. same basename)
+      var videoMatch = _.find(videoKeys, function(videoKey) {
+        return basename.startsWith(videoKey);
+      });
+
+      var toPush = (videoMatch) ? _files.videoFiles[basename] : _files.project
+      toPush.push(file);
+    });
+
     return _files;
   };
 

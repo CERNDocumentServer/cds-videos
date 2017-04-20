@@ -149,8 +149,9 @@ def test_fixture_videos(app, script_info, db, location):
             assert len(deposit['videos']) == 3
         else:
             # Video deposit
-            files = next(iter(deposit.files))
+            video_file = next(f for f in deposit.files.dumps()
+                              if f['context_type'] == 'master')
             # Has 5 frames
-            assert len(files['frame']) == 5
+            assert len(video_file['frame']) == 5
             # Has 3 subformats
-            assert len(files['subformat']) == 3
+            assert len(video_file['subformat']) == 3
