@@ -76,7 +76,15 @@ class CDSPreviewRecordFile(PreviewFile):
             format='vtt')
 
     @property
+    def subtitles(self):
+        """Get video's subtitles."""
+        return [(f['links']['self'], f['tags']['language'])
+                for f in self.record['_files']
+                if f['context_type'] == 'subtitle']
+
+    @property
     def smil_file_object(self):
+        """Get corresponding SMIL file."""
         data = self.file.dumps()
         if 'playlist' in data:
             smil_info = data['playlist'][0]
