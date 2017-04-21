@@ -51,7 +51,8 @@ from invenio_webhooks.models import Event
 from six import BytesIO
 
 from helpers import failing_task, get_object_count, get_tag_count, \
-    simple_add, mock_current_user, success_task, get_indexed_records_from_mock
+    simple_add, mock_current_user, success_task, \
+    get_indexed_records_from_mock
 
 
 @mock.patch('flask_login.current_user', mock_current_user)

@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import re
 import os
 import uuid
 
@@ -158,9 +159,13 @@ class CDSFilesIterator(FilesIterator):
     @staticmethod
     def get_master_video_file(record):
         """Get master video file from a Video record."""
-        return next(
-            f for f in record['_files']
-            if f['media_type'] == 'video' and f['context_type'] == 'master')
+        try:
+            return next(
+                f for f in record['_files']
+                if f['media_type'] == 'video'
+                and f['context_type'] == 'master')
+        except StopIteration:
+            return {}
 
     @staticmethod
     def get_video_subformats(master_file):
@@ -704,6 +709,8 @@ class Video(CDSDeposit):
         video_published = super(Video, self).publish(pid=pid, id_=id_,
                                                      **kwargs)
         _, record_new = self.fetch_published()
+        # generate extra tags for files
+        self._create_tags()
         # update associated project
         video_published.project._update_videos(
             [video_build_url(video_old_id)],
@@ -786,6 +793,31 @@ class Video(CDSDeposit):
         hours, minutes = divmod(minutes, 60)
         self['duration'] = '{0:02d}:{1:02d}:{2:06.3f}'.format(
             int(hours), int(minutes), seconds)
+
+    def _create_tags(self):
+        """Create additional tags."""
+        master = splitext(
+            CDSFilesIterator.get_master_video_file(self).get('key', '')
+        )[0]
+        pattern = re.compile("{0}_([a-zA-Z][a-zA-Z])\.vtt$".format(master))
+        objs = [o for o in sorted_files_from_bucket(self._bucket)
+                if pattern.match(o.key)]
+        with db.session.begin_nested():
+            for obj in objs:
+                # language tag
+                found = pattern.findall(obj.key)
+                if len(found) == 1:
+                    lang = found[0]
+                    ObjectVersionTag.create_or_update(obj, 'language', lang)
+                else:
+                    # clean to be sure there is no some previous value
+                    ObjectVersionTag.delete(obj, 'language')
+                # other tags
+                ObjectVersionTag.create_or_update(obj, 'content_type', 'vtt')
+                ObjectVersionTag.create_or_update(
+                    obj, 'context_type', 'subtitle')
+                ObjectVersionTag.create_or_update(
+                    obj, 'media_type', 'subtitle')
 
 
 class Category(Record):
