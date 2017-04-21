@@ -101,9 +101,32 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   };
 
+  this.formAuthor = function(author) {
+    return {
+      text: author.name,
+      value: author,
+      name: author.name
+    };
+  }
+
+  this.authorFromUser = function(query) {
+    var re = /^(\w*,\s\w*):\s(\w*)$/
+    var [fullName, affiliation] = query.split(re).splice(1, 2)
+    if (!(fullName && affiliation)) {
+      return null;
+    }
+    return that.formAuthor({
+      name: fullName,
+      affiliations: [affiliation],
+    });
+  }
+
   this.autocompleteAuthors = function(options, query) {
     var defer = $q.defer();
     if (query) {
+      // Get user input
+      var userInput = _.compact([that.authorFromUser(query)])
+
       // Parse the url parameters
       $http.get(options.url, {
         params: angular.merge({
@@ -111,33 +134,32 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         }, options.extraParams)
       }).then(function(data) {
         that.lastAuthorSuggestions = {
-          data: data.data.map(function (author) {
-            var fullName = (author.lastname || '') + ', ' +
-                           (author.firstname || '');
-            var valueObj = {
-              name: fullName
-            };
+          data: _.union(
+            userInput,
+            data.data.map(function (author) {
+              var fullName = (author.lastname || '') + ', ' +
+                             (author.firstname || '');
+              var valueObj = {
+                name: fullName
+              };
 
-            if (author.affiliation) {
-              valueObj.affiliations = [author.affiliation];
-            }
-            if (author.email) {
-              valueObj.email = author.email;
-            }
-            valueObj.ids = _.reduce({
-              cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
-            }, function(acc, newName, oldName) {
-              if (author.hasOwnProperty(oldName)) {
-                acc.push({ value: author[oldName], source: newName });
+              if (author.affiliation) {
+                valueObj.affiliations = [author.affiliation];
               }
-              return acc;
-            }, []);
-            return {
-              text: fullName,
-              name: fullName,
-              value: valueObj
-            };
-          }).slice(0, 20)
+              if (author.email) {
+                valueObj.email = author.email;
+              }
+              valueObj.ids = _.reduce({
+                cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
+              }, function(acc, newName, oldName) {
+                if (author.hasOwnProperty(oldName)) {
+                  acc.push({ value: author[oldName], source: newName });
+                }
+                return acc;
+              }, []);
+              return that.formAuthor(valueObj);
+            }).slice(0, 20)
+          )
         };
         defer.resolve(that.lastAuthorSuggestions);
       });
@@ -147,11 +169,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         {
           data: _.map(
             that.cdsDepositCtrl.record.contributors || [],
-            function(_contributor) {
-              return {
-                text: _contributor.name, value: _contributor, name: _contributor.name
-              }
-            }
+            that.formAuthor
           )
         }
       );
@@ -161,8 +179,19 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   this.types = $q.defer();
 
+  this.formKeyword = function(name, key_id) {
+    var value = {name: name};
+    if (key_id) { value.key_id = key_id }
+    return {
+      name: name,
+      value: value
+    };
+  }
+
   this.autocompleteKeywords = function(options, query) {
     if (query) {
+      // Get user input
+      var userInput = [that.formKeyword(query)];
       // Parse the url parameters
       return $http.get(options.url, {
         params: {
@@ -170,31 +199,19 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         }
       }).then(function(data) {
         that.lastKeywordSuggestions = {
-          data: data.data['suggest-name'][0]['options'].concat(that.cdsDepositCtrl.record.keywords || []).map(function(keyword) {
-            var name = (keyword.payload) ? keyword.payload.name : keyword.name;
-            var key_id = (keyword.payload) ? keyword.payload.key_id : keyword.key_id;
-            return {
-              name: name,
-              value: {
-                name: name,
-                key_id: key_id
-              }
-            };
-          }).slice(0, 20)
+          data: _.union(
+            userInput, // Prepend user input
+            data.data['suggest-name'][0]['options']
+              .concat(that.cdsDepositCtrl.record.keywords || [])
+              .map(function(keyword) {
+                return that.formKeyword(
+                  (keyword.payload) ? keyword.payload.name : keyword.name,
+                  (keyword.payload) ? keyword.payload.key_id : keyword.key_id
+                );
+              }).slice(0, 10)
+          )
         };
-
         return that.lastKeywordSuggestions;
-        return { data : angular.merge(
-          {},
-          that.lastKeywordSuggestions.data,
-          _.map(
-            that.cdsDepositCtrl.record.keywords || [],
-            function(_keyword) {
-              return {
-                name: _keyword.name, value: _keyword,
-              }
-            })
-        )}
       });
     } else {
       // If the query string is empty and there's already a value set on the
@@ -207,9 +224,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         that.lastKeywordSuggestions || {data:  _.map(
           that.cdsDepositCtrl.record.keywords || [],
           function(_keyword) {
-            return {
-              name: _keyword.name, value: _keyword
-            }
+            return that.formKeyword(_keyword.name, _keyword.key_id)
           })}
       );
       return defer.promise;
@@ -254,7 +269,12 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 }
 
-cdsFormCtrl.$inject = ['$scope', '$http', '$q', 'schemaFormDecorators'];
+cdsFormCtrl.$inject = [
+  '$scope',
+  '$http',
+  '$q',
+  'schemaFormDecorators'
+];
 
 function cdsForm() {
   return {

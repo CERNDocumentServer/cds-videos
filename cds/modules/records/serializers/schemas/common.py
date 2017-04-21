@@ -55,8 +55,8 @@ class StrictKeysSchema(Schema):
 class KeywordsSchema(Schema):
     """Keywords schema."""
 
-    key_id = fields.Method(deserialize='get_keywords_refs',
-                           attribute='$ref')
+    name = fields.Str()
+    key_id = fields.Method(deserialize='get_keywords_refs', attribute='$ref')
 
     def get_keywords_refs(self, obj):
         """Get keywords references."""
