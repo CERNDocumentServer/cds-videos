@@ -68,6 +68,7 @@ def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
     # Create objects
     obj = ObjectVersion.create(bucket=bucket_id, key=filename_1,
                                stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'context_type', 'master')
     ObjectVersionTag.create(obj, 'preview', True)
     ObjectVersion.create(bucket=bucket_id, key=filename_2,
                          stream=open(video, 'rb'))
@@ -131,6 +132,7 @@ def test_legacy_embed(previewer_app, db, api_project, video):
     bucket_id = video_1['_buckets']['deposit']
     obj = ObjectVersion.create(bucket=bucket_id, key=filename,
                                stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'context_type', 'master')
     ObjectVersionTag.create(obj, 'preview', True)
     prepare_videos_for_publish([video_1])
     video_1 = video_1.publish()

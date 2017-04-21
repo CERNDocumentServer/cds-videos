@@ -24,10 +24,7 @@
 
 from __future__ import absolute_import, print_function
 
-import shutil
-import tempfile
-from os.path import join
-
+from six import BytesIO
 from cds.modules.deposit.api import Video, CDSFilesIterator
 from cds.modules.previewer.api import get_relative_path
 from flask import render_template
@@ -82,28 +79,20 @@ class Smil(object):
 
 def generate_smil_file(record_id, record, bucket, master_object):
     """Generate SMIL file for Video record (on publish)."""
-    output_folder = tempfile.mkdtemp()
+    #  output_folder = tempfile.mkdtemp()
     master_object = as_object_version(master_object)
 
     # Generate SMIL file
     master_key = master_object.key
     smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
-    smil_path = join(output_folder, smil_key)
-
-    with open(smil_path, 'w') as f:
-        smil_content = SmilSerializer.serialize(record_id, record)
-        f.write(smil_content)
+    smil_content = SmilSerializer.serialize(record_id, record)
 
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
         obj = ObjectVersion.create(
             bucket=bucket,
             key=smil_key,
-            stream=open(smil_path, 'rb'))
-        ObjectVersionTag.create(obj, 'master', master_object.version_id)
+            stream=BytesIO(smil_content.encode()))
+        ObjectVersionTag.create(obj, 'master', str(master_object.version_id))
         ObjectVersionTag.create(obj, 'context_type', 'playlist')
         ObjectVersionTag.create(obj, 'media_type', 'text')
-
-    # Commit changes
-    shutil.rmtree(output_folder)
-    db.session.commit()
