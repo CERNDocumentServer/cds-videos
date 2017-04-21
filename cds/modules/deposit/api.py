@@ -35,6 +35,7 @@ import itertools
 from contextlib import contextmanager
 from os.path import splitext
 
+from copy import deepcopy
 import arrow
 from celery import states
 from cds.modules.records.minters import report_number_minter
@@ -133,10 +134,12 @@ class CDSFileObject(FileObject):
 
         master_dump = _dumps(self.obj)
         # get all the slaves and add them inside <type> as a list order by key
-        for slave in ObjectVersion.query.join(ObjectVersion.tags).filter(
+        for slave in ObjectVersion.query_heads_by_bucket(
+            bucket=self.obj.bucket).join(ObjectVersion.tags).filter(
+                ObjectVersion.file_id.isnot(None),
                 ObjectVersionTag.key == 'master',
                 ObjectVersionTag.value == str(self.obj.version_id)
-                ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
+        ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
             master_dump.setdefault(
                 slave.get_tags()['context_type'], []).append(_dumps(slave))
         # Sort slaves by key within their lists
@@ -360,37 +363,10 @@ class CDSDeposit(Deposit):
             assert not self.files.bucket.locked
             snapshot = self.files.bucket.snapshot()
             self.files.bucket.locked = True
-            # dict of version_ids in original bucket to version_ids in
-            # snapshot bucket for the each file
-            old_to_new_version = {str(self.files[obj.key]['version_id']):
-                                  str(obj.version_id)
-                                  for obj in snapshot.objects
-                                  if 'master' not in obj.get_tags()}
-            # list of tags with 'master' key
-            slave_tags = [tag for obj in snapshot.objects for tag in obj.tags
-                          if tag.key == 'master']
-            # change master of slave videos to new master object versions
-            for tag in slave_tags:
-                tag.value = old_to_new_version.get(tag.value)
-            db.session.add_all(slave_tags)
-
-            # Generate SMIL file
-            data['_files'] = self.files.dumps(bucket=snapshot.id)
-
-            from cds.modules.records.serializers.smil import generate_smil_file
-            master_video = get_master_object(snapshot)
-            if master_video:
-                generate_smil_file(record_id, data, snapshot, master_video)
-
-            # Update metadata with SMIL file information
-            data['_files'] = self.files.dumps(bucket=snapshot.id)
-
-            snapshot.locked = True
-
-            yield data
-            db.session.add(RecordsBuckets(
-                record_id=record_id, bucket_id=snapshot.id
-            ))
+            for data in self._merge_related_objects(
+                record_id=record_id, snapshot=snapshot, data=data
+            ):
+                yield data
         else:
             yield
 
@@ -427,6 +403,74 @@ class CDSDeposit(Deposit):
         """Check if deposit has a minted DOI."""
         return is_local_doi(self['doi']) if self.is_published() else False
 
+    def _prepare_edit(self, record):
+        """Unlock bucket after edit."""
+        data = super(CDSDeposit, self)._prepare_edit(record=record)
+        if record.files:
+            snapshot = record.files.bucket.snapshot()
+            self.files.bucket = snapshot
+            self.files.bucket.locked = False
+            db.session.merge(self.files.bucket)
+        return data
+
+    def _publish_edited(self):
+        """Sync deposit bucket with the record bucket."""
+        record = super(CDSDeposit, self)._publish_edited()
+        if self.files:
+            record.files.bucket.locked = False
+            snapshot = self.files.bucket.merge(bucket=record.files.bucket)
+            self.files.bucket.locked = True
+            next(self._merge_related_objects(
+                record_id=record.id, snapshot=snapshot, data=record
+            ))
+            record.files.bucket.locked = True
+
+        return record
+
+    def _merge_related_objects(self, record_id, snapshot, data):
+        """."""
+        # dict of version_ids in original bucket to version_ids in
+        # snapshot bucket for the each file
+        snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=snapshot)
+        old_to_new_version = {
+            str(self.files[obj.key]['version_id']): str(obj.version_id)
+            for obj in snapshot_obj_list if 'master' not in obj.get_tags()}
+        # list of tags with 'master' key
+        slave_tags = [tag for obj in snapshot_obj_list for tag in obj.tags
+                      if tag.key == 'master']
+        # change master of slave videos to new master object versions
+        for tag in slave_tags:
+            # note: the smil file probably already point to the right
+            # record bucket and it doesn't need update
+            new_master_id = old_to_new_version.get(tag.value)
+            if new_master_id:
+                tag.value = new_master_id
+        db.session.add_all(slave_tags)
+
+        # FIXME bug when dump a different bucket
+        backup = deepcopy(self['_files'])
+
+        # Generate SMIL file
+        data['_files'] = self.files.dumps(bucket=snapshot.id)
+
+        master_video = get_master_object(snapshot)
+        if master_video:
+            from cds.modules.records.serializers.smil import generate_smil_file
+            generate_smil_file(record_id, data, snapshot, master_video)
+
+        # Update metadata with SMIL file information
+        data['_files'] = self.files.dumps(bucket=snapshot.id)
+
+        # FIXME bug when dump a different bucket
+        self['_files'] = backup
+
+        snapshot.locked = True
+
+        yield data
+        db.session.add(RecordsBuckets(
+            record_id=record_id, bucket_id=snapshot.id
+        ))
+
 
 # TODO move inside Video class
 def video_build_url(video_id):
@@ -454,11 +498,12 @@ def is_deposit(url):
 
 def get_master_object(bucket):
     """Get master ObjectVersion from a bucket."""
+    # TODO do as we do in `get_master_video_file()`?
     return ObjectVersion.get_by_bucket(bucket).join(
         ObjectVersionTag
     ).filter(
-        ObjectVersionTag.key == 'preview',
-        ObjectVersionTag.value == 'true'
+        ObjectVersionTag.key == 'context_type',
+        ObjectVersionTag.value == 'master'
     ).one_or_none()
 
 

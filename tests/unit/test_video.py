@@ -54,6 +54,7 @@ from time import sleep
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
                                      record_video_resolver,
+                                     CDSFilesIterator,
                                      deposit_video_resolver)
 from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
@@ -660,31 +661,104 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     assert dump['media_type'] == 'subtitle'
     assert dump['tags'] == {u'content_type': u'vtt', u'language': u'fr'}
 
-    # TODO enable tests after republish is ready!
-    #  # edit the video
-    #  video_1 = video_1.edit()
+    # edit the video
+    video_1 = video_1.edit()
 
-    #  # try to delete the old vtt file and substitute with a new one
-    #  video_1 = deposit_video_resolver(video_1_depid)
-    #  ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
-    #  obj2 = ObjectVersion.create(
-    #      video_1._bucket, key="test_en.vtt", stream=BytesIO(b'hello'))
+    # try to delete the old vtt file and substitute with a new one
+    video_1 = deposit_video_resolver(video_1_depid)
+    ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
+    obj2 = ObjectVersion.create(
+        video_1._bucket, key="test_en.vtt", stream=BytesIO(b'hello'))
 
-    #  # publish again the video
-    #  video_1.publish()
+    # publish again the video
+    video_1 = video_1.publish()
 
-    #  # check tags
-    #  db.session.refresh(obj2)
-    #  assert obj2.get_tags() == {
-    #      u'context_type': u'subtitle',
-    #      u'media_type': u'subtitle',
-    #      u'language': u'en',
-    #      u'content_type': u'vtt'
-    #  }
-    #  dump = [d for d in video_1._get_files_dump()
-    #          if d['key'] == 'test_en.vtt'][0]
-    #  assert dump['content_type'] == 'vtt'
-    #  assert dump['context_type'] == 'subtitle'
-    #  assert dump['media_type'] == 'subtitle'
-    #  assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
-    # /TODO
+    # check tags
+    db.session.refresh(obj2)
+    assert obj2.get_tags() == {
+        u'context_type': u'subtitle',
+        u'media_type': u'subtitle',
+        u'language': u'en',
+        u'content_type': u'vtt'
+    }
+    dump = [d for d in video_1._get_files_dump()
+            if d['key'] == 'test_en.vtt'][0]
+    assert dump['content_type'] == 'vtt'
+    assert dump['context_type'] == 'subtitle'
+    assert dump['media_type'] == 'subtitle'
+    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
+
+    # edit a re-published video
+    video_1 = video_1.edit()
+
+    # add a new vtt file
+    obj3 = ObjectVersion.create(
+        video_1._bucket, key="test_it.vtt", stream=BytesIO(b'hello'))
+
+    # publish again the video
+    video_1 = video_1.publish()
+
+    # check tags
+    db.session.refresh(obj3)
+    assert obj3.get_tags() == {
+        u'context_type': u'subtitle',
+        u'media_type': u'subtitle',
+        u'language': u'it',
+        u'content_type': u'vtt'
+    }
+    dump = [d for d in video_1._get_files_dump()
+            if d['key'] == 'test_en.vtt'][0]
+    assert dump['content_type'] == 'vtt'
+    assert dump['context_type'] == 'subtitle'
+    assert dump['media_type'] == 'subtitle'
+    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
+    dump = [d for d in video_1._get_files_dump()
+            if d['key'] == 'test_it.vtt'][0]
+    assert dump['content_type'] == 'vtt'
+    assert dump['context_type'] == 'subtitle'
+    assert dump['media_type'] == 'subtitle'
+    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'it'}
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_deposit_smil_tag_generation(api_app, db, api_project):
+    """Test AVCWorkflow receiver."""
+    def check_smil(video):
+        _, record = video.fetch_published()
+        master = CDSFilesIterator.get_master_video_file(record)
+        playlist = master['playlist']
+        assert playlist[0]['key'] == 'test.smil'
+        assert playlist[0]['content_type'] == 'smil'
+        assert playlist[0]['context_type'] == 'playlist'
+        assert playlist[0]['media_type'] == 'text'
+        assert playlist[0]['tags']['master'] == master['version_id']
+
+        # check bucket dump is done correctly
+        master_video = CDSFilesIterator.get_master_video_file(video)
+        assert master_video['version_id'] != master['version_id']
+
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+
+    # insert a master file inside the video
+    add_master_to_video(
+        video_deposit=video_1,
+        filename='test.mp4',
+        stream=BytesIO(b'1234'), video_duration="15s"
+    )
+    # publish the video
+    prepare_videos_for_publish([video_1])
+    video_1 = deposit_video_resolver(video_1_depid)
+    video_1 = video_1.publish()
+
+    # check smil
+    check_smil(video_1)
+
+    # edit the video
+    video_1 = video_1.edit()
+
+    # publish again the video
+    video_1 = video_1.publish()
+
+    # check smil
+    check_smil(video_1)
