@@ -103,9 +103,14 @@
         "inline": true,
         "items": [
           {
+            "type": "template",
+            "templateUrl": "/static/templates/cds_deposit/types/common/custom_authors_dialog.html"
+          },
+          {
             "type": "uiselect",
             "key": "contributors[]",
             "title": "Name",
+            "description": "",
             "placeholder": "Author name",
             "options": {
               "refreshDelay": 100,
