@@ -55,6 +55,7 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video)
 from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
+from cds.modules.fixtures.video_utils import add_master_to_video
 
 from helpers import workflow_receiver_video_failing, mock_current_user, \
     get_indexed_records_from_mock, prepare_videos_for_publish
@@ -617,3 +618,69 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
     kw_expect = {k['key_id']: k['name'] for k in [keyword_2]}
     assert kw_expect == kw_result
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_deposit_vtt_tags(api_app, db, api_project):
+    """Test AVCWorkflow receiver."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+
+    # insert a master file inside the video
+    add_master_to_video(
+        video_deposit=video_1,
+        filename='test.mp4',
+        stream=BytesIO(b'1234'), video_duration="15s"
+    )
+    # try to insert a new vtt object
+    obj = ObjectVersion.create(
+        video_1._bucket, key="test_fr.vtt",
+        stream=BytesIO(b'hello'))
+    # publish the video
+    prepare_videos_for_publish([video_1])
+    video_1 = video_resolver([video_1_depid])[0]
+    video_1 = video_1.publish()
+
+    # check tags
+    db.session.refresh(obj)
+    assert obj.get_tags() == {
+        u'context_type': u'subtitle',
+        u'media_type': u'subtitle',
+        u'language': u'fr',
+        u'content_type': u'vtt'
+    }
+    dump = [d for d in video_1._get_files_dump()
+            if d['key'] == 'test_fr.vtt'][0]
+    assert dump['content_type'] == 'vtt'
+    assert dump['context_type'] == 'subtitle'
+    assert dump['media_type'] == 'subtitle'
+    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'fr'}
+
+    # TODO enable tests after republish is ready!
+    #  # edit the video
+    #  video_1 = video_1.edit()
+
+    #  # try to delete the old vtt file and substitute with a new one
+    #  video_1 = video_resolver([video_1_depid])[0]
+    #  ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
+    #  obj2 = ObjectVersion.create(
+    #      video_1._bucket, key="test_en.vtt", stream=BytesIO(b'hello'))
+
+    #  # publish again the video
+    #  video_1.publish()
+
+    #  # check tags
+    #  db.session.refresh(obj2)
+    #  assert obj2.get_tags() == {
+    #      u'context_type': u'subtitle',
+    #      u'media_type': u'subtitle',
+    #      u'language': u'en',
+    #      u'content_type': u'vtt'
+    #  }
+    #  dump = [d for d in video_1._get_files_dump()
+    #          if d['key'] == 'test_en.vtt'][0]
+    #  assert dump['content_type'] == 'vtt'
+    #  assert dump['context_type'] == 'subtitle'
+    #  assert dump['media_type'] == 'subtitle'
+    #  assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
+    # /TODO
