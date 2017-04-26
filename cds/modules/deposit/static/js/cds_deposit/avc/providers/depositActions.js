@@ -33,7 +33,8 @@ function depositActions() {
           },
           PUBLISH: {
             method: 'POST',
-            link: 'publish'
+            link: 'publish',
+            preprocess: sanitizeData
           },
           DELETE: {
             method: 'DELETE',
