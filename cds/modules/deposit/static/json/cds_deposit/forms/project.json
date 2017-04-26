@@ -198,10 +198,6 @@
           "key": "license[].material",
           "placeholder": "Material",
           "title": "Material"
-        },
-        {
-          "key": "license[].url",
-          "placeholder": "Url"
         }
       ]
     }
