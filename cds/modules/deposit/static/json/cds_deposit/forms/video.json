@@ -250,11 +250,8 @@
         },
         {
           "key": "license[].material",
-          "placeholder": "Material"
-        },
-        {
-          "key": "license[].url",
-          "placeholder": "Url"
+          "placeholder": "Material",
+          "title": "Material"
         }
       ]
     },
