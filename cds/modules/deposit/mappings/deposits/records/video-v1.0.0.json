@@ -35,7 +35,7 @@
                             "type": "string"
                         },
                         "size": {
-                            "type": "integer"
+                            "type": "long"
                         },
                         "type": {
                             "type": "string"

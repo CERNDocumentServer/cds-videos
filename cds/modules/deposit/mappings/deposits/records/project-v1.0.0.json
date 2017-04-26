@@ -108,7 +108,7 @@
                             "type": "string"
                         },
                         "size": {
-                            "type": "integer"
+                            "type": "long"
                         }
                     }
                 },
