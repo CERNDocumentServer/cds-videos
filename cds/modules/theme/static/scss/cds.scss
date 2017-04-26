@@ -144,7 +144,7 @@ i.sort-handle {
   line-height: 28px;
   padding: 0 1em;
   background-color: #fff;
-  border: 1px solid $bg-gray;
+  border: 1px solid $divider-color;
   border-radius: 3px;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -549,9 +549,9 @@ i.sort-handle {
 }
 
 .cds-video-duration {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
+  position: relative;
+  bottom: 27px;
+  left: 2px;
   padding: 3px;
   font-size: 12px;
   background-color: rgba(0, 0, 0, .75);
