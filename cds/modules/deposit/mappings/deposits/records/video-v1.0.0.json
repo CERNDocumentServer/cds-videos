@@ -61,6 +61,24 @@
           },
           "type": "object"
         },
+        "category": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
         "date": {
           "type": "string"
         },
