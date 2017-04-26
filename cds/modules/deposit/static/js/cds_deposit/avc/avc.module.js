@@ -47,9 +47,11 @@ function cdsDepositsConfig(
   depositActions.setValues(['project', 'video'])
 
   inheritedPropertiesProvider.setValues([
-    'title.title',
-    'description.value',
     'contributors',
+    'date',
+    'description.value',
+    'keywords',
+    'title.title',
   ]);
 
   taskRepresentationsProvider.setValues({
