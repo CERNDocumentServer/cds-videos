@@ -383,7 +383,7 @@ DEPOSIT_PROJECT_FACETS = {
                 'terms': {'field': '_deposit.status'},
             },
             'category': {
-                'terms': {'field': 'category'},
+                'terms': {'field': 'category.untouched'},
             },
             'transcode': {
                 'terms': {'field': '_deposit.state.file_transcode'},
