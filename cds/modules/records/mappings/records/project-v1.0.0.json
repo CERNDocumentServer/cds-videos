@@ -241,7 +241,7 @@
                             "type": "string"
                         },
                         "size": {
-                            "type": "integer"
+                            "type": "long"
                         },
                         "version_id": {
                             "type": "string"
