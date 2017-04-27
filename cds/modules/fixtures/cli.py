@@ -485,7 +485,7 @@ def videos(video, frames, temp, video_count):
                     stream=fp
                 )
                 create_tags(obj, master=master_id,
-                            media_type='image', context_type='frame-preview')
+                            media_type='image', context_type='frames-preview')
 
             deposits.append(video_deposit.commit())
         project.commit()

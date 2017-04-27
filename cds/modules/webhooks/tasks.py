@@ -402,7 +402,8 @@ class ExtractFramesTask(AVCTask):
         # Generate GIF images
         gif_filename = 'frames.gif'
         frames = [Image.open(in_output(f)) for f in frames]
-        create_gif_from_frames(frames).save(in_output(gif_filename))
+        gif_image = create_gif_from_frames(frames)
+        gif_image.save(in_output(gif_filename), save_all=True)
         create_object(gif_filename, 'image', 'frames-preview')
 
         # Cleanup
