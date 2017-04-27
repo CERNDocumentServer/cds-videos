@@ -100,7 +100,7 @@ app.filter('findPoster', function() {
 // Find gif animation of master video file's frames
 app.filter('findGif', function() {
   return function(masterFile) {
-    return _.find(masterFile['frame-preview'], function (gif) {
+    return _.find(masterFile['frames-preview'], function (gif) {
         return gif.key === 'frames.gif'
     })
   }
