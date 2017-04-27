@@ -478,6 +478,10 @@ function cdsDepositCtrl(
       $scope.$emit('cds.deposit.status.changed', that.id, that.stateQueue);
     };
 
+    this.refreshDescription = function() {
+      that.escapedDescription = $sce.trustAsHtml(that.record.description.value);
+    }
+
     // Initialize state the queue
     this.initializeStateQueue();
     // Initialize state reporter
@@ -490,6 +494,7 @@ function cdsDepositCtrl(
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
     $scope.$watch('$ctrl.taskState', that.refreshStateQueue, true);
+    $scope.$watch('$ctrl.record.description.value', that.refreshDescription, true);
 
     // Set the deposit State
     this.depositStatusCurrent = this.calculateStatus();

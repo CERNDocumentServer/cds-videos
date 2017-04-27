@@ -63,7 +63,7 @@
           <hr />
           <div class="cds-detail-description cds-detail-video-description t-b">
             <p class="mb-20"><strong>Uploaded on {{ ::record.metadata.date }}</strong></p>
-            <p class="f7 mb-20">{{ ::record.metadata.description.value }}</p>
+            <p class="f7 mb-20" ng-bind-html="escapedDescription"></p>
             <p class="text-muted mt-10 mb-0">
               <a ng-href="/search?q=_project_id:{{:: record.metadata._project_id}}">Other videos in this project</a>
             </p>
