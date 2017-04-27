@@ -373,43 +373,7 @@ RECORDS_REST_DEFAULT_SORT = {
 }
 
 # Defined facets for records REST API.
-RECORDS_REST_FACETS = dict(
-    records=dict(
-        aggs=dict(
-            authors=dict(terms=dict(
-                field='main_entry_personal_name.personal_name.untouched')),
-            languages=dict(terms=dict(
-                field='language_code.language_code_of_text_'
-                      'sound_track_or_separate_title')),
-            topic=dict(terms=dict(
-                field='subject_added_entry_topical_term.'
-                      'topical_term_or_geographic_name_entry_element.untouched'
-            )),
-            years=dict(date_histogram=dict(
-                field='imprint.complete_date',
-                interval='year',
-                format='yyyy')),
-            category=dict(terms=dict(field='category')),
-            type=dict(terms=dict(field='type')),
-        ),
-        post_filters=dict(
-            authors=terms_filter(
-                'main_entry_personal_name.personal_name.untouched'),
-            languages=terms_filter(
-                'language_code.language_code_of_text_'
-                'sound_track_or_separate_title'),
-            topic=terms_filter(
-                'subject_added_entry_topical_term.'
-                'topical_term_or_geographic_name_entry_element.untouched'),
-            years=range_filter(
-                'imprint.complete_date',
-                format='yyyy',
-                end_date_math='/y'),
-            category=terms_filter('category'),
-            type=terms_filter('type'),
-        )
-    )
-)
+RECORDS_REST_FACETS = dict()
 
 # Facets for the specific index
 DEPOSIT_PROJECT_FACETS = {
@@ -419,7 +383,7 @@ DEPOSIT_PROJECT_FACETS = {
                 'terms': {'field': '_deposit.status'},
             },
             'category': {
-                'terms': {'field': 'category'},
+                'terms': {'field': 'category.untouched'},
             },
             'transcode': {
                 'terms': {'field': '_deposit.state.file_transcode'},
@@ -442,24 +406,20 @@ DEPOSIT_PROJECT_FACETS = {
 RECORD_VIDEOS_FACETS = {
     'records-video-v1.0.0': {
         'aggs': {
-            'contributors': {
-                'terms': {'field': 'contributors.name'},
-            },
-            'license': {
-                'terms': {'field': 'license.license'},
-            },
             'category': {
-                'terms': {'field': 'category'},
+                'terms': {'field': 'category.untouched'},
             },
             'type': {
-                'terms': {'field': 'type'},
+                'terms': {'field': 'type.untouched'},
+            },
+            'license': {
+                'terms': {'field': 'license.license.untouched'},
             },
         },
         'post_filters': {
-            'license': terms_filter('license.license'),
-            'category': terms_filter('category'),
-            'contributors': terms_filter('contributors.name'),
-            'type': terms_filter('type'),
+            'category': terms_filter('category.untouched'),
+            'type': terms_filter('type.untouched'),
+            'license': terms_filter('license.license.untouched'),
         },
     }
 }

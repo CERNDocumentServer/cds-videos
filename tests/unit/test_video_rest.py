@@ -189,7 +189,10 @@ def test_video_publish_registering_the_datacite_not_local(
         assert project_dict['metadata']['keywords'][0] == keyword_2
         project_depid = project_dict['metadata']['_deposit']['id']
         project = project_resolver(project_depid)
-        assert project['keywords'] == [{'$ref': keyword_2.ref}]
+        assert project['keywords'] == [{
+            '$ref': keyword_2.ref,
+            'name': keyword_2['name'],
+        }]
 
         # [[ ADD A NEW VIDEO_1 ]]
         video_metadata = copy.deepcopy(video_deposit_metadata)
@@ -206,7 +209,10 @@ def test_video_publish_registering_the_datacite_not_local(
         assert video_1_dict['metadata']['keywords'][0] == keyword_1
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
         [video_1] = video_resolver([video_1_depid])
-        assert video_1['keywords'] == [{'$ref': keyword_1.ref}]
+        assert video_1['keywords'] == [{
+            '$ref': keyword_1.ref,
+            'name': keyword_1['name'],
+        }]
         video_1['doi'] = '10.1123/doi'
         prepare_videos_for_publish([video_1])
 

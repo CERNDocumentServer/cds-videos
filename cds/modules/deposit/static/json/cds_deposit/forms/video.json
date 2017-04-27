@@ -155,10 +155,15 @@
       "inline": true,
       "items": [
         {
+          "type": "template",
+          "templateUrl": "/static/templates/cds_deposit/types/common/custom_authors_dialog.html"
+        },
+        {
           "type": "uiselect",
           "key": "contributors[]",
           "placeholder": "Author name",
           "title": "Name",
+          "description": "",
           "options": {
             "refreshDelay": 100,
             "mergeObjects": true,
@@ -245,7 +250,6 @@
         },
         {
           "key": "license[].material",
-          "placeholder": "Material",
           "placeholder": "Material"
         },
         {

@@ -47,9 +47,11 @@ function cdsDepositsConfig(
   depositActions.setValues(['project', 'video'])
 
   inheritedPropertiesProvider.setValues([
-    'title.title',
-    'description.value',
     'contributors',
+    'date',
+    'description.value',
+    'keywords',
+    'title.title',
   ]);
 
   taskRepresentationsProvider.setValues({
@@ -64,6 +66,7 @@ function cdsDepositsConfig(
     iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png',
     sse: '/api/deposits/project/<%=id%>/sse',
     video: '/deposit/<%=deposit%>/preview/video/<%=key%>',
+    eventInfo: '/hooks/receivers/avc/events/<%=eventId%>',
     restartEvent: '/hooks/receivers/avc/events/<%=eventId%>/tasks/<%=taskId%>',
     taskFeedback: '/hooks/receivers/avc/events/<%=eventId%>/feedback',
     actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>'

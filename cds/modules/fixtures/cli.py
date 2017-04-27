@@ -49,7 +49,9 @@ from invenio_records_files.models import RecordsBuckets
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_opendefinition.tasks import harvest_licenses, \
     import_licenses_from_json
-from cds.modules.records.tasks import keywords_harvesting
+
+from ..records.tasks import keywords_harvesting
+from .video_utils import add_master_to_video
 
 
 def _load_json_source(filename):
@@ -436,16 +438,11 @@ def videos(video, frames, temp, video_count):
 
             # Master video
             with open(video, 'rb') as fp:
-                master_obj = ObjectVersion.create(
-                    bucket=video_bucket,
-                    key='video{0}.mp4'.format(video_index),
-                    stream=fp)
-            create_tags(
-                master_obj, display_aspect_ratio='16:9', bit_rate='959963',
-                codec_name='h264', duration=video_duration, nb_framesr='1557',
-                size='10498667', media_type='video', context_type='master',
-                avg_frame_rate='25/1', width='1280', height='720')
-            master_id = str(master_obj.version_id)
+                master_id = add_master_to_video(
+                    video_deposit=video_deposit,
+                    filename='video{0}.mp4'.format(video_index),
+                    stream=fp, video_duration=video_duration
+                )
 
             # Slave videos
             number_of_frames = len(frame_files)

@@ -1,270 +1,294 @@
 {
-    "mappings": {
-        "project-v1.0.0": {
-            "numeric_detection": true,
-            "properties": {
-                "license": {
-                    "type": "object",
-                    "properties": {
-                        "license": {
-                          "type": "string"
-                        },
-                        "material": {
-                          "type": "string"
-                        },
-                        "url": {
-                          "type": "string"
-                        }
-                    }
+  "mappings": {
+    "project-v1.0.0": {
+      "numeric_detection": true,
+      "properties": {
+        "license": {
+          "type": "object",
+          "properties": {
+            "license": {
+              "type": "string",
+              "fields": {
+                "untouched": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                }
+              }
+            },
+            "material": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "_access": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "update": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "description": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "keywords": {
+          "type": "object",
+          "properties": {
+            "key_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "contributors": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "ids": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
                 },
-                "_access": {
-                    "type": "object",
-                    "properties": {
-                        "read": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "update": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        }
-                    }
+                "source": {
+                  "type": "string"
+                }
+              }
+            },
+            "affiliations": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "contribution": {
+              "type": "string"
+            }
+          }
+        },
+        "_files": {
+          "type": "object",
+          "properties": {
+            "version_id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "bucket": {
+              "type": "string"
+            },
+            "previewer": {
+              "type": "string"
+            },
+            "checksum": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            },
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "category": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "recid": {
+          "type": "double"
+        },
+        "videos": {
+          "type": "object",
+          "properties": {
+            "$reference": {
+              "type": "string"
+            }
+          }
+        },
+        "_oai": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "sets": {
+              "type": "string"
+            },
+            "updated": {
+              "type": "string"
+            }
+          }
+        },
+        "translations": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
                 },
-                "description": {
-                    "type": "object",
-                    "properties": {
-                        "value": {
-                            "type": "string"
-                        },
-                        "source": {
-                            "type": "string"
-                        }
-                    }
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "language": {
+              "type": "string"
+            },
+            "title": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
                 },
-                "keywords": {
-                    "type": "object",
-                    "properties": {
-                        "key_id": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "contributors": {
-                    "type": "object",
-                    "properties": {
-                        "role": {
-                            "type": "string"
-                        },
-                        "ids": {
-                            "type": "object",
-                            "properties": {
-                                "value": {
-                                    "type": "string"
-                                },
-                                "source": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "affiliations": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        },
-                        "contribution": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "_files": {
-                    "type": "object",
-                    "properties": {
-                        "version_id": {
-                            "type": "string"
-                        },
-                        "type": {
-                            "type": "string"
-                        },
-                        "category": {
-                            "type": "string"
-                        },
-                        "bucket": {
-                            "type": "string"
-                        },
-                        "previewer": {
-                            "type": "string"
-                        },
-                        "checksum": {
-                            "type": "string"
-                        },
-                        "key": {
-                            "type": "string"
-                        },
-                        "size": {
-                            "type": "long"
-                        }
-                    }
-                },
-                "recid": {
-                    "type": "double"
-                },
-                "videos": {
-                    "type": "object",
-                    "properties": {
-                        "$reference": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "_oai": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "string"
-                        },
-                        "sets": {
-                            "type": "string"
-                        },
-                        "updated": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "translations": {
-                  "type": "object",
-                  "properties": {
-                    "description": {
-                      "type": "object",
-                      "properties": {
-                        "source": {
-                          "type": "string"
-                        },
-                        "value": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "language": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "object",
-                      "properties": {
-                        "source": {
-                          "type": "string"
-                        },
-                        "subtitle": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                },
-                "_deposit": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "string"
-                        },
-                        "created_by": {
-                            "type": "integer"
-                        },
-                        "pid": {
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "string"
-                                },
-                                "revision_id": {
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "status": {
-                            "type": "string"
-                        },
-                        "owners": {
-                            "type": "integer"
-                        },
-                        "extracted_metadata": {
-                          "type": "object"
-                        }
-                    }
-                },
-                "creator": {
-                    "type": "object",
-                    "properties": {
-                        "affiliations": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        },
-                        "contribution": {
-                            "type": "string"
-                        },
-                        "ids": {
-                            "type": "object",
-                            "properties": {
-                                "value": {
-                                    "type": "string"
-                                },
-                                "source": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                "subtitle": {
+                  "type": "string"
                 },
                 "title": {
-                    "type": "object",
-                    "properties": {
-                        "subtitle": {
-                            "type": "string"
-                        },
-                        "source": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "$schema": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "_buckets": {
-                    "type": "object",
-                    "properties": {
-                        "record": {
-                            "type": "string"
-                        },
-                        "deposit": {
-                            "type": "string"
-                        }
-                    }
+                  "type": "string"
                 }
+              }
+            }
+          }
+        },
+        "_deposit": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
             },
-            "date_detection": true
+            "created_by": {
+              "type": "integer"
+            },
+            "pid": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "revision_id": {
+                  "type": "integer"
+                }
+              }
+            },
+            "status": {
+              "type": "string"
+            },
+            "owners": {
+              "type": "integer"
+            },
+            "extracted_metadata": {
+              "type": "object"
+            }
+          }
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "affiliations": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "contribution": {
+              "type": "string"
+            },
+            "ids": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "subtitle": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          }
+        },
+        "$schema": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "_buckets": {
+          "type": "object",
+          "properties": {
+            "record": {
+              "type": "string"
+            },
+            "deposit": {
+              "type": "string"
+            }
+          }
         }
+      },
+      "date_detection": true
     }
+  }
 }

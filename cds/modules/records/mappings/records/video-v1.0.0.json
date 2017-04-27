@@ -1,292 +1,310 @@
 {
-    "mappings": {
-        "video-v1.0.0": {
-            "numeric_detection": true,
-            "properties": {
-                "duration": {
-                    "type": "string"
-                },
-                "featured": {
-                    "type": "boolean"
-                },
-                "copyright": {
-                    "type": "object",
-                    "properties": {
-                        "holder": {
-                            "type": "string"
-                        },
-                        "year": {
-                            "type": "string"
-                        },
-                        "url": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "contributors": {
-                    "type": "object",
-                    "properties": {
-                        "ids": {
-                            "type": "object",
-                            "properties": {
-                                "source": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "affiliations": {
-                            "type": "string"
-                        },
-                        "role": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        },
-                        "contribution": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "license": {
-                    "type": "object",
-                    "properties": {
-                        "license": {
-                          "type": "string"
-                        },
-                        "material": {
-                          "type": "string"
-                        },
-                        "url": {
-                          "type": "string"
-                        }
-                    }
-                },
-                "keywords": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "description": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "translations": {
-                  "type": "object",
-                  "properties": {
-                    "description": {
-                      "type": "object",
-                      "properties": {
-                        "source": {
-                          "type": "string"
-                        },
-                        "value": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "language": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "object",
-                      "properties": {
-                        "source": {
-                          "type": "string"
-                        },
-                        "subtitle": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                },
-                "_files": {
-                    "type": "object",
-                    "properties": {
-                        "thumbnail": {
-                            "type": "string"
-                        },
-                        "width": {
-                            "type": "string"
-                        },
-                        "height": {
-                            "type": "string"
-                        },
-                        "checksum": {
-                            "type": "string"
-                        },
-                        "category": {
-                            "type": "string"
-                        },
-                        "quality": {
-                            "type": "string"
-                        },
-                        "size": {
-                            "type": "long"
-                        },
-                        "type": {
-                            "type": "string"
-                        },
-                        "key": {
-                            "type": "string"
-                        },
-                        "version_id": {
-                            "type": "string"
-                        },
-                        "bitrate": {
-                            "type": "string"
-                        },
-                        "bucket": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "_oai": {
-                    "type": "object",
-                    "properties": {
-                        "sets": {
-                            "type": "string"
-                        },
-                        "updated": {
-                            "type": "string"
-                        },
-                        "id": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "creator": {
-                    "type": "object",
-                    "properties": {
-                        "ids": {
-                            "type": "object",
-                            "properties": {
-                                "source": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "affiliations": {
-                            "type": "string"
-                        },
-                        "contribution": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "_deposit": {
-                    "type": "object",
-                    "properties": {
-                        "owners": {
-                            "type": "integer"
-                        },
-                        "id": {
-                            "type": "string"
-                        },
-                        "created_by": {
-                            "type": "integer"
-                        },
-                        "extracted_metadata": {
-                          "type": "object"
-                        }
-                    }
-                },
-                "date": {
-                    "type": "string"
-                },
-                "recid": {
-                    "type": "double"
-                },
-                "doi": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "subtitle": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "$schema": {
-                    "type": "string"
-                },
-                "_access": {
-                    "type": "object",
-                    "properties": {
-                        "read": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "update": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        }
-                    }
-                },
-                "category": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "report_number": {
-                    "properties": {
-                        "_report_number": {
-                            "type": "string"
-                        },
-                        "report_number": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "language": {
+  "mappings": {
+    "video-v1.0.0": {
+      "numeric_detection": true,
+      "properties": {
+        "duration": {
+          "type": "string"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "copyright": {
+          "type": "object",
+          "properties": {
+            "holder": {
+              "type": "string"
+            },
+            "year": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "contributors": {
+          "type": "object",
+          "properties": {
+            "ids": {
+              "type": "object",
+              "properties": {
+                "source": {
                   "type": "string"
                 },
-                "publication_date": {
+                "value": {
                   "type": "string"
                 }
+              }
             },
-            "date_detection": true
+            "affiliations": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "contribution": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "license": {
+          "type": "object",
+          "properties": {
+            "license": {
+              "type": "string",
+              "fields": {
+                "untouched": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                }
+              }
+            },
+            "material": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "keywords": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        "translations": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "language": {
+              "type": "string"
+            },
+            "title": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "_files": {
+          "type": "object",
+          "properties": {
+            "thumbnail": {
+              "type": "string"
+            },
+            "width": {
+              "type": "string"
+            },
+            "height": {
+              "type": "string"
+            },
+            "checksum": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "quality": {
+              "type": "string"
+            },
+            "size": {
+              "type": "long"
+            },
+            "type": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            },
+            "version_id": {
+              "type": "string"
+            },
+            "bitrate": {
+              "type": "string"
+            },
+            "bucket": {
+              "type": "string"
+            }
+          }
+        },
+        "_oai": {
+          "type": "object",
+          "properties": {
+            "sets": {
+              "type": "string"
+            },
+            "updated": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "ids": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "affiliations": {
+              "type": "string"
+            },
+            "contribution": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        },
+        "_deposit": {
+          "type": "object",
+          "properties": {
+            "owners": {
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "created_by": {
+              "type": "integer"
+            },
+            "extracted_metadata": {
+              "type": "object"
+            }
+          }
+        },
+        "date": {
+          "type": "string"
+        },
+        "recid": {
+          "type": "double"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          }
+        },
+        "$schema": {
+          "type": "string"
+        },
+        "_access": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "update": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "category": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "fields": {
+            "untouched": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "report_number": {
+          "properties": {
+            "_report_number": {
+              "type": "string"
+            },
+            "report_number": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "language": {
+          "type": "string"
+        },
+        "publication_date": {
+          "type": "string"
         }
+      },
+      "date_detection": true
     }
+  }
 }

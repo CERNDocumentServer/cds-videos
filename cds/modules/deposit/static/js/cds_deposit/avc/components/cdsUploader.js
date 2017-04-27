@@ -24,11 +24,8 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
    */
   function _success(key, data) {
     // Add the necessary flags
-    data.progress = 100;
+    data.percentage = 100;
     data.completed = true;
-    if (!(data.tags && data.tags.uri_origin)) {
-      that.cdsDepositCtrl.taskState.file_download = 'SUCCESS';
-    }
     that.updateFile(
       key,
       data,
@@ -39,12 +36,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   /*
    * Updates the file with the percentage
    */
-  function _progress(key, progress) {
+  function _progress(key, percentage) {
     that.updateFile(
       key,
       {
-        progress: progress || 0,
-        completed: progress === 100
+        percentage: percentage || 0,
+        completed: percentage === 100
       }
     );
   }
@@ -57,7 +54,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       key,
       {
         errored: true,
-        progress: 0
+        percentage: 0
       }
     );
   }
@@ -70,7 +67,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       key,
       {
         errored: true,
-        progress: 0
+        percentage: 0
       }
     );
   }
@@ -228,22 +225,22 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         switch(data.state) {
           case 'FAILURE':
             // Notify for error
-            _subformatError(data.meta.payload.key);
-            var failedSubformats = that.cdsDepositCtrl.failedSubformatKeys;
-            if (!failedSubformats.includes(data.meta.payload.key)) {
-              failedSubformats.push(data.meta.payload.key);
-            }
+            // _subformatError(data.meta.payload.key);
+            // var failedSubformats = that.cdsDepositCtrl.failedSubformatKeys;
+            // if (!failedSubformats.includes(data.meta.payload.key)) {
+            //   failedSubformats.push(data.meta.payload.key);
+            // }
             break;
           case 'STARTED':
           case 'SUCCESS':
-            that.updateSubformat(
-              data.meta.payload.key,
-              {
-                progress: data.meta.payload.percentage || 0,
-                completed: data.meta.payload.percentage === 100,
-                errored: false,
-              }
-            );
+            // that.updateSubformat(
+            //   data.meta.payload.key,
+            //   {
+            //     percentage: data.meta.payload.percentage || 0,
+            //     completed: data.meta.payload.percentage === 100,
+            //     errored: false,
+            //   }
+            // );
             break;
         }
       }
@@ -453,14 +450,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       key: key,
       res: '150,100'
     });
-  };
-
-  this.getFrames = function() {
-    return (that.cdsDepositCtrl.findMasterFile() || {}).frame;
-  };
-
-  this.getSubformats = function() {
-    return (that.cdsDepositCtrl.findMasterFile() || {}).subformat;
   };
 
   this.allFinished = function() {
