@@ -42,30 +42,47 @@ def _get_keywords_from_api(url):
     """Get keywords list from API."""
     request = requests.get(
         url, headers={'User-Agent': 'cdslabs'}).text
-    return {k['id']: k['name'] for k in json.loads(request)['tags']}
+
+    keywords = {}
+    for tag in json.loads(request)['tags']:
+        keywords[tag['id']] = dict(
+            name=tag['name'],
+            provenance=url
+        )
+    return keywords
 
 
 def _update_existing_keywords(indexer, keywords_api, keywords_db):
     """Update existing keywords."""
+    def _keyword_data(values):
+        """Prepare the keyword data."""
+        return dict(
+            name=values.get('name'),
+            provenance=values.get('provenance', ''),
+            deleted=values.get('deleted', False)
+        )
+
+    def _check_if_updated(old_keyword, new_data):
+        """Return True in the keyword should be updated."""
+        old_data = _keyword_data(old_keyword)
+        return old_data != new_data
+
     to_db = []
     to_update_index = []
     keywords_saved = {k['key_id']: k for k in keywords_db}
     keys_saved = keywords_saved.keys()
     # check loaded keywords against the keywords in the database
-    for key_id, name in keywords_api.items():
+    for key_id, values in keywords_api.items():
         keyword = None
 
         if key_id not in keys_saved:
             # create a new keyword
-            keyword = Keyword.create(
-                data={'key_id': key_id, 'name': name, 'deleted': False})
-        elif keywords_saved[key_id]['deleted'] is True:
-            # restore keyword
-            keywords_saved[key_id].update(name=name, deleted=False)
-            keyword = keywords_saved[key_id]
-        elif name != keywords_saved[key_id]['name']:
-            # update a keyword
-            keywords_saved[key_id]['name'] = name
+            data = _keyword_data(values)
+            data.update(key_id=key_id)
+            keyword = Keyword.create(data=data)
+        elif _check_if_updated(keywords_saved[key_id], _keyword_data(values)):
+            # update a keyword (also handles the restoring of a keyword)
+            keywords_saved[key_id].update(_keyword_data(values))
             keyword = keywords_saved[key_id]
 
         if keyword:

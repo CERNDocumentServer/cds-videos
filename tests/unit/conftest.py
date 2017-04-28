@@ -930,10 +930,14 @@ def cern_keywords():
     """Cern fixtures."""
     return {
         "tags": [
-            {"id": "751", "name": "13 TeV"},
-            {"id": "856", "name": "Accelerating News"},
-            {"id": "97", "name": "accelerator"},
-            {"id": "14", "name": "AEGIS"},
+            {"id": "751",
+             "name": "13 TeV"},
+            {"id": "856",
+             "name": "Accelerating News"},
+            {"id": "97",
+             "name": "accelerator"},
+            {"id": "14",
+             "name": "AEGIS"},
         ]
     }
 
