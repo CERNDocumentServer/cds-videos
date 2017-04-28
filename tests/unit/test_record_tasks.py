@@ -44,16 +44,21 @@ from helpers import create_keyword, get_indexed_records_from_mock
 
 def test_get_keywords_from_api(cern_keywords):
     """Test get keywords from API."""
-    return_value = type('test', (object, ), {
+    url = 'test'
+    return_value = type(url, (object, ), {
         'text': json.dumps(cern_keywords)}
     )
     with mock.patch('requests.get', return_value=return_value):
-        keywords = _get_keywords_from_api('test')
+        keywords = _get_keywords_from_api(url)
         expected = {
-            '751': '13 TeV',
-            '856': 'Accelerating News',
-            '97': 'accelerator',
-            '14': 'AEGIS',
+            '751': dict(name='13 TeV',
+                        provenance=url),
+            '856': dict(name='Accelerating News',
+                        provenance=url),
+            '97': dict(name='accelerator',
+                       provenance=url),
+            '14': dict(name='AEGIS',
+                       provenance=url),
         }
         assert expected == keywords
 
@@ -62,15 +67,23 @@ def test_update_existing_keywords(cern_keywords):
     """Test update existing keywords on db."""
     keywords = [
         # 1: unchanged
-        {'key_id': '751', 'name': '13 TeV'},
+        {'key_id': '751',
+         'name': '13 TeV',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 2: changed
-        {'key_id': '856', 'name': 'test-changed'},
-        # 3: not exists
-        # ...
-        # 4: already deleted
-        {'key_id': '21', 'name': 'ACE', 'deleted': True},
-        # 5: restored
-        {'key_id': '14', 'name': 'AEGIS', 'deleted': True},
+        {'key_id': '856',
+         'name': 'test-changed',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
+        # 3: already deleted
+        {'key_id': '21',
+         'name': 'ACE',
+         'deleted': True,
+         'provenance': 'http://home.cern/api/tags-json-feed'},
+        # 4: restored
+        {'key_id': '14',
+         'name': 'AEGIS',
+         'deleted': True,
+         'provenance': 'http://home.cern/api/tags-json-feed'},
     ]
     keywords_db = []
     for keyword in keywords:
@@ -78,10 +91,14 @@ def test_update_existing_keywords(cern_keywords):
     assert RecordMetadata.query.count() == 4
     # keyword harvested
     keywords_api = {
-        '751': '13 TeV',
-        '856': 'Accelerating News',
-        '97': 'accelerator',
-        '14': 'AEGIS',
+        '751': dict(name='13 TeV',
+                    provenance='http://home.cern/api/tags-json-feed'),
+        '856': dict(name='Accelerating News',
+                    provenance='http://home.cern/api/tags-json-feed'),
+        '97': dict(name='accelerator',
+                   provenance='http://home.cern/api/tags-json-feed'),
+        '14': dict(name='AEGIS',
+                   provenance='http://home.cern/api/tags-json-feed'),
     }
     indexer = type('indexer', (object, ), {})
     indexer.bulk_index = mock.Mock()
@@ -95,9 +112,15 @@ def test_update_existing_keywords(cern_keywords):
     # 2 existing + 1 created + 1 deleted + 1 restored
     records = RecordMetadata.query.all()
     assert len(records) == 5
-    ks = {k.json['key_id']: k.json['name'] for k in records}
+    # This test becomes hackish, so I would remove it in the future
+    ks = {k.json['key_id']:
+          dict(name=k.json['name'],
+               provenance=k.json['provenance']) for k in records}
     # count also the deleted key
-    keywords_api['21'] = 'ACE'
+    keywords_api['21'] = {
+        'name': 'ACE',
+        'provenance': 'http://home.cern/api/tags-json-feed'
+    }
     assert keywords_api == ks
 
 
@@ -141,17 +164,27 @@ def test_keyword_harvesting_one_time(db, es, cern_keywords):
     """Test keyword harvesting."""
     keywords = [
         # 1: unchanged
-        {'key_id': '751', 'name': '13 TeV'},
+        {'key_id': '751',
+         'name': '13 TeV',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 2: changed
-        {'key_id': '856', 'name': 'test-changed'},
+        {'key_id': '856',
+         'name': 'test-changed',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 3: deleted
-        {'key_id': '532', 'name': 'ACCU'},
-        # 4: add new
-        # new: {'key_id': '97', 'name': 'accelerator'},
-        # 5: already deleted
-        {'key_id': '21', 'name': 'ACE', 'deleted': True},
-        # 6: restored
-        {'key_id': '14', 'name': 'AEGIS', 'deleted': True},
+        {'key_id': '532',
+         'name': 'ACCU',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
+        # 4: already deleted
+        {'key_id': '21',
+         'name': 'ACE',
+         'deleted': True,
+         'provenance': 'http://home.cern/api/tags-json-feed'},
+        # 5: restored
+        {'key_id': '14',
+         'name': 'AEGIS',
+         'deleted': True,
+         'provenance': 'http://home.cern/api/tags-json-feed'},
     ]
     keywords_db = []
     for keyword in keywords:
@@ -190,15 +223,25 @@ def test_keyword_harvesting_deleted_keywords(db, es, cern_keywords):
     """Test keyword harvesting."""
     keywords = [
         # 1: unchanged
-        {'key_id': '751', 'name': '13 TeV'},
+        {'key_id': '751',
+         'name': '13 TeV',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 2: unchanged
-        {'key_id': '856', 'name': 'Accelerating News'},
+        {'key_id': '856',
+         'name': 'Accelerating News',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 3: deleted
-        {'key_id': '532', 'name': 'ACCU'},
+        {'key_id': '532',
+         'name': 'ACCU',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 4: unchanged
-        {'key_id': '97', 'name': 'accelerator'},
+        {'key_id': '97',
+         'name': 'accelerator',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
         # 6: unchanged
-        {'key_id': '14', 'name': 'AEGIS'},
+        {'key_id': '14',
+         'name': 'AEGIS',
+         'provenance': 'http://home.cern/api/tags-json-feed'},
     ]
     keywords_db = []
     for keyword in keywords:
