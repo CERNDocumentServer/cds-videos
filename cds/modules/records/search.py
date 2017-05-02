@@ -62,13 +62,13 @@ def cern_filter():
     return Q('bool', filter=[combined_filter])
 
 
-class CERNRecordsSearch(RecordsSearch):
+class RecordVideosSearch(RecordsSearch):
     """CERN search class."""
 
     class Meta:
         """Configuration for CERN search."""
 
-        index = 'records-video-v1.0.0'
+        index = 'records-videos-video'
         doc_types = None
         fields = ('*',)
         default_filter = DefaultFilter(cern_filter)

@@ -83,13 +83,13 @@ def cern_filter():
     return Q('bool', filter=[combined_filter])
 
 
-class ProjectSearch(RecordsSearch):
+class DepositVideosSearch(RecordsSearch):
     """Default search class."""
 
     class Meta:
         """Configuration for deposit search."""
 
-        index = 'deposits-records-project-v1.0.0'
+        index = 'deposits-records-videos-project'
         doc_types = None
         fields = ('*', )
         default_filter = DefaultFilter(cern_filter)

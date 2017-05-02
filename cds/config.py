@@ -44,7 +44,7 @@ from .modules.records.permissions import (deposit_delete_permission_factory,
                                           record_create_permission_factory,
                                           record_read_permission_factory,
                                           record_update_permission_factory)
-from .modules.records.search import CERNRecordsSearch, NotDeletedKeywordSearch
+from .modules.records.search import NotDeletedKeywordSearch, RecordVideosSearch
 
 
 # Identity function for string extraction
@@ -255,7 +255,7 @@ RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
 # Endpoints for record API.
 _Record_PID = 'pid(recid,record_class="invenio_records_files.api:Record")'
-_Category_PID = 'pid(catid,record_class="cds.modules.deposit.api:Category")'
+_Category_PID = 'pid(catid,record_class="cds.modules.records.api:Category")'
 _Keyword_PID = 'pid(kwid,record_class="cds.modules.records.api:Keyword")'
 RECORDS_REST_ENDPOINTS = dict(
     recid=dict(
@@ -263,7 +263,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_minter='cds_recid',
         pid_fetcher='cds_recid',
         search_type=None,
-        search_class=CERNRecordsSearch,
+        search_class=RecordVideosSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
             'application/json': ('cds.modules.records.serializers'
@@ -294,7 +294,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher='cds_catid',
         search_index='categories',
         search_type=None,
-        search_class=CERNRecordsSearch,
+        search_class=RecordVideosSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
@@ -366,7 +366,7 @@ RECORDS_REST_SORT_OPTIONS = dict(
 # Default sort for records REST API.
 RECORDS_REST_DEFAULT_SORT = {
     'records': dict(query='bestmatch'),
-    'deposits-records-project-v1.0.0': dict(
+    'deposits-records-videos-project': dict(
         query='bestmatch',
         noquery='mostrecent'
     )
@@ -377,7 +377,7 @@ RECORDS_REST_FACETS = dict()
 
 # Facets for the specific index
 DEPOSIT_PROJECT_FACETS = {
-    'deposits-records-project-v1.0.0': {
+    'deposits-records-videos-project': {
         'aggs': {
             'status': {
                 'terms': {'field': '_deposit.status'},
@@ -404,7 +404,7 @@ DEPOSIT_PROJECT_FACETS = {
 }
 
 RECORD_VIDEOS_FACETS = {
-    'records-video-v1.0.0': {
+    'records-videos-video': {
         'aggs': {
             'category': {
                 'terms': {'field': 'category.untouched'},
@@ -425,11 +425,11 @@ RECORD_VIDEOS_FACETS = {
 }
 
 # Deposit search index.
-DEPOSIT_UI_SEARCH_INDEX = 'deposits-records-project-v1.0.0'
+DEPOSIT_UI_SEARCH_INDEX = 'deposits-records-videos-project'
 
 # Options for sorting deposits.
 DEPOSIT_REST_SORT_OPTIONS = {
-    'deposits-records-project-v1.0.0': dict(
+    'deposits-records-videos-project': dict(
         bestmatch=dict(
             fields=['-_score'],
             title='Best match',
@@ -653,7 +653,7 @@ DEPOSIT_UI_NEW_TEMPLATE = 'cds_deposit/edit.html'
 # The schema form deposit
 DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/forms/project.json'
 # Default schema for the deposit
-DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/project-v1.0.0.json'
+DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/videos/project/project-v1.0.0.json'
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
 DEPOSIT_UI_JSTEMPLATE_ACTIONS = 'templates/cds_deposit/actions.html'
@@ -735,7 +735,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
                 'cds.modules.records.serializers'
                 ':cdsdeposit_json_v1_response'),
         },
-        search_class='cds.modules.deposit.search:ProjectSearch',
+        search_class='cds.modules.deposit.search:DepositVideosSearch',
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_search'),

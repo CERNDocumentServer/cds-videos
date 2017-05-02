@@ -12,7 +12,7 @@
     "report_number": {
       "report_number": "Category-Type-2017-3-2"
     },
-    "$schema": "https://cdslabs.cern.ch/schemas/records/video-v1.0.0.json",
+    "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category"
   },
@@ -29,7 +29,7 @@
     "report_number": {
       "report_number": "Category-Type-2017-3-3"
     },
-    "$schema": "https://cdslabs.cern.ch/schemas/records/video-v1.0.0.json",
+    "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category"
   },
@@ -46,7 +46,7 @@
     "report_number": {
       "report_number": "Category-Type-2017-3-4"
     },
-    "$schema": "https://cdslabs.cern.ch/schemas/records/video-v1.0.0.json",
+    "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category"
   },
@@ -62,7 +62,7 @@
       "report_number": "Category-Type-2017-3"
     },
     "type": "Type",
-    "$schema": "https://cdslabs.cern.ch/schemas/records/project-v1.0.0.json",
+    "$schema": "https://cdslabs.cern.ch/schemas/records/videos/project/project-v1.0.0.json",
     "category": "Category",
     "publication_date": "2017-03-09"
   }

@@ -83,12 +83,13 @@ def test_video_publish_and_edit(api_project):
     video_path_1 = project['videos'][0]['$ref']
     video_path_2 = project['videos'][1]['$ref']
 
-    deposit_project_schema = ('https://cdslabs.cern.ch/schemas/'
-                              'deposits/records/project-v1.0.0.json')
+    deposit_project_schema = (
+        'https://cdslabs.cern.ch/schemas/'
+        'deposits/records/videos/project/project-v1.0.0.json')
     deposit_video_schema = ('https://cdslabs.cern.ch/schemas/'
-                            'deposits/records/video-v1.0.0.json')
+                            'deposits/records/videos/video/video-v1.0.0.json')
     record_video_schema = ('https://cdslabs.cern.ch/schemas/'
-                           'records/video-v1.0.0.json')
+                           'records/videos/video/video-v1.0.0.json')
 
     # check video1 is not published
     assert video_1['_deposit']['status'] == 'draft'
