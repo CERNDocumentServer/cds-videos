@@ -35,7 +35,7 @@ from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
 
-from cds.modules.records.search import CERNRecordsSearch
+from cds.modules.records.search import RecordVideosSearch
 
 
 def mock_provides(needs):
@@ -47,7 +47,7 @@ def mock_provides(needs):
 def test_es_filter(es, users):
     """Test query filter based on CERN groups."""
     mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
-    assert CERNRecordsSearch().to_dict()['query']['bool']['filter'] == [
+    assert RecordVideosSearch().to_dict()['query']['bool']['filter'] == [
         {'bool': {'filter': [{'bool': {
             'should': [
                 {'missing': {'field': '_access.read'}},

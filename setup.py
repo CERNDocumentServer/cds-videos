@@ -230,13 +230,12 @@ setup(
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
             'deposits = cds.modules.deposit.mappings',
-            'categories = cds.modules.deposit.mappings',
+            'categories = cds.modules.records.mappings',
             'keywords = cds.modules.records.mappings',
         ],
         'invenio_jsonschemas.schemas': [
             'marc21 = dojson.contrib.marc21.schemas',
             'cds = cds_dojson.schemas',
-            'cds_deposit = cds.modules.deposit.jsonschemas',
         ],
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.webhooks.tasks',

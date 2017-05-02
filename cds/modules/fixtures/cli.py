@@ -21,18 +21,19 @@
 
 from __future__ import absolute_import, print_function
 
-import simplejson
 import tarfile
 import uuid
 from os import listdir, makedirs
-from os.path import basename, exists, isdir, join, splitext, dirname
+from os.path import basename, dirname, exists, isdir, join, splitext
 
-from cds.modules.deposit.minters import catid_minter
-import click
-from cds.modules.deposit.api import Category, Video, Project
 import pkg_resources
+
+import click
+import simplejson
+from cds.modules.deposit.api import Project, Video
+from cds.modules.deposit.minters import catid_minter
 from cds.modules.ffmpeg import ff_probe
-from invenio_sequencegenerator.api import Template
+from cds.modules.records.api import Category
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
 from flask import current_app
@@ -41,14 +42,15 @@ from invenio_db import db
 from invenio_files_rest.models import (Bucket, FileInstance, Location,
                                        ObjectVersion, ObjectVersionTag)
 from invenio_indexer.api import RecordIndexer
+from invenio_opendefinition.tasks import (harvest_licenses,
+                                          import_licenses_from_json)
 from invenio_pages import Page
 from invenio_pidstore import current_pidstore
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.api import Record
 from invenio_records_files.api import Record as FileRecord
 from invenio_records_files.models import RecordsBuckets
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_opendefinition.tasks import harvest_licenses, \
-    import_licenses_from_json
+from invenio_sequencegenerator.api import Template
 
 from ..records.tasks import keywords_harvesting
 from .video_utils import add_master_to_video
