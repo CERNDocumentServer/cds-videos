@@ -21,7 +21,6 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Record ID provider."""
 
 from __future__ import absolute_import, print_function
@@ -55,15 +54,14 @@ class CDSRecordIdProvider(BaseProvider):
         # Request next integer in recid sequence.
         assert 'pid_value' not in kwargs
 
-        if current_app.config.get('DEBUG'):
+        provider_url = current_app.config.get('RECORDS_ID_PROVIDER_ENDPOINT',
+                                              None)
+        if not provider_url:
             # Don't query external service in DEBUG mode
             kwargs['pid_value'] = str(RecordIdentifier.next())
         else:
             response = requests.get(
-                current_app.config['RECORDS_ID_PROVIDER_ENDPOINT'],
-                headers={
-                    'User-Agent': 'cdslabs'
-                }).text
+                provider_url, headers={'User-Agent': 'cdslabs'}).text
 
             if response.strip().lower().startswith('[error]'):
                 raise PersistentIdentifierError(response)

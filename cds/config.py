@@ -463,9 +463,8 @@ RECORDS_VALIDATION_TYPES = dict(
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
     'cds.modules.records.permissions:deposit_read_permission_factory'
 
-# Endpoint and user agent for the cds_recid provider
-RECORDS_ID_PROVIDER_ENDPOINT = \
-    'http://cds-test.cern.ch/batchuploader/allocaterecord'
+# Endpoint for the cds_recid provider
+RECORDS_ID_PROVIDER_ENDPOINT = None
 
 ###############################################################################
 # Files
