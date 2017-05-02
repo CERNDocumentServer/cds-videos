@@ -69,6 +69,7 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
+        "readonly": "!model.category",
         "options": {
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",
@@ -311,7 +312,8 @@
       "title": "Update access for the project",
       "description": "",
       "add": "Add another person/e-group",
-      "inline": true
+      "inline": true,
+      "startEmpty": true
     }
   ]
 }
