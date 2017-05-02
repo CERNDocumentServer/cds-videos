@@ -302,11 +302,11 @@ function cdsDepositsCtrl(
   };
 
   this.makeAction = function(url, depositType, action, payload) {
-    var { method, headers, preprocess } = depositActions[depositType][action];
-    if (preprocess) {
-      payload = preprocess(payload);
+    var actionInfo = depositActions[depositType][action];
+    if (actionInfo.preprocess) {
+      payload = actionInfo.preprocess(payload);
     }
-    return cdsAPI.action(url, method, payload, headers);
+    return cdsAPI.action(url, actionInfo.method, payload, actionInfo.headers);
   };
 
   this.chainedActions = function(promises) {

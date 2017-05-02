@@ -1,6 +1,7 @@
 function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   var that = this;
+
   this.$onInit = function() {
     this.cdsDepositCtrl.depositForm = {};
     this.cdsDepositCtrl.cdsDepositsCtrl.JSONResolver(this.form)
@@ -58,128 +59,42 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   }
 
-  this.autocompleteLicenses = function(options, query) {
-    if (query) {
-      // Parse the url parameters
-      return $http.get(options.url, {
-        params: {"text": query}
-      }).then(function(data) {
-        that.lastLicenseSuggestions = {
-          data: data.data['text'][0]['options'].map(function(license) {
-            var value = license['payload'].id;
-            var text = value;
-
-            return {
-              text: text,
-              value: value
-            };
-          }).slice(0, 20)
-        };
-        return that.lastLicenseSuggestions;
-      });
-    } else {
-      // If the query string is empty and there's already a value set on the
-      // model, this means that the form was just loaded and is trying to
-      // display this value.
-      // This also happens when the user clicks on a suggestion or on the
-      // suggestion field. In this case, return the previous suggestions.
-      var defer = $q.defer();
-      defer.resolve(
-        that.lastLicenseSuggestions ||
-        {
-          data: _.map(
-            that.cdsDepositCtrl.record.license || [],
-            function(_license) {
-              return {
-                text: _license.license, value: _license.license
-              }
-            }
-          )
-        }
-      );
-      return defer.promise;
-    }
-  };
-
-  this.formAuthor = function(author) {
-    return {
-      text: author.name,
-      value: author,
-      name: author.name
+  // Wrapper for functions used for autocompletion
+  function autocomplete(paramsProvider, responseHandler) {
+    return function(options, query) {
+      if (query) {
+        return $http.get(options.url, {
+          params: paramsProvider(query, options)
+        }).then(function(data) {
+          return {data: responseHandler(data, query).slice(0, 10)};
+        });
+      } else {
+        return $q.when({data: []});
+      }
     };
   }
 
-  this.authorFromUser = function(query) {
-    var re = /^(\w*,\s\w*):\s(\w*)$/
-    var [fullName, affiliation] = query.split(re).splice(1, 2)
-    if (!(fullName && affiliation)) {
-      return null;
+  /**
+   * Licences
+   */
+  this.autocompleteLicenses = autocomplete(
+    // Parameters provider
+    function(query) {
+      return {"text": query};
+    },
+    // Response handler
+    function(data) {
+      return data.data['text'][0]['options'].map(function(license) {
+          var value = license['payload'].id;
+          return {text: value, value: value};
+        });
     }
-    return that.formAuthor({
-      name: fullName,
-      affiliations: [affiliation],
-    });
-  }
+  );
 
-  this.autocompleteAuthors = function(options, query) {
-    var defer = $q.defer();
-    if (query) {
-      // Get user input
-      var userInput = _.compact([that.authorFromUser(query)])
-
-      // Parse the url parameters
-      $http.get(options.url, {
-        params: angular.merge({
-          query: query
-        }, options.extraParams)
-      }).then(function(data) {
-        that.lastAuthorSuggestions = {
-          data: _.union(
-            userInput,
-            data.data.map(function (author) {
-              var fullName = (author.lastname || '') + ', ' +
-                             (author.firstname || '');
-              var valueObj = {
-                name: fullName
-              };
-
-              if (author.affiliation) {
-                valueObj.affiliations = [author.affiliation];
-              }
-              if (author.email) {
-                valueObj.email = author.email;
-              }
-              valueObj.ids = _.reduce({
-                cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
-              }, function(acc, newName, oldName) {
-                if (author.hasOwnProperty(oldName)) {
-                  acc.push({ value: author[oldName], source: newName });
-                }
-                return acc;
-              }, []);
-              return that.formAuthor(valueObj);
-            }).slice(0, 20)
-          )
-        };
-        defer.resolve(that.lastAuthorSuggestions);
-      });
-    } else {
-      defer.resolve(
-        that.lastAuthorSuggestions ||
-        {
-          data: _.map(
-            that.cdsDepositCtrl.record.contributors || [],
-            that.formAuthor
-          )
-        }
-      );
-    }
-    return defer.promise;
-  };
-
-  this.types = $q.defer();
-
-  this.formKeyword = function(name, key_id) {
+  /**
+   * Keywords
+   */
+  function formKeyword(name, key_id) {
     var value = {name: name};
     if (key_id) { value.key_id = key_id }
     return {
@@ -188,48 +103,99 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     };
   }
 
-  this.autocompleteKeywords = function(options, query) {
-    if (query) {
-      // Get user input
-      var userInput = [that.formKeyword(query)];
-      // Parse the url parameters
-      return $http.get(options.url, {
-        params: {
-          "suggest-name": query
-        }
-      }).then(function(data) {
-        that.lastKeywordSuggestions = {
-          data: _.union(
-            userInput, // Prepend user input
-            data.data['suggest-name'][0]['options']
-              .concat(that.cdsDepositCtrl.record.keywords || [])
-              .map(function(keyword) {
-                return that.formKeyword(
-                  (keyword.payload) ? keyword.payload.name : keyword.name,
-                  (keyword.payload) ? keyword.payload.key_id : keyword.key_id
-                );
-              }).slice(0, 10)
-          )
-        };
-        return that.lastKeywordSuggestions;
-      });
-    } else {
-      // If the query string is empty and there's already a value set on the
-      // model, this means that the form was just loaded and is trying to
-      // display this value.
-      // This also happens when the user clicks on a suggestion or on the
-      // suggestion field. In this case, return the previous suggestions.
-      var defer = $q.defer();
-      defer.resolve(
-        that.lastKeywordSuggestions || {data:  _.map(
-          that.cdsDepositCtrl.record.keywords || [],
-          function(_keyword) {
-            return that.formKeyword(_keyword.name, _keyword.key_id)
-          })}
-      );
-      return defer.promise;
+  this.autocompleteKeywords = autocomplete(
+    // Parameters provider
+    function(query) {
+      return {"suggest-name": query};
+    },
+    // Response handler
+    function(data, query) {
+      var userInput = formKeyword(query);
+      var suggestions =
+        data.data['suggest-name'][0]['options']
+          .concat(that.cdsDepositCtrl.record.keywords || [])
+          .map(function(keyword) {
+            return formKeyword(
+              (keyword.payload) ? keyword.payload.name : keyword.name,
+              (keyword.payload) ? keyword.payload.key_id : keyword.key_id
+            );
+          });
+      prependUserInput(userInput, suggestions);
+      return suggestions;
     }
-  };
+  );
+
+  /**
+   * Authors
+   */
+  function formAuthor(author) {
+    return {
+      text: stripCommas(author.name),
+      value: author,
+      name: author.name
+    };
+  }
+
+  function authorFromUser(query) {
+    var re = /^(\w*,\s\w*):\s(\w*)$/
+    var [fullName, affiliation] = query.split(re).splice(1, 2)
+    if (!(fullName && affiliation)) {
+      return null;
+    }
+    return formAuthor({
+      name: fullName,
+      affiliations: [affiliation],
+    });
+  }
+
+  this.autocompleteAuthors = autocomplete(
+    // Parameters provider
+    function(query, options) {
+      var userInput = authorFromUser(query);
+      if (userInput) {
+        query = userInput.name;
+      }
+      return angular.merge({
+        query: stripCommas(query)
+      }, options.extraParams);
+    },
+    // Response handler
+    function(data, query) {
+      var userInput = authorFromUser(query);
+      var suggestions = data.data.map(function (author) {
+        var fullName = (author.lastname || '') + ', ' +
+                       (author.firstname || '');
+        var valueObj = {
+          name: fullName
+        };
+
+        if (author.affiliation) {
+          valueObj.affiliations = [author.affiliation];
+        }
+        if (author.email) {
+          valueObj.email = author.email;
+        }
+        valueObj.ids = _.reduce({
+          cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
+        }, function(acc, newName, oldName) {
+          if (author.hasOwnProperty(oldName)) {
+            acc.push({ value: author[oldName], source: newName });
+          }
+          return acc;
+        }, []);
+        return formAuthor(valueObj);
+      });
+
+      prependUserInput(userInput, suggestions);
+
+      return suggestions;
+    }
+  );
+
+  /**
+   * Categories and Types
+   */
+  this.types = $q.defer();
 
   this.autocompleteCategories = function(options, query) {
     if (!that.categories) {
@@ -266,6 +232,22 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   this.autocompleteType = function() {
     return that.types.promise;
+  }
+
+  /**
+   * Utilities
+   */
+  function stripCommas(string) {
+    return string.replace(/,/g, '');
+  }
+
+  // Prepends user input as custom field, if not already pre-defined
+  function prependUserInput(userInput, suggestions) {
+    if (userInput && _.findIndex(suggestions, function (suggestion) {
+      return suggestion.name.toUpperCase() === userInput.name.toUpperCase();
+    }) == -1) {
+      suggestions.unshift(userInput);
+    }
   }
 }
 
