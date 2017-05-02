@@ -55,9 +55,9 @@ def test_simple_workflow(
         assert len(videos) == len(project['videos'])
 
     project_schema = ('https://cdslabs.cern.ch/schemas/'
-                      'deposits/records/project-v1.0.0.json')
+                      'deposits/records/videos/project/project-v1.0.0.json')
     video_schema = ('https://cdslabs.cern.ch/schemas/'
-                    'deposits/records/video-v1.0.0.json')
+                    'deposits/records/videos/video/video-v1.0.0.json')
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -77,6 +77,7 @@ def test_simple_workflow(
             'http://localhost/files/')
         assert all(link.startswith('http://localhost/deposits/project')
                    for (key, link) in project_dict['links'].items()
+
                    if key not in ['html', 'bucket'])
         # check database
         project_id = project_dict['metadata']['_deposit']['id']

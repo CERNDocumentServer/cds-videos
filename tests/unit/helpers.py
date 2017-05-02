@@ -30,32 +30,30 @@ import copy
 import json
 import random
 import uuid
-import mock
-import pkg_resources
+from time import sleep
 
-from invenio_db import db
+import pkg_resources
+from six import BytesIO
+
+import mock
+from cds.modules.deposit.api import Project, Video
+from cds.modules.deposit.minters import catid_minter
+from cds.modules.records.api import Category, Keyword
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
+                                        update_record)
 from cds_sorenson.api import get_available_preset_qualities
+from celery import chain, group, shared_task, states
+from flask_security import login_user
+from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
+from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records import Record
-from six import BytesIO
-from celery import shared_task, states
-from cds.modules.deposit.minters import catid_minter
-from cds.modules.records.api import Keyword
-from invenio_indexer.api import RecordIndexer
-from cds.modules.webhooks.tasks import AVCTask, update_record
-from cds.modules.deposit.api import Category
-from cds.modules.webhooks.tasks import TranscodeVideoTask
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.deposit.api import Project, Video
-from celery import chain, group
-from sqlalchemy.orm.attributes import flag_modified
 from invenio_webhooks import current_webhooks
-from flask import current_app
-from flask_security import login_user
-from time import sleep
-from invenio_accounts.models import User
+from sqlalchemy.orm.attributes import flag_modified
 
 
 @shared_task(bind=True)

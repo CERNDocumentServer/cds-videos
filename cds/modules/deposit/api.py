@@ -468,7 +468,7 @@ class Project(CDSDeposit):
     sequence_name = 'project-v1_0_0'
     """Sequence identifier."""
 
-    _schema = 'deposits/records/project-v1.0.0.json'
+    _schema = 'deposits/records/videos/project/project-v1.0.0.json'
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
@@ -649,7 +649,7 @@ class Video(CDSDeposit):
     sequence_name = 'video-v1_0_0'
     """Sequence identifier."""
 
-    _schema = 'deposits/records/video-v1.0.0.json'
+    _schema = 'deposits/records/videos/video/video-v1.0.0.json'
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
@@ -864,20 +864,3 @@ def record_video_resolver(video_id):
 def record_project_resolver(video_id):
     """Get the video deposit from the record."""
     return Project.get_record(record_resolver.resolve(video_id)[1].id)
-
-
-class Category(Record):
-    """Define API for a category."""
-
-    _schema = 'categories/category-v1.0.0.json'
-
-    @classmethod
-    def create(cls, data, id_=None, **kwargs):
-        """Create a category."""
-        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
-
-        data['suggest_name'] = {
-            'input': data.get('name', None),
-            'payload': {'types': data.get('types', [])}
-        }
-        return super(Category, cls).create(data=data, id_=id_, **kwargs)

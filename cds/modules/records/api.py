@@ -21,7 +21,6 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Record API."""
 
 from __future__ import absolute_import, print_function
@@ -36,7 +35,6 @@ from .minters import kwid_minter
 
 
 class Keyword(Record):
-
     """Define API for a keywords."""
 
     _schema = 'keywords/keyword-v1.0.0.json'
@@ -56,7 +54,10 @@ class Keyword(Record):
 
         data['suggest_name'] = {
             'input': name,
-            'payload': {'key_id': key_id, 'name': name},
+            'payload': {
+                'key_id': key_id,
+                'name': name
+            },
         }
         return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
 
@@ -74,3 +75,22 @@ class Keyword(Record):
     def get_ref(cls, id_):
         """Get reference from an ID."""
         return 'https://cds.cern.ch/api/keywords/{0}'.format(str(id_))
+
+
+class Category(Record):
+    """Define API for a category."""
+
+    _schema = 'categories/category-v1.0.0.json'
+
+    @classmethod
+    def create(cls, data, id_=None, **kwargs):
+        """Create a category."""
+        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+
+        data['suggest_name'] = {
+            'input': data.get('name', None),
+            'payload': {
+                'types': data.get('types', [])
+            }
+        }
+        return super(Category, cls).create(data=data, id_=id_, **kwargs)
