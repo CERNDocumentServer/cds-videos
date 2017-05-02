@@ -875,6 +875,7 @@ DEPOSIT_FORM_TEMPLATES = {
     'textarea': 'textarea.html',
     'checkbox': 'checkbox.html',
     'uiselectmultiple': 'uiselectmultiple.html',
+    'strapselect': 'strapselect.html',
 }
 
 # App key for uploading files from dropbox
