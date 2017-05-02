@@ -294,10 +294,7 @@ function cdsDepositCtrl(
               var transcodeTasks = groupedTasks.file_transcode;
               // Update the state reporter with all the new info
               data.forEach(function(task) {
-                if (task.info && task.status) {
-                  task.info.status = task.status;
-                }
-                that.updateStateReporter(task.name, task.info);
+                that.updateStateReporter(task.name, task.info, task.status);
               });
               // Update subformat info
               var subformatsNew =  transcodeTasks.filter(function(task) {
@@ -433,7 +430,10 @@ function cdsDepositCtrl(
     });
 
     // Calculate the transcode
-    this.updateStateReporter = function(type, data) {
+    this.updateStateReporter = function(type, data, status) {
+      if (data && status && !data.status) {
+        data.status = status;
+      }
       if (type === 'file_transcode') {
         if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
           that.videoPreviewer(
@@ -481,6 +481,34 @@ function cdsDepositCtrl(
       $scope.$apply(function() {
         if (type === 'update_deposit') {
           that.updateDeposit(data.meta.payload.deposit);
+        } else if (type == 'file_video_metadata_extraction' ||
+                   type == 'file_video_extract_frames') {
+          that.updateStateReporter(type, data.meta, data.state);
+        } else if (type == 'file_transcode') {
+          var masterFile = that.findMasterFile();
+          if (masterFile) {
+            var subformats = masterFile.subformat;
+            if (!subformats) {
+              masterFile.subformat = [];
+              subformats = masterFile.subformat;
+            }
+            var curSubformat = _.find(subformats, {key: data.meta.payload.key});
+            if (curSubformat) {
+              curSubformat = angular.merge(curSubformat, data.meta.payload);
+            } else {
+              curSubformat = angular.copy(data.meta.payload);
+              subformats.push(curSubformat);
+            }
+
+            if (curSubformat.percentage === 100 && data.state === 'SUCCESS') {
+              curSubformat.completed = true;
+            } else if (data.state === 'FAILURE') {
+              curSubformat.errored = true;
+            }
+
+            that.processSubformats();
+          }
+          that.updateStateReporter(type, data.meta, data.state);
         }
       });
       // The state has been changed update the current
