@@ -62,11 +62,8 @@ function cdsDepositsCtrl(
       ) {
         that.addMaster(response.data);
         that.initialized = true;
-        // FIXME: Remove me when the project dereferencing the videos
         angular.forEach(response.data.metadata.videos, function(video, index) {
-          cdsAPI.resolveJSON(video.$reference).then(function success(response) {
-            that.children.push(response.data);
-          }, function error(response) {});
+          that.children.push({metadata: video});
         });
       }, function error(response) {
         if (response.status === 403) {

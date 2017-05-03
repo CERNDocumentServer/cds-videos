@@ -87,6 +87,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           );
           // Check if needs upload
           var _subpromise;
+          upload.key = upload.name;
           if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
             _subpromise = Upload.http(
               _prepareLocalFileWebhooks(upload, response)
@@ -161,7 +162,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
    */
   function _prepareLocalFile(file) {
     return {
-      url: that.cdsDepositCtrl.links.bucket + '/' + file.key,
+      url: that.cdsDepositCtrl.links.bucket + '/' + file.name,
       method: 'PUT',
       headers: {
         'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
@@ -182,7 +183,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       },
       data: {
         uri: file.url,
-        key: file.key,
+        key: file.name,
         bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
         deposit_id: that.cdsDepositCtrl.record._deposit.id,
         sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
