@@ -30,7 +30,7 @@
              </li>
            </ul>
          </div>
-        {{ (record.metadata.description.value | stripTags)  || 'No project description'}}
+        {{ (record.metadata.description.value | stripTags | trustHtml)  || 'No project description'}}
        </p>
        <ul class="list-inline pull-left w-100 text-muted">
          <li class="f9">
