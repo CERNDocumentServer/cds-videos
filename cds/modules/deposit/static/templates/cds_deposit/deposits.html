@@ -35,7 +35,7 @@
             template="/static/templates/cds_deposit/remote_upload.html"
             dropbox-enabled="true"
             dropbox-selector=".dropbox-upload"
-            dropbox-app-key="{{ dropboxAppKey }}"
+            dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
             remote-master-receiver="/api/hooks/receivers/avc/events/"
             remote-children-receiver="/api/hooks/receivers/downloader/events/"
         >
@@ -131,7 +131,7 @@
                         template="/static/templates/cds_deposit/remote_upload.html"
                         dropbox-enabled="true"
                         dropbox-selector=".dropbox-upload"
-                        dropbox-app-key="{{ dropboxAppKey }}"
+                        dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
                         remote-master-receiver="/api/hooks/receivers/avc/events/"
                         remote-children-receiver="/api/hooks/receivers/downloader/events/"
                     >
@@ -153,7 +153,7 @@
                 template="/static/templates/cds_deposit/remote_upload.html"
                 dropbox-enabled="true"
                 dropbox-selector=".dropbox-upload"
-                dropbox-app-key="{{ dropboxAppKey }}"
+                dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
                 remote-master-receiver="/api/hooks/receivers/avc/events/"
                 remote-children-receiver="/api/hooks/receivers/downloader/events/"
             >
