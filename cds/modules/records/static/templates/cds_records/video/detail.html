@@ -39,7 +39,9 @@
           <div class="cds-detail-title cds-detail-video-title">
             <hgroup>
               <h1 class="mb-0 f4 fw-n t-b">{{ ::record.metadata.title.title }}</h1>
-              <h2 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h2>
+              <h2 ng-repeat="translation in record.metadata.translations" class="cds-detail-secondary-title text-muted mt-0 f4 fw-n" ng-if="translation.language == 'fr'">
+                <em>{{ ::translation.title.title }}</em>
+              </h2>
             </hgroup>
           </div>
           <!-- /Title -->
@@ -63,13 +65,27 @@
           <hr />
           <div class="cds-detail-description cds-detail-video-description t-b">
             <p class="mb-20"><strong>Uploaded on {{ ::record.metadata.date }}</strong></p>
-            <p class="f7 mb-20">{{ ::record.metadata.description.value }}</p>
-            <p class="text-muted mt-10 mb-0">
+            <p class="f8 mb-20">{{ ::record.metadata.description.value }}</p>
+            <p class="text-muted mt-10 mb-0 pull-right">
               <a ng-href="/search?q=_project_id:{{:: record.metadata._project_id}}">Other videos in this project</a>
             </p>
           </div>
           <!-- /Description -->
           <!-- More -->
+          <div ng-if="record.metadata.language" class="row cds-detail-language cds-detail-more cds-detail-video-more">
+              <strong class="col-sm-2">Language</strong>
+              <span class="col-sm-offset-1 col-sm-4">{{ record.metadata.language }}</span>
+          </div>
+          <div ng-if="record.metadata.contributors.length" class="row cds-detail-contributors cds-detail-more cds-detail-video-more">
+            <strong class="col-sm-2">Contributors</strong>
+            <div class="col-sm-offset-1 col-sm-4">
+              <ul class="list-inline">
+                <li ng-repeat="contrib in record.metadata.contributors">
+                  {{ contrib.name }} - {{ contrib.role }}
+                </li>
+              </ul>
+            </div>
+          </div>
           <div class="cds-detail-more cds-detail-video-more">
             <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
           </div>

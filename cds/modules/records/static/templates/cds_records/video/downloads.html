@@ -32,7 +32,7 @@
     <ul ng-repeat="file in record.metadata._files">
       <li>
         <a ng-href="{{ file.links.self }}">
-          {{ file.tags.preset_quality }}
+          {{ file.key }}
         </a>
       </li>
     </ul>
