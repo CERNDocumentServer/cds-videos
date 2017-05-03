@@ -120,3 +120,10 @@ app.filter('iiif', function($filter) {
     });
   }
 });
+
+// Trust as html
+app.filter('trustHtml', ['$sce', function($sce) {
+  return function(text) {
+    return $sce.trustAsHtml(text);
+  };
+}]);
