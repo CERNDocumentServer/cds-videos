@@ -69,7 +69,8 @@ function cdsDepositsConfig(
     eventInfo: '/hooks/receivers/avc/events/<%=eventId%>',
     restartEvent: '/hooks/receivers/avc/events/<%=eventId%>/tasks/<%=taskId%>',
     taskFeedback: '/hooks/receivers/avc/events/<%=eventId%>/feedback',
-    actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>'
+    selfVideo: '/api/deposits/video/<%=deposit%>',
+    actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>',
   });
 
   // Initialize type reducer
