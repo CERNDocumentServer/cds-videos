@@ -101,6 +101,7 @@
                 <li role="presentation" ng-class="{active: active=='metadata'}"><a ng-click="active='metadata'" role="tab" data-toggle="tab">Basic Info</a></li>
                 <li role="presentation" ng-class="{active: active=='files'}"><a ng-click="active='files'" role="tab" data-toggle="tab">Files</a></li>
                 <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
+                <li role="presentation" ng-class="{active: active=='translations'}"><a ng-click="active='translations'" role="tab" data-toggle="tab">Translations</a></li>
                 <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug (for @drjova)</a></li>
                 <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
                   <a class="dropdown-toggle" title="More options" data-toggle="dropdown" ng-click="openDropdown=!openDropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -136,6 +137,16 @@
                     sf-model="$ctrl.cdsDepositCtrl.record"
                     sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }">
                   </form>
+                </div>
+                <div ng-show="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
+                  <form
+                    name="$ctrl.cdsDepositCtrl.depositFormModels[2]"
+                    class="form"
+                    sf-schema="$ctrl.cdsDepositCtrl.schema"
+                    sf-form="$ctrl.form.translations"
+                    sf-model="$ctrl.cdsDepositCtrl.record"
+                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+                  ></form>
                 </div>
                 <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
 
