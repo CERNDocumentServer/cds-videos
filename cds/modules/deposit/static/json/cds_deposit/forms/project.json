@@ -30,6 +30,7 @@
             "ckeditor": {
               "autoParagraph": false,
               "enterMode": 2,
+              "entities": false,
               "height": 200,
               "toolbar": [
                 ["PasteText", "PasteFromWord"],

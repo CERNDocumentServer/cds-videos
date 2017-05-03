@@ -435,7 +435,7 @@ function cdsDepositCtrl(
     // Calculate the transcode
     this.updateStateReporter = function(type, data) {
       if (type === 'file_transcode') {
-        if (data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
+        if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
           that.videoPreviewer(
             data.payload.deposit_id,
             data.payload.key
@@ -539,10 +539,17 @@ function cdsDepositCtrl(
 
   this.guessEndpoint = function(action) {
     var link = depositActions[that.depositType][action].link
-    if (Object.keys(that.links).indexOf(link) > -1) {
+    if (that.links && Object.keys(that.links).indexOf(link) > -1) {
       return that.links[link];
     } else {
-      if (that.record._deposit.status === 'published' && !that.master) {
+      if (!that.master) {
+        // If the link is self just return the self video url
+        if (link === 'self') {
+          return urlBuilder.selfVideo({
+            deposit: that.record._deposit.id,
+          })
+        }
+        // If the link is different return the action video url
         return urlBuilder.actionVideo({
           deposit: that.record._deposit.id,
           action: action.toLowerCase()
@@ -688,7 +695,7 @@ function cdsDeposit() {
       id: '=',
       schema: '@',
       record: '=',
-      links: '=',
+      links: '=?',
     },
     require: { cdsDepositsCtrl: '^cdsDeposits' },
     controller: cdsDepositCtrl,
