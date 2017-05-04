@@ -214,6 +214,17 @@
             }
           }
         },
+        "related_links": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
         "creator": {
           "properties": {
             "contribution": {

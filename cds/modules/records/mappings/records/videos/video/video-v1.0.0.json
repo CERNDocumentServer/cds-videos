@@ -132,6 +132,17 @@
             }
           }
         },
+        "related_links": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
         "_files": {
           "type": "object",
           "properties": {

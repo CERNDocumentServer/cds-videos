@@ -382,5 +382,23 @@
         }
       ]
     }
+  ],
+  "related_links": [
+    {
+      "notitle": true,
+      "key": "related_links",
+      "type": "array",
+      "add": "Add related link",
+      "items": [
+        {
+          "title": "Name",
+          "key": "related_links[].name"
+        },
+        {
+          "title": "URL",
+          "key": "related_links[].url"
+        }
+      ]
+    }
   ]
 }
