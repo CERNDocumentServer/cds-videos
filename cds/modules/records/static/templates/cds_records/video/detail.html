@@ -47,12 +47,12 @@
           <div class="cds-detail-date cds-detail-video-date my-20">
             <div class="row">
               <div class="col-md-6">
-                <div class="text-muted f8">
+                <div class="text-muted f9">
                   {{ ::record.metadata.copyright.year || '2017' }} &copy; {{ ::record.metadata.copyright.holder || 'CERN' }}
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="text-right text-muted f8">
+                <div class="text-right text-muted f9">
                   300000 views
                 </div>
               </div>
@@ -62,16 +62,45 @@
           <!-- Description -->
           <hr />
           <div class="cds-detail-description cds-detail-video-description t-b">
-            <p class="mb-20"><strong>Uploaded on {{ ::record.metadata.date }}</strong></p>
-            <p class="f7 mb-20" ng-bind-html="(record.metadata.description.value | stripTags | trustHtml) || 'No description'"></p>
-            <p class="text-muted mt-10 mb-0">
-              <a ng-href="/search?q=_project_id:{{:: record.metadata._project_id}}">Other videos in this project</a>
-            </p>
+            <p class="f9 mb-20">Uploaded on {{ ::record.metadata.date }}</p>
+            <p class="f8 mb-20" ng-bind-html="(record.metadata.description.value | stripTags | trustHtml) || 'No description'"></p>
           </div>
           <!-- /Description -->
           <!-- More -->
+          <div class="cds-detail-description cds-detail-video-description t-b">
+            <hr />
+            <ul class="list-unstyled">
+              <li ng-repeat="(role, contribs) in record.metadata.contributors | groupBy:'role'">
+                <h3 class="f9">{{ role }}</h3>
+                <ul class="list-unstyled" ng-repeat="(name, contrib) in contribs|groupBy: 'name'">
+                  <li>
+                    <a ng-href='/search?q="{{ name }}"'>{{ name }}</a> - {{ contrib[0].affiliations.join(',')}}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <h3 class="f9 tw-b">License</h3>
+                <ul class="list-unstyled" ng-repeat="license in record.metadata.license">
+                  <li>
+                    <a ng-href='{{ :: license.url }}'>{{ license.license }}</a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <h3 class="f9 tw-b">Language</h3>
+                <a ng-href='/search?q="{{ :: record.metadata.language }}"'>{{ record.metadata.language }}</a>
+
+              </li>
+            </ul>
+          </div>
           <div class="cds-detail-more cds-detail-video-more">
             <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
+            <hr ng-if="record.metadata.keywords.length >0" />
+          </div>
+          <div class="cds-detail-more cds-detail-video-more">
+            <p class="text-muted mt-10 mb-0">
+              <a ng-href="/search?q=_project_id:{{:: record.metadata._project_id}}">Other videos in this project</a>
+            </p>
           </div>
           <!-- /More -->
           </div>

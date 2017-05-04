@@ -131,3 +131,10 @@ app.filter('trustHtml', ['$sce', function($sce) {
     return $sce.trustAsHtml(text);
   };
 }]);
+
+// Group by key filter
+app.filter('groupBy', function() {
+  return _.memoize(function(items, field) {
+    return _.groupBy(items, field);
+  });
+});
