@@ -654,6 +654,11 @@ DEPOSIT_UI_NEW_TEMPLATE = 'cds_deposit/edit.html'
 DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/forms/project.json'
 # Default schema for the deposit
 DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/videos/project/project-v1.0.0.json'
+# Deposit schemas
+DEPOSIT_JSONSCHEMA = {
+    'project': 'deposits/records/videos/project/project-v1.0.0.json',
+    'video': 'deposits/records/videos/video/video-v1.0.0.json',
+}
 # Template for <invenio-records-form> directive
 DEPOSIT_UI_JSTEMPLATE_FORM = 'templates/cds_deposit/form.html'
 DEPOSIT_UI_JSTEMPLATE_ACTIONS = 'templates/cds_deposit/actions.html'
