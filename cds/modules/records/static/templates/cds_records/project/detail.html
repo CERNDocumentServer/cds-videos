@@ -39,8 +39,8 @@
               <div class="col-md-12 text-center">
                 <h2 class="mb-20 fw-b f4">Videos</h2>
               </div>
-              <div class="col-md-4" ng-repeat="video in record.videos">
-                <a class="cds-video-title l-b" target="_self" ng-href="/record/{{ video.id }}">
+              <div class="col-md-4" ng-repeat="video in record.metadata.videos">
+                <a class="cds-video-title l-b" target="_self" ng-href="/record/{{ ::video.recid }}">
                   <img
                     class="img-responsive"
                     ng-src="{{ video | iiif:gif:[330,190] }}"
@@ -49,9 +49,9 @@
                     ng-mouseover="gif=true"
                     ng-mouseleave="gif=false"
                   />
-                  <span ng-hide="!video.metadata._deposit.extracted_metadata.duration" class="cds-video-duration">{{ ::video.metadata._deposit.extracted_metadata.duration | toMinutes }}</span>
+                  <span ng-hide="!video._deposit.extracted_metadata.duration" class="cds-video-duration">{{ ::video._deposit.extracted_metadata.duration | toMinutes }}</span>
                   <p>
-                    {{ ::video.metadata.title.title || 'No title :(' | limitTo: 120}} {{ video.metadata.title.title.length > 120 ? ' [...]' : '' }}
+                    {{ ::video.title.title || 'No title :(' | limitTo: 120}} {{ video.title.title.length > 120 ? ' [...]' : '' }}
                   </p>
                 </a>
               </div>

@@ -82,9 +82,12 @@ app.filter('toMinutes', function() {
 // Find master video file in record's files
 app.filter('findMaster', function() {
   return function(record) {
-    return _.find(record.metadata._files, function (file) {
-        return file.context_type === 'master';
-    })
+    if (!_.isEmpty(record)) {
+      var _files = record.metadata ? record.metadata._files : record._files;
+      return _.find(_files, function (file) {
+          return file.context_type === 'master';
+      })
+    }
   }
 });
 
@@ -110,10 +113,11 @@ app.filter('findGif', function() {
 app.filter('iiif', function($filter) {
   return function(record, showGif, size) {
     var masterFile = $filter('findMaster')(record);
+    var _deposit = record.metadata ? record.metadata._buckets.deposit : record._buckets.deposit;
     return _.template(
       "/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
     )({
-      deposit: record.metadata._buckets.deposit,
+      deposit: _deposit,
       key: ($filter(showGif ? 'findGif' : 'findPoster')(masterFile)).key,
       size: size.join(','),
       ext: showGif ? 'gif' : 'png',
