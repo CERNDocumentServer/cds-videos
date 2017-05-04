@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, request, url_for
 from invenio_pidstore.models import PersistentIdentifier
 
 blueprint = Blueprint(
@@ -37,20 +37,37 @@ blueprint = Blueprint(
 )
 
 
+def recid_from_rn(report_number):
+    """Retrieves a report number's corresponding record ID."""
+    object_uuid = PersistentIdentifier.query.filter_by(
+        pid_type='rn',
+        pid_value=report_number
+    ).one().object_uuid
+    return PersistentIdentifier.query.filter_by(
+        pid_type='recid',
+        object_type='rec',
+        object_uuid=object_uuid
+    ).one().pid_value
+
+
 # /record/<pid_value>/embed/<filename>
 # /video/<report_number>
 @blueprint.route('/video/<report_number>')
 def video_embed_alias(report_number):
     """Redirect from the old video embed URL to the new one."""
-    object_uuid = PersistentIdentifier.query.filter_by(
-        pid_type='rn',
-        pid_value=report_number
-    ).one().object_uuid
-    recid = PersistentIdentifier.query.filter_by(
-        pid_type='recid',
-        object_type='rec',
-        object_uuid=object_uuid
-    ).one().pid_value
     return redirect(url_for(
         'invenio_records_ui.recid_embed_default',
-        pid_value=recid), code=301)
+        pid_value=recid_from_rn(report_number)
+    ), code=301)
+
+
+# /record/<:id:>/export/drupal
+# /api/mediaexport?id=<report_number>
+@blueprint.route('/api/mediaexport')
+def drupal_export_alias():
+    """Redirect from the old drupal export URL to the new one."""
+    rn = request.args.get('id', '')
+    return redirect(url_for(
+        'invenio_records_ui.recid_export',
+        pid_value=recid_from_rn(rn), format='drupal', raw=True
+    ), code=301)
