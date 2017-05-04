@@ -26,45 +26,43 @@
 
 from __future__ import absolute_import, print_function
 
-import re
-import os
-import uuid
-
 import datetime
 import itertools
+import os
+import re
+import uuid
 from contextlib import contextmanager
+from functools import partial, wraps
 from os.path import splitext
 
 import arrow
 from celery import states
-from cds.modules.records.minters import report_number_minter
 from flask import current_app, url_for
-
-from functools import wraps
-from jsonschema.exceptions import ValidationError
 from invenio_db import db
-from invenio_deposit.api import Deposit, preserve, has_status
+from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
-                                       ObjectVersion, ObjectVersionTag)
-from invenio_pidstore.resolver import Resolver
-from functools import partial
+                                       ObjectVersion, ObjectVersionTag,
+                                       as_bucket)
+from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.resolver import Resolver
 from invenio_records.validators import PartialDraft4Validator
 from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
+from jsonschema.exceptions import ValidationError
 from sqlalchemy import func
-from invenio_records.api import Record
-from invenio_jsonschemas import current_jsonschemas
 
-from .errors import DiscardConflict
-from ..records.resolver import record_resolver
-from ..webhooks.status import ComputeGlobalStatus, get_deposit_events, \
-    iterate_events_results, get_tasks_status_by_task
+from cds.modules.records.minters import report_number_minter
+
 from ..records.minters import is_local_doi
-
+from ..records.resolver import record_resolver
+from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
+                               get_tasks_status_by_task,
+                               iterate_events_results)
+from .errors import DiscardConflict
 
 PRESERVE_FIELDS = (
     '_deposit',
@@ -204,6 +202,10 @@ class CDSDeposit(Deposit):
     @property
     def _bucket(self):
         """Get the bucket object."""
+        try:
+            return as_bucket(self['_buckets']['deposit'])
+        except KeyError:
+            pass  # we will look into the db for it
         records_buckets = RecordsBuckets.query.filter_by(
             record_id=self.id).first()
         if records_buckets:
@@ -330,18 +332,6 @@ class CDSDeposit(Deposit):
         """Return pure Python dictionary with record metadata."""
         self._update_tasks_status()
         data = super(CDSDeposit, self).dumps(**kwargs)
-        return data
-
-    def replace_refs(self):
-        """Replace refs."""
-        files = self['_files']
-        data = super(CDSDeposit, self).replace_refs()
-        # NOTE: inside replace_refs() is passing through the Video init but
-        #       loosing the model parameter.
-        #       It means that the files list looks empty because will not
-        #       find the associated bucket.
-        #       To fix it, we make a backup and restore the files list.
-        data['_files'] = files
         return data
 
     def _update_tasks_status(self):
