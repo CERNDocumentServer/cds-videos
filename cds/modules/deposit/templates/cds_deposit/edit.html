@@ -45,7 +45,6 @@
       {% else %}
         master-init="/api/deposits/project/"
       {% endif %}
-      copyright='{{ config.DEPOSIT_AVC_COPYRIGHT|tojson }}'
       master-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_JSONSCHEMA.project, _external=True) }}"
       master-form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
       dropbox-app-key="{{ config.DEPOSIT_DROPBOX_APP_KEY }}"
