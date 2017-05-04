@@ -123,10 +123,8 @@ install_requires = [
     'invenio-rest[cors]>=1.0.0a9',
     'invenio-search-ui>=1.0.0a5',
     'invenio-search>=1.0.0a7',
-    # FIXME wait until invenio-sequencegenerator is released
-    #  'invenio-sequencegenerator>=1.0.0a1',
-    # FIXME wait until invenio-sse is released
-    #  'invenio-sse>=1.0.0a1',
+     'invenio-sequencegenerator>=1.0.0a1',
+     'invenio-sse>=1.0.0a1',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
     'invenio-webhooks>=1.0.0a4',
