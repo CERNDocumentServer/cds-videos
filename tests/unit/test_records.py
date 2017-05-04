@@ -26,6 +26,8 @@
 
 from __future__ import absolute_import, print_function
 
+from functools import partial
+
 import mock
 import json
 
@@ -53,26 +55,30 @@ def test_records_ui_export(app, project_published, video_record_metadata):
     db.session.commit()
     pid = project['_deposit']['pid']['value']
     vid = video_1['_deposit']['pid']['value']
-    with app.test_request_context():
-        url_no_existing_exporter = url_for(
-            'invenio_records_ui.recid_export', pid_value=pid, format='blabla')
-        url_not_valid_type_record = url_for(
-            'invenio_records_ui.recid_export', pid_value=pid, format='smil')
-        url_valid_smil = url_for(
-            'invenio_records_ui.recid_export', pid_value=vid, format='smil')
-        url_valid_vtt = url_for(
-            'invenio_records_ui.recid_export', pid_value=vid, format='vtt')
-        url_valid_json = url_for(
-            'invenio_records_ui.recid_export', pid_value=pid, format='json')
-        url_valid_drupal = url_for(
-            'invenio_records_ui.recid_export', pid_value=vid,
-            format='drupal')
-        url_valid_drupal_project = url_for(
-            'invenio_records_ui.recid_export', pid_value=pid,
-            format='drupal')
-        url_valid_datacite_video = url_for(
-            'invenio_records_ui.recid_export', pid_value=vid,
-            format='dcite')
+    url_no_existing_exporter = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=pid, format='blabla')
+    url_not_valid_type_record = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=pid, format='smil')
+    url_valid_smil = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=vid, format='smil')
+    url_valid_vtt = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=vid, format='vtt')
+    url_valid_json = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=pid, format='json')
+    url_valid_drupal = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=vid, format='drupal')
+    url_valid_drupal_project = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=pid, format='drupal')
+    url_valid_datacite_video = partial(
+        url_for, 'invenio_records_ui.recid_export',
+        pid_value=vid, format='dcite')
 
     def get_pre(data):
         data = data.decode('utf-8')
@@ -80,36 +86,34 @@ def test_records_ui_export(app, project_published, video_record_metadata):
         data_end = data.find('</pre>', data_start)
         return data[data_start:data_end]
 
-    with app.test_client() as client:
-        # Test that default view function can deal with multiple parameters.
-        res = client.get(url_no_existing_exporter)
-        assert res.status_code == 404
+    def check_url(partial_url, status_code):
+        res = client.get(partial_url())
+        res_raw = client.get(partial_url(raw=True))
+        assert res.status_code == status_code
+        assert res_raw.status_code == status_code
+        return res.data
 
-        res = client.get(url_not_valid_type_record)
-        assert res.status_code == 400
+    with app.test_request_context():
+        with app.test_client() as client:
+            check_url(url_no_existing_exporter, 404)
+            check_url(url_not_valid_type_record, 400)
 
-        res = client.get(url_valid_smil)
-        assert res.status_code == 200
-        assert get_pre(res.data).startswith('&lt;smil&gt;') is True
+            data = check_url(url_valid_smil, 200)
+            assert get_pre(data).startswith('&lt;smil&gt;')
 
-        res = client.get(url_valid_vtt)
-        assert res.status_code == 200
-        assert 'WEBVTT' in res.data.decode('utf-8')
+            data = check_url(url_valid_vtt, 200)
+            assert 'WEBVTT' in data.decode('utf-8')
 
-        res = client.get(url_valid_json)
-        assert res.status_code == 200
+            check_url(url_valid_json, 200)
 
-        res = client.get(url_valid_drupal)
-        assert res.status_code == 200
-        assert get_pre(res.data).startswith('{') is True
+            data = check_url(url_valid_drupal, 200)
+            assert get_pre(data).startswith('{')
 
-        res = client.get(url_valid_drupal_project)
-        assert res.status_code == 200
-        assert get_pre(res.data) == '{}'
+            data = check_url(url_valid_drupal_project, 200)
+            assert get_pre(data) == '{}'
 
-        res = client.get(url_valid_datacite_video)
-        assert res.status_code == 200
-        assert get_pre(res.data).startswith('&lt;?xml version=')
+            data = check_url(url_valid_datacite_video, 200)
+            assert get_pre(data).startswith('&lt;?xml version=')
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

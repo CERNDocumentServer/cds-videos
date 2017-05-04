@@ -72,8 +72,7 @@ class CDSPreviewRecordFile(PreviewFile):
         """Get video's thumbnails' link."""
         return url_for(
             'invenio_records_ui.{0}_export'.format(self.pid.pid_type),
-            pid_value=self.pid.pid_value,
-            format='vtt')
+            pid_value=self.pid.pid_value, format='vtt', raw=True)
 
     @property
     def subtitles(self):

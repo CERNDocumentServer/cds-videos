@@ -161,22 +161,27 @@ REST_ENABLE_CORS = True
 CDS_RECORDS_EXPORTFORMATS = {
     'json': dict(
         title='JSON',
+        mimetype='application/json',
         serializer='invenio_records_rest.serializers:json_v1'
     ),
     'smil': dict(
         title='SMIL',
+        mimetype='application/smil',
         serializer='cds.modules.records.serializers:smil_v1'
     ),
     'vtt': dict(
         title='VTT',
+        mimetype='text/vtt',
         serializer='cds.modules.records.serializers:vtt_v1'
     ),
     'drupal': dict(
         title='Drupal',
+        mimetype='x-application/drupal',
         serializer='cds.modules.records.serializers:drupal_v1'
     ),
     'dcite': dict(
         title='Datacite XML v3.1',
+        mimetype='application/x-datacite+xml',
         serializer='cds.modules.records.serializers:datacite_v31'
     )
 }
@@ -230,18 +235,10 @@ RECORDS_UI_ENDPOINTS = dict(
     recid_export=dict(
         pid_type='recid',
         route='/record/<pid_value>/export/<any({0}):format>'.format(
-            ", ".join(
-                [k for k in CDS_RECORDS_EXPORTFORMATS.keys() if k != 'vtt']
-            )
+            ", ".join(list(CDS_RECORDS_EXPORTFORMATS.keys()))
         ),
         template='cds_records/record_export.html',
         view_imp='cds.modules.records.views.records_ui_export',
-        record_class='invenio_records_files.api:Record',
-    ),
-    recid_export_vtt=dict(
-        pid_type='recid',
-        route='/record/<pid_value>/export/<any(vtt):format>',
-        view_imp='cds.modules.records.views.records_ui_export_vtt',
         record_class='invenio_records_files.api:Record',
     ),
 )

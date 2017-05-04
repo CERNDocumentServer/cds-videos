@@ -45,21 +45,18 @@ def records_ui_export(pid, record, template=None, **kwargs):
     else:
         serializer = import_string(formats[fmt]['serializer'])
         data = serializer.serialize(pid, record)
-        if isinstance(data, six.binary_type):
-            data = data.decode('utf8')
+        if 'raw' in request.args:
+            response = make_response(data)
+            response.headers['Content-Type'] = formats[fmt]['mimetype']
+            return response
+        else:
+            if isinstance(data, six.binary_type):
+                data = data.decode('utf8')
 
-        return render_template(
-            template,
-            pid=pid,
-            record=record,
-            data=data,
-            format_title=formats[fmt]['title']
-        )
-
-
-def records_ui_export_vtt(pid, record, **kwargs):
-    """Export a record as a VTT file."""
-    data = VTTSerializer().serialize(pid, record)
-    response = make_response(data)
-    response.headers['Content-Type'] = 'text/vtt'
-    return response
+            return render_template(
+                template,
+                pid=pid,
+                record=record,
+                data=data,
+                format_title=formats[fmt]['title']
+            )
