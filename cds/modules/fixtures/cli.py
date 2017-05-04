@@ -418,7 +418,8 @@ def videos(video, frames, temp, video_count):
                 video_deposit = Video.create(
                     dict(_project_id=str(project['_deposit']['id']),
                          contributors=[dict(name='contrib', role='Provider')],
-                         copyright=dict(url='copyright'),
+                         copyright=dict(url='http://cds.cern.ch/copyright',
+                                        year='2017', holder='CERN'),
                          date='2017-01-16',
                          description=dict(value='desc'),
                          title=dict(title='Video')))

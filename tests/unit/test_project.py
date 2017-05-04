@@ -30,6 +30,7 @@ import mock
 import pytest
 import uuid
 import json
+import datetime
 
 from invenio_db import db
 from copy import deepcopy
@@ -186,6 +187,9 @@ def test_add_video(api_app, es, cds_jsonresolver, users,
         'url': 'http://copyright.web.cern.ch',
     }]
 
+    # check default copyright
+    assert 'copyright' not in project
+
     # check project <--/--> video
     assert project['videos'] == []
 
@@ -204,6 +208,14 @@ def test_add_video(api_app, es, cds_jsonresolver, users,
         'material': '',
         'url': 'http://copyright.web.cern.ch',
     }]
+
+    # check default video copyright
+    year = str(datetime.date.today().year)
+    assert video_1['copyright'] == {
+        'holder': 'CERN',
+        'year': year,
+        'url': 'http://copyright.web.cern.ch',
+    }
 
     # check project <----> video
     assert project._find_refs([video_1.ref])

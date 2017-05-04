@@ -244,18 +244,6 @@ function cdsDepositsCtrl(
               var _f = [];
               _f.push(file);
               _f = _f.concat(_files.videoFiles[key] || []);
-              // Add default CERN copyright and year
-              if (that.copyright) {
-                if (!response.data.metadata.copyright) {
-                  response.data.metadata.copyright = angular.merge(
-                    {},
-                    that.copyright,
-                    {
-                      year: new Date().getFullYear().toString()
-                    }
-                  );
-                }
-              }
               that.addChildren(response.data, _f);
             },
           ]);
@@ -418,8 +406,6 @@ function cdsDeposits() {
       formTemplates: '=?',
       // Dropbox related
       dropboxAppKey: '@',
-      // Default cern copyright
-      copyright: '=?',
       // Accepted video file extensions
       videoExtensions: '@?',
     },

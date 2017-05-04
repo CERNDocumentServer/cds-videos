@@ -694,6 +694,11 @@ class Video(CDSDeposit):
         """
         project_id = data.get('_project_id')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+        data.setdefault('copyright', {
+            'holder': 'CERN',
+            'year': str(datetime.date.today().year),
+            'url': 'http://copyright.web.cern.ch',
+        })
         project = deposit_project_resolver(project_id)
         video_new = super(Video, cls).create(data, id_=id_, **kwargs)
         video_new.project = project
