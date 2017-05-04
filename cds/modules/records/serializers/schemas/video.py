@@ -27,9 +27,9 @@ from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
-    DepositSchema, DescriptionSchema, LicenseSchema, \
-    OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
-    TranslationsSchema, KeywordsSchema
+    DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
+    OaiSchema, RelatedLinksSchema, ReportNumberSchema, StrictKeysSchema, \
+    TitleSchema, TranslationsSchema
 from .doi import DOI
 
 
@@ -92,6 +92,7 @@ class VideoSchema(StrictKeysSchema):
     keywords = fields.Nested(KeywordsSchema, many=True)
     language = fields.Str()
     license = fields.Nested(LicenseSchema, many=True)
+    related_links = fields.Nested(RelatedLinksSchema, many=True)
     schema = fields.Str(attribute="$schema", dump_to='$schema')
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.Nested(ReportNumberSchema, many=False)
