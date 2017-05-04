@@ -176,3 +176,10 @@ class TranslationsSchema(StrictKeysSchema):
     title = fields.Nested(TitleSchema)
     description = fields.Nested(DescriptionSchema)
     language = fields.Str()
+
+
+class RelatedLinksSchema(StrictKeysSchema):
+    """Translations schema."""
+
+    name = fields.Str()
+    url = fields.Str()
