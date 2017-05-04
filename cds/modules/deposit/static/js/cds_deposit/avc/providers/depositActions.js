@@ -25,7 +25,8 @@ function depositActions() {
           },
           SAVE: {
             method: 'PUT',
-            link: 'self'
+            link: 'self',
+            preprocess: sanitizeData
           },
           EDIT: {
             method: 'POST',
