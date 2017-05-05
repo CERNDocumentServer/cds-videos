@@ -120,7 +120,6 @@ angular
     };
   });
 
-
 angular.module('schemaForm')
   .controller('invenioDynamicSelectController', ['$scope', '$controller',
     function ($scope, $controller) {
@@ -142,7 +141,18 @@ angular.module('schemaForm')
           }
         });
       }
+    }])
+  .controller('invenioDynamicMultiSelectController', ['$scope', '$controller',
+    function ($scope, $controller) {
+      $controller('dynamicSelectController', {$scope: $scope});
+      var toWatch = $scope.$parent.form.options.watchAndUpdateOn;
+      if (toWatch) {
+        $scope.$watchCollection(toWatch, function (newValue) {
+          $scope.uiMultiSelectInitInternalModel(newValue);
+        });
+      }
     }]);
+
 // Initialize the module
 angular
   .module('cdsDeposit', [
