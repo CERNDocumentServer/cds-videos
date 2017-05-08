@@ -765,12 +765,12 @@ class Video(CDSDeposit):
         self['type'] = self.project.get('type')
         # generate human-readable duration
         self.generate_duration()
+        # generate extra tags for files
+        self._create_tags()
         # publish the video
         video_published = super(Video, self).publish(pid=pid, id_=id_,
                                                      **kwargs)
         _, record_new = self.fetch_published()
-        # generate extra tags for files
-        self._create_tags()
         # update associated project
         video_published.project._update_videos(
             [video_build_url(video_old_id)],
@@ -860,6 +860,8 @@ class Video(CDSDeposit):
         master = splitext(
             CDSFilesIterator.get_master_video_file(self).get('key', '')
         )[0]
+
+        # Subtitle file
         pattern = re.compile("{0}_([a-zA-Z][a-zA-Z])\.vtt$".format(master))
         objs = [o for o in sorted_files_from_bucket(self._bucket)
                 if pattern.match(o.key)]
@@ -879,6 +881,24 @@ class Video(CDSDeposit):
                     obj, 'context_type', 'subtitle')
                 ObjectVersionTag.create_or_update(
                     obj, 'media_type', 'subtitle')
+                # refresh object
+                db.session.refresh(obj)
+
+            # Poster frame
+            pattern = re.compile('^poster\.(jpg|png)$')
+            try:
+                poster = [o for o in sorted_files_from_bucket(self._bucket)
+                          if pattern.match(o.key)][0]
+            except IndexError:
+                return
+
+            ext = pattern.findall(poster.key)[0]
+            # frame tags
+            ObjectVersionTag.create_or_update(poster, 'content_type', ext)
+            ObjectVersionTag.create_or_update(poster, 'context_type', 'poster')
+            ObjectVersionTag.create_or_update(poster, 'media_type', 'image')
+            # refresh object
+            db.session.refresh(poster)
 
 
 project_resolver = Resolver(

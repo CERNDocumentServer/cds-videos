@@ -51,7 +51,6 @@ app.directive('errSrc', function() {
 });
 app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
   return function(text, id, key, external) {
-
     var _url = '/record/' + id + '/preview/' + key;
     if (external) {
       _url = $window.location.origin + _url;
@@ -79,24 +78,38 @@ app.filter('toMinutes', function() {
   }
 });
 
-// Find master video file in record's files
-app.filter('findMaster', function() {
-  return function(record) {
+// Find record's file with given context_type
+app.filter('findContextType', function() {
+  return function(record, context_type) {
     if (!_.isEmpty(record)) {
       var _files = record.metadata ? record.metadata._files : record._files;
       return _.find(_files, function (file) {
-          return file.context_type === 'master';
+        return file.context_type === context_type;
       })
     }
   }
 });
 
+// Find master video file in record's files
+app.filter('findMaster', function($filter) {
+  return function(record) {
+    return $filter('findContextType')(record, 'master');
+  }
+});
+
 // Find first frame of master video file
-app.filter('findPoster', function() {
-  return function(masterFile) {
-    return _.find(masterFile['frame'], function (frame) {
+app.filter('findPoster', function($filter) {
+  return function(record) {
+    var poster = $filter('findContextType')(record, 'poster');
+    if (poster) {
+        return poster;
+    }
+    else {
+      var masterFile = $filter('findMaster')(record);
+      return _.find(masterFile['frame'], function (frame) {
         return frame.key === 'frame-1.jpg'
-    })
+      })
+    }
   }
 });
 
@@ -104,7 +117,7 @@ app.filter('findPoster', function() {
 app.filter('findGif', function() {
   return function(masterFile) {
     return _.find(masterFile['frames-preview'], function (gif) {
-        return gif.key === 'frames.gif'
+      return gif.key === 'frames.gif'
     })
   }
 });
@@ -114,11 +127,13 @@ app.filter('iiif', function($filter) {
   return function(record, showGif, size) {
     var masterFile = $filter('findMaster')(record);
     var _deposit = record.metadata ? record.metadata._buckets.deposit : record._buckets.deposit;
+    var filterFun = showGif ? 'findGif' : 'findPoster';
+    var filterArg = showGif ? masterFile : record
     return _.template(
       "/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
     )({
       deposit: _deposit,
-      key: ($filter(showGif ? 'findGif' : 'findPoster')(masterFile)).key,
+      key: $filter(filterFun)(filterArg).key,
       size: size.join(','),
       ext: showGif ? 'gif' : 'png',
     });
