@@ -26,13 +26,18 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_pidstore.resolver import Resolver
+from invenio_pidstore.models import PersistentIdentifier
+
 from functools import partial
 
-from .api import Video, Project
+
+def get_pid(pid_type, pid_value):
+    """Get all pids."""
+    return PersistentIdentifier.query.filter_by(
+        pid_type=pid_type, pid_value=pid_value
+    ).one()
 
 
-deposit_resolver = Resolver(
-    pid_type='depid', object_type='rec',
-    getter=partial(Project.get_record, with_deleted=True)
-)
+get_project_pid = partial(get_pid, pid_type='depid')
+
+get_video_pid = partial(get_pid, pid_type='depid')
