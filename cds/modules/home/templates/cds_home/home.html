@@ -7,7 +7,7 @@
       <div class="container">
         <!-- List group -->
         <invenio-search
-          handle-urls="false"
+            disable-url-handler="true"
           search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
         >
           <div class="text-center">
@@ -38,7 +38,7 @@
         </div>
         <!-- List group -->
         <invenio-search
-          handle-urls="false"
+          disable-url-handler="true"
           search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
         >
           <div class="text-center">
