@@ -22,7 +22,6 @@
 from __future__ import absolute_import, print_function
 
 from flask_iiif import IIIF
-from flask_iiif.cache import simple
 from flask_restful import Api
 
 from .utils import image_opener
@@ -39,7 +38,6 @@ class CDSIIIF(object):
     def init_app(self, app):
         """Flask application initialization."""
         api = Api(app=app)
-        app.config['IIIF_CACHE_HANDLER'] = simple.ImageSimpleCache()
         ext = IIIF()
         ext.init_app(app)
         ext.uuid_to_image_opener_handler(image_opener)
