@@ -31,6 +31,8 @@ import mock
 
 from time import sleep
 from copy import deepcopy
+from cds.modules.deposit.resolver import get_video_pid, \
+    get_project_pid
 from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
     deposit_videos_resolver, Project, Video, record_video_resolver
 from flask import url_for
@@ -587,9 +589,8 @@ def test_project_access_rights_based_admin(api_app, users, api_project):
         assert client.post(publish_url).status_code == 202
 
 
-def test_video_deleted(api_app, db, location, api_project, users,
-                       json_headers):
-    """Test delete of files."""
+def test_deleted(api_app, db, location, api_project, users, json_headers):
+    """Test delete of project/videos."""
     (project, video_1, video_2) = api_project
 
     def get_vids(project):
@@ -609,6 +610,14 @@ def test_video_deleted(api_app, db, location, api_project, users,
         assert video_2['_deposit']['id'] in vids
         assert len(vids) == 2
 
+        # check pids
+        pid = get_project_pid(pid_value=project['_deposit']['id'])
+        assert pid.is_deleted() is False
+        pid = get_video_pid(pid_value=video_1['_deposit']['id'])
+        assert pid.is_deleted() is False
+        pid = get_video_pid(pid_value=video_2['_deposit']['id'])
+        assert pid.is_deleted() is False
+
         # delete video_1
         vid = video_1['_deposit']['id']
         url = url_for('invenio_deposit_rest.video_item', pid_value=vid)
@@ -616,6 +625,7 @@ def test_video_deleted(api_app, db, location, api_project, users,
         assert res.status_code == 204
 
         # check project contains only video_2
+        pid = project['_deposit']['id']
         url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
         res = client.get(url, headers=json_headers)
         data = json.loads(res.data.decode('utf-8'))
@@ -636,3 +646,35 @@ def test_video_deleted(api_app, db, location, api_project, users,
         assert video_1['_deposit']['id'] not in vids
         assert video_2['_deposit']['id'] in vids
         assert len(vids) == 1
+
+        # check pids
+        pid = get_project_pid(pid_value=project['_deposit']['id'])
+        assert pid.is_deleted() is False
+        pid = get_video_pid(pid_value=video_1['_deposit']['id'])
+        assert pid.is_deleted() is True
+        pid = get_video_pid(pid_value=video_2['_deposit']['id'])
+        assert pid.is_deleted() is False
+
+        # delete the project
+        pid = project['_deposit']['id']
+        url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
+        res = client.delete(url, headers=json_headers)
+        assert res.status_code == 204
+
+        # check elasticsearch is up-to-date
+        sleep(2)
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list',
+                    q='_deposit.id:{0}'.format(pid)),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 0
+
+        # check pids
+        pid = get_project_pid(pid_value=project['_deposit']['id'])
+        assert pid.is_deleted() is True
+        pid = get_video_pid(pid_value=video_1['_deposit']['id'])
+        assert pid.is_deleted() is True
+        pid = get_video_pid(pid_value=video_2['_deposit']['id'])
+        assert pid.is_deleted() is True
