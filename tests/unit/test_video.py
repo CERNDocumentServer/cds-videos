@@ -627,7 +627,7 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_deposit_vtt_tags(api_app, db, api_project):
-    """Test AVCWorkflow receiver."""
+    """Test VTT tag generation."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
 
@@ -635,7 +635,7 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     add_master_to_video(
         video_deposit=video_1,
         filename='test.mp4',
-        stream=BytesIO(b'1234'), video_duration="15s"
+        stream=BytesIO(b'1234'), video_duration="15"
     )
     # try to insert a new vtt object
     obj = ObjectVersion.create(
@@ -647,19 +647,8 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     video_1 = video_1.publish()
 
     # check tags
-    db.session.refresh(obj)
-    assert obj.get_tags() == {
-        u'context_type': u'subtitle',
-        u'media_type': u'subtitle',
-        u'language': u'fr',
-        u'content_type': u'vtt'
-    }
-    dump = [d for d in video_1._get_files_dump()
-            if d['key'] == 'test_fr.vtt'][0]
-    assert dump['content_type'] == 'vtt'
-    assert dump['context_type'] == 'subtitle'
-    assert dump['media_type'] == 'subtitle'
-    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'fr'}
+    check_object_tags(obj, video_1, content_type='vtt', media_type='subtitle',
+                      context_type='subtitle', language='fr')
 
     # edit the video
     video_1 = video_1.edit()
@@ -674,19 +663,8 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     video_1 = video_1.publish()
 
     # check tags
-    db.session.refresh(obj2)
-    assert obj2.get_tags() == {
-        u'context_type': u'subtitle',
-        u'media_type': u'subtitle',
-        u'language': u'en',
-        u'content_type': u'vtt'
-    }
-    dump = [d for d in video_1._get_files_dump()
-            if d['key'] == 'test_en.vtt'][0]
-    assert dump['content_type'] == 'vtt'
-    assert dump['context_type'] == 'subtitle'
-    assert dump['media_type'] == 'subtitle'
-    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
+    check_object_tags(obj2, video_1, content_type='vtt', media_type='subtitle',
+                      context_type='subtitle', language='en')
 
     # edit a re-published video
     video_1 = video_1.edit()
@@ -699,25 +677,53 @@ def test_deposit_vtt_tags(api_app, db, api_project):
     video_1 = video_1.publish()
 
     # check tags
-    db.session.refresh(obj3)
-    assert obj3.get_tags() == {
-        u'context_type': u'subtitle',
-        u'media_type': u'subtitle',
-        u'language': u'it',
-        u'content_type': u'vtt'
-    }
-    dump = [d for d in video_1._get_files_dump()
-            if d['key'] == 'test_en.vtt'][0]
-    assert dump['content_type'] == 'vtt'
-    assert dump['context_type'] == 'subtitle'
-    assert dump['media_type'] == 'subtitle'
-    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'en'}
-    dump = [d for d in video_1._get_files_dump()
-            if d['key'] == 'test_it.vtt'][0]
-    assert dump['content_type'] == 'vtt'
-    assert dump['context_type'] == 'subtitle'
-    assert dump['media_type'] == 'subtitle'
-    assert dump['tags'] == {u'content_type': u'vtt', u'language': u'it'}
+    check_object_tags(obj3, video_1, content_type='vtt', media_type='subtitle',
+                      context_type='subtitle', language='it')
+
+
+@mock.patch('flask_login.current_user', mock_current_user)
+def test_deposit_poster_tags(api_app, db, api_project):
+    """Test poster tag generation."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    master_video_filename = 'test.mp4'
+    poster_filename = 'poster.jpg'
+    poster_filename2 = 'poster.png'
+
+    # insert a master file inside the video
+    add_master_to_video(
+        video_deposit=video_1,
+        filename=master_video_filename,
+        stream=BytesIO(b'1234'), video_duration='15'
+    )
+    # try to insert a new vtt object
+    obj = ObjectVersion.create(
+        video_1._bucket, key=poster_filename,
+        stream=BytesIO(b'hello'))
+    # publish the video
+    prepare_videos_for_publish([video_1])
+    video_1 = deposit_video_resolver(video_1_depid)
+    video_1 = video_1.publish()
+
+    # check tags
+    check_object_tags(obj, video_1, content_type='jpg',
+                      context_type='poster', media_type='image')
+
+    # edit the video
+    video_1 = video_1.edit()
+
+    # try to delete the old poster frame and substitute with a new one
+    video_1 = deposit_video_resolver(video_1_depid)
+    ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
+    obj2 = ObjectVersion.create(
+        video_1._bucket, key=poster_filename2, stream=BytesIO(b'hello'))
+
+    # publish again the video
+    video_1 = video_1.publish()
+
+    # check tags
+    check_object_tags(obj2, video_1, content_type='png',
+                      context_type='poster', media_type='image')
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -762,3 +768,18 @@ def test_deposit_smil_tag_generation(api_app, db, api_project):
 
     # check smil
     check_smil(video_1)
+
+
+def check_object_tags(obj, video, **tags):
+    """Check tags on an ObjectVersion (i.e. on DB and deposit/record dump)."""
+    assert obj.get_tags() == tags
+    for dump in [
+        [d for d in files if d['key'] == obj.key][0]
+        for files in [video._get_files_dump(),
+                      video.fetch_published()[1]['_files']]
+    ]:
+        assert dump['content_type'] == tags['content_type']
+        assert dump['context_type'] == tags['context_type']
+        assert dump['media_type'] == tags['media_type']
+        assert dump['tags'] == {t: tags[t] for t in tags
+                                if t not in ['context_type', 'media_type']}

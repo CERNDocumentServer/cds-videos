@@ -62,10 +62,15 @@ class CDSPreviewRecordFile(PreviewFile):
     @property
     def poster_uri(self):
         """Get video's poster link."""
-        return url_for(
-            'invenio_records_ui.{0}_files'.format(self.pid.pid_type),
-            pid_value=self.pid.pid_value,
-            filename='frame-1.jpg')
+        try:
+            return [f['links']['self']
+                    for f in self.record['_files']
+                    if f['context_type'] == 'poster'][0]
+        except IndexError:
+            return url_for(
+                'invenio_records_ui.{0}_files'.format(self.pid.pid_type),
+                pid_value=self.pid.pid_value,
+                filename='frame-1.jpg')
 
     @property
     def thumbnails_uri(self):

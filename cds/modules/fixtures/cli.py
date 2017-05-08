@@ -495,6 +495,17 @@ def videos(video, frames, temp, video_count):
                         obj, language=lang, context_type='subtitle',
                         content_type='vtt', media_type='subtitle')
 
+            # Poster frame
+            poster = pkg_resources.resource_filename('cds.modules.fixtures',
+                                                     'data/poster.png')
+            with open(poster, 'rb') as fp:
+                obj = ObjectVersion.create(
+                    bucket=video_bucket,
+                    key='poster.png',
+                    stream=fp)
+                create_tags(obj, content_type='png',
+                            context_type='poster', media_type='image')
+
             deposits.append(video_deposit.commit())
 
         project.commit()
