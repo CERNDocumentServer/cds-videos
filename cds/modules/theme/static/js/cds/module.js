@@ -37,6 +37,7 @@ app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
     });
   };
 }]);
+
 app.directive('errSrc', function() {
   // Replace 404 images with an error
   return {
@@ -49,6 +50,7 @@ app.directive('errSrc', function() {
     }
   }
 });
+
 app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
   return function(text, id, key, external) {
     var _url = '/record/' + id + '/preview/' + key;
@@ -58,16 +60,19 @@ app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
     return $sce.trustAsResourceUrl(_url)
   };
 }]);
+
 app.filter('toInt', function() {
   return function(text) {
     return text ? parseInt(text) : text;
   }
 });
+
 app.filter('stripTags', function() {
   return function(text) {
     return text ? String(text).replace(/<[^>]+>/gm, '') : '';
   }
 });
+
 app.filter('toMinutes', function() {
   return function(seconds) {
     try {
@@ -153,6 +158,7 @@ app.filter('groupBy', function() {
     return _.groupBy(items, field);
   });
 });
+
 // Image loading with fallback
 app.directive('imageProgressiveLoading', function() {
 
