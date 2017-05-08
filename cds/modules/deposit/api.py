@@ -56,9 +56,8 @@ from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 from sqlalchemy import func
 
-from cds.modules.records.minters import report_number_minter
-
-from ..records.minters import is_local_doi
+from .resolver import get_video_pid
+from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
                                get_tasks_status_by_task,
@@ -632,8 +631,13 @@ class Project(CDSDeposit):
         # check if I can delete all videos
         if any(video['_deposit'].get('pid') for video in videos):
             raise PIDInvalidAction()
+        # delete all videos
         for video in videos:
             video.delete(force=force)
+            # mark video PIDs as DELETED
+            pid = get_video_pid(pid_value=video['_deposit']['id'])
+            if not pid.is_deleted():
+                pid.delete()
         return super(Project, self).delete(force=force, pid=pid)
 
     @has_status(status='draft')
