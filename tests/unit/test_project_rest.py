@@ -585,3 +585,54 @@ def test_project_access_rights_based_admin(api_app, users, api_project):
                               pid_value=cds_depid, action='publish')
         assert client.get(deposit_url).status_code == 200
         assert client.post(publish_url).status_code == 202
+
+
+def test_video_deleted(api_app, db, location, api_project, users,
+                       json_headers):
+    """Test delete of files."""
+    (project, video_1, video_2) = api_project
+
+    def get_vids(project):
+        return [video['_deposit']['id'] for video in project['videos']]
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # check project contains both videos
+        pid = project['_deposit']['id']
+        url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        vids = get_vids(data['metadata'])
+        assert video_1['_deposit']['id'] in vids
+        assert video_2['_deposit']['id'] in vids
+        assert len(vids) == 2
+
+        # delete video_1
+        vid = video_1['_deposit']['id']
+        url = url_for('invenio_deposit_rest.video_item', pid_value=vid)
+        res = client.delete(url, headers=json_headers)
+        assert res.status_code == 204
+
+        # check project contains only video_2
+        url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
+        res = client.get(url, headers=json_headers)
+        data = json.loads(res.data.decode('utf-8'))
+        vids = get_vids(data['metadata'])
+        assert video_1['_deposit']['id'] not in vids
+        assert video_2['_deposit']['id'] in vids
+        assert len(vids) == 1
+
+        # check elasticsearch is up-to-date
+        sleep(2)
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list',
+                    q='_deposit.id:{0}'.format(pid)),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        vids = get_vids(data['hits']['hits'][0]['metadata'])
+        assert video_1['_deposit']['id'] not in vids
+        assert video_2['_deposit']['id'] in vids
+        assert len(vids) == 1
