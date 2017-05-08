@@ -797,6 +797,7 @@ class Video(CDSDeposit):
         video_deleted = super(Video, self).delete(force=force, pid=pid)
         # update project
         project._delete_videos([ref_old])
+        project.commit()
         return video_deleted
 
     def discard(self, pid=None):
