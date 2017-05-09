@@ -80,7 +80,8 @@
           }
         },
         "date": {
-          "type": "string"
+          "type": "date",
+          "format": "date||date_time_no_millis"
         },
         "keywords": {
           "properties": {
