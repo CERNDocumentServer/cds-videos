@@ -1,13 +1,13 @@
 <div class="row">
-  <div class="col-sm-4 mb-20" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
+  <div class="col-md-4 mb-20" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <a class="cds-video-title l-b" target="_self" ng-href="/record/{{ ::record.id }}">
       <img
         class="img-responsive"
-        ng-src="{{ record | iiif:gif:[330,190] }}"
+        gif-src="{{ record | iiif:true:[330,190] }}"
+        img-src="{{ record | iiif:false:[330,190] }}"
+        ng-src="{{ record | iiif:false:[20,11] }}"
         err-src="//unsplash.it/1024/576>?random&blur"
-        ng-init="gif=false"
-        ng-mouseover="gif=true"
-        ng-mouseleave="gif=false"
+        image-progressive-loading
       />
       <span ng-hide="!record.metadata._deposit.extracted_metadata.duration" class="cds-video-duration">{{ ::record.metadata._deposit.extracted_metadata.duration | toMinutes }}</span>
       <p>
