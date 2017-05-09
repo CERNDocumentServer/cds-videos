@@ -26,16 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_pidstore.models import PersistentIdentifier
-
 from functools import partial
 
-
-def get_pid(pid_type, pid_value):
-    """Get all pids."""
-    return PersistentIdentifier.query.filter_by(
-        pid_type=pid_type, pid_value=pid_value
-    ).one()
+from ..records.resolver import get_pid
 
 
 get_project_pid = partial(get_pid, pid_type='depid')
