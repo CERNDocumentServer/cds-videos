@@ -415,11 +415,19 @@ RECORD_VIDEOS_FACETS = {
             'license': {
                 'terms': {'field': 'license.license.untouched'},
             },
+            'years': {
+                'date_histogram': {
+                    'field': 'date',
+                    'interval': 'year',
+                    'format': 'yyyy'
+                }
+            }
         },
         'post_filters': {
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
             'license': terms_filter('license.license.untouched'),
+            'years': range_filter('date', format='yyyy', end_date_math='/y'),
         },
     }
 }
