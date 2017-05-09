@@ -1,18 +1,18 @@
 <div class="row">
-  <div class="col-sm-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
+  <div class="col-md-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <a ng-mouseover="show=true"
        ng-mouseleave="show=false"
-       class="cds-transition cds-video-title l-w"
+       class="cds-transition cds-video-title l-w cds-line-height-100"
        target="_self"
        ng-href="/record/{{ ::record.id }}"
-       ng-class="{'cds-video-title-with-play-button': !gif}">
+       ng-class="{'cds-video-title-with-play-button': !show}">
       <img
         class="img-responsive"
-        ng-src="{{ record | iiif:gif:[400,220] }}"
+        gif-src="{{ record | iiif:true:[400,220] }}"
+        img-src="{{ record | iiif:false:[400,220] }}"
+        ng-src="{{ record | iiif:false:[20,11] }}"
         err-src="//unsplash.it/1024/576>?random&blur"
-        ng-init="gif=false"
-        ng-mouseover="gif=true"
-        ng-mouseleave="gif=false"
+        image-progressive-loading
       />
       <p>
         {{ ::record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}

@@ -433,9 +433,22 @@ i.sort-handle {
   opacity: 1;
 }
 
+.cds-line-height-100 {
+  line-height: 100%;
+}
+
+.cds-blur {
+  filter: blur(3px);
+}
+
 .cds-video-title {
   font-size: 18px;
+  min-width: 100%;
   position: relative;
+  transition: all 250ms ease;
+  img {
+    width: 100%;
+  }
   p {
     margin-top: 10px;
   }
@@ -443,20 +456,20 @@ i.sort-handle {
 
 .cds-video-title-with-play-button {
   position: relative;
+  width: 100%;
   display: inline-block;
-  &::before {
+  &::after {
     content: "\f01d";
     font-family: FontAwesome;
     font-size: 40px;
-    width: 90%;
-    margin-left: 5%;
+    width: 100%;
+    top: 40%;
     font-style: normal;
     font-weight: normal;
     text-decoration: none;
     color: #fff;
     z-index: 2;
     position: absolute;
-    top: 25%;
     text-align: center;
   }
 }

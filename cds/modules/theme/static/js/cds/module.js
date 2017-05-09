@@ -138,3 +138,47 @@ app.filter('groupBy', function() {
     return _.groupBy(items, field);
   });
 });
+// Image loading with fallback
+app.directive('imageProgressiveLoading', ['$interpolate', function($interpolate) {
+  function linkFunction(scope, element, attr) {
+    // Add the blur class
+    element.addClass('cds-blur');
+    // Initialize vars
+    scope.isLoaded = false;
+    scope.hasError = false;
+
+    var _img = new Image();
+    _img.src = $interpolate(attr.imgSrc)(scope);
+    _img.onload = function() {
+      element[0].src = attr.imgSrc;
+      element.removeClass('cds-blur');
+    }
+    // If there is gif replace it with the main image
+    if (attr.gifSrc) {
+      // Mouse out
+      element.bind('mouseout', function (e) {
+        element[0].src = attr.imgSrc;
+      });
+      // Mouse over
+      element.bind('mouseover', function (e) {
+        if (scope.isLoaded) {
+          element[0].src = attr.gifSrc;
+        } else if(!scope.hasError) {
+          var img = new Image();
+          img.src = $interpolate(attr.gifSrc)(scope);
+          img.onload = function() {
+            scope.isLoaded = true;
+            element[0].src = attr.gifSrc;
+          }
+          img.onerror = function() {
+            scope.hasError = true;
+          }
+        }
+      });
+    }
+  }
+  return {
+      restrict: 'A',
+      link: linkFunction
+  };
+}]);
