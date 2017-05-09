@@ -454,3 +454,57 @@ def test_video_publish_edit_publish_again(
             data = json.loads(res.data.decode('utf-8'))
             for hit in data['hits']['hits']:
                 assert isinstance(hit['id'], int)
+
+
+@mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
+def test_record_video_links(datacite_mock, api_app, es, api_project, users,
+                            json_headers):
+    """Test record video links."""
+    (project, video_1, video_2) = api_project
+    user = User.query.filter_by(id=users[0]).first()
+    prepare_videos_for_publish([video_1, video_2])
+    vid = video_1['_deposit']['id']
+    pid = project['_deposit']['id']
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, user)
+
+        # publish video
+        url = url_for('invenio_deposit_rest.video_actions',
+                      pid_value=vid, action='publish')
+        assert client.post(url).status_code == 202
+        rec_pid, rec_video = deposit_video_resolver(vid).fetch_published()
+
+        # get a record video (with no published project)
+        url = url_for('invenio_records_rest.recid_item',
+                      pid_value=rec_pid.pid_value, _external=True)
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+
+        # check video record
+        data = json.loads(res.data.decode('utf-8'))
+        assert data['links'] == {
+            'self': url
+        }
+
+        # publish the project
+        url = url_for('invenio_deposit_rest.project_actions',
+                      pid_value=pid, action='publish')
+        assert client.post(url).status_code == 202
+        rec_pid_proj, rec_proj = video_1.project.fetch_published()
+
+        # get a record video (with no published project)
+        url = url_for('invenio_records_rest.recid_item',
+                      pid_value=rec_pid.pid_value, _external=True)
+        res = client.get(url, headers=json_headers)
+        assert res.status_code == 200
+
+        # check video record
+        data = json.loads(res.data.decode('utf-8'))
+        url_api_prj = 'http://localhost/record/3'
+        url_prj = 'http://localhost/record/3'
+        assert data['links'] == {
+            'self': url,
+            'project': url_api_prj,
+            'project_html': url_prj,
+        }

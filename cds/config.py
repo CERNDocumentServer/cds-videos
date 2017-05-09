@@ -283,6 +283,7 @@ RECORDS_REST_ENDPOINTS = dict(
         default_media_type='application/json',
         max_result_window=10000,
         read_permission_factory_imp=record_read_permission_factory,
+        links_factory_imp='cds.modules.records.links.record_link_factory',
     ),
     catid=dict(
         default_endpoint_prefix=True,
@@ -371,6 +372,8 @@ RECORDS_REST_DEFAULT_SORT = {
 
 # Defined facets for records REST API.
 RECORDS_REST_FACETS = dict()
+
+RECORD_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # Facets for the specific index
 DEPOSIT_PROJECT_FACETS = {
