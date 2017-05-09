@@ -577,6 +577,28 @@ class Project(CDSDeposit):
         for index in self._find_refs(refs).keys():
             del self['videos'][index]
 
+    def _publish_videos(self):
+        """Publish all videos that are still deposits."""
+        # get reference of all video deposits still not published
+        refs_old = [video_ref for video_ref in self._video_refs
+                    if is_deposit(video_ref)]
+
+        # extract the PIDs from the video deposits
+        ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
+
+        # publish them and get the new PID
+        videos_published = [video.publish().commit()
+                            for video in deposit_videos_resolver(ids_old)]
+
+        # get new video references
+        refs_new = [record_build_url(video['recid'])
+                    for video in videos_published]
+
+        # update project video references
+        self._update_videos(refs_old, refs_new)
+
+        return videos_published
+
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a project.
 
@@ -584,24 +606,11 @@ class Project(CDSDeposit):
 
         :returns: The new project version.
         """
-        # get reference of all deposit still not published
-        refs_old = [video_ref for video_ref in self._video_refs
-                    if is_deposit(video_ref)]
-
-        # extract the PIDs from them
-        ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
-
-        # publish them and get the new PID
-        refs_new = [record_build_url(video.publish().commit()['recid'])
-                    for video in deposit_videos_resolver(ids_old)]
-
-        # update project video references
-        self._update_videos(refs_old, refs_new)
-
+        # make sure all video are published
+        self._publish_videos()
         # Return project with generated report number
         self = Project(self.model.json, self.model)
         assert self.report_number
-
         # publish project
         return super(Project, self).publish(pid=pid, id_=id_, **kwargs)
 
