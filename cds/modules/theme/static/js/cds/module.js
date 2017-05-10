@@ -159,6 +159,19 @@ app.filter('groupBy', function() {
   });
 });
 
+// Transform the URL into absolute an URL
+app.filter('absoluteURL', ['$sce', function($sce) {
+  return function(url) {
+    if (url.startsWith("https://") || url.startsWith("http://")) {
+        // The protocol is correct
+        return url;
+    } else {
+      // The URL is: 'foo.com' or 'www.foo.com', so at least add the http
+        return  "http://" + url;
+    }
+  };
+}]);
+
 // Image loading with fallback
 app.directive('imageProgressiveLoading', function() {
 
