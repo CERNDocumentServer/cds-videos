@@ -106,6 +106,7 @@ function cdsDepositCtrl(
     };
 
     this.inheritMetadata = function(specific) {
+      // Inherit metadata from project
       var record = that.record;
       var master = that.cdsDepositsCtrl.master.metadata;
       var paths = (specific !== undefined ) ? specific : inheritedProperties;
@@ -120,6 +121,8 @@ function cdsDepositCtrl(
           accessElement(record, propPath, inheritedArray);
         }
       });
+      // Set form dirty
+      that.setDirty();
     };
 
     this.getTaskFeedback = function(eventId, taskName, taskStatus) {
@@ -663,6 +666,14 @@ function cdsDepositCtrl(
 
   this.isInvalid = function() {
     return that.depositFormModels.some(_.property('$invalid'))
+  }
+
+  this.setDirty = function() {
+    _.invoke(that.depositFormModels, '$setDirty');
+  }
+
+  this.setPristine = function() {
+    _.invoke(that.depositFormModels, '$setPristine');
   }
 
   // Local storage
