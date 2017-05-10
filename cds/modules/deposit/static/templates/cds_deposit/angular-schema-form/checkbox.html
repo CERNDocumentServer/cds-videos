@@ -3,7 +3,7 @@
   <label class="{{form.labelHtmlClass}}">
     <input type="checkbox"
            sf-changed="form"
-           ng-disabled="form.readonly"
+           ng-disabled="evalExpr(form.readonly)"
            ng-model="$$value$$"
            ng-model-options="form.ngModelOptions"
            schema-validate="form"

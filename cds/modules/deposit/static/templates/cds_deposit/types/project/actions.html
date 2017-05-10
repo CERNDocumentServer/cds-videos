@@ -18,7 +18,7 @@
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-success btn-sm"
+    class="btn btn-default btn-sm"
     ng-click="$ctrl.actionMultipleHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
   Edit
   </button>

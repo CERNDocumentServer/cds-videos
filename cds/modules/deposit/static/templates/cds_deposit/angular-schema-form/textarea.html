@@ -13,7 +13,7 @@
       placeholder="{{ ::form.placeholder }}"
       ng-if="!form.fieldAddonLeft && !form.fieldAddonRight"
       sf-changed="form"
-      ng-disabled="form.readonly"
+      ng-disabled="evalExpr(form.readonly)"
       ng-model="$$value$$"
       ng-model-options="form.ngModelOptions"
       schema-validate="form"></textarea>
@@ -29,7 +29,7 @@
         id="{{ form.key.slice(-1)[0] }}"
         sf-changed="form"
         placeholder="{{ ::form.placeholder }}"
-        ng-disabled="form.readonly"
+        ng-disabled="evalExpr(form.readonly)"
         ng-model="$$value$$"
         ng-model-options="form.ngModelOptions"
         schema-validate="form"

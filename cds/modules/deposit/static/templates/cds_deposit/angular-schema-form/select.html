@@ -7,7 +7,7 @@
   </label>
     <select ng-model="$$value$$"
             ng-model-options="form.ngModelOptions"
-            ng-disabled="form.readonly"
+            ng-disabled="evalExpr(form.readonly)"
             sf-changed="form"
             class="form-control {{ form.fieldHtmlClass }}"
             schema-validate="form"

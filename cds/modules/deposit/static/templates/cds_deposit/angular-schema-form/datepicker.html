@@ -22,6 +22,7 @@
       sf-changed="form"
       ng-show="form.key"
       ng-model="$$value$$"
+      ng-disabled="evalExpr(form.readonly)"
       data-date-format="{{form.format}}"
       data-date-type="string"
       data-autoclose="true"

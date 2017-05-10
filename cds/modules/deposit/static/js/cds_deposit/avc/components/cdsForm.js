@@ -2,6 +2,20 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   var that = this;
 
+  // Default options for schema forms
+  this.sfOptions = {
+    formDefaults: {
+      readonly: '$ctrl.cdsDepositCtrl.isPublished()',
+      disableSuccessState: true,
+      feedback: false,
+      onChange: '$ctrl.removeValidationMessage(modelValue,form)',
+      ngModelOptions: {
+        updateOn: 'default blur',
+        allowInvalid: true
+      }
+    }
+  }
+
   this.$onInit = function() {
     this.cdsDepositCtrl.depositForm = {};
     this.cdsDepositCtrl.cdsDepositsCtrl.JSONResolver(this.form)
