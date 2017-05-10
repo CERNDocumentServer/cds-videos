@@ -1,4 +1,4 @@
-<div ng-show="vm.invenioSearchResults.hits.total > 0" class="cds-search-facets bg-w pa-20 pt-30">
+<div ng-show="vm.invenioSearchResults.hits.total > 0" class="cds-search-facets bg-w pt-30">
   <div ng-init="tree=[];tree_more=[]" ng-repeat="(key, value) in vm.invenioSearchResults.aggregations track by $index">
     <div ng-if="value.buckets.length > 0 && key != 'years'" class="cds-border ba mb-30 pa-10 b-r-3">
       <h2 class="text-capitalize f9 mt-5"><b>{{ key }}</b></h2>

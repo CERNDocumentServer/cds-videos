@@ -1,12 +1,13 @@
 <div class="row">
   <div class="col-md-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
-    <a ng-mouseover="show=true"
+    <a ng-mouseenter="show=true"
        ng-mouseleave="show=false"
        class="cds-transition cds-video-title l-w cds-line-height-100"
        target="_self"
        ng-href="/record/{{ ::record.id }}"
        ng-class="{'cds-video-title-with-play-button': !show}">
       <img
+        ng-cloak
         class="img-responsive"
         gif-src="{{ record | iiif:true:[400,220] }}"
         img-src="{{ record | iiif:false:[400,220] }}"
