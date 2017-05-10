@@ -69,7 +69,7 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "readonly": "!model.category",
+        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
         "options": {
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",

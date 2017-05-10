@@ -1,5 +1,5 @@
 <fieldset ng-controller="dynamicSelectController" class="form-group {{form.htmlClass}}"
-     ng-disabled="$eval(form.readonly)"
+     ng-disabled="evalExpr(form.readonly)"
      ng-class="{'has-error': hasError(), 'has-success': hasSuccess()}">
     <label class="control-label {{form.labelHtmlClass}}" ng-show="showTitle()">{{form.title}}</label>
     <div class="form-group {{form.fieldHtmlClass}}" ng-init="populateTitleMap(form)">

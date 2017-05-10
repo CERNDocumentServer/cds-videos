@@ -14,7 +14,7 @@
           type="radio"
           class="{{ form.fieldHtmlClass }}"
           sf-changed="form"
-          ng-disabled="form.readonly"
+          ng-disabled="evalExpr(form.readonly)"
           ng-model="$$value$$"
           ng-value="item.value"
           name="{{ form.key.join('.') }}">

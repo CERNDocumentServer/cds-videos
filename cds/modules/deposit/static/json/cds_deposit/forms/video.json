@@ -385,10 +385,10 @@
   ],
   "related_links": [
     {
-      "notitle": true,
       "key": "related_links",
       "type": "array",
       "add": "Add related link",
+      "readonly": "model._deposit.status == 'published'",
       "items": [
         {
           "title": "Name",
