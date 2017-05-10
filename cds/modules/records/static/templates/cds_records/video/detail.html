@@ -91,6 +91,14 @@
                 <a ng-href='/search?q="{{ :: record.metadata.language }}"'>{{ record.metadata.language }}</a>
 
               </li>
+              <li ng-if="record.metadata.related_links.length > 0">
+                <h3 class="f9 tw-b">Related links</h3>
+                <ul ng-repeat="related_link in record.metadata.related_links">
+                  <li>
+                    <a ng-href='{{ :: related_link.url | absoluteURL }}' target="_blank">{{ related_link.name }}</a>
+                  </li>
+                </ul>
+              </li>
             </ul>
           </div>
           <div class="cds-detail-more cds-detail-video-more">
