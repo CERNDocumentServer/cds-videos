@@ -19,7 +19,7 @@
       id="{{ form.key.slice(-1)[0] }}"
       ng-model="$$value$$"
       ng-model-options="form.ngModelOptions"
-      ng-disabled="form.readonly"
+      ng-disabled="evalExpr(form.readonly)"
       schema-validate="form"
       name="{{ form.key.slice(-1)[0] }}"
       aria-describedby="{{ form.key.slice(-1)[0] + 'Status' }}">
@@ -40,7 +40,7 @@
         class="form-control {{ form.fieldHtmlClass }}"
         id="{{ form.key.slice(-1)[0] }}"
         sf-field-model
-        ng-disabled="form.readonly"
+        ng-disabled="evalExpr(form.readonly)"
         schema-validate="form"
         name="{{ form.key.slice(-1)[0] }}"
         aria-describedby="{{ form.key.slice(-1)[0] + 'Status' }}">

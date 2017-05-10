@@ -13,6 +13,8 @@
       class="form-control"
       schema-validate="form"
       ng-model="$$value$$"
-      ckeditor="form.ckeditor"></textarea>
+      ng-disabled="evalExpr(form.readonly)"
+      ckeditor="form.ckeditor">
+    </textarea>
     <span class="help-block">{{ (hasError() && errorMessage(schemaError())) || form.description}}</span>
 </div>

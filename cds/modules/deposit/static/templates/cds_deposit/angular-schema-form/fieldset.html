@@ -1,6 +1,6 @@
 <fieldset
   class="schema-form-fieldset {{ form.htmlClass }}"
-  ng-disabled="form.readonly"
+  ng-disabled="evalExpr(form.readonly)"
   ng-init="collapsed = form.collapsed">
   <div class="panel panel-default deposit-panel">
     <div class="panel-heading" ng-click="collapsed = !collapsed">

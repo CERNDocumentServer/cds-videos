@@ -24,7 +24,7 @@
           <button
             class="close"
             type="button"
-            ng-hide="form.readonly || form.remove === null || modelArray.length < 2"
+            ng-hide="evalExpr(form.readonly) || form.remove === null || modelArray.length < 2"
             ng-click="deleteFromArray($index)"
             ng-disabled="modelArray.length < 2">
             <span aria-hidden="true">&times;</span>
@@ -43,7 +43,7 @@
         ng-bind-html="(hasError() && errorMessage(schemaError())) || form.description"></div>
       <a
         class="add-button {{ form.style.add }}"
-        ng-hide="form.readonly || form.add === null"
+        ng-hide="evalExpr(form.readonly) || form.add === null"
         ng-click="appendToArray()"
         ng-disabled="form.schema.maxItems <= modelArray.length">
         <i class="fa fa-plus"></i>&nbsp;{{ form.add || 'Add'}}

@@ -47,12 +47,25 @@ function cdsDepositCtrl(
   // Failed subformats list
   that.failedSubformatKeys = [];
 
-  // Deposit type property
+  // Deposit type
   Object.defineProperty(this, 'depositType', {
     get: function() {
       return that.master ? 'project' : 'video';
     }
   })
+
+  // Deposit status
+  this.isPublished = function() {
+    return that.record._deposit.status === 'published';
+  };
+
+  this.isDraft = function() {
+    return that.record._deposit.status === 'draft';
+  };
+
+  this.hasCategory = function() {
+    return !that.record.category;
+  }
 
   // Initilize stateCurrent
   this.stateCurrent = null;
@@ -431,7 +444,7 @@ function cdsDepositCtrl(
     }
 
     // Clean storage if published
-    if (this.record._deposit.status == 'published') {
+    if (this.isPublished()) {
       this.cleanLocalStorage();
     }
 

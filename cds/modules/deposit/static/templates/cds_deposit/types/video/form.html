@@ -123,8 +123,8 @@
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.basic"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }">
-                  </form>
+                    sf-options="$ctrl.sfOptions"
+                  ></form>
                 </div>
                 <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
                   <div ng-transclude></div>
@@ -136,8 +136,8 @@
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.licenses"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }">
-                  </form>
+                    sf-options="$ctrl.sfOptions"
+                  ></form>
                 </div>
                 <div ng-show="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
                   <form
@@ -146,7 +146,7 @@
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.translations"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+                    sf-options="$ctrl.sfOptions"
                   ></form>
                 </div>
                 <div ng-show="active=='related_links'" role="tabpanel" ng-class="{active: active=='related_links'}"  class="tab-pane">
@@ -156,7 +156,7 @@
                     sf-schema="$ctrl.cdsDepositCtrl.schema"
                     sf-form="$ctrl.form.related_links"
                     sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="{formDefaults: { disableSuccessState: true, feedback: false, onChange: '$ctrl.removeValidationMessage(modelValue,form)', ngModelOptions: { updateOn: 'default blur', allowInvalid: true} } }"
+                    sf-options="$ctrl.sfOptions"
                   ></form>
                 </div>
                 <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
