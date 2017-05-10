@@ -377,21 +377,23 @@ function cdsDepositCtrl(
 
     // Calculate the transcode
     this.updateStateReporter = function(type, data, status) {
-      if (data && status && !data.status) {
-        data.status = status;
-      }
-      if (type === 'file_transcode') {
-        if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
-          that.videoPreviewer(
-            data.payload.deposit_id,
-            data.payload.key
-          );
+      if (data) {
+        if (status && !data.status) {
+          data.status = status;
         }
-      } else {
-        if (that.stateReporter[type].status != data.status) {
-          $scope.$broadcast('cds.deposit.task', type, data.status, data);
+        if (type === 'file_transcode') {
+          if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
+            that.videoPreviewer(
+              data.payload.deposit_id,
+              data.payload.key
+            );
+          }
+        } else {
+          if (that.stateReporter[type].status != data.status) {
+            $scope.$broadcast('cds.deposit.task', type, data.status, data);
+          }
+          that.stateReporter[type] = angular.copy(data);
         }
-        that.stateReporter[type] = angular.copy(data);
       }
     };
 
@@ -584,6 +586,10 @@ function cdsDepositCtrl(
         if (link === 'self') {
           return urlBuilder.selfVideo({
             deposit: that.record._deposit.id,
+          })
+        } else if (link == 'bucket') {
+          return urlBuilder.bucketVideo({
+            bucket: that.record._buckets.deposit,
           })
         }
         // If the link is different return the action video url

@@ -40,6 +40,10 @@ function depositActions() {
           DELETE: {
             method: 'DELETE',
             link: 'self'
+          },
+          BUCKET: {
+            method: 'GET',
+            link: 'bucket'
           }
         }, extraActions || {})
         return obj

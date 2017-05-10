@@ -72,6 +72,7 @@ function cdsDepositsConfig(
     restartEvent: '/hooks/receivers/avc/events/<%=eventId%>/tasks/<%=taskId%>',
     taskFeedback: '/hooks/receivers/avc/events/<%=eventId%>/feedback',
     selfVideo: '/api/deposits/video/<%=deposit%>',
+    bucketVideo: '/api/files/<%=bucket%>',
     actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>',
   });
 
