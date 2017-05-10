@@ -65,7 +65,7 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
     return deferred.promise;
   }
   function onSelect(selected) {
-    if (selected){
+    if (selected && !_.isEmpty(selected.value)){
       try {
         var searches = localStorageService.get('cds.search.history') || [];
         var exists = _.findWhere(searches, {value: selected.value});
