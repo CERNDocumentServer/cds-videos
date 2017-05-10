@@ -81,7 +81,10 @@ class CDSRecordDump(RecordDump):
             val = data['json']
 
         # MARC21 versions of the record are only accessible to admins
-        val['_access'] = {'read': ['cds-admin@cern.ch']}
+        val['_access'] = {
+            'read': ['cds-admin@cern.ch'],
+            'update': ['cds-admin@cern.ch']
+        }
 
         return (dt, val)
 
