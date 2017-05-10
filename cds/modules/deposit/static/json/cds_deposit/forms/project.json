@@ -2,7 +2,7 @@
   "basic": {
     "leftColumn": [
       {
-        "title": "Name",
+        "title": "Title",
         "key": "title.title",
         "required": false
       },
