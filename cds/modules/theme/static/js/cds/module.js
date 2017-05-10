@@ -139,36 +139,39 @@ app.filter('groupBy', function() {
   });
 });
 // Image loading with fallback
-app.directive('imageProgressiveLoading', ['$interpolate', function($interpolate) {
+app.directive('imageProgressiveLoading', function() {
+
   function linkFunction(scope, element, attr) {
     // Add the blur class
     element.addClass('cds-blur');
     // Initialize vars
     scope.isLoaded = false;
     scope.hasError = false;
-
     var _img = new Image();
-    _img.src = $interpolate(attr.imgSrc)(scope);
+    _img.src = attr.imgSrc;
     _img.onload = function() {
       element[0].src = attr.imgSrc;
+      attr.$set('src', attr.imgSrc);
       element.removeClass('cds-blur');
     }
     // If there is gif replace it with the main image
     if (attr.gifSrc) {
       // Mouse out
       element.bind('mouseout', function (e) {
-        element[0].src = attr.imgSrc;
+        if (scope.isLoaded && !scope.hasError) {
+          attr.$set('src', attr.imgSrc);
+        }
       });
       // Mouse over
-      element.bind('mouseover', function (e) {
+      element.bind('mouseenter', function (e) {
         if (scope.isLoaded) {
           element[0].src = attr.gifSrc;
         } else if(!scope.hasError) {
           var img = new Image();
-          img.src = $interpolate(attr.gifSrc)(scope);
+          img.src = attr.gifSrc;
           img.onload = function() {
             scope.isLoaded = true;
-            element[0].src = attr.gifSrc;
+            attr.$set('src', attr.gifSrc);
           }
           img.onerror = function() {
             scope.hasError = true;
@@ -181,4 +184,4 @@ app.directive('imageProgressiveLoading', ['$interpolate', function($interpolate)
       restrict: 'A',
       link: linkFunction
   };
-}]);
+});
