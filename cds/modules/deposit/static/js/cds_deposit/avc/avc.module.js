@@ -8,13 +8,15 @@ function cdsDepositsConfig(
   taskRepresentationsProvider,
   urlBuilderProvider,
   typeReducerProvider,
-  localStorageServiceProvider
+  localStorageServiceProvider,
+  sfErrorMessageProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
     requireBase: false,
     rewriteLinks: false,
   });
+  sfErrorMessageProvider.setDefaultMessage(0, 'This field is required.');
 
   // Local storage configuration
   localStorageServiceProvider.setPrefix('cdsDeposit');
@@ -98,6 +100,7 @@ cdsDepositsConfig.$inject = [
   'urlBuilderProvider',
   'typeReducerProvider',
   'localStorageServiceProvider',
+  'sfErrorMessageProvider',
 ];
 
 // Register modules
@@ -113,6 +116,7 @@ angular.module('cdsDeposit.modules', [
   'cdsDeposit.factories',
   'cdsDeposit.components',
   'LocalStorageModule',
+  'schemaForm',
 ]).config(cdsDepositsConfig);
 
 angular
