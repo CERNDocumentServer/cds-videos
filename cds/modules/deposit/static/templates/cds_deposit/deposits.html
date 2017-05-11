@@ -83,21 +83,23 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12">
+          <!-- Draft Project -->
           <cds-form
             template="/static/templates/cds_deposit/types/project/form.html"
             form="{{ $ctrl.masterForm || {} }}"
           >
           </cds-form>
+          <!-- Published Project -->
           <!-- ADD children -->
-          <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.children track by $index">
+          <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by $index">
             <cds-deposit
               index="$index + 1"
-              id="child.metadata._deposit.id"
+              id="child._deposit.id"
               update-record-after-success="true"
               update-record-in-background="10000"
               links="child.links"
               schema="{{ $ctrl.childrenSchema }}"
-              record="child.metadata"
+              record="child"
             >
               <div class="panel panel-default">
                 <div class="panel-heading">
@@ -116,14 +118,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="panel-body">
+                <div ng-init="showForm=false" class="panel-body">
+                  <!-- Draft Video -->
                   <cds-form
                     template="/static/templates/cds_deposit/types/video/form.html"
                     form="{{ $ctrl.childrenForm || {} }}"
                   >
                   <cds-uploader
                     auto-start-upload="true"
-                    files="child.metadata._files"
+                    files="child._files"
                     template="/static/templates/cds_deposit/types/common/uploader.html"
                     remote-master-receiver="/api/hooks/receivers/avc/events/"
                   >

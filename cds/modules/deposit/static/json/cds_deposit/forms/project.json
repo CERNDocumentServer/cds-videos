@@ -21,7 +21,6 @@
         "type": "section",
         "htmlClass": "form-ckeditor",
         "description": "",
-
         "items": [
           {
             "type": "ckeditor",
@@ -213,17 +212,20 @@
       "items": [
         {
           "title": "Title",
-          "key": "translations[].title.title"
+          "key": "translations[].title.title",
+          "required": false
         },
         {
           "title": "Description",
           "key": "translations[].description.value",
-          "type": "textarea"
+          "type": "textarea",
+          "required": false
         },
         {
           "title": "Language",
           "key": "translations[].language",
           "type": "select",
+          "required": false,
           "titleMap": [
             {
               "value":  "bg",

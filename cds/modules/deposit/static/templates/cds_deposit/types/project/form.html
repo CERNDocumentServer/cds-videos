@@ -7,10 +7,17 @@
   </div>
   <div class="row">
     <div class="col-sm-12">
-      <!-- Brief view of the video -->
+      <!-- Brief view of the project -->
       <div class="row">
         <div class="col-sm-9">
-          <h3 class="mb-5 mt-0">{{ $ctrl.cdsDepositCtrl.record.title.title || 'No project title'}}</h3>
+          <h3 class="mb-5 mt-0">
+            <a ng-if="$ctrl.cdsDepositCtrl.isPublished()" ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+              {{ $ctrl.cdsDepositCtrl.record.title.title || 'No project title'}}
+            </a>
+            <span ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+              {{ $ctrl.cdsDepositCtrl.record.title.title || 'No project title'}}
+            </span>
+          </h3>
           <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
         </div>
         <div class="col-sm-3">
@@ -22,8 +29,8 @@
           </div>
         </div>
       </div>
+      <!-- Brief view of the project -->
       <div ng-show="showAll">
-        <!-- Brief view of the video -->
         <ul ng-init="active='metadata'" class="nav nav-tabs mt-20" role="tablist">
           <li role="presentation" ng-class="{active: active=='metadata'}"><a ng-click="active='metadata'" role="tab" data-toggle="tab">Basic Info</a></li>
           <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
@@ -101,8 +108,9 @@
         </div>
       </div>
       <!-- Tab panes -->
+      <hr />
       <div class="text-center">
-        <a class="btn btn-default btn-sm" ng-click="showAll=!showAll">{{ showAll ? 'Hide' : 'Show' }}</a>
+        <a class="btn btn-default btn-sm" ng-click="showAll=!showAll">{{ showAll ? 'Show less' : 'Show more' }}</a>
       </div>
     </div>
   </div>

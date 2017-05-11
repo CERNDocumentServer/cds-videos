@@ -52,7 +52,7 @@ function cdsDepositCtrl(
     get: function() {
       return that.master ? 'project' : 'video';
     }
-  })
+  });
 
   // Deposit status
   this.isPublished = function() {
@@ -84,6 +84,7 @@ function cdsDepositCtrl(
 
   // The deposit can have the following depositStates
   this.$onInit = function() {
+
     // Resolve the record schema
     this.cdsDepositsCtrl.JSONResolver(this.schema).then(function(response) {
       that.schema = response.data;
@@ -320,7 +321,10 @@ function cdsDepositCtrl(
                 that.updateStateReporter(task.name, task.info, task.status);
               });
               // Update subformat info
-              var subformatsNew =  transcodeTasks.filter(function(task) {
+              if (!transcodeTasks) {
+                return;
+              }
+              var subformatsNew = transcodeTasks.filter(function(task) {
                 return task.info;
               }).map(function(task) {
                 var payload = task.info.payload;
@@ -561,7 +565,8 @@ function cdsDepositCtrl(
     };
 
     this.displaySuccess = function() {
-      return that.depositStatusCurrent === that.depositStatuses.SUCCESS;
+      return that.depositStatusCurrent === that.depositStatuses.SUCCESS &&
+        !that.isPublished();
     };
 
     this.postSuccessProcess = function(responses) {

@@ -76,6 +76,7 @@ function cdsDepositsConfig(
     selfVideo: '/api/deposits/video/<%=deposit%>',
     bucketVideo: '/api/files/<%=bucket%>',
     actionVideo: '/api/deposits/video/<%=deposit%>/actions/<%=action%>',
+    record: '/record/<%=recid%>',
   });
 
   // Initialize type reducer
