@@ -6,7 +6,6 @@
     ng-click="$ctrl.actionHandler('SAVE_PARTIAL')">
   Save
   </button>
-
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE"
@@ -14,7 +13,6 @@
     ng-click="$ctrl.actionMultipleHandler(['SAVE_PARTIAL', 'PUBLISH'], '/deposit')">
   Publish
   </button>
-
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
