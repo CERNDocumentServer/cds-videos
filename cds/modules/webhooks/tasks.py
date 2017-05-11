@@ -401,8 +401,16 @@ class ExtractFramesTask(AVCTask):
 
         # Generate GIF images
         gif_filename = 'frames.gif'
-        frames = [Image.open(in_output(f)) for f in frames]
-        gif_image = create_gif_from_frames(frames)
+
+        images = []
+        for f in frames:
+            image = Image.open(in_output(f))
+            # Convert image for better quality
+            im = image.convert('RGB').convert(
+                'P', palette=Image.ADAPTIVE, colors=255
+            )
+            images.append(im)
+        gif_image = create_gif_from_frames(images)
         gif_image.save(in_output(gif_filename), save_all=True)
         create_object(gif_filename, 'image', 'frames-preview')
 
