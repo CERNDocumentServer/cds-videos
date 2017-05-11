@@ -41,6 +41,7 @@
       "type": "uiselectmultiple",
       "placeholder": "Keywords",
       "options": {
+        "watchAndUpdateOn": "$parent.$parent.$parent.model.keywords",
         "refreshDelay": 100,
         "asyncCallback": "$ctrl.autocompleteKeywords",
         "url": "/api/keywords/_suggest"
