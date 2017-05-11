@@ -1,9 +1,11 @@
+<!-- Alerts -->
 <div class="alerts" ng-repeat="alert in $ctrl.cdsDepositCtrl.alerts">
   <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
     <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     {{ alert.message }}
   </div>
 </div>
+<!-- Fill metadata suggestion -->
 <div class="alert alert-warning alert-dismissible" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
   <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   Extracted metadata can be used to automatically fill part of the form.
@@ -20,81 +22,86 @@
     <button class="btn btn-danger" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
   </p>
 </modal-dialog>
-
-
-<div>
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="row">
-        <div class="col-sm-3">
-          <div
-           class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
-           ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
-            <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
-              <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
-              <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
-            </div>
-
-            <iframe allowfullscreen="" ng-show="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+<!-- Main form -->
+<div ng-init="showAll=false" class="row">
+  <div class="col-sm-12">
+    <div class="row">
+      <div class="col-sm-3">
+        <div
+         class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
+         ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
+          <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
+            <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
+            <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
           </div>
-          <br />
-          <div class="cds-deposit-box-upload-status">
-            <h5>Upload status:</h5>
-            <p>{{ $ctrl.cdsDepositCtrl.depositStatusCurrent }}</p>
+          <iframe allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+        </div>
+      </div>
+      <!-- Progress -->
+      <div class="col-sm-9">
+        <div class="col-sm-12">
+          <!-- FAILURE -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
+            <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
+                <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
+            </div>
+          </div>
+          <!-- Failed transcodings -->
+          <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
+            <div class="pull-left">
+              <b>Failed transcodings:</b>
+              <ul>
+                <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
+                  {{ key }}
+                </li>
+              </ul>
+            </div>
+            <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
+              <i class="fa fa-undo"></i>
+            </button>
+          </div>
+          <!-- PENDING -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                Loading ...
+              </div>
+            </div>
+          </div>
+          <!-- STARTED -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
+            <div class="progress">
+                <div ng-hide="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                  {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }}
+                </div>
+                <div ng-show="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage || 100}}%;">
+                  {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
+                </div>
+            </div>
+          </div>
+          <!-- SUCCESS -->
+          <div ng-show="$ctrl.cdsDepositCtrl.displaySuccess()" class="row">
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                <strong>Success</strong>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Progress -->
-        <div class="col-sm-9">
+          <!-- Published view -->
+          <div ng-show="$ctrl.cdsDepositCtrl.isPublished() && !showAll">
             <div class="col-sm-12">
-              <!-- FAILURE -->
-              <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
-                <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
-                    <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
-                </div>
-              </div>
-              <!-- Failed transcodings -->
-              <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
-                <div class="pull-left">
-                  <b>Failed transcodings:</b>
-                  <ul>
-                    <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
-                      {{ key }}
-                    </li>
-                  </ul>
-                </div>
-                <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
-                  <i class="fa fa-undo"></i>
-                </button>
-              </div>
-
-              <!-- PENDING -->
-              <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
-                <div class="progress">
-                  <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                    Loading ...
-                  </div>
-                </div>
-              </div>
-              <!-- STARTED -->
-              <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
-                <div class="progress">
-                    <div ng-hide="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                      {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }}
-                    </div>
-                    <div ng-show="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage || 100}}%;">
-                      {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
-                    </div>
-                </div>
-              </div>
-              <!-- SUCCESS -->
-              <div ng-show="$ctrl.cdsDepositCtrl.displaySuccess()">
-                <div class="progress">
-                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
-                    <strong>Success</strong>
-                  </div>
-                </div>
-              </div>
+              <h4 class="mb-5 mt-0">
+                <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+                  {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
+                </a>
+              </h4>
+              <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
             </div>
+          </div>
+          <!-- Published view -->
+          <!-- Edit view -->
+          <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || showAll">
             <div class="col-sm-12">
               <!-- Nav tabs -->
               <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
@@ -160,7 +167,6 @@
                   ></form>
                 </div>
                 <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
-
                   -- PRESETS FINISHED --
                   -- HOW MANY {{that.presets_finished}}
                   <hr />
@@ -180,6 +186,17 @@
                 </div>
             </div>
           </div>
+        </div>
+        <!-- EDIT view -->
+      </div>
+    </div>
+    <hr />
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="text-center">
+          <a class="btn btn-sm btn-default" ng-click="showAll = !showAll">
+            {{ showAll ? 'Show less' : 'Show more' }}
+          </a>
         </div>
       </div>
     </div>

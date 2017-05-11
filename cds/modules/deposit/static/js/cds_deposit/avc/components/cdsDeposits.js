@@ -17,8 +17,6 @@ function cdsDepositsCtrl(
 
   // The master deposit
   this.master = {};
-  // The children deposit
-  this.children = [];
   // Global loading state
   this.loading = false;
   // The connection
@@ -62,9 +60,6 @@ function cdsDepositsCtrl(
       ) {
         that.addMaster(response.data);
         that.initialized = true;
-        angular.forEach(response.data.metadata.videos, function(video, index) {
-          that.children.push({metadata: video});
-        });
       }, function error(response) {
         if (response.status === 403) {
           that.permissionDenied = true;
@@ -124,7 +119,7 @@ function cdsDepositsCtrl(
 
   this.addChildren = function(deposit, files) {
     deposit.metadata._files = files || [];
-    this.children.push(deposit);
+    this.master.metadata.videos.push(deposit.metadata);
     this.overallState[deposit.metadata._deposit.id] = angular.copy(
       that.initState
     );
@@ -204,10 +199,10 @@ function cdsDepositsCtrl(
       // Build the promises
       var _promises = [];
       // Find already uploaded videos
-      var uploadedVideos = that.children
+      var uploadedVideos = that.master.metadata.videos
         .map(function(deposit) {
-          if (deposit.metadata._files && deposit.metadata._files.length > 0) {
-            return deposit.metadata._files[0].key;
+          if (deposit._files && deposit._files.length > 0) {
+            return deposit._files[0].key;
           }
         })
         .filter(function(key) {
@@ -329,7 +324,7 @@ function cdsDepositsCtrl(
 
   var checkStatus = function(task, status) {
     return function(child) {
-      return child.metadata._deposit.state[task] == status;
+      return child._deposit.state[task] == status;
     };
   };
 
@@ -369,8 +364,12 @@ function cdsDepositsCtrl(
           thisState[prevState], thisState[curState]);
       });
     });
-    that.aggregatedState = getOverallState(that.children);
+    that.aggregatedState = getOverallState(that.master.metadata.videos);
   });
+
+  this.getRecordUrl = function(recid) {
+    return urlBuilder.record({recid: recid});
+  }
 }
 
 cdsDepositsCtrl.$inject = [

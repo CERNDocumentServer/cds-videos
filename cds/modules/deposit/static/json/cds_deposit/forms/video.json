@@ -51,6 +51,7 @@
       "type": "select",
       "key": "language",
       "placeholder": "Language",
+      "required": false,
       "titleMap": [
         {
           "value":  "bg",
@@ -180,6 +181,7 @@
           "key": "contributors[].role",
           "placeholder": "Role",
           "title": "Role",
+          "required": false,
           "titleMap": [
             {
               "value":  "Director",
@@ -287,20 +289,24 @@
       "key": "translations",
       "type": "array",
       "add": "Add translations",
+      "required": false,
       "items": [
         {
           "title": "Title",
+          "required": false,
           "key": "translations[].title.title"
         },
         {
           "title": "Description",
           "key": "translations[].description.value",
-          "type": "textarea"
+          "type": "textarea",
+          "required": false
         },
         {
           "title": "Language",
           "key": "translations[].language",
           "type": "select",
+          "required": false,
           "titleMap": [
             {
               "value":  "bg",

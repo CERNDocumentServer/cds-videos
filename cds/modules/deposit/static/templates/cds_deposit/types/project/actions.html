@@ -4,7 +4,7 @@
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-default btn-sm"
     ng-click="$ctrl.actionHandler('SAVE_PARTIAL')">
-  Save
+  Save Project
   </button>
 
   <button
@@ -12,7 +12,7 @@
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE"
     class="btn btn-primary btn-sm"
     ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit')">
-  Publish
+  Publish All
   </button>
 
   <button
@@ -20,6 +20,6 @@
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-default btn-sm"
     ng-click="$ctrl.actionMultipleHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
-  Edit
+  Edit Project
   </button>
 </div>
