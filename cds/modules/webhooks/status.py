@@ -57,9 +57,10 @@ def iterate_events_results(events, fun):
     return fun
 
 
-def get_tasks_status_by_task(events):
+def get_tasks_status_by_task(events, statuses=None):
     """Get tasks status grouped by task name."""
-    status_extractor = CollectStatusesByTask()
+    statuses = statuses or {}
+    status_extractor = CollectStatusesByTask(statuses=statuses)
     iterate_events_results(events=events, fun=status_extractor)
     return status_extractor.statuses
 
@@ -86,10 +87,13 @@ def iterate_result(raw_info, fun):
 
 def _compute_status(statuses):
     """Compute minimum state."""
-    for status_to_check in [states.FAILURE, states.STARTED, states.RETRY,
-                            states.PENDING]:
+    for status_to_check in [states.FAILURE, states.STARTED,
+                            states.RETRY, states.PENDING]:
         if any(status == status_to_check for status in statuses):
             return status_to_check
+    if len(statuses) > 0 and all(status_to_check == states.REVOKED
+                                 for status_to_check in statuses):
+        return states.REVOKED
     return states.SUCCESS
 
 
@@ -133,14 +137,30 @@ def collect_info(task_name, result):
 class CollectStatusesByTask(object):
     """Collect status information and organize by task name."""
 
-    def __init__(self):
+    def __init__(self, statuses):
         """Init status collection list."""
-        self.statuses = {}
+        self._statuses = {}
+        self._original = statuses
 
     def __call__(self, task_name, result):
         """Update status collection."""
-        old_status = self.statuses.get(task_name, states.SUCCESS)
-        self.statuses[task_name] = _compute_status([old_status, result.status])
+        old_status = self._statuses.get(task_name, states.SUCCESS)
+        # get new status from celery only if still exists on celery cache
+        new_status = result.status \
+            if result.result is not None else states.SUCCESS
+        self._statuses[task_name] = _compute_status([old_status, new_status])
+
+    @property
+    def statuses(self):
+        """Get new status or original."""
+        from copy import deepcopy
+        # take the calculated
+        statuses = deepcopy(self._statuses)
+        # and add orignal value if there is no new value
+        keys = set(self._original) - set(self._statuses)
+        for key in keys:
+            statuses[key] = self._original[key]
+        return statuses
 
 
 class CollectInfoTasks(object):

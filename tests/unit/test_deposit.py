@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import json
+import mock
 
 from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
@@ -35,6 +36,7 @@ from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
 from invenio_files_rest.models import ObjectVersion
+from cds.modules.deposit.tasks import preserve_celery_states_on_db
 
 
 def test_deposit_link_factory_has_bucket(
@@ -139,3 +141,29 @@ def test_publish_process_files(api_app, db, location):
                     assert obj.get_tags()['master'] == master_version
                     assert obj.get_tags()['media_type'] == 'video'
                     assert obj.get_tags()['context_type'] == 'subformat'
+
+
+@mock.patch('cds.modules.deposit.tasks._is_state_changed')
+def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
+                                      api_project):
+    """Test preserve celery states on db."""
+    #  mock_is_state_changed.return_value = True
+    project, video_1, video_2 = api_project
+    vid1 = video_1['_deposit']['id']
+
+    # simulate video_1 update is needed
+    def mymock_is_state_changed(x, y):
+        return x['_deposit']['id'] == vid1
+    mock_is_state_changed.side_effect = mymock_is_state_changed
+    with mock.patch('invenio_deposit.api.Deposit.indexer') \
+            as mock_indexer:
+        mock_indexer.index = mock.Mock()
+        preserve_celery_states_on_db.s().apply()
+
+    assert mock_indexer.index.called is True
+    indexed = []
+    for call in mock_indexer.index.call_args_list:
+        ((arg, ), _) = call
+        indexed.append(arg)
+    assert len(indexed) == 1
+    assert indexed[0]['_deposit']['id'] == vid1
