@@ -129,10 +129,21 @@ angular
 
 
 angular.module('schemaForm')
-  .controller('invenioDynamicSelectController', ['$scope', '$controller',
-    function ($scope, $controller) {
+  .controller('invenioDynamicSelectController', ['$scope', '$controller', '$select', '$http',
+    function ($scope, $controller, $select, $http) {
+    console.log('sel', $select);
+    $select.taggingLabel = false;
       $controller('dynamicSelectController', {$scope: $scope});
       // If it is ui-select inside an array...
+      $scope.tags = [];
+      $scope.suggestKeywords = function(name) {
+        $http.get('/api/keywords/_suggest?suggest-name=' + name).then(function(res) {
+          var payloads = res.data['suggest-name'][0].options.map((x) => x.payload);
+          $scope.tags = payloads;
+        });
+        console.log(name);
+        return { name: name };
+      };
       if ($scope.modelArray) {
         $scope.$watchCollection('modelArray', function (newValue) {
           // If this is not the initial setting of the element...
