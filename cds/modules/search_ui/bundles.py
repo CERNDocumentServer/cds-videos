@@ -38,9 +38,7 @@ js = NpmBundle(
     npm={
         'angular-loading-bar': '~0.9.0',
         'd3': '^3.5.17',
-        # FIXME: Wait until invenio org permissions in npm
-        'invenio-search-js':
-            'git://github.com/drjova/invenio-search-js.git#temp-release-v1.1.4'
+        'invenio-search-js': '~1.1.4',
     },
 )
 
