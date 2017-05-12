@@ -20,13 +20,13 @@
           class="close-container pull-right"
           style="padding-bottom: 20px"
           ng-class="{'clear-form': !form.inline}">
-          <i ng-hide="modelArray.length < 2" class="sort-handle fa fa-sort fa-fw" ng-if="form.sortOptions.disabled === false"></i>
+          <i ng-hide="modelArray.length <= (form.options.minLength == null ? 1 : form.options.minLength)" class="sort-handle fa fa-sort fa-fw" ng-if="form.sortOptions.disabled === false"></i>
           <button
             class="close"
             type="button"
-            ng-hide="evalExpr(form.readonly) || form.remove === null || modelArray.length < 2"
+            ng-hide="evalExpr(form.readonly) || form.remove === null || modelArray.length <= (form.options.minLength == null ? 1 : form.options.minLength)"
             ng-click="deleteFromArray($index)"
-            ng-disabled="modelArray.length < 2">
+            ng-disabled="modelArray.length <= (form.options.minLength === null ? 1 : form.options.minLength)">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
