@@ -313,7 +313,10 @@
       "description": "",
       "add": "Add another person/e-group",
       "inline": true,
-      "startEmpty": true
+      "startEmpty": true,
+      "options": {
+        "minLength": 0
+      }
     }
   ]
 }
