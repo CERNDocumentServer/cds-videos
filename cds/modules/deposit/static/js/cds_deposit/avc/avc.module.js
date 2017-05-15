@@ -130,10 +130,26 @@ angular
 
 
 angular.module('schemaForm')
-  .controller('invenioDynamicSelectController', ['$scope', '$controller',
-    function ($scope, $controller) {
+  .controller('invenioDynamicSelectController', ['$scope', '$controller', '$select', '$http',
+    function ($scope, $controller, $select, $http) {
       $controller('dynamicSelectController', {$scope: $scope});
-      // If it is ui-select inside an array...
+      // Use this only in multiple select
+      if ($scope.form.type === 'uiselectmultiple') {
+        $scope.$watchCollection('ngModel.$modelValue', function(newValue) {
+          if(newValue !== undefined && !_.isEqual($scope.form.$$selectedObjects, newValue)){
+            $scope.form.$$selectedObjects = newValue;
+          }
+        }, true);
+
+        $scope.$watchCollection('form.$$selectedObjects', function(newValue) {
+          if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)){
+            $scope.ngModel.$setViewValue(_.unique(newValue));
+            $scope.ngModel.$commitViewValue();
+            $scope.ngModel.$render();
+          }
+        }, true);
+      }
+
       if ($scope.modelArray) {
         $scope.$watchCollection('modelArray', function (newValue) {
           // If this is not the initial setting of the element...
