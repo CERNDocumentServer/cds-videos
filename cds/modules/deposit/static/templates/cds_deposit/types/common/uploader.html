@@ -58,7 +58,7 @@
     <tr ng-show="($ctrl.files | filter:fileSearch).length == 0">
       <td colspan="4" class="text-center text-muted"> No results.</td>
     </tr>
-    <tr class="warning" ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.subformat">
+    <tr class="warning" ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.subformat||[]).length > 0">
       <td>Extracted subformats</td>
       <td></td>
       <td class="text-center"></td>
