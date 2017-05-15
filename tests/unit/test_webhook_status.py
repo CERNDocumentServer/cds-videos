@@ -28,8 +28,12 @@ from __future__ import absolute_import
 
 import mock
 import json
+from celery import states
+from copy import deepcopy
 from flask import url_for
-from cds.modules.webhooks.status import GetInfoByID, iterate_result
+from collections import namedtuple
+from cds.modules.webhooks.status import GetInfoByID, iterate_result, \
+    CollectStatusesByTask
 from invenio_webhooks.models import Event
 from helpers import mock_current_user
 
@@ -73,3 +77,62 @@ def test_tasks_status(api_app, db, bucket, cds_depid,
                 iterate_result(raw_info=event.receiver._raw_info(event=event),
                                fun=search)
                 assert search.task_name == task_name
+
+
+def test_collect_statuses_by_task():
+    """Test CollectStatusesByTask."""
+    AsyncResult = namedtuple('AsyncResult', ['result', 'status'])
+
+    coll = CollectStatusesByTask(statuses={
+        'file_download': states.PENDING,
+    })
+    # simulate a task start
+    coll('file_transcode', AsyncResult(status=states.STARTED, result={}))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.STARTED,
+    }
+    # simulate the redis cache for celery tasks is cleanup
+    coll('file_transcode', AsyncResult(status=states.FAILURE, result=None))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.STARTED,
+    }
+    # simulate a task is failing
+    coll('file_transcode', AsyncResult(status=states.FAILURE, result={}))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.FAILURE,
+    }
+
+    # simulate that we run the tasks and the result is:
+    #    1 transcode fail + 1 transcode success = fail
+    # we save them in db:
+    db_status = {
+        'file_download': states.PENDING,
+        'file_transcode': states.FAILURE,
+    }
+    # now we ask the current status:
+    coll = CollectStatusesByTask(statuses=db_status)
+    assert coll.statuses == db_status
+    # we update it because the failing transcode is restarted
+    coll('file_transcode', AsyncResult(status=states.STARTED, result={}))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.STARTED,
+    }
+    # we clean the celery cache and try to read the up-to-date tasks status
+    coll('file_transcode', AsyncResult(status=states.PENDING, result=None))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.STARTED,
+    }
+    # we update the db informations
+    db_status = deepcopy(coll.statuses)
+    # now we restart again the task and it's successfully finish the job
+    coll = CollectStatusesByTask(statuses=db_status)
+    coll('file_transcode', AsyncResult(status=states.SUCCESS, result={}))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+        'file_transcode': states.SUCCESS,
+    }

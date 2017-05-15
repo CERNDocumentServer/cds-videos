@@ -26,15 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app
-from werkzeug.local import LocalProxy
+from invenio_jsonschemas import current_jsonschemas
 
 from .api import Video, Project
-
-
-current_jsonschemas = LocalProxy(
-    lambda: current_app.extensions['invenio-jsonschemas']
-)
 
 
 def cdsdeposit_indexer_receiver(
