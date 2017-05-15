@@ -93,6 +93,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'invenio_accounts.tasks.clean_session_table',
         'schedule': timedelta(days=1),
     },
+    'tasks_status': {
+        'task': 'cds.modules.deposit.tasks.preserve_celery_states_on_db',
+        'schedule': timedelta(days=1),
+    },
 }
 
 ###############################################################################

@@ -679,7 +679,8 @@ class Project(CDSDeposit):
         """Return up-to-date tasks status."""
         list_events = [get_deposit_events(depid) for depid in self.video_ids]
         events = list(itertools.chain.from_iterable(list_events))
-        return get_tasks_status_by_task(events)
+        return get_tasks_status_by_task(
+            events, statuses=deepcopy(self['_deposit'].get('state', {})))
 
     @classmethod
     def build_video_ref(cls, video):
@@ -845,7 +846,8 @@ class Video(CDSDeposit):
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
         return get_tasks_status_by_task(
-            get_deposit_events(self['_deposit']['id']))
+            get_deposit_events(self['_deposit']['id']),
+            statuses=deepcopy(self['_deposit'].get('state', {})))
 
     def generate_duration(self):
         """Generate human-readable duration field."""
