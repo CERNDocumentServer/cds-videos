@@ -23,7 +23,7 @@
   </p>
 </modal-dialog>
 <!-- Main form -->
-<div ng-init="showAll=false" class="row">
+<div class="row">
   <div class="col-sm-12">
     <div class="row">
       <div class="col-sm-3">
@@ -89,7 +89,7 @@
           </div>
         </div>
           <!-- Published view -->
-          <div ng-show="$ctrl.cdsDepositCtrl.isPublished() && !showAll">
+          <div ng-show="$ctrl.cdsDepositCtrl.isPublished() || !showAll">
             <div class="col-sm-12">
               <h4 class="mb-5 mt-0">
                 <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
@@ -190,8 +190,8 @@
         <!-- EDIT view -->
       </div>
     </div>
-    <hr />
-    <div class="row">
+    <div ng-show="$ctrl.cdsDepositCtrl.isPublished()" class="row">
+      <hr />
       <div class="col-sm-12">
         <div class="text-center">
           <a class="btn btn-sm btn-default" ng-click="showAll = !showAll">
