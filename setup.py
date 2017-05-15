@@ -84,7 +84,7 @@ install_requires = [
     'Flask-BabelEx>=0.9.2',
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.1.0',
-    'Flask-WTF==0.13.1',
+    'Flask-WTF>=0.14.2',
     'Flask>=0.11.1',
     'cds-dojson>=0.3.2',
     'datacite>=0.2.1',
