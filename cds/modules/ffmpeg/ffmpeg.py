@@ -27,13 +27,14 @@
 from __future__ import absolute_import
 
 import json
-from itertools import takewhile, count
-from os.path import devnull
-from subprocess import check_output, check_call
+from itertools import count, takewhile
+from subprocess import STDOUT, CalledProcessError, check_output
 
-from cds.modules.ffmpeg.errors import FrameExtractionInvalidArguments
 from cds_sorenson.api import get_available_aspect_ratios
 from flask import current_app
+
+from .errors import FrameExtractionInvalidArguments, FFmpegExecutionError, \
+    MetadataExtractionExecutionError, FrameExtractionExecutionError
 
 
 def ff_probe(input_filename, field):
@@ -49,13 +50,11 @@ def ff_probe(input_filename, field):
     if field == 'display_aspect_ratio':
         return probe_aspect_ratio(input_filename)
 
-    return check_output([
-        'ffprobe', '-v', 'error',
-        '-select_streams', 'v:0',
-        '-show_entries', 'stream={}'.format(field),
-        '-of', 'default=noprint_wrappers=1:nokey=1',
-        '{}'.format(input_filename)
-    ]).rstrip()
+    return run_command(
+        'ffprobe -v error -select_streams v:0 -show_entries stream={0} -of '
+        'default=noprint_wrappers=1:nokey=1 {1}'.format(field, input_filename),
+        error_class=MetadataExtractionExecutionError
+    ).rstrip()
 
 
 def ff_probe_all(input_filename):
@@ -67,12 +66,11 @@ def ff_probe_all(input_filename):
     * *-show_format -print_format json* output in JSON format
     * *-show_streams -select_streams v:0* show information for video streams
     """
-    metadata = check_output([
-        'ffprobe', '-v', 'error',
-        '-show_format', '-print_format', 'json',
-        '-show_streams', '-select_streams', 'v:0',
-        '{}'.format(input_filename)
-    ]).decode('utf-8')
+    metadata = run_command(
+        'ffprobe -v error -show_format -print_format json -show_streams '
+        '-select_streams v:0 {0}'.format(input_filename),
+        error_class=MetadataExtractionExecutionError
+    ).decode('utf-8')
 
     return _patch_aspect_ratio(metadata)
 
@@ -142,8 +140,19 @@ def ff_frames(input_file, start, end, step, duration, output,
             cmd = 'bash -c "eosfusebind && {}"'.format(cmd)
 
         # Run ffmpeg command
-        with open(devnull, 'wb') as null:
-            check_call(cmd, shell=True, stdout=null, stderr=null)
+        run_command(cmd, error_class=FrameExtractionExecutionError)
 
         # Report progress
         progress_callback(i + 1)
+
+
+#
+# Subprocess wrapper
+#
+def run_command(command, error_class=FFmpegExecutionError, **kwargs):
+    """Run ffmpeg command and capture errors."""
+    kwargs.setdefault('stderr', STDOUT)
+    try:
+        return check_output(command.split(), **kwargs)
+    except CalledProcessError as e:
+        raise error_class(e)
