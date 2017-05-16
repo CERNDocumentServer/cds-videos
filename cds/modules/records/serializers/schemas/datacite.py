@@ -77,7 +77,7 @@ class DataCiteSchemaV1(Schema):
         """Get subjects."""
         items = []
         for s in obj['metadata'].get('keywords', []):
-            value = s.get('value')
+            value = s.get('name')
             if value:
                 items.append({'subject': value})
         return items
