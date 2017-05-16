@@ -572,11 +572,11 @@ def extra_metadata():
         'keywords': [
             {
                 'source': 'source1',
-                'value': 'keyword1',
+                'name': 'keyword1',
             },
             {
                 'source': 'source2',
-                'value': 'keyword2',
+                'name': 'keyword2',
             }
         ],
         'copyright': {

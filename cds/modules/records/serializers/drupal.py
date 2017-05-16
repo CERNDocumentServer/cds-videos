@@ -116,7 +116,7 @@ class VideoDrupal(object):
     def keywords(self):
         """Get keywords."""
         keywords = self._record.get('keywords', [])
-        return ", ".join([keyword['value'] for keyword in keywords])
+        return ", ".join([keyword['name'] for keyword in keywords])
 
 
 class DrupalSerializer(JSONSerializer):
