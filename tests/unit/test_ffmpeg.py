@@ -26,16 +26,39 @@
 
 from __future__ import absolute_import
 
+import json
 import shutil
 import tempfile
 from os import listdir
-from os.path import isfile, join, dirname
-import json
+from os.path import dirname, isfile, join
 
 import pytest
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
-from cds.modules.ffmpeg.errors import FrameExtractionInvalidArguments
+from cds.modules.ffmpeg.errors import (FrameExtractionExecutionError,
+                                       FrameExtractionInvalidArguments,
+                                       MetadataExtractionExecutionError)
 from cds_sorenson.api import get_available_aspect_ratios
+
+
+def test_error_report(datadir):
+    """Test FFmpeg error reporting."""
+    not_found = 'invalid_filename: No such file or directory'
+    is_dir = 'Is a directory'
+
+    with pytest.raises(MetadataExtractionExecutionError) as e:
+        ff_probe('invalid_filename', 'width')
+    assert not_found in repr(e.value)
+    assert not_found in e.value.error_message
+
+    with pytest.raises(MetadataExtractionExecutionError) as e:
+        ff_probe(datadir, 'width')
+    assert is_dir in repr(e.value)
+    assert is_dir in e.value.error_message
+
+    with pytest.raises(FrameExtractionExecutionError) as e:
+        ff_frames('invalid_filename', 10, 20, 2, 100, '')
+    assert not_found in repr(e.value)
+    assert not_found in e.value.error_message
 
 
 def test_ffprobe(video):

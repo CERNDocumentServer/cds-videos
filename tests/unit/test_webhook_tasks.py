@@ -263,7 +263,7 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
 
     message = listener.await()
     assert '"state": "FAILURE"' in message
-    assert 'ffprobe' in message
+    assert 'invalid_uri: No such file or directory' in message
 
 
 def test_transcode(db, bucket, mock_sorenson):
