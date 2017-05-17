@@ -37,7 +37,7 @@ function cdsActionsCtrl($scope) {
       that.actionHandler('DELETE').then(function() {
         var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
         for (var i in children) {
-          if (children[i].metadata._deposit.id == that.cdsDepositCtrl.id) {
+          if (children[i]._deposit.id == that.cdsDepositCtrl.id) {
             children.splice(i, 1);
           }
         }
