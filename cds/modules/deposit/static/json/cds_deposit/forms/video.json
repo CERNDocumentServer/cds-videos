@@ -151,7 +151,8 @@
         "disabled": false,
         "handle": "i.sort-handle",
         "cursor": "move",
-        "axis": "y"
+        "axis": "y",
+        "update": "$ctrl.onSortableReorder"
       },
       "add": "Add another contributor",
       "inline": true,
