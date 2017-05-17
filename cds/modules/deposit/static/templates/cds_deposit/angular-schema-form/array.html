@@ -11,7 +11,7 @@
     <i ng-if="form.fa_cls" class="fa fa-fw {{ form.fa_cls }}"></i>&nbsp;{{ form.title }}
   </label>
 
-    <ul class="list-unstyled" ng-model="modelArray" ui-sortable="form.sortOptions">
+    <ul class="list-unstyled" ng-model="modelArray" ui-sortable="evalExpr(form.sortOptions)">
       <li
         class="{{ form.fieldHtmlClass }} list-group-item"
         ng-class="{'deposit-inline': form.inline}"
