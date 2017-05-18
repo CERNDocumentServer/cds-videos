@@ -87,6 +87,9 @@ def iterate_result(raw_info, fun):
 
 def _compute_status(statuses):
     """Compute minimum state."""
+    if len(statuses) > 0 and all(status_to_check is None
+                                 for status_to_check in statuses):
+        return states.PENDING
     for status_to_check in [states.FAILURE, states.STARTED,
                             states.RETRY, states.PENDING]:
         if any(status == status_to_check for status in statuses):
@@ -144,10 +147,10 @@ class CollectStatusesByTask(object):
 
     def __call__(self, task_name, result):
         """Update status collection."""
-        old_status = self._statuses.get(task_name, states.SUCCESS)
+        old_status = self._statuses.get(task_name)
         # get new status from celery only if still exists on celery cache
         new_status = result.status \
-            if result.result is not None else states.SUCCESS
+            if result.result is not None else None
         self._statuses[task_name] = _compute_status([old_status, new_status])
 
     @property
