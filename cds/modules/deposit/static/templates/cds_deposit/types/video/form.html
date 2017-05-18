@@ -38,7 +38,7 @@
         </div>
       </div>
       <!-- Progress -->
-      <div class="col-sm-9">
+      <div ng-init="showAll=!$ctrl.cdsDepositCtrl.isPublished()" class="col-sm-9">
         <div class="col-sm-12">
           <!-- FAILURE -->
           <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
