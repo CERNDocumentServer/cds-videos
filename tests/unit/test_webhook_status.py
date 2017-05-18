@@ -104,6 +104,12 @@ def test_collect_statuses_by_task():
         'file_download': states.PENDING,
         'file_transcode': states.FAILURE,
     }
+    # simulate first call
+    coll = CollectStatusesByTask(statuses={})
+    coll('file_download', AsyncResult(status=states.FAILURE, result=None))
+    assert coll.statuses == {
+        'file_download': states.PENDING,
+    }
 
     # simulate that we run the tasks and the result is:
     #    1 transcode fail + 1 transcode success = fail

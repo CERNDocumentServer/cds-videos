@@ -890,6 +890,7 @@ def test_compute_status():
         states.SUCCESS, states.REVOKED, states.SUCCESS, states.SUCCESS])
     assert states.SUCCESS == _compute_status([states.SUCCESS, states.SUCCESS])
     assert states.REVOKED == _compute_status([states.REVOKED, states.REVOKED])
+    assert states.PENDING == _compute_status([None, None])
 
 
 def test_collect_info():
