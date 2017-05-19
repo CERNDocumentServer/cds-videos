@@ -135,10 +135,6 @@ def ff_frames(input_file, start, end, step, duration, output,
         cmd = 'ffmpeg -accurate_seek -ss {0} -i {1} -vframes 1 {2}'.format(
             timestamp, input_file, output.format(i + 1))
 
-        # Wrap command with EOS environment
-        if current_app.config.get('USE_EOS', False):
-            cmd = 'bash -c "eosfusebind && {}"'.format(cmd)
-
         # Run ffmpeg command
         run_command(cmd, error_class=FrameExtractionExecutionError)
 
