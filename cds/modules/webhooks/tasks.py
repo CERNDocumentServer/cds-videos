@@ -274,8 +274,13 @@ class ExtractMetadataTask(AVCTask):
 
         self._base_payload.update(uri=uri)
 
-        # Extract video's metadata using `ff_probe`
-        metadata = json.loads(ff_probe_all(uri))
+        try:
+            # Extract video's metadata using `ff_probe`
+            metadata = json.loads(ff_probe_all(uri))
+        except Exception as exc:
+            db.session.rollback()
+            raise self.retry(max_retries=5, countdown=5, exc=exc)
+
         extracted_dict = dict(metadata['format'], **metadata['streams'][0])
 
         # Add technical information to the ObjectVersion as Tags
@@ -385,11 +390,16 @@ class ExtractFramesTask(AVCTask):
             ObjectVersionTag.create(obj, 'context_type', context_type)
             [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
 
-        # Generate frames
-        ff_frames(input_file=self.object.file.uri,
-                  start=start_time, end=end_time, step=time_step,
-                  duration=duration, progress_callback=progress_updater,
-                  output=os.path.join(output_folder, 'frame-{:d}.jpg'))
+        try:
+            # Generate frames
+            ff_frames(input_file=self.object.file.uri,
+                      start=start_time, end=end_time, step=time_step,
+                      duration=duration, progress_callback=progress_updater,
+                      output=os.path.join(output_folder, 'frame-{:d}.jpg'))
+        except Exception as exc:
+            db.session.rollback()
+            shutil.rmtree(output_folder, ignore_errors=True)
+            raise self.retry(max_retries=5, countdown=5, exc=exc)
 
         frames = sorted(
             os.listdir(output_folder),
