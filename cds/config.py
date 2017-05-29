@@ -51,6 +51,7 @@ def _(x):
     """Identity function."""
     return x
 
+
 ###############################################################################
 # Translations & Time
 ###############################################################################
@@ -526,7 +527,8 @@ FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
 SECURITY_REGISTERABLE = False
 SECURITY_RECOVERABLE = False
 SECURITY_CONFIRMABLE = False
-# SECURITY_CHANGEABLE = False # uncomment when related PR is merged (-accounts)
+SECURITY_CHANGEABLE = False
+PERMANENT_SESSION_LIFETIME = timedelta(1)
 
 # Override login template.
 SECURITY_LOGIN_USER_TEMPLATE = 'cds_theme/login_user.html'
