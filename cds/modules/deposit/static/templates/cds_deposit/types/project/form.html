@@ -93,7 +93,8 @@
           </div>
           <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
             <div class="row">
-              <div class="col-sm-12">
+              <div class="col-sm-6">
+                <h4>Share deposit with</h4>
                 <form
                   name="$ctrl.cdsDepositCtrl.depositFormModels[4]"
                   class="form"
@@ -103,6 +104,54 @@
                   sf-options="$ctrl.sfOptions"
                 ></form>
               </div>
+              <!-- Record permissions -->
+              <div class="col-sm-6">
+                <h4>Record restrictions</h4>
+                <div ng-show="$ctrl.cdsDepositCtrl.record.category">
+                  <select
+                    ng-model="$ctrl.permissions"
+                    ng-change="$ctrl.changeAccess()"
+                    class="form-control"
+                    ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public"
+                  >
+                    <option value="public" ng-selected="$ctrl.permissions === 'public'">
+                      Public
+                    </option>
+                    <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
+                      Restricted
+                    </option>
+                  </select>
+                  <div class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
+                    <label class="control-label ng-binding">
+                      Choose who has access to the record
+                    </label>
+                    <ui-select
+                     multiple
+                     tagging
+                     on-select="$ctrl.cdsDepositCtrl.setDirty()"
+                     tagging-label="(new email)"
+                     ng-model="$ctrl.cdsDepositCtrl.record._access.read"
+                     theme="bootstrap"
+                     ng-disabled="!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public'"
+                     title="Add emails"
+                    >
+                     <ui-select-match
+                      ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
+                      placeholder="Select emails..."
+                    >
+                      {{$item}}
+                    </ui-select-match>
+                     <ui-select-choices repeat="email in $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted | filter:$select.search">
+                       {{email}}
+                     </ui-select-choices>
+                   </ui-select>
+                  </div>
+                </div>
+                <div ng-show="!$ctrl.cdsDepositCtrl.record.category">
+                  Please select a category from the Basic Info tab.
+                </div>
+              </div>
+              <!-- Record permissions -->
             </div>
           </div>
         </div>

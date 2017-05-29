@@ -89,7 +89,7 @@
           </div>
         </div>
           <!-- Published view -->
-          <div ng-show="$ctrl.cdsDepositCtrl.isPublished() || !showAll">
+          <div ng-show="$ctrl.cdsDepositCtrl.isPublished() && !showAll">
             <div class="col-sm-12">
               <h4 class="mb-5 mt-0">
                 <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
@@ -101,7 +101,7 @@
           </div>
           <!-- Published view -->
           <!-- Edit view -->
-          <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || showAll">
+          <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && showAll)">
             <div class="col-sm-12">
               <!-- Nav tabs -->
               <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
@@ -110,6 +110,7 @@
                 <li role="presentation" ng-class="{active: active=='licenses'}"><a ng-click="active='licenses'" role="tab" data-toggle="tab">Licenses</a></li>
                 <li role="presentation" ng-class="{active: active=='translations'}"><a ng-click="active='translations'" role="tab" data-toggle="tab">Translations</a></li>
                 <li role="presentation" ng-class="{active: active=='related_links'}"><a ng-click="active='related_links'" role="tab" data-toggle="tab">Related links</a></li>
+                <li role="presentation" ng-class="{active: active=='access'}"><a ng-click="active='access'" role="tab" data-toggle="tab">Access rights</a></li>
                 <li role="presentation" ng-class="{active: active=='debug'}"><a ng-click="active='debug'" role="tab" data-toggle="tab">Debug (for @drjova)</a></li>
                 <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
                   <a class="dropdown-toggle" title="More options" data-toggle="dropdown" ng-click="openDropdown=!openDropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -165,6 +166,57 @@
                     sf-model="$ctrl.cdsDepositCtrl.record"
                     sf-options="$ctrl.sfOptions"
                   ></form>
+                </div>
+                <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <h4>Record restrictions</h4>
+                      <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
+                        <select
+                          ng-model="$ctrl.permissions"
+                          ng-change="$ctrl.changeAccess()"
+                          class="form-control"
+                          ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public"
+                        >
+                          <option value="public" ng-selected="$ctrl.permissions === 'public'">
+                            Public
+                          </option>
+                          <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
+                            Restricted
+                          </option>
+                        </select>
+                        <div class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
+                          <label class="control-label ng-binding">
+                            Choose who has access to the record
+                          </label>
+                          <ui-select
+                           multiple
+                           tagging
+                           on-select="$ctrl.cdsDepositCtrl.setDirty()"
+                           tagging-label="(new email)"
+                           ng-model="$ctrl.cdsDepositCtrl.record._access.read"
+                           theme="bootstrap"
+                           ng-disabled="!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public'"
+                           title="Add emails"
+                          >
+                           <ui-select-match
+                            ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
+                            placeholder="Select emails..."
+                          >
+                            {{$item}}
+                          </ui-select-match>
+                           <ui-select-choices repeat="email in $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted | filter:$select.search">
+                             {{email}}
+                           </ui-select-choices>
+                         </ui-select>
+                        </div>
+                      </div>
+                      <div ng-show="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
+                        Please select a category for the project.
+                      </div>
+                    </div>
+                    <!-- Record permissions -->
+                  </div>
                 </div>
                 <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
                   -- PRESETS FINISHED --
