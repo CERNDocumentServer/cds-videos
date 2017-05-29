@@ -29,8 +29,7 @@ from __future__ import absolute_import, print_function
 import os
 from datetime import timedelta
 
-from invenio_deposit.config import (DEPOSIT_REST_FACETS,
-                                    DEPOSIT_REST_SORT_OPTIONS)
+from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
@@ -370,7 +369,7 @@ RECORDS_REST_DEFAULT_SORT = {
     'records': dict(query='bestmatch'),
     'deposits-records-videos-project': dict(
         query='bestmatch',
-        noquery='mostrecent'
+        noquery='mostrecent',
     )
 }
 
@@ -448,7 +447,7 @@ DEPOSIT_REST_SORT_OPTIONS = {
             default_order='asc',
             order=1
         ),
-        newest=dict(
+        mostrecent=dict(
             fields=['-_updated'],
             title='Newest',
             default_order='asc', order=2,
@@ -507,9 +506,9 @@ FORMATTER_BADGES_ENABLE = True
 # Display a homepage.
 FRONTPAGE_ENDPOINT = 'cds_home.index'
 # Featured query
-FRONTPAGE_FEATURED_QUERY = '/api/records/?featured=1&size=1&sort=newest'
+FRONTPAGE_FEATURED_QUERY = '/api/records/?featured=1&size=1&sort=mostrecent'
 # Recent videos query
-FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=newest'
+FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
     {'size': 5, 'page': 1},
@@ -665,7 +664,8 @@ DEPOSIT_UI_NEW_TEMPLATE = 'cds_deposit/edit.html'
 # The schema form deposit
 DEPOSIT_DEFAULT_SCHEMAFORM = 'json/cds_deposit/forms/project.json'
 # Default schema for the deposit
-DEPOSIT_DEFAULT_JSONSCHEMA = 'deposits/records/videos/project/project-v1.0.0.json'
+DEPOSIT_DEFAULT_JSONSCHEMA = \
+    'deposits/records/videos/project/project-v1.0.0.json'
 # Deposit schemas
 DEPOSIT_JSONSCHEMA = {
     'project': 'deposits/records/videos/project/project-v1.0.0.json',
