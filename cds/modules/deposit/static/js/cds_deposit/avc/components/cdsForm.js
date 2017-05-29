@@ -215,11 +215,13 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
    * Categories and Types
    */
   this.types = $q.defer();
-
+  this._categories = {}
   this.autocompleteCategories = function(options, query) {
     if (!that.categories) {
       that.categories = $http.get(options.url).then(function(data) {
-        var categories = data.data.hits.hits;
+        var categories = that._categories = data.data.hits.hits;
+        // Init permissions
+        that.initPermissions();
         that.types.resolve({ data: [].concat.apply([], categories.map(
           function (category) {
             return category.metadata.types.map(
@@ -268,6 +270,76 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       suggestions.unshift(userInput);
     }
   }
+
+  this.getPermissionsFromCategory = function() {
+    if (that.cdsDepositCtrl.record.category) {
+      that.cdsDepositCtrl.cdsDepositsCtrl.accessRights = _.first(
+        _.filter(that._categories, function(_access) {
+          if (_access.metadata.name === that.cdsDepositCtrl.record.category) {
+            return _access;
+          }
+        })
+      );
+    }
+  }
+
+  // Init permissions
+  this.initPermissions = function() {
+    // Get permissions from category
+    this.getPermissionsFromCategory();
+    if (that.cdsDepositCtrl.record.category) {
+      that.permissions = (
+        !that.cdsDepositCtrl.record._access.read &&
+        that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public)
+        ? 'public' : 'restricted';
+    }
+  }
+
+  // Get access rights based on category
+  this.setPermissions = function(modelValue, form) {
+    // Get new access rights
+    this.getPermissionsFromCategory();
+    // Set permission for the new access rights
+    that.permissions =
+      that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public
+        ? 'public' : 'restricted';
+    // Change Access
+    that.changeAccess();
+  }
+
+  // Handle change of access rights
+  this.changeAccess = function() {
+    // Delete any previous permissions
+    delete that.cdsDepositCtrl.record._access.read;
+    // If is restricted then copy the access
+    if (that.permissions === 'restricted') {
+      that.cdsDepositCtrl.record._access.read = angular.copy(
+        that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted
+      );
+    }
+    // Set the form dirty
+    that.cdsDepositCtrl.setDirty();
+    // Update permissions to videos
+    if (that.cdsDepositCtrl.master) {
+      $scope.$emit(
+        'cds.deposit.project.permissions.update', that.cdsDepositCtrl.record._access, that.permissions
+      );
+    }
+  }
+
+  // Listen for permission change
+  $scope.$on('cds.deposit.video.permissions.update', function(evt, _access, permissions) {
+    if (!that.cdsDepositCtrl.master) {
+      // Set the access
+      that.cdsDepositCtrl.record._access = angular.copy(
+        _access || {}
+      );
+      // Set the permissions
+      that.permissions = angular.copy(permissions);
+      // Set the form dirty
+      that.cdsDepositCtrl.setDirty();
+    }
+  });
 }
 
 cdsFormCtrl.$inject = [

@@ -21,6 +21,8 @@ function cdsDepositsCtrl(
   this.loading = false;
   // The connection
   this.sseListener = {};
+  // The access rights
+  this.accessRights = {};
 
   this.$onDestroy = function() {
     try {
@@ -370,6 +372,17 @@ function cdsDepositsCtrl(
   this.getRecordUrl = function(recid) {
     return urlBuilder.record({recid: recid});
   }
+
+  // Listen for permission change
+  $scope.$on(
+    'cds.deposit.project.permissions.update',
+    function(evt, _access, permissions) {
+      // Broadcast down
+      $scope.$broadcast(
+        'cds.deposit.video.permissions.update', _access, permissions
+      );
+    }
+  );
 }
 
 cdsDepositsCtrl.$inject = [
