@@ -41,7 +41,7 @@ from invenio_db import db
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
-from helpers import prepare_videos_for_publish
+from helpers import prepare_videos_for_publish, new_project
 
 
 def test_simple_workflow(
@@ -678,3 +678,43 @@ def test_deleted(api_app, db, location, api_project, users, json_headers):
         assert pid.is_deleted() is True
         pid = get_video_pid(pid_value=video_2['_deposit']['id'])
         assert pid.is_deleted() is True
+
+
+def test_default_order(api_app, es, cds_jsonresolver, users,
+                       location, db, deposit_metadata, json_headers):
+    """Test default project order."""
+    (project_1, _, _) = new_project(api_app, es, cds_jsonresolver, users,
+                                    location, db, deposit_metadata,
+                                    project_data={
+                                        'title': {'title': 'project 1'}
+                                    })
+    (project_2, _, _) = new_project(api_app, es, cds_jsonresolver, users,
+                                    location, db, deposit_metadata,
+                                    project_data={
+                                        'title': {'title': 'project 2'}
+                                    })
+    RecordIndexer().bulk_index([project_1.id, project_2.id])
+    RecordIndexer().process_bulk_queue()
+    sleep(2)
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        # test order: older first
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', sort='oldest'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 2
+        assert data['hits'][
+            'hits'][0]['metadata']['title']['title'] == 'project 1'
+
+        # test default order: newest first
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 2
+        assert data['hits'][
+            'hits'][0]['metadata']['title']['title'] == 'project 2'
