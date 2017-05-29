@@ -1,9 +1,15 @@
 <div class="text-left">
+  <modal-dialog show="form.infoShown" dialog-title="Delete video" width="75%">
+    Are you sure you want permanently delete the video?
+    <p class="pull-right">
+      <button class="btn btn-success" ng-click="$ctrl.deleteDeposit(); $parent.hideModal()">Yes</button>
+      <button class="btn btn-danger" ng-click="$parent.hideModal()">No</button>
+    </p>
+  </modal-dialog>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-link"
-    ng-click="$ctrl.deleteDeposit()">
+    class="btn btn-link" ng-click="form.infoShown = true">
     <i class="fa fa-trash-o text-muted"></i>
   </button>
 </div>
