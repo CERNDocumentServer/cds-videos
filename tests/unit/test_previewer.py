@@ -168,6 +168,15 @@ def test_smil_generation(previewer_app, db, api_project, video):
                                      stream=open(video, 'rb'))
         ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
         create_video_tags(slave, context_type='subformat')
+    # Create one slave that shouldn't be added to the SMIL file
+    no_smil_slave = ObjectVersion.create(bucket=bucket_id,
+                                         key='test_no_smil.mp4',
+                                         stream=open(video, 'rb'))
+    ObjectVersionTag.create(no_smil_slave,
+                            'master',
+                            str(master_obj.version_id))
+    create_video_tags(no_smil_slave, context_type='subformat')
+    ObjectVersionTag.create(no_smil_slave, 'no_smil', 'true')
 
     prepare_videos_for_publish([video_1])
     video_1.publish()
@@ -189,6 +198,7 @@ def test_smil_generation(previewer_app, db, api_project, video):
             slave_key = '{0}_{1}.mp4'.format(basename, suffix)
             slave_obj = ObjectVersion.get(new_bucket, slave_key)
             assert get_relative_path(slave_obj) in contents
+        assert 'test_no_smil.mp4' not in contents
 
 
 def test_vtt_export(previewer_app, db, project_published,
