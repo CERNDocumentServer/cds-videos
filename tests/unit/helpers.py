@@ -202,7 +202,8 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         5 if download else 0,
         10 if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
-        ((len(get_available_preset_qualities()) - 1) * 8) if transcode else 0,
+        # -1 because 1024p is not used with the aspect ratio 16:9
+        ((len(get_available_preset_qualities()) - 1) * 10) if transcode else 0,
     ])
 
 

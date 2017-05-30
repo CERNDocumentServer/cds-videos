@@ -82,7 +82,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     # check elasticsearch
     assert mock_indexer.called is True
     ids = get_indexed_records_from_mock(mock_indexer)
-    assert len(ids) == 9
+    assert len(ids) == 12
     assert set(ids) == set([video_id])
 
 
@@ -112,7 +112,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
         assert resp.status_code == 204
 
     assert ObjectVersion.query.count() == get_object_count() - 1
-    assert ObjectVersionTag.query.count() == get_tag_count() - 8
+    assert ObjectVersionTag.query.count() == get_tag_count() - 10
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -146,7 +146,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
         assert resp.status_code == 204
 
     assert ObjectVersion.query.count() == get_object_count() - 2
-    assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 8
+    assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 10
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
