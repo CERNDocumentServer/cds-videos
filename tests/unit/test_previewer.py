@@ -147,10 +147,17 @@ def test_legacy_embed(previewer_app, db, api_project, video):
 
 def test_smil_generation(previewer_app, db, api_project, video):
     """Test SMIL file export from video."""
-    def create_video_tags(obj, context_type):
+    def create_slave(key):
+        """Create a slave."""
+        slave = ObjectVersion.create(bucket=bucket_id,
+                                     key=key, stream=open(video, 'rb'))
+        ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
+        return slave
+
+    def create_video_tags(obj, context_type, bitrate=None):
         """Create video tags."""
         tags = [('width', 1000), ('height', 1000),
-                ('bit_rate', 123456), ('video_bitrate', 123456),
+                ('bit_rate', 123456), ('video_bitrate', bitrate or 123456),
                 ('media_type', 'video'), ('context_type', context_type)]
         [ObjectVersionTag.create(obj, key, val) for key, val in tags]
 
@@ -163,12 +170,19 @@ def test_smil_generation(previewer_app, db, api_project, video):
     ObjectVersionTag.create(master_obj, 'preview', True)
     create_video_tags(master_obj, context_type='master')
     for i in range(4):
-        slave = ObjectVersion.create(bucket=bucket_id,
-                                     key='{0}_{1}.mp4'.format(basename, i),
-                                     stream=open(video, 'rb'))
-        ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
+        slave = create_slave(key='{0}_{1}.mp4'.format(basename, i))
         create_video_tags(slave, context_type='subformat')
 
+    # Create one slave that shouldn't be added to the SMIL file
+    no_smil_slave = create_slave(key='test_no_smil.mp4')
+    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876)
+    ObjectVersionTag.create(no_smil_slave, 'smil', False)
+    # and one that should be added to the SMIL file
+    yes_smil_slave = create_slave(key='test_no_smil.mp4')
+    create_video_tags(yes_smil_slave, context_type='subformat', bitrate=7654)
+    ObjectVersionTag.create(yes_smil_slave, 'smil', True)
+
+    # publish video
     prepare_videos_for_publish([video_1])
     video_1.publish()
     _, video_record = video_1.fetch_published()
@@ -189,6 +203,11 @@ def test_smil_generation(previewer_app, db, api_project, video):
             slave_key = '{0}_{1}.mp4'.format(basename, suffix)
             slave_obj = ObjectVersion.get(new_bucket, slave_key)
             assert get_relative_path(slave_obj) in contents
+
+        # check if special file is out of the smile
+        assert '9876' not in contents
+        # check if special file is inside the smile
+        assert '7654' in contents
 
 
 def test_vtt_export(previewer_app, db, project_published,
