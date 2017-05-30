@@ -69,12 +69,15 @@ class Smil(object):
         master_file = CDSFilesIterator.get_master_video_file(record)
         for video in CDSFilesIterator.get_video_subformats(master_file):
             tags = video['tags']
-            yield dict(
-                src=get_relative_path(video['version_id']),
-                width=tags['width'],
-                height=tags['height'],
-                bit_rate=tags['video_bitrate']
-            )
+            # If the 'smil' config variable is False,
+            # don't add this video to the SMIL file
+            if tags.get('smil', True):
+                yield dict(
+                    src=get_relative_path(video['version_id']),
+                    width=tags['width'],
+                    height=tags['height'],
+                    bit_rate=tags['video_bitrate']
+                )
 
 
 def generate_smil_file(record_id, record, bucket, master_object):

@@ -377,3 +377,55 @@ def test_transcode_ignore_exception_if_invalid(db, bucket):
         # Transcode
         task = task_s1.delay()
         isinstance(task.result, Ignore)
+
+
+@pytest.mark.parametrize('preset, is_inside', [
+    ('1080ph265', 'false'), ('240p', 'true')
+])
+def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
+    """Test that smil tags are generated correctly."""
+    def create_file(filename, preset_quality, aspect_ratio):
+        obj = ObjectVersion.create(bucket, key=filename,
+                                   stream=BytesIO(b'\x00' * 1024))
+        ObjectVersionTag.create(obj, 'display_aspect_ratio', aspect_ratio)
+        return str(obj.version_id)
+
+    # Setup and run the transcoding task
+    obj_id = create_file('test.mp4', preset, '16:9')
+    db.session.commit()
+
+    TranscodeVideoTask().s(
+        version_id=obj_id, preset_quality=preset, sleep_time=0
+    ).apply()
+
+    # Get the tags from the newly created slave
+    tags = ObjectVersion.query.filter(
+        ObjectVersion.version_id != obj_id).first().get_tags()
+    # Make sure the smil tag is set
+    assert tags['smil'] == is_inside
+
+
+@pytest.mark.parametrize('preset, is_inside', [
+    ('1080ph265', 'true'), ('240p', 'false')
+])
+def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
+    """Test that download tags are generated correctly."""
+    def create_file(filename, preset_quality, aspect_ratio):
+        obj = ObjectVersion.create(bucket, key=filename,
+                                   stream=BytesIO(b'\x00' * 1024))
+        ObjectVersionTag.create(obj, 'display_aspect_ratio', aspect_ratio)
+        return str(obj.version_id)
+
+    # Setup and run the transcoding task
+    obj_id = create_file('test.mp4', preset, '16:9')
+    db.session.commit()
+
+    TranscodeVideoTask().s(
+        version_id=obj_id, preset_quality=preset, sleep_time=0
+    ).apply()
+
+    # Get the tags from the newly created slave
+    tags = ObjectVersion.query.filter(
+        ObjectVersion.version_id != obj_id).first().get_tags()
+    # Make sure the download tag is set
+    assert tags['download'] == is_inside
