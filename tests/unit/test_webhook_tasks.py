@@ -195,6 +195,12 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     tags = ObjectVersion.query.first().get_tags()
     assert len(tags) == 0
 
+    # Simulate failed task, no extracted_metadata
+    ExtractMetadataTask().clean(deposit_id=dep_id,
+                                version_id=obj_id)
+    record = Record.get_record(recid)
+    assert 'extracted_metadata' not in record['_deposit']
+
 
 def test_video_extract_frames(app, db, bucket, video):
     """Test extract frames from video."""
