@@ -28,38 +28,40 @@ from __future__ import absolute_import
 import fnmatch
 import hashlib
 import json
-import jsonpatch
 import os
-import requests
 import shutil
 import signal
 import tempfile
 import time
-
-from PIL import Image
-from flask_iiif.utils import create_gif_from_frames
 from functools import partial
 
-from cds_sorenson.api import get_encoding_status, get_preset_info, \
-    start_encoding, stop_encoding
+import jsonpatch
+import requests
+from cds_sorenson.api import (get_encoding_status, get_preset_info,
+                              start_encoding, stop_encoding)
 from cds_sorenson.error import InvalidResolutionError
-from celery import Task, shared_task, current_app as celery_app
-from celery.states import FAILURE, STARTED, SUCCESS, REVOKED
+from celery import current_app as celery_app
+from celery import Task, shared_task
 from celery.exceptions import Ignore
-
+from celery.states import FAILURE, REVOKED, STARTED, SUCCESS
+from celery.utils.log import get_task_logger
+from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
+from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_sse import current_sse
+from PIL import Image
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
-from invenio_indexer.api import RecordIndexer
 from werkzeug.utils import import_string
 
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
+
+logger = get_task_logger(__name__)
 
 
 def sse_publish_event(channel, type_, state, meta):
@@ -250,7 +252,12 @@ class ExtractMetadataTask(AVCTask):
             'path': '/_deposit/extracted_metadata',
         }]
         validator = 'invenio_records.validators.PartialDraft4Validator'
-        patch_record(recid=recid, patch=patch, validator=validator)
+        try:
+            patch_record(recid=recid, patch=patch, validator=validator)
+        except jsonpatch.JsonPatchConflict as c:
+            logger.warning(
+                'Failed to apply JSON Patch to deposit {0}: {1}'.format(
+                    recid, c))
 
         # 2. Delete every tag created
         for tag in ObjectVersionTag.query.filter(
