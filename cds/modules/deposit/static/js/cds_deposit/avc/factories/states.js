@@ -48,6 +48,7 @@ function cdsAPI($q, $http) {
 
   function cleanData(data, unwanted) {
     var _unwantend = unwanted || [[null], [undefined]];
+    data = angular.copy(data);
     // Delete the _files before request
     delete data._files;
     angular.forEach(data, function(value, key) {
