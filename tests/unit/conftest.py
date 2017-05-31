@@ -110,6 +110,8 @@ def app():
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
+        # FIXME
+        ACCOUNTS_JWT_ENABLE=False,
     )
     app.register_blueprint(files_rest_blueprint)
 
@@ -150,8 +152,9 @@ def celery_not_fail_on_eager_app(app):
                 view_imp='cds.modules.previewer.views.preview_depid',
                 record_class='cds.modules.deposit.api:Video',
             ),
-        )
-
+        ),
+        # FIXME
+        ACCOUNTS_JWT_ENABLE=False,
     )
     app.register_blueprint(files_rest_blueprint)
 
