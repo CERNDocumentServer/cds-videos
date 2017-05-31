@@ -21,6 +21,7 @@
                 {{select_model.selected.name}}
             </ui-select-match>
       <ui-select-choices
+        minimum-input-length="{{ form.minLength || 3 }}"
         refresh="populateTitleMap(form, $select.search)"
         refresh-delay="form.options.refreshDelay"
         group-by="form.options.groupBy"
