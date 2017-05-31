@@ -72,9 +72,9 @@
             <ul class="list-unstyled">
               <li ng-repeat="(role, contribs) in record.metadata.contributors | groupBy:'role'">
                 <h3 class="f9">{{ role }}</h3>
-                <ul class="list-unstyled" ng-repeat="(name, contrib) in contribs|groupBy: 'name'">
+                <ul class="list-unstyled" ng-repeat="contrib in contribs">
                   <li>
-                    <a ng-href='/search?q="{{ name }}"'>{{ name }}</a> - {{ contrib[0].affiliations.join(',')}}
+                    <a ng-href='/search?q=contributors.name:"{{ :: contrib.name }}"'>{{ contrib.name }}</a>  {{ contrib.affiliations ? '-' + contrib.affiliations.join(',') : ''}}
                   </li>
                 </ul>
               </li>
@@ -88,8 +88,7 @@
               </li>
               <li>
                 <h3 class="f9 tw-b">Language</h3>
-                <a ng-href='/search?q="{{ :: record.metadata.language }}"'>{{ record.metadata.language }}</a>
-
+                <a ng-href='/search?q=language:"{{ :: record.metadata.language }}"'>{{ record.metadata.language }}</a>
               </li>
               <li ng-if="record.metadata.related_links.length > 0">
                 <h3 class="f9 tw-b">Related links</h3>
