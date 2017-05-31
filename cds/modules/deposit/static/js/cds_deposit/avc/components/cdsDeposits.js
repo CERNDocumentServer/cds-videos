@@ -288,7 +288,7 @@ function cdsDepositsCtrl(
     var actionInfo = depositActions[depositType][action];
     if (actionInfo.preprocess) {
       payload = actionInfo.preprocess(payload);
-    }
+    };
     return cdsAPI.action(url, actionInfo.method, payload, actionInfo.headers);
   };
 

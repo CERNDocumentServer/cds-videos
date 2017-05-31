@@ -9,7 +9,7 @@ function cdsDepositsConfig(
   urlBuilderProvider,
   typeReducerProvider,
   localStorageServiceProvider,
-  sfErrorMessageProvider
+  sfErrorMessageProvider,
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -127,7 +127,6 @@ angular
       return taskRepresentations[input] || input;
     };
   });
-
 
 angular.module('schemaForm')
   .controller('invenioDynamicSelectController', ['$scope', '$controller', '$select', '$http',
