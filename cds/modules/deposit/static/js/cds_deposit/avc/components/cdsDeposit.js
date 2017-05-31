@@ -712,7 +712,6 @@ function cdsDepositCtrl(
   this.cleanLocalStorage = function() {
     localStorageService.remove(that.id);
   }
-
 }
 
 cdsDepositCtrl.$inject = [

@@ -21,9 +21,14 @@
   {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
+    var _app = angular
+      .module('cdsDepositApp', ['cds', 'cdsDeposit', 'ngModal'])
+      .config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common['Authorization'] = 'Bearer {{ jwt_token() }}';
+     }]);
     angular.element(document).ready(function() {
       angular.bootstrap(
-        document.getElementById('cds-deposit'), ['cds', 'cdsDeposit', 'ngModal']
+        document.getElementById('cds-deposit'), ['cdsDepositApp']
       );
     });
   $(document).ready(function() {
