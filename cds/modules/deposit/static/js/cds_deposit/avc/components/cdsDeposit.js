@@ -517,6 +517,9 @@ function cdsDepositCtrl(
         } else if (type == 'file_video_metadata_extraction' ||
                    type == 'file_video_extract_frames') {
           that.updateStateReporter(type, data.meta, data.state);
+        } else if (type == 'file_download') {
+          var broadcastKey = depositListenerName + '.' + data.meta.payload.key;
+          $scope.$broadcast(broadcastKey, data);
         } else if (type == 'file_transcode') {
           var masterFile = that.findMasterFile();
           if (masterFile) {

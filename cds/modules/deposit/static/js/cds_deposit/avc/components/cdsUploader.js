@@ -135,7 +135,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         },
         function progress(evt) {
           _progress(
-            evt.config.data.key,
+            evt.config.data.key || evt.config.data.name,
             parseInt(100.0 * evt.loaded / evt.total, 10)
           );
         }
@@ -152,7 +152,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     // Prepare the listener
     that.sseEventListener = $scope.$on(
       'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key,
-      function(event, type, data) {
+      function(event, data) {
         switch (data.state) {
           case 'FAILURE':
             _error(upload.key);
@@ -185,6 +185,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
    * Prepare http request of Local File Upload without Webhooks
    */
   function _prepareLocalFile(file) {
+    // Add ``key`` key to be consistent with the backend. JS API for files
+    // uses ``name`` instead of ``key``
+    file.key = file.name;
     return {
       url: that.cdsDepositCtrl.guessEndpoint('BUCKET') + '/' + file.name,
       method: 'PUT',
@@ -242,34 +245,6 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
 
     // Add any files in the queue that are not completed
     Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
-
-    // Listen for events for transcoding
-    $scope.$on(
-      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.file.transcoding',
-      function(evt, type, data) {
-        switch(data.state) {
-          case 'FAILURE':
-            // Notify for error
-            // _subformatError(data.meta.payload.key);
-            // var failedSubformats = that.cdsDepositCtrl.failedSubformatKeys;
-            // if (!failedSubformats.includes(data.meta.payload.key)) {
-            //   failedSubformats.push(data.meta.payload.key);
-            // }
-            break;
-          case 'STARTED':
-          case 'SUCCESS':
-            // that.updateSubformat(
-            //   data.meta.payload.key,
-            //   {
-            //     percentage: data.meta.payload.percentage || 0,
-            //     completed: data.meta.payload.percentage === 100,
-            //     errored: false,
-            //   }
-            // );
-            break;
-        }
-      }
-    )
 
     this.addFiles = function(_files) {
       // Do nothing if files array is empty
@@ -370,11 +345,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
 
     this.upload = function() {
       if (that.queue.length > 0) {
-        // FIXME: LOADING
-        // Start local loading
-        that.cdsDepositCtrl.loading = true;
+        // Loading
         that.loading = true;
-        that.uploader()
+        return that.uploader()
           .then(
             function success(response) {
             },
@@ -384,20 +357,30 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
             }
           ).finally(
             function done() {
-              // FIXME: LOADING
+              // Stop loading
+              that.cdsDepositCtrl.waitingUpload = false;
               that.cdsDepositCtrl.loading = false;
               that.loading = false;
             }
           );
+      } else {
+        // Go ahead no uploads
+        that.cdsDepositCtrl.waitingUpload = false;
+        return $q.resolve();
       }
     }
   }
 
   this.$postLink = function() {
     // Upload video file when creating a new deposit
-    if (!this.cdsDepositCtrl.master) {
+    if (!that.cdsDepositCtrl.master) {
+      that.cdsDepositCtrl.waitingUpload = true;
+      that.cdsDepositCtrl.loading = true;
       $timeout(function () {
-        that.upload();
+        that.cdsDepositsCtrl.lastVideoUpload =
+          that.cdsDepositsCtrl.lastVideoUpload.finally(function() {
+          return that.upload();
+        });
       }, 1500);
     }
   }
