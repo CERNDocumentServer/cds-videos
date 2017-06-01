@@ -61,12 +61,12 @@ class CDSRecordIdProvider(BaseProvider):
             kwargs['pid_value'] = str(RecordIdentifier.next())
         else:
             response = requests.get(
-                provider_url, headers={'User-Agent': 'cdslabs'}).text
+                provider_url, headers={'User-Agent': 'cdslabs'})
 
-            if response.strip().lower().startswith('[error]'):
-                raise PersistentIdentifierError(response)
+            if not response.ok or response.text.strip().startswith('[ERROR]'):
+                raise PersistentIdentifierError(response.text)
 
-            kwargs['pid_value'] = response
+            kwargs['pid_value'] = response.text
 
         kwargs.setdefault('status', cls.default_status)
         if object_type and object_uuid:
