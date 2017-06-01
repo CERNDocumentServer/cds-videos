@@ -9,7 +9,7 @@ function cdsDepositsConfig(
   urlBuilderProvider,
   typeReducerProvider,
   localStorageServiceProvider,
-  sfErrorMessageProvider,
+  sfErrorMessageProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
