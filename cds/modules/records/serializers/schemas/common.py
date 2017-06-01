@@ -99,7 +99,7 @@ class TitleSchema(StrictKeysSchema):
 
     source = fields.Str()
     subtitle = fields.Str()
-    title = fields.Str(required=True, allow_none=False, validate=Length(min=3))
+    title = fields.Str(required=True, allow_none=False, validate=Length(min=4))
 
 
 class CreatorSchema(StrictKeysSchema):
