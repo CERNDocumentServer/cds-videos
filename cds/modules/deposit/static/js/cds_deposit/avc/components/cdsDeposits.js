@@ -23,6 +23,8 @@ function cdsDepositsCtrl(
   this.sseListener = {};
   // The access rights
   this.accessRights = {};
+  // The last video upload promise
+  this.lastVideoUpload = $q.resolve();
 
   this.$onDestroy = function() {
     try {
