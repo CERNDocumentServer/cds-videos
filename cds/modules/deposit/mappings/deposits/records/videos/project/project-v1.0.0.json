@@ -3,6 +3,9 @@
     "project-v1.0.0": {
       "numeric_detection": true,
       "properties": {
+        "_updated": {
+          "type": "date"
+        },
         "license": {
           "type": "object",
           "properties": {
