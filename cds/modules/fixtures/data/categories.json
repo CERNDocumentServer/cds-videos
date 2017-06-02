@@ -2,26 +2,53 @@
   {
     "name": "CERN",
     "types": ["FOOTAGE", "VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": [
+        "audiovisual-support@cern.ch",
+        "it-dep-uds-avc@cern.ch",
+        "editorial-group@cern.ch",
+        "hr-video-group@cern.ch",
+        "visualmedia-office@cern.ch",
+        "vmo-restictedrights@cern.ch"
+      ]
+    },
     "_record_type": ["PROJECT"]
   },
   {
     "name": "ATLAS",
-    "types": ["VIDEO"],
+    "types": ["FOOTAGE", "VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": ["atlas-readaccess-active-members@cern.ch"]
+    },
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "CMS",
     "types": ["VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": []
+    },
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "OPEN",
     "types": ["VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": []
+    },
     "_record_type":  ["PROJECT"]
   },
   {
     "name": "SCADA",
     "types": ["VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": []
+    },
     "_record_type":  ["PROJECT"]
   }
 ]
