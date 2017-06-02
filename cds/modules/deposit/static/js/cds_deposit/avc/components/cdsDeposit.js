@@ -11,7 +11,8 @@ function cdsDepositCtrl(
   cdsAPI,
   urlBuilder,
   typeReducer,
-  localStorageService
+  localStorageService,
+  jwt
 ) {
 
   var that = this;
@@ -85,11 +86,6 @@ function cdsDepositCtrl(
   // The deposit can have the following depositStates
   this.$onInit = function() {
 
-    // Resolve the record schema
-    this.cdsDepositsCtrl.JSONResolver(this.schema).then(function(response) {
-      that.schema = response.data;
-    });
-
     this.findMasterFile = function() {
       return _.find(that.record._files, {'context_type': 'master'});
     };
@@ -141,7 +137,7 @@ function cdsDepositCtrl(
 
     this.getTaskFeedback = function(eventId, taskName, taskStatus) {
       var url = urlBuilder.taskFeedback({ eventId: eventId });
-      return cdsAPI.action(url, 'GET').then(function(data) {
+      return cdsAPI.action(url, 'GET', {}, jwt).then(function(data) {
         data = _.flatten(data.data, true);
         if (taskName || taskStatus) {
           return data.filter(function (taskInfo) {
@@ -242,7 +238,7 @@ function cdsDepositCtrl(
           }).length;
 
         var fetchPresetsPromise = $q.resolve();
-        if (that.presets.length == 0) {
+        if (that.presets && that.presets.length == 0) {
           var eventId = masterFile.tags._event_id;
           if (eventId) {
             var eventUrl = urlBuilder.eventInfo({eventId: eventId});
@@ -254,12 +250,14 @@ function cdsDepositCtrl(
           }
         }
         fetchPresetsPromise.then(function() {
-          that.stateReporter['file_transcode'] = angular.merge(
-            that.stateReporter['file_transcode'], {
-              payload: {
-                percentage: subformatsFinished / that.presets.length * 100,
-              },
-            });
+          if (that.presets && that.presets.length > 0) {
+            that.stateReporter['file_transcode'] = angular.merge(
+              that.stateReporter['file_transcode'], {
+                payload: {
+                  percentage: subformatsFinished / that.presets.length * 100,
+                },
+              });
+          }
         });
       }
     };
@@ -517,6 +515,9 @@ function cdsDepositCtrl(
         } else if (type == 'file_video_metadata_extraction' ||
                    type == 'file_video_extract_frames') {
           that.updateStateReporter(type, data.meta, data.state);
+        } else if (type == 'file_download') {
+          var broadcastKey = depositListenerName + '.' + data.meta.payload.key;
+          $scope.$broadcast(broadcastKey, data);
         } else if (type == 'file_transcode') {
           var masterFile = that.findMasterFile();
           if (masterFile) {
@@ -727,7 +728,8 @@ cdsDepositCtrl.$inject = [
   'cdsAPI',
   'urlBuilder',
   'typeReducer',
-  'localStorageService'
+  'localStorageService',
+  'jwt'
 ];
 
 /**
@@ -764,7 +766,7 @@ function cdsDeposit() {
       updateRecordInBackground: '@?',
       // Deposit related
       id: '=',
-      schema: '@',
+      schema: '=',
       record: '=',
       links: '=?',
     },

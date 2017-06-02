@@ -53,6 +53,13 @@ function cdsDepositsCtrl(
       });
     });
 
+    cdsAPI.resolveJSON(this.masterSchema).then(function(response) {
+      that.masterSchemaResolved = response.data;
+    });
+    cdsAPI.resolveJSON(this.childrenSchema).then(function(response) {
+      that.childrenSchemaResolved = response.data;
+    });
+
     if (this.masterLinks) {
       // Set mode to edit
       this.edit = true;
