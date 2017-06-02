@@ -363,6 +363,16 @@ def test_publish_project_check_indexed(
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
+        # [[ GET EMPTY PROJECT LIST ]]
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list'),
+            data=json.dumps(project_deposit_metadata),
+            headers=json_headers)
+
+        assert res.status_code == 200
+        project_list = json.loads(res.data.decode('utf-8'))
+        assert project_list['hits']['hits'] == []
+
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
             url_for('invenio_deposit_rest.project_list'),
