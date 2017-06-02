@@ -58,7 +58,7 @@
         "htmlClass": "cds-deposit-strap-select",
         "onChange": "$ctrl.setPermissions(modelValue, form)",
         "options": {
-          "url": "/api/categories",
+          "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
         },
         "required": false
