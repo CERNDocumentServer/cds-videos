@@ -9,7 +9,9 @@ function cdsDepositsConfig(
   urlBuilderProvider,
   typeReducerProvider,
   localStorageServiceProvider,
-  sfErrorMessageProvider
+  sfErrorMessageProvider,
+  jwtProvider,
+  $httpProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -87,6 +89,20 @@ function cdsDepositsConfig(
       }
     },
   });
+
+  // JWT Token
+  // Search DOM if exists
+  var authorized_token = document.getElementsByName('authorized_token');
+  if (authorized_token.length > 0) {
+    token = authorized_token[0].value;
+    var headers = {
+      'Authorization': 'Bearer ' + token,
+    };
+    jwtProvider.setHeader(headers);
+    $httpProvider.defaults.headers['delete'] = headers;
+    $httpProvider.defaults.headers['post']= headers;
+    $httpProvider.defaults.headers['put'] = headers;
+  }
 }
 
 // Inject the necessary angular services
@@ -102,6 +118,8 @@ cdsDepositsConfig.$inject = [
   'typeReducerProvider',
   'localStorageServiceProvider',
   'sfErrorMessageProvider',
+  'jwtProvider',
+  '$httpProvider',
 ];
 
 // Register modules

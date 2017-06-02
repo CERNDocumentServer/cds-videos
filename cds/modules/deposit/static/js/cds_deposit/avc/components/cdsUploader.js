@@ -494,8 +494,15 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   }
 }
 
-cdsUploaderCtrl.$inject = ['$scope', '$q', 'Upload', '$http', '$timeout',
-                           'urlBuilder'];
+cdsUploaderCtrl.$inject = [
+  '$scope',
+  '$q',
+  'Upload',
+  '$http',
+  '$timeout',
+  'urlBuilder',
+  'jwt'
+];
 
 function cdsUploader() {
   return {

@@ -89,6 +89,7 @@ js_deposit_common = Bundle(
     'js/cds_deposit/avc/providers/stateReducer.js',
     'js/cds_deposit/avc/providers/typeReducer.js',
     'js/cds_deposit/avc/providers/urlBuilder.js',
+    'js/cds_deposit/avc/providers/jwt.js',
     output='gen/cds.deposit.common.%(version)s.js'
 )
 
