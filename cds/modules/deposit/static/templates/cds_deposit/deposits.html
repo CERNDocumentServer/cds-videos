@@ -56,7 +56,7 @@
       id="$ctrl.master.metadata._deposit.id"
       links="$ctrl.master.links"
       update-record-after-success="true"
-      schema="{{ $ctrl.masterSchema }}"
+      schema="$ctrl.masterSchemaResolved"
       record="$ctrl.master.metadata"
     >
     <div ng-class="{'status-fix-top': !$ctrl.isOnTop}" class="cds-deposit-avc-overall-status mb-20 mt--20">
@@ -99,7 +99,7 @@
               update-record-after-success="true"
               update-record-in-background="10000"
               links="child.links"
-              schema="{{ $ctrl.childrenSchema }}"
+              schema="$ctrl.childrenSchemaResolved"
               record="child"
             >
               <div class="panel panel-default">

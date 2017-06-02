@@ -12,7 +12,6 @@
 
 {%- block javascript %}
   {{ super() }}
-
   <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"></script>
   <script type="text/javascript">
     // CKEDITOR static location
@@ -20,15 +19,11 @@
   </script>
   {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+
   <script type="text/javascript">
-    var _app = angular
-      .module('cdsDepositApp', ['cds', 'cdsDeposit', 'ngModal'])
-      .config(['$httpProvider', function($httpProvider) {
-        $httpProvider.defaults.headers.common['Authorization'] = 'Bearer {{ jwt_token() }}';
-     }]);
     angular.element(document).ready(function() {
       angular.bootstrap(
-        document.getElementById('cds-deposit'), ['cdsDepositApp']
+        document.getElementById('cds-deposit'), ['cds', 'cdsDeposit', 'ngModal']
       );
     });
   $(document).ready(function() {
@@ -62,5 +57,6 @@
       form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
   >
   </cds-deposits>
+  {{ jwt() }}
 </div>
 {%- endblock %}
