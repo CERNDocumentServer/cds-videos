@@ -300,7 +300,7 @@ def categories(source):
         for data in categories:
             cat_id = uuid.uuid4()
             catid_minter(cat_id, data)
-            category = Category.create(data)
+            category = Category.create(data, id_=cat_id)
             to_index.append(category.id)
     db.session.commit()
 
