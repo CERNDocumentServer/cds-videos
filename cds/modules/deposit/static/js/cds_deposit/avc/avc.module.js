@@ -97,6 +97,7 @@ function cdsDepositsConfig(
     token = authorized_token[0].value;
     var headers = {
       'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
     };
     jwtProvider.setHeader(headers);
     $httpProvider.defaults.headers['delete'] = headers;
