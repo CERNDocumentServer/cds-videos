@@ -9,6 +9,17 @@
         "name": {
           "type": "string"
         },
+        "access": {
+          "type": "object",
+          "properties": {
+            "public": {
+              "type": "boolean"
+            },
+            "restricted": {
+              "type": "string"
+            }
+          }
+        },
         "_record_type": {
           "type": "string"
         },
