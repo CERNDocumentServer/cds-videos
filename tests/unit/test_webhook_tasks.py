@@ -377,3 +377,26 @@ def test_transcode_ignore_exception_if_invalid(db, bucket):
         # Transcode
         task = task_s1.delay()
         isinstance(task.result, Ignore)
+
+
+def test_smil_generation(app, db, bucket, mock_sorenson):
+    """Test that smil files are generated correctly."""
+    # Setup and run the transcoding task
+    filename = 'test.mp4'
+    preset_quality = '1080ph265'
+    obj = ObjectVersion.create(bucket, key=filename,
+                               stream=BytesIO(b'\x00' * 1024))
+    ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
+    obj_id = str(obj.version_id)
+    db.session.commit()
+
+    task_s = TranscodeVideoTask().s(version_id=obj_id,
+                                    preset_quality=preset_quality,
+                                    sleep_time=0)
+    task_s.delay()
+
+    # Get the tags from the newly created slave
+    tags = ObjectVersionTag.query.filter_by(
+        value=obj_id).first().object_version.get_tags()
+    # Make sure the no_smil option is set
+    assert tags['no_smil'] == 'true'

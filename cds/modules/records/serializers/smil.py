@@ -69,6 +69,10 @@ class Smil(object):
         master_file = CDSFilesIterator.get_master_video_file(record)
         for video in CDSFilesIterator.get_video_subformats(master_file):
             tags = video['tags']
+            if tags.get('no_smil'):
+                # If the 'no_smil' config variable is set,
+                # don't add this video to the SMIL file
+                continue
             yield dict(
                 src=get_relative_path(video['version_id']),
                 width=tags['width'],
