@@ -231,34 +231,6 @@
             }
           }
         },
-        "creator": {
-          "type": "object",
-          "properties": {
-            "affiliations": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "email": {
-              "type": "string"
-            },
-            "contribution": {
-              "type": "string"
-            },
-            "ids": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "type": "string"
-                },
-                "source": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
         "title": {
           "type": "object",
           "properties": {
