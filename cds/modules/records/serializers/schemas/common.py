@@ -102,16 +102,6 @@ class TitleSchema(StrictKeysSchema):
     title = fields.Str(required=True, allow_none=False, validate=Length(min=4))
 
 
-class CreatorSchema(StrictKeysSchema):
-    """Creator schema."""
-
-    affiliations = fields.List(fields.Str())
-    contribution = fields.Str()
-    email = fields.Str()
-    ids = fields.Nested(IdsSchema, many=True)
-    name = fields.Str(required=True)
-
-
 class AccessSchema(StrictKeysSchema):
     """Access schema."""
 
