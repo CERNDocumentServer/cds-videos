@@ -26,7 +26,7 @@ from invenio_jsonschemas import current_jsonschemas
 from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import \
-    AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
+    AccessSchema, BucketSchema, ContributorSchema, \
     DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
     OaiSchema, RelatedLinksSchema, ReportNumberSchema, StrictKeysSchema, \
     TitleSchema, TranslationsSchema
@@ -84,7 +84,6 @@ class VideoSchema(StrictKeysSchema):
     _project_id = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True)
     copyright = fields.Nested(CopyrightSchema)
-    creator = fields.Nested(CreatorSchema)
     doi = DOI()
     vr = fields.Boolean()
     duration = fields.Str()

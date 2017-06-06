@@ -26,7 +26,7 @@ from invenio_jsonschemas import current_jsonschemas
 from ....deposit.api import Project, deposit_video_resolver
 from ..fields.datetime import DateString
 from .common import \
-    AccessSchema, BucketSchema, ContributorSchema, CreatorSchema, \
+    AccessSchema, BucketSchema, ContributorSchema, \
     DepositSchema, DescriptionSchema, LicenseSchema, \
     OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
     TranslationsSchema, KeywordsSchema
@@ -68,7 +68,6 @@ class ProjectSchema(StrictKeysSchema):
     _buckets = fields.Nested(BucketSchema)
     _oai = fields.Nested(OaiSchema)
     contributors = fields.Nested(ContributorSchema, many=True)
-    creator = fields.Nested(CreatorSchema)
     doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)

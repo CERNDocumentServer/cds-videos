@@ -200,34 +200,6 @@
             }
           }
         },
-        "creator": {
-          "type": "object",
-          "properties": {
-            "ids": {
-              "type": "object",
-              "properties": {
-                "source": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            },
-            "affiliations": {
-              "type": "string"
-            },
-            "contribution": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "email": {
-              "type": "string"
-            }
-          }
-        },
         "_deposit": {
           "type": "object",
           "properties": {
