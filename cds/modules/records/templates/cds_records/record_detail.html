@@ -18,7 +18,7 @@
   <div id="cds-record">
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
-        record='/api/record/{{record._deposit.pid.value}}'
+        record='/api/record/{{record.recid}}'
     ></cds-record-view>
   </div>
   <!-- Recent videos -->

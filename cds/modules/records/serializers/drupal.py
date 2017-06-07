@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@ from __future__ import absolute_import, print_function
 import arrow
 from arrow.parser import ParserError
 from invenio_records_rest.serializers.json import JSONSerializer
-from ...deposit.api import Video, Project, CDSFileObject
+
+from ...deposit.api import Project, Video
+from ..api import CDSFileObject
 
 
 def format_datetime(datetime):

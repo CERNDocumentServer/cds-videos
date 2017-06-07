@@ -123,8 +123,8 @@ install_requires = [
     'invenio-rest[cors]>=1.0.0a9',
     'invenio-search-ui>=1.0.0a5',
     'invenio-search>=1.0.0a7',
-     'invenio-sequencegenerator>=1.0.0a1',
-     'invenio-sse>=1.0.0a1',
+    'invenio-sequencegenerator>=1.0.0a1',
+    'invenio-sse>=1.0.0a1',
     'invenio-theme>=1.0.0a14',
     'invenio-userprofiles>=1.0.0a7',
     'invenio-webhooks>=1.0.0a4',
@@ -211,11 +211,11 @@ setup(
         ],
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',
-            'cds_catid = cds.modules.deposit.fetchers:catid_fetcher',
+            'cds_catid = cds.modules.records.fetchers:catid_fetcher',
             'cds_kwid = cds.modules.records.fetchers:kwid_fetcher',
         ],
         'invenio_pidstore.minters': [
-            'cds_catid = cds.modules.deposit.minters:catid_minter',
+            'cds_catid = cds.modules.records.minters:catid_minter',
             'cds_kwid = cds.modules.records.minters:kwid_minter',
             'cds_report_number = '
             'cds.modules.records.minters:report_number_minter',

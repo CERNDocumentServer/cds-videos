@@ -168,7 +168,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
 
         # try get drupal
         file_frame = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
-        with mock.patch('cds.modules.deposit.api.CDSFileObject._link',
+        with mock.patch('cds.modules.records.api.CDSFileObject._link',
                         return_value=file_frame):
             res = client.get(url2, headers=drupal_headers)
 
@@ -217,7 +217,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
     with api_app.test_client() as client:
         # try get drupal
         file_frame = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
-        with mock.patch('cds.modules.deposit.api.CDSFileObject._link',
+        with mock.patch('cds.modules.records.api.CDSFileObject._link',
                         return_value=file_frame):
             res = client.get(url2, headers=drupal_headers)
 

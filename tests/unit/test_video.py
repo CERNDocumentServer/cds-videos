@@ -54,8 +54,8 @@ from time import sleep
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
                                      record_video_resolver,
-                                     CDSFilesIterator,
                                      deposit_video_resolver)
+from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
@@ -742,7 +742,7 @@ def test_deposit_smil_tag_generation(api_app, db, api_project):
     """Test AVCWorkflow receiver."""
     def check_smil(video):
         _, record = video.fetch_published()
-        master = CDSFilesIterator.get_master_video_file(record)
+        master = CDSVideosFilesIterator.get_master_video_file(record)
         playlist = master['playlist']
         assert playlist[0]['key'] == 'test.smil'
         assert playlist[0]['content_type'] == 'smil'
@@ -751,7 +751,7 @@ def test_deposit_smil_tag_generation(api_app, db, api_project):
         assert playlist[0]['tags']['master'] == master['version_id']
 
         # check bucket dump is done correctly
-        master_video = CDSFilesIterator.get_master_video_file(video)
+        master_video = CDSVideosFilesIterator.get_master_video_file(video)
         assert master_video['version_id'] != master['version_id']
 
     project, video_1, video_2 = api_project
