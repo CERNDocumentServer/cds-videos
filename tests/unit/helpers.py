@@ -32,16 +32,8 @@ import random
 import uuid
 from time import sleep
 
-import pkg_resources
-from six import BytesIO
-
 import mock
-from cds.modules.deposit.api import Project, Video
-from cds.modules.deposit.minters import catid_minter
-from cds.modules.records.api import Category, Keyword
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
-                                        update_record)
+import pkg_resources
 from cds_sorenson.api import get_available_preset_qualities
 from celery import chain, group, shared_task, states
 from flask_security import login_user
@@ -53,7 +45,15 @@ from invenio_pidstore import current_pidstore
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records import Record
 from invenio_webhooks import current_webhooks
+from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
+
+from cds.modules.deposit.api import Project, Video
+from cds.modules.records.api import Category, Keyword
+from cds.modules.records.minters import catid_minter
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
+                                        update_record)
 
 
 @shared_task(bind=True)

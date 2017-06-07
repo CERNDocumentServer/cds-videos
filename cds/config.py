@@ -198,31 +198,31 @@ RECORDS_UI_ENDPOINTS = dict(
         pid_type='recid',
         route='/record/<pid_value>',
         template='cds_records/record_detail.html',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
     recid_preview=dict(
         pid_type='recid',
         route='/record/<pid_value>/preview/<filename>',
         view_imp='cds.modules.previewer.views.preview_recid',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
     recid_embed=dict(
         pid_type='recid',
         route='/record/<pid_value>/embed/<filename>',
         view_imp='cds.modules.previewer.views.preview_recid_embed',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
     recid_embed_default=dict(
         pid_type='recid',
         route='/record/<pid_value>/embed',
         view_imp='cds.modules.previewer.views.preview_recid_embed',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
     recid_files=dict(
         pid_type='recid',
         route='/record/<pid_value>/files/<filename>',
         view_imp='invenio_records_files.utils:file_download_ui',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
     video_preview=dict(
         pid_type='depid',
@@ -243,7 +243,7 @@ RECORDS_UI_ENDPOINTS = dict(
         ),
         template='cds_records/record_export.html',
         view_imp='cds.modules.records.views.records_ui_export',
-        record_class='invenio_records_files.api:Record',
+        record_class='cds.modules.records.api:CDSRecord',
     ),
 )
 
@@ -255,9 +255,9 @@ OAISERVER_RECORD_INDEX = 'records'
 RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
 # Endpoints for record API.
-_Record_PID = 'pid(recid,record_class="invenio_records_files.api:Record")'
-_Category_PID = 'pid(catid,record_class="cds.modules.records.api:Category")'
-_Keyword_PID = 'pid(kwid,record_class="cds.modules.records.api:Keyword")'
+_Record_PID = 'pid(recid, record_class="cds.modules.records.api:CDSRecord")'
+_Category_PID = 'pid(catid, record_class="cds.modules.records.api:Category")'
+_Keyword_PID = 'pid(kwid, record_class="cds.modules.records.api:Keyword")'
 RECORDS_REST_ENDPOINTS = dict(
     recid=dict(
         pid_type='recid',

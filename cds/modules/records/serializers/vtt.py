@@ -26,11 +26,11 @@ from __future__ import absolute_import, print_function
 
 from datetime import datetime
 
-from flask import current_app
-from flask import render_template
-from cds.modules.deposit.api import Video, CDSFilesIterator
-from flask import url_for
-from invenio_rest.errors import RESTValidationError, FieldError
+from flask import current_app, render_template, url_for
+from invenio_rest.errors import FieldError, RESTValidationError
+
+from ...deposit.api import Video
+from ..api import CDSVideosFilesIterator
 
 
 class VTTSerializer(object):
@@ -66,12 +66,12 @@ class VTT(object):
     @staticmethod
     def _format_frames(record):
         """Select frames and format the start/end times."""
-        master_file = CDSFilesIterator.get_master_video_file(record)
+        master_file = CDSVideosFilesIterator.get_master_video_file(record)
         frames = [{
             'time': float(f['tags']['timestamp']),
             'bid': f['bucket_id'],
             'key': f['key']
-        } for f in CDSFilesIterator.get_video_frames(master_file)]
+        } for f in CDSVideosFilesIterator.get_video_frames(master_file)]
 
         last_time = float(master_file['tags']['duration'])
         poster_size = current_app.config['VIDEO_POSTER_SIZE']

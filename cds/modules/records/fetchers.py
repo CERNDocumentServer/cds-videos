@@ -45,3 +45,12 @@ def kwid_fetcher(record_uuid, data):
         pid_type='kwid',
         pid_value=str(data['key_id'])
     )
+
+
+def catid_fetcher(record_uuid, data):
+    """Fetch PID from category record."""
+    return FetchedPID(
+        provider=None,
+        pid_type='catid',
+        pid_value=str(data['name'])
+    )

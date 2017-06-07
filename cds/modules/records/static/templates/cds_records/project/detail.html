@@ -49,7 +49,7 @@
                     ng-mouseover="gif=true"
                     ng-mouseleave="gif=false"
                   />
-                  <span ng-hide="!video._deposit.extracted_metadata.duration" class="cds-video-duration">{{ ::video._deposit.extracted_metadata.duration | toMinutes }}</span>
+                  <span ng-hide="!video.duration" class="cds-video-duration">{{ video.duration }}</span>
                   <p>
                     {{ ::video.title.title || 'No title :(' | limitTo: 120}} {{ video.title.title.length > 120 ? ' [...]' : '' }}
                   </p>

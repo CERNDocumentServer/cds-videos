@@ -111,3 +111,14 @@ def kwid_minter(record_uuid, data):
         object_uuid=record_uuid,
         status=PIDStatus.REGISTERED
     )
+
+
+def catid_minter(record_uuid, data):
+    """Mint category identifiers."""
+    return PersistentIdentifier.create(
+        'catid',
+        data['name'],
+        object_type='rec',
+        object_uuid=record_uuid,
+        status=PIDStatus.REGISTERED
+    )

@@ -31,13 +31,13 @@ import os
 import re
 import uuid
 from contextlib import contextmanager
+from copy import deepcopy
 from functools import partial, wraps
 from os.path import splitext
 
-from copy import deepcopy
 import arrow
 from celery import states
-from flask import current_app, url_for
+from flask import current_app
 from invenio_db import db
 from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
@@ -48,20 +48,21 @@ from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
 from invenio_records.validators import PartialDraft4Validator
-from invenio_records_files.api import FileObject, FilesIterator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
-from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
-from sqlalchemy import func
 
-from .resolver import get_video_pid
+from invenio_sequencegenerator.api import Sequence
+
+from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
+                           CDSVideosFilesIterator)
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
-                               get_tasks_status_by_task, merge_tasks_status,
-                               iterate_events_results)
+                               get_tasks_status_by_task,
+                               iterate_events_results, merge_tasks_status)
 from .errors import DiscardConflict
+from .resolver import get_video_pid
 
 PRESERVE_FIELDS = (
     '_deposit',
@@ -89,101 +90,6 @@ def required(fields):
     return check
 
 
-class CDSFileObject(FileObject):
-    """Wrapper for files."""
-
-    @classmethod
-    def _link(cls, bucket_id, key, _external=True):
-        return url_for('invenio_files_rest.object_api',
-                       bucket_id=bucket_id, key=key, _external=_external)
-
-    def dumps(self):
-        """Create a dump of the metadata associated to the record."""
-        def _dumps(obj):
-            tags = obj.get_tags()
-            # File information
-            content_type = splitext(obj.key)[1][1:].lower()
-            context_type = tags.pop('context_type', '')
-            media_type = tags.pop('media_type', '')
-            return {
-                'key': obj.key,
-                'bucket_id': str(obj.bucket_id),
-                'version_id': str(obj.version_id),
-                'checksum': obj.file.checksum if obj.file else '',
-                'size': obj.file.size if obj.file else 0,
-                'file_id': str(obj.file_id),
-                'completed': obj.file is not None,
-                'content_type': content_type,
-                'context_type': context_type,
-                'media_type': media_type,
-                'tags': tags,
-                'links': {
-                    'self': (
-                        current_app.config['DEPOSIT_FILES_API'] +
-                        u'/{bucket}/{key}?versionId={version_id}'.format(
-                            bucket=obj.bucket_id,
-                            key=obj.key,
-                            version_id=obj.version_id,
-                        )),
-                }
-            }
-
-        master_dump = _dumps(self.obj)
-        # get all the slaves and add them inside <type> as a list order by key
-        for slave in ObjectVersion.query_heads_by_bucket(
-            bucket=self.obj.bucket).join(ObjectVersion.tags).filter(
-                ObjectVersion.file_id.isnot(None),
-                ObjectVersionTag.key == 'master',
-                ObjectVersionTag.value == str(self.obj.version_id)
-        ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
-            master_dump.setdefault(
-                slave.get_tags()['context_type'], []).append(_dumps(slave))
-        # Sort slaves by key within their lists
-        self.data.update(master_dump)
-
-        return self.data
-
-
-class CDSFilesIterator(FilesIterator):
-    """Iterator for files."""
-
-    def dumps(self, bucket=None):
-        """Serialize files from a bucket."""
-        files = []
-        for o in sorted_files_from_bucket(bucket or self.bucket, self.keys):
-            if 'master' in o.get_tags():
-                continue
-            dump = self.file_cls(o, self.filesmap.get(o.key, {})).dumps()
-            if dump:
-                files.append(dump)
-        return files
-
-    @staticmethod
-    def get_master_video_file(record):
-        """Get master video file from a Video record."""
-        try:
-            return next(
-                f for f in record['_files']
-                if f['media_type'] == 'video'
-                and f['context_type'] == 'master')
-        except StopIteration:
-            return {}
-
-    @staticmethod
-    def get_video_subformats(master_file):
-        """Get list of video subformats."""
-        return [video
-                for video in master_file.get('subformat', [])
-                if video['media_type'] == 'video' and video[
-                    'context_type'] == 'subformat']
-
-    @staticmethod
-    def get_video_frames(master_file):
-        """Get sorted list of video frames."""
-        return sorted(master_file.get('frame', []),
-                      key=lambda s: float(s['tags']['timestamp']))
-
-
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
@@ -193,6 +99,8 @@ class CDSDeposit(Deposit):
     file_cls = CDSFileObject
 
     files_iter_cls = CDSFilesIterator
+
+    published_record_class = CDSRecord
 
     def __init__(self, *args, **kwargs):
         """Init."""
@@ -883,7 +791,7 @@ class Video(CDSDeposit):
     def _create_tags(self):
         """Create additional tags."""
         master = splitext(
-            CDSFilesIterator.get_master_video_file(self).get('key', '')
+            CDSVideosFilesIterator.get_master_video_file(self).get('key', '')
         )[0]
 
         # Subtitle file
