@@ -492,6 +492,15 @@ function cdsDepositCtrl(
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 10000);
     $scope.$watch('$ctrl.record._deposit.state', that.refreshStateQueue, true);
+    $scope.$watch('$ctrl.record._deposit.status', function() {
+      if (CKEDITOR) {
+        $timeout(function() {
+          Object.values(CKEDITOR.instances).forEach(function (instance) {
+            instance.setReadOnly(instance.element.$.disabled);
+          });
+        }, 0);
+      }
+    });
 
     // Listen for task status changes
     $scope.$on('cds.deposit.task', function(evt, type, status, data) {
