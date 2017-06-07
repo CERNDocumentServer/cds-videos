@@ -31,6 +31,7 @@
           "properties": {
             "ids": {
               "type": "object",
+              "include_in_all": false,
               "properties": {
                 "source": {
                   "type": "string"
@@ -44,7 +45,8 @@
               "type": "string"
             },
             "role": {
-              "type": "string"
+              "type": "string",
+              "include_in_all": false
             },
             "email": {
               "type": "string"

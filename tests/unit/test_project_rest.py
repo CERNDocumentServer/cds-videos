@@ -366,7 +366,6 @@ def test_publish_project_check_indexed(
         # [[ GET EMPTY PROJECT LIST ]]
         res = client.get(
             url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata),
             headers=json_headers)
 
         assert res.status_code == 200
@@ -728,3 +727,61 @@ def test_default_order(api_app, es, cds_jsonresolver, users,
         assert len(data['hits']['hits']) == 2
         assert data['hits'][
             'hits'][0]['metadata']['title']['title'] == 'project 2'
+
+
+def test_search_excluded_fields(api_app, users, api_project,
+                                json_headers, location,
+                                project_deposit_metadata):
+    """Test search excluded fields."""
+    # publish a project with "contributors" field
+    (project, video_1, video_2) = api_project
+    with api_app.test_request_context():
+        prepare_videos_for_publish([video_1, video_2])
+        video_1['contributors'] = [
+            {
+                "affiliations": [
+                    "Universita degli Studi di Udine (IT)"
+                ],
+                "email": "example@cern.ch",
+                "ids": [
+                    {
+                        "source": "cern",
+                        "value": "123456"
+                    },
+                    {
+                        "source": "cds",
+                        "value": "67890"
+                    }
+                ],
+                "name": "Fuu, Bar",
+                "role": "Director"
+            }
+        ],
+        project = project.publish()
+
+        video = record_video_resolver(project.video_ids[0])
+        indexer = RecordIndexer()
+        indexer.index(video)
+        sleep(2)
+
+    with api_app.test_client() as client:
+        # check record is indexed
+        res = client.get(url_for('invenio_records_rest.recid_list',
+                                 headers=json_headers))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 1
+
+        # check record is not searchable for contributors role
+        res = client.get(url_for('invenio_records_rest.recid_list',
+                                 q='Director', headers=json_headers))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 0
+
+        # check record is not searchable for contributors id
+        res = client.get(url_for('invenio_records_rest.recid_list',
+                                 q='67890', headers=json_headers))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert len(data['hits']['hits']) == 0
