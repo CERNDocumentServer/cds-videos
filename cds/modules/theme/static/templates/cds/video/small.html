@@ -9,7 +9,7 @@
         err-src="//unsplash.it/1024/576>?random&blur"
         image-progressive-loading
       />
-      <span ng-hide="!record.metadata._deposit.extracted_metadata.duration" class="cds-video-duration">{{ record.metadata._deposit.extracted_metadata.duration | toMinutes }}</span>
+      <span ng-hide="!record.metadata.duration" class="cds-video-duration">{{ record.metadata.duration }}</span>
       <p>
         {{ record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
       </p>

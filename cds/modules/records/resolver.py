@@ -29,9 +29,8 @@ from __future__ import absolute_import, print_function
 from functools import partial
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
-from invenio_records_files.api import Record
 
-from .api import Keyword
+from .api import Keyword, CDSRecord
 
 
 def get_pid(pid_type, pid_value):
@@ -49,7 +48,7 @@ keyword_resolver = Resolver(
 
 record_resolver = Resolver(
     pid_type='recid', object_type='rec',
-    getter=partial(Record.get_record, with_deleted=True)
+    getter=partial(CDSRecord.get_record, with_deleted=True)
 )
 
 

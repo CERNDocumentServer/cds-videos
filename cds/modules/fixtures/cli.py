@@ -26,14 +26,9 @@ import uuid
 from os import listdir, makedirs
 from os.path import basename, dirname, exists, isdir, join, splitext
 
-import pkg_resources
-
 import click
+import pkg_resources
 import simplejson
-from cds.modules.deposit.api import Project, Video
-from cds.modules.deposit.minters import catid_minter
-from cds.modules.ffmpeg import ff_probe
-from cds.modules.records.api import Category
 from cds_dojson.marc21 import marc21
 from dojson.contrib.marc21.utils import create_record, split_blob
 from flask import current_app
@@ -51,6 +46,11 @@ from invenio_records.api import Record
 from invenio_records_files.api import Record as FileRecord
 from invenio_records_files.models import RecordsBuckets
 from invenio_sequencegenerator.api import Template
+
+from cds.modules.deposit.api import Project, Video
+from cds.modules.ffmpeg import ff_probe
+from cds.modules.records.api import Category
+from cds.modules.records.minters import catid_minter
 
 from ..records.tasks import keywords_harvesting
 from .video_utils import add_master_to_video

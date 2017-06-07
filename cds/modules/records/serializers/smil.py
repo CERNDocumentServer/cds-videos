@@ -24,14 +24,16 @@
 
 from __future__ import absolute_import, print_function
 
-from six import BytesIO
-from cds.modules.deposit.api import Video, CDSFilesIterator
-from cds.modules.previewer.api import get_relative_path
 from flask import render_template
 from invenio_db import db
-from invenio_files_rest.models import as_object_version, ObjectVersion, \
-    ObjectVersionTag
-from invenio_rest.errors import RESTValidationError, FieldError
+from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
+                                       as_object_version)
+from invenio_rest.errors import FieldError, RESTValidationError
+from six import BytesIO
+
+from ...deposit.api import Video
+from ...previewer.api import get_relative_path
+from ..api import CDSVideosFilesIterator
 
 
 class SmilSerializer(object):
@@ -66,8 +68,8 @@ class Smil(object):
     @staticmethod
     def _format_videos(record):
         """Format each video subformat."""
-        master_file = CDSFilesIterator.get_master_video_file(record)
-        for video in CDSFilesIterator.get_video_subformats(master_file):
+        master_file = CDSVideosFilesIterator.get_master_video_file(record)
+        for video in CDSVideosFilesIterator.get_video_subformats(master_file):
             tags = video['tags']
             # If the 'smil' config variable is False,
             # don't add this video to the SMIL file

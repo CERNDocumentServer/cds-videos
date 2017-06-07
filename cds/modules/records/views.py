@@ -20,10 +20,10 @@
 """CDS Records UI."""
 
 from __future__ import absolute_import, print_function
+
 import six
-from cds.modules.records.serializers import VTTSerializer
-from flask import Blueprint, current_app, render_template, request
-from flask import make_response
+from flask import (Blueprint, current_app, make_response, render_template,
+                   request)
 from werkzeug.utils import import_string
 
 blueprint = Blueprint(
