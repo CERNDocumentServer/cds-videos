@@ -4,7 +4,7 @@
        ng-mouseleave="show=false"
        class="cds-transition cds-video-title l-w cds-line-height-100"
        target="_self"
-       ng-href="/record/{{ ::record.id }}"
+       ng-href="/record/{{ record.id }}"
        ng-class="{'cds-video-title-with-play-button': !show}">
       <img
         ng-cloak
@@ -16,11 +16,11 @@
         image-progressive-loading
       />
       <p>
-        {{ ::record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
+        {{ record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
       </p>
     </a>
     <p ng-class="{'cds-visibility-visible': show, 'cds-visibility-hidden': !show}" class="cds-transition t-w">
-      {{ ::record.metadata.description.value | limitTo: 60 }}
+      {{ record.metadata.description.value | limitTo: 60 }}
     </p>
   </div>
 </div>

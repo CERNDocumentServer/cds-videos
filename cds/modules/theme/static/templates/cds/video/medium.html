@@ -5,7 +5,7 @@
        ng-class="{'cds-video-title-with-play-button': !show}"
        ng-mouseover="show=true"
        ng-mouseleave="show=false"
-       ng-href="/record/{{ ::record.id }}">
+       ng-href="/record/{{ record.id }}">
       <img
         class="img-responsive"
         gif-src="{{ record | iiif:true:[400,224] }}"
@@ -15,7 +15,7 @@
         image-progressive-loading
       />
       <p>
-        {{ ::record.metadata.title.title || 'No title :(' | limitTo: 120 }}
+        {{ record.metadata.title.title || 'No title :(' | limitTo: 120 }}
         {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
       </p>
     </a>
