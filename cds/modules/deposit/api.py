@@ -761,9 +761,13 @@ class Video(CDSDeposit):
         # check all tasks are successfully
         if self._tasks_global_status() != states.SUCCESS:
             raise PIDInvalidAction()
-        # inherit ``category`` and ``type`` fields from parent project
+        # inherit some fields from parent project
         self['category'] = self.project.get('category')
         self['type'] = self.project.get('type')
+        if '_access' not in self:
+            self['_access'] = {}
+        self['_access']['update'] = self.project.get(
+            '_access', {}).get('update', [])
         # generate human-readable duration
         self.generate_duration()
         # generate extra tags for files

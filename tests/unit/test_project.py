@@ -41,7 +41,8 @@ from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      is_deposit, record_unbuild_url,
                                      deposit_project_resolver,
                                      record_video_resolver,
-                                     deposit_video_resolver)
+                                     deposit_video_resolver,
+                                     deposit_videos_resolver)
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -605,3 +606,32 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
     kw_expect = {k['key_id']: k['name'] for k in [keyword_2]}
     assert kw_expect == kw_result
+
+
+@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
+            RecordIdProvider.create)
+def test_access_update_on_publish(api_app, api_project):
+    """Test video publish."""
+    (project, video_1, video_2) = api_project
+
+    # set a particular value for _access.update
+    project['_access'] = {'update': ['my@email.it']}
+    project = project.commit()
+    db.session.commit()
+    # publish project
+    prepare_videos_for_publish([video_1, video_2])
+    project = project.publish()
+    # check project/videos records
+    video_1_record = record_video_resolver(project.video_ids[0])
+    video_2_record = record_video_resolver(project.video_ids[1])
+    _, project_record = project.fetch_published()
+    assert video_1_record['_access'] == project_record['_access']
+    assert video_2_record['_access'] == project_record['_access']
+    assert project_record['_access'] == {'update': ['my@email.it']}
+    # check project/videos deposits
+    [video_1, video_2] = deposit_videos_resolver([
+        video_1['_deposit']['id'], video_2['_deposit']['id']
+    ])
+    assert video_1['_access'] == project['_access']
+    assert video_2['_access'] == project['_access']
+    assert project['_access'] == {'update': ['my@email.it']}
