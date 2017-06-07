@@ -205,9 +205,9 @@ def test_smil_generation(previewer_app, db, api_project, video):
             assert get_relative_path(slave_obj) in contents
 
         # check if special file is out of the smile
-        assert '9876' not in contents
+        assert 'system-bitrate="9876"' not in contents
         # check if special file is inside the smile
-        assert '7654' in contents
+        assert 'system-bitrate="7654"' in contents
 
 
 def test_vtt_export(previewer_app, db, project_published,
