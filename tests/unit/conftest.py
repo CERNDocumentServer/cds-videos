@@ -398,11 +398,6 @@ def project_deposit_metadata(deposit_metadata):
             'title': 'my project',
             'subtitle': 'tempor quis elit mollit',
         },
-        'creator': {
-            'email': 'test@cds.cern.ch',
-            'contribution': 'Fuu Bar',
-            'name': 'John Doe',
-        },
         'description': {
             'value': 'in tempor reprehenderit enim eiusmod',
         },
