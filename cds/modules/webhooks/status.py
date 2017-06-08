@@ -100,6 +100,15 @@ def _compute_status(statuses):
     return states.SUCCESS
 
 
+def merge_tasks_status(task_statuses_1, task_statuses_2):
+    """Merge task statuses."""
+    statuses = {}
+    for key in set(task_statuses_1.keys()) | set(task_statuses_2.keys()):
+        statuses[key] = _compute_status(
+            [task_statuses_1.get(key), task_statuses_2.get(key)])
+    return statuses
+
+
 class ComputeGlobalStatus(object):
     """Compute a global status from celery receiver raw info."""
 
