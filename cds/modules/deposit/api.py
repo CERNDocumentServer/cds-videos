@@ -512,6 +512,20 @@ class Project(CDSDeposit):
 
         return videos_published
 
+    def _publish_new(self, id_=None):
+        """Publish new project and update all the video pointers."""
+        record = super(Project, self)._publish_new(id_=id_)
+        patch = [{
+            'op': 'replace',
+            'path': '/_project_id',
+            'value': str(record['recid'])
+        }]
+        for video_id in self.video_ids:
+            video = CDSRecord.get_record(
+                record_resolver.resolve(video_id)[0].object_uuid)
+            video.patch(patch).commit()
+        return record
+
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a project.
 
@@ -717,6 +731,8 @@ class Video(CDSDeposit):
         video_old_id = self['recid']
         # edit the video
         video_new = super(Video, self).edit(pid=pid)
+        # update project reference from recid to depid
+        video_new['_project_id'] = self.project['_deposit']['id']
         # update associated project
         video_new.project._update_videos(
             [record_build_url(video_old_id)],

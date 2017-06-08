@@ -26,31 +26,29 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import url_for, current_app, request
+from flask import current_app, request, url_for
+from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_rest.links import default_links_factory
 
-from .resolver import record_resolver, get_record_pid
-from ..deposit.api import deposit_project_resolver
+from .resolver import record_resolver
 
 
 def _fill_video_extra_links(record, links):
     """Add extra links if it's a video."""
-    if '_project_id' in record:
-        # if it's a video, get the deposit project
-        deposit_project = deposit_project_resolver(record['_project_id'])
-        if deposit_project.is_published():
-            # if the project is published, get the record project
-            pid_project = get_record_pid(
-                pid_value=deposit_project['_deposit']['pid']['value'])
-            # include project link
-            api_url = url_for('invenio_records_rest.recid_item',
-                              pid_value=pid_project.pid_value, _external=True)
-            url = current_app.config['RECORD_UI_ENDPOINT'].format(
-                scheme=request.scheme,
-                host=request.host,
-                pid_value=pid_project.pid_value,
-            )
-            links.update(project=api_url, project_html=url)
+    try:
+        project_pid = record_resolver.resolve(record['_project_id'])[0]
+        # include project link
+        api_url = url_for('invenio_records_rest.recid_item',
+                          pid_value=project_pid.pid_value, _external=True)
+        url = current_app.config['RECORD_UI_ENDPOINT'].format(
+            scheme=request.scheme,
+            host=request.host,
+            pid_value=project_pid.pid_value,
+        )
+        links.update(project=api_url, project_html=url)
+    except (KeyError, PIDDoesNotExistError):
+        # The project has not been published yet.
+        pass
 
 
 def record_link_factory(pid):
