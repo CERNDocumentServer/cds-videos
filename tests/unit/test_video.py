@@ -553,18 +553,21 @@ def test_video_publish_with_no_category(api_project):
     """Test video publish if category is not set."""
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
-    video_1_depid = video_1['_deposit']['id']
     # test: no category in project
-    category = project['category']
     del project['category']
     assert 'type' in project
     project.commit()
     db.session.commit()
     with pytest.raises(ValidationError):
         video_1.publish()
+
+
+def test_video_publish_with_no_type(api_project):
+    """Test video publish with no type."""
+    (project, video_1, video_2) = api_project
+    prepare_videos_for_publish([video_1, video_2])
+    video_1_depid = video_1['_deposit']['id']
     # test: no type in project
-    type_ = project['type']
-    project['category'] = category
     del project['type']
     assert 'category' in project
     project.commit()
@@ -572,8 +575,16 @@ def test_video_publish_with_no_category(api_project):
     video_1 = deposit_video_resolver(video_1_depid)
     with pytest.raises(ValidationError):
         video_1.publish()
+
+
+def test_video_publish_with_category_and_type(api_project):
+    """Test video publish with category and type."""
+    (project, video_1, video_2) = api_project
+    prepare_videos_for_publish([video_1, video_2])
+    video_1_depid = video_1['_deposit']['id']
     # test with category + type
-    project['type'] = type_
+    assert 'type' in project
+    assert 'category' in project
     project.commit()
     db.session.commit()
     video_1 = deposit_video_resolver(video_1_depid)

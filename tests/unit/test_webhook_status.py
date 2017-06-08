@@ -33,7 +33,7 @@ from copy import deepcopy
 from flask import url_for
 from collections import namedtuple
 from cds.modules.webhooks.status import GetInfoByID, iterate_result, \
-    CollectStatusesByTask
+    CollectStatusesByTask, merge_tasks_status
 from invenio_webhooks.models import Event
 from helpers import mock_current_user
 
@@ -142,3 +142,20 @@ def test_collect_statuses_by_task():
         'file_download': states.PENDING,
         'file_transcode': states.SUCCESS,
     }
+
+
+def test_merge_tasks_status():
+    """Test merge tasks status."""
+    statuses_1 = {
+        'task_download': states.STARTED,
+        'task_metadata_extraction': states.SUCCESS,
+    }
+    statuses_2 = {
+        'task_frame_extraction': states.FAILURE,
+        'task_metadata_extraction': states.PENDING,
+    }
+    assert {
+        'task_download': states.STARTED,
+        'task_metadata_extraction': states.PENDING,
+        'task_frame_extraction': states.FAILURE,
+    } == merge_tasks_status(statuses_1, statuses_2)
