@@ -27,7 +27,6 @@
 from __future__ import absolute_import, print_function
 
 import datetime
-import itertools
 import os
 import re
 import uuid
@@ -60,7 +59,7 @@ from .resolver import get_video_pid
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
-                               get_tasks_status_by_task,
+                               get_tasks_status_by_task, merge_tasks_status,
                                iterate_events_results)
 from .errors import DiscardConflict
 
@@ -543,7 +542,13 @@ class Project(CDSDeposit):
 
         :returns: A list of video references.
         """
-        return [video['$ref'] for video in self.get('videos', [])]
+        refs = []
+        for video in self.get('videos', []):
+            if '$ref' in video:
+                refs.append(video['$ref'])
+            else:
+                refs.append(Video(video).ref)
+        return refs
 
     def _find_refs(self, refs):
         """Find index of references."""
@@ -677,10 +682,11 @@ class Project(CDSDeposit):
 
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
-        list_events = [get_deposit_events(depid) for depid in self.video_ids]
-        events = list(itertools.chain.from_iterable(list_events))
-        return get_tasks_status_by_task(
-            events, statuses=deepcopy(self['_deposit'].get('state', {})))
+        status = {}
+        for video in self.videos:
+            status = merge_tasks_status(
+                status, video['_deposit'].get('state', {}))
+        return status
 
     @classmethod
     def build_video_ref(cls, video):
@@ -690,6 +696,19 @@ class Project(CDSDeposit):
         else:
             url = video_build_url(video['_deposit']['id'])
         return {'$ref': url}
+
+    @property
+    def videos(self):
+        """Get videos."""
+        videos = []
+        for ref in self._video_refs:
+            if is_deposit(ref):
+                videos.append(deposit_video_resolver(record_unbuild_url(ref)))
+            else:
+                videos.append(record_resolver.resolve(
+                    record_unbuild_url(ref)
+                )[1])
+        return videos
 
 
 class Video(CDSDeposit):

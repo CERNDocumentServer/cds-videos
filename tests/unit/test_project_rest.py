@@ -34,7 +34,7 @@ from copy import deepcopy
 from cds.modules.deposit.resolver import get_video_pid, \
     get_project_pid
 from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
-    deposit_videos_resolver, Project, Video, record_video_resolver
+    deposit_videos_resolver, Project, Video
 from flask import url_for
 from flask_principal import RoleNeed, identity_loaded
 from invenio_db import db
@@ -434,8 +434,7 @@ def test_publish_project_check_indexed(
             _, project_record = project_resolver.resolve(
                 project_depid)[1].fetch_published()
             # get video records
-            video_records = [record_video_resolver(id_)
-                             for id_ in Project(data=project_record).video_ids]
+            video_records = Project(data=project_record).videos
             assert len(video_records) == 2
             # check project + videos are indexed
             assert mock_indexer.called is True
@@ -759,7 +758,7 @@ def test_search_excluded_fields(api_app, users, api_project,
         ],
         project = project.publish()
 
-        video = record_video_resolver(project.video_ids[0])
+        video = project.videos[0]
         indexer = RecordIndexer()
         indexer.index(video)
         sleep(2)

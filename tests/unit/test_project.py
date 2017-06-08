@@ -39,8 +39,8 @@ from cds.modules.records.permissions import has_update_permission
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_build_url,
                                      is_deposit, record_unbuild_url,
-                                     deposit_project_resolver,
                                      record_video_resolver,
+                                     deposit_project_resolver,
                                      deposit_video_resolver,
                                      deposit_videos_resolver)
 from invenio_accounts.models import User
@@ -270,9 +270,9 @@ def test_project_edit(app, project_published):
     assert len(videos) == 2
     for i, video in enumerate(videos):
         #  video = Video.get_record(video.id)
-        assert video.status == 'published'
+        assert video['_deposit']['status'] == 'published'
         new_video = video.edit()
-        assert new_video.status == 'draft'
+        assert new_video['_deposit']['status'] == 'draft'
         new_video.update(title={'title': 'Video {}'.format(i + 1)})
         new_video.publish()
 
@@ -280,10 +280,9 @@ def test_project_edit(app, project_published):
     new_project.publish()
 
     # Check that everything is published
-    videos = [record_video_resolver(id_)
-              for id_ in new_project.video_ids]
-    assert new_project.status == 'published'
-    assert all(video.status == 'published' for video in videos)
+    videos = [record_video_resolver(id_) for id_ in new_project.video_ids]
+    assert new_project['_deposit']['status'] == 'published'
+    assert all(video['_deposit']['status'] == 'published' for video in videos)
 
     # Check that all titles where properly changed
     assert new_project['title']['title'] == 'My project'
@@ -622,8 +621,8 @@ def test_access_update_on_publish(api_app, api_project):
     prepare_videos_for_publish([video_1, video_2])
     project = project.publish()
     # check project/videos records
-    video_1_record = record_video_resolver(project.video_ids[0])
-    video_2_record = record_video_resolver(project.video_ids[1])
+    [video_1_record, video_2_record] = [record_video_resolver(id_)
+                                        for id_ in project.video_ids]
     _, project_record = project.fetch_published()
     assert video_1_record['_access'] == project_record['_access']
     assert video_2_record['_access'] == project_record['_access']
