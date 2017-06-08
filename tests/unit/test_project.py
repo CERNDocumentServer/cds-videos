@@ -256,6 +256,7 @@ def test_project_discard(app, project_published):
 def test_project_edit(app, project_published):
     """Test project edit."""
     (project, video_1, video_2) = project_published
+
     assert project.status == 'published'
     assert video_1.status == 'published'
     assert video_2.status == 'published'
@@ -266,7 +267,11 @@ def test_project_edit(app, project_published):
     new_project.update(title={'title': 'My project'})
 
     # Edit videos inside project (change video titles)
-    videos = [record_video_resolver(id_) for id_ in new_project.video_ids]
+    videos = [
+        deposit_video_resolver(
+            record_video_resolver(id_)['_deposit']['id'])
+        for id_ in new_project.video_ids
+    ]
     assert len(videos) == 2
     for i, video in enumerate(videos):
         #  video = Video.get_record(video.id)

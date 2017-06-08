@@ -493,7 +493,7 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
         assert client.post(url).status_code == 202
         rec_pid_proj, rec_proj = video_1.project.fetch_published()
 
-        # get a record video (with no published project)
+        # get a record video (with published project)
         url = url_for('invenio_records_rest.recid_item',
                       pid_value=rec_pid.pid_value, _external=True)
         res = client.get(url, headers=json_headers)
