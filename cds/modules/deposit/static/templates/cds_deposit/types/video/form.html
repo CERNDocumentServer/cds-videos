@@ -208,7 +208,7 @@
                           ng-model="$ctrl.permissions"
                           ng-change="$ctrl.changeAccess()"
                           class="form-control"
-                          ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public"
+                          ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
                         >
                           <option value="public" ng-selected="$ctrl.permissions === 'public'">
                             Public
@@ -228,7 +228,7 @@
                            tagging-label="(new email)"
                            ng-model="$ctrl.cdsDepositCtrl.record._access.read"
                            theme="bootstrap"
-                           ng-disabled="!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public'"
+                           ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
                            title="Add emails"
                           >
                            <ui-select-match
