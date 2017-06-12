@@ -399,7 +399,7 @@ DEPOSIT_PROJECT_FACETS = {
         },
         'post_filters': {
             'status': terms_filter('_deposit.status'),
-            'category': terms_filter('category'),
+            'category': terms_filter('category.untouched'),
             'transcode': terms_filter('_deposit.state.file_transcode'),
             'frames': terms_filter('_deposit.state.file_video_extract_frames'),
             'created_by': terms_filter('_deposit.created_by'),
