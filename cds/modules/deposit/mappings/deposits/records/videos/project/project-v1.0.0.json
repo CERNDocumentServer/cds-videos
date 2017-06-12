@@ -241,7 +241,14 @@
               "type": "string"
             },
             "title": {
-              "type": "string"
+              "type": "string",
+              "fields": {
+                "raw": {
+                  "type": "string",
+                  "index": "not_analyzed",
+                  "analyzer": "case_insensitive_sort"
+                }
+              }
             }
           }
         },
@@ -265,6 +272,16 @@
         }
       },
       "date_detection": true
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "case_insensitive_sort": {
+          "tokenizer": "keyword",
+          "filter":  [ "lowercase" ]
+        }
+      }
     }
   }
 }

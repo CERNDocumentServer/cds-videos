@@ -458,6 +458,16 @@ DEPOSIT_REST_SORT_OPTIONS = {
             fields=['_updated'],
             title='Oldest',
             default_order='asc', order=3,
+        ),
+        title_asc=dict(
+            fields=['title.title.raw'],
+            title='Title [Asc]',
+            default_order='asc', order=4,
+        ),
+        title_desc=dict(
+            fields=['title.title.raw'],
+            title='Title [Desc]',
+            default_order='desc', order=5,
         )),
 }
 
