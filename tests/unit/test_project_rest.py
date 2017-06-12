@@ -696,26 +696,65 @@ def test_default_order(api_app, es, cds_jsonresolver, users,
                                     project_data={
                                         'title': {'title': 'project 1'}
                                     })
+    project_1.commit()
+    db.session.commit()
     (project_2, _, _) = new_project(api_app, es, cds_jsonresolver, users,
+                                    location, db, deposit_metadata,
+                                    project_data={
+                                        'title': {'title': 'alpha'}
+                                    })
+    project_2.commit()
+    db.session.commit()
+    (project_3, _, _) = new_project(api_app, es, cds_jsonresolver, users,
+                                    location, db, deposit_metadata,
+                                    project_data={
+                                        'title': {'title': 'zeta'}
+                                    })
+    project_3.commit()
+    db.session.commit()
+    (project_4, _, _) = new_project(api_app, es, cds_jsonresolver, users,
                                     location, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'project 2'}
                                     })
-    RecordIndexer().bulk_index([project_1.id, project_2.id])
-    RecordIndexer().process_bulk_queue()
+    project_4.commit()
+    db.session.commit()
     sleep(2)
+
+    def check_order(data, orders):
+        hits = [hit['metadata']['title']['title']
+                for hit in data['hits']['hits']]
+        assert hits == orders
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # test order: title descending
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', sort='-title_desc'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        check_order(data, ['zeta', 'project 2', 'project 1', 'alpha'])
+
+        # test order: title ascending
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', sort='title_asc'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        check_order(data, ['alpha', 'project 1', 'project 2', 'zeta'])
+
         # test order: older first
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', sort='oldest'),
+            headers=json_headers)
         res = client.get(
             url_for('invenio_deposit_rest.project_list', sort='oldest'),
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 2
-        assert data['hits'][
-            'hits'][0]['metadata']['title']['title'] == 'project 1'
+        check_order(data, ['project 1', 'alpha', 'zeta', 'project 2'])
 
         # test default order: newest first
         res = client.get(
@@ -723,9 +762,7 @@ def test_default_order(api_app, es, cds_jsonresolver, users,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 2
-        assert data['hits'][
-            'hits'][0]['metadata']['title']['title'] == 'project 2'
+        check_order(data, ['project 2', 'zeta', 'alpha', 'project 1'])
 
 
 def test_search_excluded_fields(api_app, users, api_project,
