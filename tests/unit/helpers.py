@@ -247,7 +247,7 @@ def workflow_receiver_video_failing(api_app, db, video,
 
 
 def new_project(app, es, cds_jsonresolver, users, location, db,
-                deposit_metadata, project_data=None):
+                deposit_metadata, project_data=None, wait=None):
     """New project with videos."""
     project_data = project_data or {
         'title': {
@@ -298,7 +298,8 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
         video_2.commit()
 
     db.session.commit()
-    sleep(2)
+    if wait is not False:
+        sleep(2)
     return project, video_1, video_2
 
 

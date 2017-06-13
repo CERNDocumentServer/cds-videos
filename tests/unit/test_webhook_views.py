@@ -33,11 +33,15 @@ import mock
 from celery.result import AsyncResult
 from celery import states
 from flask import url_for
+from flask_security import current_user
+from flask_principal import UserNeed, identity_loaded
 from helpers import get_object_count, get_tag_count, mock_current_user, \
     workflow_receiver_video_failing
 from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
+from invenio_accounts.testutils import login_user_via_session
+from invenio_accounts.models import User
 from six import BytesIO
 from cds.modules.deposit.api import deposit_video_resolver
 from invenio_webhooks.models import Event
@@ -46,7 +50,8 @@ from helpers import get_indexed_records_from_mock
 
 
 def check_restart_avc_workflow(api_app, event_id, access_token,
-                               json_headers, data, video_id):
+                               json_headers, data, video_1_id, video_1_depid,
+                               users):
     """Try to restart AVC workflow via REST API."""
     with api_app.test_request_context():
         url = url_for(
@@ -72,9 +77,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
     # check SSE
     assert mock_sse.called is True
@@ -82,12 +86,78 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     # check elasticsearch
     assert mock_indexer.called is True
     ids = get_indexed_records_from_mock(mock_indexer)
-    assert len(ids) == 12
-    assert set(ids) == set([video_id])
+    setids = set(ids)
+    assert len(setids) == 2
+    assert video_1_id in setids
+
+    # check restart from anonymous user
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_item',
+            receiver_id='avc',
+            event_id=event_id,
+        )
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            sse_channel=sse_channel
+        )
+        resp = client.put(
+            url, headers=json_headers, data=json.dumps(payload))
+        assert resp.status_code == 401
+
+    # check feedback from another user without access
+    user_2 = User.query.get(users[1])
+    user_2_email = user_2.email
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_item',
+            receiver_id='avc',
+            event_id=event_id,
+        )
+    with api_app.test_client() as client:
+        sse_channel = 'mychannel'
+        payload = dict(
+            sse_channel=sse_channel
+        )
+        login_user_via_session(client, email=user_2_email)
+        resp = client.put(
+            url, headers=json_headers, data=json.dumps(payload))
+        assert resp.status_code == 403
+
+    # check feedback from another user with access
+    user_2 = User.query.get(users[1])
+    user_2_id = str(user_2.id)
+    user_2_email = user_2.email
+    project = deposit_video_resolver(video_1_depid).project
+    project['_access'] = {'update': [user_2_email]}
+    project.commit()
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_item',
+            receiver_id='avc',
+            event_id=event_id,
+        )
+    with api_app.test_client() as client:
+
+        @identity_loaded.connect
+        def load_email(sender, identity):
+            if current_user.get_id() == user_2_id:
+                identity.provides.update([UserNeed(user_2_email)])
+
+        sse_channel = 'mychannel'
+        payload = dict(
+            sse_channel=sse_channel
+        )
+        login_user_via_session(client, email=user_2_email)
+        resp = client.put(
+            url, headers=json_headers, data=json.dumps(payload))
+        assert resp.status_code == 201
 
 
 def check_video_transcode_delete(api_app, event_id, access_token,
-                                 json_headers, data, video_id):
+                                 json_headers, data, video_1_id, video_1_depid,
+                                 users):
     """Try to delete transcoded file via REST API."""
     # DELETE FIRST TRANSCODED FILE
     task_id = data['global_status'][1][1]['file_transcode']['id']
@@ -115,9 +185,8 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count() - 10
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
     # check bucket size
     bucket = Bucket.query.first()
@@ -149,13 +218,13 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 10
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
 
 def check_video_transcode_restart(api_app, event_id, access_token,
-                                  json_headers, data, video_id):
+                                  json_headers, data, video_1_id,
+                                  video_1_depid, users):
     """Try to delete transcoded file via REST API."""
     # RESTART FIRST TRANSCODED FILE
     task_id = data['global_status'][1][1]['file_transcode']['id']
@@ -185,9 +254,8 @@ def check_video_transcode_restart(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
     # check task id is changed
     event = Event.query.first()
@@ -201,7 +269,7 @@ def check_video_transcode_restart(api_app, event_id, access_token,
 
 
 def check_video_frames(api_app, event_id, access_token,
-                       json_headers, data, video_id):
+                       json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete video frames via REST API."""
     task_id = data['global_status'][1][0]['file_video_extract_frames']['id']
     with api_app.test_request_context():
@@ -228,13 +296,12 @@ def check_video_frames(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
 
 def check_video_download(api_app, event_id, access_token,
-                         json_headers, data, video_id):
+                         json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete downloaded files via REST API."""
     task_id = data['global_status'][0][0]['file_download']['id']
     with api_app.test_request_context():
@@ -261,13 +328,13 @@ def check_video_download(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count(download=False)
 
     # check extracted metadata is not there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
 
 def check_video_metadata_extraction(api_app, event_id, access_token,
-                                    json_headers, data, video_id):
+                                    json_headers, data, video_1_id,
+                                    video_1_depid, users):
     """Try to delete metadata extraction via REST API."""
     task_id = data['global_status'][0][1][
         'file_video_metadata_extraction']['id']
@@ -295,9 +362,8 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
 
     # check extracted metadata is not there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' not in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' not in record.json['_deposit']
 
 
 @pytest.mark.parametrize('checker', [
@@ -309,10 +375,13 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     check_video_transcode_restart,
 ])
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_delete(api_app, db, cds_depid,
+def test_avc_workflow_delete(api_app, db, api_project, users,
                              access_token, json_headers, mock_sorenson,
                              online_video, webhooks, checker):
     """Test AVCWorkflow receiver REST API."""
+    project, video_1, video_2 = api_project
+    video_1_id = video_1.id
+    video_1_depid = video_1['_deposit']['id']
     master_key = 'test.mp4'
 
     with api_app.test_request_context():
@@ -328,7 +397,7 @@ def test_avc_workflow_delete(api_app, db, cds_depid,
         sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
-            deposit_id=cds_depid,
+            deposit_id=video_1_depid,
             key=master_key,
             sse_channel=sse_channel,
             sleep_time=0,
@@ -339,17 +408,17 @@ def test_avc_workflow_delete(api_app, db, cds_depid,
         data = json.loads(resp.data.decode('utf-8'))
 
     # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    record = RecordMetadata.query.get(video_1_id)
+    assert 'extracted_metadata' in record.json['_deposit']
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     event_id = data['tags']['_event_id']
-    video_id = str(deposit_video_resolver(cds_depid).id)
+    video_1_id = str(deposit_video_resolver(video_1_depid).id)
     ###
-    checker(api_app, event_id, access_token, json_headers, data, video_id)
+    checker(api_app, event_id, access_token, json_headers, data,
+            video_1_id, video_1_depid, users)
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
