@@ -8,6 +8,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       readonly: '$ctrl.cdsDepositCtrl.isPublished()',
       disableSuccessState: true,
       feedback: false,
+      startEmpty: true,
       onChange: '$ctrl.removeValidationMessage(modelValue,form)',
       ngModelOptions: {
         updateOn: 'default blur',
@@ -17,11 +18,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   this.$onInit = function() {
-    this.cdsDepositCtrl.depositForm = {};
-    this.cdsDepositCtrl.cdsDepositsCtrl.JSONResolver(this.form)
-    .then(function(response) {
-      that.form = response.data;
-    });
 
     this.checkCopyright = function(value, form) {
       if (that.cdsDepositCtrl.cdsDepositsCtrl.copyright) {
@@ -353,7 +349,7 @@ function cdsForm() {
   return {
     transclude: true,
     bindings: {
-      form: '@',
+      form: '=',
     },
     require: {
       cdsDepositCtrl: '^cdsDeposit'

@@ -11,7 +11,8 @@ function cdsDepositsConfig(
   localStorageServiceProvider,
   sfErrorMessageProvider,
   jwtProvider,
-  $httpProvider
+  $httpProvider,
+  $compileProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -104,6 +105,9 @@ function cdsDepositsConfig(
     $httpProvider.defaults.headers['post']= headers;
     $httpProvider.defaults.headers['put'] = headers;
   }
+
+  // Optimize Angular on production
+  // $compileProvider.debugInfoEnabled(false);
 }
 
 // Inject the necessary angular services
@@ -121,6 +125,7 @@ cdsDepositsConfig.$inject = [
   'sfErrorMessageProvider',
   'jwtProvider',
   '$httpProvider',
+  '$compileProvider'
 ];
 
 // Register modules

@@ -87,7 +87,7 @@
           <!-- Draft Project -->
           <cds-form
             template="/static/templates/cds_deposit/types/project/form.html"
-            form="{{ $ctrl.masterForm || {} }}"
+            form="$ctrl.masterFormResolved"
           >
           </cds-form>
           <!-- Published Project -->
@@ -123,7 +123,7 @@
                   <!-- Draft Video -->
                   <cds-form
                     template="/static/templates/cds_deposit/types/video/form.html"
-                    form="{{ $ctrl.childrenForm || {} }}"
+                    form="$ctrl.childrenFormResolved"
                   >
                   <cds-uploader
                     auto-start-upload="true"
