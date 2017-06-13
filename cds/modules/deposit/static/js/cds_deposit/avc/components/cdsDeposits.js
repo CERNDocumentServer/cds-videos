@@ -26,6 +26,12 @@ function cdsDepositsCtrl(
   // The last video upload promise
   this.lastVideoUpload = $q.resolve();
 
+  // Schemas and forms
+  that.masterSchemaResolved = {};
+  that.childrenSchemaResolved = {};
+  that.childrenFormResolved = {};
+  that.masterFormResolved = {};
+
   this.$onDestroy = function() {
     try {
       // On destroy delete the event listener
@@ -60,6 +66,12 @@ function cdsDepositsCtrl(
     });
     cdsAPI.resolveJSON(this.childrenSchema).then(function(response) {
       that.childrenSchemaResolved = response.data;
+    });
+    cdsAPI.resolveJSON(this.childrenForm).then(function(response) {
+      that.childrenFormResolved = response.data;
+    });
+    cdsAPI.resolveJSON(this.masterForm).then(function(response) {
+      that.masterFormResolved = response.data;
     });
 
     if (this.masterLinks) {
