@@ -223,9 +223,7 @@
                           </label>
                           <ui-select
                            multiple
-                           tagging
                            on-select="$ctrl.cdsDepositCtrl.setDirty()"
-                           tagging-label="(new email)"
                            ng-model="$ctrl.cdsDepositCtrl.record._access.read"
                            theme="bootstrap"
                            ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
@@ -237,7 +235,10 @@
                           >
                             {{$item}}
                           </ui-select-match>
-                           <ui-select-choices repeat="email in $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted | filter:$select.search">
+                           <ui-select-choices
+                           repeat="email in $ctrl.accessSuggestions | filter:$select.search"
+                           refresh="$ctrl.autocompleteAccess($select.search)"
+                           >
                              {{email}}
                            </ui-select-choices>
                          </ui-select>

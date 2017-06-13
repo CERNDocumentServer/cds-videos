@@ -48,6 +48,11 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
           .template = formTemplatesBase + value;
       });
     }
+
+    this.cdsDepositCtrl.cdsDepositsCtrl.categoriesPromise.then(function(hits) {
+      that._categories = hits;
+      that.initPermissions();
+    });
   };
 
   $scope.$on('cds.deposit.validation.error', function(evt, value, depositId) {
@@ -211,17 +216,31 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   );
 
+  this.autocompleteAccess = function(query) {
+    var options = {
+      url: '//cds.cern.ch/submit/get_authors',
+      refreshDelay: 100,
+      extraParams: {
+        'relative_curdir': 'cdslabs/videos'
+      }
+    };
+    that.autocompleteAuthors(options, query).then(function(results) {
+      that.accessSuggestions = results.data.map(function(res) {
+        return res.value.email;
+      });
+    });
+  };
+
   /**
    * Categories and Types
    */
   this.types = $q.defer();
-  this._categories = {}
+  this._categories = {};
   this.autocompleteCategories = function(options, query) {
     if (!that.categories) {
-      that.categories = $http.get(options.url).then(function(data) {
-        var categories = that._categories = data.data.hits.hits;
-        // Init permissions
-        that.initPermissions();
+      var deposits = that.cdsDepositCtrl.cdsDepositsCtrl;
+      that.categories = deposits.categoriesPromise.then(function() {
+        var categories = that._categories;
         that.types.resolve({ data: [].concat.apply([], categories.map(
           function (category) {
             return category.metadata.types.map(
@@ -272,10 +291,11 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   this.getPermissionsFromCategory = function() {
-    if (that.cdsDepositCtrl.record.category) {
+    var master = that.cdsDepositCtrl.cdsDepositsCtrl.master;
+    if (master && master.metadata) {
       that.cdsDepositCtrl.cdsDepositsCtrl.accessRights = _.first(
         _.filter(that._categories, function(_access) {
-          if (_access.metadata.name === that.cdsDepositCtrl.record.category) {
+          if (_access.metadata.name === master.metadata.category) {
             return _access;
           }
         })
@@ -287,7 +307,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   this.initPermissions = function() {
     // Get permissions from category
     this.getPermissionsFromCategory();
-    if (that.cdsDepositCtrl.record.category) {
+    var masterData = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata;
+    if (masterData && masterData.category) {
       that.permissions = (
         !that.cdsDepositCtrl.record._access.read &&
         that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public)

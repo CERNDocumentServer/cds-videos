@@ -77,6 +77,11 @@ function cdsDepositsCtrl(
         }
       });
     }
+
+    that.categoriesPromise = $http.get(urlBuilder.categories()).then(
+      function(data) {
+        return data.data.hits.hits;
+      });
   };
 
   this.addMaster = function(deposit, files) {
