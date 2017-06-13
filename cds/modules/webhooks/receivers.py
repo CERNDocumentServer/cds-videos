@@ -28,6 +28,7 @@ from __future__ import absolute_import
 
 from copy import deepcopy
 
+from flask_security import current_user
 from cds_sorenson.api import get_available_preset_qualities
 from celery import chain, group
 from celery.result import AsyncResult
@@ -47,6 +48,8 @@ from .status import ComputeGlobalStatus, iterate_result, collect_info, \
     GetInfoByID, replace_task_id, ResultEncoder
 from .tasks import DownloadTask, ExtractFramesTask, ExtractMetadataTask, \
     TranscodeVideoTask, update_avc_deposit_state
+from ..records.permissions import DepositPermission
+from ..deposit.api import deposit_video_resolver
 
 
 def _update_event_bucket(event):
@@ -510,3 +513,13 @@ class AVCWorkflow(CeleryAsyncReceiver):
         for res in result.children[1:]:
             second_step.append({'file_transcode': res})
         return first_step, second_step
+
+    @classmethod
+    def can(cls, user_id, event, action, **kwargs):
+        """Check permission."""
+        record = None
+        if event:
+            deposit_id = event.payload['deposit_id']
+            record = deposit_video_resolver(deposit_id).project
+        return DepositPermission.create(
+            record=record, action=action, user=current_user).can()

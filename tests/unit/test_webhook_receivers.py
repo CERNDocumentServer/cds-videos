@@ -31,6 +31,8 @@ import json
 import mock
 from cds_sorenson.api import get_available_preset_qualities
 from flask import url_for
+from flask_principal import UserNeed, identity_loaded
+from flask_security import current_user
 
 from invenio_files_rest.models import ObjectVersion, \
     Bucket, ObjectVersionTag
@@ -38,6 +40,9 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 import pytest
 from invenio_records.models import RecordMetadata
+from invenio_accounts.testutils import login_user_via_session
+from invenio_accounts.models import User
+from cds.modules.deposit.api import deposit_project_resolver
 
 from celery import states, chain, group
 from celery.result import AsyncResult
@@ -204,7 +209,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
                                     json_headers, mock_sorenson, online_video,
-                                    webhooks):
+                                    webhooks, users):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -369,6 +374,55 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             'file_video_extract_frames': states.SUCCESS,
             'file_transcode': states.SUCCESS,
         }
+
+    # check feedback from anoymous user
+    event_id = data['tags']['_event_id']
+    with api_app.test_request_context():
+        url = url_for('invenio_webhooks.event_feedback_item',
+                      event_id=event_id,
+                      receiver_id='avc')
+    with api_app.test_client() as client:
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 401
+    # check feedback from owner
+    with api_app.test_request_context():
+        url = url_for('invenio_webhooks.event_feedback_item',
+                      event_id=event_id,
+                      receiver_id='avc')
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 200
+    # check feedback from another user without access
+    with api_app.test_request_context():
+        url = url_for('invenio_webhooks.event_feedback_item',
+                      event_id=event_id,
+                      receiver_id='avc')
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 403
+    # check feedback from another user with access
+    user_2 = User.query.get(users[1])
+    user_2_id = str(user_2.id)
+    user_2_email = user_2.email
+    project = deposit_project_resolver(project['_deposit']['id'])
+    project['_access'] = {'update': [user_2_email]}
+    project = project.commit()
+    with api_app.test_request_context():
+        url = url_for('invenio_webhooks.event_feedback_item',
+                      event_id=event_id,
+                      receiver_id='avc')
+    with api_app.test_client() as client:
+
+        @identity_loaded.connect
+        def load_email(sender, identity):
+            if current_user.get_id() == user_2_id:
+                identity.provides.update([UserNeed(user_2_email)])
+
+        login_user_via_session(client, email=user_2_email)
+        resp = client.get(url, headers=json_headers)
+        assert resp.status_code == 200
 
     # Test cleaning!
     url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
