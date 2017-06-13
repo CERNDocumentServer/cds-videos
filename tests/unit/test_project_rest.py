@@ -695,28 +695,28 @@ def test_default_order(api_app, es, cds_jsonresolver, users,
                                     location, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'project 1'}
-                                    })
+                                    }, wait=False)
     project_1.commit()
     db.session.commit()
     (project_2, _, _) = new_project(api_app, es, cds_jsonresolver, users,
                                     location, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'alpha'}
-                                    })
+                                    }, wait=False)
     project_2.commit()
     db.session.commit()
     (project_3, _, _) = new_project(api_app, es, cds_jsonresolver, users,
                                     location, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'zeta'}
-                                    })
+                                    }, wait=False)
     project_3.commit()
     db.session.commit()
     (project_4, _, _) = new_project(api_app, es, cds_jsonresolver, users,
                                     location, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'project 2'}
-                                    })
+                                    }, wait=False)
     project_4.commit()
     db.session.commit()
     sleep(2)
@@ -832,7 +832,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         project_data={
             'title': {'title': 'project 1'},
             'category': 'CERN',
-        })
+        }, wait=False)
     #  project_1['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_1.commit()
     db.session.commit()
@@ -844,7 +844,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
             'description': {'value': 'fuu'},
             'category': 'CERN',
             'type': 'FOOTER',
-        })
+        }, wait=False)
     #  project_2['_deposit']['state']['file_video_extract_frames'] = 'FAILURE'
     prepare_videos_for_publish([video_1, video_2])
     project_2 = project_2.publish()
@@ -855,7 +855,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
         project_data={
             'title': {'title': 'zeta'},
-        })
+        }, wait=False)
     #  project_3['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_3['category'] = 'LHC'
     project_3.commit()
@@ -865,7 +865,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
         project_data={
             'title': {'title': 'project 2'},
-        })
+        }, wait=False)
     #  project_4['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_4['category'] = 'ATLAS'
     project_4.commit()

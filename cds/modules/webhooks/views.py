@@ -30,7 +30,8 @@ from invenio_db import db
 from flask.views import MethodView
 from invenio_webhooks.views import blueprint, error_handler
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
-from invenio_webhooks.views import ReceiverEventResource
+from invenio_webhooks.decorators import pass_event, pass_user_id, \
+    need_receiver_permission
 
 from .receivers import build_task_payload
 from .status import iterate_result, collect_info, ResultEncoder
@@ -42,9 +43,11 @@ class TaskResource(MethodView):
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
     @error_handler
-    def put(self, receiver_id, event_id, task_id):
+    @pass_user_id
+    @pass_event
+    @need_receiver_permission('update')
+    def put(self, user_id, receiver_id, event, task_id):
         """Handle PUT request: restart a task."""
-        event = ReceiverEventResource._get_event(receiver_id, event_id)
         payload = build_task_payload(event, task_id)
         if payload:
             event.receiver.rerun_task(**payload)
@@ -55,9 +58,11 @@ class TaskResource(MethodView):
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
     @error_handler
-    def delete(self, receiver_id, event_id, task_id):
+    @pass_user_id
+    @pass_event
+    @need_receiver_permission('delete')
+    def delete(self, user_id, receiver_id, event, task_id):
         """Handle DELETE request: stop and clean a task."""
-        event = ReceiverEventResource._get_event(receiver_id, event_id)
         payload = build_task_payload(event, task_id)
         if payload:
             event.receiver.clean_task(**payload)
@@ -72,9 +77,11 @@ class EventFeedbackResource(MethodView):
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
     @error_handler
-    def get(self, receiver_id, event_id):
+    @pass_user_id
+    @pass_event
+    @need_receiver_permission('read')
+    def get(self, user_id, receiver_id, event):
         """Handle GET request: get more informations."""
-        event = ReceiverEventResource._get_event(receiver_id, event_id)
         raw_info = event.receiver._raw_info(event=event)
 
         def collect(task_name, result):
