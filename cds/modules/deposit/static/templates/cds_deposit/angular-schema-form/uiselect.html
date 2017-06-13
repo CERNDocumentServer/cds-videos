@@ -14,6 +14,7 @@
     ng-model="select_model.selected"
     ng-if="!(form.options.tagging||false)"
     theme="bootstrap"
+    ng-required="evalExpr(form.options.required || false)"
     ng-disabled="evalExpr(form.readonly)"
     on-select="$$value$$=$item.value; select_model.selected=$item" class="{{form.options.uiClass}}">
             <ui-select-match

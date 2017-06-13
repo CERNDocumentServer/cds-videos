@@ -170,6 +170,7 @@
           "options": {
             "refreshDelay": 100,
             "mergeObjects": true,
+            "required": true,
             "asyncCallback": "$ctrl.autocompleteAuthors",
             "url": "//cds.cern.ch/submit/get_authors",
             "extraParams": {
@@ -182,7 +183,7 @@
           "key": "contributors[].role",
           "placeholder": "Role",
           "title": "Role",
-          "required": false,
+          "required": true,
           "titleMap": [
             {
               "value":  "Director",
@@ -218,7 +219,8 @@
             }
           ]
         }
-      ]
+      ],
+      "startEmpty": false
     },
     {
       "title": "Feature this video on the home page",

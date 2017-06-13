@@ -245,7 +245,7 @@ function cdsDepositCtrl(
             var updatePresets = function (resp) {
               that.presets = angular.copy(resp.data.presets);
             };
-            fetchPresetsPromise = cdsAPI.action(eventUrl, 'GET')
+            fetchPresetsPromise = cdsAPI.action(eventUrl, 'GET', {}, jwt)
               .then(updatePresets, updatePresets);
           }
         }
@@ -472,7 +472,8 @@ function cdsDepositCtrl(
         that.alerts = [];
         that.alerts.push({
           message: response.data.message,
-          type: 'danger'
+          type: 'danger',
+          errors: response.data.errors || [],
         });
       }
     });
@@ -496,7 +497,11 @@ function cdsDepositCtrl(
       if (CKEDITOR) {
         $timeout(function() {
           Object.values(CKEDITOR.instances).forEach(function (instance) {
-            instance.setReadOnly(instance.element.$.disabled);
+            try {
+                instance.setReadOnly(instance.element.$.disabled);
+            } catch(error) {
+                // Do nothing probably not initialized yet
+            }
           });
         }, 0);
       }
