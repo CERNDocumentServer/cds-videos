@@ -25,7 +25,7 @@
 
 from flask import current_app
 from flask_login import current_user
-from invenio_records_rest.facets import _post_filter, _query_filter
+from invenio_records_rest.facets import _query_filter, _create_filter_dsl
 from werkzeug.datastructures import MultiDict
 
 
@@ -46,8 +46,19 @@ def _aggregations(search, definitions):
     """
     if definitions:
         for name, agg in definitions.items():
-            search.aggs[name] = agg if not callable(agg) else agg()
+            aggreg = agg if not callable(agg) else agg()
+            search.aggs[name] = aggreg
     return search
+
+
+def _post_filter(search, urlkwargs, definitions):
+    """Ingest post filter in query."""
+    filters, urlkwargs = _create_filter_dsl(urlkwargs, definitions)
+
+    for filter_ in filters:
+        search = search.filter(filter_)
+
+    return (search, urlkwargs)
 
 
 def deposit_facets_factory(search, index):

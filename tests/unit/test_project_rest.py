@@ -821,3 +821,102 @@ def test_search_excluded_fields(api_app, users, api_project,
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
         assert len(data['hits']['hits']) == 0
+
+
+def test_aggregations(api_app, es, cds_jsonresolver, users,
+                      location, db, deposit_metadata, json_headers):
+    """Test default project order."""
+    (project_1, _, _) = new_project(
+        api_app, es, cds_jsonresolver, users,
+        location, db, deposit_metadata,
+        project_data={
+            'title': {'title': 'project 1'},
+            'category': 'CERN',
+        })
+    #  project_1['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
+    project_1.commit()
+    db.session.commit()
+    (project_2, video_1, video_2) = new_project(
+        api_app, es, cds_jsonresolver, users,
+        location, db, deposit_metadata,
+        project_data={
+            'title': {'title': 'alpha'},
+            'description': {'value': 'fuu'},
+            'category': 'CERN',
+            'type': 'FOOTER',
+        })
+    #  project_2['_deposit']['state']['file_video_extract_frames'] = 'FAILURE'
+    prepare_videos_for_publish([video_1, video_2])
+    project_2 = project_2.publish()
+    project_2.commit()
+    db.session.commit()
+    (project_3, _, _) = new_project(
+        api_app, es, cds_jsonresolver, users,
+        location, db, deposit_metadata,
+        project_data={
+            'title': {'title': 'zeta'},
+        })
+    #  project_3['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
+    project_3['category'] = 'LHC'
+    project_3.commit()
+    db.session.commit()
+    (project_4, _, _) = new_project(
+        api_app, es, cds_jsonresolver, users,
+        location, db, deposit_metadata,
+        project_data={
+            'title': {'title': 'project 2'},
+        })
+    #  project_4['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
+    project_4['category'] = 'ATLAS'
+    project_4.commit()
+    db.session.commit()
+    sleep(2)
+
+    def check_agg(agg, key, doc_count):
+        [res] = list(filter(lambda x: x['key'] == key, agg['buckets']))
+        assert res['doc_count'] == doc_count
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # test: get all
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        agg = data['aggregations']
+        check_agg(agg['category'], 'CERN', 2)
+        check_agg(agg['category'], 'LHC', 1)
+        check_agg(agg['category'], 'ATLAS', 1)
+        assert len(agg['category']['buckets']) == 3
+        check_agg(agg['status'], 'draft', 3)
+        check_agg(agg['status'], 'published', 1)
+        assert len(agg['status']['buckets']) == 2
+
+        # test: category == 'CERN'
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', category='CERN'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        agg = data['aggregations']
+        check_agg(agg['category'], 'CERN', 2)
+        assert len(agg['category']['buckets']) == 1
+        check_agg(agg['status'], 'draft', 1)
+        check_agg(agg['status'], 'published', 1)
+        assert len(agg['status']['buckets']) == 2
+
+        # test: category == 'CERN'
+        res = client.get(
+            url_for('invenio_deposit_rest.project_list', status='draft'),
+            headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        agg = data['aggregations']
+        check_agg(agg['category'], 'CERN', 1)
+        check_agg(agg['category'], 'LHC', 1)
+        check_agg(agg['category'], 'ATLAS', 1)
+        assert len(agg['category']['buckets']) == 3
+        check_agg(agg['status'], 'draft', 3)
+        assert len(agg['status']['buckets']) == 1
