@@ -35,8 +35,9 @@ from cds.modules.deposit.resolver import get_video_pid, \
     get_project_pid
 from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
     deposit_videos_resolver, Project, Video
+from flask_security import current_user
 from flask import url_for
-from flask_principal import RoleNeed, identity_loaded
+from flask_principal import RoleNeed, UserNeed, identity_loaded
 from invenio_db import db
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
@@ -254,12 +255,12 @@ def test_simple_workflow(
                     pid_value=project['_deposit']['id'], action='publish'),
             headers=json_headers)
 
-        video_1 = deposit_video_resolver(
-            video_1_dict['metadata']['_deposit']['id'])
-        video_1 = Video.get_record(video_1.fetch_published()[1].id)
-        video_2 = deposit_video_resolver(
-            video_2_dict['metadata']['_deposit']['id'])
-        video_2 = Video.get_record(video_2.fetch_published()[1].id)
+        def get_video_record(depid):
+            deposit = deposit_video_resolver(depid)
+            return Video.get_record(deposit.fetch_published()[1].id)
+
+        video_1 = get_video_record(video_1_dict['metadata']['_deposit']['id'])
+        video_2 = get_video_record(video_2_dict['metadata']['_deposit']['id'])
         record_videos = [video_1, video_2]
 
         # check returned value
@@ -327,6 +328,8 @@ def test_simple_workflow(
         assert all(link.startswith('http://localhost/deposits/project')
                    for (key, link) in project_dict['links'].items()
                    if key not in ['html', 'bucket'])
+        video_1 = get_video_record(video_1_dict['metadata']['_deposit']['id'])
+        video_2 = get_video_record(video_2_dict['metadata']['_deposit']['id'])
         assert video_1 == project_dict['metadata']['videos'][0]
         assert video_2 == project_dict['metadata']['videos'][1]
         # check database
@@ -920,3 +923,119 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         assert len(agg['category']['buckets']) == 3
         check_agg(agg['status'], 'draft', 3)
         assert len(agg['status']['buckets']) == 1
+
+
+def test_sync_access_rights(
+        api_app, api_project, es, cds_jsonresolver, users,
+        location, db, deposit_metadata, json_headers, video_deposit_metadata,
+        json_partial_video_headers, json_partial_project_headers):
+    """Test default project order."""
+    (project, video_1, video_2) = api_project
+    video_1_depid = video_1['_deposit']['id']
+    project_depid = project['_deposit']['id']
+    # set access rights
+    access_rights = {'update': ['my@email.it']}
+    project['_access'] = deepcopy(access_rights)
+    project.commit()
+    prepare_videos_for_publish([video_1, video_2])
+    project_dict = deepcopy(project.replace_refs())
+    del project_dict['_files']
+    db.session.commit()
+
+    def check_record_access_rights(recid):
+        # check video has same access rights of the project
+        res = client.get(url_for('invenio_records_rest.recid_item',
+                                 pid_value=recid))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert data['metadata']['_access'] == access_rights
+
+    def check_video_access_rights(video_depid):
+        # check video has same access rights of the project
+        res = client.get(url_for('invenio_deposit_rest.video_item',
+                                 pid_value=video_depid))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert data['metadata']['_access'] == access_rights
+
+    def check_project_access_rights(project_depid):
+        # check project didn't change access rights
+        res = client.get(url_for('invenio_deposit_rest.project_item',
+                                 pid_value=project_depid))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert data['metadata']['_access'] == access_rights
+
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+
+        # create a new video
+        video_metadata = deepcopy(video_deposit_metadata)
+        video_metadata.update(_project_id=project['_deposit']['id'])
+        res = client.post(
+            url_for('invenio_deposit_rest.video_list'),
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+        video_3_depid = data['metadata']['_deposit']['id']
+
+        check_video_access_rights(video_3_depid)
+        check_project_access_rights(project_depid)
+
+        # try to update the project
+        project_dict = deepcopy(project.replace_refs())
+        del project_dict['_files']
+        project_dict['title']['title'] = 'changed.. 1'
+        res = client.put(
+            url_for('invenio_deposit_rest.project_item',
+                    pid_value=project_depid),
+            data=json.dumps(project_dict),
+            headers=json_partial_project_headers)
+        assert res.status_code == 200
+
+        check_video_access_rights(video_3_depid)
+        check_project_access_rights(project_depid)
+
+        # publish a video -> update project access rights
+        res = client.post(url_for('invenio_deposit_rest.video_actions',
+                                  pid_value=video_1_depid, action='publish'))
+        assert res.status_code == 202
+        data = json.loads(res.data.decode('utf-8'))
+        recid = data['metadata']['recid']
+        project_dict = deepcopy(project.replace_refs())
+        del project_dict['_files']
+        project_dict['title']['title'] = 'changed.. 2'
+        # user1 can now access to the project
+        access_rights['update'] = [User.query.get(users[1]).email]
+        project_dict['_access'] = deepcopy(access_rights)
+        res = client.put(
+            url_for('invenio_deposit_rest.project_item',
+                    pid_value=project_depid),
+            data=json.dumps(project_dict),
+            headers=json_partial_project_headers)
+        assert res.status_code == 200
+
+        check_record_access_rights(recid)
+        check_project_access_rights(project_depid)
+
+    with api_app.test_client() as client:
+        user_2 = User.query.get(users[1])
+        user_2_id = str(user_2.id)
+        user_2_email = user_2.email
+
+        @identity_loaded.connect
+        def load_email(sender, identity):
+            if current_user.get_id() == user_2_id:
+                identity.provides.update([UserNeed(user_2_email)])
+
+        # edit video as user1 (who has access to the video because previously
+        # user0 give access to the project)
+        login_user_via_session(client, email=user_2_email)
+        res = client.post(url_for('invenio_deposit_rest.video_actions',
+                                  pid_value=video_1_depid, action='edit'))
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+
+        check_video_access_rights(video_3_depid)
+        check_project_access_rights(project_depid)

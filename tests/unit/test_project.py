@@ -41,8 +41,7 @@ from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      is_deposit, record_unbuild_url,
                                      record_video_resolver,
                                      deposit_project_resolver,
-                                     deposit_video_resolver,
-                                     deposit_videos_resolver)
+                                     deposit_video_resolver)
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -166,15 +165,9 @@ def test_delete_videos(api_project):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 def test_add_video(api_app, es, cds_jsonresolver, users,
-                   location, deposit_metadata):
+                   location, project_deposit_metadata, video_deposit_metadata):
     """Test add video."""
-    project_data = {
-        'title': {
-            'title': 'my project',
-        },
-        'videos': [],
-    }
-    project_data.update(deposit_metadata)
+    project_data = deepcopy(project_deposit_metadata)
 
     login_user(User.query.get(users[0]))
 
@@ -195,12 +188,13 @@ def test_add_video(api_app, es, cds_jsonresolver, users,
     assert project['videos'] == []
 
     # create video
-    project_video_1 = {
-        'title': {
-            'title': 'video 1',
-        },
-        '_project_id': project['_deposit']['id'],
-    }
+    project_video_1 = deepcopy(video_deposit_metadata)
+    if 'license' in project_video_1:
+        del project_video_1['license']
+    if 'copyright' in project_video_1:
+        del project_video_1['copyright']
+    project_video_1['title']['title'] = 'video 1'
+    project_video_1['_project_id'] = project['_deposit']['id']
     video_1 = Video.create(project_video_1)
 
     # check default video license
@@ -225,7 +219,7 @@ def test_add_video(api_app, es, cds_jsonresolver, users,
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_discard(app, project_published):
+def test_project_discard(app, project_published, video_deposit_metadata):
     """Test project discard."""
     (project, video_1, video_2) = project_published
 
@@ -240,13 +234,8 @@ def test_project_discard(app, project_published):
 
     # try to fail because a video added
     project = project.edit()
-    project_video = {
-        'title': {
-            'title': 'video 1',
-        },
-        '_project_id': project['_deposit']['id'],
-    }
-    Video.create(project_video)
+    video_deposit_metadata['_project_id'] = project['_deposit']['id']
+    Video.create(video_deposit_metadata)
     with pytest.raises(DiscardConflict):
         project.discard()
 
@@ -610,32 +599,3 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     kw_result = {k['key_id']: k['name'] for k in result['_source']['keywords']}
     kw_expect = {k['key_id']: k['name'] for k in [keyword_2]}
     assert kw_expect == kw_result
-
-
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
-def test_access_update_on_publish(api_app, api_project):
-    """Test video publish."""
-    (project, video_1, video_2) = api_project
-
-    # set a particular value for _access.update
-    project['_access'] = {'update': ['my@email.it']}
-    project = project.commit()
-    db.session.commit()
-    # publish project
-    prepare_videos_for_publish([video_1, video_2])
-    project = project.publish()
-    # check project/videos records
-    [video_1_record, video_2_record] = [record_video_resolver(id_)
-                                        for id_ in project.video_ids]
-    _, project_record = project.fetch_published()
-    assert video_1_record['_access'] == project_record['_access']
-    assert video_2_record['_access'] == project_record['_access']
-    assert project_record['_access'] == {'update': ['my@email.it']}
-    # check project/videos deposits
-    [video_1, video_2] = deposit_videos_resolver([
-        video_1['_deposit']['id'], video_2['_deposit']['id']
-    ])
-    assert video_1['_access'] == project['_access']
-    assert video_2['_access'] == project['_access']
-    assert project['_access'] == {'update': ['my@email.it']}
