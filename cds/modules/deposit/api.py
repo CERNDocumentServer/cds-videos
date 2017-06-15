@@ -81,9 +81,9 @@ def required(fields):
     def check(f):
         @wraps(f)
         def wrapper(self, *args, **kwargs):
-            for field in fields:
+            for field, error in fields.items():
                 if field not in self:
-                    raise ValidationError('{0} field not found'.format(field))
+                    raise ValidationError(error)
             return f(self, *args, **kwargs)
         return wrapper
     return check
@@ -160,6 +160,7 @@ class CDSDeposit(Deposit):
             'material': '',
             'url': 'http://copyright.web.cern.ch',
         }])
+        data.setdefault('_access', {})
         deposit = super(CDSDeposit, cls).create(
             data, id_=id_, validator=PartialDraft4Validator)
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
@@ -588,7 +589,10 @@ class Project(CDSDeposit):
         pid.assign('rec', id_, overwrite=True)
         assert pid.register()
 
-    @required(['category', 'type'])
+    @required({
+        'category': 'Category field not found in the project',
+        'type': 'Type field not found in the project',
+    })
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Projects."""
         try:
@@ -631,6 +635,42 @@ class Project(CDSDeposit):
                 )[1])
         return videos
 
+    def update(self, *args, **kwargs):
+        """Update project."""
+        super(Project, self).update(*args, **kwargs)
+        self._sync_videos()
+        return self
+
+    def _sync_videos(self):
+        """Sync fields from project to the videos."""
+        # sync access right from project to the videos
+        for video in self.videos:
+            # sync video with project
+            if self._sync_fields(video=video):
+                video.commit(validator=PartialDraft4Validator)
+            if not isinstance(video, Video):
+                # if it's a record, sync also video deposit
+                deposit_video = deposit_video_resolver(video['_deposit']['id'])
+                if self._sync_fields(video=deposit_video):
+                    deposit_video.commit(validator=PartialDraft4Validator)
+
+    def _sync_fields(self, video):
+        """Sync some fields from project."""
+        changed = False
+        project_access = self.get('_access', {})
+        project_created_by = self['_deposit'].get('created_by')
+        if video.get('_access', {}) != project_access or \
+                video['_deposit'].get('created_by') != project_created_by:
+            changed = True
+        # sync access rights
+        video['_access'] = deepcopy(project_access)
+        # sync owner
+        try:
+            video['_deposit']['created_by'] = project_created_by
+        except KeyError:
+            pass
+        return changed
+
 
 class Video(CDSDeposit):
     """Define API for a video."""
@@ -648,14 +688,19 @@ class Video(CDSDeposit):
         """
         project_id = data.get('_project_id')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+        # set default copyright
         data.setdefault('copyright', {
             'holder': 'CERN',
             'year': str(datetime.date.today().year),
             'url': 'http://copyright.web.cern.ch',
         })
         project = deposit_project_resolver(project_id)
+        # create video
         video_new = super(Video, cls).create(data, id_=id_, **kwargs)
+        # set video project
         video_new.project = project
+        # copy access rights from project
+        project._sync_fields(video=video_new)
         project.commit()
         video_new.commit()
         return video_new
