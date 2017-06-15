@@ -36,7 +36,9 @@ import mock
 import pkg_resources
 from cds_sorenson.api import get_available_preset_qualities
 from celery import chain, group, shared_task, states
-from flask_security import login_user
+from flask_security import login_user, current_user
+from invenio_accounts.testutils import login_user_via_session
+from flask_principal import UserNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
