@@ -56,7 +56,7 @@ function depositActions() {
 }
 
 function isPopulated(val) {
-  return val !== null && val !== undefined &&
+  return val !== null && val !== undefined && !_.isEqual(val, []) &&
     !(val.constructor === Object && _.isEmpty(val));
 }
 
