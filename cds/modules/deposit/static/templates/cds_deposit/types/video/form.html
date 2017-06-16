@@ -114,6 +114,7 @@
                 <li role="presentation" ng-class="{active: active=='files'}">
                   <a ng-click="active='files'" role="tab" data-toggle="tab">
                     Files
+                    <small ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length || $ctrl.cdsDepositCtrl.stateReporter.file_video_metadata_extraction.status == 'FAILURE' || $ctrl.cdsDepositCtrl.stateReporter.file_video_extract_frames.status == 'FAILURE'"><i class="fa fa-circle text-danger"></i></small>
                   </a>
                 </li>
                 <li role="presentation" ng-class="{active: active=='licenses'}">
