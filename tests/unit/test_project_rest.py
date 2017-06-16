@@ -829,6 +829,7 @@ def test_search_excluded_fields(api_app, users, api_project,
 def test_aggregations(api_app, es, cds_jsonresolver, users,
                       location, db, deposit_metadata, json_headers):
     """Test default project order."""
+    # project 1
     (project_1, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
@@ -836,9 +837,9 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
             'title': {'title': 'project 1'},
             'category': 'CERN',
         }, wait=False)
-    #  project_1['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_1.commit()
     db.session.commit()
+    # project 2
     (project_2, video_1, video_2) = new_project(
         api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
@@ -848,28 +849,27 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
             'category': 'CERN',
             'type': 'FOOTER',
         }, wait=False)
-    #  project_2['_deposit']['state']['file_video_extract_frames'] = 'FAILURE'
     prepare_videos_for_publish([video_1, video_2])
     project_2 = project_2.publish()
     project_2.commit()
     db.session.commit()
+    # project 3
     (project_3, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
         project_data={
             'title': {'title': 'zeta'},
         }, wait=False)
-    #  project_3['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_3['category'] = 'LHC'
     project_3.commit()
     db.session.commit()
+    # project 4
     (project_4, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
         project_data={
             'title': {'title': 'project 2'},
         }, wait=False)
-    #  project_4['_deposit']['state']['file_video_extract_frames'] = 'SUCCESS'
     project_4['category'] = 'ATLAS'
     project_4.commit()
     db.session.commit()
@@ -1039,3 +1039,71 @@ def test_sync_access_rights(
 
         check_video_access_rights(video_3_depid)
         check_project_access_rights(project_depid)
+
+
+def test_sync_owners(api_app, es, cds_jsonresolver, users,
+                     location, db, deposit_metadata, json_headers,
+                     json_partial_project_headers, video_deposit_metadata,
+                     json_partial_video_headers):
+    """Test default project order."""
+    user_1 = User.query.get(users[0])
+    user_1_id = str(user_1.id)
+    user_1_email = user_1.email
+    user_2 = User.query.get(users[1])
+    user_2_id = str(user_2.id)
+    user_2_email = user_2.email
+
+    # user1 create a project
+    (project, _, _) = new_project(
+        api_app, es, cds_jsonresolver, users,
+        location, db, deposit_metadata,
+        project_data={
+            'title': {'title': 'project 1'},
+            'category': 'CERN',
+        }, wait=False)
+    assert project['_deposit']['owners'] == [users[0]]
+    project_depid = project['_deposit']['id']
+
+    # user1 give to user2 access to the project
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=user_1_email)
+        project_dict = deepcopy(project.replace_refs())
+        del project_dict['_files']
+        project_dict['_access'] = {'update': [user_2_email]}
+        res = client.put(
+            url_for('invenio_deposit_rest.project_item',
+                    pid_value=project_depid),
+            data=json.dumps(project_dict),
+            headers=json_partial_project_headers)
+        assert res.status_code == 200
+
+    # user2 enter a new video
+    with api_app.test_client() as client:
+        @identity_loaded.connect
+        def load_email(sender, identity):
+            if current_user.get_id() == user_2_id:
+                identity.provides.update([UserNeed(user_2_email)])
+        login_user_via_session(client, email=user_2_email)
+        video_metadata = deepcopy(video_deposit_metadata)
+        video_metadata.update(_project_id=project['_deposit']['id'])
+        res = client.post(
+            url_for('invenio_deposit_rest.video_list'),
+            data=json.dumps(video_metadata),
+            headers=json_partial_video_headers)
+        assert res.status_code == 201
+        data = json.loads(res.data.decode('utf-8'))
+        video_depid = data['metadata']['_deposit']['id']
+        # user 2 try to access to the new video
+        res = client.get(url_for('invenio_deposit_rest.video_item',
+                                 pid_value=video_depid))
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        # check user1 is the owner
+        assert data['metadata']['_deposit']['created_by'] == int(user_1_id)
+
+    # user1 try to access to the video entered by user2
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=user_1_email)
+        res = client.get(url_for('invenio_deposit_rest.video_item',
+                                 pid_value=video_depid))
+        assert res.status_code == 200
