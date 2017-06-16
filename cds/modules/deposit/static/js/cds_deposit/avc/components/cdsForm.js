@@ -305,10 +305,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     this.getPermissionsFromCategory();
     var masterData = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata;
     if (masterData && masterData.category) {
-      that.permissions = (
-        !that.cdsDepositCtrl.record._access.read &&
-        that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public)
-        ? 'public' : 'restricted';
+      try {
+        that.permissions = (
+          !that.cdsDepositCtrl.record._access.read &&
+          that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public)
+          ? 'public' : 'restricted';
+      } catch (e) {
+          that.permissions = 'public';
+      }
     }
   }
 

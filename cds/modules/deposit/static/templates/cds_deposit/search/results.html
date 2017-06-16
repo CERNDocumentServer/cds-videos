@@ -23,14 +23,18 @@
          {{ record.metadata.title.title || 'No project title'}}
        </a>
        <p class="f8 mt-5 text-muted">
-         <div class="pull-right px-20">
-           <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
-             <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
-               <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
-             </li>
-           </ul>
+         <div class="row">
+           <div class="col-md-9">
+              {{ (record.metadata.description.value | stripTags | trustHtml)  || 'No project description'}}
+           </div>
+           <div class="col-md-3">
+             <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
+               <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
+                 <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
+               </li>
+             </ul>
+           </div>
          </div>
-        {{ (record.metadata.description.value | stripTags | trustHtml)  || 'No project description'}}
        </p>
        <ul class="list-inline pull-left w-100 text-muted">
          <li class="f9">

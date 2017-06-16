@@ -9,7 +9,15 @@
     <div class="col-sm-12">
       <!-- Brief view of the project -->
       <div class="row">
-        <div class="col-sm-9">
+        <div class="col-sm-12">
+          <div class="text-right">
+            <ul class="list-inline">
+              <li><span ng-show="$ctrl.cdsDepositCtrl.record.category" class="label label-default">{{$ctrl.cdsDepositCtrl.record.category}}</span></li>
+              <li><span ng-show="$ctrl.cdsDepositCtrl.record.type" class="label label-warning">{{$ctrl.cdsDepositCtrl.record.type}}</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-12">
           <h3 class="mb-5 mt-0">
             <a ng-if="$ctrl.cdsDepositCtrl.isPublished()" ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
               {{ $ctrl.cdsDepositCtrl.record.title.title || 'No project title'}}
@@ -19,14 +27,6 @@
             </span>
           </h3>
           <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
-        </div>
-        <div class="col-sm-3">
-          <div class="text-right">
-            <ul class="list-inline">
-              <li><span ng-show="$ctrl.cdsDepositCtrl.record.category" class="label label-default">{{$ctrl.cdsDepositCtrl.record.category}}</span></li>
-              <li><span ng-show="$ctrl.cdsDepositCtrl.record.type" class="label label-warning">{{$ctrl.cdsDepositCtrl.record.type}}</span></li>
-            </ul>
-          </div>
         </div>
       </div>
       <!-- Brief view of the project -->
