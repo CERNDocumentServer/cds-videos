@@ -662,13 +662,13 @@ class Project(CDSDeposit):
         if video.get('_access', {}) != project_access or \
                 video['_deposit'].get('created_by') != project_created_by:
             changed = True
-        # sync access rights
-        video['_access'] = deepcopy(project_access)
-        # sync owner
-        try:
-            video['_deposit']['created_by'] = project_created_by
-        except KeyError:
-            pass
+            # sync access rights
+            video['_access'] = deepcopy(project_access)
+            # sync owner
+            try:
+                video['_deposit']['created_by'] = project_created_by
+            except KeyError:
+                pass
         return changed
 
 
