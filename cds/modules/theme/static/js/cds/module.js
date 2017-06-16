@@ -173,9 +173,10 @@ app.filter('absoluteURL', ['$sce', function($sce) {
 }]);
 
 // Image loading with fallback
-app.directive('imageProgressiveLoading', function() {
+app.directive('imageProgressiveLoading', ['$timeout', function($timeout) {
 
   function linkFunction(scope, element, attr) {
+    var timer;
     // Add the blur class
     element.addClass('cds-blur');
     // Initialize vars
@@ -191,26 +192,31 @@ app.directive('imageProgressiveLoading', function() {
     // If there is gif replace it with the main image
     if (attr.gifSrc) {
       // Mouse out
-      element.bind('mouseout', function (e) {
-        if (scope.isLoaded && !scope.hasError) {
-          attr.$set('src', attr.imgSrc);
-        }
+      element.bind('blur', function (e) {
+        $timeout.cancel(timer);
+        attr.$set('src', attr.imgSrc);
+      });
+      element.bind('mouseleave', function (e) {
+        $timeout.cancel(timer);
+        attr.$set('src', attr.imgSrc);
       });
       // Mouse over
-      element.bind('mouseenter', function (e) {
-        if (scope.isLoaded) {
-          element[0].src = attr.gifSrc;
-        } else if(!scope.hasError) {
-          var img = new Image();
-          img.src = attr.gifSrc;
-          img.onload = function() {
-            scope.isLoaded = true;
-            attr.$set('src', attr.gifSrc);
+      element.bind('mouseover', function (e) {
+        timer = $timeout(function() {
+          if (scope.isLoaded) {
+            element[0].src = attr.gifSrc;
+          } else if(!scope.hasError) {
+            var img = new Image();
+            img.src = attr.gifSrc;
+            img.onload = function() {
+              scope.isLoaded = true;
+              attr.$set('src', attr.gifSrc);
+            }
+            img.onerror = function() {
+              scope.hasError = true;
+            }
           }
-          img.onerror = function() {
-            scope.hasError = true;
-          }
-        }
+        }, 800);
       });
     }
   }
@@ -218,4 +224,4 @@ app.directive('imageProgressiveLoading', function() {
       restrict: 'A',
       link: linkFunction
   };
-});
+}]);

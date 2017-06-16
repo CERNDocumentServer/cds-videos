@@ -7,16 +7,15 @@
        ng-href="/record/{{ record.id }}"
        ng-class="{'cds-video-title-with-play-button': !show}">
       <img
-        ng-cloak
         class="img-responsive"
         gif-src="{{ record | iiif:true:[400,220] }}"
         img-src="{{ record | iiif:false:[400,220] }}"
-        ng-src="{{ record | iiif:false:[20,11] }}"
+        ng-src="{{ record | iiif:false:[400,220] }}"
         err-src="//unsplash.it/1024/576>?random&blur"
         image-progressive-loading
       />
       <p>
-        {{ record.metadata.title.title || 'No title :(' | limitTo: 120}} {{ record.metadata.title.title.length > 120 ? ' [...]' : '' }}
+        {{ record.metadata.title.title || 'No title :(' | limitTo: 60}} {{ record.metadata.title.title.length > 60 ? ' [...]' : '' }}
       </p>
     </a>
     <p ng-class="{'cds-visibility-visible': show, 'cds-visibility-hidden': !show}" class="cds-transition t-w">
