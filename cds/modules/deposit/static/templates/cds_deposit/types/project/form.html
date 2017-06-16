@@ -26,7 +26,7 @@
               {{ $ctrl.cdsDepositCtrl.record.title.title || 'No project title'}}
             </span>
           </h3>
-          <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
+          <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | wordsSplit:70 | stripTags | trustHtml) || 'No description'"></p>
         </div>
       </div>
       <!-- Brief view of the project -->

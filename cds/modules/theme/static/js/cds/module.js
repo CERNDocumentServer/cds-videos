@@ -172,6 +172,21 @@ app.filter('absoluteURL', ['$sce', function($sce) {
   };
 }]);
 
+// Truncate words
+app.filter('wordsSplit', function () {
+  return function (input, words) {
+      if (words === undefined) return input;
+      if (words <= 0) return '';
+      if (input) {
+          var inputWords = input.split(/\s+/);
+          if (inputWords.length > words) {
+              input = inputWords.slice(0, words).join(' ') + ' [...]';
+          }
+      }
+      return input;
+  };
+});
+
 // Image loading with fallback
 app.directive('imageProgressiveLoading', ['$timeout', function($timeout) {
 
