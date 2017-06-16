@@ -50,9 +50,8 @@ from invenio_pidstore.resolver import Resolver
 from invenio_records.validators import PartialDraft4Validator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
-from jsonschema.exceptions import ValidationError
-
 from invenio_sequencegenerator.api import Sequence
+from jsonschema.exceptions import ValidationError
 
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
@@ -703,8 +702,12 @@ class Video(CDSDeposit):
         if self._tasks_global_status() != states.SUCCESS:
             raise PIDInvalidAction()
         # inherit some fields from parent project
-        self['category'] = self.project.get('category')
-        self['type'] = self.project.get('type')
+        try:
+            self['category'] = self.project['category']
+            self['type'] = self.project['type']
+        except KeyError:
+            raise ValidationError(
+                message='category and/or type not found in the project')
         if '_access' not in self:
             self['_access'] = {}
         self['_access']['update'] = self.project.get(
