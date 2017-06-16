@@ -10,7 +10,7 @@
     ng-hide='$ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
     class="btn btn-primary btn-sm"
-    ng-click="$ctrl.actionMultipleHandler(['SAVE_PARTIAL', 'PUBLISH'], '/deposit')">
+    ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish
   </button>
   <button
