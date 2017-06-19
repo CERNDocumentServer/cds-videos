@@ -14,7 +14,27 @@
     },
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
-    "category": "Category"
+    "category": "Category",
+    "contributors": [
+      {
+        "affiliations": [
+          "University of FuuBar"
+        ],
+        "email": "test_foo@cern.ch",
+        "ids": [
+          {
+            "source": "cern",
+            "value": "12345"
+          },
+          {
+            "source": "cds",
+            "value": "67890"
+          }
+        ],
+        "name": "Do, John",
+        "role": "Camera operator"
+      }
+    ]
   },
   {
     "date": "2017-01-16",
@@ -31,7 +51,28 @@
     },
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
-    "category": "Category"
+    "category": "Category",
+    "contributors": [
+      {
+        "affiliations": [
+          "University of FuuBar"
+        ],
+        "email": "test_foo@cern.ch",
+        "ids": [
+          {
+            "source": "cern",
+            "value": "12345"
+          },
+          {
+            "source": "cds",
+            "value": "67890"
+          }
+        ],
+        "name": "Hello, World",
+        "role": "Camera operator"
+      }
+    ]
+
   },
   {
     "date": "2017-01-16",
@@ -48,7 +89,28 @@
     },
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
-    "category": "Category"
+    "category": "Category",
+    "contributors": [
+      {
+        "affiliations": [
+          "University of FuuBar"
+        ],
+        "email": "test_foo@cern.ch",
+        "ids": [
+          {
+            "source": "cern",
+            "value": "124"
+          },
+          {
+            "source": "cds",
+            "value": "678"
+          }
+        ],
+        "name": "Fuu, Bar",
+        "role": "Camera operator"
+      }
+    ]
+
   },
   {
     "date": "2017-01-17",
@@ -64,6 +126,27 @@
     "type": "Type",
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/project/project-v1.0.0.json",
     "category": "Category",
-    "publication_date": "2017-03-09"
+    "publication_date": "2017-03-09",
+    "contributors": [
+      {
+        "affiliations": [
+          "University of FuuBar"
+        ],
+        "email": "test_foo@cern.ch",
+        "ids": [
+          {
+            "source": "cern",
+            "value": "135"
+          },
+          {
+            "source": "cds",
+            "value": "790"
+          }
+        ],
+        "name": "Test, Test2",
+        "role": "Camera operator"
+      }
+    ]
+
   }
 ]

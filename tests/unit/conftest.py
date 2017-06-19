@@ -387,6 +387,26 @@ def deposit_metadata():
         'date': '2016-12-03T00:00:00Z',
         'category': 'CERN',
         'type': 'MOVIE',
+        "contributors": [
+            {
+                "affiliations": [
+                    "University of FuuBar"
+                ],
+                "email": "test_foo@cern.ch",
+                "ids": [
+                    {
+                        "source": "cern",
+                        "value": "12345"
+                    },
+                    {
+                        "source": "cds",
+                        "value": "67890"
+                    }
+                ],
+                "name": "Do, John",
+                "role": "Camera operator"
+            }
+        ]
     }
 
 
