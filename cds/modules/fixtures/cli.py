@@ -401,6 +401,7 @@ def videos(video, frames, temp, video_count):
 
         project = Project.create(
             dict(
+                contributors=[dict(name='contrib', role='Provider')],
                 date='2017-01-17',
                 description=dict(value='desc'),
                 title=dict(title='Project'),

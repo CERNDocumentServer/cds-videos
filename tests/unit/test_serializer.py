@@ -78,6 +78,13 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
         'report_number': {'report_number': report_number},
         '$schema': Video.get_record_schema(),
         'duration': duration,
+        'contributors': [
+            {'name': 'paperone', 'role': 'Director'},
+            {'name': 'topolino', 'role': 'Music by'},
+            {'name': 'nonna papera', 'role': 'Producer'},
+            {'name': 'pluto', 'role': 'Director'},
+            {'name': 'zio paperino', 'role': 'Producer'}
+        ],
     })
     expected = dict(
         caption_en='in tempor reprehenderit enim eiusmod',
