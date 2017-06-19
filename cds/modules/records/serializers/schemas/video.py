@@ -74,8 +74,8 @@ class VideoSchema(StrictKeysSchema):
     title = fields.Nested(TitleSchema, required=True)
     description = fields.Nested(DescriptionSchema, required=True)
     date = DateString(required=True)
-    category = fields.Str(required=True)
-    type = fields.Str(required=True)
+    category = fields.Str()
+    type = fields.Str()
 
     recid = fields.Number()
     _access = fields.Nested(AccessSchema)
