@@ -254,6 +254,9 @@ OAISERVER_RECORD_INDEX = 'records'
 # 404 template.
 RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
+CDS_RECORDS_RELATED_QUERY = \
+    '/api/records/?size=3&sort=mostrecent&q={0}'
+
 # Endpoints for record API.
 _Record_PID = 'pid(recid, record_class="cds.modules.records.api:CDSRecord")'
 _Category_PID = 'pid(catid, record_class="cds.modules.records.api:Category")'
