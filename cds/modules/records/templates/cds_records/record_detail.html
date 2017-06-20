@@ -1,5 +1,18 @@
 {%- extends config.RECORDS_UI_BASE_TEMPLATE %}
 {%- set title = '%s | %s'|format(record.title.title, config.THEME_SITENAME) or 'CDS' -%}
+{%- set type = 'video' if record._project_id else 'project'%}
+{%- block head_meta %}
+    {{ super() }}
+    <meta property="og:url" content="{{ url_for('invenio_records_ui.recid', pid_value=record['recid'], _external=True) }}" />
+    <meta property="og:type" content="video" />
+    <meta property="og:title" content="{{ record['title']['title'] }}" />
+    <meta property="og:description" content="{{ record['description']['value'] }}" />
+    {%- if type == 'video' %}
+      <meta property="og:image" content="{{ url_for('invenio_records_ui.recid_files',
+                                                    pid_value=pid.pid_value,
+                                                    filename='frame-1.jpg', _external=True) }}" />
+    {% endif %}
+{%- endblock head_meta %}
 {%- block javascript %}
   {{ super() }}
   {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
@@ -14,7 +27,6 @@
 {%- endblock page_footer %}
 
 {%- block page_body %}
-  {% set type = 'video' if record._project_id else 'project'%}
   {% set refer_query = "and -recid:{0}".format(record['recid']) %}
   {% if record['keywords'] %}
     {% set keywords = [] %}
