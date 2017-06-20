@@ -3,6 +3,9 @@
     "video-v1.0.0": {
       "date_detection": true,
       "properties": {
+        "_project_id":{
+              "type": "string"
+        },
         "title": {
           "properties": {
             "subtitle": {

@@ -3,6 +3,9 @@
     "video-v1.0.0": {
       "numeric_detection": true,
       "properties": {
+        "_project_id":{
+              "type": "string"
+        },
         "vr": {
           "type": "boolean"
         },
