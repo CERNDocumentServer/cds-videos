@@ -153,7 +153,7 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     # simulate a no fully filled record
     record = Record.get_record(recid)
     del record['date']
-    validator = 'invenio_records.validators.PartialDraft4Validator'
+    validator = 'cds.modules.records.validators.PartialDraft4Validator'
     record.commit(validator=import_string(validator))
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')

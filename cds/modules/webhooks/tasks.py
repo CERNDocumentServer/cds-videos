@@ -251,7 +251,7 @@ class ExtractMetadataTask(AVCTask):
             'op': 'remove',
             'path': '/_deposit/extracted_metadata',
         }]
-        validator = 'invenio_records.validators.PartialDraft4Validator'
+        validator = 'cds.modules.records.validators.PartialDraft4Validator'
         try:
             patch_record(recid=recid, patch=patch, validator=validator)
         except jsonpatch.JsonPatchConflict as c:
@@ -305,7 +305,7 @@ class ExtractMetadataTask(AVCTask):
             'path': '/_deposit/extracted_metadata',
             'value': extracted_dict
         }]
-        validator = 'invenio_records.validators.PartialDraft4Validator'
+        validator = 'cds.modules.records.validators.PartialDraft4Validator'
         update_record.s(
             recid=recid, patch=patch, validator=validator).apply()
 
