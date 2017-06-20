@@ -186,6 +186,12 @@ app.filter('wordsSplit', function () {
   };
 });
 
+app.filter('isPublic', function () {
+  return function (record) {
+    return (!record['_access'] || !record['_access']['read']);
+  };
+});
+
 // Image loading with fallback
 app.directive('imageProgressiveLoading', ['$timeout', function($timeout) {
 
