@@ -28,6 +28,7 @@ import arrow
 from arrow.parser import ParserError
 from invenio_records_rest.serializers.json import JSONSerializer
 
+from ...records.api import CDSVideosFilesIterator
 from ...deposit.api import Project, Video
 from ..api import CDSFileObject
 
@@ -100,7 +101,8 @@ class VideoDrupal(object):
     @property
     def thumbnail(self):
         """Get thumbnail."""
-        frame = self._record.get('_files', [{}])[0].get('frame', [{}])[0]
+        frame = CDSVideosFilesIterator.get_master_video_file(
+            record=self._record)
         if frame:
             return CDSFileObject._link(
                 bucket_id=frame['bucket_id'], key=frame['key'], _external=True)
