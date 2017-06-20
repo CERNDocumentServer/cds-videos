@@ -26,6 +26,12 @@
           <!-- DOI and report number -->
           <div class="text-right">
             <ul class="list-inline">
+              <li ng-show="record.metadata|isPublic">
+                <span class="label label-success">Public</span>
+              </li>
+              <li ng-hide="record.metadata|isPublic">
+                <span class="label label-warning">Restricted</span>
+              </li>
               <li ng-if="record.metadata.doi">
                 <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
               </li>
