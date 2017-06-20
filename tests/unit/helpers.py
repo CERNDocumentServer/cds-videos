@@ -344,7 +344,7 @@ def prepare_videos_for_publish(videos):
                 'path': '/_deposit/extracted_metadata',
                 'value': metadata_dict,
             }],
-            validator='invenio_records.validators.PartialDraft4Validator'
+            validator='cds.modules.records.validators.PartialDraft4Validator'
         )
 
 

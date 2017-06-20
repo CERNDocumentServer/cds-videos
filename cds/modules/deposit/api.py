@@ -47,7 +47,6 @@ from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
-from invenio_records.validators import PartialDraft4Validator
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
@@ -57,6 +56,7 @@ from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
+from ..records.validators import PartialDraft4Validator
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
                                get_tasks_status_by_task,
                                iterate_events_results, merge_tasks_status)

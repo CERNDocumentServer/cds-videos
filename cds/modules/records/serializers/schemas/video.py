@@ -82,7 +82,7 @@ class VideoSchema(StrictKeysSchema):
     _buckets = fields.Nested(BucketSchema)
     _oai = fields.Nested(OaiSchema)
     _project_id = fields.Str()
-    contributors = fields.Nested(ContributorSchema, many=True)
+    contributors = fields.Nested(ContributorSchema, many=True, required=True)
     copyright = fields.Nested(CopyrightSchema)
     doi = DOI()
     vr = fields.Boolean()
