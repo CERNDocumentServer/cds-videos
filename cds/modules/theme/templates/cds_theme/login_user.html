@@ -22,12 +22,11 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
-{% extends config.THEME_BASE_TEMPLATE %}
+{% extends config.COVER_TEMPLATE %}
 
 {%- from "invenio_accounts/_macros.html" import render_field, form_errors -%}
 {%- from "cds_theme/_macros.html" import cds_oauth_button %}
 
-{%- block page_header %}{% endblock page_header %}
 {%- block page_body -%}
   <div class="cds-login">
     <div class="col-md-4 col-md-offset-4">
@@ -36,7 +35,7 @@
       <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
       {% if config.OAUTHCLIENT_REMOTE_APPS %}
         {% for name in config.OAUTHCLIENT_REMOTE_APPS.keys() %}
-          {{ cds_oauth_button(name, next=url_for('cds_home.index', _external=True)) }}
+          {{cds_oauth_button(name, next=request.args.get('next') or url_for('cds_home.index')) }}
         {% endfor %}
       {% endif %}
       {%- if config.DEBUG -%}

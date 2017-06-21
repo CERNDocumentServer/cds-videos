@@ -24,19 +24,10 @@
 #}
 
 {% macro cds_oauth_button(name, next=False) %}
-  {%- if request.endpoint not in ['security.login', 'security.logout'] and next -%}
-    <a class="btn btn-default btn-lg btn-block"
-      href="{{url_for('invenio_oauthclient.login', remote_app=name, next=next)}}">
-      <i class="fa fa-{{ name|lower() }}"></i> {{
-        _('Sign in with %(title)s', title=config.OAUTHCLIENT_REMOTE_APPS[name]['title'])
-      }}
-    </a>
-  {%- else -%}
-    <a class="btn btn-default btn-lg btn-block"
-      href="{{url_for('invenio_oauthclient.login', remote_app=name)}}">
-      <i class="fa fa-{{ name|lower() }}"></i> {{
-        _('Sign in with %(title)s', title=config.OAUTHCLIENT_REMOTE_APPS[name]['title'])
-      }}
-    </a>
-  {%- endif -%}
+  <a class="btn btn-default btn-lg btn-block"
+     href="{{url_for('invenio_oauthclient.login', remote_app=name, next=next or request.referrer)}}">
+    <i class="fa fa-{{ name|lower() }}"></i> {{
+    _('Sign in with %(title)s', title=config.OAUTHCLIENT_REMOTE_APPS[name]['title'])
+    }}
+  </a>
 {% endmacro %}
