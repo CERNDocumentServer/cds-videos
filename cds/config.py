@@ -847,6 +847,8 @@ DEPOSIT_REST_ENDPOINTS = dict(
     ),
 )
 
+DEPOSIT_PROJECT_UI_ENDPOINT = '{scheme}://{host}/deposit/project/{pid_value}'
+
 # Deposit UI endpoints
 DEPOSIT_RECORDS_UI_ENDPOINTS = {
     'video_new': {

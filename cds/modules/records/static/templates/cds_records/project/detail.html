@@ -21,7 +21,10 @@
           <!-- Title -->
           <div class="cds-detail-title cds-detail-video-title">
             <hgroup>
-              <h1 class="mb-0 f4 fw-n t-b">{{ ::record.metadata.title.title }}</h1>
+              <h1 class="mb-0 f4 fw-n t-b">
+                {{ ::record.metadata.title.title }}
+                <span class="f9" ng-show="!!record.links.project_edit"><a ng-href="{{ ::record.links.project_edit }}">edit</a></span>
+              </h1>
               <h2 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h2>
             </hgroup>
           </div>
