@@ -1107,3 +1107,44 @@ def test_sync_owners(api_app, es, cds_jsonresolver, users,
         res = client.get(url_for('invenio_deposit_rest.video_item',
                                  pid_value=video_depid))
         assert res.status_code == 200
+
+
+def test_project_edit_links(api_app, app, project_published, json_headers,
+                            users):
+    """Check project edit links."""
+    (project, video_1, video_2) = project_published
+
+    def check_links(url_video_1, result):
+        res = client.get(url_video_1, headers=json_headers)
+        assert res.status_code == 200
+        data = json.loads(res.data.decode('utf-8'))
+        assert ('project_edit' in data['links']) is result
+        if result:
+            return data['links']['project_edit']
+
+    #  check anonymous user can't see links
+    with api_app.test_client() as client:
+        url_video_1 = url_for('invenio_records_rest.recid_item',
+                              pid_value=video_1['recid'])
+        url_project = url_for('invenio_records_rest.recid_item',
+                              pid_value=project['recid'])
+        check_links(url_video_1, False)
+        check_links(url_project, False)
+
+    # check user2 can't see links
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[1]).email)
+        check_links(url_video_1, False)
+        check_links(url_project, False)
+
+    # check user1 (owner) can see links
+    with api_app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        project_link_1 = check_links(url_video_1, True)
+        project_link_2 = check_links(url_project, True)
+        assert project_link_1 == project_link_2
+    # check project links
+    with app.test_client() as client:
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        res = client.get(project_link_1, headers=json_headers)
+        assert res.status_code == 200

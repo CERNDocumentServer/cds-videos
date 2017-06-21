@@ -503,8 +503,10 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
         data = json.loads(res.data.decode('utf-8'))
         url_api_prj = 'http://localhost/record/3'
         url_prj = 'http://localhost/record/3'
+        url_prj_edit = 'http://localhost/deposit/project/{0}'.format(pid)
         assert data['links'] == {
             'self': url,
             'project': url_api_prj,
             'project_html': url_prj,
+            'project_edit': url_prj_edit,
         }

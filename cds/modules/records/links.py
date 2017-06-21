@@ -31,23 +31,55 @@ from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_rest.links import default_links_factory
 
 from .resolver import record_resolver
+from .permissions import deposit_update_permission_factory
+from ..deposit.api import project_resolver, is_project_record
+
+
+def _build_record_project_links(project_pid):
+    """Get project links."""
+    return {
+        'project': url_for('invenio_records_rest.recid_item',
+                           pid_value=project_pid.pid_value, _external=True),
+        'project_html': current_app.config['RECORD_UI_ENDPOINT'].format(
+            scheme=request.scheme, host=request.host,
+            pid_value=project_pid.pid_value,
+        ),
+    }
+
+
+def _build_deposit_project_links(deposit_project):
+    """Get deposit video links."""
+    project_pid, deposit = deposit_project
+    url = current_app.config['DEPOSIT_PROJECT_UI_ENDPOINT']
+    links = {}
+    if deposit_update_permission_factory(record=deposit).can():
+        links['project_edit'] = url.format(
+            scheme=request.scheme, host=request.host,
+            pid_value=project_pid.pid_value
+        )
+    return links
 
 
 def _fill_video_extra_links(record, links):
     """Add extra links if it's a video."""
+    record_project = None
     try:
-        project_pid = record_resolver.resolve(record['_project_id'])[0]
-        # include project link
-        api_url = url_for('invenio_records_rest.recid_item',
-                          pid_value=project_pid.pid_value, _external=True)
-        url = current_app.config['RECORD_UI_ENDPOINT'].format(
-            scheme=request.scheme,
-            host=request.host,
-            pid_value=project_pid.pid_value,
-        )
-        links.update(project=api_url, project_html=url)
+        pid, record_project = record_resolver.resolve(record['_project_id'])
+        # include record project links
+        links.update(**_build_record_project_links(
+            project_pid=pid))
     except (KeyError, PIDDoesNotExistError):
         # The project has not been published yet.
+        if is_project_record(record):
+            record_project = record
+
+    try:
+        # include deposit project links
+        if record_project:
+            links.update(**_build_deposit_project_links(
+                deposit_project=project_resolver.resolve(
+                    record_project['_deposit']['id'])))
+    except (KeyError, PIDDoesNotExistError):
         pass
 
 

@@ -404,6 +404,13 @@ def get_master_object(bucket):
     ).one_or_none()
 
 
+def is_project_record(record):
+    """Check if it is a project record."""
+    project_schema = current_app.config['DEPOSIT_JSONSCHEMAS_PREFIX'] + \
+        current_jsonschemas.url_to_path(record['$schema'])
+    return project_schema == Project._schema
+
+
 class Project(CDSDeposit):
     """Define API for a project."""
 
