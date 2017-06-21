@@ -739,10 +739,12 @@ def video_published(app, project_published):
 @pytest.fixture()
 def mock_sorenson():
     """Mock requests to the Sorenson server."""
-    def mocked_encoding(input_file, output_file, preset_name, aspect_ratio):
+    def mocked_encoding(input_file, output_file, preset_name, aspect_ratio,
+                        max_height=None, max_width=None):
         # Check if options are valid
         try:
-            get_preset_id(preset_name, aspect_ratio)
+            get_preset_id(preset_name, aspect_ratio, max_height=max_height,
+                          max_width=max_width)
         except InvalidResolutionError as e:
             raise e
 
