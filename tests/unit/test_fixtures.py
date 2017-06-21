@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,17 +27,20 @@
 from __future__ import absolute_import, print_function
 
 import json
+
 import mock
 from click.testing import CliRunner
 from invenio_pages import InvenioPages, Page
-from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.models import RecordMetadata
 from invenio_sequencegenerator.models import TemplateDefinition
-from cds.modules.deposit.api import CDSDeposit
-from cds.modules.fixtures.cli import categories as cli_categories, \
-    sequence_generator as cli_sequence_generator, \
-    pages as cli_pages, videos as cli_videos, keywords as cli_keywords, \
-    licenses as cli_licenses
+
+from cds.modules.fixtures.cli import categories as cli_categories
+from cds.modules.fixtures.cli import keywords as cli_keywords
+from cds.modules.fixtures.cli import licenses as cli_licenses
+from cds.modules.fixtures.cli import pages as cli_pages
+from cds.modules.fixtures.cli import records as cli_records
+from cds.modules.fixtures.cli import \
+    sequence_generator as cli_sequence_generator
 
 
 def test_fixture_licenses(app, script_info, db, es, cds_jsonresolver,
@@ -126,32 +129,11 @@ def test_fixture_pages(app, script_info, db, client):
     assert about_response.status_code == 200
 
 
-def test_fixture_videos(app, script_info, db, location):
-    """Test load video fixtures."""
-    PersistentIdentifier.query.delete()
-    RecordMetadata.query.delete()
-    assert len(PersistentIdentifier.query.all()) == 0
+def test_fixture_records(app, script_info, location, es):
+    """Test load demo records."""
+    # TODO: once we have a nice subset of test finish the test with more checks
+    assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()
-    res = runner.invoke(cli_videos, [], obj=script_info)
+    res = runner.invoke(cli_records, [], obj=script_info)
     assert res.exit_code == 0
-    pids = PersistentIdentifier.query.all()
-    assert len(pids) == 16
-    depids = [pid for pid in pids if pid.pid_type == 'depid']
-    rns = [pid for pid in pids if pid.pid_type == 'rn']
-    recids = [pid for pid in pids if pid.pid_type == 'recid']
-    assert len(depids) == 4
-    assert len(rns) == 4
-    assert len(recids) == 4
-    deposits = CDSDeposit.get_records([pid.object_uuid for pid in depids])
-    for deposit in deposits:
-        if 'videos' in deposit:
-            # Project deposit
-            assert len(deposit['videos']) == 3
-        else:
-            # Video deposit
-            video_file = next(f for f in deposit.files.dumps()
-                              if f['context_type'] == 'master')
-            # Has 5 frames
-            assert len(video_file['frame']) == 5
-            # Has 3 subformats
-            assert len(video_file['subformat']) == 3
+    assert len(RecordMetadata.query.all()) > 0

@@ -21,39 +21,37 @@
 
 from __future__ import absolute_import, print_function
 
+import copy
+import json
+import os
+import shutil
 import tarfile
+import tempfile
 import uuid
-from os import listdir, makedirs
-from os.path import basename, dirname, exists, isdir, join, splitext
 
 import click
 import pkg_resources
-import simplejson
-from cds_dojson.marc21 import marc21
-from dojson.contrib.marc21.utils import create_record, split_blob
+import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
-from invenio_files_rest.models import (Bucket, FileInstance, Location,
-                                       ObjectVersion, ObjectVersionTag)
+from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
+                                       ObjectVersionTag)
 from invenio_indexer.api import RecordIndexer
 from invenio_opendefinition.tasks import (harvest_licenses,
                                           import_licenses_from_json)
 from invenio_pages import Page
-from invenio_pidstore import current_pidstore
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_records.api import Record
-from invenio_records_files.api import Record as FileRecord
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_files.models import RecordsBuckets
 from invenio_sequencegenerator.api import Template
 
-from cds.modules.deposit.api import Project, Video
-from cds.modules.ffmpeg import ff_probe
-from cds.modules.records.api import Category
-from cds.modules.records.minters import catid_minter
+from ..records.minters import catid_minter
+from ..records.api import Category, CDSVideosFilesIterator
+from ..records.serializers.smil import generate_smil_file
 
+
+from ..records.api import CDSRecord as Record
 from ..records.tasks import keywords_harvesting
-from .video_utils import add_master_to_video
 
 
 def _load_json_source(filename):
@@ -62,237 +60,137 @@ def _load_json_source(filename):
         'cds.modules.fixtures', 'data/{0}'.format(filename)
     )
     with open(source, 'r') as fp:
-        content = simplejson.load(fp)
+        content = json.load(fp)
     return content
 
 
-def _handle_source(source, temp):
-    """Handle the input source.
+def _index(iterator):
+    """Bulk index the iterator."""
+    indexer = RecordIndexer()
+    indexer.bulk_index(iterator)
+    indexer.process_bulk_queue()
 
-    :param source: the file path
-    :param temp: the temp directory to extract data
-    :returns: the list of path files
-    :rtype: list
 
-    .. note::
+def _process_files(record, files_metadata):
+    """Attach files to a record with a given metadata.
 
-        Returns always a list of file paths.
-
-        Example output:
-
-        ['/tmp/files/test_1.txt', '/tmp/files/test_2.txt']
+    Assumptions:
+    - The source must be a URL pointing to a tar file.
+    - All files listed in the metadata are inside the source tar.
+    - Master files are listed before slaves.
+    - The reference from the slave to master is done via key.
     """
-    if source.endswith('.tar.gz'):
-        source = _untar(source, temp)
+    if not files_metadata:
+        return
+    bucket = Bucket.create(location=Location.get_by_name('videos'))
+    RecordsBuckets.create(record=record.model, bucket=bucket)
+    response = requests.get(
+        files_metadata['source'], stream=True, verify=False)
 
-    return _get_files(source)
+    # Throw an error for bad status codes
+    response.raise_for_status()
 
-
-def _untar(source, temp):
-    """Untar in location.
-
-    :param source: the tar location
-    :param temp: the temp directory to extract
-    :returns: the path to the untar-ed
-    :rtype: str
-
-    .. note::
-
-        Returns the *only* the extracted directory, if there is no directory
-        in the tarball it will fail.
-
-        Example of structure:
-
-        files/
-        files/test_1.txt
-        files/test_2.txt
-        files/test_3.txt
-    """
-    tar = tarfile.open(source)
-    _untar_location = _dir(tar)
-    tar.extractall(temp)
+    with tempfile.NamedTemporaryFile(suffix='.tar', delete=False) as f:
+        for chunk in response:
+            f.write(chunk)
+    tar = tarfile.open(name=f.name)
+    tar.extractall(path=tempfile.gettempdir())
+    files_base_dir = os.path.join(tempfile.gettempdir(), tar.getnames()[0])
     tar.close()
-    return join(temp, _untar_location)
+    os.remove(f.name)
+
+    for f in files_metadata['metadata']:
+        obj = ObjectVersion.create(bucket, f['key'])
+        with open(os.path.join(files_base_dir, f['key']), 'rb') as fp:
+            obj.set_contents(fp)
+        for k, v in f['tags'].items():
+            if k == 'master':
+                v = ObjectVersion.get(bucket, v).version_id
+            ObjectVersionTag.create(obj, k, v)
+    shutil.rmtree(files_base_dir)
+
+    record['_files'] = record.files.dumps()
 
 
-def _dir(tar):
-    """Return the enclosed directory.
-
-    :param tar: the tar object to search for wrapper directory
-    :returns: the name of the wrapper directory
-    :rtype: str
-
-    .. note::
-
-        Example of structure:
-
-        files/
-        files/test_1.txt
-        files/test_2.txt
-        files/test_3.txt
-
-        This structure will return ``files`` directory.
-    """
-    for tarinfo in tar:
-        if splitext(tarinfo.name)[1] == '':
-            return tarinfo.name
-
-
-def _get_files(path):
-    """Return the list of files.
-
-    :param path: the path to files or directory
-    :returns: a list of paths
-    :rtype: list
-
-    .. note::
-
-        It will always return a list of path files.
-
-        Example output:
-
-        ['/tmp/files/test_1.txt', '/tmp/files/test_2.txt']
-    """
-    if isdir(path):
-        return [join(path, name) for name in listdir(path)]
-    return [path]
+def _mint_pids(record):
+    """Mint available PIDs."""
+    # TODO: refactor to get list of dicts with the parameters to pass to create
+    # TODO: can we update the sequences for the report number?
+    PersistentIdentifier.create(
+        pid_type='recid',
+        pid_value=record['recid'],
+        pid_provider=None,
+        object_type='rec',
+        object_uuid=record.id,
+        status=PIDStatus.REGISTERED
+    )
+    PersistentIdentifier.create(
+        pid_type='rn',
+        pid_value=record['report_number']['report_number'],
+        pid_provider=None,
+        object_type='rec',
+        object_uuid=record.id,
+        status=PIDStatus.REGISTERED
+    )
 
 
 @click.group()
 def fixtures():
-    """Create demo records."""
+    """Create initial data and demo records."""
 
 
 @fixtures.command()
-@click.option('--temp', '-t', default='/tmp')
-@click.option('--source', '-s', default=False)
 @with_appcontext
-def cds(temp, source):
-    """CDS demo records."""
-    click.echo('Loading data it may take several minutes.')
-    # pkg resources the demodata
-    if not source:
-        source = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/records.xml'
-        )
-    files = _handle_source(source, temp)
-    # Record indexer
-    indexer = RecordIndexer()
-    for f in files:
-        with open(f) as source:
-            # FIXME: Add some progress
-            # with click.progressbar(data) as records:
-            with db.session.begin_nested():
-                for index, data in enumerate(split_blob(source.read()),
-                                             start=1):
-                    # create uuid
-                    rec_uuid = uuid.uuid4()
-                    # do translate
-                    record = marc21.do(create_record(data))
-                    # create PID
-                    current_pidstore.minters['recid'](
-                        rec_uuid, record
-                    )
-                    # create record
-                    indexer.index(Record.create(record, id_=rec_uuid))
-    db.session.commit()
+def records():
+    """Load demo records."""
+    to_index = []
+    for project_file in pkg_resources.resource_listdir(
+            'cds.modules.fixtures', os.path.join('data', 'videos')):
+        project_data = _load_json_source(os.path.join('videos', project_file))
+        with db.session.begin_nested():
+            files_metadata = copy.deepcopy(project_data.get('_files'))
+            project_data['_files'] = []
+            project = Record.create(data=project_data)
+            _mint_pids(project)
+            to_index.append(project.id)
+            videos = copy.deepcopy(project.get('videos'))
+            project['videos'] = []
+            _process_files(project, files_metadata)
+            for video_data in videos:
+                files_metadata = copy.deepcopy(video_data.get('_files'))
+                video_data['_files'] = []
+                video = Record.create(data=video_data)
+                _mint_pids(video)
+                to_index.append(video.id)
+                video['_project_id'] = str(project['recid'])
+                _process_files(video, files_metadata)
+                # FIXME probably there is a better way to create the smil file
+                master_video = CDSVideosFilesIterator.get_master_video_file(
+                    video)
+                generate_smil_file(
+                    video['recid'], video,
+                    master_video['bucket_id'], master_video['version_id'],
+                    skip_schema_validation=True
+                )
+                video['_files'] = video.files.dumps()
+
+                project['videos'].append({
+                    '$ref':
+                    'https://cds.cern.ch/api/record/{0}'.format(video['recid'])
+                })
+                video.commit()
+            project.commit()
+        db.session.commit()
+
+    _index(to_index)
     click.echo('DONE :)')
 
 
 @fixtures.command()
-@click.option('--temp', '-t', default='/tmp')
-@click.option('--source', '-s', default=False)
 @with_appcontext
-def files(temp, source):
-    """Demo files for testing.
-
-    .. note::
-
-        This files are *only* for testing.
-    """
-    click.echo('Loading files it may take several minutes.')
-    if not source:
-        source = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/files.tar.gz'
-        )
-
-    files = _handle_source(source, temp)
-
-    d = current_app.config['FIXTURES_FILES_LOCATION']
-    if not exists(d):
-        makedirs(d)
-
-    # Clear data
-    ObjectVersion.query.delete()
-    Bucket.query.delete()
-    FileInstance.query.delete()
-    Location.query.delete()
-    db.session.commit()
-
-    # Create location
-    loc = Location(name='local', uri=d, default=True)
-    db.session.commit()
-
-    # Record indexer
-    indexer = RecordIndexer()
-    for f in files:
-        with open(join(source, f), 'rb') as fp:
-            # Create bucket
-            bucket = Bucket.create(loc)
-
-            # The filename
-            file_name = basename(f)
-
-            # Create object version
-            ObjectVersion.create(bucket, file_name, stream=fp)
-
-            # Attach to dummy records
-            rec_uuid = uuid.uuid4()
-            record = {
-                '_access': {
-                    'read': ['orestis.melkonian@cern.ch', 'it-dep']
-                },
-                'dummy': True,
-                'files': [
-                    {
-                        'uri': '/api/files/{0}/{1}'.format(
-                            str(bucket.id), file_name),
-                        'filename': file_name,
-                        'bucket': str(bucket.id),
-                        'local': True
-                    }
-                ]
-            }
-
-            # Create PID
-            current_pidstore.minters['recid'](
-                rec_uuid, record
-            )
-
-            # Create record
-            record = FileRecord.create(record, id_=rec_uuid)
-
-            # Index record
-            indexer.index(record)
-
-            # Create records' bucket
-            RecordsBuckets.create(record=record.model, bucket=bucket)
-    db.session.commit()
-    click.echo('DONE :)')
-
-
-@fixtures.command()
-@click.option('--source', '-s', default=False)
-@with_appcontext
-def categories(source):
+def categories():
     """Load categories."""
-    if not source:
-        source = pkg_resources.resource_filename(
-            'cds.modules.fixtures', 'data/categories.json'
-        )
-
-    with open(source, 'r') as fp:
-        categories = simplejson.load(fp)
+    categories = _load_json_source('categories.json')
 
     # save in db
     to_index = []
@@ -305,9 +203,8 @@ def categories(source):
     db.session.commit()
 
     # index them
-    indexer = RecordIndexer()
-    for cat_id in to_index:
-        indexer.index_by_id(cat_id)
+    _index(to_index)
+    click.echo('DONE :)')
 
 
 @fixtures.command()
@@ -322,6 +219,7 @@ def sequence_generator():
                         meta_template='{project-v1_0_0}-{counter:03d}',
                         start=1)
     db.session.commit()
+    click.echo('DONE :)')
 
 
 @fixtures.command()
@@ -330,7 +228,7 @@ def pages():
     """Register CDS static pages."""
     def page_data(page):
         return pkg_resources.resource_stream(
-            'cds.modules.fixtures', join('data/pages', page)
+            'cds.modules.fixtures', os.path.join('data/pages', page)
         ).read().decode('utf8')
 
     pages = [
@@ -373,155 +271,6 @@ def pages():
 
 
 @fixtures.command()
-@click.option('--video', '-v', default=False)
-@click.option('--frames', '-f', default=False)
-@click.option('--temp', '-t', default='/tmp')
-@click.option('--video-count', '-n', default=3)
-@with_appcontext
-def videos(video, frames, temp, video_count):
-    """Load videos, frames and subformats."""
-    def create_tags(video_obj, **tags):
-        """Create multiple tags for a single object version."""
-        [ObjectVersionTag.create(video_obj, tag, tags[tag]) for tag in tags]
-
-    with current_app.wsgi_app.mounts['/api'].app_context():
-        if not video:
-            video = join(dirname(__file__), '..', '..', '..',
-                         'tests', 'data', 'test.mp4')
-        video_duration = float(ff_probe(video, 'duration'))
-        if not frames:
-            frames = pkg_resources.resource_filename(
-                'cds.modules.fixtures', 'data/frames.tar.gz'
-            )
-
-        frame_files = _handle_source(frames, temp)
-        d = current_app.config['FIXTURES_FILES_LOCATION']
-        if not exists(d):
-            makedirs(d)
-
-        project = Project.create(
-            dict(
-                contributors=[dict(name='contrib', role='Provider')],
-                date='2017-01-17',
-                description=dict(value='desc'),
-                title=dict(title='Project'),
-                category='Category',
-                type='Type'))
-        project['_deposit']['owners'] = [1]
-        project['_deposit']['created_by'] = 1
-        project['videos'] = []
-
-        # All deposits created
-        deposits = [project]
-
-        for video_index in range(video_count):
-            with current_app.test_request_context():
-                video_deposit = Video.create(
-                    dict(_project_id=str(project['_deposit']['id']),
-                         contributors=[dict(name='contrib', role='Provider')],
-                         copyright=dict(url='http://cds.cern.ch/copyright',
-                                        year='2017', holder='CERN'),
-                         date='2017-01-16',
-                         description=dict(value='desc'),
-                         title=dict(title='Video')))
-            video_bucket = Bucket.get(video_deposit['_buckets']['deposit'])
-
-            video_deposit['_deposit'].update(dict(
-                owners=[1],
-                created_by=1,
-                extracted_metadata=dict(
-                    display_aspect_ratio='16:9', duration=video_duration,
-                    bit_rate='679886', avg_frame_rate='288000/12019',
-                    nb_frames='1440', size='5111048',
-                    codec_name='h264', color_range='tv',
-                    width=640, height=360,)))
-
-            # Master video
-            with open(video, 'rb') as fp:
-                master_id = add_master_to_video(
-                    video_deposit=video_deposit,
-                    filename='video{0}.mp4'.format(video_index),
-                    stream=fp, video_duration=video_duration
-                )
-
-            # Slave videos
-            number_of_frames = len(frame_files)
-            frame_files.sort()
-            frame_files.sort(key=len)
-            for i, f in enumerate(frame_files):
-                with open(join(frames, f), 'rb') as fp:
-                    # The filename
-                    file_name = basename(f)
-
-                    obj = ObjectVersion.create(
-                        bucket=video_bucket,
-                        key=file_name,
-                        stream=fp)
-                timestamp = (float(i) / number_of_frames) * video_duration
-                create_tags(obj, master=master_id, media_type='image',
-                            context_type='frame', timestamp=timestamp)
-
-            for quality in ['360p', '480p', '720p']:
-                with open(video, 'rb') as fp:
-                    obj = ObjectVersion.create(
-                        bucket=video_bucket,
-                        key='video{0}[{1}].mp4'.format(video_index, quality),
-                        stream=fp)
-                create_tags(obj, master=master_id, media_type='video',
-                            context_type='subformat', preset_quality=quality,
-                            width=1000, height=1000, video_bitrate=123456)
-
-            # Gif preview
-            gif = pkg_resources.resource_filename('cds.modules.fixtures',
-                                                  'data/frames.gif')
-
-            with open(gif, 'rb') as fp:
-                obj = ObjectVersion.create(
-                    bucket=video_bucket,
-                    key=basename(gif),
-                    stream=fp)
-                create_tags(obj, master=master_id,
-                            media_type='image', context_type='frames-preview')
-
-            # Subtitles
-            for lang in ['en', 'fr']:
-                subtitle = pkg_resources.resource_filename(
-                    'cds.modules.fixtures', 'data/test_{0}.vtt'.format(lang))
-                with open(subtitle, 'rb') as fp:
-                    obj = ObjectVersion.create(
-                        bucket=video_bucket,
-                        key='video{0}_{1}.vtt'.format(video_index, lang),
-                        stream=fp)
-                    create_tags(
-                        obj, language=lang, context_type='subtitle',
-                        content_type='vtt', media_type='subtitle')
-
-            # Poster frame
-            poster = pkg_resources.resource_filename('cds.modules.fixtures',
-                                                     'data/poster.png')
-            with open(poster, 'rb') as fp:
-                obj = ObjectVersion.create(
-                    bucket=video_bucket,
-                    key='poster.png',
-                    stream=fp)
-                create_tags(obj, content_type='png',
-                            context_type='poster', media_type='image')
-
-            deposits.append(video_deposit.commit())
-
-        project.commit()
-        with current_app.test_request_context():
-            project.publish()
-            indexer = RecordIndexer()
-            # index all published records
-            for deposit in deposits:
-                _, record = deposit.fetch_published()
-                indexer.index(record)
-        db.session.commit()
-        click.echo('DONE :)')
-
-
-@fixtures.command()
 @click.option('--url', '-u')
 @with_appcontext
 def keywords(url):
@@ -529,8 +278,8 @@ def keywords(url):
     if url:
         current_app.config['CDS_KEYWORDS_HARVESTER_URL'] = url
 
-    click.echo("Sending to index...")
     keywords_harvesting.s().apply()
+    click.echo('DONE :)')
 
 
 @fixtures.command()
@@ -545,5 +294,5 @@ def licenses():
     # index all licenses
     query = (str(x[0]) for x in PersistentIdentifier.query.filter_by(
         pid_type='od_lic').values(PersistentIdentifier.object_uuid))
-    click.echo("Sending to index...")
-    RecordIndexer().bulk_index(query)
+    _index(query)
+    click.echo('DONE :)')

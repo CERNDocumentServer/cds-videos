@@ -1,0 +1,352 @@
+{
+  "$schema": "https://cds.cern.ch/schemas/records/videos/project/project-v1.0.0.json",
+  "_access": {
+    "update": []
+  },
+  "category": "ATLAS",
+  "contributors": [
+    {
+      "affiliations": [
+        "Universita degli Studi di Udine (IT)"
+      ],
+      "email": "emma.ward@cern.ch",
+      "ids": [
+        {
+          "source": "cern",
+          "value": "761853"
+        },
+        {
+          "source": "cds",
+          "value": "2093012"
+        }
+      ],
+      "name": "Ward, Emma",
+      "role": "Director"
+    },
+    {
+      "name": "ATLAS Collaboration",
+      "role": "Producer"
+    }
+
+  ],
+  "date": "2017-05-19",
+  "description": {
+    "value": "Tales of the tile calorimeter."
+  },
+  "keywords": [
+    {
+      "name": "TileCal"
+    },
+    {
+      "name": "Calorimeter"
+    },
+    {
+      "name": "Tile"
+    },
+    {
+      "name": "ATLAS"
+    },
+    {
+      "name": "detector"
+    },
+    {
+      "name": "electronics"
+    },
+    {
+      "name": "Testing"
+    }
+  ],
+  "license": [
+    {
+      "license": "CERN",
+      "material": "",
+      "url": "http://copyright.web.cern.ch"
+    }
+  ],
+  "publication_date": "2017-06-02",
+  "recid": 1,
+  "report_number": {
+    "report_number": "ATLAS-VIDEO-2017-013"
+  },
+  "title": {
+    "title": "Tales of the tile calorimeter"
+  },
+  "translations": [],
+  "type": "VIDEO",
+  "videos": [
+    {
+      "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+      "category": "ATLAS",
+      "contributors": [
+        {
+          "affiliations": [
+            "Universita degli Studi di Udine (IT)"
+          ],
+          "email": "emma.ward@cern.ch",
+          "ids": [
+            {
+              "source": "cern",
+              "value": "761853"
+            },
+            {
+              "source": "cds",
+              "value": "2093012"
+            }
+          ],
+          "name": "Ward, Emma",
+          "role": "Director"
+        },
+        {
+          "name": "ATLAS Collaboration",
+          "role": "Producer"
+        }
+      ],
+      "copyright": {
+        "holder": "CERN",
+        "url": "http://copyright.web.cern.ch",
+        "year": "2017"
+      },
+      "date": "2017-05-19",
+      "description": {
+        "value": "This video is about the work that took place on the Tile Calorimeter during the 2015/2017 EYETS"
+      },
+      "duration": "00:02:52.000",
+      "featured": false,
+      "keywords": [
+        {
+          "name": "TileCal"
+        },
+        {
+          "name": "Calorimeter"
+        },
+        {
+          "name": "Tile"
+        },
+        {
+          "name": "ATLAS"
+        },
+        {
+          "name": "detector"
+        },
+        {
+          "name": "electronics"
+        },
+        {
+          "name": "Testing"
+        }
+      ],
+      "language": "en",
+      "license": [
+        {
+          "license": "CERN",
+          "material": "",
+          "url": "http://copyright.web.cern.ch"
+        }
+      ],
+      "publication_date": "2017-06-02",
+      "recid": 2,
+      "related_links": [],
+      "report_number": {
+        "report_number": "ATLAS-VIDEO-2017-013-001"
+      },
+      "title": {
+        "title": "Tales of the Tile Calorimeter"
+      },
+      "translations": [],
+      "type": "VIDEO",
+      "vr": false,
+      "_files": {
+        "source": "https://eospublichttp.cern.ch/eos/workspace/c/cds/public/demo_records/videos/ATLAS-VIDEO-2017-013-001.tar",
+        "metadata": [
+          {
+            "key": "ATLAS-MOVIE-2017-013-001.mov",
+            "tags": {
+              "media_type": "video",
+              "context_type": "master",
+              "avg_frame_rate": "25/1",
+              "bit_rate": "15258543",
+              "codec_name": "h264",
+              "color_range": "tv",
+              "display_aspect_ratio": "16:9",
+              "duration": "172.000000",
+              "height": "1080",
+              "nb_frames": "4300",
+              "preview": "true",
+              "size": "331381566",
+              "width": "1920"
+            }
+          },
+          {
+            "key": "frame-1.jpg",
+            "tags": {
+              "timestamp": "25.799999999999997",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-2.jpg",
+            "tags": {
+              "timestamp": "43.0",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-3.jpg",
+            "tags": {
+              "timestamp": "60.199999999999996",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-4.jpg",
+            "tags": {
+              "timestamp": "77.39999999999999",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-5.jpg",
+            "tags": {
+              "timestamp": "94.6",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-6.jpg",
+            "tags": {
+              "timestamp": "111.79999999999998",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-7.jpg",
+            "tags": {
+              "timestamp": "129.0",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-8.jpg",
+            "tags": {
+              "timestamp": "146.2",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-9.jpg",
+            "tags": {
+              "timestamp": "163.39999999999998",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frame-10.jpg",
+            "tags": {
+              "timestamp": "180.6",
+              "context_type": "frame",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "frames.gif",
+            "tags": {
+              "context_type": "frames-preview",
+              "media_type": "image",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "slave_240p.mp4",
+            "tags": {
+              "context_type": "subformat",
+              "media_type": "video",
+              "height": "240",
+              "preset_quality": "240p",
+              "video_bitrate": "386",
+              "width": "432",
+              "download": "false",
+              "smil": "true",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "slave_360p.mp4",
+            "tags": {
+              "context_type": "subformat",
+              "media_type": "video",
+              "height": "360",
+              "preset_quality": "360p",
+              "video_bitrate": "836",
+              "width": "640",
+              "download": "false",
+              "smil": "true",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "slave_480p.mp4",
+            "tags": {
+              "context_type": "subformat",
+              "media_type": "video",
+              "height": "480",
+              "preset_quality": "480p",
+              "video_bitrate": "1436",
+              "width": "854",
+              "download": "false",
+              "smil": "true",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "slave_720p.mp4",
+            "tags": {
+              "context_type": "subformat",
+              "media_type": "video",
+              "height": "720",
+              "preset_quality": "720p",
+              "video_bitrate": "2672",
+              "width": "1280",
+              "download": "true",
+              "smil": "true",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          },
+          {
+            "key": "slave_1080p.mp4",
+            "tags": {
+              "context_type": "subformat",
+              "media_type": "video",
+              "height": "1080",
+              "preset_quality": "1080p",
+              "video_bitrate": "5872",
+              "width": "1920",
+              "download": "true",
+              "smil": "true",
+              "master": "ATLAS-MOVIE-2017-013-001.mov"
+            }
+          }
+        ]
+      }
+
+    }
+  ]
+}

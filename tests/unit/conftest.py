@@ -208,7 +208,7 @@ def location(db):
     tmppath = tempfile.mkdtemp()
 
     loc = Location(
-        name='testloc',
+        name='videos',
         uri=tmppath,
         default=True
     )
