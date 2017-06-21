@@ -27,16 +27,17 @@
 from __future__ import absolute_import, print_function
 
 import json
-import mock
 
-from cds.modules.deposit.api import CDSDeposit, Project
-from cds.modules.deposit.views import to_links_js
+import mock
 from flask import current_app, request, url_for
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
-from invenio_files_rest.models import FileInstance, ObjectVersionTag, Bucket
-from invenio_files_rest.models import ObjectVersion
+from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
+                                       ObjectVersionTag)
+
+from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.tasks import preserve_celery_states_on_db
+from cds.modules.deposit.views import to_links_js
 
 
 def test_deposit_link_factory_has_bucket(
@@ -107,10 +108,16 @@ def test_links_filter(app, es, location, deposit_metadata):
 
 def test_publish_process_files(api_app, db, location):
     """Test _process_files changing master tags on bucket snapshots."""
-    deposit = CDSDeposit.create(dict(date='1/2/3', category='cat', type='type',
-                                title=dict(title='title'),
-                                report_number=dict(report_number='1234'),
-                                videos=[]))
+    deposit = CDSDeposit.create(
+        dict(
+            date='1/2/3',
+            category='cat',
+            type='type',
+            title=dict(title='title'),
+            report_number=dict(report_number='1234'),
+            videos=[]),
+        bucket_location='videos')
+
     # deposit has no files, so _process_files must yield None
     with deposit._process_files(None, dict()) as data:
         assert data is None

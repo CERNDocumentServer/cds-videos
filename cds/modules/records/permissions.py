@@ -27,12 +27,12 @@ from __future__ import absolute_import, print_function
 from flask_security import current_user
 from invenio_access import DynamicPermission
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
-from invenio_records.api import Record
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from invenio_deposit.permissions import action_admin_access
 
 from .utils import is_deposit, is_record, get_user_provides
+from .api import CDSRecord as Record
 
 
 def files_permission_factory(obj, action=None):
