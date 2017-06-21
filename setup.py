@@ -255,6 +255,7 @@ setup(
         'invenio_records.jsonresolver': [
             'keywords = cds.modules.records.jsonresolver.keywords',
             'records = cds.modules.records.jsonresolver.records',
+            'schemas = cds.modules.records.jsonresolver.schemas',
             'deposits = cds.modules.deposit.jsonresolver',
         ]
     },

@@ -33,6 +33,6 @@ from ..resolver import record_resolver
 
 @jsonresolver.route('/api/record/<path:path>', host='cds.cern.ch')
 def record_jsonresolver(path):
-    """Create a nested JSON."""
+    """Resolve local records."""
     _, record = record_resolver.resolve(path)
     return record

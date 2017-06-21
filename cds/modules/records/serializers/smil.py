@@ -19,7 +19,6 @@
 # In applying this licence, CERN does not waive the privileges and immunities
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
-
 """Smil serializer for records."""
 
 from __future__ import absolute_import, print_function
@@ -40,16 +39,17 @@ class SmilSerializer(object):
     """Smil serializer for records."""
 
     @staticmethod
-    def serialize(pid, record, links_factory=None):
+    def serialize(pid, record, links_factory=None, **kwargs):
         """Serialize a single record and persistent identifier.
 
         :param pid: Persistent identifier instance.
         :param record: Record instance.
         :param links_factory: Factory function for record links.
         """
-        if record['$schema'] != Video.get_record_schema():
-            raise RESTValidationError(errors=[FieldError(
-                str(record.id), 'Unsupported format')])
+        if record['$schema'] != Video.get_record_schema() and not kwargs.get(
+                'skip_schema_validation'):
+            raise RESTValidationError(
+                errors=[FieldError(str(record.id), 'Unsupported format')])
         return Smil(record=record).format()
 
 
@@ -78,11 +78,10 @@ class Smil(object):
                     src=get_relative_path(video['version_id']),
                     width=tags['width'],
                     height=tags['height'],
-                    bit_rate=tags['video_bitrate']
-                )
+                    bit_rate=tags['video_bitrate'])
 
 
-def generate_smil_file(record_id, record, bucket, master_object):
+def generate_smil_file(record_id, record, bucket, master_object, **kwargs):
     """Generate SMIL file for Video record (on publish)."""
     #  output_folder = tempfile.mkdtemp()
     master_object = as_object_version(master_object)
@@ -90,14 +89,12 @@ def generate_smil_file(record_id, record, bucket, master_object):
     # Generate SMIL file
     master_key = master_object.key
     smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
-    smil_content = SmilSerializer.serialize(record_id, record)
+    smil_content = SmilSerializer.serialize(record_id, record, **kwargs)
 
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
         obj = ObjectVersion.create(
-            bucket=bucket,
-            key=smil_key,
-            stream=BytesIO(smil_content.encode()))
+            bucket=bucket, key=smil_key, stream=BytesIO(smil_content.encode()))
         ObjectVersionTag.create(obj, 'master', str(master_object.version_id))
         ObjectVersionTag.create(obj, 'context_type', 'playlist')
         ObjectVersionTag.create(obj, 'media_type', 'text')

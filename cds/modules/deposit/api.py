@@ -151,7 +151,8 @@ class CDSDeposit(Deposit):
         if '_deposit' not in data:
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
-        bucket = Bucket.create(default_location=Location.get_default())
+        bucket = Bucket.create(location=Location.get_by_name(
+            kwargs.get('bucket_location', 'default')))
         data['_buckets'] = {'deposit': str(bucket.id)}
         data['_deposit']['state'] = {}
         data.setdefault('keywords', [])
@@ -417,6 +418,7 @@ class Project(CDSDeposit):
 
         Adds bucket creation immediately on deposit creation.
         """
+        kwargs.setdefault('bucket_location', 'videos')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         data.setdefault('videos', [])
         return super(Project, cls).create(data, id_=id_, **kwargs)
@@ -686,6 +688,7 @@ class Video(CDSDeposit):
 
         Adds bucket creation immediately on deposit creation.
         """
+        kwargs.setdefault('bucket_location', 'videos')
         project_id = data.get('_project_id')
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         # set default copyright
