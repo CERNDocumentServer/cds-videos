@@ -30,6 +30,7 @@ import time
 import mock
 import pytest
 
+from celery import states
 from werkzeug.utils import import_string
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
     Bucket, FileInstance
@@ -270,6 +271,28 @@ def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
     message = listener.await()
     assert '"state": "FAILURE"' in message
     assert 'invalid_uri: No such file or directory' in message
+
+
+def test_transcode_too_high_resolutions(db, bucket):
+    """Test trascoding task when it should discard some high resolutions."""
+    filesize = 1024
+    filename = 'test.mp4'
+    preset_quality = '480p'
+    obj = ObjectVersion.create(bucket, key=filename,
+                               stream=BytesIO(b'\x00' * filesize))
+    ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
+    ObjectVersionTag.create(obj, 'height', 360)
+    ObjectVersionTag.create(obj, 'width', 640)
+    obj_id = str(obj.version_id)
+    db.session.commit()
+
+    task_s = TranscodeVideoTask().s(version_id=obj_id,
+                                    preset_quality=preset_quality,
+                                    sleep_time=0)
+
+    # Transcode
+    result = task_s.delay()
+    assert result.status == states.IGNORED
 
 
 def test_transcode(db, bucket, mock_sorenson):

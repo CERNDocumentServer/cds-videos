@@ -39,7 +39,7 @@ import jsonpatch
 import requests
 from cds_sorenson.api import (get_encoding_status, get_preset_info,
                               start_encoding, stop_encoding)
-from cds_sorenson.error import InvalidResolutionError
+from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import Task, shared_task
 from celery.exceptions import Ignore
@@ -493,8 +493,13 @@ class TranscodeVideoTask(AVCTask):
         bucket_location = self.object.bucket.location.uri
         # Get master file's key
         master_key = self.object.key
+
+        tags = self.object.get_tags()
         # Get master file's aspect ratio
-        aspect_ratio = self.object.get_tags()['display_aspect_ratio']
+        aspect_ratio = tags['display_aspect_ratio']
+        # Get master file's width x height
+        width = int(tags['width']) if 'width' in tags else None
+        height = int(tags['height']) if 'height' in tags else None
 
         with db.session.begin_nested():
             # Create FileInstance
@@ -515,8 +520,9 @@ class TranscodeVideoTask(AVCTask):
             try:
                 # Start Sorenson
                 job_id = start_encoding(input_file, output_file,
-                                        preset_quality, aspect_ratio)
-            except InvalidResolutionError as e:
+                                        preset_quality, aspect_ratio,
+                                        max_height=height, max_width=width)
+            except (InvalidResolutionError, TooHighResolutionError) as e:
                 exception = self._meta_exception_envelope(exc=e)
                 self.update_state(state=REVOKED, meta=exception)
                 raise Ignore()

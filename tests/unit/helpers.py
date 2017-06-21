@@ -34,11 +34,9 @@ from time import sleep
 
 import mock
 import pkg_resources
-from cds_sorenson.api import get_available_preset_qualities
+from flask import current_app
 from celery import chain, group, shared_task, states
-from flask_security import login_user, current_user
-from invenio_accounts.testutils import login_user_via_session
-from flask_principal import UserNeed, identity_loaded
+from flask_security import login_user
 from invenio_accounts.models import User
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
@@ -186,6 +184,13 @@ def transcode_task(bucket, filesize, filename, preset_qualities):
     ])
 
 
+def get_presets_applied():
+    """Return list of preset applied."""
+    presets = current_app.config['CDS_SORENSON_PRESETS']['16:9']
+    return {key: preset for (key, preset) in presets.items()
+            if preset['width'] <= 640}
+
+
 def get_object_count(download=True, frames=True, transcode=True):
     """Get number of ObjectVersions, based on executed tasks."""
     return sum([
@@ -193,8 +198,8 @@ def get_object_count(download=True, frames=True, transcode=True):
         1 if download else 0,
         # 10 frames + 1 GIF
         11 if frames else 0,
-        # 1 failed transcoding due to invalid resolution (i.e. 16:9 - 1024p)
-        (len(get_available_preset_qualities()) - 1) if transcode else 0,
+        # count the presets with width x height < 640x320 (video resolution)
+        (len(get_presets_applied())) if transcode else 0,
     ])
 
 
@@ -204,8 +209,8 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         5 if download else 0,
         10 if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
-        # -1 because 1024p is not used with the aspect ratio 16:9
-        ((len(get_available_preset_qualities()) - 1) * 10) if transcode else 0,
+        # count the presets with width x height < 640x320 (video resolution)
+        ((len(get_presets_applied())) * 10) if transcode else 0,
     ])
 
 

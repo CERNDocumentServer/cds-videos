@@ -57,7 +57,7 @@ from six import BytesIO
 
 from helpers import failing_task, get_object_count, get_tag_count, \
     simple_add, mock_current_user, success_task, \
-    get_indexed_records_from_mock
+    get_indexed_records_from_mock, get_presets_applied
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -220,7 +220,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['slave_{0}.mp4'.format(quality)
-                  for quality in get_available_preset_qualities()
+                  for quality in get_presets_applied()
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
@@ -304,16 +304,17 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         collector = CollectInfoTasks()
         iterate_events_results(events=events, fun=collector)
         info = list(collector)
+        presets = get_presets_applied().keys()
         assert info[0][0] == 'file_download'
         assert info[0][1].status == states.SUCCESS
         assert info[1][0] == 'file_video_metadata_extraction'
         assert info[1][1].status == states.SUCCESS
         assert info[2][0] == 'file_video_extract_frames'
         assert info[2][1].status == states.SUCCESS
-        assert info[3][0] == 'file_transcode'
-        assert info[3][1].status == states.SUCCESS
-        assert info[4][0] == 'file_transcode'
-        assert info[4][1].status == states.SUCCESS
+        for i in info[3:]:
+            assert i[0] == 'file_transcode'
+            if i[1].status == states.SUCCESS:
+                assert i[1].result['payload']['preset_quality'] in presets
 
         # check tags
         assert ObjectVersionTag.query.count() == get_tag_count()
@@ -353,8 +354,8 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 24
-        _, kwargs = list_kwargs[22]
+        assert len(list_kwargs) == 12
+        _, kwargs = list_kwargs[10]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
@@ -471,7 +472,7 @@ def test_avc_workflow_receiver_local_file_pass(
     video_size = 5510872
     master_key = 'test.mp4'
     slave_keys = ['slave_{0}.mp4'.format(quality)
-                  for quality in get_available_preset_qualities()
+                  for quality in get_presets_applied().keys()
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
@@ -562,9 +563,9 @@ def test_avc_workflow_receiver_local_file_pass(
         transocode_tasks = info[2:]
         statuses = [task[1].status for task in info[2:]]
         assert len(transocode_tasks) == len(statuses)
-        assert [states.SUCCESS, states.SUCCESS, states.SUCCESS,
-                states.SUCCESS, states.SUCCESS, states.SUCCESS, states.SUCCESS,
-                states.SUCCESS, states.REVOKED] == statuses
+        assert [states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
+                states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
+                states.REVOKED] == statuses
 
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
@@ -602,8 +603,8 @@ def test_avc_workflow_receiver_local_file_pass(
             return x['type_'] == 'update_deposit'
 
         list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 22
-        _, kwargs = list_kwargs[20]
+        assert len(list_kwargs) == 10
+        _, kwargs = list_kwargs[8]
         assert kwargs['type_'] == 'update_deposit'
         assert kwargs['channel'] == 'mychannel'
         assert kwargs['data']['state'] == states.SUCCESS
@@ -783,7 +784,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
     #
     # CLEAN
     #
-    presets = [p for p in get_available_preset_qualities() if p != '1024p']
+    presets = [p for p in get_presets_applied() if p != '1024p']
     for i, preset_quality in enumerate(presets, 1):
         # Clean transcode task for each preset
         event = Event.query.first()
