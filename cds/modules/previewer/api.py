@@ -21,6 +21,7 @@
 
 from __future__ import absolute_import, print_function
 
+import re
 from os import symlink
 from os.path import exists, join, relpath, split
 
@@ -115,3 +116,17 @@ class CDSPreviewDepositFile(PreviewFile):
             key=self.file.key
         )
         return uri
+
+    @property
+    def subtitles(self):
+        """Get video's subtitles."""
+        pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
+
+        def get_subtitle_tuple(f):
+            """Get URL and language of a subtitle file."""
+            found = pattern.findall(f['key'])
+            lang = found[0] if len(found) == 1 else ''
+            return f['links']['self'], lang
+
+        return [get_subtitle_tuple(f) for f in self.record['_files']
+                if f['content_type'] == 'vtt']
