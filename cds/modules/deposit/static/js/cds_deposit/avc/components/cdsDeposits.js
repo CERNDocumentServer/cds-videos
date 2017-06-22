@@ -178,6 +178,11 @@ function cdsDepositsCtrl(
     var videos = _.keyBy(videos, function(video) {
       return that.isVideoFile(video.name);
     });
+    angular.forEach(videos, function(video) {
+      if (!video.key) {
+        video.key = video.name;
+      }
+    });
     var videoKeys = _.keys(videos);
     var _files = {
       project: [],

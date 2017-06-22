@@ -108,7 +108,9 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           );
           // Check if needs upload
           var _subpromise;
-          upload.key = upload.name;
+          if (!upload.key) {
+            upload.key = upload.name;
+          }
           if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
             _subpromise = Upload.http(
               _prepareLocalFileWebhooks(upload, response)
@@ -187,9 +189,8 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   function _prepareLocalFile(file) {
     // Add ``key`` key to be consistent with the backend. JS API for files
     // uses ``name`` instead of ``key``
-    file.key = file.name;
     return {
-      url: that.cdsDepositCtrl.guessEndpoint('BUCKET') + '/' + file.name,
+      url: that.cdsDepositCtrl.guessEndpoint('BUCKET') + '/' + file.key,
       method: 'PUT',
       headers: {
         'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
@@ -210,7 +211,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       },
       data: {
         uri: file.url,
-        key: file.name,
+        key: file.key,
         bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
         deposit_id: that.cdsDepositCtrl.record._deposit.id,
         sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
@@ -265,10 +266,17 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       that.duplicateFiles = [];
 
       var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
-      var newMasterFile = _.find(_files, { key: masterFile.key });
+      var videoFiles = _.values(that.cdsDepositsCtrl.filterOutFiles(_files)
+        .videos);
+      // Exclude video files
+      _files = _.difference(_files, videoFiles);
+      var newMasterFile = videoFiles[0];
+      if (newMasterFile) {
+        newMasterFile.key = masterFile.key;
+      }
 
       _files = _.reject(_files, function(file) {
-        if (file != newMasterFile && existingFiles.includes(file.key)) {
+        if (existingFiles.includes(file.key)) {
           that.duplicateFiles.push(file.key);
           return true;
         }
@@ -280,16 +288,18 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         // Add new videos and files to master
         that.cdsDepositsCtrl.addFiles(_files, this.queue);
       } else {
-        var videoFiles = _.values(that.cdsDepositsCtrl.filterOutFiles(_files)
-          .videos);
-        // Exclude video files
-        _files = _.difference(_files, videoFiles);
         // Add the files to the list
         if (newMasterFile) {
-          var oldMasterIndex = _.findIndex(that.files, {key: masterFile.key});
-          that.files.splice(oldMasterIndex, 1);
-          that.files.push(newMasterFile);
-          that.queue.push(newMasterFile);
+          that.confirmNewMaster = true;
+          that.newMasterName = newMasterFile.name;
+          that.newMasterDefer = $q.defer();
+          that.newMasterDefer.promise.then(function() {
+            var oldMasterIndex = _.findIndex(that.files, {key: masterFile.key});
+            that.files.splice(oldMasterIndex, 1);
+            that.files.push(newMasterFile);
+            that.queue.push(newMasterFile);
+            that.upload();
+          });
         }
         Array.prototype.push.apply(that.files, _files);
         // Add the files to the queue
