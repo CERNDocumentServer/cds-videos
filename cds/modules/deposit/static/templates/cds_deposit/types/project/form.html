@@ -115,14 +115,25 @@
             <div class="row">
               <div class="col-sm-6">
                 <h4>Share deposit with</h4>
-                <form
-                  name="$ctrl.cdsDepositCtrl.depositFormModels[4]"
-                  class="form"
-                  sf-schema="$ctrl.cdsDepositCtrl.schema"
-                  sf-form="$ctrl.form.access"
-                  sf-model="$ctrl.cdsDepositCtrl.record"
-                  sf-options="$ctrl.sfOptions"
-                ></form>
+                <ui-select
+                 multiple
+                 on-select="$ctrl.cdsDepositCtrl.setDirty()"
+                 ng-model="$ctrl.cdsDepositCtrl.record._access.update"
+                 theme="bootstrap"
+                 title="Add emails"
+                >
+                 <ui-select-match
+                  placeholder="Select emails..."
+                >
+                  {{$item}}
+                </ui-select-match>
+                 <ui-select-choices
+                  repeat="email in $ctrl.accessSuggestions | filter:$select.search"
+                  refresh="$ctrl.autocompleteAccess($select.search)"
+                 >
+                   {{email}}
+                 </ui-select-choices>
+               </ui-select>
               </div>
               <!-- Record permissions -->
               <div class="col-sm-6">

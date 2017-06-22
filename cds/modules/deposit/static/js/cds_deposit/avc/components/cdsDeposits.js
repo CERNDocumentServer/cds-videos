@@ -175,15 +175,14 @@ function cdsDepositsCtrl(
     });
 
     // Index videos by their key
-    var videos = _.indexBy(videos, function(video) {
+    var videos = _.keyBy(videos, function(video) {
       return that.isVideoFile(video.name);
     });
     var videoKeys = _.keys(videos);
-
     var _files = {
       project: [],
       videos: videos,
-      videoFiles: _.mapObject(videos, _.constant([]))
+      videoFiles: _.map(videos, _.constant([]))
     };
 
     angular.forEach(other, function(file, index) {
@@ -277,7 +276,6 @@ function cdsDepositsCtrl(
       if (_promises.length > 0) {
         // Make requests for the videos
         that.chainedActions(_promises).then(function(data) {
-          console.log('DONE chained actions', data);
         }, function(error) {
           console.log('ERROR chained actiοns', error);
         });
