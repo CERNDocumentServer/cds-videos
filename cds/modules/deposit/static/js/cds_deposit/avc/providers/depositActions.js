@@ -56,8 +56,8 @@ function depositActions() {
 }
 
 function isPopulated(val) {
-  return val !== null && val !== undefined && !_.isEqual(val, []) &&
-    !(val.constructor === Object && _.isEmpty(val));
+  return val !== null && val !== undefined && !_.isEqual(val, '')
+    && !_.isEqual(val, []) && !(val.constructor === Object && _.isEmpty(val));
 }
 
 function sanitizeData(payload) {
@@ -65,11 +65,10 @@ function sanitizeData(payload) {
       return payload.map(sanitizeData).filter(isPopulated);
     } else if (_.isObject(payload)) {
       return _.chain(payload)
-              .mapObject(sanitizeData)
-              .omit(function(value) {
-                return !isPopulated(value);
-              })
-              .value();
+              .mapValues(sanitizeData)
+              .omitBy(function(o) {
+                return !isPopulated(o);
+              }).value();
     } else {
       return payload;
     }

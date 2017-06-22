@@ -86,6 +86,7 @@
         "options": {
           "refreshDelay": 100,
           "mergeObjects": true,
+          "tagging": true,
           "asyncCallback": "$ctrl.autocompleteKeywords",
           "url": "/api/keywords/_suggest"
         }
@@ -308,19 +309,6 @@
           ]
         }
       ]
-    }
-  ],
-  "access": [
-    {
-      "key": "_access.update",
-      "title": "Update access for the project",
-      "description": "",
-      "add": "Add another person/e-group",
-      "inline": true,
-      "startEmpty": true,
-      "options": {
-        "minLength": 0
-      }
     }
   ]
 }

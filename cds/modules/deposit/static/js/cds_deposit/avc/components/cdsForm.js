@@ -114,7 +114,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   /**
    * Keywords
    */
-  function formKeyword(name, key_id) {
+  function selectMultiple(name, key_id) {
     var value = {name: name};
     if (key_id) { value.key_id = key_id }
     return {
@@ -130,12 +130,12 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     },
     // Response handler
     function(data, query) {
-      var userInput = formKeyword(query);
+      var userInput = selectMultiple(query);
       var suggestions =
         data.data['suggest-name'][0]['options']
           .concat(that.cdsDepositCtrl.record.keywords || [])
           .map(function(keyword) {
-            return formKeyword(
+            return selectMultiple(
               (keyword.payload) ? keyword.payload.name : keyword.name,
               (keyword.payload) ? keyword.payload.key_id : keyword.key_id
             );
@@ -279,10 +279,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   // Prepends user input as custom field, if not already pre-defined
   function prependUserInput(userInput, suggestions) {
-    if (userInput && _.findIndex(suggestions, function (suggestion) {
-      return suggestion.name.toUpperCase() === userInput.name.toUpperCase();
-    }) == -1) {
-      suggestions.unshift(userInput);
+    try {
+      if (userInput && _.findIndex(suggestions, function (suggestion) {
+        return suggestion.name.toUpperCase() === userInput.name.toUpperCase();
+      }) == -1) {
+        suggestions.unshift(userInput);
+      }
+    } catch(e) {
+
     }
   }
 

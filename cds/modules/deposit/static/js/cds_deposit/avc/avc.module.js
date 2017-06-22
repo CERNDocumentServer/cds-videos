@@ -167,7 +167,7 @@ angular.module('schemaForm')
 
         $scope.$watchCollection('form.$$selectedObjects', function(newValue) {
           if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)){
-            $scope.ngModel.$setViewValue(_.unique(newValue));
+            $scope.ngModel.$setViewValue(_.uniq(newValue));
             $scope.ngModel.$commitViewValue();
             $scope.ngModel.$render();
           }

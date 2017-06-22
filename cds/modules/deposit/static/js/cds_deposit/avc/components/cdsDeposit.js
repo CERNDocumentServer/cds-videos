@@ -678,7 +678,7 @@ function cdsDepositCtrl(
     // Inform the parents
     $scope.$emit('cds.deposit.success', response);
     // Make the form pristine again
-    _.invoke(that.depositFormModels, '$setPristine');
+    that.setPristine();
   };
 
   this.onErrorAction = function(response) {
@@ -702,11 +702,15 @@ function cdsDepositCtrl(
   }
 
   this.setDirty = function() {
-    _.invoke(that.depositFormModels, '$setDirty');
+    _.each(that.depositFormModels, function(model) {
+        model.$setDirty();
+    });
   }
 
   this.setPristine = function() {
-    _.invoke(that.depositFormModels, '$setPristine');
+    _.each(that.depositFormModels, function(model) {
+        model.$setPristine();
+    });
   }
 
   // Local storage
