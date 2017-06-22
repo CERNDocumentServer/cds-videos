@@ -258,8 +258,8 @@ class CDSDeposit(Deposit):
         """Snapshot bucket and add files in record during first publishing."""
         if self.files:
             assert not self.files.bucket.locked
+            # FIXME deposit bucket is never locked down
             snapshot = self.files.bucket.snapshot()
-            self.files.bucket.locked = True
             for data in self._merge_related_objects(
                 record_id=record_id, snapshot=snapshot, data=data
             ):
@@ -313,10 +313,13 @@ class CDSDeposit(Deposit):
     def _publish_edited(self):
         """Sync deposit bucket with the record bucket."""
         record = super(CDSDeposit, self)._publish_edited()
+        return self._sync_record_files(record=record)
+
+    def _sync_record_files(self, record):
+        """Synchronize deposit files with deposit files."""
         if self.files:
             record.files.bucket.locked = False
             snapshot = self.files.bucket.merge(bucket=record.files.bucket)
-            self.files.bucket.locked = True
             next(self._merge_related_objects(
                 record_id=record.id, snapshot=snapshot, data=record
             ))
@@ -753,10 +756,6 @@ class Video(CDSDeposit):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self['_deposit']['id']
-        # check all tasks are successfully
-        if self._tasks_global_status() != states.SUCCESS:
-            raise PIDInvalidAction()
-        # inherit some fields from parent project
         try:
             self['category'] = self.project['category']
             self['type'] = self.project['type']

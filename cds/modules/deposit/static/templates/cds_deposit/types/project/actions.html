@@ -9,7 +9,7 @@
 
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
-    ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
+    ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-primary btn-sm"
     ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish All
