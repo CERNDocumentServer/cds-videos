@@ -869,7 +869,7 @@ class Video(CDSDeposit):
         )[0]
 
         # Subtitle file
-        pattern = re.compile("{0}_([a-zA-Z][a-zA-Z])\.vtt$".format(master))
+        pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
         objs = [o for o in sorted_files_from_bucket(self._bucket)
                 if pattern.match(o.key)]
         with db.session.begin_nested():
