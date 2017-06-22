@@ -92,6 +92,9 @@ class AVCTask(Task):
         kwargs = self._extract_call_arguments(arg_list, **kwargs)
 
         with self.app.flask_app.app_context():
+            if kwargs.get('_clean', False):
+                self.clean(*args, **kwargs)
+
             self.object = as_object_version(kwargs.pop('version_id', None))
             if self.object:
                 self.obj_id = str(self.object.version_id)
