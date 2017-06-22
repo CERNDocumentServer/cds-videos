@@ -447,6 +447,13 @@ class TranscodeVideoTask(AVCTask):
         self._type = 'file_transcode'
         self._base_payload = {}  # {'type': self._type}
 
+    def on_success(self, *args, **kwargs):
+        """On success update the record if exists."""
+        super(TranscodeVideoTask, self).on_success(*args, **kwargs)
+        # update record if already published
+        sync_records_with_deposit_files.s(
+            deposit_id=self._base_payload['deposit_id']).apply_async()
+
     @staticmethod
     def _build_slave_key(preset_quality, master_key):
         """Build the object version key connected with the transcoding."""
@@ -610,6 +617,29 @@ def patch_record(recid, patch, validator=None):
             validator = import_string(validator)
         record.commit(validator=validator)
     return record
+
+
+@shared_task(bind=True)
+def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
+                                    countdown=5):
+    """Low level files synchronize."""
+    deposit_video = deposit_video_resolver(deposit_id)
+    db.session.refresh(deposit_video.model)
+    if deposit_video.is_published():
+        # update record videos list
+        _, record_video = deposit_video.fetch_published()
+        db.session.refresh(record_video.model)
+        record_video = deposit_video._sync_record_files(
+            record=record_video)
+        try:
+            record_video.commit()
+        except ConcurrentModificationError as exc:
+            db.session.rollback()
+            raise self.retry(
+                max_retries=max_retries, countdown=countdown, exc=exc)
+        db.session.commit()
+        # index the record again
+        RecordIndexer().index(record_video)
 
 
 #
