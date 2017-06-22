@@ -172,10 +172,8 @@ class CeleryAsyncReceiver(Receiver):
     def rerun_task(self, **payload):
         """Re-run a task."""
         db.session.expunge(payload['event'])
-        # clean previous task results
-        self.clean_task(**payload)
-        # run task
-        result = self.run_task(**payload).apply_async()
+        # rerun task (with cleaning)
+        result = self.run_task(_clean=True, **payload).apply_async()
         # update event information
         self._update_serialized_result(
             event=payload['event'], old_task_id=payload['task_id'],
