@@ -5,60 +5,79 @@
         'has-feedback': form.feedback !== false
     }"
     class="form-group">
-
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
-
-    <div class="form-group">
-        <ui-select
-            ng-init="form.$$selectedObjects=$$value$$"
-            ng-if="!(form.options.tagging||false)"
-            multiple
-            tagging
-            tagging-label="(custom 'new')"
-            ng-model="form.$$selectedObjects"
-            sortable="form.options.sortable||false"
-            theme="bootstrap"
-            ng-disabled="evalExpr(form.readonly)"
-            on-select="form.$$selectedValues.push($item.value);"
-            on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value), 1)"
-            class="{{form.options.uiClass}}">
-            <ui-select-match
-                placeholder="{{
-                    form.placeholder ||
-                    form.schema.placeholder ||
-                    ('placeholders.select' | translate)
-                }}">
-                {{$item.name}}
-            </ui-select-match>
-            <ui-select-choices
-                refresh="populateTitleMap(form, $select.search)"
-                refresh-delay="form.options.refreshDelay"
-                group-by="form.options.groupBy"
-                repeat="item in form.titleMap | propsFilter: {name: $select.search}">
-                <div ng-bind-html="item.name | highlight: $select.search"></div>
-            </ui-select-choices>
-        </ui-select>
-        <input
-            type="hidden"
-            rows="5"
-            cols="5"
-            name="{{form.key.slice(-1)[0]}}"
-            toggle-multiple-model
-            ng-model="$$value$$"
-            ng-change="changeA()"
-            form="form"
-            sf-changed="form"
-            schema-validate="form"/>
-        <span
-            ng-if="form.feedback !== false"
-            ng-class="evalInScope(form.feedback) || {
-                'glyphicon': true,
-                'glyphicon-ok': hasSuccess(),
-                'glyphicon-remove': hasError()
-            }"
-            class="form-control-feedback">
-        </span>
-
-        <div class="help-block" sf-message="form.description"></div>
-    </div>
+    <ui-select
+        ng-init="form.$$selectedObjects=$$value$$"
+        ng-if="!(evalExpr(form.options.tagging)||false)"
+        multiple
+        ng-model="form.$$selectedObjects"
+        sortable="form.options.sortable||false"
+        theme="bootstrap"
+        ng-disabled="evalExpr(form.readonly)"
+        on-select="form.$$selectedValues.push($item.value)"
+        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value), 1)"
+        class="{{form.options.uiClass}}">
+        <ui-select-match
+            placeholder="{{
+                form.placeholder ||
+                form.schema.placeholder ||
+                ('placeholders.select' | translate)
+            }}">
+            {{$item.name}}
+        </ui-select-match>
+        <ui-select-choices
+            refresh="populateTitleMap(form, $select.search)"
+            refresh-delay="form.options.refreshDelay"
+            group-by="form.options.groupBy"
+            repeat="item in form.titleMap | propsFilter: {name: $select.search}">
+            <div ng-bind-html="item.name | highlight: $select.search"></div>
+        </ui-select-choices>
+    </ui-select>
+    <ui-select
+        ng-init="form.$$selectedObjects=$$value$$"
+        ng-if="(evalExpr(form.options.tagging)||false)"
+        multiple
+        tagging
+        tagging-label="(custom 'new')"
+        ng-model="form.$$selectedObjects"
+        sortable="form.options.sortable||false"
+        theme="bootstrap"
+        ng-disabled="evalExpr(form.readonly)"
+        on-select="form.$$selectedValues.push($item.value);"
+        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value), 1)"
+        class="{{form.options.uiClass}}">
+        <ui-select-match
+            placeholder="{{
+                form.placeholder ||
+                form.schema.placeholder ||
+                ('placeholders.select' | translate)
+            }}">
+            {{$item.name}}
+        </ui-select-match>
+        <ui-select-choices
+            refresh="populateTitleMap(form, $select.search)"
+            refresh-delay="form.options.refreshDelay"
+            group-by="form.options.groupBy"
+            repeat="item in form.titleMap | propsFilter: {name: $select.search}">
+            <div ng-bind-html="item.name | highlight: $select.search"></div>
+        </ui-select-choices>
+    </ui-select>
+    <input
+        type="hidden"
+        name="{{form.key.slice(-1)[0]}}"
+        toggle-multiple-model
+        ng-model="$$value$$"
+        form="form"
+        sf-changed="form"
+        schema-validate="form"/>
+    <span
+        ng-if="form.feedback !== false"
+        ng-class="evalInScope(form.feedback) || {
+            'glyphicon': true,
+            'glyphicon-ok': hasSuccess(),
+            'glyphicon-remove': hasError()
+        }"
+        class="form-control-feedback">
+    </span>
+    <div class="help-block" sf-message="form.description"></div>
 </div>

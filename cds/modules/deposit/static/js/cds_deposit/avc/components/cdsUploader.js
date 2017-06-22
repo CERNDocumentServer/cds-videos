@@ -265,7 +265,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
       that.duplicateFiles = [];
 
       var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
-      var newMasterFile = _.findWhere(_files, { key: masterFile.key });
+      var newMasterFile = _.find(_files, { key: masterFile.key });
 
       _files = _.reject(_files, function(file) {
         if (file != newMasterFile && existingFiles.includes(file.key)) {
@@ -388,7 +388,7 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
   this.findFileIndex = function(files, key) {
     return _.indexOf(
       files,
-      _.findWhere(that.files, {key: key})
+      _.find(that.files, {key: key})
     );
   }
 

@@ -61,7 +61,7 @@ js = NpmBundle(
         'node_modules/ng-dialog/js/ngDialog.js',
         'node_modules/clipboard/dist/clipboard.js',
         'node_modules/ngclipboard/dist/ngclipboard.js',
-        'node_modules/underscore/underscore.js',
+        'node_modules/lodash/lodash.js',
         'node_modules/d3/d3.js',
         'node_modules/angular-loading-bar/build/loading-bar.js',
         'js/cds/module.js',
@@ -86,7 +86,7 @@ js = NpmBundle(
         'ng-dialog': '~0.6.0',
         'clipboard': '~1.5.16',
         'ngclipboard': '~1.1.1',
-        'underscore': '~1.8.3',
+        'lodash': '~4.17.4',
         'angular-mass-autocomplete': '~0.5.0',
         'angular-local-storage': '~0.5.2',
     }
