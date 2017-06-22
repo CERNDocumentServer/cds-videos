@@ -462,31 +462,23 @@ def test_project_publish_with_workflow(
     events = get_deposit_events(deposit_id=video_1_depid)
     assert len(events) == 1
 
-    assert project.status == 'draft'
-    assert video_1.status == 'draft'
-    assert video_2.status == 'draft'
+    def check(project_status, video_1_status, video_2_status):
+        project = deposit_project_resolver(project_depid)
+        video_1 = deposit_video_resolver(video_1_depid)
+        video_2 = deposit_video_resolver(video_2_depid)
+        assert project.status == project_status
+        assert video_1.status == video_1_status
+        assert video_2.status == video_2_status
+
+    check('draft', 'draft', 'draft')
 
     video_2 = deposit_video_resolver(video_2_depid)
     video_2.publish()
+    check('draft', 'draft', 'published')
 
-    assert project.status == 'draft'
-    assert video_1.status == 'draft'
-    assert video_2.status == 'published'
-
-    video_1 = deposit_video_resolver(video_1_depid)
-    with pytest.raises(PIDInvalidAction):
-        video_1.publish()
-
-    assert project.status == 'draft'
-    assert video_1.status == 'draft'
-    assert video_2.status == 'published'
-
-    with pytest.raises(PIDInvalidAction):
-        project.publish()
-
-    assert project.status == 'draft'
-    assert video_1.status == 'draft'
-    assert video_2.status == 'published'
+    project = deposit_project_resolver(project_depid)
+    project.publish()
+    check('published', 'published', 'published')
 
 
 def test_project_record_schema(api_app, db, api_project):
