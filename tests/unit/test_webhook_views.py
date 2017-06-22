@@ -229,14 +229,17 @@ def check_video_transcode_restart(api_app, event_id, access_token,
                                   json_headers, data, video_1_id,
                                   video_1_depid, users):
     """Try to delete transcoded file via REST API."""
+    task_ids = [d['file_transcode']['id']
+                for d in data['global_status'][1]
+                if 'file_transcode' in d and
+                d['file_transcode']['status'] == 'SUCCESS']
     # RESTART FIRST TRANSCODED FILE
-    task_id = data['global_status'][1][1]['file_transcode']['id']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
-            task_id=task_id,
+            task_id=task_ids[0],
             access_token=access_token
         )
     with api_app.test_client() as client, \
@@ -263,8 +266,8 @@ def check_video_transcode_restart(api_app, event_id, access_token,
     # check task id is changed
     event = Event.query.first()
     new_task_id = event.response['global_status'][1][1]['file_transcode']['id']
-    assert task_id != new_task_id
-    old_result = AsyncResult(task_id)
+    assert task_ids[0] != new_task_id
+    old_result = AsyncResult(task_ids[0])
     new_result = AsyncResult(new_task_id)
     for key in ['tags', 'key', 'deposit_id', 'event_id', 'preset_quality']:
         assert old_result.result[
