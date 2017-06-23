@@ -537,13 +537,8 @@ class TranscodeVideoTask(AVCTask):
             ObjectVersionTag.create(obj, 'media_type', 'video')
             ObjectVersionTag.create(obj, 'context_type', 'subformat')
             preset_info = get_preset_info(aspect_ratio, preset_quality)
-            for key in ['video_bitrate', 'width', 'height']:
-                ObjectVersionTag.create(obj, key, preset_info[key])
-            # Add additional config parameters
-            ObjectVersionTag.create(
-                obj, 'smil', preset_info.get('smil', True))
-            ObjectVersionTag.create(
-                obj, 'download', preset_info.get('download', True))
+            for key, value in preset_info.items():
+                ObjectVersionTag.create(obj, key, value)
 
             # Information necessary for monitoring
             job_info = dict(
