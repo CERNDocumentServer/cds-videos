@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import json
+import pytest
 
 import mock
 from click.testing import CliRunner
@@ -129,6 +130,7 @@ def test_fixture_pages(app, script_info, db, client):
     assert about_response.status_code == 200
 
 
+@pytest.mark.skip(reason='To long due to file download from cernbox')
 def test_fixture_records(app, script_info, location, es):
     """Test load demo records."""
     # TODO: once we have a nice subset of test finish the test with more checks
