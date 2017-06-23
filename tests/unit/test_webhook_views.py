@@ -186,7 +186,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
         assert resp.status_code == 204
 
     assert ObjectVersion.query.count() == get_object_count() - 1
-    assert ObjectVersionTag.query.count() == get_tag_count() - 10
+    assert ObjectVersionTag.query.count() == get_tag_count() - 14
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -218,7 +218,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
         assert resp.status_code == 204
 
     assert ObjectVersion.query.count() == get_object_count() - 2
-    assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 10
+    assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 14
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)

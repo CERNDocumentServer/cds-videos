@@ -797,7 +797,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert 'extracted_metadata' in records[0].json['_deposit']
 
         assert ObjectVersion.query.count() == get_object_count() - i
-        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 10)
+        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 14)
 
     assert ObjectVersion.query.count() == get_object_count(transcode=False)
     assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
@@ -813,7 +813,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert ObjectVersion.query.count() == get_object_count(
             transcode=False) + i
         assert ObjectVersionTag.query.count() == get_tag_count(
-            transcode=False) + (i * 10)
+            transcode=False) + (i * 14)
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
