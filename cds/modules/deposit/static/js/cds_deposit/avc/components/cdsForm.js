@@ -183,11 +183,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     function(data, query) {
       var userInput = authorFromUser(query);
       var suggestions = data.data.map(function (author) {
-        var fullName = (author.lastname || '') + ', ' +
-                       (author.firstname || '');
-        var valueObj = {
-          name: fullName
-        };
+        var valueObj = {};
+
+        if (author.firstname) {
+          valueObj.name = (author.lastname || '') + ', ' +
+            (author.firstname || '');
+        } else {
+          valueObj.name = (author.name) || '';
+        }
 
         if (author.affiliation) {
           valueObj.affiliations = [author.affiliation];
