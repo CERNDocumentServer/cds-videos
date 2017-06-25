@@ -39,6 +39,10 @@
 .bg-g {
   background-color: $gray;
 }
+.bg-gl {
+  background-color: $bg-gray;
+}
+
 // Background white
 .bg-w {
   background-color: white;
@@ -84,4 +88,12 @@
 // Border grey
 .bc-g {
   border-color: $gray !important;
+}
+
+.bc-gl {
+  border-color: $bg-gray !important;
+}
+
+.bc-ccc {
+  border-color: #ccc !important;
 }

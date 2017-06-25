@@ -618,7 +618,7 @@ PREVIEWER_PREFERENCE = [
     'cds_deposit_video',
 ]
 # Licence key for THEO player
-THEO_LICENCE_KEY = 'CHANGE_ME'
+THEO_LICENCE_KEY = None
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cds/_definist_/smil:'
                       '{filepath}/playlist.m3u8')
