@@ -125,6 +125,82 @@ def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
     assert_preview(expected=success_list)
 
 
+@pytest.mark.parametrize(
+    'preview_func, publish, endpoint_template, ui_blueprint', [
+        ('preview_recid', True, '/record/{0}/preview/{1}', 'recid_preview'),
+        ('preview_recid_embed', True, '/record/{0}/embed/{1}', 'recid_embed'),
+        ('preview_depid', False, '/deposit/{0}/preview/video/{1}',
+         'video_preview'),
+    ])
+def test_preview_video_html5(previewer_app, es, db, cds_jsonresolver, users,
+                             location, deposit_metadata, video, preview_func,
+                             publish, endpoint_template, ui_blueprint):
+    """Test record video previewing."""
+    # Enable HTML5 player
+    previewer_app.config['THEO_LICENCE_KEY'] = None
+    project = new_project(previewer_app, es, cds_jsonresolver, users,
+                          location, db, deposit_metadata)
+
+    project, video_1, _ = project
+    basename = 'test'
+    filename_1 = '{}.mp4'.format(basename)
+    filename_2 = '{}.invalid'.format(basename)
+    deposit_filename = 'playlist.m3u8'
+    bucket_id = video_1['_buckets']['deposit']
+    preview_func = import_string(
+        'cds.modules.previewer.views.{0}'.format(preview_func))
+
+    # Create objects
+    obj = ObjectVersion.create(bucket=bucket_id, key=filename_1,
+                               stream=open(video, 'rb'))
+    ObjectVersionTag.create(obj, 'context_type', 'master')
+    ObjectVersionTag.create(obj, 'preview', True)
+    ObjectVersion.create(bucket=bucket_id, key=filename_2,
+                         stream=open(video, 'rb'))
+
+    success_list = [
+        '<video',
+    ]
+
+    if publish:
+        prepare_videos_for_publish([video_1])
+        video_1 = video_1.publish()
+        assert video_1.status == 'published'
+        pid, video_1 = video_1.fetch_published()
+    else:
+        assert video_1.status == 'draft'
+        pid = PersistentIdentifier.get('depid', video_1['_deposit']['id'])
+
+    def assert_preview(expected=None, exception=None, **query_params):
+        with previewer_app.test_request_context(query_string=query_params):
+            if exception is not None:
+                with pytest.raises(exception):
+                    preview_func(pid, video_1)
+            else:
+                if 'filename' in query_params:
+                    filename = query_params['filename']
+                    try:
+                        pid_value = pid.pid_value
+                    except AttributeError:
+                        pid_value = pid
+                    assert url_for(
+                        'invenio_records_ui.{0}'.format(ui_blueprint),
+                        pid_value=pid_value,
+                        filename=filename,
+                    ) == endpoint_template.format(pid_value, filename)
+                for exp in expected:
+                    assert exp in preview_func(pid, video_1)
+
+    # Non-existent filename
+    assert_preview(exception=NotFound, filename='non-existent')
+    # Invalid extension
+    assert_preview(expected=['Cannot preview file'], filename=filename_2)
+    # Specific filename
+    assert_preview(expected=success_list, filename=filename_1)
+    # No filename (falls back to file with preview tag)
+    assert_preview(expected=success_list)
+
+
 def test_legacy_embed(previewer_app, db, api_project, video):
     """Test backwards-compatibility with legacy embed URL for videos."""
     project, video_1, _ = api_project

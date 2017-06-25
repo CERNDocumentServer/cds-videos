@@ -11,8 +11,11 @@
     </ul>
   </div>
   <div class="text-right">
-    <a ng-click="technicalExpand=!technicalExpand">
-      <i class="fa fa-2x" ng-class="{'fa-angle-up': technicalExpand, 'fa-angle-down': !technicalExpand}"> </i>
+    <a class="f8 display-block" ng-click="technicalExpand=!technicalExpand">
+      <p class="mb-0">
+        <span ng-show="technicalExpand"><i class="fa f5 fa-angle-up"></i></span>
+        <span ng-show="!technicalExpand"><i class="fa f5 fa-angle-down"></i></span>
+      </p>
     </a>
   </div>
 </div>
