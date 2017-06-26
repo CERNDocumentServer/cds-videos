@@ -859,8 +859,8 @@ class Video(CDSDeposit):
         seconds = float(self['_deposit']['extracted_metadata']['duration'])
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
-        self['duration'] = '{0:02d}:{1:02d}:{2:06.3f}'.format(
-            int(hours), int(minutes), seconds)
+        self['duration'] = '{0:02d}:{1:02d}:{2:02d}'.format(
+            int(hours), int(minutes), int(seconds))
 
     def _create_tags(self):
         """Create additional tags."""

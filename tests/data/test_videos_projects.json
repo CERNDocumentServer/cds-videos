@@ -1,7 +1,7 @@
 [
   {
     "date": "2017-01-16",
-    "duration": "00:01:00.095",
+    "duration": "00:01:00",
     "description": {
       "value": "Video file"
     },
@@ -38,7 +38,7 @@
   },
   {
     "date": "2017-01-16",
-    "duration": "00:01:00.095",
+    "duration": "00:01:00",
     "description": {
       "value": "Different video file"
     },
@@ -76,7 +76,7 @@
   },
   {
     "date": "2017-01-16",
-    "duration": "00:01:00.095",
+    "duration": "00:01:00",
     "description": {
       "value": "Video file"
     },
