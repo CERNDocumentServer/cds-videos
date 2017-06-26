@@ -196,7 +196,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'title_en': u'My english title',
                         u'title_fr': u'My french title',
                         u'type': u'video',
-                        u'video_length': u'00:01:00.140',
+                        u'video_length': u'00:01:00',
                     }
                 }
             ]
@@ -245,7 +245,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'title_en': u'My english title',
                         u'title_fr': u'',
                         u'type': u'video',
-                        u'video_length': u'00:01:00.140',
+                        u'video_length': u'00:01:00',
                     }
                 }
             ]
@@ -255,7 +255,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
 
 def test_video_duration(app, video_published):
     """Validate calculated duration of video."""
-    assert re.match(r'^\d\d:\d\d:\d\d.\d\d\d$', video_published['duration'])
+    assert re.match(r'^\d\d:\d\d:\d\d$', video_published['duration'])
 
 
 def test_videos_search(api_app, indexed_videos):
