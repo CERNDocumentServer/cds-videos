@@ -48,7 +48,7 @@ from celery import states, chain, group
 from celery.result import AsyncResult
 from invenio_webhooks import current_webhooks
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.webhooks.status import _compute_status, collect_info, \
+from cds.modules.webhooks.status import collect_info, \
     get_tasks_status_by_task, get_deposit_events, iterate_events_results
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.status import CollectInfoTasks
@@ -929,24 +929,6 @@ def test_async_receiver_status_fail(api_app, access_token, u_email,
         assert data['name'] == receiver_id
         extra_info = json.loads(resp.headers['X-Hub-Info'])
         assert extra_info['id'] == ctx['myresult'].id
-
-
-def test_compute_status():
-    """Test compute status."""
-    assert states.FAILURE == _compute_status([
-        states.STARTED, states.RETRY, states.PENDING, states.FAILURE,
-        states.SUCCESS])
-    assert states.STARTED == _compute_status([
-        states.RETRY, states.PENDING, states.STARTED, states.SUCCESS])
-    assert states.RETRY == _compute_status([
-        states.RETRY, states.PENDING, states.SUCCESS, states.SUCCESS])
-    assert states.PENDING == _compute_status([
-        states.PENDING, states.PENDING, states.SUCCESS, states.SUCCESS])
-    assert states.SUCCESS == _compute_status([
-        states.SUCCESS, states.REVOKED, states.SUCCESS, states.SUCCESS])
-    assert states.SUCCESS == _compute_status([states.SUCCESS, states.SUCCESS])
-    assert states.REVOKED == _compute_status([states.REVOKED, states.REVOKED])
-    assert states.PENDING == _compute_status([None, None])
 
 
 def test_collect_info():

@@ -29,6 +29,7 @@ from __future__ import absolute_import
 import json
 import sqlalchemy
 
+from copy import deepcopy
 from celery import states
 
 from invenio_webhooks.models import Event
@@ -89,7 +90,7 @@ def _compute_status(statuses):
     """Compute minimum state."""
     if len(statuses) > 0 and all(status_to_check is None
                                  for status_to_check in statuses):
-        return states.PENDING
+        return None
     for status_to_check in [states.FAILURE, states.STARTED,
                             states.RETRY, states.PENDING]:
         if any(status == status_to_check for status in statuses):
@@ -152,11 +153,11 @@ class CollectStatusesByTask(object):
     def __init__(self, statuses):
         """Init status collection list."""
         self._statuses = {}
-        self._original = statuses
+        self._original = deepcopy(statuses)
 
     def __call__(self, task_name, result):
         """Update status collection."""
-        old_status = self._statuses.get(task_name)
+        old_status = self._statuses.get(task_name, None)
         # get new status from celery only if still exists on celery cache
         new_status = result.status \
             if result.result is not None else None
@@ -165,11 +166,11 @@ class CollectStatusesByTask(object):
     @property
     def statuses(self):
         """Get new status or original."""
-        from copy import deepcopy
         # take the calculated
-        statuses = deepcopy(self._statuses)
+        statuses = {key: value for key, value in self._statuses.items()
+                    if value is not None}
         # and add orignal value if there is no new value
-        keys = set(self._original) - set(self._statuses)
+        keys = set(self._original) - set(statuses)
         for key in keys:
             statuses[key] = self._original[key]
         return statuses
