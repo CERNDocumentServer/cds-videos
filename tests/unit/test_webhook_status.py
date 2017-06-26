@@ -33,7 +33,8 @@ from copy import deepcopy
 from flask import url_for
 from collections import namedtuple
 from cds.modules.webhooks.status import GetInfoByID, iterate_result, \
-    CollectStatusesByTask, merge_tasks_status
+    CollectStatusesByTask, merge_tasks_status, get_tasks_status_by_task, \
+    _compute_status
 from invenio_webhooks.models import Event
 from helpers import mock_current_user
 
@@ -104,12 +105,10 @@ def test_collect_statuses_by_task():
         'file_download': states.PENDING,
         'file_transcode': states.FAILURE,
     }
-    # simulate first call
+    # simulate db empty and celery tasks is cleanup
     coll = CollectStatusesByTask(statuses={})
     coll('file_download', AsyncResult(status=states.FAILURE, result=None))
-    assert coll.statuses == {
-        'file_download': states.PENDING,
-    }
+    assert coll.statuses == {}
 
     # simulate that we run the tasks and the result is:
     #    1 transcode fail + 1 transcode success = fail
@@ -119,7 +118,7 @@ def test_collect_statuses_by_task():
         'file_transcode': states.FAILURE,
     }
     # now we ask the current status:
-    coll = CollectStatusesByTask(statuses=db_status)
+    coll = CollectStatusesByTask(statuses=deepcopy(db_status))
     assert coll.statuses == db_status
     # we update it because the failing transcode is restarted
     coll('file_transcode', AsyncResult(status=states.STARTED, result={}))
@@ -144,6 +143,24 @@ def test_collect_statuses_by_task():
     }
 
 
+def test_get_tasks_status_by_task():
+    """Test get tasks status by task."""
+    # simulate a "celery cache empty" creating an empty result
+    AsyncResult = namedtuple('AsyncResult', ['result', 'status'])
+    lost_result = AsyncResult(None, states.PENDING)
+    # and: event -> receiver -> lost result
+    Event = namedtuple('Event', ['receiver'])
+    receiver = mock.MagicMock()
+    receiver.has_result = mock.MagicMock(return_value=True)
+    receiver._raw_info = mock.MagicMock(
+        return_value={'task_trascode': lost_result})
+    event = Event(receiver)
+    # build the current state if the previous value saved on db is SUCCESS
+    computed_states = get_tasks_status_by_task(
+        events=[event], statuses={'task_trascode': states.SUCCESS})
+    assert computed_states == {'task_trascode': states.SUCCESS}
+
+
 def test_merge_tasks_status():
     """Test merge tasks status."""
     statuses_1 = {
@@ -159,3 +176,21 @@ def test_merge_tasks_status():
         'task_metadata_extraction': states.PENDING,
         'task_frame_extraction': states.FAILURE,
     } == merge_tasks_status(statuses_1, statuses_2)
+
+
+def test_compute_status():
+    """Test compute status."""
+    assert states.FAILURE == _compute_status([
+        states.STARTED, states.RETRY, states.PENDING, states.FAILURE,
+        states.SUCCESS])
+    assert states.STARTED == _compute_status([
+        states.RETRY, states.PENDING, states.STARTED, states.SUCCESS])
+    assert states.RETRY == _compute_status([
+        states.RETRY, states.PENDING, states.SUCCESS, states.SUCCESS])
+    assert states.PENDING == _compute_status([
+        states.PENDING, states.PENDING, states.SUCCESS, states.SUCCESS])
+    assert states.SUCCESS == _compute_status([
+        states.SUCCESS, states.REVOKED, states.SUCCESS, states.SUCCESS])
+    assert states.SUCCESS == _compute_status([states.SUCCESS, states.SUCCESS])
+    assert states.REVOKED == _compute_status([states.REVOKED, states.REVOKED])
+    assert None is _compute_status([None, None])
