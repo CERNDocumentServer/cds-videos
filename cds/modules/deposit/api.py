@@ -33,10 +33,8 @@ import uuid
 from contextlib import contextmanager
 from copy import deepcopy
 from functools import partial, wraps
-from os.path import splitext
 
 import arrow
-from celery import states
 from flask import current_app
 from invenio_db import db
 from invenio_deposit.api import Deposit, has_status, preserve
@@ -52,8 +50,7 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
-                           CDSVideosFilesIterator)
+from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord)
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.validators import PartialDraft4Validator
@@ -863,10 +860,6 @@ class Video(CDSDeposit):
 
     def _create_tags(self):
         """Create additional tags."""
-        master = splitext(
-            CDSVideosFilesIterator.get_master_video_file(self).get('key', '')
-        )[0]
-
         # Subtitle file
         pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
         objs = [o for o in sorted_files_from_bucket(self._bucket)
