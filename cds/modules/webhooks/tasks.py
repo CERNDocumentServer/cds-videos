@@ -621,19 +621,15 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
     deposit_video = deposit_video_resolver(deposit_id)
     db.session.refresh(deposit_video.model)
     if deposit_video.is_published():
-        # update record videos list
-        _, record_video = deposit_video.fetch_published()
-        db.session.refresh(record_video.model)
-        record_video = deposit_video._sync_record_files(
-            record=record_video)
         try:
-            record_video.commit()
-        except ConcurrentModificationError as exc:
+            deposit_video = deposit_video.edit().publish().commit()
+            db.session.commit()
+        except Exception as exc:
             db.session.rollback()
             raise self.retry(
                 max_retries=max_retries, countdown=countdown, exc=exc)
-        db.session.commit()
         # index the record again
+        _, record_video = deposit_video.fetch_published()
         RecordIndexer().index(record_video)
 
 
