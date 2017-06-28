@@ -153,8 +153,10 @@ app.filter('trustHtml', ['$sce', function($sce) {
 
 // Group by key filter
 app.filter('groupBy', function() {
-  return _.memoize(function(items, field) {
-    return _.groupBy(items, field);
+  return _.memoize(function(items, field, defaultGroup) {
+    return _.groupBy(items, (e) => {
+      return _.get(e, field) || defaultGroup;
+    })
   });
 });
 
@@ -188,7 +190,7 @@ app.filter('wordsSplit', function () {
 
 app.filter('isPublic', function () {
   return function (record) {
-    return (!record['_access'] || !record['_access']['read']);
+    return (_.get(record, '_access') === undefined || _.get(record, '_access.read') === undefined);
   };
 });
 

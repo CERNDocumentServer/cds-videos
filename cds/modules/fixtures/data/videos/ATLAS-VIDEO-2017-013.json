@@ -284,6 +284,7 @@
               "video_bitrate": "386",
               "width": "432",
               "download": "false",
+              "type": "broadcaster",
               "smil": "true",
               "master": "ATLAS-MOVIE-2017-013-001.mov"
             }
@@ -298,6 +299,7 @@
               "video_bitrate": "836",
               "width": "640",
               "download": "false",
+              "type": "hd",
               "smil": "true",
               "master": "ATLAS-MOVIE-2017-013-001.mov"
             }
@@ -312,6 +314,7 @@
               "video_bitrate": "1436",
               "width": "854",
               "download": "false",
+              "type": "hd",
               "smil": "true",
               "master": "ATLAS-MOVIE-2017-013-001.mov"
             }
@@ -326,6 +329,7 @@
               "video_bitrate": "2672",
               "width": "1280",
               "download": "true",
+              "type": "hd",
               "smil": "true",
               "master": "ATLAS-MOVIE-2017-013-001.mov"
             }
@@ -340,6 +344,7 @@
               "video_bitrate": "5872",
               "width": "1920",
               "download": "true",
+              "type": "hd",
               "smil": "true",
               "master": "ATLAS-MOVIE-2017-013-001.mov"
             }
