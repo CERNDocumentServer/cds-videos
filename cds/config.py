@@ -393,18 +393,18 @@ DEPOSIT_PROJECT_FACETS = {
                 'terms': {'field': 'category.untouched'},
             },
             'transcode': {
-                'terms': {'field': '_deposit.state.file_transcode'},
+                'terms': {'field': '_cds.state.file_transcode'},
             },
             'frames': {
-                'terms': {'field': '_deposit.state.file_video_extract_frames'},
+                'terms': {'field': '_cds.state.file_video_extract_frames'},
             },
             'created_by': created_by_me_aggs,
         },
         'post_filters': {
             'status': terms_filter('_deposit.status'),
             'category': terms_filter('category.untouched'),
-            'transcode': terms_filter('_deposit.state.file_transcode'),
-            'frames': terms_filter('_deposit.state.file_video_extract_frames'),
+            'transcode': terms_filter('_cds.state.file_transcode'),
+            'frames': terms_filter('_cds.state.file_video_extract_frames'),
             'created_by': terms_filter('_deposit.created_by'),
         },
     },

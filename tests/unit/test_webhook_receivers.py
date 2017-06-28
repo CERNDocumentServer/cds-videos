@@ -183,7 +183,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
         ids = set(get_indexed_records_from_mock(mock_indexer))
         assert video_1_id in ids
         assert project_id in ids
-        assert deposit['_deposit']['state'] == {
+        assert deposit['_cds']['state'] == {
             u'file_download': states.SUCCESS}
 
     # Test cleaning!
@@ -273,8 +273,8 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         # Check metadata patch
         recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
         record = Record.get_record(recid)
-        assert 'extracted_metadata' in record['_deposit']
-        assert all([key in str(record['_deposit']['extracted_metadata'])
+        assert 'extracted_metadata' in record['_cds']
+        assert all([key in str(record['_cds']['extracted_metadata'])
                     for key in metadata_keys])
 
         # Check slaves
@@ -369,7 +369,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         ids = set(get_indexed_records_from_mock(mock_indexer))
         assert video_1_id in ids
         assert project_id in ids
-        assert deposit['_deposit']['state'] == {
+        assert deposit['_cds']['state'] == {
             'file_download': states.SUCCESS,
             'file_video_metadata_extraction': states.SUCCESS,
             'file_video_extract_frames': states.SUCCESS,
@@ -447,7 +447,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         events = get_deposit_events(record.json['_deposit']['id'])
 
         # check metadata patch are deleted
-        assert 'extracted_metadata' not in record.json['_deposit']
+        assert 'extracted_metadata' not in record.json['_cds']
 
         # check the corresponding Event persisted after cleaning
         assert len(events) == 1
@@ -525,8 +525,8 @@ def test_avc_workflow_receiver_local_file_pass(
         # Check metadata patch
         recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
         record = Record.get_record(recid)
-        assert 'extracted_metadata' in record['_deposit']
-        assert all([key in str(record['_deposit']['extracted_metadata'])
+        assert 'extracted_metadata' in record['_cds']
+        assert all([key in str(record['_cds']['extracted_metadata'])
                     for key in metadata_keys])
 
         # Check slaves
@@ -618,7 +618,7 @@ def test_avc_workflow_receiver_local_file_pass(
         ids = set(get_indexed_records_from_mock(mock_indexer))
         assert video_1_id in ids
         assert project_id in ids
-        assert deposit['_deposit']['state'] == {
+        assert deposit['_cds']['state'] == {
             'file_video_metadata_extraction': states.SUCCESS,
             'file_video_extract_frames': states.SUCCESS,
             'file_transcode': states.SUCCESS,
@@ -646,7 +646,7 @@ def test_avc_workflow_receiver_local_file_pass(
         events = get_deposit_events(record.json['_deposit']['id'])
 
         # check metadata patch are deleted
-        assert 'extracted_metadata' not in record.json['_deposit']
+        assert 'extracted_metadata' not in record.json['_cds']
 
         # check the corresponding Event persisted after cleaning
         assert len(events) == 1
@@ -690,7 +690,7 @@ def test_avc_workflow_receiver_clean_download(
     # check extracted metadata is there
     records = RecordMetadata.query.all()
     assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    assert 'extracted_metadata' in records[0].json['_cds']
 
     assert ObjectVersion.query.count() == get_object_count(download=False)
     assert ObjectVersionTag.query.count() == get_tag_count(download=False)
@@ -739,7 +739,7 @@ def test_avc_workflow_receiver_clean_video_frames(
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
     assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    assert 'extracted_metadata' in records[0].json['_cds']
 
     assert ObjectVersion.query.count() == get_object_count(frames=False)
     assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
@@ -794,7 +794,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         # check extracted metadata is there
         records = RecordMetadata.query.all()
         assert len(records) == 1
-        assert 'extracted_metadata' in records[0].json['_deposit']
+        assert 'extracted_metadata' in records[0].json['_cds']
 
         assert ObjectVersion.query.count() == get_object_count() - i
         assert ObjectVersionTag.query.count() == get_tag_count() - (i * 14)
@@ -855,7 +855,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
     assert len(records) == 1
-    assert 'extracted_metadata' not in records[0].json['_deposit']
+    assert 'extracted_metadata' not in records[0].json['_cds']
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
@@ -870,7 +870,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     # check extracted metadata is there
     records = RecordMetadata.query.all()
     assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_deposit']
+    assert 'extracted_metadata' in records[0].json['_cds']
 
 
 @pytest.mark.parametrize(

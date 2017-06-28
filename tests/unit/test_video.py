@@ -331,7 +331,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
                                     q='_deposit.id:{0}'.format(video_1_depid),
                                     access_token=access_token)
         data = search_record(url_video_deposit)
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
         assert file_dumps == data['_files']
         # -> check project
         url_project_deposit = url_for(
@@ -339,12 +339,12 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
             q='_deposit.id:{0}'.format(project_depid),
             access_token=access_token)
         search_record(url_project_deposit)
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
 
         # [[ EDIT VIDEO ]]
         video_edited = deepcopy(deposit)
         del video_edited['_files']
-        del video_edited['_deposit']['state']
+        del video_edited['_cds']['state']
         res = client.put(
             url_for('invenio_deposit_rest.video_item',
                     pid_value=video_1_depid),
@@ -355,7 +355,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         # check if the tasks states and files are inside elasticsearch
         # -> check video
         data = search_record(url_video_deposit)
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
         assert file_dumps == data['_files']
         # -> check project
         url_project_deposit = url_for(
@@ -363,7 +363,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
             q='_deposit.id:{0}'.format(project_depid),
             access_token=access_token)
         search_record(url_project_deposit)
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
 
         # [[ PUBLISH THE PROJECT ]]
         res = client.post(
@@ -381,7 +381,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         # check if the files are inside elasticsearch
         # -> check video deposit
         data = search_record(url_video_deposit)
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
         assert file_dumps == data['_files']
         # check video record
         pid, record = deposit.fetch_published()
@@ -455,7 +455,7 @@ def test_video_events_on_download_create(api_app, webhooks, db, api_project,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['file_download'] == states.SUCCESS
+        assert data['_cds']['state']['file_download'] == states.SUCCESS
         assert deposit._get_files_dump() == data['_files']
 
         # check the record is inside the indexer queue
@@ -519,8 +519,8 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_deposit']['state']['add'] == states.SUCCESS
-        assert data['_deposit']['state']['failing'] == states.FAILURE
+        assert data['_cds']['state']['add'] == states.SUCCESS
+        assert data['_cds']['state']['failing'] == states.FAILURE
 
         # run indexer
         RecordIndexer().process_bulk_queue()
@@ -532,7 +532,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
                           headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
-        status = data['hits']['hits'][0]['metadata']['_deposit']['state']
+        status = data['hits']['hits'][0]['metadata']['_cds']['state']
         assert status['add'] == states.SUCCESS
         assert status['failing'] == states.FAILURE
         # check elasticsearch project state
@@ -542,7 +542,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
                           headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
-        status = data['hits']['hits'][0]['metadata']['_deposit']['state']
+        status = data['hits']['hits'][0]['metadata']['_cds']['state']
         assert status['add'] == states.SUCCESS
         assert status['failing'] == states.FAILURE
 

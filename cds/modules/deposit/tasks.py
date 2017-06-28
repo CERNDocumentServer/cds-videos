@@ -73,8 +73,8 @@ def datacite_register(
 
 def _is_state_changed(record, deposit):
     """Return True if the celery tasks state changed."""
-    state_r = record['_deposit'].get('state', {})
-    state_d = deposit['_deposit'].get('state', {})
+    state_r = record['_cds'].get('state', {})
+    state_d = deposit['_cds'].get('state', {})
     return state_r != state_d
 
 

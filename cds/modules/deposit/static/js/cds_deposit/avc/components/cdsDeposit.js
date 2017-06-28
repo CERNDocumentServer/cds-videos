@@ -207,7 +207,7 @@ function cdsDepositCtrl(
           payload: { percentage: 0 },
         };
       });
-      _.forEach(that.record._deposit.state, function(value, state) {
+      _.forEach(that.record._cds.state, function(value, state) {
         that.stateReporter[state].status = value;
       });
       that.calculateCurrentState();
@@ -292,9 +292,9 @@ function cdsDepositCtrl(
       that.currentMasterFile = that.findMasterFile();
 
       // Check for new state
-      that.record._deposit.state = angular.merge(
-        that.record._deposit.state,
-        deposit._deposit.state || {}
+      that.record._cds.state = angular.merge(
+        that.record._cds.state,
+        deposit._cds.state || {}
       );
 
       if (_.isEmpty(that.previewer)) {
@@ -419,14 +419,14 @@ function cdsDepositCtrl(
       // The state has been changed update the current
       var stateCurrent = null;
       depositStates.forEach(function(task) {
-        var state = that.record._deposit.state[task];
+        var state = that.record._cds.state[task];
         if ((state == 'STARTED' || state == 'PENDING') && !stateCurrent) {
           stateCurrent = task;
         }
       });
       that.stateCurrent = stateCurrent;
       // Change the Deposit Status
-      var values = _.values(that.record._deposit.state);
+      var values = _.values(that.record._cds.state);
       if (!values.length) {
         that.depositStatusCurrent = null;
       } else if (values.includes('FAILURE')) {
@@ -479,7 +479,7 @@ function cdsDepositCtrl(
     });
 
     this.refreshStateQueue = function() {
-      $scope.$emit('cds.deposit.status.changed', that.id, that.record._deposit.state);
+      $scope.$emit('cds.deposit.status.changed', that.id, that.record._cds.state);
     };
 
     this.currentMasterFile = this.findMasterFile();
@@ -492,7 +492,7 @@ function cdsDepositCtrl(
     // Update subformat statuses
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 10000);
-    $scope.$watch('$ctrl.record._deposit.state', that.refreshStateQueue, true);
+    $scope.$watch('$ctrl.record._cds.state', that.refreshStateQueue, true);
     $scope.$watch('$ctrl.record._deposit.status', function() {
       if (CKEDITOR) {
         $timeout(function() {

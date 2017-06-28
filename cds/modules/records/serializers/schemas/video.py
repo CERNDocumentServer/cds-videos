@@ -20,7 +20,7 @@
 
 from __future__ import absolute_import
 
-from marshmallow import fields, post_load
+from marshmallow import fields, post_load, Schema
 from invenio_jsonschemas import current_jsonschemas
 
 from ....deposit.api import Video
@@ -33,12 +33,17 @@ from .common import \
 from .doi import DOI
 
 
+class _CDSSSchema(Schema):
+    """CDS private metadata."""
+
+    state = fields.Raw()
+    extracted_metadata = fields.Raw()
+
+
 class VideoDepositSchema(DepositSchema):
     """Project Deposit Schema."""
 
     id = fields.Str(required=True)
-    state = fields.Raw()
-    extracted_metadata = fields.Raw()
 
 
 class CopyrightSchema(StrictKeysSchema):
@@ -71,6 +76,7 @@ class VideoSchema(StrictKeysSchema):
     """Video schema."""
 
     _deposit = fields.Nested(VideoDepositSchema, required=True)
+    _cds = fields.Nested(_CDSSSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
     description = fields.Nested(DescriptionSchema, required=True)
     date = DateString(required=True)
