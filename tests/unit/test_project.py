@@ -456,8 +456,8 @@ def test_project_publish_with_workflow(
     # check tasks status is propagated to video and project
     video_1 = deposit_video_resolver(video_1_depid)
     expected = {u'add': u'SUCCESS', u'failing': u'FAILURE'}
-    assert video_1['_deposit']['state'] == expected
-    assert video_1.project['_deposit']['state'] == expected
+    assert video_1['_cds']['state'] == expected
+    assert video_1.project['_cds']['state'] == expected
 
     events = get_deposit_events(deposit_id=video_1_depid)
     assert len(events) == 1
@@ -493,7 +493,7 @@ def test_project_deposit(es, location, deposit_metadata):
     id_ = deposit.id
     db.session.expire_all()
     deposit = Project.get_record(id_)
-    assert deposit['_deposit']['state'] == {}
+    assert deposit['_cds']['state'] == {}
     assert deposit_project_resolver(deposit['_deposit']['id']) is not None
     assert '_buckets' in deposit
 

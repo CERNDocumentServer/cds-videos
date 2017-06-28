@@ -252,7 +252,7 @@ class ExtractMetadataTask(AVCTask):
             'depid', deposit_id).object_uuid)
         patch = [{
             'op': 'remove',
-            'path': '/_deposit/extracted_metadata',
+            'path': '/_cds/extracted_metadata',
         }]
         validator = 'cds.modules.records.validators.PartialDraft4Validator'
         try:
@@ -273,7 +273,7 @@ class ExtractMetadataTask(AVCTask):
 
         All technical metadata, i.e. bitrate, will be translated into
         ``ObjectVersionTags``, plus all the metadata extracted will be
-        store under ``_deposit`` as ``extracted_metadata``.
+        store under ``_cds`` as ``extracted_metadata``.
 
         :param self: reference to instance of task base class
         :param uri: URL of the file to extract metadata from.
@@ -305,7 +305,7 @@ class ExtractMetadataTask(AVCTask):
         # Insert metadata into deposit's metadata
         patch = [{
             'op': 'add',
-            'path': '/_deposit/extracted_metadata',
+            'path': '/_cds/extracted_metadata',
             'value': extracted_dict
         }]
         validator = 'cds.modules.records.validators.PartialDraft4Validator'
@@ -663,13 +663,13 @@ def update_record(self, recid, patch, validator=None,
 
 def get_patch_tasks_status(deposit):
     """Get the patch to apply to update record tasks status."""
-    old_status = deposit['_deposit']['state']
+    old_status = deposit['_cds']['state']
     new_status = deposit._current_tasks_status()
     # create tasks status patch
     patches = jsonpatch.make_patch(old_status, new_status).patch
     # make it suitable for the deposit
     for patch in patches:
-        patch['path'] = '/_deposit/state{0}'.format(patch['path'])
+        patch['path'] = '/_cds/state{0}'.format(patch['path'])
     return patches
 
 

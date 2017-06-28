@@ -355,7 +355,7 @@ function cdsDepositsCtrl(
 
   var checkStatus = function(task, status) {
     return function(child) {
-      return child._deposit.state[task] == status;
+      return child._cds.state[task] == status;
     };
   };
 

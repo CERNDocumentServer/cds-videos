@@ -214,8 +214,16 @@
             },
             "created_by": {
               "type": "integer"
-            },
+            }
+          }
+        },
+        "_cds": {
+          "type": "object",
+          "properties": {
             "extracted_metadata": {
+              "type": "object"
+            },
+            "state": {
               "type": "object"
             }
           }

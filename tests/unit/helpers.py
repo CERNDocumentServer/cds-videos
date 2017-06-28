@@ -338,15 +338,15 @@ def prepare_videos_for_publish(videos):
     )
     for video in videos:
         # Inline update
-        if '_deposit' not in video:
-            video['_deposit'] = {}
-        video['_deposit']['extracted_metadata'] = metadata_dict
+        if '_cds' not in video:
+            video['_cds'] = {}
+        video['_cds']['extracted_metadata'] = metadata_dict
         # DB update
         update_record(
             recid=video.id,
             patch=[{
                 'op': 'add',
-                'path': '/_deposit/extracted_metadata',
+                'path': '/_cds/extracted_metadata',
                 'value': metadata_dict,
             }],
             validator='cds.modules.records.validators.PartialDraft4Validator'
