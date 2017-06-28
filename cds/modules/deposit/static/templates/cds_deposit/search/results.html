@@ -1,5 +1,5 @@
 <div ng-if="vm.invenioSearchResults.hits.total != 0">
-  <ul class="cds-deposit-media-list media-list" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index" ng-init="state = (record.metadata._deposit.state | overallState)">
+  <ul class="cds-deposit-media-list media-list" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index" ng-init="state = (record.metadata._cds.state | overallState)">
     <li id="depoost_{{ record.metadata._deposit.id  }}" class="media mb-10 pa-5 cds-deposit-media-list-border"
         ng-class="{'cds-tasks-error': state === 'DEPOSIT_STATE/FAILURE' && record.metadata._deposit.status === 'draft',
                'cds-tasks-success': state === 'DEPOSIT_STATE/SUCCESS'&& record.metadata._deposit.status === 'draft',
@@ -29,7 +29,7 @@
            </div>
            <div class="col-md-3">
              <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
-               <li class="small" ng-repeat="(task, status) in (record.metadata._deposit.state | orderTasks)">
+               <li class="small" ng-repeat="(task, status) in (record.metadata._cds.state | orderTasks)">
                  <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
                </li>
              </ul>

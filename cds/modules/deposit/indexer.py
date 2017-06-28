@@ -41,5 +41,5 @@ def cdsdeposit_indexer_receiver(
     if record['$schema'] == video_schema:
         deposit = Video.get_record(record.id)
     if record['$schema'] in [project_schema, video_schema]:
-        json['_deposit']['state'] = deposit['_deposit']['state']
+        json['_cds']['state'] = deposit['_cds']['state']
         json['_files'] = deposit['_files']

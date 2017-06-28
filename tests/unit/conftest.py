@@ -407,7 +407,8 @@ def deposit_metadata():
                 "name": "Do, John",
                 "role": "Camera operator"
             }
-        ]
+        ],
+        '_cds': {},
     }
 
 

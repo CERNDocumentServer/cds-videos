@@ -78,7 +78,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
     # check SSE
     assert mock_sse.called is True
@@ -190,7 +190,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
     # check bucket size
     bucket = Bucket.query.first()
@@ -222,7 +222,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
 
 def check_video_transcode_restart(api_app, event_id, access_token,
@@ -261,7 +261,7 @@ def check_video_transcode_restart(api_app, event_id, access_token,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
     # check task id is changed
     event = Event.query.first()
@@ -303,7 +303,7 @@ def check_video_frames(api_app, event_id, access_token,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
 
 def check_video_download(api_app, event_id, access_token,
@@ -335,7 +335,7 @@ def check_video_download(api_app, event_id, access_token,
 
     # check extracted metadata is not there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
 
 def check_video_metadata_extraction(api_app, event_id, access_token,
@@ -369,7 +369,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
 
     # check extracted metadata is not there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' not in record.json['_deposit']
+    assert 'extracted_metadata' not in record.json['_cds']
 
 
 @pytest.mark.parametrize('checker', [
@@ -415,7 +415,7 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
-    assert 'extracted_metadata' in record.json['_deposit']
+    assert 'extracted_metadata' in record.json['_cds']
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()

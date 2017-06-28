@@ -61,6 +61,7 @@ from .errors import DiscardConflict
 from .resolver import get_video_pid
 
 PRESERVE_FIELDS = (
+    '_cds',
     '_deposit',
     '_buckets',
     '_files',
@@ -151,7 +152,8 @@ class CDSDeposit(Deposit):
         bucket = Bucket.create(location=Location.get_by_name(
             kwargs.get('bucket_location', 'default')))
         data['_buckets'] = {'deposit': str(bucket.id)}
-        data['_deposit']['state'] = {}
+        data.setdefault('_cds', {})
+        data['_cds'].setdefault('state', {})
         data.setdefault('keywords', [])
         data.setdefault('license', [{
             'license': 'CERN',
@@ -243,8 +245,8 @@ class CDSDeposit(Deposit):
 
     def _update_tasks_status(self):
         """Update tasks status."""
-        if '_deposit' in self:
-            self['_deposit']['state'] = self._current_tasks_status()
+        if '_cds' in self:
+            self['_cds']['state'] = self._current_tasks_status()
 
     def _current_tasks_status(self):
         """."""
@@ -619,7 +621,7 @@ class Project(CDSDeposit):
         status = {}
         for video in self.videos:
             status = merge_tasks_status(
-                status, video['_deposit'].get('state', {}))
+                status, video['_cds'].get('state', {}))
         return status
 
     @classmethod
@@ -848,11 +850,11 @@ class Video(CDSDeposit):
         """Return up-to-date tasks status."""
         return get_tasks_status_by_task(
             get_deposit_events(self['_deposit']['id']),
-            statuses=deepcopy(self['_deposit'].get('state', {})))
+            statuses=deepcopy(self['_cds'].get('state', {})))
 
     def generate_duration(self):
         """Generate human-readable duration field."""
-        seconds = float(self['_deposit']['extracted_metadata']['duration'])
+        seconds = float(self['_cds']['extracted_metadata']['duration'])
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
         self['duration'] = '{0:02d}:{1:02d}:{2:02d}'.format(

@@ -169,8 +169,8 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
 
     # Check that deposit's metadata got updated
     record = Record.get_record(recid)
-    assert 'extracted_metadata' in record['_deposit']
-    assert record['_deposit']['extracted_metadata']
+    assert 'extracted_metadata' in record['_cds']
+    assert record['_cds']['extracted_metadata']
 
     # Check that ObjectVersionTags were added
     tags = ObjectVersion.query.first().get_tags()
@@ -190,7 +190,7 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
 
     # Check that deposit's metadata got reverted
     record = Record.get_record(recid)
-    assert 'extracted_metadata' not in record['_deposit']
+    assert 'extracted_metadata' not in record['_cds']
 
     # Check that ObjectVersionTags were removed
     tags = ObjectVersion.query.first().get_tags()
@@ -200,7 +200,7 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     ExtractMetadataTask().clean(deposit_id=dep_id,
                                 version_id=obj_id)
     record = Record.get_record(recid)
-    assert 'extracted_metadata' not in record['_deposit']
+    assert 'extracted_metadata' not in record['_cds']
 
 
 def test_video_extract_frames(app, db, bucket, video):

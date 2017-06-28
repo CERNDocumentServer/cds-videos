@@ -94,12 +94,12 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
     var promise = $q.defer();
     var args = that.prepareUpload(upload);
     var deposit = that.cdsDepositCtrl;
-    deposit.record._deposit.state.file_upload = 'STARTED';
+    deposit.record._cds.state.file_upload = 'STARTED';
     $scope.$emit('cds.deposit.status.changed', deposit.id, deposit.stateQueue);
     Upload.http(args)
       .then(
         function success(response) {
-          deposit.record._deposit.state.file_upload = 'SUCCESS';
+          deposit.record._cds.state.file_upload = 'SUCCESS';
           $scope.$emit('cds.deposit.status.changed', deposit.id,
                        deposit.stateQueue);
           _success(
