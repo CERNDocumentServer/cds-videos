@@ -13,7 +13,10 @@
         "vmo-restictedrights@cern.ch"
       ]
     },
-    "_record_type": ["PROJECT"]
+    "_record_type": ["PROJECT"],
+    "_access": {
+      "read": ["vmo-restictedrights@cern.ch"]
+    }
   },
   {
     "name": "ATLAS",
@@ -22,7 +25,10 @@
       "public": true,
       "restricted": ["atlas-readaccess-active-members@cern.ch"]
     },
-    "_record_type":  ["PROJECT"]
+    "_record_type":  ["PROJECT"],
+    "_access": {
+      "read": ["atlas-outreach-cds-access@cern.ch"]
+    }
   },
   {
     "name": "CMS",
@@ -31,7 +37,10 @@
       "public": true,
       "restricted": []
     },
-    "_record_type":  ["PROJECT"]
+    "_record_type":  ["PROJECT"],
+    "_access": {
+      "read": ["cms-outreach-cds-access@cern.ch"]
+    }
   },
   {
     "name": "OPEN",
