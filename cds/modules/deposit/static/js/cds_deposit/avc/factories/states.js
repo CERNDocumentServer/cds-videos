@@ -68,7 +68,15 @@ function cdsAPI($q, $http) {
   }
 
   function resolveJSON(url) {
-    return $http.get(url);
+    return $http({
+      url: url,
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': 0
+      }
+    });
   }
 
   return {
