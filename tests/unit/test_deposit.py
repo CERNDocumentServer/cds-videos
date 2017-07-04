@@ -39,6 +39,8 @@ from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.tasks import preserve_celery_states_on_db
 from cds.modules.deposit.views import to_links_js
 
+from helpers import check_deposit_record_files
+
 
 def test_deposit_link_factory_has_bucket(
         api_app, db, es, users, location, cds_jsonresolver,
@@ -174,3 +176,68 @@ def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
         indexed.append(arg)
     assert len(indexed) == 1
     assert indexed[0]['_deposit']['id'] == vid1
+
+
+def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata):
+    """Test deposit prepare edit."""
+    # create new deposit
+    project_deposit_metadata['report_number'] = {'report_number': '123'}
+    deposit = CDSDeposit.create(project_deposit_metadata,
+                                bucket_location=location.name)
+    assert deposit.is_published() is False
+    assert deposit.has_record() is False
+    # insert objects inside the deposit
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_1"
+    ).set_location("mylocation1", 1, "mychecksum1")
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_2"
+    ).set_location("mylocation2", 1, "mychecksum2")
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_3"
+    ).set_location("mylocation3", 1, "mychecksum3")
+    obj_4 = ObjectVersion.create(
+        deposit.files.bucket, "obj_4"
+    ).set_location("mylocation4", 1, "mychecksum4")
+
+    # publish
+    deposit = deposit.publish()
+    _, record = deposit.fetch_published()
+    assert deposit.is_published() is True
+    assert deposit.has_record() is True
+    # check record bucket is locked
+    files = ['obj_1', 'obj_2', 'obj_3', 'obj_4']
+    check_deposit_record_files(deposit, files, record, files)
+
+    # add a new object
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_new"
+    ).set_location("mylocation_new", 1, "mychecksum")
+    # modify obj_1
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_new"
+    ).set_location("mylocation2.1", 1, "mychecksum2.1")
+    # delete obj_3
+    ObjectVersion.delete(
+        deposit.files.bucket, "obj_3")
+    # remove obj_4
+    obj_4.remove()
+
+    # check deposit and record
+    edited_files = ['obj_1', 'obj_2', 'obj_3', 'obj_new']
+    check_deposit_record_files(deposit, edited_files, record, files)
+
+    # edit
+    deposit = deposit.edit()
+    assert deposit.is_published() is False
+    assert deposit.has_record() is True
+    # check the situation
+    check_deposit_record_files(deposit, edited_files, record, files)
+
+    # publish again
+    deposit = deposit.publish()
+    assert deposit.is_published() is True
+    assert deposit.has_record() is True
+    # check that record and deposit are sync
+    re_edited_files = edited_files + ['obj_4']
+    check_deposit_record_files(deposit, edited_files, record, re_edited_files)
