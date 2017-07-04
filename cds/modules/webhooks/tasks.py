@@ -622,7 +622,12 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
     db.session.refresh(deposit_video.model)
     if deposit_video.is_published():
         try:
+            # sync deposit files <--> record files
             deposit_video = deposit_video.edit().publish().commit()
+            record_pid, record = deposit_video.fetch_published()
+            # save changes
+            deposit_video.commit()
+            record.commit()
             db.session.commit()
         except Exception as exc:
             db.session.rollback()
@@ -705,16 +710,7 @@ def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
 
 def dispose_object_version(object_version):
     """Clean up resources related to an ObjectVersion."""
-    # TODO move the "file removal" in a separate function to be able to
-    # remove the file from download without remove the object version.
-    # See: AVC workflow download task (clean)
     if object_version:
         object_version = as_object_version(object_version)
-        file_id = object_version.file_id
+        # remove the object version
         object_version.remove()
-        if file_id:
-            # TODO add a "force" option on remove_file_data() task?
-            #  remove_file_data.s(file_id, silent=False).apply_async()
-            f = FileInstance.get(file_id)
-            f.delete()
-            f.storage().delete()

@@ -45,9 +45,12 @@ from cds_sorenson.error import InvalidResolutionError
 from cds.modules.webhooks.tasks import (DownloadTask,
                                         update_record, ExtractFramesTask,
                                         ExtractMetadataTask,
-                                        TranscodeVideoTask)
+                                        TranscodeVideoTask,
+                                        sync_records_with_deposit_files)
+from cds.modules.deposit.api import deposit_video_resolver, Video, Project
 
-from helpers import add_video_tags, get_object_count, transcode_task
+from helpers import add_video_tags, get_object_count, transcode_task, \
+    check_deposit_record_files, prepare_videos_for_publish
 
 
 def test_download_to_object_version(db, bucket):
@@ -83,7 +86,7 @@ def test_download_to_object_version(db, bucket):
         DownloadTask().clean(version_id=obj.version_id)
 
         assert ObjectVersion.query.count() == 0
-        assert FileInstance.query.count() == 0
+        assert FileInstance.query.count() == 1
         assert Bucket.get(bid).size == 0
 
 
@@ -452,3 +455,68 @@ def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
         ObjectVersion.version_id != obj_id).first().get_tags()
     # Make sure the download tag is set
     assert tags['download'] == is_inside
+
+
+def test_sync_records_with_deposits(app, db, location,
+                                    project_deposit_metadata,
+                                    video_deposit_metadata):
+    """Test sync records with deposits task."""
+    # create a project
+    project = Project.create(project_deposit_metadata)
+    project_deposit_metadata['report_number'] = {'report_number': '123'}
+    # create new video
+    video_deposit_metadata['_project_id'] = project['_deposit']['id']
+    deposit = Video.create(video_deposit_metadata)
+    depid = deposit['_deposit']['id']
+
+    # insert objects inside the deposit
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_1"
+    ).set_location("mylocation1", 1, "mychecksum1")
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_2"
+    ).set_location("mylocation2", 1, "mychecksum2")
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_3"
+    ).set_location("mylocation3", 1, "mychecksum3")
+    obj_4 = ObjectVersion.create(
+        deposit.files.bucket, "obj_4"
+    ).set_location("mylocation4", 1, "mychecksum4")
+
+    # publish
+    prepare_videos_for_publish([deposit])
+    deposit = deposit.publish()
+    _, record = deposit.fetch_published()
+    assert deposit.is_published() is True
+
+    # add a new object
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_new"
+    ).set_location("mylocation_new", 1, "mychecksum")
+    # modify obj_1
+    ObjectVersion.create(
+        deposit.files.bucket, "obj_new"
+    ).set_location("mylocation2.1", 1, "mychecksum2.1")
+    # delete obj_3
+    ObjectVersion.delete(
+        deposit.files.bucket, "obj_3")
+    # remove obj_4
+    obj_4.remove()
+
+    # check video and record
+    files = ['obj_1', 'obj_2', 'obj_3', 'obj_4']
+    edited_files = ['obj_1', 'obj_2', 'obj_3', 'obj_new']
+    check_deposit_record_files(deposit, edited_files, record, files)
+
+    # try to sync deposit and record
+    sync_records_with_deposit_files.s(deposit_id=depid).apply_async()
+
+    # get deposit and record
+    deposit = deposit_video_resolver(depid)
+    _, record = deposit.fetch_published()
+    assert deposit.is_published() is True
+
+    # check that record and deposit are sync
+    re_edited_files = edited_files + ['obj_4']
+    check_deposit_record_files(deposit, edited_files, record,
+                               re_edited_files)

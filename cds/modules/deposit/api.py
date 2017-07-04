@@ -291,22 +291,22 @@ class CDSDeposit(Deposit):
             lambda x: x['$ref'] != ref, self['keywords']
         ))
 
-    def is_published(self):
-        """Check if deposit is published."""
+    def has_record(self):
+        """Check if deposit is published at least one time."""
         return self['_deposit'].get('pid') is not None
+
+    def is_published(self):
+        """Check if deposit is currently published."""
+        return self['_deposit']['status'] == 'published'
 
     def has_minted_doi(self):
         """Check if deposit has a minted DOI."""
-        return is_local_doi(self['doi']) if self.is_published() else False
+        return is_local_doi(self['doi']) if self.has_record() else False
 
     def _prepare_edit(self, record):
         """Unlock bucket after edit."""
         data = super(CDSDeposit, self)._prepare_edit(record=record)
-        if record.files:
-            snapshot = record.files.bucket.snapshot()
-            self.files.bucket = snapshot
-            self.files.bucket.locked = False
-            db.session.merge(self.files.bucket)
+        # TODO when you edit we are starting always from the deposit
         return data
 
     def _publish_edited(self):
@@ -333,7 +333,8 @@ class CDSDeposit(Deposit):
         snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=snapshot)
         old_to_new_version = {
             str(self.files[obj.key]['version_id']): str(obj.version_id)
-            for obj in snapshot_obj_list if 'master' not in obj.get_tags()}
+            for obj in snapshot_obj_list
+            if 'master' not in obj.get_tags() and obj.key in self.files}
         # list of tags with 'master' key
         slave_tags = [tag for obj in snapshot_obj_list for tag in obj.tags
                       if tag.key == 'master']

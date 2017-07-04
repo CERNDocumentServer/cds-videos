@@ -3,6 +3,17 @@
     "video-v1.0.0": {
       "date_detection": true,
       "properties": {
+        "report_number": {
+          "properties": {
+            "_report_number": {
+              "type": "string"
+            },
+            "report_number": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "_project_id":{
               "type": "string"
         },
