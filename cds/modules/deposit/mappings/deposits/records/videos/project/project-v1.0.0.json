@@ -3,6 +3,17 @@
     "project-v1.0.0": {
       "numeric_detection": true,
       "properties": {
+        "report_number": {
+          "properties": {
+            "_report_number": {
+              "type": "string"
+            },
+            "report_number": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "_updated": {
           "type": "date"
         },
