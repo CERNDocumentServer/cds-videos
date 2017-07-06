@@ -210,7 +210,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         10 if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
         # count the presets with width x height < 640x320 (video resolution)
-        ((len(get_presets_applied())) * 14) if transcode else 0,
+        ((len(get_presets_applied())) * 14) - 2 if transcode else 0,
     ])
 
 

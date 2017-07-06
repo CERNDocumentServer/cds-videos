@@ -406,7 +406,7 @@ def test_transcode_ignore_exception_if_invalid(db, bucket):
 
 
 @pytest.mark.parametrize('preset, is_inside', [
-    ('1080ph265', 'false'), ('240p', 'true')
+    ('1080ph265', None), ('240p', 'true')
 ])
 def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     """Test that smil tags are generated correctly."""
@@ -428,11 +428,11 @@ def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     tags = ObjectVersion.query.filter(
         ObjectVersion.version_id != obj_id).first().get_tags()
     # Make sure the smil tag is set
-    assert tags['smil'] == is_inside
+    assert tags.get('smil') == is_inside
 
 
 @pytest.mark.parametrize('preset, is_inside', [
-    ('1080ph265', 'true'), ('240p', 'false')
+    ('1080ph265', 'true'), ('240p', None)
 ])
 def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     """Test that download tags are generated correctly."""
@@ -454,7 +454,7 @@ def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     tags = ObjectVersion.query.filter(
         ObjectVersion.version_id != obj_id).first().get_tags()
     # Make sure the download tag is set
-    assert tags['download'] == is_inside
+    assert tags.get('download') == is_inside
 
 
 def test_sync_records_with_deposits(app, db, location,
