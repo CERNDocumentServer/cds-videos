@@ -154,8 +154,17 @@ app.filter('trustHtml', ['$sce', function($sce) {
 // Group by key filter
 app.filter('groupBy', function() {
   return _.memoize(function(items, field, defaultGroup) {
-    return _.groupBy(items, (e) => {
+    return _.groupBy(items, function(e) {
       return _.get(e, field) || defaultGroup;
+    })
+  });
+});
+
+// Downloadable files - files for download and files for additonal
+app.filter('groupDownloadable', function() {
+  return _.memoize(function(items, field, defaultGroup) {
+    return _.groupBy(items, function(e) {
+      return _.get(e, 'tags.download')  === 'true' ?  'download' : 'additional';
     })
   });
 });
