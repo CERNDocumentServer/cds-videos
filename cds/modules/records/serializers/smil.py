@@ -73,7 +73,7 @@ class Smil(object):
             tags = video['tags']
             # If the 'smil' config variable is False,
             # don't add this video to the SMIL file
-            if tags.get('smil', True):
+            if tags.get('smil', False):
                 yield dict(
                     src=get_relative_path(video['version_id']),
                     width=tags['width'],
