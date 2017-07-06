@@ -529,6 +529,7 @@ def video_record_metadata(db, project_published, extra_metadata):
                             preset_quality='{}p'.format(qualities[i]),
                             width=1000,
                             height=1000,
+                            smil=True,
                             video_bitrate=123456, ),
                         version_id=slave_id,)
                     for i, slave_id in enumerate(slave_ids)

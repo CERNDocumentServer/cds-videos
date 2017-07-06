@@ -230,11 +230,14 @@ def test_smil_generation(previewer_app, db, api_project, video):
         ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
         return slave
 
-    def create_video_tags(obj, context_type, bitrate=None):
+    def create_video_tags(obj, context_type, bitrate=None, smil=True):
         """Create video tags."""
         tags = [('width', 1000), ('height', 1000),
                 ('bit_rate', 123456), ('video_bitrate', bitrate or 123456),
-                ('media_type', 'video'), ('context_type', context_type)]
+                ('media_type', 'video'), ('context_type', context_type), ]
+        # Append smil tag
+        if smil:
+            tags.append(('smil', True))
         [ObjectVersionTag.create(obj, key, val) for key, val in tags]
 
     project, video_1, _ = api_project
@@ -251,12 +254,10 @@ def test_smil_generation(previewer_app, db, api_project, video):
 
     # Create one slave that shouldn't be added to the SMIL file
     no_smil_slave = create_slave(key='test_no_smil.mp4')
-    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876)
-    ObjectVersionTag.create(no_smil_slave, 'smil', False)
+    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876, smil=False)
     # and one that should be added to the SMIL file
     yes_smil_slave = create_slave(key='test_no_smil.mp4')
     create_video_tags(yes_smil_slave, context_type='subformat', bitrate=7654)
-    ObjectVersionTag.create(yes_smil_slave, 'smil', True)
 
     # publish video
     prepare_videos_for_publish([video_1])

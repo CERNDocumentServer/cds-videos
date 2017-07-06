@@ -683,7 +683,6 @@ def test_avc_workflow_receiver_clean_download(
         assert resp.status_code == 201
 
     assert ObjectVersionTag.query.count() == get_tag_count()
-
     event = Event.query.first()
     event.receiver.clean_task(event=event, task_name='file_download')
 
@@ -797,7 +796,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert 'extracted_metadata' in records[0].json['_cds']
 
         assert ObjectVersion.query.count() == get_object_count() - i
-        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 14)
+        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 13)
 
     assert ObjectVersion.query.count() == get_object_count(transcode=False)
     assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
@@ -813,7 +812,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert ObjectVersion.query.count() == get_object_count(
             transcode=False) + i
         assert ObjectVersionTag.query.count() == get_tag_count(
-            transcode=False) + (i * 14)
+            transcode=False) + (i * 13)
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
