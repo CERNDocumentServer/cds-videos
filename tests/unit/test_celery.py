@@ -28,6 +28,8 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
+from celery.schedules import crontab
+
 
 # FIXME see cds#618 comments
 @pytest.mark.skip(reason='see cds#618 comments')
@@ -37,3 +39,14 @@ def test_celery():
     celery.loader.import_default_modules()
     assert 'invenio_mail.tasks.send_email' in celery.tasks
     assert 'invenio_records.tasks.api.create_record' in celery.tasks
+
+
+def test_celery_beat(app):
+    """Test celery beat."""
+    beats = [task['schedule']
+             for task in app.config['CELERYBEAT_SCHEDULE'].values()
+             if isinstance(task['schedule'], crontab)]
+    assert len(beats) == 3
+    for beat in beats:
+        [hour] = beat.hour
+        assert hour < 5

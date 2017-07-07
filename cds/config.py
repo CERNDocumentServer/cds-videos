@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import os
 from datetime import timedelta
 
+from celery.schedules import crontab
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
@@ -87,15 +88,15 @@ CELERYBEAT_SCHEDULE = {
     },
     'keywords': {
         'task': 'cds.modules.records.tasks.keywords_harvesting',
-        'schedule': timedelta(days=1),
+        'schedule': crontab(minute=10, hour=0),
     },
     'sessions': {
         'task': 'invenio_accounts.tasks.clean_session_table',
-        'schedule': timedelta(days=1),
+        'schedule': crontab(minute=0, hour=0),
     },
     'tasks_status': {
         'task': 'cds.modules.deposit.tasks.preserve_celery_states_on_db',
-        'schedule': timedelta(days=1),
+        'schedule': crontab(minute=5, hour=0),
     },
 }
 
