@@ -108,14 +108,7 @@ class CDSDeposit(Deposit):
     @property
     def _bucket(self):
         """Get the bucket object."""
-        try:
-            return as_bucket(self['_buckets']['deposit'])
-        except KeyError:
-            pass  # we will look into the db for it
-        records_buckets = RecordsBuckets.query.filter_by(
-            record_id=self.id).first()
-        if records_buckets:
-            return records_buckets.bucket
+        return as_bucket(self['_buckets']['deposit'])
 
     def _get_files_dump(self):
         """Get files without create the record_bucket."""
@@ -677,10 +670,7 @@ class Project(CDSDeposit):
             # sync access rights
             video['_access'] = deepcopy(project_access)
             # sync owner
-            try:
-                video['_deposit']['created_by'] = project_created_by
-            except KeyError:
-                pass
+            video['_deposit']['created_by'] = project_created_by
         return changed
 
 
