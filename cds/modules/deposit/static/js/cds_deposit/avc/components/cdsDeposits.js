@@ -234,7 +234,9 @@ function cdsDepositsCtrl(
       var uploadedVideos = that.master.metadata.videos
         .map(function(deposit) {
           if (deposit._files && deposit._files.length > 0) {
-            return deposit._files[0].key;
+            // Find the master
+            var _f = _.find(deposit._files, {'context_type': 'master'});
+            return (!_.isEmpty(_f)) ? _f.key : undefined;
           }
         })
         .filter(function(key) {
@@ -244,7 +246,7 @@ function cdsDepositsCtrl(
         return _files.videos[name].key;
       });
       that.duplicateVideos = _.intersection(videoKeys, uploadedVideos);
-      _files.videos = _.omit(_files.videos, function (val) {
+      _files.videos = _.omitBy(_files.videos, function (val) {
         return that.duplicateVideos.includes(val.key)
       });
       // for each files create child
