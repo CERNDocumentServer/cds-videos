@@ -13,7 +13,8 @@ function cdsDepositCtrl(
   urlBuilder,
   typeReducer,
   localStorageService,
-  jwt
+  jwt,
+  toaster
 ) {
 
   var that = this;
@@ -470,6 +471,13 @@ function cdsDepositCtrl(
           message: 'Success!',
           type: 'success'
         });
+        // Push a notification
+        toaster.pop({
+          type: 'success',
+          title: (that.record.title.title || 'Video'),
+          body: 'Success!',
+          bodyOutputType: 'trustedHtml',
+        });
       }
     });
     // Messages Error
@@ -480,6 +488,13 @@ function cdsDepositCtrl(
           message: response.data.message,
           type: 'danger',
           errors: response.data.errors || [],
+        });
+        // Push a notification
+        toaster.pop({
+          type: 'error',
+          title: (that.record.title.title || 'Video'),
+          body: response.data.message,
+          bodyOutputType: 'trustedHtml',
         });
       }
     });
@@ -497,7 +512,7 @@ function cdsDepositCtrl(
     that.videoPreviewer();
     // Update subformat statuses
     that.fetchCurrentStatuses();
-    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 10000);
+    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 20000);
     $scope.$watch('$ctrl.record._cds.state', that.refreshStateQueue, true);
     $scope.$watch('$ctrl.record._deposit.status', function() {
       if (CKEDITOR) {
@@ -754,7 +769,8 @@ cdsDepositCtrl.$inject = [
   'urlBuilder',
   'typeReducer',
   'localStorageService',
-  'jwt'
+  'jwt',
+  'toaster'
 ];
 
 /**

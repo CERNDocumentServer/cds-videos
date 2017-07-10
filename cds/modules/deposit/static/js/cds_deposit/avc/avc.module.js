@@ -13,7 +13,7 @@ function cdsDepositsConfig(
   sfErrorMessageProvider,
   jwtProvider,
   $httpProvider,
-  $compileProvider
+  $compileProvider,
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -160,7 +160,7 @@ cdsDepositsConfig.$inject = [
   'sfErrorMessageProvider',
   'jwtProvider',
   '$httpProvider',
-  '$compileProvider'
+  '$compileProvider',
 ];
 
 // Register modules
@@ -243,4 +243,7 @@ angular
     'monospaced.elastic',
     'invenioFiles.filters',
     'afkl.lazyImage',
+    'hl.sticky',
+    'duScroll',
+    'toaster'
   ]);

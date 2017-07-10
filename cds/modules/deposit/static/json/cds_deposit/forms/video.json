@@ -140,7 +140,8 @@
       "format": "yyyy-MM-dd",
       "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
       "fa_cls": "fa-calendar",
-      "required": false
+      "required": false,
+      "onChange": "$ctrl.removeValidationMessage(modelValue,form)"
     },
     {
       "type": "array",

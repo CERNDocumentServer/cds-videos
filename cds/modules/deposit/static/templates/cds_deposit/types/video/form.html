@@ -1,15 +1,22 @@
 <!-- Alerts -->
 <div class="alerts" ng-repeat="alert in $ctrl.cdsDepositCtrl.alerts">
-  <div class="alert alert-{{alert.type}} alert-dismissible" role="alert">
-    <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    {{ alert.message }}
+  <div ng-if="alert.errors.length > 0 && alert.type == 'danger'">
+    <div class="panel panel-danger">
+       <div class="panel-heading">Errors</div>
+       <div class="panel-body">
+         {{ alert.message }}
+       </div>
+       <ul class="list-group">
+        <li ng-repeat="error in alert.errors" class="list-group-item text-danger"><b>{{ error.field }}</b> {{error.message}}</li>
+      </ul>
+    </div>
   </div>
 </div>
+<!-- Alerts -->
 <!-- Fill metadata suggestion -->
 <div class="alert alert-warning alert-dismissible" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
   <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Extracted metadata can be used to automatically fill part of the form.
-  <button ng-click="metadataModal = true" class="btn-default">Fill</button>
+  Extracted metadata can be used to automatically fill part of the form. <button ng-click="metadataModal = true" class="btn pl-0 btn-link">Click here to fill the metadata</button>
 </div>
 <modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="75%">
   <ul>
@@ -35,6 +42,21 @@
             <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
           </div>
           <iframe allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+        </div>
+
+        <div ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+          <!-- Category and type -->
+          <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+            <ul class="list-inline">
+               <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+               <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+             </ul>
+          </div>
+          <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+            <i class="fa fa-info-circle"></i> For publishing the video please select category from the
+            <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
+          </div>
+          <!-- Category and type -->
         </div>
       </div>
       <!-- Progress -->
@@ -91,6 +113,12 @@
           <!-- Published view -->
           <div ng-show="$ctrl.cdsDepositCtrl.isPublished() && !showAll">
             <div class="col-sm-12">
+              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+                <ul class="list-inline text-right">
+                   <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+                   <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+                 </ul>
+              </div>
               <h4 class="mb-5 mt-0">
                 <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
                   {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
@@ -138,11 +166,6 @@
                 <li role="presentation" ng-class="{active: active=='access'}">
                   <a ng-click="active='access'" role="tab" data-toggle="tab">
                     Access rights
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='debug'}">
-                  <a ng-click="active='debug'" role="tab" data-toggle="tab">
-                    Debug (for @drjova)
                   </a>
                 </li>
                 <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
@@ -251,24 +274,6 @@
                     </div>
                     <!-- Record permissions -->
                   </div>
-                </div>
-                <div ng-show="active=='debug'" role="tabpanel" ng-class="{active: active=='debug'}"  class="tab-pane">
-                  -- PRESETS FINISHED --
-                  -- HOW MANY {{that.presets_finished}}
-                  <hr />
-                  File transcode: {{$ctrl.cdsDepositCtrl.stateReporter['file_transcode']}} <br />
-                  <hr />
-
-                  <strong>PENDING:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.PENDING }}
-                  <strong>STARTED:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.STARTED }}
-                  <strong>FAILURE:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.FAILURE }}
-                  <strong>SUCCESS:</strong> {{ $ctrl.cdsDepositCtrl.stateQueue.SUCCESS }}
-                  <br />
-                  <hr />
-                  <span class="label label-default">{{ $ctrl.cdsDepositCtrl.index }}</span>
-                  <span class="label label-info">{{ $ctrl.cdsDepositCtrl.record._deposit.status }}</span>
-                  <pre>{{ $ctrl.cdsDepositCtrl.record | json}}</pre>
-                  <pre>{{ $ctrl.cdsDepositCtrl.links | json}}</pre>
                 </div>
             </div>
           </div>

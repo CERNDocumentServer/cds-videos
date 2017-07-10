@@ -9,14 +9,7 @@
              }"
     >
       <div class="media-left">
-        <i class="fa pl-5"
-          ng-class="{'fa-remove text-danger': state === 'DEPOSIT_STATE/FAILURE' && record.metadata._deposit.status === 'draft',
-               'fa-check text-success': state === 'DEPOSIT_STATE/SUCCESS'&& record.metadata._deposit.status === 'draft',
-               'fa-circle-thin text-muted': state === 'DEPOSIT_STATE/PENDING' && record.metadata._deposit.status === 'draft',
-               'fa-spinner fa-spin text-warning': state === 'DEPOSIT_STATE/STARTED' && record.metadata._deposit.status === 'draft',
-               'fa-check text-primary': record.metadata._deposit.status === 'published'
-             }"
-        ></i>
+        <i class="fa pl-5 {{ state | progressIcon:record.metdata._deposit.status }} {{ state | progressClass:record.metdata._deposit.status }}"></i>
      </div>
      <div class="media-body">
        <a class="media-heading f8 fw-b" target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">

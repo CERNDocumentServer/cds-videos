@@ -2,11 +2,13 @@ function overallState(depositStatuses) {
   return function(tasks) {
     var values = _.values(tasks);
     if (values.length !== 0) {
-      if (_.includes(tasks, 'FAILURE')){
+      if (_.includes(values, 'FAILURE')){
         return depositStatuses.FAILURE;
-      } else if (_.includes(tasks, 'STARTED')) {
+      } else if (_.includes(values, 'STARTED')) {
         return depositStatuses.STARTED;
-      } else if (_.every(tasks, 'SUCCESS')) {
+      } else if (_.every(values, function(val) {
+        return val === 'SUCCESS';
+      })) {
         return depositStatuses.SUCCESS;
       }
     }
