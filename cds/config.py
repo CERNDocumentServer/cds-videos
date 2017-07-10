@@ -931,3 +931,20 @@ CDS_KEYWORDS_HARVESTER_URL = 'http://home.cern/api/tags-json-feed'
 # ==============
 #: Hostname for OpenAIRE's grant resolver.
 OPENDEFINITION_JSONRESOLVER_HOST = 'cds.cern.ch'
+
+###############################################################################
+# ffmpeg
+###############################################################################
+
+CDS_FFMPEG_METADATA_ALIASES = {
+    'streams/0/title': [
+        'format/tags/title', 'format/tags/com.apple.quicktime.title'
+    ],
+    'streams/0/description': [
+        'format/tags/description',
+        'format/tags/com.apple.quicktime.description'
+    ],
+    'streams/0/keywords': ['format/tags/com.apple.quicktime.keywords'],
+    'streams/0/creation_time': ['format/tags/creation_time'],
+}
+CDS_FFMPEG_METADATA_POST_SPLIT = ['streams/0/keywords']

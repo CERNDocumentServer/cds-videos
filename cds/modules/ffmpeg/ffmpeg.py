@@ -27,12 +27,11 @@
 from __future__ import absolute_import
 
 import json
+from flask import current_app as app
 from itertools import count, takewhile
 from subprocess import STDOUT, CalledProcessError, check_output
 
 from cds_sorenson.api import get_available_aspect_ratios
-from flask import current_app
-
 from .errors import FrameExtractionInvalidArguments, FFmpegExecutionError, \
     MetadataExtractionExecutionError, FrameExtractionExecutionError
 
@@ -72,7 +71,7 @@ def ff_probe_all(input_filename):
         error_class=MetadataExtractionExecutionError
     ).decode('utf-8')
 
-    return _patch_aspect_ratio(metadata)
+    return _refactoring_metadata(_patch_aspect_ratio(json.loads(metadata)))
 
 
 #
@@ -81,7 +80,7 @@ def ff_probe_all(input_filename):
 def probe_aspect_ratio(input_filename):
     """Probe video's aspect ratio, calculating it if needed."""
     metadata = ff_probe_all(input_filename)
-    return json.loads(metadata)['streams'][0]['display_aspect_ratio']
+    return metadata['streams'][0]['display_aspect_ratio']
 
 
 def _calculate_aspect_ratio(width, height):
@@ -96,12 +95,73 @@ def _calculate_aspect_ratio(width, height):
 
 def _patch_aspect_ratio(metadata):
     """Replace invalid aspect ratio(i.e. '0:1') with calculated one."""
-    info = json.loads(metadata)
-    sinfo = info['streams'][0]
+    sinfo = metadata['streams'][0]
     key = 'display_aspect_ratio'
     if sinfo[key] == '0:1':
         sinfo[key] = _calculate_aspect_ratio(sinfo['width'], sinfo['height'])
-    return json.dumps(info)
+    return metadata
+
+
+def _go_deep(key, metadata, fun=None):
+    fun = fun or (lambda x: x)
+    subpaths = key.split('/')
+    value = metadata
+    key = metadata
+    # Scroll down the list / dictionary to the required value
+    for subpath in subpaths:
+        try:
+            # if it's a number, it search for a list
+            subpath = int(subpath)
+        except ValueError:
+            # it's a key of dictionary
+            pass
+        key = value
+        value = value[subpath]
+    # set a new value if required (default leave as it is)
+    key[subpath] = fun(value)
+    # return the value as output
+    return key[subpath]
+
+
+def _extract_first_found(keys, metadata, fun=None):
+    """Extract first metadata found."""
+    for key in keys:
+        try:
+            return _go_deep(key=key, metadata=metadata, fun=fun)
+        except KeyError:
+            pass
+    # if the value is not found, return a default value
+    return ''
+
+
+def _refactoring_metadata(metadata):
+    """Refactoring metadata."""
+    for key, aliases in app.config['CDS_FFMPEG_METADATA_ALIASES'].items():
+        key_base = key.split('/')
+        key_last = key_base.pop()
+
+        def set_value(x):
+            """Set new value."""
+            x[key_last] = value
+            return x
+
+        try:
+            value = _extract_first_found(keys=aliases, metadata=metadata)
+            if value:
+                _go_deep(key='/'.join(key_base), metadata=metadata,
+                         fun=set_value)
+        except KeyError:
+            pass
+
+    def split_and_trim(value_string):
+        """Split and trim value."""
+        return [value.strip() for value in value_string.split(',')]
+    for key in app.config['CDS_FFMPEG_METADATA_POST_SPLIT']:
+        try:
+            _go_deep(key=key, metadata=metadata, fun=split_and_trim)
+        except KeyError:
+            pass
+    return metadata
 
 
 #

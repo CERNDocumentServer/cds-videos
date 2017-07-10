@@ -1,5 +1,6 @@
 function cdsDepositsConfig(
   $locationProvider,
+  depositExtractedMetadataProvider,
   depositStatesProvider,
   depositSSEEventsProvider,
   depositStatusesProvider,
@@ -47,6 +48,38 @@ function cdsDepositsConfig(
     FAILURE: 'DEPOSIT_STATE/FAILURE',
     SUCCESS: 'DEPOSIT_STATE/SUCCESS',
     REVOKED: 'DEPOSIT_STATE/REVOKED',
+  });
+
+  // Initialize extracted metadata pre-fill
+  depositExtractedMetadataProvider.setValues({
+    values:{
+      'title': function(deposit, metadata){
+        if('title' in metadata){
+          deposit.title = {title: metadata.title};
+          return metadata.title;
+        }
+      },
+      'description': function(deposit, metadata){
+        if('description' in metadata){
+          deposit.description = {value: metadata.description};
+          return metadata.description;
+        }
+      },
+      'keywords': function(deposit, metadata){
+        if('keywords' in metadata){
+          deposit.keywords = metadata.keywords.map(function(keyword){
+            return {name: keyword, value: {name: keyword}};
+          });
+          return metadata.keywords.join(', ');
+        }
+      },
+      'date': function(deposit, metadata){
+        if('creation_time' in metadata){
+          deposit.date = new Date(metadata.creation_time).toISOString().slice(0,10);
+          return deposit.date;
+        }
+      },
+    }
   });
 
   // Deposit actions' information
@@ -114,6 +147,7 @@ function cdsDepositsConfig(
 // Inject the necessary angular services
 cdsDepositsConfig.$inject = [
   '$locationProvider',
+  'depositExtractedMetadataProvider',
   'depositStatesProvider',
   'depositSSEEventsProvider',
   'depositStatusesProvider',

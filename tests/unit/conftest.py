@@ -1016,3 +1016,92 @@ def licenses():
             "url": "http://www.opensource.org/licenses/AGPL-3.0"
         }
     }
+
+
+@pytest.fixture()
+def demo_ffmpeg_metadata():
+    """Demo metadata extracted from ffmpeg."""
+    keywords = ("21-07-16,cds,timelapseSM18,magnet on SM18,2 mqxfs quadrupole "
+                "coils: winding completed and waiting for heat treatment")
+    return {
+        "streams": [
+            {
+                "index": 0,
+                "codec_name": "prores",
+                "codec_long_name": "Apple ProRes (iCodec Pro)",
+                "codec_type": "video",
+                "codec_time_base": "1/25",
+                "codec_tag_string": "apch",
+                "codec_tag": "0x68637061",
+                "width": 3840,
+                "height": 2160,
+                "coded_width": 3840,
+                "coded_height": 2160,
+                "has_b_frames": 0,
+                "sample_aspect_ratio": "1:1",
+                "display_aspect_ratio": "16:9",
+                "pix_fmt": "yuv422p10le",
+                "level": -99,
+                "color_space": "bt709",
+                "color_transfer": "bt709",
+                "color_primaries": "bt709",
+                "field_order": "progressive",
+                "refs": 1,
+                "r_frame_rate": "25/1",
+                "avg_frame_rate": "25/1",
+                "time_base": "1/2500",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 1472300,
+                "duration": "588.920000",
+                "bit_rate": "732390489",
+                "bits_per_raw_sample": "10",
+                "nb_frames": "14723",
+                "disposition": {
+                    "default": 1,
+                    "dub": 0,
+                    "original": 0,
+                    "comment": 0,
+                    "lyrics": 0,
+                    "karaoke": 0,
+                    "forced": 0,
+                    "hearing_impaired": 0,
+                    "visual_impaired": 0,
+                    "clean_effects": 0,
+                    "attached_pic": 0,
+                    "timed_thumbnails": 0
+                },
+                "tags": {
+                    "creation_time": "2017-03-23T13:25:03.000000Z",
+                    "language": "und",
+                    "handler_name": "Core Media Data Handler",
+                    "encoder": "Apple ProRes 422 HQ",
+                    "timecode": "00:00:00:00"
+                }
+            }
+        ],
+        "format": {
+            "filename": "CERN-FOOTAGE-2017-017-001.mov",
+            "nb_streams": 3,
+            "nb_programs": 0,
+            "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+            "format_long_name": "QuickTime / MOV",
+            "start_time": "0.000000",
+            "duration": "588.920000",
+            "size": "54115322362",
+            "bit_rate": "735112712",
+            "probe_score": 100,
+            "tags": {
+                "major_brand": "qt  ",
+                "minor_version": "0",
+                "compatible_brands": "qt  ",
+                "creation_time": "2017-03-23T13:25:02.000000Z",
+                "com.apple.quicktime.keywords": keywords,
+                "com.apple.quicktime.description":
+                "This video is about Quadrupole",
+                "com.apple.quicktime.author": "MACVMO04",
+                "com.apple.quicktime.displayname": "Quadrupole",
+                "com.apple.quicktime.title": "Quadrupole"
+            }
+        }
+    }
