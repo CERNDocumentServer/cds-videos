@@ -219,7 +219,7 @@ i.sort-handle {
   }
 }
 .cds-facets {
-    border-color: $bg-gray;
+  border-color: $bg-gray;
 }
 .cds-facets-item-link {
   display: inline-block;
@@ -277,9 +277,9 @@ i.sort-handle {
 
 .cds-deposit-box {
   background-color: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,.1);
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #eee;
   margin-bottom: 15px;
 }
 
@@ -382,12 +382,49 @@ i.sort-handle {
   }
 }
 
-.status-fix-top {
-  position: fixed;
-  margin-top: 0px;
+.cds-deposit-side-nav-item-header {
+  text-decoration: none !important;
+  display: block;
+  padding: 4px 10px;
+  border-radius: 3px;
+  color: $state-info-text;
+  &:hover {
+    background-color: $state-info-bg;
+    color: $state-info-text;
+    text-decoration: none!important;
+  }
+  &.active {
+    background-color: $state-info-bg;
+    color: $state-info-text;
+    &:hover {
+      background-color: $state-info-bg;
+      color: $state-info-text;
+      text-decoration: none!important;
+    }
+  }
+}
+
+.cds-deposit-side-nav-item-link {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 3px;
   width: 100%;
-  z-index: 100;
-  top: 0;
+  color: $gray;
+  &:hover {
+    background-color: $bg-gray;
+    color: $gray;
+    text-decoration: none!important;
+  }
+  &.active {
+    background: $bg-gray;
+    color: $gray;
+    &:hover {
+      background: $bg-gray;
+      color: $gray;
+      text-decoration: none!important;
+    }
+  }
 }
 
 .header-search-form {

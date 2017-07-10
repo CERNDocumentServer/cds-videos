@@ -37,6 +37,7 @@ css = Bundle(
         'node_modules/ui-select/dist/select.css',
         'node_modules/angular-loading-bar/build/loading-bar.css',
         'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
+        'node_modules/angularjs-toaster/toaster.css',
         filters='cleancssurl',
     ),
     NpmBundle(
@@ -69,6 +70,7 @@ js = NpmBundle(
         'node_modules/angular-sanitize/angular-sanitize.js',
         'node_modules/angular-mass-autocomplete/massautocomplete.js',
         'node_modules/angular-local-storage/dist/angular-local-storage.js',
+        'node_modules/angularjs-toaster/toaster.js',
         'js/main.js',
         filters='jsmin',
     ),
@@ -89,6 +91,7 @@ js = NpmBundle(
         'lodash': '~4.17.4',
         'angular-mass-autocomplete': '~0.5.0',
         'angular-local-storage': '~0.5.2',
+        'angularjs-toaster': '~2.1.0',
     }
 )
 """Default JavaScript bundle."""

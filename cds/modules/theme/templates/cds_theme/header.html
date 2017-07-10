@@ -1,7 +1,7 @@
 <header>
   {%- block navbar %}
   <nav class="navbar navbar-default navbar-static-top">
-    <div class="container">
+    <div class="{{ container_class if container_class else 'container'  }}">
       {%- block navbar_header %}
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#cds-navbar" aria-expanded="false" aria-controls="navbar">
@@ -14,7 +14,7 @@
           {%- if config.THEME_LOGO %}
             <a href="/"><img class="navbar-brand" src="{{ url_for('static', filename=config.THEME_LOGO)}}" alt="{{_(config.THEME_SITENAME)}}" /></a>
           {%- else %}
-            <a class="cds-navbar-brand navbar-brand l-w" href="/"><b>CDS</b> <small class="l-w">video</small></a>
+            <a class="cds-navbar-brand navbar-brand l-w" href="/"><b>CDS</b> <small class="l-w">videos</small></a>
           {%- endif %}
         {%- endblock %}
       </div>

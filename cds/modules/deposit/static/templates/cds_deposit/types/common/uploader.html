@@ -1,4 +1,4 @@
-<modal-dialog show="$ctrl.confirmNewMaster">
+<modal-dialog show="$ctrl.confirmNewMaster" width="50%">
   <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
   <p class="pull-right">
     <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
@@ -129,7 +129,7 @@
  </div>
 </div>
 <hr />
-<div class="cds-deposit-box">
+<div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
   <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
     <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
     <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>

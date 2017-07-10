@@ -1,6 +1,5 @@
 {%- extends "cds_theme/page.html" %}
 {%- set title = '%s | %s'|format(_('Deposits'), config.THEME_SITENAME) or 'CDS' -%}
-
 {%- block css %}
   {{ super() }}
   {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
