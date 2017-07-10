@@ -49,8 +49,7 @@
     </div>
   </div>
 </div>
-
-<div ng-if="$ctrl.initialized">
+<div id="{{ $ctrl.master.metadata._deposit.id }}" ng-if="$ctrl.initialized">
     <cds-deposit
       master="true"
       id="$ctrl.master.metadata._deposit.id"
@@ -59,13 +58,11 @@
       schema="$ctrl.masterSchemaResolved"
       record="$ctrl.master.metadata"
     >
-    <div ng-class="{'status-fix-top': !$ctrl.isOnTop}" class="cds-deposit-avc-overall-status mb-20 mt--20">
-      <div class="container">
+    <!-- Top status bar -->
+    <div hl-sticky class="cds-deposit-avc-overall-status mb-20 mt--20">
+      <div class="container-fluid">
         <div class="row">
           <div class="col-md-9">
-            <div ng-show="!$ctrl.isOnTop">
-              <p><strong>{{ $ctrl.master.metadata.title.title || 'No project title' }}</strong></p>
-            </div>
             <ul class="list-inline text-left">
               <li ng-repeat="(task, status) in ($ctrl.aggregatedState | orderTasks)">
                 <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
@@ -81,18 +78,68 @@
         </div>
       </div>
     </div>
-    <div class="container">
+    <!-- Top status bar -->
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-3">
+          <div hl-sticky media-query="min-width: 990px" offset-top="20" class="cds-deposit-box">
+            <a offset="200" du-scrollspy="{{$ctrl.master.metadata._deposit.id}}" du-smooth-scroll ng-href="#{{$ctrl.master.metadata._deposit.id}}" class="active text-capitalize f8 mt-5 mb-10 cds-deposit-side-nav-item-header">
+            <i class="fa fa-list-ul"></i>  {{ ($ctrl.master.metadata.title.title) ?  ($ctrl.master.metadata.title.title | limitTo:45) : 'No project title' }} <span ng-show="$ctrl.master.metadata.title.title.length > 45">[...]</span>
+            </a>
+            <ul class="mt-10 list-unstyled" ng-repeat="vid in $ctrl.master.metadata.videos">
+              <li ng-init="state=(vid._cds.state | overallState)">
+                <a offset="200" du-scrollspy="{{vid._deposit.id}}" du-smooth-scroll ng-href="#{{vid._deposit.id}}" class="cds-deposit-side-nav-item-link f9">
+                  <i class="fa text-muted fa-video-camera"></i> {{ (vid.title.title | limitTo:30) || 'Video #' + ($index + 1) }} <span ng-show="vid.title.title.length > 30">[...]</span> <span class="pull-right fw-b">
+                  <i class="fa pl-5 {{ (vid._cds.state | overallState) | progressIcon:vid._deposit.status }} {{ (vid._cds.state | overallState) | progressClass:vid._deposit.status }}"></i>
+                  </span>
+                </a>
+              </li>
+            </ul>
+            <div class="text-center">
+              <a du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
+                <i class="fa fa-plus"></i> Add videos
+              </a>
+            </div>
+          </div>
+          <toaster-container toaster-options="{'close-html':'<button>Close</button>',  'showCloseButton':true, 'position-class': 'toast-bottom-left'}"></toaster-container>
+        </div>
+        <div class="col-md-9">
           <!-- Draft Project -->
           <cds-form
             template="/static/templates/cds_deposit/types/project/form.html"
             form="$ctrl.masterFormResolved"
           >
+            <cds-uploader
+              auto-start-upload="true"
+              files="$ctrl.master.metadata._files"
+              template="/static/templates/cds_deposit/types/common/uploader.html"
+            >
+              <cds-remote-uploader
+                  template="/static/templates/cds_deposit/remote_upload.html"
+                  dropbox-enabled="true"
+                  dropbox-selector=".dropbox-upload"
+                  dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
+                  remote-master-receiver="/api/hooks/receivers/avc/events/"
+                  remote-children-receiver="/api/hooks/receivers/downloader/events/"
+              >
+                <div class="dropbox-upload"></div>
+              </cds-remote-uploader>
+            </cds-uploader>
+
+            <div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
+              <p>
+                Multiple files with the same filename are not allowed:
+              </p>
+              <ul>
+                <li ng-repeat="file in $ctrl.duplicateFiles">
+                  {{ file }}
+                </li>
+              </ul>
+            </div>
           </cds-form>
           <!-- Published Project -->
           <!-- ADD children -->
-          <div id="{{child.metadata._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by $index">
+          <div id="{{child._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by $index">
             <cds-deposit
               index="$index + 1"
               id="child._deposit.id"
@@ -102,22 +149,17 @@
               schema="$ctrl.childrenSchemaResolved"
               record="child"
             >
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <cds-actions
-                        template="/static/templates/cds_deposit/types/video/action_delete.html"
-                      >
-                      </cds-actions>
-                    </div>
-                    <div class="col-md-6">
-                      <cds-actions
-                        template="/static/templates/cds_deposit/types/video/actions.html"
-                      >
-                      </cds-actions>
-                    </div>
-                  </div>
+              <div class="panel panel-default bg-w">
+                <div class="panel-heading text-muted">
+                  <span class="text-muted">
+                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
+                  </span>
+                  <span class="pull-right">
+                    <cds-actions
+                      template="/static/templates/cds_deposit/types/video/actions.html"
+                    >
+                    </cds-actions>
+                  </span>
                 </div>
                 <div ng-init="showForm=false" class="panel-body">
                   <!-- Draft Video -->
@@ -148,22 +190,41 @@
             </cds-deposit>
           </div>
           <!-- /ADD children -->
-          <cds-uploader
-            auto-start-upload="true"
-            files="$ctrl.master.metadata._files"
-            template="/static/templates/cds_deposit/types/common/uploader.html"
-          >
-            <cds-remote-uploader
-                template="/static/templates/cds_deposit/remote_upload.html"
-                dropbox-enabled="true"
-                dropbox-selector=".dropbox-upload"
-                dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
-                remote-master-receiver="/api/hooks/receivers/avc/events/"
-                remote-children-receiver="/api/hooks/receivers/downloader/events/"
-            >
-              <div class="dropbox-upload"></div>
-            </cds-remote-uploader>
-          </cds-uploader>
+          <!-- Uploader Extra -->
+          <div id="cds-deposit-main-uploader" class="cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
+            <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
+              <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
+              <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
+                <div
+                     ngf-drag-over-class="'dragover'"
+                     ngf-drop=""
+                     ngf-change="$ctrl.addFiles($newFiles)"
+                     ngf-select=""
+                     ngf-max-size="20GB"
+                     ngf-multiple="true"
+                >
+                  <div class="cds-deposit-box-upload-wrapper text-center">
+                    <p class="cds-deposit-box-upload-icon">
+                      <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
+                    </p>
+                    <div class="cds-deposit-box-upload-content">
+                      <div class="cds-deposit-box-upload-title">
+                        <h4>Select files to upload</h4>
+                      </div>
+                      <p class="cds-deposit-box-upload-description"> Or drag and drop video files</p>
+                      <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
+                  <div ng-transclude></div>
+              </div>
+            </div>
+          </div>
           <div ng-if="$ctrl.duplicateVideos.length" class="alert alert-danger">
             <p>
               Multiple deposits with the same filename are not allowed:
@@ -174,6 +235,7 @@
               </li>
             </ul>
           </div>
+          <!-- Uploader Extra -->
         </div>
       </div>
     </div>

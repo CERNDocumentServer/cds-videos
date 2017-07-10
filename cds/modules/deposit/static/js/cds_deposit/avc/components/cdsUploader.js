@@ -1,4 +1,13 @@
-function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
+function cdsUploaderCtrl(
+  $scope,
+  $q,
+  Upload,
+  $http,
+  $timeout,
+  urlBuilder,
+  jwt,
+  toaster
+) {
   var that = this;
 
   // Is the uploader loading
@@ -287,6 +296,19 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
           existingFiles.push(file.key);
           return false;
         });
+
+        // Send an alert for duplicate videos
+        if (that.duplicateFiles.length > 0) {
+          // Push a notification
+          toaster.pop({
+            type: 'error',
+            title: 'Duplicate file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
+            body: that.duplicateFiles.join(', '),
+            bodyOutputType: 'trustedHtml',
+            timeout: 6000
+          });
+        }
+
         // Add files to the list
         Array.prototype.push.apply(that.files, _files);
         // Add the files to the queue
@@ -364,10 +386,26 @@ function cdsUploaderCtrl($scope, $q, Upload, $http, $timeout, urlBuilder) {
         return that.uploader()
           .then(
             function success(response) {
+              // Success uploading notification
+              toaster.pop({
+                type: 'info',
+                title: 'The file(s) has been succesfuly uploaded.',
+                body: (_.map(response, 'data.key') || []).join(', '),
+                bodyOutputType: 'trustedHtml',
+                timeout: 8000
+              });
             },
             function error(response) {
               // Inform the parents
               $scope.$emit('cds.deposit.error', response);
+              // Error uploading notification
+              toaster.pop({
+                type: 'error',
+                title: 'Error uploading the file(s).',
+                body: (_.map(response, 'config.data.key') || []).join(', '),
+                bodyOutputType: 'trustedHtml',
+                timeout: 8000
+              });
             }
           ).finally(
             function done() {
@@ -498,7 +536,8 @@ cdsUploaderCtrl.$inject = [
   '$http',
   '$timeout',
   'urlBuilder',
-  'jwt'
+  'jwt',
+  'toaster'
 ];
 
 function cdsUploader() {

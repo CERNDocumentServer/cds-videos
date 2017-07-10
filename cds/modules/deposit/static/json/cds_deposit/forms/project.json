@@ -7,17 +7,6 @@
         "required": false
       },
       {
-        "type": "template",
-        "key": "date",
-        "title": "Date",
-        "placeholder": "eg. 2013-05-08",
-        "templateUrl": "/static/templates/cds_deposit/angular-schema-form/datepicker.html",
-        "format": "yyyy-MM-dd",
-        "description": "Required. Format: YYYY-MM-DD. In case your upload was already p ublished elsewhere, please use the date of first publication.",
-        "fa_cls": "fa-calendar",
-        "required": false
-      },
-      {
         "type": "section",
         "htmlClass": "form-ckeditor",
         "description": "",
@@ -47,6 +36,20 @@
             "required": false
           }
         ]
+      },
+      {
+        "title": "Keywords",
+        "key": "keywords",
+        "type": "uiselectmultiple",
+        "notitle": false,
+        "placeholder": "Keywords",
+        "options": {
+          "refreshDelay": 100,
+          "mergeObjects": true,
+          "tagging": true,
+          "asyncCallback": "$ctrl.autocompleteKeywords",
+          "url": "/api/keywords/_suggest"
+        }
       }
     ],
     "rightColumn": [
@@ -76,20 +79,6 @@
           "asyncCallback": "$ctrl.autocompleteType"
         },
         "required": false
-      },
-      {
-        "title": "Keywords",
-        "key": "keywords",
-        "type": "uiselectmultiple",
-        "notitle": false,
-        "placeholder": "Keywords",
-        "options": {
-          "refreshDelay": 100,
-          "mergeObjects": true,
-          "tagging": true,
-          "asyncCallback": "$ctrl.autocompleteKeywords",
-          "url": "/api/keywords/_suggest"
-        }
       },
       {
         "type": "array",

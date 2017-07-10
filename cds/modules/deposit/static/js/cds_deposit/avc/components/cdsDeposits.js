@@ -10,7 +10,8 @@ function cdsDepositsCtrl(
   depositSSEEvents,
   cdsAPI,
   urlBuilder,
-  localStorageService
+  localStorageService,
+  toaster
 ) {
   var that = this;
   this.edit = false;
@@ -245,10 +246,22 @@ function cdsDepositsCtrl(
       var videoKeys = _.keys(_files.videos).map(function (name) {
         return _files.videos[name].key;
       });
+
       that.duplicateVideos = _.intersection(videoKeys, uploadedVideos);
       _files.videos = _.omitBy(_files.videos, function (val) {
         return that.duplicateVideos.includes(val.key)
       });
+
+      // Send an alert for duplicate videos
+      if (that.duplicateVideos.length > 0) {
+        toaster.pop({
+          type: 'error',
+          title: 'Duplicate video(s)!',
+          body: that.duplicateVideos.join(', '),
+          bodyOutputType: 'trustedHtml',
+        });
+      }
+
       // for each files create child
       angular.forEach(
         _files.videos,
@@ -429,6 +442,7 @@ cdsDepositsCtrl.$inject = [
   'cdsAPI',
   'urlBuilder',
   'localStorageService',
+  'toaster',
 ];
 
 function cdsDeposits() {

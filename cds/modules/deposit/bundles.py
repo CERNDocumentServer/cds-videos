@@ -42,11 +42,15 @@ js_main = NpmBundle(
     'node_modules/angular-elastic/elastic.js',
     'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
     'node_modules/ngmodal/dist/ng-modal.js',
+    'node_modules/angular-sticky-plugin/dist/angular-sticky.js',
+    'node_modules/angular-scroll/angular-scroll.js',
     npm={
         'angular': '~1.5.8',
         'angular-sanitize': '~1.5.8',
         'lodash': '~4.17.4',
         'angular-elastic': '~2.5.1',
+        "angular-scroll": '~1.0.2',
+        "angular-sticky-plugin": '~0.4.1',
     }
 )
 
