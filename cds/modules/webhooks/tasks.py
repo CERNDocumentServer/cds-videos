@@ -286,7 +286,7 @@ class ExtractMetadataTask(AVCTask):
 
         try:
             # Extract video's metadata using `ff_probe`
-            metadata = json.loads(ff_probe_all(uri))
+            metadata = ff_probe_all(uri)
         except Exception as exc:
             db.session.rollback()
             raise self.retry(max_retries=5, countdown=5, exc=exc)

@@ -26,7 +26,6 @@
 
 from __future__ import absolute_import
 
-import json
 import shutil
 import tempfile
 from os import listdir
@@ -34,6 +33,7 @@ from os.path import dirname, isfile, join
 
 import pytest
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from cds.modules.ffmpeg.ffmpeg import _refactoring_metadata
 from cds.modules.ffmpeg.errors import (FrameExtractionExecutionError,
                                        FrameExtractionInvalidArguments,
                                        MetadataExtractionExecutionError)
@@ -136,9 +136,40 @@ def test_frames(video_with_small, start, end, step, error):
     shutil.rmtree(tmp)
 
 
+def test_refactoring_metadata(demo_ffmpeg_metadata):
+    """Test refactoring metadata."""
+    metadata = _refactoring_metadata(demo_ffmpeg_metadata)
+    result = metadata['streams'][0]
+    assert result['description'] == 'This video is about Quadrupole'
+    assert result['title'] == 'Quadrupole'
+    assert result['keywords'] == [
+        '21-07-16',
+        'cds',
+        'timelapseSM18',
+        'magnet on SM18',
+        '2 mqxfs quadrupole coils: winding completed and waiting for heat '
+        'treatment'
+    ]
+    assert result['creation_time'] == '2017-03-23T13:25:02.000000Z'
+
+    # test empty
+    metadata = _refactoring_metadata({})
+    assert metadata == {}
+
+    # test partial metadata
+    metadata = _refactoring_metadata({
+        'format': {'tags': {'title': 'test'}},
+        'streams': [{}],
+    })
+    result = metadata['streams'][0]
+    assert result['title'] == 'test'
+    for key in ['description', 'keywords', 'creation_time']:
+        assert key not in result
+
+
 def test_ffprobe_all(online_video):
     """Test ff_probe_all wrapper."""
-    information = json.loads(ff_probe_all(online_video))
+    information = ff_probe_all(online_video)
 
     assert 'streams' in information
     video_stream = information['streams'][0]
@@ -155,7 +186,7 @@ def test_ffprobe_all(online_video):
 def test_aspect_ratio(video, online_video):
     """Test calculation of video's aspect ratio."""
     for video in [video, online_video]:
-        metadata = json.loads(ff_probe_all(video))['streams'][0]
+        metadata = ff_probe_all(video)['streams'][0]
         for aspect_ratio in [ff_probe(video, 'display_aspect_ratio'),
                              metadata['display_aspect_ratio']]:
             assert aspect_ratio in get_available_aspect_ratios()
