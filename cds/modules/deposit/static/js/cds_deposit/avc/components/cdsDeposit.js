@@ -4,6 +4,7 @@ function cdsDepositCtrl(
   $timeout,
   $interval,
   $sce,
+  depositExtractedMetadata,
   depositStates,
   depositStatuses,
   depositActions,
@@ -30,6 +31,9 @@ function cdsDepositCtrl(
 
   // Event Listener (only for destroy)
   this.sseEventListener = null;
+
+  // Add depositExtractedMetadata to the scope
+  this.depositExtractedMetadata = depositExtractedMetadata;
 
   // Add depositStatuses to the scope
   this.depositStatuses = depositStatuses;
@@ -343,8 +347,9 @@ function cdsDepositCtrl(
 
     // Update deposit based on extracted metadata from task
     this.fillMetadata = function(answer) {
+      [metadataToFill, metadataToFill_values] = that.metadataToFill;
       if (answer) {
-        angular.merge(that.record, that.metadataToFill);
+        angular.merge(that.record, metadataToFill);
         that.makeSingleAction('SAVE_PARTIAL');
       }
       that.setOnLocalStorage('prompted', true);
@@ -367,30 +372,31 @@ function cdsDepositCtrl(
         return false;
       }
 
+      // Metadata extracted
       var metadataToFill = {};
-
-      // Title
-      var defaultTitle = that.getFromLocalStorage('basename');
-      if ((that.record.title) && (that.record.title.title === defaultTitle) &&
-          (allMetadata.title)) {
-        metadataToFill.title = {title: allMetadata.title};
-      }
+      var metadataToFill_values = {};
+      Object.keys(depositExtractedMetadata.values).forEach(function(item, index){
+        value = depositExtractedMetadata.values[item](metadataToFill, allMetadata);
+        if(value){
+          metadataToFill_values[item] = value;
+        }
+      });
 
       // Do not prompt user when there is no metadata to fill in
       if (_.isEmpty(metadataToFill)) {
         return false;
       }
 
-      return metadataToFill;
+      return [metadataToFill, metadataToFill_values];
     };
 
     // Pre-fill changes to display to the user
     this.getMetadataToDisplay = function() {
-        var toDisplay = {};
-        if (that.metadataToFill.title) {
-            toDisplay.Name = that.metadataToFill.title.title;
+        if(that.metadataToFill){
+          [metadataToFill, metadataToFill_values] = that.metadataToFill;
+          return metadataToFill_values;
         }
-        return toDisplay;
+        return {}
     };
 
     // Calculate the transcode
@@ -739,6 +745,7 @@ cdsDepositCtrl.$inject = [
   '$timeout',
   '$interval',
   '$sce',
+  'depositExtractedMetadata',
   'depositStates',
   'depositStatuses',
   'depositActions',
