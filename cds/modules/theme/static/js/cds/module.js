@@ -83,6 +83,22 @@ app.filter('toMinutes', function() {
   }
 });
 
+app.filter('findBy', function() {
+  return function(data, key, value) {
+    if (!_.isEmpty(data)) {
+      return _.filter(data, _.matchesProperty(key, value));
+    }
+  }
+});
+
+app.filter('removeBy', function() {
+  return function(data, key, value) {
+    if (!_.isEmpty(data)) {
+      return _.reject(data, _.matchesProperty(key, value));
+    }
+  }
+});
+
 // Find record's file with given context_type
 app.filter('findContextType', function() {
   return function(record, context_type) {

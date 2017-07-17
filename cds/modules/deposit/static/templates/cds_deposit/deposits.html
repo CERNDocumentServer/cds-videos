@@ -10,12 +10,14 @@
           <div class="tab-content">
             <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
               <div
-                   ngf-drag-over-class="'dragover'"
+                   ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
                    ngf-drop=""
                    ngf-change="$ctrl.addFiles($newFiles)"
                    ngf-select=""
                    ngf-max-size="20GB"
                    ngf-multiple="true"
+                   ngf-accept="'video/*'"
+                   ngf-pattern="{{$ctrl.videoExtensions}}"
               >
                 <div class="cds-deposit-box-upload-wrapper text-center">
                   <p class="cds-deposit-box-upload-icon">
@@ -23,9 +25,9 @@
                   </p>
                   <div class="cds-deposit-box-upload-content">
                     <div class="cds-deposit-box-upload-title">
-                      <h4>Select files to upload</h4>
+                      <h4>Select videos to upload</h4>
                     </div>
-                    <p class="cds-deposit-box-upload-description"> Or drag and drop video files</p>
+                    <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
                     <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                   </div>
                 </div>
@@ -170,7 +172,7 @@
                   <cds-uploader
                     auto-start-upload="true"
                     files="child._files"
-                    template="/static/templates/cds_deposit/types/common/uploader.html"
+                    template="/static/templates/cds_deposit/types/video/uploader.html"
                     remote-master-receiver="/api/hooks/receivers/avc/events/"
                   >
                     <cds-remote-uploader
@@ -199,10 +201,13 @@
             <div class="tab-content">
               <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
                 <div
-                     ngf-drag-over-class="'dragover'"
+                     ngf-drag-over-class="'cds-deposit-dragover'"
                      ngf-drop=""
-                     ngf-change="$ctrl.addFiles($newFiles)"
+                     ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+                     ngf-model-options="{allowInvalid: false}"
                      ngf-select=""
+                     ngf-accept="'video/mp4,video/mov,video/mkv'"
+                     ngf-pattern="{{$ctrl.videoExtensions}}"
                      ngf-max-size="20GB"
                      ngf-multiple="true"
                 >
@@ -212,9 +217,9 @@
                     </p>
                     <div class="cds-deposit-box-upload-content">
                       <div class="cds-deposit-box-upload-title">
-                        <h4>Select files to upload</h4>
+                        <h4>Select videos to upload</h4>
                       </div>
-                      <p class="cds-deposit-box-upload-description"> Or drag and drop video files</p>
+                      <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
                       <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                     </div>
                   </div>

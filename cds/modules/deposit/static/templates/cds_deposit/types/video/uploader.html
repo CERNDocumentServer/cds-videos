@@ -1,0 +1,266 @@
+<modal-dialog show="$ctrl.confirmNewMaster" width="50%">
+  <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
+  <p class="pull-right">
+    <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
+    <button class="btn btn-danger" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">No</button>
+  </p>
+</modal-dialog>
+<!-- Master video and subformats -->
+<div ng-show="$ctrl.files.length > 0" class="panel panel-default">
+  <div class="panel-heading">
+    Master & Subformats files
+  </div>
+  <table class="table">
+    <tr>
+      <th>Filename</th>
+      <th>Size</th>
+      <th class="text-center">Progress</th>
+      <th class="text-center">Actions</th>
+    </tr>
+    <tr class="active">
+      <td title="{{ $ctrl.cdsDepositCtrl.currentMasterFile.key }}">{{ $ctrl.cdsDepositCtrl.currentMasterFile.key | limitTo:40 }} <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.key.length > 40">...</span></td>
+      <td>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.size != undefined">{{ $ctrl.cdsDepositCtrl.currentMasterFile.size | bytesToHumanReadable }}</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.size == undefined">Unknown</span>
+      </td>
+      <td class="text-center">
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.percentage < 100 && !$ctrl.cdsDepositCtrl.currentMasterFile.errored">{{ f.percentage }} %</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.processing && !$ctrl.cdsDepositCtrl.currentMasterFile.errored">Processing...</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.errored" class="text-danger">Error</span>
+        <span ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.completed || $ctrl.cdsDepositCtrl.currentMasterFile.percentage==100) && !$ctrl.cdsDepositCtrl.currentMasterFile.errored" class="text-success">✓</span>
+      </td>
+      <td ng-show="$ctrl.cdsDepositCtrl.currentMasterFile" class="text-center">
+          <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
+          <modal-dialog show="dialogShown" dialog-title="How to update the video file" width="50%">
+            <p class="text-left">To replace the video file, just upload another video file.</p>
+          </modal-dialog>
+      </td>
+    </tr>
+    <!-- Fix frame -->
+    <tr ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.subformat||[]).length > 0">
+      <td>Extracted subformats ({{ ($ctrl.cdsDepositCtrl.currentMasterFile.subformat||[]).length }})</td>
+      <td></td>
+      <td class="text-center"></td>
+      <td class="text-center">
+        <a ng-click="showSubformats = !showSubformats">
+          <span ng-show="!showSubformats">Show</span>
+          <span ng-show="showSubformats">Hide</span>
+        </a>
+      </td>
+    </tr>
+    <tr ng-if="f.key" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
+      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
+      <td>
+      </td>
+      <td class="text-center">
+        <span ng-show="f.percentage > 0 && !f.completed && !f.errored">{{ f.percentage | toInt }} %</span>
+        <span ng-show="!f.percentage && !f.completed && !f.errored"><i class="fa fa-spinner fa-spin"></i></span>
+        <span ng-show="f.errored" class="text-danger">Error</span>
+        <span ng-show="f.completed && !f.errored" class="text-success">✓</span>
+      </td>
+      <td ng-show="f" class="text-center">
+        <span ng-show="f.errored">
+          <a ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats([f.key])">
+            <i class="fa fa-undo"></i>
+          </a>
+        </span>
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- Master video and subformats -->
+<!-- Thumbnail -->
+<div class="panel panel-default"  ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.frame||[]).length > 0"
+  ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
+  ngf-drop="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=poster;media_type=image;custom_frame=true'})"
+  ngf-accept="'image/*'"
+    ngf-model-options="{allowInvalid: false}"
+  ngf-pattern="'image/*'"
+  ngf-max-size="20GB"
+  >
+  <div class="panel-heading">
+    Thumbnails ({{($ctrl.cdsDepositCtrl.currentMasterFile.frame||[]).length + ($ctrl.files | findBy:'context_type':'poster' || []).length }})
+    <span class="pull-right">
+      <a
+        ngf-model-options="{allowInvalid: false}"
+        ngf-drag-over-class="'cds-deposit-dragover'"
+        ngf-select="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=poster;media_type=image;custom_frame=true'})"
+        ng-click=""
+        ngf-accept="'image/*'"
+        ngf-pattern="'image/*'"
+        ngf-max-size="20GB"
+      ><i class="fa fa-plus-square"></i></a>
+    </span>
+  </div>
+  <div class="panel-body">
+    <div class="cds-deposit-thumbnail-pad">
+      <div class="cds-deposit-frame-thumbnail" ng-repeat="frame in $ctrl.cdsDepositCtrl.currentMasterFile.frame">
+        <a ng-href="{{ frame.links.self }}" target="_blank">
+          <img width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
+        </a>
+      </div>
+      <div class="cds-deposit-frame-thumbnail" ng-repeat="frame in $ctrl.files | findBy:'context_type':'poster'">
+        <a ng-href="{{ frame.links.self }}" target="_blank">
+          <img width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Thumbnail -->
+<!-- Subtitles -->
+<div class="panel panel-default"
+  ngf-drag-over-class="'cds-deposit-dragover'"
+  ngf-model-options="{allowInvalid: false}"
+  ngf-drop=""
+  ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
+  ngf-pattern="'.vtt'"
+  ngf-accept="'text/vtt'"
+  ngf-max-size="20GB"
+  ngf-multiple="true"
+  ng-switch="($ctrl.files | findBy:'context_type':'subtitle' || []).length"
+  >
+  <div class="panel-heading">
+    Subtitles
+    <span class="pull-right">
+      <a
+        ng-click=""
+        ngf-model-options="{allowInvalid: false}"
+        ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
+        ngf-select=""
+        ngf-pattern="'.vtt'"
+        ngf-accept="'.vtt'"
+        ngf-max-size="20GB"
+      ><i class="fa fa-plus-square"></i></a>
+    </span>
+  </div>
+  <div class="panel-body text-center" ng-switch-when="0">
+    <p class="text-muted text-center f7">
+      No subtitles.
+    </p>
+    <p class="text-muted text-center f8">
+      Drag & Drop <mark>vtt</mark> files here.
+    </p>
+  </div>
+  <table ng-switch-default class="table">
+    <tr>
+      <th>Filename</th>
+      <th>Size</th>
+      <th class="text-center">Progress</th>
+      <th class="text-center">Actions</th>
+    </tr>
+    <tr class="sel-file" ng-repeat="f in ($ctrl.files | findBy:'context_type':'subtitle' || [])">
+      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
+      <td>
+        <span ng-show="f.size != undefined">{{ f.size | bytesToHumanReadable }}</span>
+        <span ng-show="f.size == undefined">Unknown</span>
+      </td>
+      <td class="text-center">
+        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
+        <span ng-show="f.processing && !f.errored">Processing...</span>
+        <span ng-show="f.errored" class="text-danger">Error</span>
+        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">✓</span>
+      </td>
+      <td ng-show="f" class="text-center">
+        <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
+          <i class="fa fa-trash-o"></i>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- Subtitles -->
+<!-- Other -->
+<div ng-show="($ctrl.files | removeBy:'context_type':'poster' |removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' || []).length > 0" class="panel panel-default">
+  <div class="panel-heading">
+    Other files
+  </div>
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-sm-6">
+        <p ng-show="$ctrl.files.length > 0" class="text-muted">
+        </p>
+      </div>
+      <div class="col-sm-12">
+        <div class="form-group">
+          <input type="text" class="input-sm form-control" placeholder="Search" ng-model="fileSearch" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="table">
+    <tr>
+      <th>Filename</th>
+      <th>Size</th>
+      <th class="text-center">Progress</th>
+      <th class="text-center">Actions</th>
+    </tr>
+    <tr ng-show="($ctrl.files | removeBy:'context_type':'poster' | removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' | filter:fileSearch).length == 0">
+      <td colspan="4" class="text-center text-muted"> No results.</td>
+    </tr>
+    <tr class="sel-file" ng-repeat="f in $ctrl.files | removeBy:'context_type':'poster' | removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' | filter:fileSearch | orderBy:sortType:sortReverse | filter:fileSearch">
+      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
+      <td>
+        <span ng-show="f.size != undefined">{{ f.size | bytesToHumanReadable }}</span>
+        <span ng-show="f.size == undefined">Unknown</span>
+      </td>
+      <td class="text-center">
+        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
+        <span ng-show="f.processing && !f.errored">Processing...</span>
+        <span ng-show="f.errored" class="text-danger">Error</span>
+        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">✓</span>
+      </td>
+      <td ng-show="f" class="text-center">
+        <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
+          <i class="fa fa-trash-o"></i>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- Other -->
+<hr />
+<div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+  <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
+    <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
+    <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
+      <div
+           ngf-drag-over-class="'cds-deposit-dragover'"
+           ngf-drop=""
+           ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+           ngf-select=""
+           ngf-model-options="{allowInvalid: false}"
+           ngf-max-size="20GB"
+           ngf-multiple="true"
+      >
+        <div class="cds-deposit-box-upload-wrapper text-center">
+          <p class="cds-deposit-box-upload-icon">
+            <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
+          </p>
+          <div class="cds-deposit-box-upload-content">
+            <div class="cds-deposit-box-upload-title">
+              <h4>Select files to upload</h4>
+            </div>
+            <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
+          </div>
+        </div>
+      </div>
+      </div>
+    <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
+        <div ng-transclude></div>
+    </div>
+  </div>
+</div>
+<div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
+  <p>
+    Multiple files with the same filename are not allowed:
+  </p>
+  <ul>
+    <li ng-repeat="file in $ctrl.duplicateFiles">
+      {{ file }}
+    </li>
+  </ul>
+</div>

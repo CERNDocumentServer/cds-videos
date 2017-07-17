@@ -91,9 +91,14 @@ function cdsDepositCtrl(
   // The deposit can have the following depositStates
   this.$onInit = function() {
 
+    this.findFilesByContextType = function(type) {
+      return _.find(that.record._files, {'context_type': type});
+    }
+
     this.findMasterFile = function() {
-      return _.find(that.record._files, {'context_type': 'master'});
+      return this.findFilesByContextType('master');
     };
+
 
     function accessElement(obj, elem, value) {
       // Find an element inside an object given a path of properties

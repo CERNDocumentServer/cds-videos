@@ -117,16 +117,6 @@
       </td>
     </tr>
   </table>
-
-  <div ng-if="$ctrl.cdsDepositCtrl.master" class="panel-footer">
-   <div class="text-right">
-     <span class="text-muted" ng-show="$ctrl.loading">
-       <i class="fa fa-spinner fa-pulse fa-fw"></i>
-       <span class="sr-only">Loading...</span>
-     </span>
-     <button class="btn btn-sm btn-primary" type="submit" ng-disabled="$ctrl.loading || $ctrl.getCompleted().length === 0 || $ctrl.allFinished()" ng-click="$ctrl.upload()">Start upload</button>
-   </div>
- </div>
 </div>
 <hr />
 <div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
@@ -137,10 +127,11 @@
   <div class="tab-content">
     <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
       <div
-           ngf-drag-over-class="'dragover'"
+          ngf-drag-over-class="'cds-deposit-dragover'"
            ngf-drop=""
-           ngf-change="$ctrl.addFiles($newFiles)"
+           ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
            ngf-select=""
+           ngf-model-options="{allowInvalid: false}"
            ngf-max-size="20GB"
            ngf-multiple="true"
       >
@@ -152,7 +143,7 @@
             <div class="cds-deposit-box-upload-title">
               <h4>Select files to upload</h4>
             </div>
-            <p class="cds-deposit-box-upload-description"> Or drag and drop video files</p>
+            <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
           </div>
         </div>
       </div>
