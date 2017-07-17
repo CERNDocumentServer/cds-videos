@@ -48,6 +48,10 @@ function cdsUploaderCtrl(
     // Add the necessary flags
     data.percentage = 100;
     data.completed = true;
+    if (data.tags) {
+      // put the tags outside
+      data = angular.merge({}, data, data.tags || {});
+    }
     that.updateFile(
       key,
       data,
@@ -198,12 +202,17 @@ function cdsUploaderCtrl(
   function _prepareLocalFile(file) {
     // Add ``key`` key to be consistent with the backend. JS API for files
     // uses ``name`` instead of ``key``
+    var _headers = angular.merge(
+      {},
+      {
+        'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
+      },
+      file.headers || {}
+    );
     return {
       url: that.cdsDepositCtrl.guessEndpoint('BUCKET') + '/' + file.key,
       method: 'PUT',
-      headers: {
-        'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
-      },
+      headers: _headers,
       data: file
     };
   };
@@ -256,63 +265,76 @@ function cdsUploaderCtrl(
     // Add any files in the queue that are not completed
     Array.prototype.push.apply(this.queue, _.reject(this.files, {completed: true}));
 
-    this.addFiles = function(_files) {
+    this.addFiles = function(_files, invalidFiles, extraHeaders) {
       // Do nothing if files array is empty
       if (!_files) {
         return;
       }
+      // Remove any invalid files
+      _files = _.difference(_files, invalidFiles || []);
       // Make sure they have proper metadata
       angular.forEach(_files, function(file) {
         file.key = file.name;
         file.local = !file.receiver;
-      });
-      // Is master or not
-      if (that.cdsDepositCtrl.master) {
-        // Add new videos and files to master
-        that.cdsDepositsCtrl.addFiles(_files, this.queue);
-      } else {
-        // Get keys from existing files
-        var existingFiles = that.files.map(function(file) {
-          return file.key
-        });
-
-        // Exclude files that already exist
-        that.duplicateFiles = [];
-
-        // Add the files to the list
-        var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
-        var videoFiles = _.values(
-          that.cdsDepositsCtrl.filterOutFiles(_files).videos
-        );
-
-        // Exclude video files
-        _files = _.difference(_files, videoFiles);
-        // Remove any duplicate files
-        _files = _.reject(_files, function(file) {
-          if (existingFiles.includes(file.key)) {
-            that.duplicateFiles.push(file.key);
-            return true;
-          }
-          existingFiles.push(file.key);
-          return false;
-        });
-
-        // Send an alert for duplicate videos
-        if (that.duplicateFiles.length > 0) {
-          // Push a notification
-          toaster.pop({
-            type: 'error',
-            title: 'Duplicate file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
-            body: that.duplicateFiles.join(', '),
-            bodyOutputType: 'trustedHtml',
-            timeout: 6000
-          });
+        // Add any extra paramemters to the files
+        if (extraHeaders) {
+          file.headers = extraHeaders;
         }
+      });
+      // Get keys from existing files
+      var existingFiles = that.files.map(function(file) {
+        return file.key
+      });
 
-        // Add files to the list
-        Array.prototype.push.apply(that.files, _files);
-        // Add the files to the queue
-        Array.prototype.push.apply(that.queue, _files);
+      // Exclude files that already exist
+      that.duplicateFiles = [];
+
+      // Add the files to the list
+      var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
+      var videoFiles = _.values(
+        that.cdsDepositsCtrl.filterOutFiles(_files).videos
+      );
+
+      // Exclude video files
+      _files = _.difference(_files, videoFiles);
+      // Remove any duplicate files
+      _files = _.reject(_files, function(file) {
+        if (existingFiles.includes(file.key)) {
+          that.duplicateFiles.push(file.key);
+          return true;
+        }
+        existingFiles.push(file.key);
+        return false;
+      });
+
+      // Send an alert for duplicate videos
+      if (that.duplicateFiles.length > 0) {
+        // Push a notification
+        toaster.pop({
+          type: 'error',
+          title: 'Duplicate file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
+          body: that.duplicateFiles.join(', '),
+          bodyOutputType: 'trustedHtml',
+          timeout: 6000
+        });
+      }
+
+      if ((invalidFiles || []).length > 0) {
+        // Push a notification
+        toaster.pop({
+          type: 'error',
+          title: 'Invalid file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
+          body: _.map(invalidFiles, 'name').join(', '),
+          bodyOutputType: 'trustedHtml',
+          timeout: 6000
+        });
+      }
+
+      // Add files to the list
+      Array.prototype.push.apply(that.files, _files);
+      // Add the files to the queue
+      Array.prototype.push.apply(that.queue, _files);
+      if (!that.cdsDepositCtrl.master) {
         // Check for new master file
         var newMasterFile = videoFiles[0];
         if (newMasterFile) {
@@ -331,6 +353,7 @@ function cdsUploaderCtrl(
           });
         }
       }
+
       // Start upload automatically if the option is selected
       if (that.autoStartUpload) {
         that.upload();

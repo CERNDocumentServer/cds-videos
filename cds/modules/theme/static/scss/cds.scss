@@ -404,6 +404,14 @@ i.sort-handle {
   }
 }
 
+.cds-deposit-dragover {
+  border: 1px dashed $state-success-text;
+}
+
+.cds-deposit-dragover-error {
+  border: 1px dashed $state-danger-text;
+}
+
 .cds-deposit-side-nav-item-link {
   display: inline-block;
   padding: 4px 10px;
