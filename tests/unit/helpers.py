@@ -31,6 +31,7 @@ import json
 import random
 import uuid
 from time import sleep
+from os.path import join
 
 import mock
 import pkg_resources
@@ -472,3 +473,12 @@ def check_deposit_record_files(deposit, deposit_expected, record,
         record.files.bucket).all()]
     assert sorted(record_expected) == sorted(record_objs)
     assert record.files.bucket.locked is True
+
+
+def load_json(datadir, filename):
+    """Load file in json format."""
+    filepath = join(datadir, filename)
+    data = None
+    with open(filepath, 'r') as file_:
+        data = json.load(file_)
+    return data

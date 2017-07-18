@@ -231,10 +231,6 @@ setup(
             'categories = cds.modules.records.mappings',
             'keywords = cds.modules.records.mappings',
         ],
-        'invenio_jsonschemas.schemas': [
-            'marc21 = dojson.contrib.marc21.schemas',
-            'cds = cds_dojson.schemas',
-        ],
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.webhooks.tasks',
         ],

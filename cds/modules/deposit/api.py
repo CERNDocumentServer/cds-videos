@@ -183,14 +183,14 @@ class CDSDeposit(Deposit):
     def report_number(self):
         """Return report number."""
         try:
-            return self['report_number']['report_number']
+            return self['report_number'][0]
         except KeyError:
             return None
 
     @report_number.setter
     def report_number(self, value):
         """Set new report number."""
-        self['report_number'] = dict(report_number=value)
+        self['report_number'] = [value]
 
     def _publish_new(self, id_=None):
         """Mint report number immediately before first publishing."""
