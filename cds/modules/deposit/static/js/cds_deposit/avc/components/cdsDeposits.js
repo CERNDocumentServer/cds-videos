@@ -158,7 +158,7 @@ function cdsDepositsCtrl(
     var videoExtensions = (that.videoExtensions || 'mp4,mkv,mov').split(',');
     var fileKey = null;
     videoExtensions.forEach(function(ext) {
-      if (key.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+      if (key.toLowerCase().endsWith(ext.toLowerCase())) {
         fileKey = that.extractBasename(key);
       }
     });
@@ -207,11 +207,13 @@ function cdsDepositsCtrl(
     return _files;
   };
 
-  this.addFiles = function(files, filesQueue) {
+  this.addFiles = function(files, invalidFiles) {
     // Do nothing if files array is empty
     if (!files) {
       return;
     }
+    // remove invalid files
+    files = _.difference(files, invalidFiles || []);
     // Filter files by videos and project
     var _files = this.filterOutFiles(files);
     var createMaster;
@@ -224,9 +226,6 @@ function cdsDepositsCtrl(
     }
 
     createMaster.then(function() {
-      if (filesQueue) {
-        Array.prototype.push.apply(filesQueue, _files.project);
-      }
       var master_id = that.master.metadata._deposit.id;
 
       // Build the promises
@@ -262,6 +261,16 @@ function cdsDepositsCtrl(
         });
       }
 
+      if ((invalidFiles || []).length > 0) {
+        // Push a notification
+        toaster.pop({
+          type: 'error',
+          title: 'Invalid file(s)',
+          body: _.map(invalidFiles, 'name').join(', '),
+          bodyOutputType: 'trustedHtml',
+          timeout: 6000
+        });
+      }
       // for each files create child
       angular.forEach(
         _files.videos,

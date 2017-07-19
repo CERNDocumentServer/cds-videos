@@ -13,7 +13,7 @@ function cdsDepositsConfig(
   sfErrorMessageProvider,
   jwtProvider,
   $httpProvider,
-  $compileProvider,
+  $compileProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
