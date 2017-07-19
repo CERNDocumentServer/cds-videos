@@ -12,12 +12,12 @@
               <div
                    ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
                    ngf-drop=""
-                   ngf-change="$ctrl.addFiles($newFiles)"
+                   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
                    ngf-select=""
                    ngf-max-size="20GB"
                    ngf-multiple="true"
-                   ngf-accept="'video/*'"
-                   ngf-pattern="{{$ctrl.videoExtensions}}"
+                   ngf-accept="'{{$ctrl.videoExtensions}}'"
+                   ngf-pattern="'{{$ctrl.videoExtensions}}'"
               >
                 <div class="cds-deposit-box-upload-wrapper text-center">
                   <p class="cds-deposit-box-upload-icon">
@@ -206,8 +206,8 @@
                      ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
                      ngf-model-options="{allowInvalid: false}"
                      ngf-select=""
-                     ngf-accept="'video/mp4,video/mov,video/mkv'"
-                     ngf-pattern="{{$ctrl.videoExtensions}}"
+                     ngf-accept="'{{$ctrl.videoExtensions}}'"
+                     ngf-pattern="'{{$ctrl.videoExtensions}}'"
                      ngf-max-size="20GB"
                      ngf-multiple="true"
                 >
