@@ -36,6 +36,7 @@
 html, body {
   font-family: 'PT Sans', sans-serif;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
 }
 
 a[ng-click]{
@@ -387,18 +388,18 @@ i.sort-handle {
   display: block;
   padding: 4px 10px;
   border-radius: 3px;
-  color: $state-info-text;
+  color: $panel-default-text;
   &:hover {
-    background-color: $state-info-bg;
-    color: $state-info-text;
+    background-color: $panel-primary-heading-bg;
+    color: $panel-primary-text;
     text-decoration: none!important;
   }
   &.active {
-    background-color: $state-info-bg;
-    color: $state-info-text;
+    background-color: $panel-primary-heading-bg;
+    color: $panel-primary-text;
     &:hover {
-      background-color: $state-info-bg;
-      color: $state-info-text;
+      background-color: $panel-primary-heading-bg;
+      color: $panel-primary-text;
       text-decoration: none!important;
     }
   }

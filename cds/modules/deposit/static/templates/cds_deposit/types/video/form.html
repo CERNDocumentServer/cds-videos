@@ -16,7 +16,7 @@
 <!-- Fill metadata suggestion -->
 <div class="alert alert-warning alert-dismissible" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
   <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Extracted metadata can be used to automatically fill part of the form. <button ng-click="metadataModal = true" class="btn pl-0 btn-link">Click here to fill the metadata</button>
+  Extracted metadata can be used to automatically fill part of the form. <a ng-click="metadataModal = true">Click here to see the extracted metadata</a>
 </div>
 <modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="75%">
   <ul>
@@ -148,7 +148,7 @@
                 </li>
                 <li role="presentation" ng-class="{active: active=='licenses'}">
                   <a ng-click="active='licenses'" role="tab" data-toggle="tab">
-                    Licenses
+                    Licences
                     <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-circle text-danger"></i></small>
                   </a>
                 </li>
