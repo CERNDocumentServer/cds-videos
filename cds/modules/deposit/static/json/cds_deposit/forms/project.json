@@ -171,14 +171,14 @@
         "cursor": "move",
         "axis": "y"
       },
-      "add": "Add another license",
+      "add": "Add another licence",
       "inline": true,
       "items": [
         {
           "type": "uiselect",
           "key": "license[].license",
           "notitle": false,
-          "title": "License",
+          "title": "Licence",
           "placeholder": "License name",
           "options": {
             "refreshDelay": 100,

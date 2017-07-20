@@ -48,6 +48,8 @@
 
         var configuration = {
           playbackRates: [0.5, 1, 2],
+          // Start with high quality
+          initialRendition: 'high',
           {% for key, value in theo_config %}
             {{ key }}: "{{ value }}",
           {% endfor %}

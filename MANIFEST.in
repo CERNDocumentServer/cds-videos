@@ -50,6 +50,7 @@ recursive-include cds *.json
 recursive-include cds *.less
 recursive-include cds *.png
 recursive-include cds *.png
+recursive-include cds *.ico
 recursive-include cds *.scss
 recursive-include cds *.smil
 recursive-include cds *.svg
