@@ -85,7 +85,7 @@
       <div class="row">
         <div class="col-md-3">
           <div hl-sticky media-query="min-width: 990px" offset-top="20" class="cds-deposit-box">
-            <a offset="200" du-scrollspy="{{$ctrl.master.metadata._deposit.id}}" du-smooth-scroll ng-href="#{{$ctrl.master.metadata._deposit.id}}" class="active text-capitalize f8 mt-5 mb-10 cds-deposit-side-nav-item-header">
+            <a offset="200" du-scrollspy="{{$ctrl.master.metadata._deposit.id}}" du-smooth-scroll ng-href="#{{$ctrl.master.metadata._deposit.id}}" class="active f8 mt-5 mb-10 cds-deposit-side-nav-item-header">
             <i class="fa fa-list-ul"></i>  {{ ($ctrl.master.metadata.title.title) ?  ($ctrl.master.metadata.title.title | limitTo:45) : 'No project title' }} <span ng-show="$ctrl.master.metadata.title.title.length > 45">[...]</span>
             </a>
             <ul class="mt-10 list-unstyled" ng-repeat="vid in $ctrl.master.metadata.videos">
@@ -151,8 +151,8 @@
               schema="$ctrl.childrenSchemaResolved"
               record="child"
             >
-              <div class="panel panel-default bg-w">
-                <div class="panel-heading text-muted">
+              <div class="panel panel-default">
+                <div class="panel-heading text-muted pa-10">
                   <span class="text-muted">
                     <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
                   </span>
@@ -194,12 +194,12 @@
           <!-- /ADD children -->
           <!-- Uploader Extra -->
           <div id="cds-deposit-main-uploader" class="cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
-            <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
-              <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
-              <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
+            <ul class="nav nav-pills cds-pills-center" ng-init="global_active_uploader='local'">
+              <li ng-class="{active: global_active_uploader=='local'}"><a ng-click="global_active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
+              <li ng-class="{active: global_active_uploader=='remote'}"><a ng-click="global_active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
             </ul>
             <div class="tab-content">
-              <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
+              <div class="tab-pane" ng-class="{active: global_active_uploader=='local'}">
                 <div
                      ngf-drag-over-class="'cds-deposit-dragover'"
                      ngf-drop=""
@@ -225,8 +225,17 @@
                   </div>
                 </div>
                 </div>
-              <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
-                  <div ng-transclude></div>
+              <div class="tab-pane" ng-class="{active: global_active_uploader=='remote'}">
+                <cds-remote-uploader
+                    template="/static/templates/cds_deposit/remote_upload.html"
+                    dropbox-enabled="true"
+                    dropbox-selector=".dropbox-upload"
+                    dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
+                    remote-master-receiver="/api/hooks/receivers/avc/events/"
+                    remote-children-receiver="/api/hooks/receivers/downloader/events/"
+                >
+                  <div class="dropbox-upload"></div>
+                </cds-remote-uploader>
               </div>
             </div>
           </div>
