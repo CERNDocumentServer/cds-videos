@@ -25,7 +25,5 @@
 
 {%- extends "cds_previewer/video.html" %}
 
-{% set theo_config = [('socialSharing', 'http://cds.cern.ch'+'{{file_url}}'),
-                      ('isEmbeddable', 'true')]
-%}
-{% set video_classes = 'theoplayer-show-social-sharing-button' %}
+{% set theo_config = {'socialSharing': True} %}
+{% set video_classes = '' %}
