@@ -85,7 +85,7 @@ class DataCiteSchemaV1(Schema):
     def get_descriptions(self, obj):
         """Get descriptions."""
         items = []
-        desc = obj['metadata'].get('description', []).get('value')
+        desc = obj['metadata'].get('description')
         if desc:
             items.append({
                 'description': desc,

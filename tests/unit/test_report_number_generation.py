@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2017, 2017 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -58,7 +58,7 @@ def test_one_video(db, api_project):
     """Test one video."""
     project, video_1, video_2 = api_project
     prepare_videos_for_publish([video_1, video_2])
-    check_deposit(video_1.publish(), 'CERN-MOVIE-2016-1-1')
+    check_deposit(video_1.publish(), 'CERN-MOVIE-2017-1-1')
 
 
 def test_only_videos(db, api_project):
@@ -67,14 +67,14 @@ def test_only_videos(db, api_project):
     prepare_videos_for_publish([video_1, video_2])
     for i, video in enumerate([video_1, video_2]):
         video = video.publish()
-        check_deposit(video, 'CERN-MOVIE-2016-1-{}'.format(i + 1))
+        check_deposit(video, 'CERN-MOVIE-2017-1-{}'.format(i + 1))
 
 
 def test_only_project(db, api_project):
     """Test only project."""
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
-    check_deposit(project.publish(), 'CERN-MOVIE-2016-1')
+    check_deposit(project.publish(), 'CERN-MOVIE-2017-1')
 
 
 def test_project_and_videos(db, api_project):
@@ -82,9 +82,9 @@ def test_project_and_videos(db, api_project):
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     project = project.publish()
-    check_deposit(project, 'CERN-MOVIE-2016-1')
+    check_deposit(project, 'CERN-MOVIE-2017-1')
     for i, video in enumerate(record_video_resolver_sorted(project.video_ids)):
-        check_deposit(video, 'CERN-MOVIE-2016-1-{}'.format(i + 1))
+        check_deposit(video, 'CERN-MOVIE-2017-1-{}'.format(i + 1))
 
 
 def test_video_then_project(db, api_project):
@@ -92,11 +92,11 @@ def test_video_then_project(db, api_project):
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     video_1 = video_1.publish()
-    check_deposit(video_1, 'CERN-MOVIE-2016-1-1')
+    check_deposit(video_1, 'CERN-MOVIE-2017-1-1')
 
     project = video_1.project
     project = project.publish()
-    check_deposit(project, 'CERN-MOVIE-2016-1')
+    check_deposit(project, 'CERN-MOVIE-2017-1')
 
     video_2 = record_video_resolver_sorted(project.video_ids)[1]
-    check_deposit(video_2, 'CERN-MOVIE-2016-1-2')
+    check_deposit(video_2, 'CERN-MOVIE-2017-1-2')

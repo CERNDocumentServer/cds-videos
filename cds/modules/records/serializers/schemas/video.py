@@ -27,8 +27,8 @@ from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, \
-    DepositSchema, DescriptionSchema, KeywordsSchema, LicenseSchema, \
-    OaiSchema, RelatedLinksSchema, ReportNumberSchema, StrictKeysSchema, \
+    DepositSchema, KeywordsSchema, LicenseSchema, \
+    OaiSchema, RelatedLinksSchema, StrictKeysSchema, \
     TitleSchema, TranslationsSchema
 from .doi import DOI
 
@@ -78,7 +78,7 @@ class VideoSchema(StrictKeysSchema):
     _deposit = fields.Nested(VideoDepositSchema, required=True)
     _cds = fields.Nested(_CDSSSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
-    description = fields.Nested(DescriptionSchema, required=True)
+    description = fields.Str(required=True)
     date = DateString(required=True)
     category = fields.Str()
     type = fields.Str()
@@ -100,7 +100,7 @@ class VideoSchema(StrictKeysSchema):
     related_links = fields.Nested(RelatedLinksSchema, many=True)
     schema = fields.Str(attribute="$schema", dump_to='$schema')
     translations = fields.Nested(TranslationsSchema, many=True)
-    report_number = fields.Nested(ReportNumberSchema, many=False)
+    report_number = fields.List(fields.Str, many=True)
     publication_date = fields.Str()
 
     @post_load(pass_many=False)

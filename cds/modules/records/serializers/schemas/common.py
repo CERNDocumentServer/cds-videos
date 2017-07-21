@@ -129,13 +129,6 @@ class TitleTranslationSchema(StrictKeysSchema):
     title = fields.Str(required=True)
 
 
-class DescriptionSchema(StrictKeysSchema):
-    """Description schema."""
-
-    source = fields.Str()
-    value = fields.Str(required=True, allow_none=False, validate=Length(min=3))
-
-
 class DepositSchema(StrictKeysSchema):
     """Deposit schema."""
 
@@ -153,18 +146,11 @@ class BucketSchema(StrictKeysSchema):
     record = fields.Str()
 
 
-class ReportNumberSchema(StrictKeysSchema):
-    """ReportNumber schema."""
-
-    report_number = fields.Str()
-    _report_number = fields.Str()
-
-
 class TranslationsSchema(StrictKeysSchema):
     """Translations schema."""
 
     title = fields.Nested(TitleSchema)
-    description = fields.Nested(DescriptionSchema)
+    description = fields.Str()
     language = fields.Str()
 
 

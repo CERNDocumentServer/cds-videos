@@ -126,7 +126,7 @@ def _mint_pids(record):
     )
     PersistentIdentifier.create(
         pid_type='rn',
-        pid_value=record['report_number']['report_number'],
+        pid_value=record['report_number'][0],
         pid_provider=None,
         object_type='rec',
         object_uuid=record.id,

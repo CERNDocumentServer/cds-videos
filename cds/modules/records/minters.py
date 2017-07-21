@@ -48,7 +48,7 @@ def report_number_minter(record_uuid, data, **kwargs):
     assert 'report_number' not in data
     provider = CDSReportNumberProvider.create(
         object_type='rec', object_uuid=record_uuid, data=data, **kwargs)
-    data['report_number'] = dict(report_number=provider.pid.pid_value)
+    data['report_number'] = [provider.pid.pid_value]
     return provider.pid.pid_value
 
 
