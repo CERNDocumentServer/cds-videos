@@ -73,7 +73,7 @@ def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
     ObjectVersion.create(bucket=bucket_id, key=filename_2,
                          stream=open(video, 'rb'))
 
-    success_list = ['theoplayer.onReady', 'playbackRates']
+    success_list = ['new THEOplayer.Player', 'player.source']
 
     if publish:
         prepare_videos_for_publish([video_1])

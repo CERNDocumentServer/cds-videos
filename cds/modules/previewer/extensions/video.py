@@ -52,6 +52,7 @@ class VideoExtension(object):
             m3u8_url=getattr(file, 'm3u8_uri', None),
             thumbnails_url=getattr(file, 'thumbnails_uri', None),
             poster_url=getattr(file, 'poster_uri', None),
+            embed_url=getattr(file, 'embed_uri', None),
             subtitles=getattr(file, 'subtitles', []),
             embed=self.embed,
             vr=getattr(file, 'vr', False),

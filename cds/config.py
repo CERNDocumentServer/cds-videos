@@ -618,13 +618,15 @@ PREVIEWER_PREFERENCE = [
     'zip',
     'cds_deposit_video',
 ]
+# Previewer base template
+PREVIEWER_BASE_TEMPLATE = 'cds_previewer/base.html'
 # Licence key for THEO player
 THEO_LICENCE_KEY = None
 # Wowza server URL for m3u8 playlist generation
-WOWZA_PLAYLIST_URL = ('https://wowzaqaedge.cern.ch/cds/_definist_/smil:'
+WOWZA_PLAYLIST_URL = ('https://wowza.cern.ch/cds/_definist_/smil:'
                       '{filepath}/playlist.m3u8')
 WOWZA_VIDEO_URL = \
-    'https://wowzaqaedge.cern.ch/cds/_definist_/mp4:%s/playlist.m3u8'
+    'https://wowza.cern.ch/cds/_definist_/mp4:%s/playlist.m3u8'
 # Size
 VIDEO_POSTER_SIZE = (180, 101)
 
