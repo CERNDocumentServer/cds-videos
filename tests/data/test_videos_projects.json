@@ -2,16 +2,14 @@
   {
     "date": "2017-01-16",
     "duration": "00:01:00",
-    "description": {
-      "value": "Video file"
-    },
+    "description": "Video file",
     "title": {
       "title": "Video"
     },
     "publication_date": "2017-03-09",
-    "report_number": {
-      "report_number": "Category-Type-2017-3-2"
-    },
+    "report_number": [
+      "Category-Type-2017-3-2"
+    ],
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category",
@@ -32,23 +30,33 @@
           }
         ],
         "name": "Do, John",
-        "role": "Camera operator"
+        "role": "Camera Operator"
       }
-    ]
+    ],
+    "copyright": {
+      "holder": "CERN",
+      "url": "http://copyright.web.cern.ch",
+      "year": "2017"
+    },
+    "license": [
+      {
+        "license": "CERN",
+        "url": "http://copyright.web.cern.ch"
+      }
+    ],
+    "language": "en"
   },
   {
     "date": "2017-01-16",
     "duration": "00:01:00",
-    "description": {
-      "value": "Different video file"
-    },
+    "description": "Different video file",
     "title": {
       "title": "Video"
     },
     "publication_date": "2017-03-09",
-    "report_number": {
-      "report_number": "Category-Type-2017-3-3"
-    },
+    "report_number": [
+      "Category-Type-2017-3-3"
+    ],
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category",
@@ -69,24 +77,33 @@
           }
         ],
         "name": "Hello, World",
-        "role": "Camera operator"
+        "role": "Camera Operator"
       }
-    ]
-
+    ],
+    "copyright": {
+      "holder": "CERN",
+      "url": "http://copyright.web.cern.ch",
+      "year": "2017"
+    },
+    "license": [
+      {
+        "license": "CERN",
+        "url": "http://copyright.web.cern.ch"
+      }
+    ],
+    "language": "en"
   },
   {
     "date": "2017-01-16",
     "duration": "00:01:00",
-    "description": {
-      "value": "Video file"
-    },
+    "description": "Video file",
     "title": {
       "title": "Video"
     },
     "publication_date": "2017-03-09",
-    "report_number": {
-      "report_number": "Category-Type-2017-3-4"
-    },
+    "report_number": [
+      "Category-Type-2017-3-4"
+    ],
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
     "type": "Type",
     "category": "Category",
@@ -107,22 +124,31 @@
           }
         ],
         "name": "Fuu, Bar",
-        "role": "Camera operator"
+        "role": "Camera Operator"
       }
-    ]
-
+    ],
+    "copyright": {
+      "holder": "CERN",
+      "url": "http://copyright.web.cern.ch",
+      "year": "2017"
+    },
+    "license": [
+      {
+        "license": "CERN",
+        "url": "http://copyright.web.cern.ch"
+      }
+    ],
+    "language": "en"
   },
   {
     "date": "2017-01-17",
-    "description": {
-      "value": "Project record"
-    },
+    "description": "Project record",
     "title": {
       "title": "Project"
     },
-    "report_number": {
-      "report_number": "Category-Type-2017-3"
-    },
+    "report_number": [
+      "Category-Type-2017-3"
+    ],
     "type": "Type",
     "$schema": "https://cdslabs.cern.ch/schemas/records/videos/project/project-v1.0.0.json",
     "category": "Category",
@@ -144,9 +170,20 @@
           }
         ],
         "name": "Test, Test2",
-        "role": "Camera operator"
+        "role": "Camera Operator"
       }
-    ]
-
+    ],
+    "copyright": {
+      "holder": "CERN",
+      "url": "http://copyright.web.cern.ch",
+      "year": "2017"
+    },
+    "license": [
+      {
+        "license": "CERN",
+        "url": "http://copyright.web.cern.ch"
+      }
+    ],
+    "language": "en"
   }
 ]

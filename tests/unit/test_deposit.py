@@ -116,7 +116,7 @@ def test_publish_process_files(api_app, db, location):
             category='cat',
             type='type',
             title=dict(title='title'),
-            report_number=dict(report_number='1234'),
+            report_number=['1234'],
             videos=[]),
         bucket_location='videos')
 
@@ -181,7 +181,7 @@ def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
 def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata):
     """Test deposit prepare edit."""
     # create new deposit
-    project_deposit_metadata['report_number'] = {'report_number': '123'}
+    project_deposit_metadata['report_number'] = ['123']
     deposit = CDSDeposit.create(project_deposit_metadata,
                                 bucket_location=location.name)
     assert deposit.is_published() is False

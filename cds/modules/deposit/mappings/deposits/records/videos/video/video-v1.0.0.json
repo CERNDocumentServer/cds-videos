@@ -4,15 +4,7 @@
       "date_detection": true,
       "properties": {
         "report_number": {
-          "properties": {
-            "_report_number": {
-              "type": "string"
-            },
-            "report_number": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "_project_id":{
               "type": "string"
@@ -249,15 +241,7 @@
           }
         },
         "description": {
-          "properties": {
-            "source": {
-              "type": "string"
-            },
-            "value": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "contributors": {
           "properties": {

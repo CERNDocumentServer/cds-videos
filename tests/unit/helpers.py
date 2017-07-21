@@ -261,31 +261,29 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
         'title': {
             'title': 'my project',
         },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
+        'description': 'in tempor reprehenderit enim eiusmod',
     }
     project_data.update(deposit_metadata)
     project_video_1 = {
         'title': {
             'title': 'video 1',
         },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
+        'description': 'in tempor reprehenderit enim eiusmod',
         'featured': True,
         'vr': True,
+        'language': 'en',
+        'date': '2017-09-25',
     }
     project_video_1.update(deposit_metadata)
     project_video_2 = {
         'title': {
             'title': 'video 2',
         },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
+        'description': 'in tempor reprehenderit enim eiusmod',
         'featured': False,
         'vr': False,
+        'language': 'en',
+        'date': '2017-09-25',
     }
     project_video_2.update(deposit_metadata)
     with app.test_request_context():

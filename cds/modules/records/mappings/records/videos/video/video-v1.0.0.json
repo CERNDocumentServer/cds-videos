@@ -94,29 +94,13 @@
           }
         },
         "description": {
-          "type": "object",
-          "properties": {
-            "source": {
-              "type": "string"
-            },
-            "value": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         },
         "translations": {
           "type": "object",
           "properties": {
             "description": {
-              "type": "object",
-              "properties": {
-                "source": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
+              "type": "string"
             },
             "language": {
               "type": "string"
@@ -287,15 +271,7 @@
           }
         },
         "report_number": {
-          "properties": {
-            "_report_number": {
-              "type": "string"
-            },
-            "report_number": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "language": {
           "type": "string"

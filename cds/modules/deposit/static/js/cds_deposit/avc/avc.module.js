@@ -61,7 +61,7 @@ function cdsDepositsConfig(
       },
       'description': function(deposit, metadata){
         if('description' in metadata){
-          deposit.description = {value: metadata.description};
+          deposit.description = metadata.description;
           return metadata.description;
         }
       },
@@ -88,7 +88,7 @@ function cdsDepositsConfig(
   inheritedPropertiesProvider.setValues([
     'contributors',
     'date',
-    'description.value',
+    'description',
     'keywords',
     'title.title',
   ]);

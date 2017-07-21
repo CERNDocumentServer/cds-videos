@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -24,11 +24,10 @@ from marshmallow import fields, post_load, Schema
 from invenio_jsonschemas import current_jsonschemas
 
 from ....deposit.api import Project, deposit_video_resolver
-from ..fields.datetime import DateString
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, \
-    DepositSchema, DescriptionSchema, LicenseSchema, \
-    OaiSchema, ReportNumberSchema, StrictKeysSchema, TitleSchema, \
+    DepositSchema, LicenseSchema, \
+    OaiSchema, StrictKeysSchema, TitleSchema, \
     TranslationsSchema, KeywordsSchema
 from .doi import DOI
 
@@ -64,8 +63,7 @@ class ProjectSchema(StrictKeysSchema):
     _deposit = fields.Nested(ProjectDepositSchema, required=True)
     _cds = fields.Nested(_CDSSSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
-    description = fields.Nested(DescriptionSchema, required=True)
-    date = DateString()
+    description = fields.Str()
     category = fields.Str(required=True)
     type = fields.Str(required=True)
 
@@ -80,7 +78,7 @@ class ProjectSchema(StrictKeysSchema):
     schema = fields.Str(attribute='$schema', dump_to='$schema')
     videos = fields.Method(deserialize='get_videos_refs')
     translations = fields.Nested(TranslationsSchema, many=True)
-    report_number = fields.Nested(ReportNumberSchema, many=False)
+    report_number = fields.List(fields.Str, many=True)
     publication_date = fields.Str()
 
     @post_load(pass_many=False)

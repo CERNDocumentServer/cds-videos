@@ -52,14 +52,14 @@ class VideoDrupal(object):
         """Format video."""
         record = self._record
         entry = {
-            'caption_en': record.get('description', {}).get('value', ''),
-            'caption_fr': self.get_translation('description', 'value', 'fr'),
+            'caption_en': record.get('description', ''),
+            'caption_fr': self.get_translation('description', None, 'fr'),
             'copyright_date': record.get('copyright', {}).get('year', ''),
             'copyright_holder': record.get('copyright', {}).get('holder', ''),
             'creation_date': self.creation_date,
             'directors': self.contributors('Director'),
             'entry_date': format_datetime(record['date']),
-            'id': record['report_number']['report_number'],
+            'id': record['report_number'][0],
             'keywords': self.keywords,
             'license_body': record.get('license', [{}])[0].get('license', ''),
             'license_url': record.get('license', [{}])[0].get('url', ''),
@@ -79,7 +79,10 @@ class VideoDrupal(object):
             lambda t: t.get('language') == lang_code,
             self._record.get('{0}_translations'.format(field_name), [])))
         if len(titles) != 0:
-            return titles[0][subfield_name]
+            if subfield_name:
+                return titles[0][subfield_name]
+            else:
+                return titles[0]['value']
         return ''
 
     @property

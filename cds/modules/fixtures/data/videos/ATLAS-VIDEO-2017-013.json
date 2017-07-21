@@ -30,9 +30,7 @@
 
   ],
   "date": "2017-05-19",
-  "description": {
-    "value": "Tales of the tile calorimeter."
-  },
+  "description": "Tales of the tile calorimeter.",
   "keywords": [
     {
       "name": "TileCal"
@@ -65,9 +63,9 @@
   ],
   "publication_date": "2017-06-02",
   "recid": 1,
-  "report_number": {
-    "report_number": "ATLAS-VIDEO-2017-013"
-  },
+  "report_number": [
+    "ATLAS-VIDEO-2017-013"
+  ],
   "title": {
     "title": "Tales of the tile calorimeter"
   },
@@ -107,9 +105,7 @@
         "year": "2017"
       },
       "date": "2017-05-19",
-      "description": {
-        "value": "This video is about the work that took place on the Tile Calorimeter during the 2015/2017 EYETS"
-      },
+      "description": "This video is about the work that took place on the Tile Calorimeter during the 2015/2017 EYETS",
       "duration": "00:02:52.000",
       "featured": false,
       "keywords": [
@@ -146,9 +142,9 @@
       "publication_date": "2017-06-02",
       "recid": 2,
       "related_links": [],
-      "report_number": {
-        "report_number": "ATLAS-VIDEO-2017-013-001"
-      },
+      "report_number": [
+        "ATLAS-VIDEO-2017-013-001"
+      ],
       "title": {
         "title": "Tales of the Tile Calorimeter"
       },

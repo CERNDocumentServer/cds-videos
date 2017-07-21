@@ -46,7 +46,7 @@ function cdsDepositCtrl(
   this.metadataToFill = false;
 
   // Ignore server validation errors for the following fields
-  this.noValidateFields = ['description.value'];
+  this.noValidateFields = ['description'];
 
   this.previewer = null;
 

@@ -30,6 +30,7 @@ import time
 import mock
 import pytest
 
+from jsonschema.exceptions import ValidationError
 from celery import states
 from werkzeug.utils import import_string
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
@@ -156,9 +157,13 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     recid = PersistentIdentifier.get('depid', cds_depid).object_uuid
     # simulate a no fully filled record
     record = Record.get_record(recid)
-    del record['date']
+    if 'title' in record:
+        del record['title']
     validator = 'cds.modules.records.validators.PartialDraft4Validator'
+    with pytest.raises(ValidationError):
+        record.commit()
     record.commit(validator=import_string(validator))
+
     # Extract metadata
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
@@ -166,8 +171,6 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     task_s = ExtractMetadataTask().s(uri=video,
                                      version_id=obj_id,
                                      deposit_id=dep_id)
-
-    # Extract metadata
     task_s.delay()
 
     # Check that deposit's metadata got updated
@@ -463,7 +466,7 @@ def test_sync_records_with_deposits(app, db, location,
     """Test sync records with deposits task."""
     # create a project
     project = Project.create(project_deposit_metadata)
-    project_deposit_metadata['report_number'] = {'report_number': '123'}
+    project_deposit_metadata['report_number'] = ['123']
     # create new video
     video_deposit_metadata['_project_id'] = project['_deposit']['id']
     deposit = Video.create(video_deposit_metadata)

@@ -157,26 +157,10 @@
           }
         },
         "report_number": {
-          "properties": {
-            "_report_number": {
-              "type": "string"
-            },
-            "report_number": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "description": {
-          "properties": {
-            "value": {
-              "type": "string"
-            },
-            "source": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "_oai": {
           "properties": {
@@ -196,15 +180,7 @@
           "type": "object",
           "properties": {
             "description": {
-              "type": "object",
-              "properties": {
-                "source": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
+              "type": "string"
             },
             "language": {
               "type": "string"
