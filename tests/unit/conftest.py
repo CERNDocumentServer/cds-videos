@@ -385,7 +385,6 @@ def api_cds_jsonresolver(api_app):
 def deposit_metadata():
     """General deposit metadata."""
     return {
-        'date': '2016-12-03T00:00:00Z',
         'category': 'CERN',
         'type': 'MOVIE',
         "contributors": [
@@ -405,7 +404,7 @@ def deposit_metadata():
                     }
                 ],
                 "name": "Do, John",
-                "role": "Camera operator"
+                "role": "Camera Operator"
             }
         ],
         '_cds': {},
@@ -420,9 +419,7 @@ def project_deposit_metadata(deposit_metadata):
             'title': 'my project',
             'subtitle': 'tempor quis elit mollit',
         },
-        'description': {
-            'value': 'in tempor reprehenderit enim eiusmod',
-        },
+        'description': 'in tempor reprehenderit enim eiusmod',
         'contributors': [
             {
                 'name': 'amet',
@@ -430,7 +427,7 @@ def project_deposit_metadata(deposit_metadata):
             },
             {
                 'name': 'in tempor reprehenderit enim eiusmod',
-                'role': 'Camera operator',
+                'role': 'Camera Operator',
                 'email': '1bABAg03RaVG3@JTHWJUUBLgqpgfaagop.wsx',
             },
             {
@@ -452,8 +449,10 @@ def video_deposit_metadata(deposit_metadata):
     """Video deposit metadata."""
     metadata = dict(
         title=dict(title='test video',),
-        description=dict(value='in tempor reprehenderit enim eiusmod',),
+        description='in tempor reprehenderit enim eiusmod',
         featured=True,
+        language='en',
+        date='2016-12-03T00:00:00Z',
     )
     metadata.update(deposit_metadata)
     return metadata

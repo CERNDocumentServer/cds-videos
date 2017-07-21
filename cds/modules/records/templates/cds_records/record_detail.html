@@ -6,7 +6,7 @@
     <meta property="og:url" content="{{ url_for('invenio_records_ui.recid', pid_value=record['recid'], _external=True) }}" />
     <meta property="og:type" content="video" />
     <meta property="og:title" content="{{ record['title']['title'] }}" />
-    <meta property="og:description" content="{{ record['description']['value'] }}" />
+    <meta property="og:description" content="{{ record['description'] }}" />
     {%- if type == 'video' %}
       <meta property="og:image" content="{{ url_for('invenio_records_ui.recid_files',
                                                     pid_value=pid.pid_value,

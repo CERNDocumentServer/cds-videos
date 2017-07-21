@@ -39,15 +39,20 @@ from cds.modules.deposit.loaders.loader import MarshmallowErrors
 @pytest.mark.parametrize('remove_key, loader', [
     (key, loader)
     for key in ['title.title']
-    for loader in [project_loader, video_loader]
+    for loader in [('project', project_loader), ('video', video_loader)]
 ])
-def test_missing_fields(
-        es, location, project_deposit_metadata, remove_key, loader):
+def test_missing_fields(es, location, project_deposit_metadata,
+                        video_deposit_metadata, remove_key, loader):
     """Test project deposit validation errors due to missing fields."""
+    type_, loader = loader
+    if type_ == 'video':
+        deposit_metadata = video_deposit_metadata
+    else:
+        deposit_metadata = project_deposit_metadata
     # Remove key in path
     key_path = remove_key.split('.')
-    project_deposit_metadata['_deposit'] = {'id': '123456'}
-    sub = project_deposit_metadata
+    deposit_metadata['_deposit'] = {'id': '123456'}
+    sub = deposit_metadata
     for k in key_path[:-1]:
         sub = sub[k]
     del sub[key_path[-1]]
@@ -55,7 +60,7 @@ def test_missing_fields(
     with current_app.test_request_context(
         '/api/deposits/project',
             method='PUT',
-            data=json.dumps(project_deposit_metadata),
+            data=json.dumps(deposit_metadata),
             content_type='application/json'):
             with pytest.raises(MarshmallowErrors) as errors:
                 loader()
@@ -67,27 +72,35 @@ def test_missing_fields(
 
 @pytest.mark.parametrize('add_key, loader', [
     (key, loader)
-    for key in ['invalid', 'title.id', 'description.id']
-    for loader in [project_loader, video_loader,
-                   partial_project_loader, partial_video_loader]
+    for key in ['invalid', 'title.id']
+    for loader in [('project', project_loader),
+                   ('video', video_loader),
+                   ('project', partial_project_loader),
+                   ('video', partial_video_loader)]
 ])
-def test_unknown_fields(
-        es, location, project_deposit_metadata, add_key, loader):
+def test_unknown_fields(es, project_deposit_metadata, video_deposit_metadata,
+                        location, add_key, loader):
     """Test validation error due to unknown fields."""
+    type_, loader = loader
+    if type_ == 'video':
+        deposit_metadata = video_deposit_metadata
+    else:
+        deposit_metadata = project_deposit_metadata
+
     # Add key in path
     key_path = add_key.split('.')
-    project_deposit_metadata['_deposit'] = {'id': '123456'}
-    sub = project_deposit_metadata
+    deposit_metadata['_deposit'] = {'id': '123456'}
+    sub = deposit_metadata
     for k in key_path[:-1]:
         sub = sub[k]
     sub[key_path[-1]] = ''
     with current_app.test_request_context(
         '/api/deposits/video',
             method='PUT',
-            data=json.dumps(project_deposit_metadata),
+            data=json.dumps(deposit_metadata),
             content_type='application/json'):
         with pytest.raises(MarshmallowErrors) as errors:
-            video_loader()
+            loader()
         assert '400 Bad Request' in str(errors.value)
 
         error_body = json.loads(errors.value.get_body())

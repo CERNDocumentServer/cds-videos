@@ -419,7 +419,7 @@ def test_video_publish_edit_publish_again(
             del video_1_dict['_files']
             # try to modify preserved fields
             video_1_dict['recid'] = 12323233
-            video_1_dict['report_number']['report_number'] = 'fuuu barrrr'
+            video_1_dict['report_number'] = ['fuuu barrrr']
             video_1_dict['publication_date'] = '2000-12-03'
             video_1_dict['_project_id'] = '1234567'
             # do the call

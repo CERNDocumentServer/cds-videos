@@ -145,7 +145,6 @@ def test_preview_video_html5(previewer_app, es, db, cds_jsonresolver, users,
     basename = 'test'
     filename_1 = '{}.mp4'.format(basename)
     filename_2 = '{}.invalid'.format(basename)
-    deposit_filename = 'playlist.m3u8'
     bucket_id = video_1['_buckets']['deposit']
     preview_func = import_string(
         'cds.modules.previewer.views.{0}'.format(preview_func))
@@ -254,7 +253,8 @@ def test_smil_generation(previewer_app, db, api_project, video):
 
     # Create one slave that shouldn't be added to the SMIL file
     no_smil_slave = create_slave(key='test_no_smil.mp4')
-    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876, smil=False)
+    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876,
+                      smil=False)
     # and one that should be added to the SMIL file
     yes_smil_slave = create_slave(key='test_no_smil.mp4')
     create_video_tags(yes_smil_slave, context_type='subformat', bitrate=7654)

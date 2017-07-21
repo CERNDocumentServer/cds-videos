@@ -11,7 +11,7 @@
       "items": [
         {
           "type": "ckeditor",
-          "key": "description.value",
+          "key": "description",
           "title": "Description",
           "ckeditor": {
             "autoParagraph": false,
@@ -190,8 +190,8 @@
               "name":  "Director"
             },
             {
-              "value":  "Camera operator",
-              "name":  "Camera operator"
+              "value":  "Camera Operator",
+              "name":  "Camera Operator"
             },
             {
               "value":  "Producer",
@@ -302,7 +302,7 @@
         },
         {
           "title": "Description",
-          "key": "translations[].description.value",
+          "key": "translations[].description",
           "type": "textarea",
           "required": false
         },

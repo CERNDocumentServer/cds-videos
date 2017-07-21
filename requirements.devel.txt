@@ -59,7 +59,9 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
 -e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
--e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
+# FIXME #72
+# -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
+-e git+https://github.com/hachreak/invenio-migrator.git@fix_created_updated#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
 -e git+https://github.com/inveniosoftware/invenio-opendefinition.git#egg=invenio-opendefinition

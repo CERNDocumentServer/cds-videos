@@ -4,15 +4,7 @@
       "numeric_detection": true,
       "properties": {
         "report_number": {
-          "properties": {
-            "_report_number": {
-              "type": "string"
-            },
-            "report_number": {
-              "type": "string"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "_updated": {
           "type": "date"
@@ -51,15 +43,7 @@
           }
         },
         "description": {
-          "type": "object",
-          "properties": {
-            "value": {
-              "type": "string"
-            },
-            "source": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         },
         "keywords": {
           "type": "object",

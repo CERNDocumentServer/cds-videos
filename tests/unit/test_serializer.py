@@ -75,7 +75,7 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
     report_number = 'RN-01'
     video_record_metadata.update(deposit_metadata)
     video_record_metadata.update({
-        'report_number': {'report_number': report_number},
+        'report_number': [report_number],
         '$schema': Video.get_record_schema(),
         'duration': duration,
         'contributors': [
@@ -93,7 +93,7 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
         copyright_holder='CERN',
         creation_date='2017-03-02',
         directors='paperone, pluto',
-        entry_date='2016-12-03',
+        entry_date='2017-09-25',
         id=report_number,
         keywords='keyword1, keyword2',
         license_body='GPLv2',

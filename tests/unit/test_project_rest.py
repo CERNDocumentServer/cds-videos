@@ -311,8 +311,7 @@ def test_simple_workflow(
         del project_dict['metadata']['_files']
         # try to modify preserved fields
         project_dict['metadata']['recid'] = 12323233
-        project_dict['metadata'][
-            'report_number']['report_number'] = 'fuuu barrrr'
+        project_dict['metadata']['report_number'][0] = 'fuuu barrrr'
         project_dict['metadata']['publication_date'] = '2000-12-03'
         # do the call
         res = client.put(
@@ -845,7 +844,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         location, db, deposit_metadata,
         project_data={
             'title': {'title': 'alpha'},
-            'description': {'value': 'fuu'},
+            'description': 'fuu',
             'category': 'CERN',
             'type': 'FOOTER',
         }, wait=False)
