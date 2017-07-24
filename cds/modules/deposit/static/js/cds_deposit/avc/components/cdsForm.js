@@ -215,6 +215,30 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   );
 
+  this.onRemoveValue = function(item, model, path) {
+    _.set(
+      that.cdsDepositCtrl.record,
+      path,
+      _.pull(
+        _.get(that.cdsDepositCtrl.record, path),
+        item
+      )
+    );
+    // Make it dirty
+    that.cdsDepositCtrl.setDirty();
+  }
+
+  this.onSelectValue = function(item, model, path) {
+    var newValue = _.concat(
+      (_.get(that.cdsDepositCtrl.record, path) || []),
+      model
+    );
+    _.set(that.cdsDepositCtrl.record, path, newValue);
+    // Make it dirty
+    that.cdsDepositCtrl.setDirty();
+  }
+
+
   this.autocompleteAccess = function(query) {
     var options = {
       url: '//cds.cern.ch/submit/get_authors',
@@ -225,7 +249,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     };
     that.autocompleteAuthors(options, query).then(function(results) {
       that.accessSuggestions = results.data.map(function(res) {
-        return res.value.email;
+        return {
+          name: res.value.name,
+          email: res.value.email,
+        }
       });
     });
   };
@@ -339,11 +366,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   this.changeAccess = function() {
     // Delete any previous permissions
     delete that.cdsDepositCtrl.record._access.read;
+    that.selectedRestricted = [];
     // If is restricted then copy the access
     if (that.permissions === 'restricted') {
       that.cdsDepositCtrl.record._access.read = angular.copy(
         that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted
       );
+      // Update also the model
+      that.selectedRestricted = that.cdsDepositCtrl.record._access.read;
     }
     // Set the form dirty
     that.cdsDepositCtrl.setDirty();
@@ -362,6 +392,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       that.cdsDepositCtrl.record._access = angular.copy(
         _access || {}
       );
+      // Update also the model
+      that.selectedRestricted = that.cdsDepositCtrl.record._access.read;
       // Set the permissions
       that.permissions = angular.copy(permissions);
       // Set the form dirty

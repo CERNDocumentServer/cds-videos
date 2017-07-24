@@ -242,30 +242,42 @@
                             Restricted
                           </option>
                         </select>
-                        <div class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
+                        <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read" class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
                           <label class="control-label ng-binding">
                             Choose who has access to the record
                           </label>
                           <ui-select
                            multiple
-                           on-select="$ctrl.cdsDepositCtrl.setDirty()"
-                           ng-model="$ctrl.cdsDepositCtrl.record._access.read"
                            theme="bootstrap"
                            ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
-                           title="Add emails"
+                           title="Search for names"
+                           on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                           on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                           ng-model="$ctrl.selectedRestricted"
                           >
                            <ui-select-match
                             ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
-                            placeholder="Select emails..."
+                            placeholder="Search for names"
                           >
-                            {{$item}}
+                            {{ $item.email || $item }}
                           </ui-select-match>
                            <ui-select-choices
-                           repeat="email in $ctrl.accessSuggestions | filter:$select.search"
-                           refresh="$ctrl.autocompleteAccess($select.search)"
+                            repeat="suggestion.email as suggestion in $ctrl.accessSuggestions | orderBy:'name'"
+                            refresh="$ctrl.autocompleteAccess($select.search)"
                            >
-                             {{email}}
+                             <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
+                             <small><{{suggestion.email}}></small>
                            </ui-select-choices>
+                           <ui-select-no-choice>
+                             <p class="pa-5 mb-0">
+                               <span ng-show="$select.search">
+                                 Not results for "{{$select.search}}"
+                               </span>
+                               <span ng-show="!$select.search">
+                                 Start typing a name ...
+                               </span>
+                             </p>
+                           </ui-select-no-choice>
                          </ui-select>
                         </div>
                       </div>

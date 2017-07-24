@@ -479,7 +479,7 @@ function cdsDepositCtrl(
         // Push a notification
         toaster.pop({
           type: 'success',
-          title: (that.record.title.title || 'Video'),
+          title: (that.record.title ? that.record.title.title : 'Video'),
           body: 'Success!',
           bodyOutputType: 'trustedHtml',
         });
