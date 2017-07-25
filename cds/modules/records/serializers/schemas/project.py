@@ -65,7 +65,7 @@ class ProjectSchema(StrictKeysSchema):
     _cds = fields.Nested(_CDSSSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
     description = fields.Nested(DescriptionSchema, required=True)
-    date = DateString(required=True)
+    date = DateString()
     category = fields.Str(required=True)
     type = fields.Str(required=True)
 
