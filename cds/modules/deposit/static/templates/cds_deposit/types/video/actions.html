@@ -9,7 +9,7 @@
 The video workflow is still processing.<br>
 Are you sure you want publish the video?<br>
   <p class="pull-right">
-    <button class="btn btn-xs btn-success" ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit'); $parent.hideModal()">Yes</button>
+    <button class="btn btn-xs btn-success" ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit'); $parent.hideModal()">Yes</button>
     <button class="btn btn-xs btn-danger" ng-click="$parent.hideModal()">No</button>
   </p>
 </modal-dialog>
@@ -31,7 +31,7 @@ Are you sure you want publish the video?<br>
     ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
     class="btn btn-xs btn-primary "
-    ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit')">
+    ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish
   </button>
   <button
@@ -45,7 +45,7 @@ Are you sure you want publish the video?<br>
     ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-xs btn-default "
-    ng-click="$ctrl.actionHandler('EDIT')">
+    ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
   Edit
   </button>
 </div>

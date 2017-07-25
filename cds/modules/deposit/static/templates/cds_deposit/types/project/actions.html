@@ -11,7 +11,7 @@
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-primary btn-sm"
-    ng-click="$ctrl.actionMultipleHandler(['SAVE', 'PUBLISH'], '/deposit')">
+    ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish All
   </button>
 
@@ -19,7 +19,7 @@
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-default btn-sm"
-    ng-click="$ctrl.actionMultipleHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
+    ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
   Edit Project
   </button>
 </div>

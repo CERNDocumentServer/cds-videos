@@ -355,8 +355,16 @@ function cdsDepositCtrl(
     this.fillMetadata = function(answer) {
       [metadataToFill, metadataToFill_values] = that.metadataToFill;
       if (answer) {
+        // Merge the data
         angular.merge(that.record, metadataToFill);
-        that.makeSingleAction('SAVE_PARTIAL');
+        that.preActions();
+        // Make a partial Save
+        return that.makeSingleAction('SAVE_PARTIAL')
+          .then(
+            that.onSuccessAction,
+            that.onErrorAction
+          )
+          .finally(that.postActions);
       }
       that.setOnLocalStorage('prompted', true);
       that.metadataToFill = false;
@@ -479,7 +487,7 @@ function cdsDepositCtrl(
         // Push a notification
         toaster.pop({
           type: 'success',
-          title: (that.record.title ? that.record.title.title : 'Video'),
+          title: that.record.title ? that.record.title.title : 'Video',
           body: 'Success!',
           bodyOutputType: 'trustedHtml',
         });
@@ -497,7 +505,7 @@ function cdsDepositCtrl(
         // Push a notification
         toaster.pop({
           type: 'error',
-          title: (that.record.title.title || 'Video'),
+          title: that.record.title ? that.record.title.title : 'Video',
           body: response.data.message,
           bodyOutputType: 'trustedHtml',
         });
@@ -696,6 +704,18 @@ function cdsDepositCtrl(
       promises
     );
     return that.cdsDepositsCtrl.chainedActions(promises);
+  };
+
+  this.preActions = function() {
+    // Stop loading
+    $scope.$emit('cds.deposit.loading.start');
+    that.loading = true;
+  };
+
+  this.postActions = function() {
+    // Stop loading
+    $scope.$emit('cds.deposit.loading.stop');
+    that.loading = false;
   };
 
   this.onSuccessAction = function(response) {

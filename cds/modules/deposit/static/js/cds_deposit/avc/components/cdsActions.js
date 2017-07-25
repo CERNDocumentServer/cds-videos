@@ -1,36 +1,16 @@
 function cdsActionsCtrl($scope) {
   var that = this;
   this.$onInit = function() {
-    this.postActions = function() {
-      // Stop loading
-      $scope.$emit('cds.deposit.loading.stop');
-      that.cdsDepositCtrl.loading = false;
-    };
 
-    this.actionHandler = function(action) {
-      // Start loading
-      $scope.$emit('cds.deposit.loading.start');
-      that.cdsDepositCtrl.loading = true;
-      return that.cdsDepositCtrl
-        .makeSingleAction(action)
+    this.actionHandler = function(actions, redirect) {
+      that.cdsDepositCtrl.preActions();
+      var method = _.isArray(actions) ? 'makeMultipleActions' : 'makeSingleAction';
+      return that.cdsDepositCtrl[method](actions)
         .then(
           that.cdsDepositCtrl.onSuccessAction,
           that.cdsDepositCtrl.onErrorAction
         )
-        .finally(that.postActions);
-    };
-
-    this.actionMultipleHandler = function(actions) {
-      // Start loading
-      $scope.$emit('cds.deposit.loading.start');
-      that.cdsDepositCtrl.loading = true;
-      return that.cdsDepositCtrl
-        .makeMultipleActions(actions)
-        .then(
-          that.cdsDepositCtrl.onSuccessAction,
-          that.cdsDepositCtrl.onErrorAction
-        )
-        .finally(that.postActions);
+        .finally(that.cdsDepositCtrl.postActions);
     };
 
     this.deleteDeposit = function() {
