@@ -326,7 +326,12 @@ function cdsDepositCtrl(
               var transcodeTasks = groupedTasks.file_transcode;
               // Update the state reporter with all the new info
               data.forEach(function(task) {
-                that.updateStateReporter(task.name, task.info, task.status);
+                if (_.isArray(task)){
+                  task = task.shift();
+                }
+                if (task.info) {
+                  that.updateStateReporter(task.name, task.info, task.status);
+                }
               });
               // Update subformat info
               if (!transcodeTasks) {
