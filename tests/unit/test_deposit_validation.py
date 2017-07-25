@@ -38,7 +38,7 @@ from cds.modules.deposit.loaders.loader import MarshmallowErrors
 
 @pytest.mark.parametrize('remove_key, loader', [
     (key, loader)
-    for key in ['date', 'title.title']
+    for key in ['title.title']
     for loader in [project_loader, video_loader]
 ])
 def test_missing_fields(
