@@ -653,6 +653,8 @@ MIGRATOR_RECORDS_DUMPLOADER_CLS = 'cds.modules.migrator.records:' \
                                   'CDSRecordDumpLoader'
 MIGRATOR_RECORDS_DUMP_CLS = 'cds.modules.migrator.records:CDSRecordDump'
 
+CDS_MIGRATION_RECORDS_BASEPATH = '/src/code/dfs/Services'
+
 ###############################################################################
 # Indexer
 ###############################################################################

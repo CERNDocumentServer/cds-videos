@@ -41,6 +41,54 @@ from .fetchers import recid_fetcher
 from .minters import kwid_minter
 
 
+def dump_object(obj):
+    """Dump a object."""
+    tags = obj.get_tags()
+    # File information
+    content_type = splitext(obj.key)[1][1:].lower()
+    context_type = tags.pop('context_type', '')
+    media_type = tags.pop('media_type', '')
+    return {
+        'key': obj.key,
+        'bucket_id': str(obj.bucket_id),
+        'version_id': str(obj.version_id),
+        'checksum': obj.file.checksum if obj.file else '',
+        'size': obj.file.size if obj.file else 0,
+        'file_id': str(obj.file_id),
+        'completed': obj.file is not None,
+        'content_type': content_type,
+        'context_type': context_type,
+        'media_type': media_type,
+        'tags': tags,
+        'links': {
+            'self': (
+                current_app.config['DEPOSIT_FILES_API'] +
+                u'/{bucket}/{key}?versionId={version_id}'.format(
+                    bucket=obj.bucket_id,
+                    key=obj.key,
+                    version_id=obj.version_id,
+                )),
+        }
+    }
+
+
+def dump_generic_object(obj, data):
+    """Dump a generic object (master, subtitles, ..) avoind depending objs."""
+    obj_dump = dump_object(obj)
+    # if it's a master, get all the depending object and add them inside
+    # <context_type> as a list order by key.
+    for slave in ObjectVersion.query_heads_by_bucket(
+        bucket=obj.bucket).join(ObjectVersion.tags).filter(
+            ObjectVersion.file_id.isnot(None),
+            ObjectVersionTag.key == 'master',
+            ObjectVersionTag.value == str(obj.version_id)
+    ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
+        obj_dump.setdefault(
+            slave.get_tags()['context_type'], []).append(dump_object(slave))
+    # Sort slaves by key within their lists
+    data.update(obj_dump)
+
+
 class CDSFileObject(FileObject):
     """Wrapper for files."""
 
@@ -51,48 +99,7 @@ class CDSFileObject(FileObject):
 
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
-        def _dumps(obj):
-            tags = obj.get_tags()
-            # File information
-            content_type = splitext(obj.key)[1][1:].lower()
-            context_type = tags.pop('context_type', '')
-            media_type = tags.pop('media_type', '')
-            return {
-                'key': obj.key,
-                'bucket_id': str(obj.bucket_id),
-                'version_id': str(obj.version_id),
-                'checksum': obj.file.checksum if obj.file else '',
-                'size': obj.file.size if obj.file else 0,
-                'file_id': str(obj.file_id),
-                'completed': obj.file is not None,
-                'content_type': content_type,
-                'context_type': context_type,
-                'media_type': media_type,
-                'tags': tags,
-                'links': {
-                    'self': (
-                        current_app.config['DEPOSIT_FILES_API'] +
-                        u'/{bucket}/{key}?versionId={version_id}'.format(
-                            bucket=obj.bucket_id,
-                            key=obj.key,
-                            version_id=obj.version_id,
-                        )),
-                }
-            }
-
-        master_dump = _dumps(self.obj)
-        # get all the slaves and add them inside <type> as a list order by key
-        for slave in ObjectVersion.query_heads_by_bucket(
-            bucket=self.obj.bucket).join(ObjectVersion.tags).filter(
-                ObjectVersion.file_id.isnot(None),
-                ObjectVersionTag.key == 'master',
-                ObjectVersionTag.value == str(self.obj.version_id)
-        ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
-            master_dump.setdefault(
-                slave.get_tags()['context_type'], []).append(_dumps(slave))
-        # Sort slaves by key within their lists
-        self.data.update(master_dump)
-
+        dump_generic_object(obj=self.obj, data=self.data)
         return self.data
 
 
@@ -112,6 +119,7 @@ class CDSFilesIterator(FilesIterator):
 
 
 class CDSVideosFilesIterator(CDSFilesIterator):
+    """Video files iterator."""
 
     @staticmethod
     def get_master_video_file(record):

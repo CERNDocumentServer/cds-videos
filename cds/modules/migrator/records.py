@@ -26,29 +26,36 @@
 
 from __future__ import absolute_import, print_function
 
-from os.path import splitext
+import os
+from copy import deepcopy
 
 import arrow
-from copy import deepcopy
 from flask import current_app
+from invenio_accounts.models import User
+from invenio_db import db
+from invenio_deposit.minters import deposit_minter
+from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
+                                       ObjectVersionTag, as_bucket,
+                                       as_object_version)
+from invenio_jsonschemas import current_jsonschemas
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.resolver import Resolver
+from invenio_records.api import Record
+from invenio_records_files.models import RecordsBuckets
 
 from cds_dojson.marc21 import marc21
 from cds_dojson.marc21.utils import create_record
-from invenio_accounts.models import User
-from invenio_db import db
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_files_rest.models import Bucket, BucketTag, Location
 from invenio_migrator.records import RecordDump, RecordDumpLoader
-from invenio_records.api import Record
-from invenio_records_files.models import RecordsBuckets
-from invenio_jsonschemas import current_jsonschemas
-from invenio_deposit.minters import deposit_minter
 
-from .utils import process_fireroles, update_access
-from ..records.fetchers import report_number_fetcher
-from ..records.minters import _doi_minter
 from ..deposit.api import Project, Video, record_build_url, record_unbuild_url
 from ..deposit.tasks import datacite_register
+from ..records.api import CDSVideosFilesIterator, dump_generic_object
+from ..records.fetchers import report_number_fetcher
+from ..records.minters import _doi_minter
+from ..records.serializers.smil import generate_smil_file
+from ..records.validators import PartialDraft4Validator
+from ..webhooks.tasks import ExtractMetadataTask
+from .utils import process_fireroles, update_access
 
 
 class CDSRecordDump(RecordDump):
@@ -114,7 +121,6 @@ class CDSRecordDump(RecordDump):
                     'Impossible to convert to JSON {0} - {1}'.format(
                         e, marc_record))
                 raise
-            # FIXME how import the field 937__s (who made the modification)?
             missing = self.dojson_model.missing(marc_record, _json=val)
             if missing:
                 raise RuntimeError('Lossy conversion: {0}'.format(missing))
@@ -150,6 +156,8 @@ class CDSRecordDump(RecordDump):
 class CDSRecordDumpLoader(RecordDumpLoader):
     """Migrate a CDS record."""
 
+    dependent_objs = ['frame', 'frames-preview', 'playlist', 'subformat']
+
     @classmethod
     def create(cls, dump):
         """Update an existing record."""
@@ -167,21 +175,37 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
+        deposit = cls._create_deposit(record=record)
+        if Video._schema in deposit['$schema']:
+            cls._resolve_project_deposit(deposit)
         return record
 
     @classmethod
     def _create_deposit(cls, record):
         """Create a deposit from the record."""
         data = deepcopy(record)
-        deposit = Record.create(data)
-        cls._resolve_schema(deposit=deposit, record=record)
+        cls._resolve_schema(deposit=data, record=record)
+        deposit = Record.create(data, validator=PartialDraft4Validator)
         cls._resolve_deposit(deposit=deposit, record=record)
         cls._resolve_bucket(deposit=deposit, record=record)
+        cls._resolve_files(deposit=deposit, record=record)
+        # generate files list
+        cls._resolve_dumps(record=record)
         # commit!
         deposit.commit()
         record.commit()
         db.session.commit()
         return deposit
+
+    @classmethod
+    def _resolve_extracted_metadata(cls, deposit, record):
+        """Extract metadata from the video."""
+        master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
+        master = as_object_version(master_video['version_id'])
+        extracted_metadata = ExtractMetadataTask.create_metadata_tags(
+            object_=master, keys=ExtractMetadataTask._all_keys)
+        deposit['_cds']['extracted_metadata'] = extracted_metadata
+        record['_cds']['extracted_metadata'] = extracted_metadata
 
     @classmethod
     def _resolve_datacite_register(cls, record):
@@ -200,8 +224,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                 "file_video_extract_frames": "SUCCESS",
                 "file_video_metadata_extraction": "SUCCESS"
             },
-            # FIXME remove it after migrate files!
-            'extracted_metadata': {'duration': 12},
+            "modified_by": record.pop('modified_by', None),
         }
 
     @classmethod
@@ -284,6 +307,156 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         record['_deposit'] = deepcopy(deposit['_deposit'])
 
     @classmethod
+    def _resolve_files(cls, deposit, record):
+        """Create files."""
+        # build deposit files
+        bucket = as_bucket(deposit['_buckets']['deposit'])
+        # build objects/tags from marc21 metadata
+        for file_ in record.get('_files', []):
+            cls._resolve_file(deposit=deposit, bucket=bucket, file_=file_)
+        # attach the master tag to the proper dependent files
+        cls._resolve_master_tag(deposit=deposit)
+        if Video.get_record_schema() == record['$schema']:
+            # probe metadata from video
+            cls._resolve_extracted_metadata(deposit=deposit, record=record)
+            # update tag 'timestamp'
+            cls._update_timestamp(deposit=deposit)
+        # build a partial files dump
+        cls._resolve_dumps(record=deposit)
+        # snapshot them to record bucket
+        snapshot = bucket.snapshot(lock=True)
+        db.session.add(RecordsBuckets(
+            record_id=record.id, bucket_id=snapshot.id
+        ))
+        if Video.get_record_schema() == record['$schema']:
+            # create smil file
+            cls._resolve_dumps(record=record)
+            cls._resolve_smil(record=record)
+            # update tag 'master'
+            cls._update_tag_master(record=record)
+
+    @classmethod
+    def _get_bucket(cls, record):
+        """Resolve bucket."""
+        records_buckets = RecordsBuckets.query.filter_by(
+            record_id=record.id).one()
+        return records_buckets.bucket
+
+    @classmethod
+    def _update_tag_master(cls, record):
+        """Update tag master of files dependent from master."""
+        bucket = CDSRecordDumpLoader._get_bucket(record=record)
+        master_video = CDSVideosFilesIterator.get_master_video_file(record)
+        for obj in ObjectVersion.get_by_bucket(bucket=bucket):
+            if obj.get_tags()['context_type'] in cls.dependent_objs:
+                ObjectVersionTag.create_or_update(
+                    obj, 'master', master_video['version_id'])
+
+    @classmethod
+    def _resolve_smil(cls, record):
+        """Build smil file."""
+        bucket = cls._get_bucket(record=record)
+        was_locked = bucket.locked
+        bucket.locked = False
+        master_video = CDSVideosFilesIterator.get_master_video_file(record)
+        generate_smil_file(
+            record['recid'], record,
+            master_video['bucket_id'], master_video['version_id'],
+            skip_schema_validation=True
+        )
+        bucket.locked = was_locked
+
+    @classmethod
+    def _resolve_dumps(cls, record):
+        """Build files dump."""
+        bucket = cls._get_bucket(record=record)
+        files = []
+        for o in ObjectVersion.get_by_bucket(bucket=bucket):
+            # skip for dependent objs (like subformats)
+            if o.get_tags()['context_type'] not in cls.dependent_objs:
+                dump = {}
+                dump_generic_object(obj=o, data=dump)
+                if dump:
+                    files.append(dump)
+        record['_files'] = files
+
+    @classmethod
+    def _resolve_master_tag(cls, deposit):
+        """Create the master tag for dependent files."""
+        # build a partial files dump
+        cls._resolve_dumps(record=deposit)
+        # get master
+        master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
+        # get deposit bucket
+        bucket = cls._get_bucket(record=deposit)
+        # attach the master tag
+        for obj in ObjectVersion.get_by_bucket(bucket=bucket):
+            if obj.get_tags()['context_type'] in cls.dependent_objs:
+                ObjectVersionTag.create(
+                    obj, 'master', master_video['version_id'])
+
+    @classmethod
+    def _get_migration_file_stream(cls, file_):
+        """Build the full file path."""
+        return open(os.path.join(
+            current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
+            file_['filepath']), 'rb'
+        )
+
+    @classmethod
+    def _resolve_file(cls, deposit, bucket, file_):
+        """Resolve file."""
+        # create object
+        stream = cls._get_migration_file_stream(file_=file_)
+        obj = ObjectVersion.create(
+            bucket=bucket, key=file_['key'], stream=stream)
+        # resolve preset info
+        tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
+        if tags_to_guess_preset:
+            file_['tags'].update(**cls._resolve_preset(
+                obj=obj, clues=tags_to_guess_preset))
+        tags_to_transform = file_.get('tags_to_transform', {})
+        # resolve timestamp
+        if 'timestamp' in tags_to_transform:
+            file_['tags']['timestamp'] = tags_to_transform['timestamp']
+        # create tags
+        for key, value in file_.get('tags', {}).items():
+            ObjectVersionTag.create(obj, key, value)
+
+    @classmethod
+    def _update_timestamp(cls, deposit):
+        """Update timestamp from percentage to seconds."""
+        duration = float(deposit['_cds']['extracted_metadata']['duration'])
+        bucket = CDSRecordDumpLoader._get_bucket(record=deposit)
+        for obj in ObjectVersion.get_by_bucket(bucket=bucket):
+            if 'timestamp' in obj.get_tags().keys():
+                timestamp = duration * float(obj.get_tags()['timestamp']) / 100
+                ObjectVersionTag.create_or_update(obj, 'timestamp', timestamp)
+
+    @classmethod
+    def _resolve_preset(cls, obj, clues):
+        """Resolve preset."""
+        def guess_preset(preset_name, clues):
+            presets = current_app.config['CDS_SORENSON_PRESETS']
+            for ratio, subpreset in presets.items():
+                for name, options in subpreset.items():
+                    if preset_name == name and \
+                            all([options.get(key) == value
+                                 for key, value in clues.items()]):
+                        return ratio, options
+            return None, None
+
+        myclues = deepcopy(clues)
+        preset = myclues.pop('preset', None)
+        if preset:
+            ratio, preset = guess_preset(preset_name=preset, clues=myclues)
+            if ratio:
+                mypreset = deepcopy(preset)
+                mypreset['display_aspect_ratio'] = ratio
+                return mypreset
+        return {}
+
+    @classmethod
     def _resolve_owner(cls, email=None):
         """Resolve the owner id."""
         if not email:
@@ -308,57 +481,24 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                 video['_project_id'] = pid_rec.pid_value
                 project = Record.get_record(pid_rec.object_uuid)
                 for index, ref in enumerate(project.get('videos', [])):
-                    id_ = record_unbuild_url(ref['$ref'])
-                    if id_ == video_rn.pid_value:
+                    if ref['$ref'] == video_rn.pid_value:
                         project['videos'][index][
                             '$ref'] = record_build_url(video_pid.pid_value)
                 project.commit()
 
     @classmethod
-    def create_files(cls, record, files, existing_files):
-        """Create files.
-
-        This method is currently limited to a single bucket per record.
-        """
-        default_bucket = None
-        # Look for bucket id in existing files.
-        for f in existing_files:
-            if 'bucket' in f:
-                default_bucket = f['bucket']
-                break
-
-        # Create a bucket in default location if none is found.
-        if default_bucket is None:
-            b = Bucket.create()
-            BucketTag.create(b, 'record', str(record.id))
-            default_bucket = str(b.id)
-            db.session.commit()
-        else:
-            b = Bucket.get(default_bucket)
-
-        record['_files'] = []
-        for key, meta in files.items():
-            obj = cls.create_file(b, key, meta)
-            ext = splitext(obj.key)[1].lower()
-            if ext.startswith('.'):
-                ext = ext[1:]
-            last_ver = meta[-1]
-            rec_docs = [
-                rec_doc[1] for rec_doc in last_ver['recids_doctype']
-                if rec_doc[0] == last_ver['recid']
-            ]
-
-            record['_files'].append(
-                dict(
-                    bucket=str(obj.bucket.id),
-                    key=obj.key,
-                    version_id=str(obj.version_id),
-                    size=obj.file.size,
-                    checksum=obj.file.checksum,
-                    type=ext,
-                    doctype=rec_docs[0] if rec_docs else ''))
-        db.session.add(RecordsBuckets(record_id=record.id, bucket_id=b.id))
-        record.commit()
-        db.session.commit()
-
-        return [b]
+    def _resolve_project_deposit(cls, video):
+        """Resolve project deposit from the video."""
+        video = Video(video)
+        project_depid = video.project['_deposit']['id']
+        _, project = Resolver(
+            pid_type='depid', object_type='rec', getter=Record.get_record
+        ).resolve(project_depid)
+        video_pid, record = video.fetch_published()
+        video_rn = PersistentIdentifier.query.filter_by(
+            pid_type='rn', object_uuid=record.id, object_type='rec').one()
+        for index, ref in enumerate(project.get('videos', [])):
+            if ref['$ref'] == video_rn.pid_value:
+                project['videos'][index][
+                    '$ref'] = record_build_url(video_pid.pid_value)
+        project.commit()
