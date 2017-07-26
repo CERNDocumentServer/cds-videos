@@ -43,24 +43,21 @@
           </div>
           <iframe allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
         </div>
-
-        <div ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
-          <!-- Category and type -->
-          <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-            <ul class="list-inline">
-               <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
-               <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
-             </ul>
-          </div>
-          <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-            <i class="fa fa-info-circle"></i> For publishing the video please select category from the
-            <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
-          </div>
-          <!-- Category and type -->
+        <!-- Category and type -->
+        <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+          <ul class="list-inline">
+             <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+             <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+           </ul>
         </div>
+        <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+          <i class="fa fa-info-circle"></i> For publishing the video please select category from the
+          <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
+        </div>
+        <!-- Category and type -->
       </div>
       <!-- Progress -->
-      <div ng-init="showAll=!$ctrl.cdsDepositCtrl.isPublished()" class="col-sm-9">
+      <div class="col-sm-9">
         <div class="col-sm-12">
           <!-- FAILURE -->
           <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
@@ -113,19 +110,15 @@
 
         <!-- Published view -->
           <div ng-hide="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && showAll)">
-            <div class="col-sm-12">
-              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-                <ul class="list-inline text-right">
-                   <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
-                   <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
-                 </ul>
+            <div class="row">
+              <div class="col-sm-12">
+                <h4 class="mb-5 mt-0">
+                  <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+                    {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
+                  </a>
+                </h4>
+                <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
               </div>
-              <h4 class="mb-5 mt-0">
-                <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
-                  {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
-                </a>
-              </h4>
-              <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description.value | stripTags | trustHtml) || 'No description'"></p>
             </div>
           </div>
           <!-- Published view -->
