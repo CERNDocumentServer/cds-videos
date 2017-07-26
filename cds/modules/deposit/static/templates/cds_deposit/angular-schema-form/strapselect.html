@@ -1,7 +1,13 @@
 <fieldset ng-controller="dynamicSelectController" class="form-group {{form.htmlClass}}"
      ng-disabled="evalExpr(form.readonly)"
      ng-class="{'has-error': hasError(), 'has-success': hasSuccess()}">
-    <label class="control-label {{form.labelHtmlClass}}" ng-show="showTitle()">{{form.title}}</label>
+     <label
+       class="{{ form.labelHtmlClass }}"
+       for="{{ form.key.slice(-1)[0] }}"
+       ng-if="!form.notitle"
+       ng-class="{'sr-only': !showTitle(), 'field-required': form.required}">
+       <i ng-if="form.fa_cls" ng-class="'fa fa-fw ' + form.fa_cls"></i>&nbsp;{{ form.title }}
+     </label>
     <div class="form-group {{form.fieldHtmlClass}}" ng-init="populateTitleMap(form)">
         <button ng-if="(form.options.multiple == 'true') || (form.options.multiple == true)"
                 type="button" class="btn btn-default" sf-changed="form" schema-validate="form" ng-model="$$value$$"

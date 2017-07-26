@@ -3,8 +3,7 @@
     "leftColumn": [
       {
         "title": "Title",
-        "key": "title.title",
-        "required": false
+        "key": "title.title"
       },
       {
         "type": "section",
@@ -32,8 +31,7 @@
               "removeButtons": ""
             },
             "description": "Required.",
-            "minLength": 1,
-            "required": false
+            "minLength": 1
           }
         ]
       },
@@ -63,8 +61,7 @@
         "options": {
           "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
-        },
-        "required": false
+        }
       },
       {
         "key": "type",
@@ -77,14 +74,14 @@
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
-        },
-        "required": false
+        }
       },
       {
         "type": "array",
         "key": "contributors",
         "title": "Contributors",
         "description": "",
+        "required": true,
         "sortOptions": {
           "disabled": false,
           "handle": "i.sort-handle",
@@ -104,6 +101,7 @@
             "title": "Name",
             "description": "",
             "placeholder": "Author name",
+            "required": true,
             "options": {
               "refreshDelay": 100,
               "mergeObjects": true,
@@ -119,6 +117,7 @@
             "key": "contributors[].role",
             "placeholder": "Role",
             "title": "Role",
+            "required": true,
             "titleMap": [
               {
                 "value":  "Director",

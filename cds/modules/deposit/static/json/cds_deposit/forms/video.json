@@ -30,8 +30,7 @@
             "removeButtons": ""
           },
           "description": "Required.",
-          "minLength": 1,
-          "required": false
+          "minLength": 1
         }
       ]
     },
@@ -51,7 +50,6 @@
       "type": "select",
       "key": "language",
       "placeholder": "Language",
-      "required": false,
       "titleMap": [
         {
           "value":  "bg",
@@ -140,13 +138,13 @@
       "format": "yyyy-MM-dd",
       "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
       "fa_cls": "fa-calendar",
-      "required": false,
       "onChange": "$ctrl.removeValidationMessage(modelValue,form)"
     },
     {
       "type": "array",
       "key": "contributors",
       "title": "Contributors",
+      "required": true,
       "description": "",
       "sortOptions": {
         "disabled": false,
@@ -167,6 +165,7 @@
           "key": "contributors[]",
           "placeholder": "Author name",
           "title": "Name",
+          "required": true,
           "description": "",
           "options": {
             "refreshDelay": 100,

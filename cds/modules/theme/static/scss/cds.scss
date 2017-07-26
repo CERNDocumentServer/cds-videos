@@ -47,6 +47,11 @@ i.sort-handle {
   cursor: move;
 }
 
+.field-required:after {
+  content: " *";
+  color: red;
+}
+
 .flex-container {
   display: flex;
   min-height: 100vh;
