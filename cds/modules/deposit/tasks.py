@@ -52,7 +52,8 @@ def datacite_register(
     try:
         record = Record.get_record(record_uuid)
         # Bail out if not a CDS DOI.
-        if not is_local_doi(record['doi']):
+        if not is_local_doi(record['doi']) or \
+                not current_app.config['DEPOSIT_DATACITE_MINTING_ENABLED']:
             return
 
         dcp = DataCiteProvider.get(record['doi'])

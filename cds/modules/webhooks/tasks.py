@@ -27,7 +27,6 @@ from __future__ import absolute_import
 
 import fnmatch
 import hashlib
-import json
 import os
 import shutil
 import signal
@@ -226,24 +225,26 @@ class DownloadTask(AVCTask):
 class ExtractMetadataTask(AVCTask):
     """Extract metadata task."""
 
+    format_keys = [
+        'duration',
+        'bit_rate',
+        'size',
+    ]
+    stream_keys = [
+        'avg_frame_rate',
+        'codec_name',
+        'width',
+        'height',
+        'nb_frames',
+        'display_aspect_ratio',
+        'color_range',
+    ]
+
+    _all_keys = format_keys + stream_keys
+
     def __init__(self):
         """Init."""
         self._type = 'file_video_metadata_extraction'
-        format_keys = [
-            'duration',
-            'bit_rate',
-            'size',
-        ]
-        stream_keys = [
-            'avg_frame_rate',
-            'codec_name',
-            'width',
-            'height',
-            'nb_frames',
-            'display_aspect_ratio',
-            'color_range',
-        ]
-        self._all_keys = format_keys + stream_keys
 
     def clean(self, deposit_id, version_id, *args, **kwargs):
         """Undo metadata extraction."""
@@ -268,6 +269,20 @@ class ExtractMetadataTask(AVCTask):
                 ObjectVersionTag.key.in_(self._all_keys)).all():
             db.session.delete(tag)
 
+    @classmethod
+    def create_metadata_tags(cls, object_, keys, uri=None):
+        """Extract metadata from the video and create corresponding tags."""
+        uri = uri or object_.file.uri
+        # Extract video's metadata using `ff_probe`
+        metadata = ff_probe_all(uri)
+        extracted_dict = dict(metadata['format'], **metadata['streams'][0])
+        # Add technical information to the ObjectVersion as Tags
+        [ObjectVersionTag.create(object_, k, v)
+         for k, v in extracted_dict.items()
+         if k in keys]
+        db.session.refresh(object_)
+        return extracted_dict
+
     def run(self, uri=None, *args, **kwargs):
         """Extract metadata from given video file.
 
@@ -280,23 +295,15 @@ class ExtractMetadataTask(AVCTask):
         """
         recid = str(PersistentIdentifier.get(
             'depid', self.deposit_id).object_uuid)
-        uri = uri or self.object.file.uri
 
         self._base_payload.update(uri=uri)
 
         try:
-            # Extract video's metadata using `ff_probe`
-            metadata = ff_probe_all(uri)
+            extracted_dict = self.create_metadata_tags(
+                uri=uri, object_=self.object, keys=self._all_keys)
         except Exception as exc:
             db.session.rollback()
             raise self.retry(max_retries=5, countdown=5, exc=exc)
-
-        extracted_dict = dict(metadata['format'], **metadata['streams'][0])
-
-        # Add technical information to the ObjectVersion as Tags
-        [ObjectVersionTag.create(self.object, k, v)
-         for k, v in extracted_dict.items()
-         if k in self._all_keys]
 
         tags = self.object.get_tags()
 

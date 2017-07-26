@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -37,11 +37,14 @@ from invenio_records import Record
 from invenio_pidstore.resolver import Resolver
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.providers.datacite import DataCiteProvider
+from invenio_files_rest.models import as_bucket, FileInstance, ObjectVersion
 
 from cds.cli import cli
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
+from cds.modules.records.api import dump_object, CDSVideosFilesIterator
+from cds.modules.webhooks.tasks import ExtractMetadataTask
 
 from helpers import load_json
 
@@ -90,7 +93,7 @@ def test_mingrate_pids(app, location, datadir):
     assert sorted(pids) == expected
 
 
-def test_mingrate_date(app, location, datadir):
+def test_migrate_record(app, location, datadir, es):
     """Test migrate date."""
     # create the project
     data = load_json(datadir, 'cds_records_demo_1_project.json')
@@ -99,7 +102,7 @@ def test_mingrate_date(app, location, datadir):
     p_id = project.id
 
     date = '2015-11-13'
-    assert project['$schema'] == {'$ref': Project.get_record_schema()}
+    assert project['$schema'] == Project.get_record_schema()
     assert project['date'] == date
     assert project['publication_date'] == date
     assert 'license' not in project
@@ -110,22 +113,38 @@ def test_mingrate_date(app, location, datadir):
             "file_video_extract_frames": "SUCCESS",
             "file_video_metadata_extraction": "SUCCESS"
         },
-        # FIXME remove it
-        'extracted_metadata': {'duration': 12},
+        'modified_by': None,
     }
+
+    # check project deposit
+    deposit_project_uuid = PersistentIdentifier.query.filter_by(
+        pid_type='depid', object_type='rec').one().object_uuid
+    deposit_project = Record.get_record(deposit_project_uuid)
+    assert Project._schema in deposit_project['$schema']
+    assert project.revision_id == deposit_project[
+        '_deposit']['pid']['revision_id']
+    assert deposit_project['_deposit']['created_by'] == -1
+    assert deposit_project['_deposit']['owners'] == [-1]
+    assert deposit_project['_files'] == []
 
     # create the video
     data = load_json(datadir, 'cds_records_demo_1_video.json')
     dump = CDSRecordDump(data=data[0])
-    with mock.patch.object(DataCiteProvider, 'register') \
-            as mock_datacite:
+
+    def load_video(*args, **kwargs):
+        return open(join(datadir, 'test.mp4'), 'rb')
+
+    with mock.patch.object(DataCiteProvider, 'register') as mock_datacite, \
+            mock.patch.object(
+                CDSRecordDumpLoader, '_get_migration_file_stream',
+                return_value=load_video()):
         video = CDSRecordDumpLoader.create(dump=dump)
-    assert mock_datacite.called is True
+        # assert mock_datacite.called is True
     project = Record.get_record(p_id)
     assert project['videos'] == [
         {'$ref': 'https://cds.cern.ch/api/record/1495143'}
     ]
-    assert video['$schema'] == {'$ref': Video.get_record_schema()}
+    assert video['$schema'] == Video.get_record_schema()
     date = '2012-11-20'
     assert video['date'] == date
     assert video['publication_date'] == date
@@ -141,31 +160,103 @@ def test_mingrate_date(app, location, datadir):
     }
     assert video['description'] == ''
     assert 'doi' in video
-    assert video['_cds'] == {
-        "state": {
-            "file_transcode": "SUCCESS",
-            "file_video_extract_frames": "SUCCESS",
-            "file_video_metadata_extraction": "SUCCESS"
-        },
-        # FIXME remove it
-        'extracted_metadata': {'duration': 12},
+    assert video['_cds']['state'] == {
+        "file_transcode": "SUCCESS",
+        "file_video_extract_frames": "SUCCESS",
+        "file_video_metadata_extraction": "SUCCESS"
     }
+    assert 'extracted_metadata' in video['_cds']
 
-    # check project deposit
-    deposit_project = CDSRecordDumpLoader._create_deposit(record=project)
-    assert Project._schema in deposit_project['$schema']
-    assert project.revision_id == deposit_project[
-        '_deposit']['pid']['revision_id']
-    assert deposit_project['_deposit']['created_by'] == -1
-    assert deposit_project['_deposit']['owners'] == [-1]
+    def check_files(video):
+        bucket = CDSRecordDumpLoader._get_bucket(record=video)
+        files = [dump_object(obj)
+                 for obj in ObjectVersion.get_by_bucket(bucket=bucket)]
+        for file_ in files:
+            assert as_bucket(file_['bucket_id']) is not None
+            assert 'checksum' in file_
+            assert 'content_type' in file_
+            assert 'context_type' in file_
+            assert FileInstance.query.filter_by(
+                id=file_['file_id']) is not None
+            assert 'key' in file_
+            assert 'links' in file_
+            assert 'content_type' in file_
+            assert 'context_type' in file_
+            assert 'media_type' in file_
+            assert 'tags' in file_
+
+        # check extracted metadata
+        master_video = CDSVideosFilesIterator.get_master_video_file(video)
+        assert any([key in master_video['tags']
+                    for key in ExtractMetadataTask._all_keys])
+        assert any([key in video['_cds']['extracted_metadata']
+                    for key in ExtractMetadataTask._all_keys])
+
+    def check_buckets(record, deposit):
+        def get(key, record):
+            bucket = CDSRecordDumpLoader._get_bucket(record=record)
+            files = [dump_object(obj)
+                     for obj in ObjectVersion.get_by_bucket(bucket=bucket)]
+            return [file_[key] for file_ in files]
+
+        def check(record, deposit, file_key, different=None):
+            values_record = set(get(file_key, record))
+            values_deposit = set(get(file_key, deposit))
+            difference = len(values_record - values_deposit)
+            assert different == difference
+
+        def check_tag_master(record):
+            bucket = CDSRecordDumpLoader._get_bucket(record=record)
+            master = CDSVideosFilesIterator.get_master_video_file(record)
+            files = [dump_object(obj)
+                     for obj in ObjectVersion.get_by_bucket(bucket=bucket)
+                     if obj.get_tags().get('master')]
+            assert all([file_['tags']['master'] == master['version_id']
+                        for file_ in files])
+
+        # 1 bucket record != 1 bucket deposit
+        check(record, deposit, 'bucket_id', 1)
+        # all file_id are the same except the smil file (only in record)
+        check(record, deposit, 'file_id', 1)
+        check(record, deposit, 'key', 1)
+        # 18 object_version record != 17 object_version deposit
+        check(record, deposit, 'version_id', 18)
+        # check tag 'master' where is pointing
+        check_tag_master(record)
+        check_tag_master(deposit)
+
+    def check_first_level_files(record):
+        [master] = [file_ for file_ in deposit_video['_files']
+                    if file_['context_type'] == 'master']
+        assert len(master['subformat']) == 5
+        assert len(master['frame']) == 10
+        # TODO assert len(master['playlist']) == ??
+        assert len([file_ for file_ in deposit_video['_files']
+                    if file_['context_type'] == 'master']) == 1
+        duration = float(record['_cds']['extracted_metadata']['duration'])
+        for frame in master['frame']:
+            assert float(frame['tags']['timestamp']) < duration
+            assert float(frame['tags']['timestamp']) > 0
 
     # check video deposit
-    deposit_video = CDSRecordDumpLoader._create_deposit(record=video)
+    deposit_video_uuid = PersistentIdentifier.query.filter(
+        PersistentIdentifier.pid_type == 'depid',
+        PersistentIdentifier.object_uuid != str(deposit_project_uuid),
+        PersistentIdentifier.object_type == 'rec'
+    ).one().object_uuid
+    deposit_video = Video.get_record(str(deposit_video_uuid))
     assert Video._schema in deposit_video['$schema']
     assert video.revision_id == deposit_video[
         '_deposit']['pid']['revision_id']
     assert deposit_video['_deposit']['created_by'] == -1
     assert deposit_video['_deposit']['owners'] == [-1]
+    assert len(video['_files']) == 2
+    assert len(deposit_video['_files']) == 2
+    check_files(video)
+    check_files(deposit_video)
+    check_buckets(video, deposit_video)
+    check_first_level_files(video)
+    check_first_level_files(deposit_video)
 
     # try to edit video
     deposit_video = deposit_video_resolver(deposit_video['_deposit']['id'])
