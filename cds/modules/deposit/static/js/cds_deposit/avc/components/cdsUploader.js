@@ -525,13 +525,27 @@ function cdsUploaderCtrl(
       );
       $http(args)
         .then(
-          function success() {
+          function success(response) {
             // Remove the file from the list
             that.files.splice(index, 1);
+            // Success uploading notification
+            toaster.pop({
+              type: 'success',
+              title: 'The file has been succesfuly deleted.',
+              bodyOutputType: 'trustedHtml',
+              timeout: 8000
+            });
           },
-          function error(error) {
+          function error(response) {
             // Inform the parents
             $scope.$emit('cds.deposit.error', response);
+            // Error uploading notification
+            toaster.pop({
+              type: 'error',
+              title: 'Error deleting the file.',
+              bodyOutputType: 'trustedHtml',
+              timeout: 8000
+            });
           }
         );
     }
