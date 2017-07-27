@@ -1,6 +1,6 @@
 {%- extends "cds_theme/page.html" %}
 {%- set title = '%s | %s'|format( record.get('title', {}).get('title', 'Project'), config.THEME_SITENAME) or 'CDS' -%}
-{%- set container_class = 'container-fluid' -%}
+{%- set container_class = 'container-fluid cds-max-fluid-width' -%}
 
 {%- block css %}
     {% assets "invenio_deposit_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
