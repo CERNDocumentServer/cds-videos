@@ -116,7 +116,7 @@
             <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
               <div ng-init="$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update" class="row">
                 <div class="col-sm-6">
-                  <h4>Share Project with</h4>
+                  <h4>Grant access to the project</h4>
                   <ui-select
                    multiple
                    on-select="$ctrl.onSelectValue($item, $model, '_access.update');$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update"
