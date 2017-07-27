@@ -90,7 +90,7 @@
             </a>
             <ul class="mt-10 list-unstyled" ng-repeat="vid in $ctrl.master.metadata.videos">
               <li ng-init="state=(vid._cds.state | overallState)">
-                <a offset="200" du-scrollspy="{{vid._deposit.id}}" du-smooth-scroll ng-href="#{{vid._deposit.id}}" class="cds-deposit-side-nav-item-link f9">
+                <a offset="200" du-scrollspy="{{vid._deposit.id}}" du-smooth-scroll ng-href="#{{vid._deposit.id}}" class="cds-deposit-side-nav-item-link f8">
                   <i class="fa text-muted fa-video-camera"></i> {{ (vid.title.title | limitTo:30) || 'Video #' + ($index + 1) }} <span ng-show="vid.title.title.length > 30">[...]</span> <span class="pull-right fw-b">
                   <i class="fa pl-5 {{ (vid._cds.state | overallState) | progressIcon:vid._deposit.status }} {{ (vid._cds.state | overallState) | progressClass:vid._deposit.status }}"></i>
                   </span>
