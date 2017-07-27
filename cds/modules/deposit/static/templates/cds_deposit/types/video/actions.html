@@ -37,9 +37,9 @@ Are you sure you want publish the video?<br>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-xs btn-primary "
+    class="btn btn-xs btn-primary"
     ng-click="form.publishInfoShown = true">
-  Force Publish
+  Publish
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
