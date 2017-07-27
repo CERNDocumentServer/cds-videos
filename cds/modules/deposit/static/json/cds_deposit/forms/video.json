@@ -252,6 +252,7 @@
           "key": "license[].license",
           "title": "Licence",
           "placeholder": "License name",
+          "minLength": 1,
           "options": {
             "refreshDelay": 100,
             "mergeObjects": true,
