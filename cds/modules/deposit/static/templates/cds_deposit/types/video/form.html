@@ -18,15 +18,15 @@
   <button ng-click="$ctrl.cdsDepositCtrl.dismissAlert(this)" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   Extracted metadata can be used to automatically fill part of the form. <a ng-click="metadataModal = true">Click here to see the extracted metadata</a>
 </div>
-<modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="75%">
+<modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="50%">
   <ul>
     <li ng-repeat="(key,value) in $ctrl.cdsDepositCtrl.getMetadataToDisplay()">
       <strong>{{key}}</strong> {{value}}
     </li>
   </ul>
   <p class="pull-right">
+    <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
     <button class="btn btn-success" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(true) ; $parent.hideModal()">Yes</button>
-    <button class="btn btn-danger" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
   </p>
 </modal-dialog>
 <!-- Main form -->
