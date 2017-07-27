@@ -1,8 +1,8 @@
 <modal-dialog show="$ctrl.confirmNewMaster" width="50%">
   <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
   <p class="pull-right">
+      <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">Cancel</button>
     <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
-    <button class="btn btn-danger" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">No</button>
   </p>
 </modal-dialog>
 <div ng-show="$ctrl.files.length > 0" class="panel panel-default">
