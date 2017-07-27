@@ -113,6 +113,7 @@
   ngf-drag-over-class="'cds-deposit-dragover'"
   ngf-model-options="{allowInvalid: false}"
   ngf-drop=""
+  ngf-select=""
   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
   ngf-pattern="'.vtt'"
   ngf-accept="'text/vtt'"
@@ -139,7 +140,13 @@
       No subtitles.
     </p>
     <p class="text-muted text-center f8">
-      Drag & Drop <mark>vtt</mark> files here.
+      Drag & Drop <mark>vtt</mark> or <a   ng-click=""
+        ngf-model-options="{allowInvalid: false}"
+        ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
+        ngf-select=""
+        ngf-pattern="'.vtt'"
+        ngf-accept="'.vtt'"
+        ngf-max-size="20GB">select</a> files.
     </p>
   </div>
   <table ng-switch-default class="table">
