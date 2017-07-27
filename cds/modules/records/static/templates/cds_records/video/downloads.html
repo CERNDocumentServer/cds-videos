@@ -109,7 +109,7 @@
   </div>
 </div>
 <!-- /Additional files -->
-<modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="75%">
+<modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" width="50%">
   <div>
     <p>Use of CERN audiovisual media denotes agreement with the following terms: </p>
       <ol>
@@ -127,10 +127,11 @@
     <p>Copyright abuse should be reported using the contact form.</p>
   </div>
   <p class="pull-right">
+    <button class="btn btn-default" ng-click="$parent.hideModal()">Disagree</button>
     <a ng-href="{{ (record | findMaster).links.self }}" download>
       <button class="btn btn-success" ng-click="$parent.hideModal()">Agree</button>
     </a>
-    <button class="btn btn-danger" ng-click="$parent.hideModal()">Refuse</button>
+
   </p>
 </modal-dialog>
 <!-- /Download -->

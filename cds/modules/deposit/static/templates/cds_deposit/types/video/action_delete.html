@@ -1,9 +1,9 @@
 <div class="text-left">
-  <modal-dialog show="form.infoShown" dialog-title="Delete video" width="75%">
+  <modal-dialog show="form.infoShown" dialog-title="Delete video" width="50%">
     Are you sure you want permanently delete the video?
     <p class="pull-right">
+      <button class="btn btn-default" ng-click="$parent.hideModal()">No</button>
       <button class="btn btn-success" ng-click="$ctrl.deleteDeposit(); $parent.hideModal()">Yes</button>
-      <button class="btn btn-danger" ng-click="$parent.hideModal()">No</button>
     </p>
   </modal-dialog>
   <button
