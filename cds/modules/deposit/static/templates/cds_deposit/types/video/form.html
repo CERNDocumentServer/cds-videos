@@ -46,6 +46,7 @@
         <!-- Category and type -->
         <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
           <ul class="list-inline">
+             <li ng-show="$ctrl.cdsDepositCtrl.isPublished()"><span class="label label-primary">Published</span></li>
              <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
              <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
            </ul>
