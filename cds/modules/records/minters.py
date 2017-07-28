@@ -30,6 +30,7 @@ import idutils
 
 from flask import current_app
 
+from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 from .providers import CDSRecordIdProvider, CDSReportNumberProvider
@@ -38,7 +39,11 @@ from .providers import CDSRecordIdProvider, CDSReportNumberProvider
 def cds_record_minter(record_uuid, data):
     """Mint record identifiers."""
     provider = _rec_minter(record_uuid, data)
-    _doi_minter(record_uuid, data)
+    from cds.modules.deposit.api import Project
+    project_schema = current_jsonschemas.path_to_url(Project._schema)
+    # We shouldn't mint the DOI for the project (CDS#996)
+    if data.get('$schema') != project_schema:
+        _doi_minter(record_uuid, data)
 
     return provider.pid
 
