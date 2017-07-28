@@ -90,6 +90,19 @@ def test_invalid_doi(db, doi):
         cds_record_minter(uuid, data)
 
 
+def test_no_doi_minted_for_projects(db, api_project):
+    """Test that the DOI is not minted for Project."""
+    (project, video_1, video_2) = api_project
+    uuid1 = uuid4()
+    uuid2 = uuid4()
+    cds_record_minter(uuid1, project)
+    # Project shouldn't have a DOI
+    assert project.get('doi') is None
+    cds_record_minter(uuid2, video_1)
+    # Video should have a DOI
+    assert video_1.get('doi')
+
+
 def test_recid_provider_exception(db):
     """Test if providing a recid will cause an error."""
     with pytest.raises(AssertionError):
