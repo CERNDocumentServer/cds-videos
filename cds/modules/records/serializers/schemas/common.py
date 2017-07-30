@@ -32,6 +32,7 @@ class LicenseSchema(Schema):
 
     license = fields.Str()
     material = fields.Str()
+    credit = fields.Str()
     url = fields.Str()
 
 

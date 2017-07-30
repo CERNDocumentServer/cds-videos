@@ -83,13 +83,12 @@
         "description": "",
         "required": true,
         "sortOptions": {
-          "disabled": false,
+          "disabled": true,
           "handle": "i.sort-handle",
           "cursor": "move",
           "axis": "y"
         },
         "add": "Add another contributor",
-        "inline": true,
         "items": [
           {
             "type": "template",
@@ -165,11 +164,12 @@
       "notitle": true,
       "description": "",
       "sortOptions": {
-        "disabled": false,
+        "disabled": true,
         "handle": "i.sort-handle",
         "cursor": "move",
         "axis": "y"
       },
+      "firstItemMessage": "General license",
       "add": "Add another licence",
       "inline": true,
       "items": [
@@ -179,6 +179,7 @@
           "notitle": false,
           "title": "Licence",
           "placeholder": "License name",
+          "setDefaultValue": "$ctrl.setDefaultValue",
           "minLength": 1,
           "options": {
             "refreshDelay": 100,
@@ -190,7 +191,13 @@
         {
           "key": "license[].material",
           "placeholder": "Material",
-          "title": "Material"
+          "title": "Material",
+          "condition": "arrayIndex !=0"
+        },
+        {
+          "key": "license[].credit",
+          "placeholder": "Credit",
+          "title": "Credit"
         }
       ]
     }

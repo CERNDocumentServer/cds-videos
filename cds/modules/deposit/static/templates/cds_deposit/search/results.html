@@ -12,15 +12,15 @@
         <i class="fa pl-5 {{ state | progressIcon:record.metdata._deposit.status }} {{ state | progressClass:record.metdata._deposit.status }}"></i>
      </div>
      <div class="media-body">
-       <a class="media-heading f8 fw-b" target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
+       <a class="media-heading fw-b" target="_self" ng-href="/deposit/project/{{ record.metadata._deposit.id }}">
          {{ record.metadata.title.title || 'No project title'}}
        </a>
        <p class="f8 mt-5 text-muted">
          <div class="row">
-           <div class="col-md-9">
-              <p ng-bind-html="(record.metadata.description | wordsSplit:32 | stripTags | trustHtml) || 'No description'"></p>
+           <div class="col-md-8">
+              <p ng-bind-html="(record.metadata.description.value | wordsSplit:32 | stripTags | trustHtml) || 'No description'"></p>
            </div>
-           <div class="col-md-3">
+           <div class="col-md-4">
              <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
                <li class="small" ng-repeat="(task, status) in (record.metadata._cds.state | orderTasks)">
                  <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}

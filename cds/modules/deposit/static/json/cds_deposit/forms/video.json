@@ -154,7 +154,6 @@
         "update": "$ctrl.onSortableReorder"
       },
       "add": "Add another contributor",
-      "inline": true,
       "items": [
         {
           "type": "template",
@@ -264,6 +263,11 @@
           "key": "license[].material",
           "placeholder": "Material",
           "title": "Material"
+        },
+        {
+          "key": "license[].credit",
+          "placeholder": "Credit",
+          "title": "Credit"
         }
       ]
     },

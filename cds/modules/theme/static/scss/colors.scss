@@ -25,22 +25,25 @@
 
 // Background normal
 .bg-n {
-  background-color: $cds-primary-color;
+  background-color: $cds-primary-color !important;
 }
 // Background light
 .bg-l {
-  background-color: $primary-color-light;
+  background-color: $primary-color-light !important;
 }
 // Background darker
 .bg-d {
-  background-color: $primary-color-dark;
+  background-color: $primary-color-dark !important;
 }
 // Background gray
 .bg-g {
-  background-color: $gray;
+  background-color: $gray !important;
 }
 .bg-gl {
-  background-color: $bg-gray;
+  background-color: $bg-gray !important;
+}
+.bg-warn {
+  background-color: #fcf8e3 !important;
 }
 
 // Background white

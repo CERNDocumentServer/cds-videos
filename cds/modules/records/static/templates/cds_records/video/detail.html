@@ -58,6 +58,29 @@
               <li>
                 <i class="fa fa-copyright text-muted"></i> {{ ::record.metadata.copyright.year || '2017' }} {{ ::record.metadata.copyright.holder || 'CERN' }}
               </li>
+              <li ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material == 'other'">
+                <i class="fa fa-certificate text-muted"></i>
+                <span ng-if="!licenses[0].license">
+                  <a ng-click="noLicense = true">Unknown</a>
+                  <modal-dialog show="noLicense" dialog-title="Unknown" width="50%">
+                    <div>
+                      <p>
+                        This resource is copyrighted as non-CERN and unfortunately we don't have enough information about its license. None of CERN's terms of use will apply.
+                      </p>
+                    </div>
+                  </modal-dialog>
+                </span>
+                <span ng-if="licenses[0].license">
+                  <span ng-switch="licenses[0].license">
+                    <span ng-switch-when='CERN'>
+                      <a target="_blank" href="http://copyright.web.cern.ch/">Conditions of Use</a>
+                    </span>
+                    <span ng-switch-default>
+                      <a target="_blank" ng-href="{{ licenses[0].url }}">{{ licenses[0].license }}</a>
+                    </span>
+                  </span>
+                </span>
+              </li>
               <li>
                 <i class="fa fa-calendar text-muted"></i> {{ ::record.metadata.date }}
               </li>
@@ -72,29 +95,46 @@
           <!-- Date & Views -->
           <!-- Description -->
           <div ng-init="showFullDescription=false" class="cds-detail-description cds-detail-video-description t-b px-20">
-            <p class="f8 mb-30" ng-bind-html="(record.metadata.description | stripTags | trustHtml) || 'No description'"></p>
+            <p class="mb-30" ng-bind-html="(record.metadata.description.value | stripTags | trustHtml) || 'No description'"></p>
             <!-- Hidden content -->
             <div ng-show="showFullDescription">
+
+              <hr />
               <!-- Contributors -->
               <div class="mb-20">
-                <p class="mb-0">Contributors:</p>
-                <div ng-repeat="(role, contribs) in record.metadata.contributors | groupBy:'role'">
-                  <span class="dl-horizontal" ng-repeat="contrib in contribs">
-                    <strong>{{ role }}: </strong>
-                    <a ng-href='/search?q=contributors.name:"{{ contrib.name }}"'>{{ contrib.name }}</a>  {{ contrib.affiliations ? ' - ' + contrib.affiliations.join(',') : ''}}
-                  </span>
+                <p><strong>Contributors</strong></p>
+                <div class="pl-10" ng-repeat="(role, contribs) in record.metadata.contributors | groupBy:'role'">
+                  <p>{{ role }}: </p>
+                  <ul>
+                    <li ng-repeat="contrib in contribs">
+                      <a ng-href='/search?q=contributors.name:"{{ contrib.name }}"'>{{ contrib.name }}</a>  {{ contrib.affiliations ? ' - ' + contrib.affiliations.join(',') : ''}}
+                    </li>
+                  </ul>
                 </div>
               </div>
               <!-- Contributors -->
               <div class="mb-10">
                 <!-- License -->
-                <p class="mb-0" ng-if="record.metadata.license.length > 0">
-                  <strong>License: </strong> <a target="_blank" ng-repeat="license in record.metadata.license" ng-href='{{ :: license.url }}'>{{ license.license }}</a>
+                <p class="mb-0" ng-if="record.metadata.license.length > 1">
+                  <p><strong>Licences</strong></p>
+                  <div class="pl-10" ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material != 'other'">
+                    <p>{{ material }}: </p>
+                    <ul>
+                      <li ng-repeat="license in licenses" ng-if="license.license || license.credit">
+                        <span ng-if="license.credit">
+                            {{ license.credit }}
+                        </span>
+                        <span ng-if="!license.credit && license.license">
+                            <a target="_blank" ng-href='{{ license.url }}'>{{ license.license }}</a>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
                 </p>
                 <!-- License -->
                 <!-- Language -->
                 <p class="mb-0" ng-if="record.metadata.language">
-                  <strong>Language: </strong> <a ng-href='/search?q=language:"{{ :: record.metadata.language }}"'>{{ record.metadata.language }}</a>
+                  <strong>Language: </strong> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language }}</a>
                 </p>
                 <!-- Language -->
                 <!-- Project link -->
