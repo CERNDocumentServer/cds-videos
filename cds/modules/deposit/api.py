@@ -662,15 +662,21 @@ class Project(CDSDeposit):
     def _sync_fields(self, video):
         """Sync some fields from project."""
         changed = False
-        project_access = self.get('_access', {})
+        # Only change metadata if the video is not published
+        project_access = self.get('_access', {}).get('update')
         project_created_by = self['_deposit'].get('created_by')
-        if video.get('_access', {}) != project_access or \
-                video['_deposit'].get('created_by') != project_created_by:
+
+        if video.get('_access', {}).get('update') != project_access \
+                and project_access:
             changed = True
             # sync access rights
-            video['_access'] = deepcopy(project_access)
+            video['_access']['update'] = deepcopy(project_access)
+
+        if video['_deposit'].get('created_by') != project_created_by:
+            changed = True
             # sync owner
             video['_deposit']['created_by'] = project_created_by
+
         return changed
 
 
@@ -704,6 +710,10 @@ class Video(CDSDeposit):
         video_new.project = project
         # copy access rights from project
         project._sync_fields(video=video_new)
+        # copy license only at creation time
+        if not video_new.get('license'):
+            video_new['license'] = deepcopy(project.get('license'))
+
         project.commit()
         video_new.commit()
         return video_new
@@ -756,6 +766,7 @@ class Video(CDSDeposit):
             self['_access'] = {}
         self['_access']['update'] = self.project.get(
             '_access', {}).get('update', [])
+        self.project._sync_fields(self)
         # generate human-readable duration
         self.generate_duration()
         # generate extra tags for files

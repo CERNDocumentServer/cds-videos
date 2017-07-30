@@ -2,7 +2,7 @@
   class="form-group schema-form-uiselect {{form.htmlClass}}"
   ng-controller="invenioDynamicSelectController"
   ng-class="{'has-error': hasError(), 'has-feedback': form.feedback !== false}"
-  ng-init="insideModel=$$value$$;">
+  ng-init="insideModel=$$value$$; select_model.selected=$$value$$">
   <label
     class="control-label"
     for="{{ form.key.slice(-1)[0] }}"
@@ -13,14 +13,15 @@
   <ui-select
     ng-model="select_model.selected"
     ng-if="!(form.options.tagging||false)"
+    ng-model-options="form.ngModelOptions"
     theme="bootstrap"
     ng-required="evalExpr(form.options.required || false)"
     ng-disabled="evalExpr(form.readonly)"
-    on-select="$$value$$=$item.value; select_model.selected=$item" class="{{form.options.uiClass}}">
-            <ui-select-match
-                    placeholder="{{ $$value$$.name || form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">
-                {{select_model.selected.name}}
-            </ui-select-match>
+    on-select="$$value$$=$item.value; select_model.selected=$item"  class="{{form.options.uiClass}}">
+      <ui-select-match
+              placeholder="{{ form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">
+              {{ (select_model.selected | isEmpty) ? select_model.selected.name : (select_model.selected.name | isEmpty) ? select_model.selected : select_model.selected.name }}
+      </ui-select-match>
       <ui-select-choices
         minimum-input-length="{{ form.minLength || 3 }}"
         refresh="populateTitleMap(form, $select.search)"

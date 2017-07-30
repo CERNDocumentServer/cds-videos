@@ -61,6 +61,12 @@ app.filter('previewIframeSrc', ['$sce', '$window', function($sce, $window) {
   };
 }]);
 
+app.filter('isEmpty', function() {
+  return function(text) {
+    return _.isEmpty(text);
+  };
+});
+
 app.filter('toInt', function() {
   return function(text) {
     return text ? parseInt(text) : text;
