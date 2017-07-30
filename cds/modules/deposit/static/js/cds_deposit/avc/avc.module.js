@@ -90,6 +90,7 @@ function cdsDepositsConfig(
     'date',
     'description',
     'keywords',
+    'license',
     'title.title',
   ]);
 

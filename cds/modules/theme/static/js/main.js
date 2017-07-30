@@ -100,4 +100,4 @@ $(document).ready(function() {
   .blur(function() {
     $(".cds-navbar-form").removeClass('cds-active-search');
   });
-});
+})
