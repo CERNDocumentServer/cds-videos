@@ -51,6 +51,9 @@ def datacite_register(
     """
     try:
         record = Record.get_record(record_uuid)
+        if not record.get('doi'):
+            # If it's a project, there is no DOI
+            return
         # Bail out if not a CDS DOI.
         if not is_local_doi(record['doi']):
             return

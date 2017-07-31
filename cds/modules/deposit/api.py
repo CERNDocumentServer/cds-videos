@@ -294,7 +294,9 @@ class CDSDeposit(Deposit):
 
     def has_minted_doi(self):
         """Check if deposit has a minted DOI."""
-        return is_local_doi(self['doi']) if self.has_record() else False
+        if self.get('doi'):
+            return is_local_doi(self['doi']) if self.has_record() else False
+        return False  # There is no DOI at all
 
     def _prepare_edit(self, record):
         """Unlock bucket after edit."""
