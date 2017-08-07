@@ -189,6 +189,7 @@ setup(
         ],
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
+            'cds_stats = cds.modules.stats.views:blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
