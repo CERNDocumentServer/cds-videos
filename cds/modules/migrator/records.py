@@ -461,7 +461,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         """Resolve the owner id."""
         if not email:
             return -1
-        return User.query.filter_by(email=email).one().id
+        return User.query.filter_by(email=email.lower()).one().id
 
     @classmethod
     def _resolve_project(cls, video):
