@@ -445,16 +445,18 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                     if preset_name == name and \
                             all([options.get(key) == value
                                  for key, value in clues.items()]):
-                        return ratio, options
-            return None, None
+                        return ratio, preset_name, options
+            return None, None, None
 
         myclues = deepcopy(clues)
         preset = myclues.pop('preset', None)
         if preset:
-            ratio, preset = guess_preset(preset_name=preset, clues=myclues)
+            ratio, preset_quality, options = guess_preset(
+                preset_name=preset, clues=myclues)
             if ratio:
-                mypreset = deepcopy(preset)
+                mypreset = deepcopy(options)
                 mypreset['display_aspect_ratio'] = ratio
+                mypreset['preset_quality'] = preset_quality
                 return mypreset
         return {}
 
