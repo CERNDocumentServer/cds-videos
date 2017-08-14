@@ -36,6 +36,7 @@ class _CDSSSchema(Schema):
     """CDS private metadata."""
 
     state = fields.Raw()
+    modified_by = fields.Int()
 
 
 class ProjectDepositSchema(DepositSchema):

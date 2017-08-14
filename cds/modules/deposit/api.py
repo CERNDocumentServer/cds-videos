@@ -221,6 +221,7 @@ class CDSDeposit(Deposit):
         """Set partial validator as default."""
         if 'validator' not in kwargs:
             kwargs['validator'] = PartialDraft4Validator
+        # TODO add 'modified_by' inside _cds (see issue #991)
         return super(CDSDeposit, self).commit(**kwargs)
 
     @classmethod
