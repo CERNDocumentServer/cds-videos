@@ -81,7 +81,7 @@ def test_record_files_migration(app, location, script_info, datadir):
     assert record['_files'][0]['doctype'] == 'CTH_FILE'
 
 
-def test_mingrate_pids(app, location, datadir):
+def test_mingrate_pids(app, location, datadir, users):
     """Test migrate pids."""
     data = load_json(datadir, 'cds_records_demo_1_project.json')
     dump = CDSRecordDump(data=data[0])
@@ -93,7 +93,7 @@ def test_mingrate_pids(app, location, datadir):
     assert sorted(pids) == expected
 
 
-def test_migrate_record(app, location, datadir, es):
+def test_migrate_record(app, location, datadir, es, users):
     """Test migrate date."""
     # create the project
     data = load_json(datadir, 'cds_records_demo_1_project.json')
@@ -113,7 +113,7 @@ def test_migrate_record(app, location, datadir, es):
             "file_video_extract_frames": "SUCCESS",
             "file_video_metadata_extraction": "SUCCESS"
         },
-        'modified_by': None,
+        'modified_by': users[0],
     }
 
     # check project deposit
@@ -248,8 +248,8 @@ def test_migrate_record(app, location, datadir, es):
     assert Video._schema in deposit_video['$schema']
     assert video.revision_id == deposit_video[
         '_deposit']['pid']['revision_id']
-    assert deposit_video['_deposit']['created_by'] == -1
-    assert deposit_video['_deposit']['owners'] == [-1]
+    assert deposit_video['_deposit']['created_by'] == users[0]
+    assert deposit_video['_deposit']['owners'] == [users[0]]
     assert len(video['_files']) == 2
     assert len(deposit_video['_files']) == 2
     check_files(video)

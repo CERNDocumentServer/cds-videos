@@ -4,7 +4,7 @@
       "numeric_detection": true,
       "properties": {
         "_project_id":{
-              "type": "string"
+          "type": "string"
         },
         "vr": {
           "type": "boolean"
@@ -212,6 +212,9 @@
             },
             "state": {
               "type": "object"
+            },
+            "modified_by": {
+              "type": "integer"
             }
           }
         },

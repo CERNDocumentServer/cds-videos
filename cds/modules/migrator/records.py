@@ -218,13 +218,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_cds(cls, record):
         """Build _cds."""
+        user_id = cls._resolve_user_id(email=record.pop('modified_by', None))
         record['_cds'] = {
             "state": {
                 "file_transcode": "SUCCESS",
                 "file_video_extract_frames": "SUCCESS",
                 "file_video_metadata_extraction": "SUCCESS"
             },
-            "modified_by": record.pop('modified_by', None),
+            "modified_by": user_id,
         }
 
     @classmethod
@@ -288,13 +289,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         record_pid = PersistentIdentifier.query.filter_by(
             object_type='rec', object_uuid=record.id, pid_type='recid').one()
         deposit_pid = deposit_minter(record_uuid=deposit.id, data=deposit)
-        userid = cls._resolve_owner(
+        userid = cls._resolve_user_id(
             email=record.get('_access', {}).get('update', [''])[0])
         deposit['_deposit'] = {
-            # FIXME
             'created_by': userid,
             'id': deposit_pid.pid_value,
-            # FIXME
             'owners': [userid],
             'pid': {
                 # +1 because we update the record from the deposit
@@ -457,7 +456,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return {}
 
     @classmethod
-    def _resolve_owner(cls, email=None):
+    def _resolve_user_id(cls, email=None):
         """Resolve the owner id."""
         if not email:
             return -1
