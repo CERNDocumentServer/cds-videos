@@ -61,7 +61,8 @@ from cds.modules.webhooks.status import get_deposit_events, \
 from cds.modules.fixtures.video_utils import add_master_to_video
 
 from helpers import workflow_receiver_video_failing, mock_current_user, \
-    get_indexed_records_from_mock, prepare_videos_for_publish
+    get_indexed_records_from_mock, prepare_videos_for_publish, \
+    reset_oauth2
 
 
 def test_video_resolver(api_project):
@@ -272,7 +273,7 @@ def test_video_record_schema(app, db, api_project):
     assert video_1.record_schema == Video.get_record_schema()
 
 
-@mock.patch('flask_login.current_user', mock_current_user)
+#  @mock.patch('flask_login.current_user', mock_current_user)
 def test_video_events_on_download_check_index(api_app, webhooks, db,
                                               api_project, access_token,
                                               json_headers, users):
@@ -342,14 +343,17 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         assert data['_cds']['state']['file_download'] == states.SUCCESS
 
         # [[ EDIT VIDEO ]]
+        deposit = deposit_video_resolver(video_1_depid)
         video_edited = deepcopy(deposit)
         del video_edited['_files']
         del video_edited['_cds']['state']
+        reset_oauth2()
         res = client.put(
             url_for('invenio_deposit_rest.video_item',
                     pid_value=video_1_depid),
             data=json.dumps(video_edited),
-            headers=json_headers)
+            headers=json_headers
+        )
         assert res.status_code == 200
 
         # check if the tasks states and files are inside elasticsearch
@@ -366,6 +370,7 @@ def test_video_events_on_download_check_index(api_app, webhooks, db,
         assert data['_cds']['state']['file_download'] == states.SUCCESS
 
         # [[ PUBLISH THE PROJECT ]]
+        reset_oauth2()
         res = client.post(
             url_for('invenio_deposit_rest.project_actions',
                     pid_value=project['_deposit']['id'], action='publish',
