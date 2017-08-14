@@ -134,12 +134,18 @@ def test_migrate_record(app, location, datadir, es, users):
     def load_video(*args, **kwargs):
         return open(join(datadir, 'test.mp4'), 'rb')
 
-    with mock.patch.object(DataCiteProvider, 'register') as mock_datacite, \
+    with mock.patch.object(DataCiteProvider, 'register'), \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream',
                 return_value=load_video()):
         video = CDSRecordDumpLoader.create(dump=dump)
         # assert mock_datacite.called is True
+    # check smil file
+    smil_obj = ObjectVersion.query.filter_by(
+        key='CERN-MOVIE-2012-193-001.smil', is_head=True).one()
+    storage = smil_obj.file.storage()
+    assert '<video src' in storage.open().read().decode('utf-8')
+    # check project
     project = Record.get_record(p_id)
     assert project['videos'] == [
         {'$ref': 'https://cds.cern.ch/api/record/1495143'}
