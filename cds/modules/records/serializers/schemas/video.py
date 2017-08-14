@@ -38,6 +38,7 @@ class _CDSSSchema(Schema):
 
     state = fields.Raw()
     extracted_metadata = fields.Raw()
+    modified_by = fields.Int()
 
 
 class VideoDepositSchema(DepositSchema):

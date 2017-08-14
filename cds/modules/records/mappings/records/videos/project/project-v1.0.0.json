@@ -105,6 +105,9 @@
             },
             "state": {
               "type": "object"
+            },
+            "modified_by": {
+              "type": "integer"
             }
           }
         },
