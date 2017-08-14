@@ -47,7 +47,7 @@ from cds_dojson.marc21 import marc21
 from cds_dojson.marc21.utils import create_record
 from invenio_migrator.records import RecordDump, RecordDumpLoader
 
-from ..deposit.api import Project, Video, record_build_url, record_unbuild_url
+from ..deposit.api import Project, Video, record_build_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
@@ -328,11 +328,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             record_id=record.id, bucket_id=snapshot.id
         ))
         if Video.get_record_schema() == record['$schema']:
-            # create smil file
+            # create an empty smil file
             cls._resolve_dumps(record=record)
             cls._resolve_smil(record=record)
             # update tag 'master'
             cls._update_tag_master(record=record)
+            # create the full smil file
+            cls._resolve_dumps(record=record)
+            cls._resolve_smil(record=record)
 
     @classmethod
     def _get_bucket(cls, record):
