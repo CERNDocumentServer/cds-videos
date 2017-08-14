@@ -243,6 +243,13 @@ def test_migrate_record(app, location, datadir, es, users):
         for frame in master['frame']:
             assert float(frame['tags']['timestamp']) < duration
             assert float(frame['tags']['timestamp']) > 0
+        # check tag 'preset_quality'
+        pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        assert sorted(pqs) == sorted(['1080p', '240p', '360p', '480p', '720p'])
+        # check tag 'display_aspect_ratio'
+        dar = set([form['tags']['display_aspect_ratio']
+                   for form in master['subformat']])
+        assert dar == {'16:9'}
 
     # check video deposit
     deposit_video_uuid = PersistentIdentifier.query.filter(
