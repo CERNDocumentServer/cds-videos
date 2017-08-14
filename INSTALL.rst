@@ -1,17 +1,24 @@
 Installation
 ============
 
-Manual
-------
+Step-by-step
+------------
+
+Install `ffmpeg` and ensure that `ffprobe` is in your PATH:
+
+.. code-block:: console
+
+    $ ffprobe
+    ... ffprobe version 3.3.3 ...
 
 Prepare the environment
 
 .. code-block:: console
 
-    $ npm install -g node-sass clean-css requirejs uglify-js
+    $ ./scripts/setup-npm.sh
     $ mkvirtualenv cds3
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
-    (cds3)$ git clone -b cdslabs https://github.com/CERNDocumentServer/cds.git
+    (cds3)$ git clone https://github.com/CERNDocumentServer/cds.git
 
 .. note::
 
@@ -50,11 +57,7 @@ Build the assets
 .. code-block:: console
 
     (cds3)$ python -O -m compileall .
-    (cds3)$ cds npm
-    (cds3)$ cdvirtualenv var/instance/static
-    (cds3)$ npm install
-    (cds3)$ cds collect -v
-    (cds3)$ cds assets build
+    (cds3)$ ./scripts/setup-assets.sh
 
 Make sure that ``elasticsearch`` server is running:
 
@@ -67,44 +70,29 @@ Create database & user
 
 .. code-block:: console
 
-    (cds3)$ cdvirtualenv src/cds
-    (cds3)$ cds db init
-    (cds3)$ cds db create
-    (cds3)$ cds users create test@test.ch -a
-    (cds3)$ cds index init
+    (cds3)$ ./scripts/setup-instance.sh
 
-
-Create a record
+Fill the database with demo data
 
 .. code-block:: console
 
-    (cds3)$ cds fixtures invenio
-
-Or you can create the entire CDS Theses collection ~ 10 mins
-
-.. code-block:: console
-
-    (cds3)$ cds fixtures cds
-
-Create some demo files
-
-.. code-block:: console
-
-    (cds3)$ cds fixtures files
+    (cds3)$ cds fixtures records
 
 Run example development server:
 
 .. code-block:: console
 
-    $ cds run --debugger
+    (cds3)$ cds run --debugger --with-threads
 
 Now you can visit http://localhost:5000/ :)
 
 In order to test the video previewer:
 
     Add the following to your /etc/hosts file:
+
     .. code-block:: console
-    $ 127.0.0.1  localhost.cern.ch
+
+        $ 127.0.0.1  localhost.cern.ch
 
 Now you can visit http://localhost.cern.ch:5000/ :)
 
@@ -130,7 +118,7 @@ Next, create the database, indexes, fixtures and an admin user:
     $ docker-compose run --rm web cds index init
     $ docker-compose run --rm web cds users create cds@cern.ch -a
     $ docker-compose run --rm web cds access allow admin-access user cds@cern.ch
-    $ docker-compose run --rm web cds fixtures cds
+    $ docker-compose run --rm web cds fixtures records
 
 Now visit the following URL in your browser:
 
