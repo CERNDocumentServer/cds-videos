@@ -37,7 +37,7 @@ import mock
 import pkg_resources
 from flask import current_app
 from celery import chain, group, shared_task, states
-from flask_security import login_user
+from flask_security import login_user, current_user
 from invenio_accounts.models import User
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
@@ -480,3 +480,9 @@ def load_json(datadir, filename):
     with open(filepath, 'r') as file_:
         data = json.load(file_)
     return data
+
+
+def reset_oauth2():
+    """After a OAuth2 request, reset user."""
+    if hasattr(current_user, 'login_via_oauth2'):
+        del current_user.login_via_oauth2
