@@ -166,15 +166,7 @@
           "type": "object",
           "properties": {
             "description": {
-              "type": "object",
-              "properties": {
-                "source": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
+              "type": "string"
             },
             "language": {
               "type": "string"
