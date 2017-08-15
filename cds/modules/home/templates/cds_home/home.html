@@ -70,54 +70,16 @@
         </div>
         <!-- List group -->
         <div class="row">
+          {% for channel in config.FRONTPAGE_CHANNELS %}
           <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-031/CERN-MOVIE-2016-031-003/CERN-MOVIE-2016-031-003-posterframe-640x360-at-5-percent.jpg' />
+            <a class="cds-video-title l-b" href="/search?keyword={{ channel.keyword }}">
+              <img class="img-responsive" src='{{ channel.img_url }}' />
               <p>
-                Experiments
+                {{ channel.label }}
               </p>
             </a>
           </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077-005/CERN-MOVIE-2016-077-005-posterframe-640x360-at-75-percent.jpg' />
-              <p>
-                Computing
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077-004/CERN-MOVIE-2016-077-004-posterframe-640x360-at-5-percent.jpg' />
-              <p>
-                Data
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/2015/CERN-MOVIE-2015-025/CERN-MOVIE-2015-025-011/CERN-MOVIE-2015-025-011-posterframe-640x360-at-5-percent.jpg' />
-              <p>
-                Physics
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Footage/CERN/2008/CERN-FOOTAGE-2008-022/CERN-FOOTAGE-2008-022-001/CERN-FOOTAGE-2008-022-001-posterframe-640x360-at-25-percent.jpg' />
-              <p>
-                Accelerators
-              </p>
-            </a>
-          </div>
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="#">
-              <img class="img-responsive" src='https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/OPEN/2016/OPEN-MOVIE-2016-002/OPEN-MOVIE-2016-002-001/OPEN-MOVIE-2016-002-001-posterframe-640x360-at-5-percent.jpg' />
-              <p>
-                Events
-              </p>
-            </a>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
