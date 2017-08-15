@@ -431,6 +431,9 @@ RECORD_VIDEOS_FACETS = {
                 }
             }
         },
+        'filters': {
+            'keyword': terms_filter('keywords.name'),
+        },
         'post_filters': {
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
@@ -501,7 +504,6 @@ FILES_REST_PERMISSION_FACTORY = \
 # Files storage
 FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
 
-
 ###############################################################################
 # Formatter
 ###############################################################################
@@ -532,6 +534,57 @@ FRONTPAGE_QUERIES = [
 ]
 # Quote before search box
 FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
+# Keywords to use when searching in ES keywords.name
+FRONTPAGE_CHANNELS = [
+    {
+        'label': 'Experiments',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Movies/CERN/2016/CERN-MOVIE-2016-031/CERN-MOVIE-2016-031'
+                   '-003/CERN-MOVIE-2016-031-003-posterframe-640x360-at-5'
+                   '-percent.jpg',
+        'keyword': 'experiment'
+    },
+    {
+        'label': 'Computing',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077'
+                   '-005/CERN-MOVIE-2016-077-005-posterframe-640x360-at-75'
+                   '-percent.jpg',
+        'keyword': 'computing'
+    },
+    {
+        'label': 'Data',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077'
+                   '-004/CERN-MOVIE-2016-077-004-posterframe-640x360-at-5'
+                   '-percent.jpg',
+        'keyword': 'data'
+    },
+    {
+        'label': 'Physics',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Movies/CERN/2015/CERN-MOVIE-2015-025/CERN-MOVIE-2015-025'
+                   '-011/CERN-MOVIE-2015-025-011-posterframe-640x360-at-5'
+                   '-percent.jpg',
+        'keyword': 'physic'
+    },
+    {
+        'label': 'Accelerators',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Footage/CERN/2008/CERN-FOOTAGE-2008-022/CERN-FOOTAGE'
+                   '-2008-022-001/CERN-FOOTAGE-2008-022-001-posterframe'
+                   '-640x360-at-25-percent.jpg',
+        'keyword': 'accelerator'
+    },
+    {
+        'label': 'Events',
+        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
+                   '/Movies/OPEN/2016/OPEN-MOVIE-2016-002/OPEN-MOVIE-2016-002'
+                   '-001/OPEN-MOVIE-2016-002-001-posterframe-640x360-at-5'
+                   '-percent.jpg',
+        'keyword': 'event'
+    }
+]
 
 ###############################################################################
 # Security
@@ -662,7 +715,6 @@ CDS_MIGRATION_RECORDS_BASEPATH = '/src/code/dfs/Services'
 INDEXER_DEFAULT_INDEX = 'records-default-v1.0.0'
 INDEXER_DEFAULT_DOC_TYPE = 'default-v1.0.0'
 INDEXER_BULK_REQUEST_TIMEOUT = 60
-
 
 ###############################################################################
 # Deposit
