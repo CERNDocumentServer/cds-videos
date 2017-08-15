@@ -72,14 +72,6 @@ class OaiSchema(StrictKeysSchema):
     updated = fields.Str()
 
 
-class DescriptionTranslationSchema(StrictKeysSchema):
-    """Description translation schema."""
-
-    language = fields.Str()
-    source = fields.Str()
-    value = fields.Str(required=True)
-
-
 class PidSchema(StrictKeysSchema):
     """Pid schema."""
 
@@ -119,15 +111,6 @@ class ContributorSchema(StrictKeysSchema):
     ids = fields.Nested(IdsSchema, many=True)
     name = fields.Str(required=True)
     role = fields.Str(required=True)
-
-
-class TitleTranslationSchema(StrictKeysSchema):
-    """TitleTranslation schema."""
-
-    language = fields.Str()
-    source = fields.Str()
-    subtitle = fields.Str()
-    title = fields.Str(required=True)
 
 
 class DepositSchema(StrictKeysSchema):
