@@ -31,13 +31,16 @@ import mock
 
 from os.path import join
 
+from datetime import datetime
+from invenio_db import db
 from click.testing import CliRunner
 from invenio_records.models import RecordMetadata
 from invenio_records import Record
 from invenio_pidstore.resolver import Resolver
-from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_files_rest.models import as_bucket, FileInstance, ObjectVersion
+from invenio_sequencegenerator.models import Counter, TemplateDefinition
 
 from cds.cli import cli
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
@@ -45,6 +48,8 @@ from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
 from cds.modules.records.api import dump_object, CDSVideosFilesIterator
 from cds.modules.webhooks.tasks import ExtractMetadataTask
+from cds.modules.migrator.cli import \
+    sequence_generator as cli_sequence_generator
 
 from helpers import load_json
 
@@ -81,7 +86,7 @@ def test_record_files_migration(app, location, script_info, datadir):
     assert record['_files'][0]['doctype'] == 'CTH_FILE'
 
 
-def test_mingrate_pids(app, location, datadir, users):
+def test_migrate_pids(app, location, datadir, users):
     """Test migrate pids."""
     data = load_json(datadir, 'cds_records_demo_1_project.json')
     dump = CDSRecordDump(data=data[0])
@@ -285,3 +290,52 @@ def test_migrate_record(app, location, datadir, es, users):
     deposit_video = deposit_video.publish()
     _, record_video = deposit_video.fetch_published()
     assert record_video['title']['title'] == 'test'
+
+
+def test_sequence_number_update_after_migration(app, location, script_info):
+    """Test sequence number update after migration."""
+    # simulate a import of record < now(year)
+    pid11 = PersistentIdentifier(
+        pid_type='recid', pid_value='2093596', status=PIDStatus.REGISTERED,
+        object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb959')
+    pid12 = PersistentIdentifier(
+        pid_type='rn', pid_value='CERN-MOVIE-2012-193',
+        status=PIDStatus.REGISTERED,
+        object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb959')
+    db.session.add(pid11)
+    db.session.add(pid12)
+    db.session.commit()
+
+    # run seq number update
+    runner = CliRunner()
+    res = runner.invoke(cli_sequence_generator, [], obj=script_info)
+
+    # no counter should be created
+    assert res.exit_code == 0
+    assert Counter.query.all() == []
+    assert len(TemplateDefinition.query.all()) == 2
+
+    # simulate a import of record == now(year)
+    year = datetime.now().year
+    pid11 = PersistentIdentifier(
+        pid_type='recid', pid_value='2093597', status=PIDStatus.REGISTERED,
+        object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb950')
+    pid12 = PersistentIdentifier(
+        pid_type='rn', pid_value='CERN-MOVIE-{0}-5'.format(year),
+        status=PIDStatus.REGISTERED,
+        object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb959')
+    db.session.add(pid11)
+    db.session.add(pid12)
+    db.session.commit()
+
+    # run seq number update
+    runner = CliRunner()
+    res = runner.invoke(cli_sequence_generator, [], obj=script_info)
+
+    # no counter should be created
+    assert res.exit_code == 0
+    [counter] = Counter.query.all()
+    assert counter.counter == 6
+    assert counter.definition_name == 'project-v1_0_0'
+    assert counter.template_instance == 'CERN-MOVIE-2017-{counter}'
+    assert len(TemplateDefinition.query.all()) == 2
