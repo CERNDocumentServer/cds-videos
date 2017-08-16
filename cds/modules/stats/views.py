@@ -22,6 +22,7 @@
 from __future__ import absolute_import, print_function
 
 from elasticsearch import Elasticsearch
+
 from flask import Blueprint, jsonify, make_response
 from flask.views import MethodView
 
@@ -35,12 +36,11 @@ ES_INDEX = 'cds-*'
 blueprint = Blueprint(
     'cds_stats',
     __name__,
-    url_prefix='/stats',
+    url_prefix='/stats/',
 )
 
-
-class ViewsStatsResource(MethodView):
-    """Statistics of number of views resource."""
+class StatsResource(MethodView):
+    """Statistics of resources."""
 
     def __init__(self):
         """Init."""
@@ -48,36 +48,152 @@ class ViewsStatsResource(MethodView):
 
     @pass_record
     @need_record_permission('read_permission_factory')
-    def get(self, pid, record, **kwargs):
+    def get(self, pid, type, record, **kwargs):
         """Handle GET request."""
-        page_views = 0
+
         es = Elasticsearch(CFG_ELASTICSEARCH_SEARCH_HOST)
-        query = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "match": {
-                                "id_bibrec": pid.pid_value
+        query = {};
+        results = {};
+
+        # Get total number of pageviews for a specific CDS record
+        if type == 'views':
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match": {
+                                    "id_bibrec": pid.pid_value
+                                }
+                            },
+                            {
+                                "match": {
+                                    "_type": "events.pageviews"
+                                }
                             }
-                        },
-                        {
-                            "match": {
-                                "_type": "events.pageviews"
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
             }
-        }
-        results = es.count(index=ES_INDEX, body=query)
-        if results:
-            page_views = results.get('count', 0)
-        return make_response(jsonify(page_views), 200)
+            results = es.count(index=ES_INDEX, body=query).get('count', 0)
 
+        # Get timestamp-aggregated downloads for specific CDS record
+        elif type == 'downloads':
+            key_type = 'date'
+            query = {
+                "query": {
+                    "filtered": {
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "id_bibrec": pid.pid_value
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "_type": "events.downloads"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "filter": {
+                            "range":{
+                                "@timestamp":{
+                                    "from": 0,
+                                    "to": "now"
+                                }
+                            }
+                        }
+                    }
+                },
+                "aggregations": {
+                    "by_time": {
+                        "date_histogram": {
+                            "field": "@timestamp",
+                            "interval": "day"
+                        }
+                    }
+                }
+            }
+            results = self.transform(
+                es.search(index=ES_INDEX, body=query),
+                type,
+                key_type)
+
+        # Get timestamp-aggregated pageviews for specific CDS record
+        elif type == 'pageviews':
+            key_type = 'date'
+            query = {
+                "query": {
+                    "filtered": {
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "id_bibrec": pid.pid_value
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "_type": "events.pageviews"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "filter": {
+                            "range":{
+                                "@timestamp":{
+                                    "from": 0,
+                                    "to": "now"
+                                }
+                            }
+                        }
+                    }
+                },
+                "aggregations": {
+                    "by_time": {
+                        "date_histogram": {
+                            "field": "@timestamp",
+                            "interval": "day"
+                        }
+                    }
+                }
+            }
+            results = self.transform(
+                es.search(index=ES_INDEX, body=query),
+                type,
+                key_type)
+
+        return make_response(jsonify(results), 200)
+
+    # Convert retrieved statistics into 'Invenio-Stats' format
+    def transform(self, response, metric, key_type):
+        graph_data = {}
+        graph_data[metric] = {}
+        graph_data[metric]['buckets'] = []
+        graph_data[metric]['type'] = 'bucket'
+        if key_type == 'date':
+            # This is a time query
+            graph_data[metric]['key_type'] = 'date'
+            graph_data[metric]['interval'] = 'month'
+        else:
+            # This is a non-time query
+            graph_data[metric]['key_type'] = 'other'
+        for entry in response['aggregations']['by_time']['buckets']:
+            temp = {}
+            temp['key'] = entry['key']
+            temp['value'] = entry['doc_count']
+            # 'buckets' array holds the input data passed to the graph
+            graph_data[metric]['buckets'].append(temp)
+        return graph_data
 
 blueprint.add_url_rule(
-    '/views/'
-    '<pid(recid, record_class="cds.modules.records.api:CDSRecord"):pid_value>',
-    view_func=ViewsStatsResource.as_view('views_stats')
+    '<pid(recid, record_class="cds.modules.records.api:CDSRecord"):pid_value>/'
+    '<type>/',
+    view_func=StatsResource.as_view('record_stats')
 )
