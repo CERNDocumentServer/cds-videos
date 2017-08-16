@@ -27,6 +27,7 @@ from invenio_assets import NpmBundle
 js = NpmBundle(
     Bundle(
         'node_modules/cds/dist/cds.js',
+        'node_modules/angular-sanitize/angular-sanitize.js',
         'node_modules/angular-strap/dist/angular-strap.js',
         'node_modules/invenio-files-js/dist/invenio-files-js.js',
         'node_modules/ngmodal/dist/ng-modal.js',
@@ -40,6 +41,7 @@ js = NpmBundle(
     output='gen/cds.record.%(version)s.js',
     npm={
         'angular': '~1.4.10',
+        'angular-sanitize': '~1.4.10',
         'angular-loading-bar': '~0.9.0',
         'cds': '~0.1.4',
         'ng-dialog': '~0.6.0',
