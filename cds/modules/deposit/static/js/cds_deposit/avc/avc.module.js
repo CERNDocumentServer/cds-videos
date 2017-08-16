@@ -214,9 +214,10 @@ angular.module('schemaForm')
           // If this is not the initial setting of the element...
           if (!angular.equals($scope.select_model, {})) {
             // Get the element's correct value from the array model
-            var value = $scope.modelArray[$scope.arrayIndex][$scope.form.key.slice(-1)[0]];
+            var formKey = $scope.form.key.slice(-1)[0],
+                value = $scope.modelArray[$scope.arrayIndex][formKey];
             // Set ui-select's model to the correct value if needed
-            if ($scope.insideModel !== value) {
+            if (value && $scope.insideModel !== value) {
               $scope.insideModel = value;
               var query = $scope.$eval($scope.form.options.processQuery || 'query', {query: value});
               $scope.populateTitleMap($scope.form, query);
