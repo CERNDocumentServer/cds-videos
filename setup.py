@@ -184,6 +184,8 @@ setup(
             'cds_search_ui_js = cds.modules.search_ui.bundles:js',
             'cds_theme_css = cds.modules.theme.bundles:css',
             'cds_theme_js = cds.modules.theme.bundles:js',
+            'cds_record_stats_js = cds.modules.records.bundles:stats_js',
+            'cds_record_stats_css = cds.modules.records.bundles:stats_css',
         ],
         'invenio_base.api_apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',

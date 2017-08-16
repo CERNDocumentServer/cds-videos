@@ -202,6 +202,13 @@ RECORDS_UI_ENDPOINTS = dict(
         template='cds_records/record_detail.html',
         record_class='cds.modules.records.api:CDSRecord',
     ),
+    recid_stats=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/stats',
+        template='cds_records/record_stats.html',
+        view_imp='cds.modules.records.views.stats_recid',
+        record_class='cds.modules.records.api:CDSRecord',
+    ),
     recid_preview=dict(
         pid_type='recid',
         route='/record/<pid_value>/preview/<filename>',

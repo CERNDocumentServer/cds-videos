@@ -1,0 +1,41 @@
+{%- extends 'cds_theme/page.html' %}
+{%- block css %}
+  {{ super() }}
+  {% assets "cds_record_stats_css" %}
+  <link href="{{ ASSET_URL }}" rel="stylesheet">
+  {% endassets %}
+{%- endblock css %}
+
+{%- block javascript %}
+  {{ super() }}
+  {% assets "cds_record_stats_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+    <script>
+      $(document).ready(function() {
+        getStats({{ record | tojson }})
+      });
+    </script>
+  {% endassets %}
+
+{%- endblock javascript %}
+
+{%- block page_header %}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_footer %}
+  {% include "cds_home/footer.html" %}
+{%- endblock page_footer %}
+
+{%- block page_body %}
+<div class='container'>
+  <div class='row'>
+    <div class='col-sm-12'>
+      <h2>Pageviews</h2>
+      <div class='pageviews'></div>
+      <h2>Downloads</h2>
+      <div class='downloads'></div>
+    </div>
+  </div>
+</div>
+{%- endblock page_body %}
