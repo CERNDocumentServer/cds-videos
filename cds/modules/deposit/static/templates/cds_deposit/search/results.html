@@ -18,7 +18,7 @@
        <p class="f8 mt-5 text-muted">
          <div class="row">
            <div class="col-md-8">
-              <p ng-bind-html="(record.metadata.description.value | wordsSplit:32 | stripTags | trustHtml) || 'No description'"></p>
+              <p ng-bind-html="(record.metadata.description | wordsSplit:32 | stripTags | trustHtml) || 'No description'"></p>
            </div>
            <div class="col-md-4">
              <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">
