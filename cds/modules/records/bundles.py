@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,12 +17,37 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""JS/CSS bundles for DS Records."""
+"""JS/CSS bundles for Records."""
 
 from __future__ import absolute_import, print_function
 
 from flask_assets import Bundle
 from invenio_assets import NpmBundle
+
+stats_js = NpmBundle(
+    'node_modules/d3-tip/index.js',
+    'node_modules/d3-svg-legend/d3-legend.min.js',
+    'node_modules/lodash/lodash.js',
+    'node_modules/invenio-charts-js/dist/lib.bundle.js',
+    'js/cds_records/stats.js',
+    output='gen/cds.records.stats.%(version)s.js',
+    npm={
+        'invenio-charts-js': '^0.1.4',
+        'd3-extended': '^1.2.10',
+        'd3-svg-legend': '^2.24.1',
+        'd3-tip': '^0.7.1',
+        'lodash': '^4.17.4'
+    }
+)
+
+stats_css = Bundle(
+    Bundle(
+        'node_modules/invenio-charts-js/src/styles/styles.scss',
+        'scss/stats.scss',
+        filters='node-scss,cleancssurl',
+    ),
+    output='gen/cds.stats.%(version)s.css',
+)
 
 js = NpmBundle(
     Bundle(

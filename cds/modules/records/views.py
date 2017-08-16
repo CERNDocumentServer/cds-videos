@@ -33,6 +33,12 @@ blueprint = Blueprint(
     static_folder='static',
 )
 
+def stats_recid(pid, record, template=None, **kwargs):
+    """Preview file for given record."""
+    return render_template(
+        'cds_records/record_stats.html',
+        record=record
+    )
 
 def records_ui_export(pid, record, template=None, **kwargs):
     """Export a record."""
