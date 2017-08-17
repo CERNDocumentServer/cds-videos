@@ -184,6 +184,8 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     assert tags['bit_rate'] == '612177'
     assert tags['avg_frame_rate'] == '288000/12019'
     assert tags['codec_name'] == 'h264'
+    assert tags['codec_long_name'] == 'H.264 / AVC / MPEG-4 AVC / ' \
+                                      'MPEG-4 part 10'
     assert tags['width'] == '640'
     assert tags['height'] == '360'
     assert tags['nb_frames'] == '1440'

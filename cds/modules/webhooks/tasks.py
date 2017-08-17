@@ -233,6 +233,7 @@ class ExtractMetadataTask(AVCTask):
     stream_keys = [
         'avg_frame_rate',
         'codec_name',
+        'codec_long_name',
         'width',
         'height',
         'nb_frames',
