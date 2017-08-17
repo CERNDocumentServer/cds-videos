@@ -36,8 +36,18 @@ def add_master_to_video(video_deposit, filename, stream, video_duration):
     master_obj = ObjectVersion.create(bucket=video_bucket, key=filename,
                                       stream=stream)
     _create_tags(
-        master_obj, display_aspect_ratio='16:9', bit_rate='959963',
-        codec_name='h264', duration=video_duration, nb_framesr='1557',
-        size='10498667', media_type='video', context_type='master',
-        avg_frame_rate='25/1', width='1280', height='720')
+        master_obj,
+        display_aspect_ratio='16:9',
+        bit_rate='959963',
+        codec_name='h264',
+        codec_long_name='H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10',
+        duration=video_duration,
+        nb_framesr='1557',
+        size='10498667',
+        media_type='video',
+        context_type='master',
+        avg_frame_rate='25/1',
+        width='1280',
+        height='720'
+    )
     return str(master_obj.version_id)

@@ -54,7 +54,7 @@ from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
-                                        update_record)
+                                        ExtractMetadataTask, update_record)
 
 
 @shared_task(bind=True)
@@ -206,9 +206,16 @@ def get_object_count(download=True, frames=True, transcode=True):
 
 def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
     """Get number of ObjectVersionTags, based on executed tasks."""
+    # download
+    tags_download = 5  # event_id, uri_origin, context_type, media_type, preview
+
+    # metadata
+    tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
+        len(ExtractMetadataTask.stream_keys)
+
     return sum([
-        5 if download else 0,
-        10 if download and metadata else 0,
+        tags_download if download else 0,
+        tags_extract_metadata if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
         # count the presets with width x height < 640x320 (video resolution)
         ((len(get_presets_applied())) * 14) - 2 if transcode else 0,
@@ -329,6 +336,7 @@ def prepare_videos_for_publish(videos):
         size='5111048',
         avg_frame_rate='288000/12019',
         codec_name='h264',
+        codec_long_name='H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10',
         width='640',
         height='360',
         nb_frames='1440',
