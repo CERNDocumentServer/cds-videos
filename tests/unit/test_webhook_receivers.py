@@ -266,8 +266,8 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
 
         # Check metadata tags
         metadata_keys = ['duration', 'bit_rate', 'size', 'avg_frame_rate',
-                         'codec_name', 'width', 'height', 'nb_frames',
-                         'display_aspect_ratio', 'color_range']
+                         'codec_name', 'codec_long_name', 'width', 'height',
+                         'nb_frames', 'display_aspect_ratio', 'color_range']
         assert all([key in tags for key in metadata_keys])
 
         # Check metadata patch
@@ -518,8 +518,8 @@ def test_avc_workflow_receiver_local_file_pass(
 
         # Check metadata tags
         metadata_keys = ['duration', 'bit_rate', 'size', 'avg_frame_rate',
-                         'codec_name', 'width', 'height', 'nb_frames',
-                         'display_aspect_ratio', 'color_range']
+                         'codec_name', 'codec_long_name', 'width', 'height',
+                         'nb_frames', 'display_aspect_ratio', 'color_range']
         assert all([key in tags for key in metadata_keys])
 
         # Check metadata patch

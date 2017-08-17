@@ -66,6 +66,7 @@ def test_ffprobe(video):
     expected_info = dict(
         codec_type=b'video',
         codec_name=b'h264',
+        codec_long_name=b'H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10',
         duration=60.095,
         width=640,
         height=360,
@@ -83,6 +84,7 @@ def test_ffprobe(video):
 
     check_metadata('codec_type')
     check_metadata('codec_name')
+    check_metadata('codec_long_name')
     check_metadata('invalid')
     check_metadata('width', convertor=int)
     check_metadata('height', convertor=int)
@@ -174,7 +176,7 @@ def test_ffprobe_all(online_video):
     assert 'streams' in information
     video_stream = information['streams'][0]
     stream_keys = ['index', 'tags', 'bit_rate', 'codec_type', 'codec_name',
-                   'start_time', 'duration']
+                   'codec_long_name', 'start_time', 'duration']
     assert all([key in video_stream for key in stream_keys])
 
     assert 'format' in information
