@@ -304,7 +304,7 @@ function cdsDepositsCtrl(
 
       if (_promises.length > 0) {
         // Make requests for the videos
-        that.chainedActions(_promises).then(function(data) {
+        cdsAPI.chainedActions(_promises).then(function(data) {
         }, function(error) {
           console.log('ERROR chained actiοns', error);
         });
@@ -336,19 +336,7 @@ function cdsDepositsCtrl(
 
   this.createDeposit = function(url, schema, depositType, extra) {
     var data = angular.merge({}, { $schema: schema }, extra || {});
-    return this.makeAction(url, depositType, 'CREATE', data);
-  };
-
-  this.makeAction = function(url, depositType, action, payload) {
-    var actionInfo = depositActions[depositType][action];
-    if (actionInfo.preprocess) {
-      payload = actionInfo.preprocess(payload);
-    };
-    return cdsAPI.action(url, actionInfo.method, payload, actionInfo.headers);
-  };
-
-  this.chainedActions = function(promises) {
-    return cdsAPI.chainedActions(promises);
+    return that.helpers.makeAction(url, depositType, 'CREATE', data);
   };
 
   this.handleRedirect = function(url, replace) {
@@ -379,7 +367,7 @@ function cdsDepositsCtrl(
 
   var checkStatus = function(task, status) {
     return function(child) {
-      return child._cds.state[task] == status;
+      return child._cds.state[task] === status;
     };
   };
 
@@ -436,6 +424,58 @@ function cdsDepositsCtrl(
       );
     }
   );
+
+  this.broadcastEvent = function (eventName, args) {
+    $scope.$broadcast(eventName, args);
+  };
+
+  this.helpers = (function () {
+
+      function containsLink(links, link) {
+        return links && Object.keys(links).indexOf(link) > -1;
+      }
+
+      function guessEndpoint(record, depositType, actionName, links) {
+          var link = depositActions[depositType][actionName].link,
+              isMaster = depositType === 'project';
+
+          if (containsLink(links, link)) {
+              return links[link];
+          } else {
+              if (!isMaster) {
+                  // If the link is self just return the self video url
+                  if (link === 'self') {
+                      return urlBuilder.selfVideo({
+                          deposit: record._deposit.id
+                      });
+                  } else if (link === 'bucket') {
+                      return urlBuilder.bucketVideo({
+                          bucket: record._buckets.deposit
+                      });
+                  }
+                  // If the link is different return the action video url
+                  return urlBuilder.actionVideo({
+                      deposit: record._deposit.id,
+                      action: actionName.toLowerCase()
+                  });
+              }
+          }
+      }
+
+      function makeAction(url, depositType, action, payload) {
+        var actionInfo = depositActions[depositType][action];
+        if (actionInfo.preprocess) {
+          payload = actionInfo.preprocess(payload);
+        }
+        return cdsAPI.action(url, actionInfo.method, payload, actionInfo.headers);
+      }
+
+      return {
+        guessEndpoint: guessEndpoint,
+        makeAction: makeAction
+      };
+  }) ();
+
 }
 
 cdsDepositsCtrl.$inject = [

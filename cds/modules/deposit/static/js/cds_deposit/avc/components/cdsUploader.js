@@ -208,14 +208,18 @@ function cdsUploaderCtrl(
         'Content-Type': (file.type || '').indexOf('/') > -1 ? file.type : ''
       },
       file.headers || {}
-    );
+    ),
+      url = urlBuilder.bucketVideo({
+          bucket: that.cdsDepositCtrl.record._buckets.deposit
+        });
+
     return {
-      url: that.cdsDepositCtrl.guessEndpoint('BUCKET') + '/' + file.key,
+      url: url + '/' + file.key,
       method: 'PUT',
       headers: _headers,
       data: file
     };
-  };
+  }
 
   /*
    * Prepare http request of Remote File Upload with Webhooks
@@ -412,7 +416,7 @@ function cdsUploaderCtrl(
               // Success uploading notification
               toaster.pop({
                 type: 'info',
-                title: 'The file(s) has been succesfuly uploaded.',
+                title: 'The file(s) has been successfully uploaded.',
                 body: (_.map(response, 'data.key') || []).join(', '),
                 bodyOutputType: 'trustedHtml',
                 timeout: 8000
