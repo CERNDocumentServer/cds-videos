@@ -3,8 +3,8 @@
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isPristine()'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-default btn-sm"
-    ng-click="$ctrl.actionHandler('SAVE_PARTIAL')">
-  Save Project
+    ng-click="$ctrl.saveAllPartial()">
+  Save All
   </button>
 
   <button
