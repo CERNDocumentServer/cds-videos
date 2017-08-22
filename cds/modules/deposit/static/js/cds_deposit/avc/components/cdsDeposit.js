@@ -151,8 +151,8 @@ function cdsDepositCtrl(
         data = _.flatten(data.data, true);
         if (taskName || taskStatus) {
           return data.filter(function (taskInfo) {
-            return (!taskName || taskInfo.name == taskName) &&
-              (!taskStatus || taskInfo.status == taskStatus);
+            return (!taskName || taskInfo.name === taskName) &&
+              (!taskStatus || taskInfo.status === taskStatus);
           });
         } else {
           return data;
@@ -427,7 +427,7 @@ function cdsDepositCtrl(
             );
           }
         } else {
-          if (that.stateReporter[type].status != data.status) {
+          if (that.stateReporter[type].status !== data.status) {
             $scope.$broadcast('cds.deposit.task', type, data.status, data);
           }
           that.stateReporter[type] = angular.copy(data);
@@ -440,7 +440,7 @@ function cdsDepositCtrl(
       var stateCurrent = null;
       depositStates.forEach(function(task) {
         var state = that.record._cds.state[task];
-        if ((state == 'STARTED' || state == 'PENDING') && !stateCurrent) {
+        if ((state === 'STARTED' || state === 'PENDING') && !stateCurrent) {
           stateCurrent = task;
         }
       });
@@ -477,37 +477,39 @@ function cdsDepositCtrl(
     // Error message
 
     // Messages Success
-    $scope.$on('cds.deposit.success', function(evt, response) {
-      if (evt.currentScope == evt.targetScope) {
+    $scope.$on('cds.deposit.success', function(evt, customMessage) {
+      if (evt.currentScope === evt.targetScope) {
         that.alerts = [];
         that.alerts.push({
           message: 'Success!',
           type: 'success'
         });
         // Push a notification
+        var popTitle = that.record.title ? that.record.title.title : 'Video',
+          popBody = (typeof customMessage === 'undefined') ? 'Success!' : customMessage;
         toaster.pop({
           type: 'success',
-          title: that.record.title ? that.record.title.title : 'Video',
-          body: 'Success!',
-          bodyOutputType: 'trustedHtml',
+          title: popTitle,
+          body: popBody,
+          bodyOutputType: 'trustedHtml'
         });
       }
     });
     // Messages Error
     $scope.$on('cds.deposit.error', function(evt, response) {
-      if (evt.currentScope == evt.targetScope) {
+      if (evt.currentScope === evt.targetScope) {
         that.alerts = [];
         that.alerts.push({
           message: response.data.message,
           type: 'danger',
-          errors: response.data.errors || [],
+          errors: response.data.errors || []
         });
         // Push a notification
         toaster.pop({
           type: 'error',
           title: that.record.title ? that.record.title.title : 'Video',
           body: response.data.message,
-          bodyOutputType: 'trustedHtml',
+          bodyOutputType: 'trustedHtml'
         });
       }
     });
@@ -646,42 +648,20 @@ function cdsDepositCtrl(
     };
   };
 
-  this.guessEndpoint = function(action) {
-    var link = depositActions[that.depositType][action].link
-    if (that.links && Object.keys(that.links).indexOf(link) > -1) {
-      return that.links[link];
-    } else {
-      if (!that.master) {
-        // If the link is self just return the self video url
-        if (link === 'self') {
-          return urlBuilder.selfVideo({
-            deposit: that.record._deposit.id,
-          })
-        } else if (link == 'bucket') {
-          return urlBuilder.bucketVideo({
-            bucket: that.record._buckets.deposit,
-          })
-        }
-        // If the link is different return the action video url
-        return urlBuilder.actionVideo({
-          deposit: that.record._deposit.id,
-          action: action.toLowerCase()
-        });
-      }
-    }
-  };
-
   this.dismissAlert = function(alert) {
     this.alerts.splice(_.indexOf(this.alerts, alert.alert), 1);
   };
 
   // Do a single action at once
   this.makeSingleAction = function(action, redirect) {
-    return this.cdsDepositsCtrl.makeAction(
-      that.guessEndpoint(action),
+    var cleanRecord = cdsAPI.cleanData(that.record),
+      url = that.cdsDepositsCtrl.helpers.guessEndpoint(cleanRecord, that.depositType, action, that.links);
+
+    return that.cdsDepositsCtrl.helpers.makeAction(
+      url,
       that.depositType,
       action,
-      cdsAPI.cleanData(that.record)
+      cleanRecord
     );
   };
 
@@ -692,9 +672,11 @@ function cdsDepositCtrl(
     angular.forEach(
       actions,
       function(action, index) {
+        var url = that.cdsDepositsCtrl.helpers.guessEndpoint(cleanRecord, that.depositType, action, that.links);
+
         this.push(function() {
-          return that.cdsDepositsCtrl.makeAction(
-            that.guessEndpoint(action),
+          return that.cdsDepositsCtrl.helpers.makeAction(
+            url,
             that.depositType,
             action,
             cleanRecord
@@ -703,7 +685,7 @@ function cdsDepositCtrl(
       },
       promises
     );
-    return that.cdsDepositsCtrl.chainedActions(promises);
+    return cdsAPI.chainedActions(promises);
   };
 
   this.preActions = function() {
@@ -722,7 +704,7 @@ function cdsDepositCtrl(
     // Post success process
     that.postSuccessProcess(response);
     // Inform the parents
-    $scope.$emit('cds.deposit.success', response);
+    $scope.$emit('cds.deposit.success');
     // Make the form pristine again
     that.setPristine();
   };
@@ -733,6 +715,22 @@ function cdsDepositCtrl(
     // Inform the parents
     $scope.$emit('cds.deposit.error', response);
   };
+
+  $scope.$on('cds.deposit.project.updated', function(evt, args) {
+    if (args.depositId === that.record._deposit.id) {
+      if (args.response.status === 200) {
+        that.postSuccessProcess(args.response);
+        that.setPristine();
+        // show only 1 notification with success, and not per project and videos
+        if (that.master) {
+          $scope.$emit('cds.deposit.success', "Project and Videos updated!");
+        }
+      } else {
+        that.postErrorProcess(args.response);
+        $scope.$emit('cds.deposit.error', response);
+      }
+    }
+  });
 
   // Form status
   this.isPristine = function() {
@@ -776,7 +774,7 @@ function cdsDepositCtrl(
 
   this.cleanLocalStorage = function() {
     localStorageService.remove(that.id);
-  }
+  };
 }
 
 cdsDepositCtrl.$inject = [
