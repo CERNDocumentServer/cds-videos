@@ -42,7 +42,7 @@ from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag,
                                        as_bucket)
 from invenio_jsonschemas import current_jsonschemas
-from invenio_pidstore.errors import PIDInvalidAction
+from invenio_pidstore.errors import PIDInvalidAction, PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
 from invenio_records_files.models import RecordsBuckets
@@ -737,9 +737,14 @@ class Video(CDSDeposit):
                 project_id = self['_project_id']
             except KeyError:
                 return None
-            project_pid = PersistentIdentifier.query.filter_by(
-                pid_value=project_id).one()
-            self._project = Project.get_record(id_=project_pid.object_uuid)
+            try:
+                # get the deposit project
+                self._project = deposit_project_resolver(project_id=project_id)
+            except PIDDoesNotExistError:
+                # get the record project
+                _, record = record_resolver.resolve(project_id)
+                project_id = record['_deposit']['id']
+                self._project = deposit_project_resolver(project_id=project_id)
         return self._project
 
     @project.setter

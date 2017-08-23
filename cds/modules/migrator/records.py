@@ -52,6 +52,7 @@ from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
+from ..records.resolver import record_resolver
 from ..records.serializers.smil import generate_smil_file
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractMetadataTask
@@ -491,10 +492,19 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                 project.commit()
 
     @classmethod
+    def _resolve_project_id(cls, video):
+        """Resolve project depid."""
+        project_id = video['_project_id']
+        # get the record project
+        _, record = record_resolver.resolve(project_id)
+        return record['_deposit']['id']
+
+    @classmethod
     def _resolve_project_deposit(cls, video):
         """Resolve project deposit from the video."""
         video = Video(video)
-        project_depid = video.project['_deposit']['id']
+        # get deposit project (as record)
+        project_depid = cls._resolve_project_id(video=video)
         _, project = Resolver(
             pid_type='depid', object_type='rec', getter=Record.get_record
         ).resolve(project_depid)
