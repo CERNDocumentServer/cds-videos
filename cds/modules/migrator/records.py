@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 #
 # This file is part of CERN Document Server.
 # Copyright (C) 2016, 2017 CERN.
@@ -169,6 +170,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._resolve_description(record=record)
             _doi_minter(record_uuid=record.id, data=record)
             cls._resolve_project(record)
+            cls._resolve_contributors(video=record)
         cls._resolve_cds(record=record)
 
         record.commit()
@@ -197,6 +199,13 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         record.commit()
         db.session.commit()
         return deposit
+
+    @classmethod
+    def _resolve_contributors(cls, video):
+        """Resolve contributors or inherit from project."""
+        if 'contributors' not in video:
+            _, project = record_resolver.resolve(video['_project_id'])
+            video['contributors'] = deepcopy(project['contributors'])
 
     @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
