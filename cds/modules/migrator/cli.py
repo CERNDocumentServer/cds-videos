@@ -26,11 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
+import click
+import json
+
 from invenio_db import db
-from invenio_migrator.cli import dumps
+from invenio_migrator.cli import dumps, _loadrecord
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_sequencegenerator.api import Sequence
 from datetime import datetime
+from flask import current_app
 from flask.cli import with_appcontext
 
 from ...modules.deposit.api import Project
@@ -87,3 +91,25 @@ def sequence_generator():
             })
 
     db.session.commit()
+
+
+@dumps.command()
+@click.argument('sources', type=click.File('r'), nargs=-1)
+@click.option('--source-type', '-t',  type=click.Choice(['json', 'marcxml']),
+              default='marcxml', help='Whether to use JSON or MARCXML.')
+@click.option('--recid', '-r',
+              help='Record ID to load (NOTE: will load only one record!).',
+              default=None)
+#  @click.option('--eager', '-e', is_flag=True, default=False)
+@with_appcontext
+def dryrun(sources, source_type, recid):
+    """Load records migration dump."""
+    current_app.config['MIGRATOR_RECORDS_DUMPLOADER_CLS'] = \
+        'cds.modules.migrator.records:DryRunCDSRecordDumpLoader'
+    for idx, source in enumerate(sources, 1):
+        click.echo('Loading dump {0} of {1} ({2})'.format(
+            idx, len(sources), source.name))
+        data = json.load(source)
+        with click.progressbar(data) as records:
+            for item in records:
+                _loadrecord(item, source_type, eager=True)

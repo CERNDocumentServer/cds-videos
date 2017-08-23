@@ -161,6 +161,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     dependent_objs = ['frame', 'frames-preview', 'playlist', 'subformat']
 
     @classmethod
+    def create_files(cls, *args, **kwargs):
+        """Disable the files load."""
+        pass
+
+    @classmethod
     def create(cls, dump):
         """Update an existing record."""
         record = super(CDSRecordDumpLoader, cls).create(dump=dump)
@@ -174,13 +179,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         cls._resolve_cds(record=record)
 
         record.commit()
-        db.session.commit()
+        #  db.session.commit()
 
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
         deposit = cls._create_deposit(record=record)
         if Video._schema in deposit['$schema']:
             cls._resolve_project_deposit(deposit)
+
+        db.session.commit()
         return record
 
     @classmethod
@@ -197,7 +204,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         # commit!
         deposit.commit()
         record.commit()
-        db.session.commit()
+        #  db.session.commit()
         return deposit
 
     @classmethod
@@ -208,12 +215,17 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             video['contributors'] = deepcopy(project['contributors'])
 
     @classmethod
+    def _run_extracted_metadata(cls, master):
+        """Run extract metadata from the video."""
+        return ExtractMetadataTask.create_metadata_tags(
+            object_=master, keys=ExtractMetadataTask._all_keys)
+
+    @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
         """Extract metadata from the video."""
         master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
         master = as_object_version(master_video['version_id'])
-        extracted_metadata = ExtractMetadataTask.create_metadata_tags(
-            object_=master, keys=ExtractMetadataTask._all_keys)
+        extracted_metadata = cls._run_extracted_metadata(master=master)
         deposit['_cds']['extracted_metadata'] = extracted_metadata
         record['_cds']['extracted_metadata'] = extracted_metadata
 
@@ -223,7 +235,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         video_pid = PersistentIdentifier.query.filter_by(
             pid_type='recid', object_uuid=record.id,
             object_type='rec').one()
-        datacite_register.delay(video_pid.pid_value, str(record.id))
+        datacite_register.apply(video_pid.pid_value, str(record.id))
 
     @classmethod
     def _resolve_cds(cls, record):
@@ -357,7 +369,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _update_tag_master(cls, record):
         """Update tag master of files dependent from master."""
-        bucket = CDSRecordDumpLoader._get_bucket(record=record)
+        bucket = cls._get_bucket(record=record)
         master_video = CDSVideosFilesIterator.get_master_video_file(record)
         for obj in ObjectVersion.get_by_bucket(bucket=bucket):
             if obj.get_tags()['context_type'] in cls.dependent_objs:
@@ -480,6 +492,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_project(cls, video):
         """Resolve project on video."""
+        # get record video pid/rn
         video_pid = PersistentIdentifier.query.filter_by(
             pid_type='recid', object_uuid=video.id, object_type='rec').one()
         video_rn = PersistentIdentifier.query.filter_by(
@@ -489,11 +502,13 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             pid_rn = PersistentIdentifier.query.filter_by(
                 pid_type='rn', pid_value=project_rn).first()
             if pid_rn:
+                # resolve project pid from report number
                 pid_rec = PersistentIdentifier.query.filter_by(
                     pid_type='recid', object_uuid=pid_rn.object_uuid,
                     object_type='rec').one()
                 video['_project_id'] = pid_rec.pid_value
                 project = Record.get_record(pid_rec.object_uuid)
+                # update video reference inside project video list
                 for index, ref in enumerate(project.get('videos', [])):
                     if ref['$ref'] == video_rn.pid_value:
                         project['videos'][index][
@@ -517,11 +532,38 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         _, project = Resolver(
             pid_type='depid', object_type='rec', getter=Record.get_record
         ).resolve(project_depid)
+        # get record video pid/rn
         video_pid, record = video.fetch_published()
         video_rn = PersistentIdentifier.query.filter_by(
             pid_type='rn', object_uuid=record.id, object_type='rec').one()
+        # update video reference inside project video list
         for index, ref in enumerate(project.get('videos', [])):
             if ref['$ref'] == video_rn.pid_value:
                 project['videos'][index][
                     '$ref'] = record_build_url(video_pid.pid_value)
         project.commit()
+
+
+class DryRunCDSRecordDumpLoader(CDSRecordDumpLoader):
+    """Dry run."""
+
+    @classmethod
+    def _get_migration_file_stream(cls, file_):
+        """Build the full file path."""
+        from six import BytesIO
+        return BytesIO(b'hello')
+
+    @classmethod
+    def _run_extracted_metadata(cls, master):
+        return dict(
+            bit_rate='679886',
+            duration='60.140000',
+            size='5111048',
+            avg_frame_rate='288000/12019',
+            codec_name='h264',
+            width='640',
+            height='360',
+            nb_frames='1440',
+            display_aspect_ratio='16:9',
+            color_range='tv',
+        )
