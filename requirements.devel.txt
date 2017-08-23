@@ -22,24 +22,15 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-# When installing from github the requirements extras doesn't seem to work
-# Cairo 2.X drops python 2 support
-# http://cairosvg.org/news/
-CairoSVG == 1.0.21 # dependency of invenio-formatter[badges]
-Flask-Cors>=2.1.2 # dependency of invenio-rest
-Pillow >= 3.2.0 # dependency of invenio-formatter[badges]
-psycopg2 >= 2.6.1 # dependency of invenio-db
-SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
-
 -r requirements.topical.branches.txt
 
+# FIXME topical branches
 # -e git+https://github.com/inveniosoftware/invenio-deposit.git#egg=invenio-deposit
 # -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
 # -e git+https://github.com/inveniosoftware/invenio-webhooks.git#egg=invenio-webhooks
 
 # FIXME removed until proper integration
 # -e git+https://github.com/inveniosoftware/invenio-i18n.git#egg=invenio-i18n
-
 -e git+https://github.com/CERNDocumentServer/cds-dojson.git#egg=cds-dojson
 -e git+https://github.com/CERNDocumentServer/cds-sorenson.git#egg=cds-sorenson
 -e git+https://github.com/inveniosoftware/dojson.git#egg=dojson
@@ -53,15 +44,14 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-celery.git#egg=invenio-celery
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
--e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db
--e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter
+-e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db[postgresql,versioning]
+-e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter[badges]
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
--e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
+-e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging[sentry]
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
-# FIXME #72
+# FIXME #75
 # -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
--e git+https://github.com/hachreak/invenio-migrator.git@fix_created_updated#egg=invenio-migrator
 -e git+https://github.com/inveniosoftware/invenio-oauthclient.git#egg=invenio-oauthclient
 -e git+https://github.com/inveniosoftware/invenio-oauth2server.git#egg=invenio-oauth2server
 -e git+https://github.com/inveniosoftware/invenio-opendefinition.git#egg=invenio-opendefinition
@@ -71,8 +61,8 @@ SQLAlchemy-Continuum>=1.2.1 # dependency of invenio-db
 -e git+https://github.com/inveniosoftware/invenio-records-files.git#egg=invenio-records-files
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
--e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records
--e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest
+-e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records[postgresql]
+-e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest[cors]
 -e git+https://github.com/inveniosoftware/invenio-search-ui.git#egg=invenio-search-ui
 -e git+https://github.com/inveniosoftware/invenio-search.git#egg=invenio-search
 -e git+https://github.com/inveniosoftware/invenio-sequencegenerator.git#egg=invenio-sequencegenerator
