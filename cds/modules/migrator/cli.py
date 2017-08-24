@@ -32,6 +32,7 @@ import json
 from invenio_db import db
 from invenio_migrator.cli import dumps, _loadrecord
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.errors import PIDAlreadyExists
 from invenio_sequencegenerator.api import Sequence
 from datetime import datetime
 from flask import current_app
@@ -104,6 +105,10 @@ def sequence_generator():
 @with_appcontext
 def dryrun(sources, source_type, recid):
     """Load records migration dump."""
+    from invenio_logging.fs import InvenioLoggingFS
+    current_app.config['LOGGING_FS'] = True
+    current_app.config['LOGGING_FS_LOGFILE'] = '/tmp/migration.log'
+    InvenioLoggingFS(current_app)
     current_app.config['MIGRATOR_RECORDS_DUMPLOADER_CLS'] = \
         'cds.modules.migrator.records:DryRunCDSRecordDumpLoader'
     for idx, source in enumerate(sources, 1):
@@ -112,4 +117,15 @@ def dryrun(sources, source_type, recid):
         data = json.load(source)
         with click.progressbar(data) as records:
             for item in records:
-                _loadrecord(item, source_type, eager=True)
+                count = PersistentIdentifier.query.filter_by(
+                    pid_type='recid', pid_value=str(item['recid'])).count()
+                if count > 0:
+                    current_app.logger.warning(
+                        "migration: duplicate {0}".format(item['recid']))
+                else:
+                    try:
+                        _loadrecord(item, source_type, eager=True)
+                    except PIDAlreadyExists:
+                        current_app.logger.warning(
+                            "migration: report number associated with multiple"
+                            "recid. See {0}".format(item['recid']))
