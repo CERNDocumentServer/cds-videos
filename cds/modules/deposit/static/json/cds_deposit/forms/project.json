@@ -119,36 +119,64 @@
             "required": true,
             "titleMap": [
               {
-                "value":  "Director",
-                "name":  "Director"
+                "value":  "Animations by",
+                "name":  "Animations by"
               },
               {
                 "value":  "Camera Operator",
                 "name":  "Camera Operator"
               },
               {
-                "value":  "Producer",
-                "name":  "Producer"
+                "value":  "Co-Producer",
+                "name":  "Co-Producer"
               },
               {
-                "value":  "Music by",
-                "name":  "Music by"
+                "value":  "Creator",
+                "name":  "Creator"
+              },
+              {
+                "value":  "Credits",
+                "name":  "Credits"
+              },
+              {
+                "value":  "Director",
+                "name":  "Director"
               },
               {
                 "value":  "Editor",
                 "name":  "Editor"
               },
               {
-                "value":  "Provider",
-                "name":  "Provider"
+                "value":  "Music by",
+                "name":  "Music by"
+              },
+              {
+                "value":  "Narrator",
+                "name":  "Narrator"
+              },
+              {
+                "value":  "Photography",
+                "name":  "Photography"
+              },
+              {
+                "value":  "Producer",
+                "name":  "Producer"
+              },
+              {
+                "value":  "Reporter",
+                "name":  "Reporter"
+              },
+              {
+                "value":  "Screenwriter",
+                "name":  "Screenwriter"
+              },
+              {
+                "value":  "Speaker",
+                "name":  "Speaker"
               },
               {
                 "value":  "Translator",
                 "name":  "Translator"
-              },
-              {
-                "value":  "Other",
-                "name":  "Other"
               }
             ]
           }
