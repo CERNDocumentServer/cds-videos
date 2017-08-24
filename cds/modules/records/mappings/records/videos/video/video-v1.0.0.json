@@ -3,6 +3,26 @@
     "video-v1.0.0": {
       "numeric_detection": true,
       "properties": {
+        "accelerator_experiment": {
+          "type": "object",
+          "properties": {
+            "project": {
+              "type": "string"
+            },
+            "study": {
+              "type": "string"
+            },
+            "experiment": {
+              "type": "string"
+            },
+            "accelerator": {
+              "type": "string"
+            },
+            "facility": {
+              "type": "string"
+            }
+          }
+        },
         "_project_id":{
           "type": "string"
         },
