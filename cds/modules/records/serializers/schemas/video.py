@@ -73,6 +73,16 @@ class VideoFileSchema(StrictKeysSchema):
     width = fields.Str()
 
 
+class AcceleratorExperimentSchema(StrictKeysSchema):
+    """Field accelerator_experiment."""
+
+    project = fields.Str()
+    study = fields.Str()
+    experiment = fields.Str()
+    accelerator = fields.Str()
+    facility = fields.Str()
+
+
 class VideoSchema(StrictKeysSchema):
     """Video schema."""
 
@@ -103,6 +113,7 @@ class VideoSchema(StrictKeysSchema):
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     publication_date = fields.Str()
+    accelerator_experiment = fields.Nested(AcceleratorExperimentSchema)
 
     @post_load(pass_many=False)
     def post_load(self, data):
