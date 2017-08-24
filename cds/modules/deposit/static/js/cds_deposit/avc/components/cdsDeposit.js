@@ -525,7 +525,7 @@ function cdsDepositCtrl(
     that.videoPreviewer();
     // Update subformat statuses
     that.fetchCurrentStatuses();
-    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 20000);
+    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
     $scope.$watch('$ctrl.record._cds.state', that.refreshStateQueue, true);
     $scope.$watch('$ctrl.record._deposit.status', function() {
       if (CKEDITOR) {

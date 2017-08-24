@@ -22,12 +22,14 @@
       sf-changed="form"
       ng-show="form.key"
       ng-model="$$value$$"
+      ng-model-options="form.ngModelOptions"
       ng-disabled="evalExpr(form.readonly)"
       data-date-format="{{form.format}}"
       data-date-type="string"
       data-autoclose="true"
       onkeydown="return false"
-      bs-datepicker/>
+      sf-field-model
+      bs-datepicker />
     <span
       class="input-group-addon"
       ng-if="form.fieldAddonRight"
