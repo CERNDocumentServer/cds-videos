@@ -31,6 +31,7 @@ import os
 from copy import deepcopy
 
 import arrow
+from time import sleep
 from flask import current_app
 from invenio_accounts.models import User
 from invenio_db import db
@@ -215,10 +216,16 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             video['contributors'] = deepcopy(project['contributors'])
 
     @classmethod
-    def _run_extracted_metadata(cls, master):
+    def _run_extracted_metadata(cls, master, retry=10):
         """Run extract metadata from the video."""
-        return ExtractMetadataTask.create_metadata_tags(
-            object_=master, keys=ExtractMetadataTask._all_keys)
+        try:
+            return ExtractMetadataTask.create_metadata_tags(
+                object_=master, keys=ExtractMetadataTask._all_keys)
+        except Exception:
+            # EOS probably was not ready
+            retry = retry - 1
+            sleep(10 - retry)
+            cls._run_extracted_metadata(master, retry=retry)
 
     @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
@@ -235,7 +242,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         video_pid = PersistentIdentifier.query.filter_by(
             pid_type='recid', object_uuid=record.id,
             object_type='rec').one()
-        datacite_register.apply(video_pid.pid_value, str(record.id))
+        datacite_register.apply(args=[video_pid.pid_value, str(record.id)])
 
     @classmethod
     def _resolve_cds(cls, record):
