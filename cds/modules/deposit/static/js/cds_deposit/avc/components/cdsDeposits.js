@@ -6,7 +6,6 @@ function cdsDepositsCtrl(
   $location,
   $element,
   depositStates,
-  depositActions,
   depositSSEEvents,
   cdsAPI,
   urlBuilder,
@@ -336,7 +335,7 @@ function cdsDepositsCtrl(
 
   this.createDeposit = function(url, schema, depositType, extra) {
     var data = angular.merge({}, { $schema: schema }, extra || {});
-    return that.helpers.makeAction(url, depositType, 'CREATE', data);
+    return cdsAPI.makeAction(url, depositType, 'CREATE', data);
   };
 
   this.handleRedirect = function(url, replace) {
@@ -429,53 +428,6 @@ function cdsDepositsCtrl(
     $scope.$broadcast(eventName, args);
   };
 
-  this.helpers = (function () {
-
-      function containsLink(links, link) {
-        return links && Object.keys(links).indexOf(link) > -1;
-      }
-
-      function guessEndpoint(record, depositType, actionName, links) {
-          var link = depositActions[depositType][actionName].link,
-              isMaster = depositType === 'project';
-
-          if (containsLink(links, link)) {
-              return links[link];
-          } else {
-              if (!isMaster) {
-                  // If the link is self just return the self video url
-                  if (link === 'self') {
-                      return urlBuilder.selfVideo({
-                          deposit: record._deposit.id
-                      });
-                  } else if (link === 'bucket') {
-                      return urlBuilder.bucketVideo({
-                          bucket: record._buckets.deposit
-                      });
-                  }
-                  // If the link is different return the action video url
-                  return urlBuilder.actionVideo({
-                      deposit: record._deposit.id,
-                      action: actionName.toLowerCase()
-                  });
-              }
-          }
-      }
-
-      function makeAction(url, depositType, action, payload) {
-        var actionInfo = depositActions[depositType][action];
-        if (actionInfo.preprocess) {
-          payload = actionInfo.preprocess(payload);
-        }
-        return cdsAPI.action(url, actionInfo.method, payload, actionInfo.headers);
-      }
-
-      return {
-        guessEndpoint: guessEndpoint,
-        makeAction: makeAction
-      };
-  }) ();
-
 }
 
 cdsDepositsCtrl.$inject = [
@@ -486,7 +438,6 @@ cdsDepositsCtrl.$inject = [
   '$location',
   '$element',
   'depositStates',
-  'depositActions',
   'depositSSEEvents',
   'cdsAPI',
   'urlBuilder',
