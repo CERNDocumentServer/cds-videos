@@ -655,9 +655,9 @@ function cdsDepositCtrl(
   // Do a single action at once
   this.makeSingleAction = function(action, redirect) {
     var cleanRecord = cdsAPI.cleanData(that.record),
-      url = that.cdsDepositsCtrl.helpers.guessEndpoint(cleanRecord, that.depositType, action, that.links);
+      url = cdsAPI.guessEndpoint(cleanRecord, that.depositType, action, that.links);
 
-    return that.cdsDepositsCtrl.helpers.makeAction(
+    return cdsAPI.makeAction(
       url,
       that.depositType,
       action,
@@ -672,10 +672,10 @@ function cdsDepositCtrl(
     angular.forEach(
       actions,
       function(action, index) {
-        var url = that.cdsDepositsCtrl.helpers.guessEndpoint(cleanRecord, that.depositType, action, that.links);
+        var url = cdsAPI.guessEndpoint(cleanRecord, that.depositType, action, that.links);
 
         this.push(function() {
-          return that.cdsDepositsCtrl.helpers.makeAction(
+          return cdsAPI.makeAction(
             url,
             that.depositType,
             action,
