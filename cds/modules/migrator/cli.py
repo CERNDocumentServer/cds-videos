@@ -41,6 +41,28 @@ from flask.cli import with_appcontext
 from ...modules.deposit.api import Project
 
 
+def load_records(sources, source_type, eager):
+    """Load records."""
+    for idx, source in enumerate(sources, 1):
+        click.echo('Loading dump {0} of {1} ({2})'.format(
+            idx, len(sources), source.name))
+        data = json.load(source)
+        with click.progressbar(data) as records:
+            for item in records:
+                count = PersistentIdentifier.query.filter_by(
+                    pid_type='recid', pid_value=str(item['recid'])).count()
+                if count > 0:
+                    current_app.logger.warning(
+                        "migration: duplicate {0}".format(item['recid']))
+                else:
+                    try:
+                        _loadrecord(item, source_type, eager=eager)
+                    except PIDAlreadyExists:
+                        current_app.logger.warning(
+                            "migration: report number associated with multiple"
+                            "recid. See {0}".format(item['recid']))
+
+
 @dumps.command()
 @with_appcontext
 def sequence_generator():
@@ -101,7 +123,6 @@ def sequence_generator():
 @click.option('--recid', '-r',
               help='Record ID to load (NOTE: will load only one record!).',
               default=None)
-#  @click.option('--eager', '-e', is_flag=True, default=False)
 @with_appcontext
 def dryrun(sources, source_type, recid):
     """Load records migration dump."""
@@ -111,21 +132,17 @@ def dryrun(sources, source_type, recid):
     InvenioLoggingFS(current_app)
     current_app.config['MIGRATOR_RECORDS_DUMPLOADER_CLS'] = \
         'cds.modules.migrator.records:DryRunCDSRecordDumpLoader'
-    for idx, source in enumerate(sources, 1):
-        click.echo('Loading dump {0} of {1} ({2})'.format(
-            idx, len(sources), source.name))
-        data = json.load(source)
-        with click.progressbar(data) as records:
-            for item in records:
-                count = PersistentIdentifier.query.filter_by(
-                    pid_type='recid', pid_value=str(item['recid'])).count()
-                if count > 0:
-                    current_app.logger.warning(
-                        "migration: duplicate {0}".format(item['recid']))
-                else:
-                    try:
-                        _loadrecord(item, source_type, eager=True)
-                    except PIDAlreadyExists:
-                        current_app.logger.warning(
-                            "migration: report number associated with multiple"
-                            "recid. See {0}".format(item['recid']))
+    load_records(sources=sources, source_type=source_type, eager=True)
+
+
+@dumps.command()
+@click.argument('sources', type=click.File('r'), nargs=-1)
+@click.option('--source-type', '-t',  type=click.Choice(['json', 'marcxml']),
+              default='marcxml', help='Whether to use JSON or MARCXML.')
+@click.option('--recid', '-r',
+              help='Record ID to load (NOTE: will load only one record!).',
+              default=None)
+@with_appcontext
+def run(sources, source_type, recid):
+    """Load records migration dump."""
+    load_records(sources=sources, source_type=source_type, eager=False)
