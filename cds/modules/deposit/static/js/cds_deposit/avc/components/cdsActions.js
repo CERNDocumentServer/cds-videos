@@ -33,8 +33,8 @@ function cdsActionsCtrl($scope, cdsAPI) {
 
       if (that.cdsDepositCtrl.master) {
         var actionName = 'SAVE_PARTIAL',
-          videoActions = getVideoActions(depositsCtrl, actionName, videos),
-          projectAction = getProjectAction(depositsCtrl, actionName, master, project);
+          videoActions = getVideoActions(actionName, videos),
+          projectAction = getProjectAction(actionName, master, project);
 
         videoActions.push(projectAction);
 
@@ -48,7 +48,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
           .finally(that.cdsDepositCtrl.postActions);
       }
 
-      function getVideoActions(depositsCtrl, actionName, videos) {
+      function getVideoActions(actionName, videos) {
         return videos
             .filter(function (video) {
               return video._deposit.status === 'draft';
@@ -58,10 +58,10 @@ function cdsActionsCtrl($scope, cdsAPI) {
             })
             .map(function (cleanedVideo) {
               var depositType = 'video',
-                url = depositsCtrl.helpers.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
+                url = cdsAPI.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
 
               return function () {
-                return depositsCtrl.helpers.makeAction(
+                return cdsAPI.makeAction(
                   url,
                   depositType,
                   actionName,
@@ -71,13 +71,13 @@ function cdsActionsCtrl($scope, cdsAPI) {
             });
       }
 
-      function getProjectAction(depositsCtrl, actionName, master, project) {
+      function getProjectAction(actionName, master, project) {
         var cleanedProject = cdsAPI.cleanData(project),
           depositType = 'project',
-          url = depositsCtrl.helpers.guessEndpoint(cleanedProject, depositType, actionName, master.links);
+          url = cdsAPI.guessEndpoint(cleanedProject, depositType, actionName, master.links);
 
           return function () {
-            return depositsCtrl.helpers.makeAction(
+            return cdsAPI.makeAction(
               url,
               depositType,
               actionName,

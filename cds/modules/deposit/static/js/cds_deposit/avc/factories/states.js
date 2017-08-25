@@ -1,4 +1,4 @@
-function cdsAPI($q, $http) {
+function cdsAPI($q, $http, depositActions, urlBuilder) {
 
   function action(url, method, payload, headers) {
     requestConfig = {
@@ -79,18 +79,61 @@ function cdsAPI($q, $http) {
     });
   }
 
+  function containsLink(links, link) {
+    return links && Object.keys(links).indexOf(link) > -1;
+  }
+
+  function guessEndpoint(record, depositType, actionName, links) {
+      var link = depositActions[depositType][actionName].link,
+          isMaster = depositType === 'project';
+
+      if (containsLink(links, link)) {
+          return links[link];
+      } else {
+          if (!isMaster) {
+              // If the link is self just return the self video url
+              if (link === 'self') {
+                  return urlBuilder.selfVideo({
+                      deposit: record._deposit.id
+                  });
+              } else if (link === 'bucket') {
+                  return urlBuilder.bucketVideo({
+                      bucket: record._buckets.deposit
+                  });
+              }
+              // If the link is different return the action video url
+              return urlBuilder.actionVideo({
+                  deposit: record._deposit.id,
+                  action: actionName.toLowerCase()
+              });
+          }
+      }
+  }
+
+  function makeAction(url, depositType, actionName, payload) {
+    var actionInfo = depositActions[depositType][actionName];
+    if (actionInfo.preprocess) {
+      payload = actionInfo.preprocess(payload);
+    }
+    return action(url, actionInfo.method, payload, actionInfo.headers);
+  }
+
   return {
     action: action,
     cleanData: cleanData,
     chainedActions: chainedActions,
     resolveJSON: resolveJSON,
     getUrlPath: getUrlPath,
+    guessEndpoint: guessEndpoint,
+    makeAction: makeAction
   };
 }
 
 cdsAPI.$inject = [
   '$q',
   '$http',
+  'depositActions',
+  'urlBuilder'
 ];
 
 angular.module('cdsDeposit.factories')
