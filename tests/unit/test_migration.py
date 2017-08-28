@@ -41,6 +41,8 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_files_rest.models import as_bucket, FileInstance, ObjectVersion
 from invenio_sequencegenerator.models import Counter, TemplateDefinition
+from invenio_accounts.models import User
+from flask_security import login_user
 
 from cds.cli import cli
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
@@ -98,7 +100,7 @@ def test_migrate_pids(app, location, datadir, users):
     assert sorted(pids) == expected
 
 
-def test_migrate_record(app, location, datadir, es, users):
+def test_migrate_record(api_app, location, datadir, es, users):
     """Test migrate date."""
     # create the project
     data = load_json(datadir, 'cds_records_demo_1_project.json')
@@ -285,7 +287,7 @@ def test_migrate_record(app, location, datadir, es, users):
         deposit_project['_deposit']['id'])
     deposit_project = deposit_project.edit()
 
-    # try to publish again the video
+    login_user(User.query.filter_by(id=users[0]).first())
     deposit_video['title']['title'] = 'test'
     deposit_video = deposit_video.publish()
     _, record_video = deposit_video.fetch_published()

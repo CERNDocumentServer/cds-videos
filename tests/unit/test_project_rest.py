@@ -34,8 +34,8 @@ from copy import deepcopy
 from cds.modules.deposit.resolver import get_video_pid, \
     get_project_pid
 from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
-    deposit_videos_resolver, Project, Video
-from flask_security import current_user
+    deposit_videos_resolver, Project, Video, deposit_project_resolver
+from flask_security import current_user, login_user
 from flask import url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
 from invenio_db import db
@@ -496,7 +496,6 @@ def test_project_keywords_serializer(api_app, es, api_project, keyword_1,
                                      keyword_2, users, json_headers):
     """Tet video keywords serializer."""
     (project, video_1, video_2) = api_project
-    # login owner
     user = User.query.filter_by(id=users[0]).first()
 
     assert project['keywords'] == []
@@ -508,6 +507,7 @@ def test_project_keywords_serializer(api_app, es, api_project, keyword_1,
 
     # check serializer
     with api_app.test_client() as client:
+        # login owner
         login_user_via_session(client, user)
 
         pid = project['_deposit']['id']
@@ -795,6 +795,7 @@ def test_search_excluded_fields(api_app, users, api_project,
                 "role": "Director"
             }
         ],
+        login_user(User.query.get(users[0]))
         project = project.publish()
 
         video = project.videos[0]
@@ -849,6 +850,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
             'type': 'FOOTER',
         }, wait=False)
     prepare_videos_for_publish([video_1, video_2])
+    login_user(User.query.get(users[0]))
     project_2 = project_2.publish()
     project_2.commit()
     db.session.commit()
@@ -1147,3 +1149,47 @@ def test_project_edit_links(api_app, app, project_published, json_headers,
         login_user_via_session(client, email=User.query.get(users[0]).email)
         res = client.get(project_link_1, headers=json_headers)
         assert res.status_code == 200
+
+
+def test_modified_by(api_app, api_project, users, json_headers):
+    """Test modified_by on publish."""
+    (project, video_1, video_2) = api_project
+    v1_depid = video_1['_deposit']['id']
+    v2_depid = video_2['_deposit']['id']
+    p_depid = project['_deposit']['id']
+    prepare_videos_for_publish([video_1, video_2])
+
+    # check modified_by
+    assert 'modified_by' not in video_1['_cds']
+    assert 'modified_by' not in video_2['_cds']
+    assert 'modified_by' not in project['_cds']
+
+    user_1 = User.query.get(users[0])
+    with api_app.test_client() as client:
+        # login as user_1
+        login_user_via_session(client, email=user_1.email)
+        # publish video_1
+        res = client.post(
+            url_for('invenio_deposit_rest.video_actions',
+                    pid_value=v1_depid, action='publish'),
+            headers=json_headers)
+        assert res.status_code == 202
+        # check
+        [video_1, video_2] = deposit_videos_resolver([v1_depid, v2_depid])
+        project = deposit_project_resolver(p_depid)
+        assert video_1['_cds']['modified_by'] == user_1.id
+        assert 'modified_by' not in video_2['_cds']
+        assert 'modified_by' not in project['_cds']
+
+        # publish project
+        res = client.post(
+            url_for('invenio_deposit_rest.project_actions',
+                    pid_value=p_depid, action='publish'),
+            headers=json_headers)
+        assert res.status_code == 202
+        # check
+        [video_1, video_2] = deposit_videos_resolver([v1_depid, v2_depid])
+        project = deposit_project_resolver(p_depid)
+        assert video_1['_cds']['modified_by'] == user_1.id
+        assert video_2['_cds']['modified_by'] == user_1.id
+        assert project['_cds']['modified_by'] == user_1.id

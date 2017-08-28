@@ -699,10 +699,12 @@ def api_project(api_app, es, users, location, db, deposit_metadata):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.fixture()
-def project_published(api_app, api_project):
+def project_published(api_app, api_project, users):
     """New published project with videos."""
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
+        # login as user_1
+        login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = [record_resolver.resolve(id_)[1]
@@ -716,10 +718,11 @@ def project_published(api_app, api_project):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.fixture()
-def api_project_published(api_app, api_project):
+def api_project_published(api_app, api_project, users):
     """New published project with videos."""
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
+        login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = [record_resolver.resolve(id_)[1]

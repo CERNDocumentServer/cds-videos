@@ -31,8 +31,10 @@ import mock
 import pytest
 
 from jsonschema.exceptions import ValidationError
+from flask_security import login_user
 from celery import states
 from werkzeug.utils import import_string
+from invenio_accounts.models import User
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
     Bucket, FileInstance
 from invenio_pidstore.models import PersistentIdentifier
@@ -462,7 +464,7 @@ def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     assert tags.get('download') == is_inside
 
 
-def test_sync_records_with_deposits(app, db, location,
+def test_sync_records_with_deposits(app, db, location, users,
                                     project_deposit_metadata,
                                     video_deposit_metadata):
     """Test sync records with deposits task."""
@@ -489,6 +491,7 @@ def test_sync_records_with_deposits(app, db, location,
     ).set_location("mylocation4", 1, "mychecksum4")
 
     # publish
+    login_user(User.query.get(users[0]))
     prepare_videos_for_publish([deposit])
     deposit = deposit.publish()
     _, record = deposit.fetch_published()

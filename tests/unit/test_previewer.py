@@ -30,6 +30,8 @@ import pytest
 from cds.modules.previewer.api import get_relative_path
 
 from flask import url_for
+from flask_security import login_user
+from invenio_accounts.models import User
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
 from helpers import prepare_videos_for_publish
@@ -76,6 +78,7 @@ def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
     success_list = ['new THEOplayer.Player', 'player.source']
 
     if publish:
+        login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1])
         video_1 = video_1.publish()
         assert video_1.status == 'published'
@@ -162,6 +165,7 @@ def test_preview_video_html5(previewer_app, es, db, cds_jsonresolver, users,
     ]
 
     if publish:
+        login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1])
         video_1 = video_1.publish()
         assert video_1.status == 'published'
@@ -200,7 +204,7 @@ def test_preview_video_html5(previewer_app, es, db, cds_jsonresolver, users,
     assert_preview(expected=success_list)
 
 
-def test_legacy_embed(previewer_app, db, api_project, video):
+def test_legacy_embed(previewer_app, db, api_project, video, users):
     """Test backwards-compatibility with legacy embed URL for videos."""
     project, video_1, _ = api_project
     filename = 'test.mp4'
@@ -209,6 +213,7 @@ def test_legacy_embed(previewer_app, db, api_project, video):
                                stream=open(video, 'rb'))
     ObjectVersionTag.create(obj, 'context_type', 'master')
     ObjectVersionTag.create(obj, 'preview', True)
+    login_user(User.query.get(users[0]))
     prepare_videos_for_publish([video_1])
     video_1 = video_1.publish()
 
@@ -220,7 +225,7 @@ def test_legacy_embed(previewer_app, db, api_project, video):
         ))
 
 
-def test_smil_generation(previewer_app, db, api_project, video):
+def test_smil_generation(previewer_app, db, api_project, video, users):
     """Test SMIL file export from video."""
     def create_slave(key):
         """Create a slave."""
@@ -260,6 +265,7 @@ def test_smil_generation(previewer_app, db, api_project, video):
     create_video_tags(yes_smil_slave, context_type='subformat', bitrate=7654)
 
     # publish video
+    login_user(User.query.get(users[0]))
     prepare_videos_for_publish([video_1])
     video_1.publish()
     _, video_record = video_1.fetch_published()
