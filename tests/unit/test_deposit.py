@@ -30,6 +30,7 @@ import json
 
 import mock
 from flask import current_app, request, url_for
+from flask_security import login_user
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
@@ -178,7 +179,8 @@ def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
     assert indexed[0]['_deposit']['id'] == vid1
 
 
-def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata):
+def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata,
+                              users):
     """Test deposit prepare edit."""
     # create new deposit
     project_deposit_metadata['report_number'] = ['123']
@@ -201,6 +203,7 @@ def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata):
     ).set_location("mylocation4", 1, "mychecksum4")
 
     # publish
+    login_user(User.query.get(users[0]))
     deposit = deposit.publish()
     _, record = deposit.fetch_published()
     assert deposit.is_published() is True

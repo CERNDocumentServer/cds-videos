@@ -87,7 +87,7 @@ def test_video_build_url(api_app):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_publish_all_videos(api_app, api_project):
+def test_publish_all_videos(api_app, api_project, users):
     """Test video publish."""
     (project, video_1, video_2) = api_project
 
@@ -97,6 +97,7 @@ def test_publish_all_videos(api_app, api_project):
     assert project['_deposit']['status'] == 'draft'
     # publish project
     prepare_videos_for_publish([video_1, video_2])
+    login_user(User.query.get(users[0]))
     new_project = project.publish()
     # check project and all video are published
     assert new_project['_deposit']['status'] == 'published'
@@ -108,7 +109,7 @@ def test_publish_all_videos(api_app, api_project):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_publish_one_video(api_app, api_project):
+def test_publish_one_video(api_app, api_project, users):
     """Test video publish."""
     (project, video_1, video_2) = api_project
 
@@ -119,6 +120,7 @@ def test_publish_one_video(api_app, api_project):
     # [publish project]
     prepare_videos_for_publish([video_1, video_2])
     # publish one video
+    login_user(User.query.get(users[0]))
     video_1 = video_1.publish()
     project = video_1.project
     # publish the project (with one video still not publish)
@@ -242,7 +244,7 @@ def test_project_discard(app, project_published, video_deposit_metadata):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_edit(app, project_published):
+def test_project_edit(app, project_published, users):
     """Test project edit."""
     (project, video_1, video_2) = project_published
 
@@ -261,6 +263,7 @@ def test_project_edit(app, project_published):
             record_video_resolver(id_)['_deposit']['id'])
         for id_ in new_project.video_ids
     ]
+    login_user(User.query.get(users[0]))
     assert len(videos) == 2
     for i, video in enumerate(videos):
         #  video = Video.get_record(video.id)
@@ -316,7 +319,8 @@ def test_project_delete_not_published(api_app, api_project, force):
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False])  # , True])
-def test_project_delete_one_video_published(api_app, api_project, force):
+def test_project_delete_one_video_published(api_app, api_project, force,
+                                            users):
     """Test project delete when one video is published."""
     def check_project(number_of_videos, video_2_status, video_1_ref,
                       video_2_ref, project_id):
@@ -341,6 +345,7 @@ def test_project_delete_one_video_published(api_app, api_project, force):
     prepare_videos_for_publish([video_1, video_2])
 
     # publish video_2
+    login_user(User.query.get(users[0]))
     video_2 = video_2.publish()
 
     project_id = project.id
@@ -392,13 +397,14 @@ def test_project_delete_one_video_published(api_app, api_project, force):
     #  project.delete(force=force)
 
 
-def test_inheritance(api_app, api_project):
+def test_inheritance(api_app, api_project, users):
     """Test that videos inherit the proper fields from parent project."""
     (project, video, _) = api_project
     assert 'category' in project
     assert 'type' in project
 
     # Publish the video
+    login_user(User.query.get(users[0]))
     prepare_videos_for_publish([video])
     video = video.publish()
     assert 'category' in video
@@ -472,6 +478,7 @@ def test_project_publish_with_workflow(
 
     check('draft', 'draft', 'draft')
 
+    login_user(User.query.get(users[0]))
     video_2 = deposit_video_resolver(video_2_depid)
     video_2.publish()
     check('draft', 'draft', 'published')
@@ -511,13 +518,14 @@ def test_project_permissions(es, location, deposit_metadata, users):
 
 def test_project_partial_validation(
         api_app, db, api_cds_jsonresolver, deposit_metadata,
-        location, video_deposit_metadata):
+        location, video_deposit_metadata, users):
     """Test project create/publish with partial validation/validation."""
     video_1 = deepcopy(video_deposit_metadata)
     # create a deposit without a required field
     if 'category' in deposit_metadata:
         del deposit_metadata['category']
     with api_app.test_request_context():
+        login_user(User.query.get(users[0]))
         project = Project.create(deposit_metadata)
         video_1['_project_id'] = project['_deposit']['id']
         video_1 = Video.create(video_1)

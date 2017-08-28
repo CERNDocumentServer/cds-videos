@@ -36,6 +36,7 @@ from functools import partial, wraps
 
 import arrow
 from flask import current_app
+from flask_security import current_user
 from invenio_db import db
 from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
@@ -221,7 +222,6 @@ class CDSDeposit(Deposit):
         """Set partial validator as default."""
         if 'validator' not in kwargs:
             kwargs['validator'] = PartialDraft4Validator
-        # TODO add 'modified_by' inside _cds (see issue #991)
         return super(CDSDeposit, self).commit(**kwargs)
 
     @classmethod
@@ -262,6 +262,7 @@ class CDSDeposit(Deposit):
 
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a deposit."""
+        self['_cds']['modified_by'] = int(current_user.get_id())
         if 'publication_date' not in self:
             now = datetime.datetime.utcnow().date().isoformat()
             self['publication_date'] = now
