@@ -29,7 +29,7 @@ import os
 import uuid
 from os.path import splitext
 
-from flask import current_app, url_for
+from flask import current_app, url_for, request
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
@@ -60,20 +60,27 @@ def dump_object(obj):
         'context_type': context_type,
         'media_type': media_type,
         'tags': tags,
-        'links': {
-            'self': (
-                current_app.config['DEPOSIT_FILES_API'] +
-                u'/{bucket}/{key}?versionId={version_id}'.format(
-                    bucket=obj.bucket_id,
-                    key=obj.key,
-                    version_id=obj.version_id,
-                )),
-        }
+        'links': _build_file_links(obj)
     }
 
 
+def _build_file_links(obj):
+    """Return a dict with file links."""
+
+    return dict(self=(
+            u'{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}'
+                .format(
+                    scheme=request.scheme,
+                    host=request.host.rstrip('/'),
+                    api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
+                    bucket=obj.bucket_id,
+                    key=obj.key,
+                    version_id=obj.version_id,
+                )))
+
+
 def dump_generic_object(obj, data):
-    """Dump a generic object (master, subtitles, ..) avoind depending objs."""
+    """Dump a generic object (master, subtitles, ..) avoid depending objs."""
     obj_dump = dump_object(obj)
     # if it's a master, get all the depending object and add them inside
     # <context_type> as a list order by key.
