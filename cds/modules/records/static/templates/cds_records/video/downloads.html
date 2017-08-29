@@ -22,7 +22,7 @@
     <div class="list-group">
       <div ng-repeat="(type, subs) in ((record | findMaster).subformat | groupDownloadable).download |  groupBy:'tags.type':'others'">
         <p class='mt-10 tw-b text-uppercase text-muted'>{{ type }}</p>
-        <a ng-repeat="file in subs" class="list-group-item" ng-href="{{ file.links.self }}" target="_blank">
+        <a ng-repeat="file in subs" class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)"  target="_blank">
           {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
         </a>
       </div>
@@ -35,7 +35,7 @@
 </div>
 <!-- /Subformat -->
 
-<!-- Other files -->
+<!-- Other formats -->
 <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0" class="cds-video-subformats bt bw-1 bc-gl pt-20">
   <div class="row">
     <div class="col-md-12">
@@ -54,14 +54,14 @@
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <div ng-repeat="file in ((record | findMaster).subformat | groupDownloadable).additional">
-        <a class="list-group-item" ng-href="{{ file.links.self }}" target="_blank">
+        <a class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" target="_blank">
           {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
         </a>
       </div>
     </div>
   </div>
 </div>
-<!-- Other files -->
+<!-- /Other formats -->
 <!-- Frame -->
 <div class="cds-video-subformats bt bw-1 bc-gl pt-20">
   <div class="row">
@@ -129,7 +129,7 @@
   <p class="pull-right">
     <button class="btn btn-default" ng-click="$parent.hideModal()">Disagree</button>
     <a ng-href="{{ (record | findMaster).links.self }}" download>
-      <button class="btn btn-success" ng-click="$parent.hideModal()">Agree</button>
+      <button class="btn btn-success" ng-click="$parent.hideModal(); logMediaDownload(record | findMaster);">Agree</button>
     </a>
 
   </p>
