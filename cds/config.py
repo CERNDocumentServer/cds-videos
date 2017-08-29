@@ -683,6 +683,8 @@ WOWZA_VIDEO_URL = \
     'https://wowza.cern.ch/cds/_definist_/mp4:%s/playlist.m3u8'
 # Size
 VIDEO_POSTER_SIZE = (180, 101)
+# File system location of videos
+VIDEOS_LOCATION = '/eos/workspace/c/cds/test/videos/'
 
 ###############################################################################
 # Logging
@@ -1005,3 +1007,14 @@ CDS_FFMPEG_METADATA_ALIASES = {
     'streams/0/creation_time': ['format/tags/creation_time'],
 }
 CDS_FFMPEG_METADATA_POST_SPLIT = ['streams/0/keywords']
+
+###############################################################################
+# LOG USER ACTIVITY
+###############################################################################
+
+LOG_ACTIONS_BASE_URL = 'http://cds-test-wn-02.cern.ch/tools/events.py/'
+LOG_MEDIA_VIEWS_URL = LOG_ACTIONS_BASE_URL + 'media_view' \
+    '?ext=true&recid={recid}&report_number={report_number}&format={format}'
+LOG_MEDIA_DOWNLOAD_URL = LOG_ACTIONS_BASE_URL + 'media_download' \
+    '?recid={recid}&report_number={report_number}&format={format}' \
+                                                '&quality={quality}'

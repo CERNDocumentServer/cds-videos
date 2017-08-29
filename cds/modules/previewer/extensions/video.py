@@ -45,6 +45,15 @@ class VideoExtension(object):
 
     def preview(self, file):
         """Render appropriate template with embed flag."""
+
+        record = getattr(file, 'record')
+        filename = getattr(file, 'filename', '')
+        file_extension = filename.split('.')[-1] \
+            if filename and '.' in filename else ''
+        report_number = record['report_number'][0] \
+            if 'report_number' in record and len(record['report_number']) \
+            else ''
+
         return render_template(
             self.template,
             file=file,
@@ -57,6 +66,9 @@ class VideoExtension(object):
             embed=self.embed,
             vr=getattr(file, 'vr', False),
             css_bundles=['cds_previewer_video_css'],
+            file_extension=file_extension,
+            recid=record['recid'] if 'recid' in record else '',
+            report_number=report_number,
         )
 
 

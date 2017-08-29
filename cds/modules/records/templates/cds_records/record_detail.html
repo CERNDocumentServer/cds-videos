@@ -42,6 +42,7 @@
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
         record-views='/api/stats/views/{{record.recid}}'
+        media-download-event-url='{{ config.LOG_MEDIA_DOWNLOAD_URL }}'
     ></cds-record-view>
   </div>
   <!-- Recent videos -->
