@@ -1012,11 +1012,14 @@ CDS_FFMPEG_METADATA_POST_SPLIT = ['streams/0/keywords']
 # LOG USER ACTIVITY
 ###############################################################################
 
-LOG_ACTIONS_BASE_URL = '//cds-test-wn-02.cern.ch/tools/events.py/'
-LOG_MEDIA_VIEWS_URL = LOG_ACTIONS_BASE_URL + 'media_view' \
-    '?ext=true&recid={recid}&report_number={report_number}&format={format}'
-LOG_MEDIA_DOWNLOAD_URL = LOG_ACTIONS_BASE_URL + 'media_download' \
-    '?recid={recid}&report_number={report_number}&format={format}' \
-                                                '&quality={quality}'
-LOG_PAGE_VIEW_URL = LOG_ACTIONS_BASE_URL + 'page_view' \
-    '?recid={recid}&userid={userid}'
+# flag to enable or disable user actions logging
+LOG_USER_ACTIONS_ENABLED = False
+# endpoints for logging user actions
+LOG_USER_ACTIONS_ENDPOINTS = {
+    'base_url': None,
+    'media_view': '{base_url}media_view?ext=true&recid={recid}&report_number={'
+                  'report_number}&format={format}',
+    'media_download': '{base_url}media_download?recid={recid}&report_number={'
+                      'report_number}&format={format}&quality={quality}',
+    'page_view': '{base_url}page_view?recid={recid}&userid={userid}'
+}
