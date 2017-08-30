@@ -16,6 +16,9 @@
 {%- block javascript %}
   {{ super() }}
   {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  <script type="text/javascript">
+    userActionsLogger.pageView('{{ config.LOG_PAGE_VIEW_URL.format(recid=record['recid'], userid=current_user.id or 0)|safe }}');
+  </script>
 {%- endblock javascript %}
 
 {%- block page_header %}

@@ -100,7 +100,7 @@
 
           function onPlay() {
             var r = new XMLHttpRequest();
-            r.open('GET', '{{ config.LOG_MEDIA_VIEWS_URL.format(recid=recid, report_number=report_number, format=file_extension) }}', true);
+            r.open('GET', '{{ config.LOG_MEDIA_VIEWS_URL.format(recid=recid, report_number=report_number, format=file_extension)|safe }}', true);
             r.onload = function() {
               if (r.status >= 200 && r.status < 400) {
                 player.removeEventListener('play', onPlay);
