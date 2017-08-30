@@ -17,7 +17,15 @@
   {{ super() }}
   {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
   <script type="text/javascript">
-    userActionsLogger.pageView('{{ config.LOG_PAGE_VIEW_URL.format(recid=record['recid'], userid=current_user.id or 0)|safe }}');
+    {% if config.LOG_USER_ACTIONS_ENABLED %}
+    {% set user_action_page_view_url = (config.LOG_USER_ACTIONS_ENDPOINTS['page_view'] or '')
+                                        .format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '',
+                                                recid=record['recid'],
+                                                userid=current_user.id or 0)|safe %}
+    {% else %}
+    {% set user_action_page_view_url = '' %}
+    {% endif %}
+    userActionsLogger.pageView('{{ user_action_page_view_url }}');
   </script>
 {%- endblock javascript %}
 
@@ -41,11 +49,17 @@
     {% set refer_query = "category:{0} {1}".format(record['category'], refer_query) %}
   {% endif %}
   <div id="cds-record">
+    {% if config.LOG_USER_ACTIONS_ENABLED %}
+    {% set user_action_media_download_url = (config.LOG_USER_ACTIONS_ENDPOINTS['media_download'] or '')
+                                    .replace('{base_url}', config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '')|safe %}
+    {% else %}
+    {% set user_action_media_download_url = '' %}
+    {% endif %}
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
         record-views='/api/stats/views/{{record.recid}}'
-        media-download-event-url='{{ config.LOG_MEDIA_DOWNLOAD_URL }}'
+        media-download-event-url="{{ user_action_media_download_url }}"
     ></cds-record-view>
   </div>
   <!-- Recent videos -->

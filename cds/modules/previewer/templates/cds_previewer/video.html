@@ -95,12 +95,17 @@
            }
        ];
       {% endif %}
-      {% if log_media_views %}
+      {% if log_media_views and config.LOG_USER_ACTIONS_ENABLED %}
         (function(player) {
+          var url = '{{ (config.LOG_USER_ACTIONS_ENDPOINTS['media_view'] or '')
+                                      .format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '',
+                                              recid=recid,
+                                              report_number=report_number,
+                                              format=file_extension)|safe }}';
 
           function onPlay() {
             var r = new XMLHttpRequest();
-            r.open('GET', '{{ config.LOG_MEDIA_VIEWS_URL.format(recid=recid, report_number=report_number, format=file_extension)|safe }}', true);
+            r.open('GET', url, true);
             r.onload = function() {
               if (r.status >= 200 && r.status < 400) {
                 player.removeEventListener('play', onPlay);
@@ -109,7 +114,9 @@
             r.send();
           }
 
-          player.addEventListener('play', onPlay);
+          if (url) {
+            player.addEventListener('play', onPlay);
+          }
 
         })(player);
       {% endif %}
