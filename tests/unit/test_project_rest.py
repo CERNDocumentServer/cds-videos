@@ -189,7 +189,8 @@ def test_simple_workflow(
         video_1_dict = json.loads(res.data.decode('utf-8'))
         assert len(video_1_dict['metadata']['_files']) == 1
         myfile = video_1_dict['metadata']['_files'][0]
-        assert myfile['links']['self'].startswith('/api/files/')
+        assert myfile['links']['self'].startswith(
+            'http://localhost/api/files/')
         assert myfile['checksum'] == 'md5:eb88ae1e3666e6fe96a33ea72aab630e'
         assert myfile['completed'] is True
         assert 'version_id' in myfile

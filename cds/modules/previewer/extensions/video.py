@@ -67,7 +67,7 @@ class VideoExtension(object):
             vr=getattr(file, 'vr', False),
             css_bundles=['cds_previewer_video_css'],
             file_extension=file_extension,
-            recid=record['recid'] if 'recid' in record else '',
+            recid=record.get('recid', ''),
             report_number=report_number,
         )
 
