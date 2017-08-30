@@ -32,6 +32,7 @@ js = NpmBundle(
         'node_modules/invenio-files-js/dist/invenio-files-js.js',
         'node_modules/ngmodal/dist/ng-modal.js',
         'js/cds_records/main.js',
+        'js/cds_records/user_actions_logger.js',
         filters='jsmin',
     ),
     depends=(
@@ -43,7 +44,7 @@ js = NpmBundle(
         'angular': '~1.4.10',
         'angular-sanitize': '~1.4.10',
         'angular-loading-bar': '~0.9.0',
-        'cds': '~0.1.4',
+        'cds': '~0.2.0',
         'ng-dialog': '~0.6.0',
         'ngmodal': '~2.0.1'
     }

@@ -1012,9 +1012,11 @@ CDS_FFMPEG_METADATA_POST_SPLIT = ['streams/0/keywords']
 # LOG USER ACTIVITY
 ###############################################################################
 
-LOG_ACTIONS_BASE_URL = 'http://cds-test-wn-02.cern.ch/tools/events.py/'
+LOG_ACTIONS_BASE_URL = '//cds-test-wn-02.cern.ch/tools/events.py/'
 LOG_MEDIA_VIEWS_URL = LOG_ACTIONS_BASE_URL + 'media_view' \
     '?ext=true&recid={recid}&report_number={report_number}&format={format}'
 LOG_MEDIA_DOWNLOAD_URL = LOG_ACTIONS_BASE_URL + 'media_download' \
     '?recid={recid}&report_number={report_number}&format={format}' \
                                                 '&quality={quality}'
+LOG_PAGE_VIEW_URL = LOG_ACTIONS_BASE_URL + 'page_view' \
+    '?recid={recid}&userid={userid}'
