@@ -18,7 +18,7 @@ Prepare the environment
     $ ./scripts/setup-npm.sh
     $ mkvirtualenv cds3
     (cds3)$ cdvirtualenv ; mkdir src ; cd src
-    (cds3)$ git clone https://github.com/CERNDocumentServer/cds.git
+    (cds3)$ git clone https://github.com/CERNDocumentServer/cds-videos.git
 
 .. note::
 
@@ -105,7 +105,7 @@ images and boot them up using Docker Compose:
 
 .. code-block:: console
 
-    $ git clone https://github.com/CERNDocumentServer/cds.git
+    $ git clone https://github.com/CERNDocumentServer/cds-videos.git
     $ git checkout master
     $ docker-compose build
     $ docker-compose up

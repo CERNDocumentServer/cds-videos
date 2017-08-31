@@ -27,7 +27,7 @@
 Links
 -----
 * `website <http://cds.cern.ch/>`_
-* `development version <https://github.com/CERNDocumentServer/cds>`_
+* `development version <https://github.com/CERNDocumentServer/cds-videos>`_
 """
 
 import os
