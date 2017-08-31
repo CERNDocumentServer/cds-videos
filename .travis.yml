@@ -52,5 +52,5 @@ deploy:
   on:
     tags: true
     distributions: sdist bdist_wheel
-    repo: CERNDocumentServer/cds
+    repo: CERNDocumentServer/cds-videos
     branch: cdslabs
