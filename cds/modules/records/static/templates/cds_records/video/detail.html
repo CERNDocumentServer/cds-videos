@@ -56,7 +56,7 @@
           <div class="cds-detail-date cds-detail-video-date mb-30 px-20 my-20 f8">
             <ul class="list-inline mb-0">
               <li>
-                <i class="fa fa-copyright text-muted"></i> {{ ::record.metadata.copyright.year || '2017' }} {{ ::record.metadata.copyright.holder || 'CERN' }}
+                <i class="fa fa-copyright text-muted"></i> {{ ::record.metadata.copyright.year }} {{ ::record.metadata.copyright.holder }}
               </li>
               <li ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material == 'other'">
                 <i class="fa fa-certificate text-muted"></i>
