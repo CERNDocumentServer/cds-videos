@@ -221,7 +221,7 @@ app.filter('wordsSplit', function () {
 
 app.filter('isPublic', function () {
   return function (record) {
-    return (_.get(record, '_access') === undefined || _.get(record, '_access.read') === undefined);
+    return (_.get(record, '_access') === undefined || _.get(record, '_access.read') === undefined || _.get(record, '_access.read').length == 0);
   };
 });
 
