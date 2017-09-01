@@ -26,16 +26,26 @@
 
 from __future__ import absolute_import, print_function
 
+import random
+import string
+
 import mock
 import copy
 import json
+
+import os
 import pytest
 
 from time import sleep
+
+import arrow
 from flask_principal import RoleNeed, identity_loaded
+from flask_security import login_user
 from invenio_db import db
 from celery.exceptions import Retry
 from flask import url_for
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
+    FileInstance
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from helpers import prepare_videos_for_publish
 from invenio_accounts.testutils import login_user_via_session
@@ -45,6 +55,7 @@ from cds.modules.deposit.api import deposit_video_resolver, \
     deposit_project_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
+from six import BytesIO
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -62,25 +73,16 @@ def test_video_publish_registering_the_datacite(
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
-        res = client.post(
-            url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata),
-            headers=json_partial_project_headers)
-
-        assert res.status_code == 201
-        project_dict = json.loads(res.data.decode('utf-8'))
+        project_dict = _create_new_project(client,
+                                           json_partial_project_headers,
+                                           project_deposit_metadata)
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
-        video_metadata = copy.deepcopy(video_deposit_metadata)
-        video_metadata.update(
-            _project_id=project_dict['metadata']['_deposit']['id'])
-        res = client.post(
-            url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata),
-            headers=json_partial_video_headers)
+        video_1_dict = _add_video_info_to_project(client,
+                                                  json_partial_video_headers,
+                                                  project_dict,
+                                                  video_deposit_metadata)
 
-        assert res.status_code == 201
-        video_1_dict = json.loads(res.data.decode('utf-8'))
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
         video_1 = deposit_video_resolver(video_1_depid)
         prepare_videos_for_publish([video_1])
@@ -122,25 +124,15 @@ def test_video_publish_registering_the_datacite_if_fail(
         login_user_via_session(client, email=User.query.get(users[0]).email)
 
         # [[ CREATE NEW PROJECT ]]
-        res = client.post(
-            url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata),
-            headers=json_partial_project_headers)
-
-        assert res.status_code == 201
-        project_dict = json.loads(res.data.decode('utf-8'))
+        project_dict = _create_new_project(client,
+                                           json_partial_project_headers,
+                                           project_deposit_metadata)
 
         # [[ ADD A NEW EMPTY VIDEO_1 ]]
-        video_metadata = copy.deepcopy(video_deposit_metadata)
-        video_metadata.update(
-            _project_id=project_dict['metadata']['_deposit']['id'])
-        res = client.post(
-            url_for('invenio_deposit_rest.video_list'),
-            data=json.dumps(video_metadata),
-            headers=json_partial_video_headers)
-
-        assert res.status_code == 201
-        video_1_dict = json.loads(res.data.decode('utf-8'))
+        video_1_dict = _add_video_info_to_project(client,
+                                                  json_partial_video_headers,
+                                                  project_dict,
+                                                  video_deposit_metadata)
         video_1_depid = video_1_dict['metadata']['_deposit']['id']
         video_1 = deposit_video_resolver(video_1_depid)
         prepare_videos_for_publish([video_1])
@@ -180,13 +172,10 @@ def test_video_publish_registering_the_datacite_not_local(
         project_deposit_metadata['keywords'] = [copy.deepcopy(keyword_2)]
 
         # [[ CREATE NEW PROJECT ]]
-        res = client.post(
-            url_for('invenio_deposit_rest.project_list'),
-            data=json.dumps(project_deposit_metadata),
-            headers=json_partial_project_headers)
+        project_dict = _create_new_project(client,
+                                           json_partial_project_headers,
+                                           project_deposit_metadata)
 
-        assert res.status_code == 201
-        project_dict = json.loads(res.data.decode('utf-8'))
         assert project_dict['metadata']['keywords'][0] == keyword_2
         project_depid = project_dict['metadata']['_deposit']['id']
         project = deposit_project_resolver(project_depid)
@@ -355,44 +344,29 @@ def test_video_publish_edit_publish_again(
             login_user_via_session(client,
                                    email=User.query.get(users[0]).email)
 
-            # [[ CREATE NEW PROJECT ]]
-            res = client.post(
-                url_for('invenio_deposit_rest.project_list'),
-                data=json.dumps(project_deposit_metadata),
-                headers=json_partial_project_headers)
+            # [[ CREATE A NEW PROJECT ]]
+            project_dict = _create_new_project(client,
+                                               json_partial_project_headers,
+                                               project_deposit_metadata)
 
-            assert res.status_code == 201
-            project_dict = json.loads(res.data.decode('utf-8'))
+            # [[ ADD A NEW EMPTY VIDEO_1 ]]
+            video_1_dict = _add_video_info_to_project(client,
+                                                      json_partial_video_headers,
+                                                      project_dict,
+                                                      video_deposit_metadata)
 
-            # [[ ADD A NEW VIDEO_1 ]]
-            video_metadata = copy.deepcopy(video_deposit_metadata)
-            video_metadata.update(
-                _project_id=project_dict['metadata']['_deposit']['id'])
-            res = client.post(
-                url_for('invenio_deposit_rest.video_list'),
-                data=json.dumps(video_metadata),
-                headers=json_partial_video_headers)
-
-            assert res.status_code == 201
-            video_1_dict = json.loads(res.data.decode('utf-8'))
             video_1_depid = video_1_dict['metadata']['_deposit']['id']
             video_1 = deposit_video_resolver(video_1_depid)
             prepare_videos_for_publish([video_1])
 
             # [[ PUBLISH VIDEO ]]
-            res = client.post(
-                url_for('invenio_deposit_rest.video_actions',
-                        pid_value=video_1['_deposit']['id'], action='publish'),
-                headers=json_headers)
-            assert res.status_code == 202
+            _deposit_publish(client, json_headers, video_1['_deposit']['id'])
+
             datacite_register.s(
                 pid_value='123', record_uuid=str(video_1.id)).apply()
 
             # [[ EDIT VIDEO ]]
-            res = client.post(
-                url_for('invenio_deposit_rest.video_actions',
-                        pid_value=video_1['_deposit']['id'], action='edit'),
-                headers=json_headers)
+            _deposit_edit(client, json_headers, video_1['_deposit']['id'])
 
             # [[ MODIFY DOI -> SAVE ]]
             video_1 = deposit_video_resolver(video_1_depid)
@@ -439,11 +413,7 @@ def test_video_publish_edit_publish_again(
             assert video_1_new['_project_id'] == video_1['_project_id']
 
             # [[ PUBLISH VIDEO ]]
-            res = client.post(
-                url_for('invenio_deposit_rest.video_actions',
-                        pid_value=video_1['_deposit']['id'], action='publish'),
-                headers=json_headers)
-            assert res.status_code == 202
+            _deposit_publish(client, json_headers, video_1['_deposit']['id'])
 
             # check indexed record
             RecordIndexer().process_bulk_queue()
@@ -510,3 +480,122 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
             'project_html': url_prj,
             'project_edit': url_prj_edit,
         }
+
+
+def test_video_publish_symlinks(location, api_project, api_app, users):
+    """Test video publish creates symlinks"""
+
+    def _random_string():
+        return ''.join(random.choice(string.ascii_uppercase)
+                       for _ in range(10))
+
+    def _get_symlink_path(record, filename):
+        year = str(arrow.get(record['date']).year)
+
+        base_no_last, _ = os.path.split(location.uri)
+        links_location = os.path.join(base_no_last, 'links')
+
+        return os.path.join(links_location, record['type'],
+                            record['category'], year,
+                            record['report_number'][0],
+                            filename)
+
+    def _upload_video_and_publish(video):
+        bucket_id = video['_buckets']['deposit']
+
+        random_file_content = 'fake video file ' + _random_string()
+        random_bytes = random_file_content.encode('utf-8')
+        video_file = ObjectVersion.create(bucket=bucket_id, key='master.mp4',
+                                          stream=BytesIO(random_bytes))
+        ObjectVersionTag.create(video_file, 'context_type', 'master')
+
+        prepare_videos_for_publish([video])
+        published_video = video.publish()
+        (_, record_published_video) = published_video.fetch_published()
+        return published_video, record_published_video
+
+    def _get_master_file(record):
+        master_file = None
+        for _file in record.get('_files', []):
+            if _file['context_type'] == 'master':
+                master_file = _file
+        return master_file
+
+    def _verify_file_and_symlink(record, file_id, filename):
+        # verify uploaded file exists
+        uploaded_file = FileInstance.get(file_id)
+        uploaded_file_path = uploaded_file.uri
+        assert os.path.exists(uploaded_file_path)
+
+        # verify symlink exists
+        symlink_path = _get_symlink_path(record, filename)
+        assert os.path.exists(symlink_path)
+
+        # verify symlink points to the correct file
+        assert os.path.realpath(symlink_path) == os.path.realpath(
+            uploaded_file_path)
+
+    with api_app.test_request_context():
+        login_user(User.query.get(users[0]))
+
+        (project, video_1, _) = api_project
+        published_video, record = _upload_video_and_publish(video_1)
+
+        master_file = _get_master_file(record)
+
+        _verify_file_and_symlink(record, master_file['file_id'],
+                                 master_file['key'])
+
+        # edit published video by uploading a new file and re-publishing
+        deposit_video = published_video.edit()
+        published_video, record = _upload_video_and_publish(deposit_video)
+
+        master_file = _get_master_file(record)
+
+        _verify_file_and_symlink(record, master_file['file_id'],
+                                 master_file['key'])
+
+
+def _deposit_edit(client, json_headers, id):
+    """Post action to edit deposit"""
+    res = client.post(
+        url_for('invenio_deposit_rest.video_actions',
+                pid_value=id, action='edit'),
+        headers=json_headers)
+    assert res.status_code == 201
+
+
+def _deposit_publish(client, json_headers, id):
+    """Post action to publish deposit"""
+    res = client.post(
+        url_for('invenio_deposit_rest.video_actions',
+                pid_value=id, action='publish'),
+        headers=json_headers)
+    assert res.status_code == 202
+
+
+def _add_video_info_to_project(client, json_partial_video_headers,
+                               project_dict, video_deposit_metadata):
+    """Post video information to add it to the project"""
+    video_metadata = copy.deepcopy(video_deposit_metadata)
+    video_metadata.update(
+        _project_id=project_dict['metadata']['_deposit']['id'])
+    res = client.post(
+        url_for('invenio_deposit_rest.video_list'),
+        data=json.dumps(video_metadata),
+        headers=json_partial_video_headers)
+    assert res.status_code == 201
+    video_1_dict = json.loads(res.data.decode('utf-8'))
+    return video_1_dict
+
+
+def _create_new_project(client, json_partial_project_headers,
+                        project_deposit_metadata):
+    """Post project info to create a project"""
+    res = client.post(
+        url_for('invenio_deposit_rest.project_list'),
+        data=json.dumps(project_deposit_metadata),
+        headers=json_partial_project_headers)
+    assert res.status_code == 201
+    project_dict = json.loads(res.data.decode('utf-8'))
+    return project_dict
