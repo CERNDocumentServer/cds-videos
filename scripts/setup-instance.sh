@@ -41,4 +41,4 @@ cds access allow deposit-admin-access role admin
 cds access allow superuser-access role admin
 
 # Create a default files location
-cds files location videos /tmp
+cds files location videos /tmp/files
