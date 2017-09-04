@@ -31,8 +31,8 @@
 # FIXME wait for PR#147
 -e git+https://github.com/inveniosoftware/invenio-files-rest.git@cds-object-version-tags#egg=invenio-files-rest
 
-# FIXME wait for PR#53
--e git+https://github.com/inveniosoftware/invenio-webhooks.git@cds#egg=invenio-webhooks
+# FIXME wait for PR#54
+-e git+https://github.com/hachreak/invenio-webhooks.git@51_receivers_permissions#egg=invenio-webhooks
 
 # FIXME #75
 # -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator

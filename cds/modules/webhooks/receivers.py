@@ -68,7 +68,10 @@ def build_task_payload(event, task_id):
     iterate_result(raw_info=raw_info, fun=search)
     if search.task_name:
         if isinstance(search.result.info, Exception):
-            payload = search.result.info.message['payload']
+            if hasattr(search.result.info, 'message'):
+                payload = search.result.info.message['payload']
+            else:
+                payload = search.result.info.args[0]['payload']
         else:
             payload = search.result.info['payload']
         base = {
@@ -122,10 +125,16 @@ class CeleryAsyncReceiver(Receiver):
             flag_modified(event, 'response_headers')
 
     def delete(self, event):
-        """Revoke all associated tasks."""
+        """Delete."""
+        self.clean(event=event)
+        super(CeleryAsyncReceiver, self).delete(event=event)
+
+    def clean(self, event):
+        """Clean environment."""
         iterate_result(
             raw_info=self._raw_info(event),
             fun=lambda task_name, result: result.revoke(terminate=True))
+        super(CeleryAsyncReceiver, self).clean(event=event)
 
     @staticmethod
     def delete_task(event, task_id):
@@ -134,6 +143,9 @@ class CeleryAsyncReceiver(Receiver):
 
     def status(self, event):
         """Get the status."""
+        if event.response_code == 410:
+            # in case the event has been removed
+            return (201, event.response)
         # get raw info from the celery receiver
         raw_info = self._raw_info(event)
         # extract global status
@@ -296,10 +308,10 @@ class Downloader(CeleryAsyncReceiver):
         result = self._deserialize_result(event)
         return {'file_download': result}
 
-    def delete(self, event):
+    def clean(self, event):
         """Delete generated files."""
-        super(Downloader, self).delete(event)
         self.clean_task(event=event, task_name='file_download')
+        super(Downloader, self).clean(event)
 
     @staticmethod
     def clean_task(event, task_name, *args, **kwargs):
@@ -476,9 +488,8 @@ class AVCWorkflow(CeleryAsyncReceiver):
         # 5. persist everything
         super(AVCWorkflow, self).persist(event, result)
 
-    def delete(self, event):
+    def clean(self, event):
         """Delete tasks and everything created by them."""
-        super(AVCWorkflow, self).delete(event)
         self.clean_task(event=event, task_name='file_video_extract_frames')
         for preset_quality in get_available_preset_qualities():
             self.clean_task(
@@ -496,6 +507,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 ObjectVersionTag.key.in_(['_event_id', 'preview',
                                           'media_type', 'context_type'])
             ).delete(synchronize_session=False)
+        super(AVCWorkflow, self).clean(event)
 
     def _raw_info(self, event):
         """Get info from the event."""
