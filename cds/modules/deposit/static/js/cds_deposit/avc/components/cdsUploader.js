@@ -357,13 +357,30 @@ function cdsUploaderCtrl(
             'X-Invenio-File-Tags': 'times_replaced='+masterFileVersion
           };
           that.newMasterDefer.promise.then(function() {
-            that.files.splice(
+            // FIXME masterFile.key is undefined !?!
+            old_master = that.files.splice(
               _.findIndex(that.files, {key: masterFile.key}), 1
             );
             that.files.push(newMasterFile);
             that.queue.push(newMasterFile);
             // Upload the video file
-            that.upload();
+            var old_event_id = old_master[0]['tags']['_event_id']
+            that.deleteEvent(old_event_id).then(
+              function success(response) {
+                that.upload();
+              },
+              function error(response) {
+                // Inform the parents
+                $scope.$emit('cds.deposit.error', response);
+                // Error uploading notification
+                toaster.pop({
+                  type: 'error',
+                  title: 'Error replacing the file: worflow failing to start.',
+                  bodyOutputType: 'trustedHtml',
+                  timeout: 8000
+                });
+              }
+            );
           });
         }
       }
@@ -377,6 +394,12 @@ function cdsUploaderCtrl(
     // Prepare file request
     this.prepareUpload = function(file) {
       return (file.receiver) ? _prepareRemoteFileWebhooks(file) : _prepareLocalFile(file);
+    };
+
+    this.deleteEvent = function(event_id){
+      var url = that.remoteMasterReceiver + event_id;
+      var args = that.prepareDelete(url);
+      return $http(args);
     };
 
     this.prepareDelete = function(url) {
