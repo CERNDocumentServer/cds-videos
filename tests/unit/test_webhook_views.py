@@ -44,6 +44,7 @@ from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from six import BytesIO
 from cds.modules.deposit.api import deposit_video_resolver
+from cds.modules.webhooks.status import get_deposit_events
 from invenio_webhooks.models import Event
 
 from helpers import get_indexed_records_from_mock
@@ -589,3 +590,64 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
         assert 'id' in data[1][0]
         assert data[1][0]['name'] == 'failing'
         assert data[1][0]['status'] == states.FAILURE
+
+
+@pytest.mark.parametrize('receiver_id', ['avc', 'downloader'])
+def test_webhooks_delete(api_app, access_token, json_headers,
+                         online_video, api_project, users, receiver_id,
+                         local_file, mock_sorenson):
+    """Test webhooks delete."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    master_key = 'test.mp4'
+
+    # run workflow!
+    with api_app.test_request_context():
+        url = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id=receiver_id,
+            access_token=access_token
+        )
+
+    # check no events are there
+    assert get_deposit_events(video_1_depid) == []
+
+    with api_app.test_client() as client, \
+            mock.patch('invenio_sse.ext._SSEState.publish'), \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            deposit_id=video_1_depid,
+            key=master_key,
+            sse_channel=sse_channel,
+            sleep_time=0,
+        )
+
+        if receiver_id != 'downloader':
+            payload['version_id'] = str(local_file)
+
+        # run the workflow!
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        # check event is created
+        assert resp.status_code == 201
+        event_id = resp.headers['X-Hub-Delivery']
+        [event] = get_deposit_events(video_1_depid)
+        assert str(event.id) == event_id
+
+        # delete event
+        url_to_delete = url_for(
+            'invenio_webhooks.event_item',
+            receiver_id=receiver_id,
+            event_id=str(event_id),
+            access_token=access_token
+        )
+        client.delete(url_to_delete, headers=json_headers)
+        # check no events are there
+        assert get_deposit_events(video_1_depid) == []
+        # check event is marked as deleted
+        [event_deleted] = Event.query.all()
+        assert event_deleted.id == event.id
+        assert event_deleted.response_code == 201

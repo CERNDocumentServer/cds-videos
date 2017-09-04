@@ -35,18 +35,25 @@ from celery import states
 from invenio_webhooks.models import Event
 
 
-def get_deposit_events(deposit_id):
+def get_deposit_events(deposit_id, _deleted=False):
     """Get a list of events associated with a deposit."""
     #  return Event.query.filter(
     #      Event.payload.op('->>')(
     #          'deposit_id').cast(String) == self['_deposit']['id']).all()
     deposit_id = str(deposit_id)
-    return Event.query.filter(
+    # do you want to involve deleted events?
+    filters = []
+    if not _deleted:
+        filters.append(Event.response_code == 202)
+    # build base query
+    query = Event.query.filter(
         sqlalchemy.cast(
             Event.payload['deposit_id'],
             sqlalchemy.String) == sqlalchemy.type_coerce(
                 deposit_id, sqlalchemy.JSON)
-    ).all()
+    )
+    # execute with more filters
+    return query.filter(*filters).all()
 
 
 def iterate_events_results(events, fun):
