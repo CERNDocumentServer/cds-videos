@@ -204,10 +204,14 @@ def get_object_count(download=True, frames=True, transcode=True):
     ])
 
 
-def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
+def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
+                  is_local=False):
     """Get number of ObjectVersionTags, based on executed tasks."""
-    # download
-    tags_download = 5  # event_id, uri_origin, context_type, media_type, preview
+    # download: event_id, uri_origin, context_type, media_type, preview
+    tags_download = 5
+    if is_local:
+        # uri_origin doesn't exists
+        tags_download = tags_download - 1
 
     # metadata
     tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
@@ -218,6 +222,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True):
         tags_extract_metadata if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
         # count the presets with width x height < 640x320 (video resolution)
+        # FIXME 13
         ((len(get_presets_applied())) * 14) - 2 if transcode else 0,
     ])
 
@@ -494,3 +499,13 @@ def reset_oauth2():
     """After a OAuth2 request, reset user."""
     if hasattr(current_user, 'login_via_oauth2'):
         del current_user.login_via_oauth2
+
+
+def get_local_file(bucket, datadir, filename):
+    """Create local file as objectversion."""
+    stream = open(join(datadir, filename), 'rb')
+    object_version = ObjectVersion.create(
+        bucket, "test.mp4", stream=stream)
+    version_id = object_version.version_id
+    db.session.commit()
+    return version_id

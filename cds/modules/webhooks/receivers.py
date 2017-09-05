@@ -365,12 +365,15 @@ class AVCWorkflow(CeleryAsyncReceiver):
                                         event.payload['uri'])
                 version_id = str(object_version.version_id)
             # add tag with corresponding event
-            ObjectVersionTag.create(object_version, '_event_id', event_id)
+            ObjectVersionTag.create_or_update(
+                object_version, '_event_id', event_id)
             # add tag for preview
-            ObjectVersionTag.create(object_version, 'preview', True)
+            ObjectVersionTag.create_or_update(object_version, 'preview', True)
             # add tags for file type
-            ObjectVersionTag.create(object_version, 'media_type', 'video')
-            ObjectVersionTag.create(object_version, 'context_type', 'master')
+            ObjectVersionTag.create_or_update(
+                object_version, 'media_type', 'video')
+            ObjectVersionTag.create_or_update(
+                object_version, 'context_type', 'master')
             event.response['version_id'] = version_id
         return object_version
 
@@ -499,14 +502,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
             event=event, task_name='file_video_metadata_extraction')
         if 'version_id' not in event.payload:
             self.clean_task(event=event, task_name='file_download')
-        else:
-            # Remove tags on pre-existing ObjectVersion
-            object_version = as_object_version(event.payload['version_id'])
-            ObjectVersionTag.query.filter(
-                ObjectVersionTag.object_version == object_version,
-                ObjectVersionTag.key.in_(['_event_id', 'preview',
-                                          'media_type', 'context_type'])
-            ).delete(synchronize_session=False)
         super(AVCWorkflow, self).clean(event)
 
     def _raw_info(self, event):
