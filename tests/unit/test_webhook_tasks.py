@@ -50,7 +50,8 @@ from cds.modules.webhooks.tasks import (DownloadTask,
                                         ExtractMetadataTask,
                                         TranscodeVideoTask,
                                         sync_records_with_deposit_files)
-from cds.modules.deposit.api import deposit_video_resolver, Video, Project
+from cds.modules.deposit.api import deposit_video_resolver, Video, Project, \
+    deposit_project_resolver
 
 from helpers import add_video_tags, get_object_count, transcode_task, \
     check_deposit_record_files, prepare_videos_for_publish
@@ -88,9 +89,9 @@ def test_download_to_object_version(db, bucket):
         # Undo
         DownloadTask().clean(version_id=obj.version_id)
 
-        assert ObjectVersion.query.count() == 0
+        # Create + Delete
+        assert ObjectVersion.query.count() == 2
         assert FileInstance.query.count() == 1
-        assert Bucket.get(bid).size == 0
 
 
 def test_update_record_thread(app, db):
@@ -202,15 +203,19 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     record = Record.get_record(recid)
     assert 'extracted_metadata' not in record['_cds']
 
-    # Check that ObjectVersionTags were removed
+    # Check that ObjectVersionTags are still there (attached to the old obj)
     tags = ObjectVersion.query.first().get_tags()
-    assert len(tags) == 0
+    assert len(tags) == 11
 
     # Simulate failed task, no extracted_metadata
     ExtractMetadataTask().clean(deposit_id=dep_id,
                                 version_id=obj_id)
     record = Record.get_record(recid)
     assert 'extracted_metadata' not in record['_cds']
+
+    # check again tags
+    tags = ObjectVersion.query.first().get_tags()
+    assert len(tags) == 11
 
 
 def test_video_extract_frames(app, db, bucket, video):
@@ -220,6 +225,7 @@ def test_video_extract_frames(app, db, bucket, video):
     add_video_tags(obj)
     version_id = str(obj.version_id)
     db.session.commit()
+    assert ObjectVersion.query.count() == 1
 
     task_s = ExtractFramesTask().s(version_id=version_id)
 
@@ -232,15 +238,17 @@ def test_video_extract_frames(app, db, bucket, video):
         ObjectVersionTag.value == version_id).all()
     assert len(frames_and_gif) == get_object_count(download=False,
                                                    transcode=False)
+    assert ObjectVersion.query.count() == 12
 
     # Undo
     ExtractFramesTask().clean(version_id=version_id)
 
-    assert ObjectVersion.query.count() == 1  # master file
+    # master file + create frames + delete frames
+    assert ObjectVersion.query.count() == 23  # master file
     frames_and_gif = ObjectVersion.query.join(ObjectVersion.tags).filter(
         ObjectVersionTag.key == 'master',
         ObjectVersionTag.value == version_id).all()
-    assert len(frames_and_gif) == 0
+    assert len(frames_and_gif) == 11
 
 
 def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
@@ -305,11 +313,12 @@ def test_transcode_too_high_resolutions(db, bucket):
     assert result.status == states.IGNORED
 
 
-def test_transcode(db, bucket, mock_sorenson):
+def test_transcode_and_undo(db, cds_depid, mock_sorenson):
     """Test TranscodeVideoTask task."""
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
+    bucket = deposit_project_resolver(cds_depid).files.bucket
     filesize = 1024
     filename = 'test.mp4'
     preset_quality = '480p'
@@ -327,7 +336,7 @@ def test_transcode(db, bucket, mock_sorenson):
                                     sleep_time=0)
 
     # Transcode
-    task_s.delay()
+    task_s.delay(deposit_id=cds_depid)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
@@ -345,14 +354,16 @@ def test_transcode(db, bucket, mock_sorenson):
     assert len(keys) == 1
     assert filename in keys
     assert new_filename not in keys
-    assert bucket.size == filesize
+    # file size doesn't change
+    assert bucket.size == 2 * filesize
 
 
-def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
+def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
     """Test TranscodeVideoTask task when run 2 task and delete 1."""
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
+    bucket = deposit_project_resolver(cds_depid).files.bucket
     filesize = 1024
     filename = 'test.mp4'
     preset_qualities = ['480p', '720p']
@@ -366,8 +377,8 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     assert bucket.size == filesize
 
     # Transcode
-    task_s1.delay()
-    task_s2.delay()
+    task_s1.delay(deposit_id=cds_depid)
+    task_s2.delay(deposit_id=cds_depid)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
@@ -386,7 +397,7 @@ def test_transcode_2tasks_delete1(db, bucket, mock_sorenson):
     assert new_filenames[0] not in keys
     assert new_filenames[1] in keys
     assert filename in keys
-    assert bucket.size == (2 * filesize)
+    assert bucket.size == (3 * filesize)
 
 
 def test_transcode_ignore_exception_if_invalid(db, bucket):

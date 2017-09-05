@@ -198,7 +198,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
 
         assert resp.status_code == 201
 
-        assert ObjectVersion.query.count() == 0
+        assert ObjectVersion.query.count() == 2
         bucket = Bucket.query.first()
         assert bucket.size == 0
 
@@ -437,8 +437,10 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert resp.status_code == 201
 
         # check that object versions and tags are deleted
-        assert ObjectVersion.query.count() == 0
-        assert ObjectVersionTag.query.count() == 0
+        # (Create + Delete) * Num Objs
+        assert ObjectVersion.query.count() == 2 * get_object_count()
+        # Tags connected with the old version
+        assert ObjectVersionTag.query.count() == get_tag_count()
         bucket = Bucket.query.first()
         # and bucket is empty
         assert bucket.size == 0
@@ -495,6 +497,7 @@ def test_avc_workflow_receiver_local_file_pass(
             sleep_time=0,
             version_id=str(local_file),
         )
+        # [[ RUN WORKFLOW ]]
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
@@ -522,6 +525,8 @@ def test_avc_workflow_receiver_local_file_pass(
                          'codec_name', 'codec_long_name', 'width', 'height',
                          'nb_frames', 'display_aspect_ratio', 'color_range']
         assert all([key in tags for key in metadata_keys])
+        assert ObjectVersion.query.count() == get_object_count()
+        assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
 
         # Check metadata patch
         recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
@@ -632,13 +637,17 @@ def test_avc_workflow_receiver_local_file_pass(
             mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
             as mock_indexer, \
             api_app.test_client() as client:
+        # [[ DELETE WORKFLOW ]]
         resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 201
 
         # check that object versions and tags are deleted
-        assert ObjectVersion.query.count() == 1
-        assert ObjectVersionTag.query.count() == 0
+        # (Create + Delete) * Num Objs - 1 (because the file is local and will
+        # be not touched)
+        assert ObjectVersion.query.count() == 2 * get_object_count() - 1
+        # Tags associated with the old version
+        assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
         bucket = Bucket.query.first()
         # and bucket is empty
         assert bucket.size == 0
@@ -686,6 +695,7 @@ def test_avc_workflow_receiver_clean_download(
 
     assert ObjectVersionTag.query.count() == get_tag_count()
     event = Event.query.first()
+    # [[ CLEAN DOWNLOAD ]]
     event.receiver.clean_task(event=event, task_name='file_download')
 
     # check extracted metadata is there
@@ -693,15 +703,19 @@ def test_avc_workflow_receiver_clean_download(
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_cds']
 
-    assert ObjectVersion.query.count() == get_object_count(download=False)
-    assert ObjectVersionTag.query.count() == get_tag_count(download=False)
+    # Create + Clean 1 Download File
+    assert ObjectVersion.query.count() == get_object_count() + 1
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # RUN again first step
     event.receiver._init_object_version(event=event)
     event.receiver._first_step(event=event).apply()
 
-    assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count()
+    # Create + Clean 1 Download File + Run First Step
+    assert ObjectVersion.query.count() == get_object_count() + 2
+    assert ObjectVersionTag.query.count() == (
+        get_tag_count() + get_tag_count(frames=False, transcode=False)
+    )
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -734,6 +748,7 @@ def test_avc_workflow_receiver_clean_video_frames(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     event = Event.query.first()
+    # [[ CLEAN VIDEO EXTRACT FRAMES ]]
     event.receiver.clean_task(
         event=event, task_name='file_video_extract_frames')
 
@@ -742,15 +757,25 @@ def test_avc_workflow_receiver_clean_video_frames(
     assert len(records) == 1
     assert 'extracted_metadata' in records[0].json['_cds']
 
-    assert ObjectVersion.query.count() == get_object_count(frames=False)
-    assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
+    # Create + Clean Frames
+    assert ObjectVersion.query.count() == (
+        get_object_count() + get_object_count(download=False, transcode=False)
+    )
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # RUN again frame extraction
     event.receiver.run_task(
         event=event, task_name='file_video_extract_frames').apply()
 
-    assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count()
+    # Create + Clean Frames + Restart Frames
+    assert ObjectVersion.query.count() == (
+        get_object_count() +
+        2 * get_object_count(download=False, transcode=False)
+    )
+    assert ObjectVersionTag.query.count() == (
+        get_tag_count() +
+        get_tag_count(download=False, metadata=False, transcode=False)
+    )
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -797,11 +822,13 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert len(records) == 1
         assert 'extracted_metadata' in records[0].json['_cds']
 
-        assert ObjectVersion.query.count() == get_object_count() - i
-        assert ObjectVersionTag.query.count() == get_tag_count() - (i * 13)
+        # Create + Delete i-th transcoded files
+        assert ObjectVersion.query.count() == get_object_count() + i
+        assert ObjectVersionTag.query.count() == get_tag_count()
 
-    assert ObjectVersion.query.count() == get_object_count(transcode=False)
-    assert ObjectVersionTag.query.count() == get_tag_count(transcode=False)
+    # Create + Delete transcoded files
+    assert ObjectVersion.query.count() == get_object_count() + len(presets)
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     #
     # RUN again
@@ -811,13 +838,11 @@ def test_avc_workflow_receiver_clean_video_transcode(
         event.receiver.run_task(event=event, task_name='file_transcode',
                                 preset_quality=preset_quality).apply()
 
-        assert ObjectVersion.query.count() == get_object_count(
-            transcode=False) + i
-        assert ObjectVersionTag.query.count() == get_tag_count(
-            transcode=False) + (i * 13)
-
-    assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count()
+        # Create + Delete transcoded files + Restart i-th transcode
+        assert ObjectVersion.query.count() == (
+            get_object_count() + len(presets) + i
+        )
+        assert ObjectVersionTag.query.count() == get_tag_count() + (i * 13)
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -842,6 +867,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
             sse_channel=sse_channel,
             sleep_time=0,
         )
+        # [[ RUN ]]
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         assert resp.status_code == 201
@@ -849,6 +875,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
 
+    # [[ CLEAN VIDEO METADATA EXTRACTION ]]
     event = Event.query.first()
     event.receiver.clean_task(
         event=event, task_name='file_video_metadata_extraction')
@@ -859,13 +886,15 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     assert 'extracted_metadata' not in records[0].json['_cds']
 
     assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
-    # RUN again first step
+    # [[ RUN again metadata extraction ]]
     event.receiver.run_task(
         event=event, task_name='file_video_metadata_extraction').apply()
 
+    # Metadata Extraction doesn't create new objects
     assert ObjectVersion.query.count() == get_object_count()
+    # neither new tags, but update the current
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there

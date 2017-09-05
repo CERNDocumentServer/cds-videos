@@ -151,7 +151,8 @@ class AVCTask(Task):
     def set_revoke_handler(handler):
         """Set handler to be executed when the task gets revoked."""
         def _handler(signum, frame):
-            handler()
+            with celery_app.flask_app.app_context():
+                handler()
         signal.signal(signal.SIGTERM, _handler)
 
     def set_base_payload(self, payload=None):
@@ -266,12 +267,6 @@ class ExtractMetadataTask(AVCTask):
                 'Failed to apply JSON Patch to deposit {0}: {1}'.format(
                     recid, c))
 
-        # 2. Delete every tag created
-        for tag in ObjectVersionTag.query.filter(
-                ObjectVersionTag.version_id == version_id,
-                ObjectVersionTag.key.in_(self._all_keys)).all():
-            db.session.delete(tag)
-
     @classmethod
     def create_metadata_tags(cls, object_, keys, uri=None):
         """Extract metadata from the video and create corresponding tags."""
@@ -280,7 +275,7 @@ class ExtractMetadataTask(AVCTask):
         metadata = ff_probe_all(uri)
         extracted_dict = dict(metadata['format'], **metadata['streams'][0])
         # Add technical information to the ObjectVersion as Tags
-        [ObjectVersionTag.create(object_, k, v)
+        [ObjectVersionTag.create_or_update(object_, k, v)
          for k, v in extracted_dict.items()
          if k in keys]
         db.session.refresh(object_)
@@ -730,4 +725,5 @@ def dispose_object_version(object_version):
     if object_version:
         object_version = as_object_version(object_version)
         # remove the object version
-        object_version.remove()
+        ObjectVersion.delete(
+            bucket=object_version.bucket, key=object_version.key)

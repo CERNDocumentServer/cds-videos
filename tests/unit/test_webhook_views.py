@@ -47,7 +47,7 @@ from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.webhooks.status import get_deposit_events
 from invenio_webhooks.models import Event
 
-from helpers import get_indexed_records_from_mock
+from helpers import get_indexed_records_from_mock, get_local_file
 
 
 def check_restart_avc_workflow(api_app, event_id, access_token,
@@ -74,8 +74,10 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
 
         assert resp.status_code == 201
 
-    assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count()
+    # (Create + Clean + Create) * Objects Count
+    assert ObjectVersion.query.count() == 3 * get_object_count()
+    # (Version 1 + Version 2) * Tags Count
+    assert ObjectVersionTag.query.count() == 2 * get_tag_count()
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -186,8 +188,13 @@ def check_video_transcode_delete(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    assert ObjectVersion.query.count() == get_object_count() - 1
-    assert ObjectVersionTag.query.count() == get_tag_count() - 13
+    # Create + Delete first transcode
+    assert ObjectVersion.query.count() == (
+        get_object_count() + 1
+    )
+    # Also if the tags are deleted, they remain associated with last version
+    # of transcoded file
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -218,8 +225,9 @@ def check_video_transcode_delete(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    assert ObjectVersion.query.count() == get_object_count() - 2
-    assert ObjectVersionTag.query.count() == get_tag_count() - 2 * 13
+    # Create + 2 Deleted transcode files
+    assert ObjectVersion.query.count() == get_object_count() + 2
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -257,8 +265,9 @@ def check_video_transcode_restart(api_app, event_id, access_token,
 
         assert mock_sse.called is True
 
-    assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count()
+    # Create + restart transcode (clean + create)
+    assert ObjectVersion.query.count() == get_object_count() + 2
+    assert ObjectVersionTag.query.count() == get_tag_count() + 13
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -299,8 +308,11 @@ def check_video_frames(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    assert ObjectVersion.query.count() == get_object_count(frames=False)
-    assert ObjectVersionTag.query.count() == get_tag_count(frames=False)
+    assert ObjectVersion.query.count() == (
+        get_object_count() +
+        get_object_count(download=False, transcode=False)
+    )
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
@@ -331,8 +343,11 @@ def check_video_download(api_app, event_id, access_token,
 
         assert resp.status_code == 204
 
-    assert ObjectVersion.query.count() == get_object_count(download=False)
-    assert ObjectVersionTag.query.count() == get_tag_count(download=False)
+    # Create + Delete Download
+    assert ObjectVersion.query.count() == (
+        get_object_count() + get_object_count(frames=False, transcode=False)
+    )
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is not there
     record = RecordMetadata.query.get(video_1_id)
@@ -366,7 +381,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
         assert resp.status_code == 204
 
     assert ObjectVersion.query.count() == get_object_count()
-    assert ObjectVersionTag.query.count() == get_tag_count(metadata=False)
+    assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is not there
     record = RecordMetadata.query.get(video_1_id)
@@ -452,6 +467,7 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
                 'headers': {'Content-Length': file_size}
             })
 
+        # [[ RUN ]]
         payload = dict(
             uri='http://example.com/test.pdf',
             deposit_id=cds_depid,
@@ -464,7 +480,7 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
         data = json.loads(resp.data.decode('utf-8'))
 
         assert ObjectVersion.query.count() == 1
-        obj = ObjectVersion.query.first()
+        [obj] = ObjectVersion.query.all()
         tags = obj.get_tags()
         assert tags['_event_id'] == data['tags']['_event_id']
         assert obj.key == data['key']
@@ -490,13 +506,16 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
                 'headers': {'Content-Length': file_size}
             })
 
+        # [[ RESTART ]]
         resp = client.put(url, headers=json_headers)
 
         assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
 
-        assert ObjectVersion.query.count() == 1
+        # Create + Delete/Create (Restart)
+        assert ObjectVersion.query.count() == 3
         obj = ObjectVersion.query.first()
+        obj = ObjectVersion.query.get(data['version_id'])
         tags = obj.get_tags()
         assert tags['_event_id'] == data['tags']['_event_id']
         assert obj.key == data['key']
@@ -644,10 +663,86 @@ def test_webhooks_delete(api_app, access_token, json_headers,
             event_id=str(event_id),
             access_token=access_token
         )
-        client.delete(url_to_delete, headers=json_headers)
+        res = client.delete(url_to_delete, headers=json_headers)
+        assert res.status_code == 201
         # check no events are there
         assert get_deposit_events(video_1_depid) == []
         # check event is marked as deleted
         [event_deleted] = Event.query.all()
         assert event_deleted.id == event.id
-        assert event_deleted.response_code == 201
+        assert event_deleted.response_code == 410
+
+
+def test_webhooks_reload_master(api_app, users, access_token, json_headers,
+                                online_video, api_project, datadir,
+                                mock_sorenson):
+    """Test webhooks reload master after publish/edit/publish."""
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    master_key = 'test.mp4'
+    receiver_id = 'avc'
+
+    with api_app.test_request_context():
+        url_run_workflow = url_for(
+            'invenio_webhooks.event_list',
+            receiver_id=receiver_id,
+            access_token=access_token
+        )
+
+    with api_app.test_client() as client, \
+            mock.patch('invenio_sse.ext._SSEState.publish'), \
+            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+
+        # create local file
+        local_file = get_local_file(bucket=video_1.files.bucket,
+                                    datadir=datadir, filename='test.mp4')
+
+        sse_channel = 'mychannel'
+        payload = dict(
+            uri=online_video,
+            deposit_id=video_1_depid,
+            key=master_key,
+            sse_channel=sse_channel,
+            sleep_time=0,
+            version_id=str(local_file),
+        )
+
+        # run the workflow!
+        login_user_via_session(client, email=User.query.get(users[0]).email)
+        resp = client.post(url_run_workflow, headers=json_headers,
+                           data=json.dumps(payload))
+        assert resp.status_code == 201
+        data = json.loads(resp.data.decode('utf-8'))
+        event_id = data['tags']['_event_id']
+
+        # publish video
+        publish_url = url_for('invenio_deposit_rest.video_actions',
+                              pid_value=video_1_depid, action='publish')
+        resp = client.post(publish_url, headers=json_headers)
+        assert resp.status_code == 202
+
+        # edit video
+        edit_url = url_for('invenio_deposit_rest.video_actions',
+                           pid_value=video_1_depid, action='edit')
+        resp = client.post(edit_url, headers=json_headers)
+        assert resp.status_code == 201
+
+        video_1 = deposit_video_resolver(video_1_depid)
+
+        # delete old worflow
+        url_delete = url_for('invenio_webhooks.event_item',
+                             receiver_id=receiver_id,
+                             event_id=str(event_id),
+                             access_token=access_token)
+        resp = client.delete(url_delete, headers=json_headers)
+
+        # run the workflow!
+        resp = client.post(url_run_workflow, headers=json_headers,
+                           data=json.dumps(payload))
+        assert resp.status_code == 201
+        data = json.loads(resp.data.decode('utf-8'))
+        event_id = data['tags']['_event_id']
+
+        # publish again
+        resp = client.post(publish_url, headers=json_headers)
+        assert resp.status_code == 202
