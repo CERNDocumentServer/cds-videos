@@ -913,6 +913,8 @@ def templates(app, db):
 @pytest.fixture()
 def local_file(db, bucket, location, online_video):
     """A local file."""
+    # FIXME check where it's used, and substitute with get_local_file
+    # if is involved a video!
     response = requests.get(online_video, stream=True)
     object_version = ObjectVersion.create(
         bucket, "test.mp4", stream=response.raw)
