@@ -346,6 +346,16 @@ function cdsUploaderCtrl(
           that.confirmNewMaster = true;
           that.newMasterName = newMasterFile.name;
           that.newMasterDefer = $q.defer();
+          // Update thow many times the master file has been replaced.
+          // It is useful to indicate in the UI how many times
+          // the file has been changed. Note is only used for UI, the number
+          // means nothing.
+          var masterFileVersion = (masterFile.tags && masterFile.tags.times_replaced) ?
+            parseInt(masterFile.tags.times_replaced) + 1 : 1;
+          // Add how many times has been changed tag
+          newMasterFile.headers = {
+            'X-Invenio-File-Tags': 'times_replaced='+masterFileVersion
+          };
           that.newMasterDefer.promise.then(function() {
             that.files.splice(
               _.findIndex(that.files, {key: masterFile.key}), 1
