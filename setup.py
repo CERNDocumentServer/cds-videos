@@ -68,7 +68,7 @@ for name, reqs in extras_require.items():
 # Do not include in all requirement
 extras_require['xrootd'] = [
     'invenio-xrootd>=1.0.0a4',
-    'xrootdpyfs>=0.1.3',
+    'xrootdpyfs>=0.1.5',
 ]
 
 setup_requires = [
@@ -190,7 +190,7 @@ setup(
         'invenio_base.api_apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
-            # 'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
@@ -200,7 +200,7 @@ setup(
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
-            # 'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
