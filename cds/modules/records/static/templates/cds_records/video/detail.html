@@ -75,6 +75,16 @@
                     <span ng-switch-when='CERN'>
                       <a target="_blank" href="http://copyright.web.cern.ch/">Conditions of Use</a>
                     </span>
+                    <span ng-switch-when='unknown'>
+                      <a ng-click="noLicense = true">Unknown</a>
+                      <modal-dialog show="noLicense" dialog-title="Unknown" width="50%">
+                        <div>
+                          <p>
+                            This resource is copyrighted as non-CERN and unfortunately we don't have enough information about its license. None of CERN's terms of use will apply.
+                          </p>
+                        </div>
+                      </modal-dialog>
+                    </span>
                     <span ng-switch-default>
                       <a target="_blank" ng-href="{{ licenses[0].url }}">{{ licenses[0].license }}</a>
                     </span>
@@ -115,10 +125,10 @@
               <!-- Contributors -->
               <div class="mb-10">
                 <!-- License -->
-                <p class="mb-0" ng-if="record.metadata.license.length > 1">
+                <div class="mb-0" ng-if="record.metadata.license.length > 1">
                   <p><strong>Licences</strong></p>
                   <div class="pl-10" ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material != 'other'">
-                    <p>{{ material }}: </p>
+                    <p>{{ material }}:</p>
                     <ul>
                       <li ng-repeat="license in licenses" ng-if="license.license || license.credit">
                         <span ng-if="license.credit">
@@ -130,7 +140,7 @@
                       </li>
                     </ul>
                   </div>
-                </p>
+                </div>
                 <!-- License -->
                 <!-- Language -->
                 <p class="mb-0" ng-if="record.metadata.language">
