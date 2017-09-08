@@ -692,6 +692,8 @@ WOWZA_VIDEO_URL = \
 VIDEO_POSTER_SIZE = (180, 101)
 # File system location of videos
 VIDEOS_LOCATION = '/eos/workspace/c/cds/test/videos/'
+# XRootD prefix for videos
+VIDEOS_XROOTD_PREFIX = 'root://eospublic.cern.ch//eos/workspace/c/cds/test/videos/'
 
 ###############################################################################
 # Logging

@@ -57,6 +57,8 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
+from .utils import replace_xrootd
+
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
 
@@ -273,7 +275,7 @@ class ExtractMetadataTask(AVCTask):
     @classmethod
     def create_metadata_tags(cls, object_, keys, uri=None):
         """Extract metadata from the video and create corresponding tags."""
-        uri = uri or object_.file.uri
+        uri = uri or replace_xrootd(object_.file.uri)
         # Extract video's metadata using `ff_probe`
         metadata = ff_probe_all(uri)
         extracted_dict = dict(metadata['format'], **metadata['streams'][0])
@@ -410,7 +412,7 @@ class ExtractFramesTask(AVCTask):
 
         try:
             # Generate frames
-            ff_frames(input_file=self.object.file.uri,
+            ff_frames(input_file=replace_xrootd(self.object.file.uri),
                       start=start_time, end=end_time, step=time_step,
                       duration=duration, progress_callback=progress_updater,
                       output=os.path.join(output_folder, 'frame-{:d}.jpg'))
