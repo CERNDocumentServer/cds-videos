@@ -303,10 +303,12 @@ function cdsDepositsCtrl(
 
       if (_promises.length > 0) {
         // Make requests for the videos
-        cdsAPI.chainedActions(_promises).then(function(data) {
-        }, function(error) {
-          console.log('ERROR chained actiοns', error);
-        });
+        cdsAPI
+          .chainedActions(_promises)
+          .then(
+            function(data) {},
+            function(error) {}
+          );
       }
     });
   };

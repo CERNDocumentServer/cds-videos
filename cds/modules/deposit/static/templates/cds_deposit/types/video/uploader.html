@@ -2,7 +2,7 @@
   <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
   <p class="pull-right">
     <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">No</button>
-    <button class="btn btn-lg btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
+    <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
   </p>
 </modal-dialog>
 <!-- Master video and subformats -->
@@ -18,7 +18,16 @@
       <th class="text-center">Actions</th>
     </tr>
     <tr class="active">
-      <td title="{{ $ctrl.cdsDepositCtrl.currentMasterFile.key }}">{{ $ctrl.cdsDepositCtrl.currentMasterFile.key | limitTo:40 }} <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.key.length > 40">...</span></td>
+      <td title="{{ $ctrl.cdsDepositCtrl.currentMasterFile.key }}">
+        {{ $ctrl.cdsDepositCtrl.currentMasterFile.key | limitTo:40 }}
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.key.length > 40">...</span>
+        <span ng-if="$ctrl.cdsDepositCtrl.currentMasterFile.tags.times_replaced">
+          <a ng-click="timesReplaced = true"> <span class="badge"> <i class="fa fa-code-fork"></i> {{ $ctrl.cdsDepositCtrl.currentMasterFile.tags.times_replaced }}</span></a>
+          <modal-dialog show="timesReplaced" dialog-title="The master video has been replaced" width="50%">
+            <p class="text-left">The master video has been replaced <strong>{{ $ctrl.cdsDepositCtrl.currentMasterFile.tags.times_replaced}} time(s)</strong>.</p>
+          </modal-dialog>
+        </span>
+      </td>
       <td>
         <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.size != undefined">{{ $ctrl.cdsDepositCtrl.currentMasterFile.size | bytesToHumanReadable }}</span>
         <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.size == undefined">Unknown</span>
@@ -30,11 +39,12 @@
         <span ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.completed || $ctrl.cdsDepositCtrl.currentMasterFile.percentage==100) && !$ctrl.cdsDepositCtrl.currentMasterFile.errored" class="text-success">✓</span>
       </td>
       <td ng-show="$ctrl.cdsDepositCtrl.currentMasterFile" class="text-center">
-          <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
-          <modal-dialog show="dialogShown" dialog-title="How to update the video file" width="50%">
-            <p class="text-left">To replace the video file, just upload another video file.</p>
-          </modal-dialog>
+        <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
       </td>
+      <modal-dialog show="dialogShown" dialog-title="How to update the video file" width="50%">
+        <p class="text-left">To replace the video file, just upload another video file.</p>
+      </modal-dialog>
+
     </tr>
     <!-- Fix frame -->
     <tr ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.subformat||[]).length > 0">
