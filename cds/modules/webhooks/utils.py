@@ -24,7 +24,7 @@
 
 """Webhooks utilities."""
 
-from flask import current_app
+from flask import current_app as app
 
 
 def replace_xrootd(path):
@@ -36,10 +36,7 @@ def replace_xrootd(path):
 
         This will only work if XRootD is enabled.
     """
-
     if app.config['XROOTD_ENABLED']:
-        path.replace(
-            app.config['VIDEOS_XROOTD_PREFIX'],
-            app.config['VIDEOS_LOCATION'],
-        )
+        path.replace(app.config['VIDEOS_XROOTD_PREFIX'],
+                     app.config['VIDEOS_LOCATION'])
     return path

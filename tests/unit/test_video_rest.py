@@ -350,10 +350,9 @@ def test_video_publish_edit_publish_again(
                                                project_deposit_metadata)
 
             # [[ ADD A NEW EMPTY VIDEO_1 ]]
-            video_1_dict = _add_video_info_to_project(client,
-                                                      json_partial_video_headers,
-                                                      project_dict,
-                                                      video_deposit_metadata)
+            video_1_dict = _add_video_info_to_project(
+                client, json_partial_video_headers, project_dict,
+                video_deposit_metadata)
 
             video_1_depid = video_1_dict['metadata']['_deposit']['id']
             video_1 = deposit_video_resolver(video_1_depid)
@@ -483,8 +482,7 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
 
 
 def test_video_publish_symlinks(location, api_project, api_app, users):
-    """Test video publish creates symlinks"""
-
+    """Test video publish creates symlinks."""
     def _random_string():
         return ''.join(random.choice(string.ascii_uppercase)
                        for _ in range(10))
@@ -540,6 +538,7 @@ def test_video_publish_symlinks(location, api_project, api_app, users):
 
         (project, video_1, _) = api_project
         published_video, record = _upload_video_and_publish(video_1)
+        assert len(record['_files']) == 1
 
         master_file = _get_master_file(record)
 
@@ -549,6 +548,7 @@ def test_video_publish_symlinks(location, api_project, api_app, users):
         # edit published video by uploading a new file and re-publishing
         deposit_video = published_video.edit()
         published_video, record = _upload_video_and_publish(deposit_video)
+        assert len(record['_files']) == 1
 
         master_file = _get_master_file(record)
 
@@ -557,7 +557,7 @@ def test_video_publish_symlinks(location, api_project, api_app, users):
 
 
 def _deposit_edit(client, json_headers, id):
-    """Post action to edit deposit"""
+    """Post action to edit deposit."""
     res = client.post(
         url_for('invenio_deposit_rest.video_actions',
                 pid_value=id, action='edit'),
@@ -566,7 +566,7 @@ def _deposit_edit(client, json_headers, id):
 
 
 def _deposit_publish(client, json_headers, id):
-    """Post action to publish deposit"""
+    """Post action to publish deposit."""
     res = client.post(
         url_for('invenio_deposit_rest.video_actions',
                 pid_value=id, action='publish'),
@@ -576,7 +576,7 @@ def _deposit_publish(client, json_headers, id):
 
 def _add_video_info_to_project(client, json_partial_video_headers,
                                project_dict, video_deposit_metadata):
-    """Post video information to add it to the project"""
+    """Post video information to add it to the project."""
     video_metadata = copy.deepcopy(video_deposit_metadata)
     video_metadata.update(
         _project_id=project_dict['metadata']['_deposit']['id'])
@@ -591,7 +591,7 @@ def _add_video_info_to_project(client, json_partial_video_headers,
 
 def _create_new_project(client, json_partial_project_headers,
                         project_deposit_metadata):
-    """Post project info to create a project"""
+    """Post project info to create a project."""
     res = client.post(
         url_for('invenio_deposit_rest.project_list'),
         data=json.dumps(project_deposit_metadata),
