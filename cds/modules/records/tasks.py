@@ -34,8 +34,9 @@ from requests.exceptions import RequestException
 from invenio_indexer.api import RecordIndexer
 from invenio_db import db
 
-from .api import Keyword
+from .api import Keyword, CDSRecord
 from .search import KeywordSearch, query_to_objects
+from .symlinks import SymlinksCreator
 
 
 def _get_keywords_from_api(url):
@@ -136,3 +137,10 @@ def keywords_harvesting(self, max_retries=5, countdown=5):
         db.session.commit()
     except RequestException as exc:
         raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
+
+
+@shared_task(ignore_result=True, default_retry_delay=10 * 60)
+def create_symlinks(previous_record, record_uuid):
+    """Create video symlinks."""
+    record_new = CDSRecord.get_record(record_uuid)
+    SymlinksCreator().create(previous_record, record_new)
