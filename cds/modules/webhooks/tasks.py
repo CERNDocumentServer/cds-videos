@@ -404,7 +404,9 @@ class ExtractFramesTask(AVCTask):
             obj = ObjectVersion.create(
                 bucket=self.object.bucket,
                 key=key,
-                stream=open(in_output(key), 'rb'))
+                stream=open(in_output(key), 'rb'),
+                size=os.path.getsize(in_output(key))
+            )
             ObjectVersionTag.create(obj, 'master', self.obj_id)
             ObjectVersionTag.create(obj, 'media_type', media_type)
             ObjectVersionTag.create(obj, 'context_type', context_type)
@@ -480,7 +482,7 @@ class TranscodeVideoTask(AVCTask):
         The best/dirtiest solution is to remove the file extension once the
         transcoded file is created.
         """
-        folder = os.path.dirname(uri)
+        folder = os.path.dirname(replace_xrootd(uri))
         for file_ in os.listdir(folder):
             if fnmatch.fnmatch(file_, 'data.*'):
                 os.rename(os.path.join(folder, file_),
@@ -535,7 +537,12 @@ class TranscodeVideoTask(AVCTask):
             directory, filename = storage._get_fs()
 
             input_file = self.object.file.uri
-            output_file = os.path.join(directory.root_path, filename)
+            # XRootDPyFS doesn't implement root_path
+            try:
+                output_file = os.path.join(
+                    directory.root_url + directory.base_path, filename)
+            except AttributeError:
+                output_file = os.path.join(directory.root_path, filename)
 
             try:
                 # Start Sorenson
