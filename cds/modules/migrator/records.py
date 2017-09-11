@@ -222,7 +222,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             return ExtractMetadataTask.create_metadata_tags(
                 object_=master, keys=ExtractMetadataTask._all_keys)
         except Exception:
-            # EOS probably was not ready
+            # EOS probably was not ready, retry few more times
+            if retry < 1:
+                raise
             retry = retry - 1
             sleep(10 - retry)
             cls._run_extracted_metadata(master, retry=retry)

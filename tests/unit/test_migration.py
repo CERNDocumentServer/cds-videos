@@ -341,3 +341,12 @@ def test_sequence_number_update_after_migration(app, location, script_info):
     assert counter.definition_name == 'project-v1_0_0'
     assert counter.template_instance == 'CERN-MOVIE-2017-{counter}'
     assert len(TemplateDefinition.query.all()) == 2
+
+
+def test_retry_run_extracted_metadata(app):
+    """Test retry is working properly."""
+    with mock.patch.object(
+            ExtractMetadataTask, 'create_metadata_tags',
+            side_effect=Exception):
+        with pytest.raises(Exception):
+            CDSRecordDumpLoader._run_extracted_metadata(master={}, retry=1)
