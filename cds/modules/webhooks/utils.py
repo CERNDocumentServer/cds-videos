@@ -36,10 +36,9 @@ def replace_xrootd(path):
 
         This will only work if XRootD is enabled.
     """
-
-    if app.config['XROOTD_ENABLED']:
-        path.replace(
-            app.config['VIDEOS_XROOTD_PREFIX'],
-            app.config['VIDEOS_LOCATION'],
+    if current_app.config['XROOTD_ENABLED']:
+        return path.replace(
+            current_app.config['VIDEOS_XROOTD_PREFIX'],
+            current_app.config['VIDEOS_LOCATION'],
         )
     return path
