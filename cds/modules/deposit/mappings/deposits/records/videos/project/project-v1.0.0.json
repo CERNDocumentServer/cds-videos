@@ -145,6 +145,32 @@
           "properties": {
             "_project_id": {
               "type": "string"
+            },
+            "contributors": {
+              "properties": {
+                "affiliations": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "ids": {
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
