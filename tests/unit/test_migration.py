@@ -108,7 +108,7 @@ def test_migrate_record(api_app, location, datadir, es, users):
     project = CDSRecordDumpLoader.create(dump=dump)
     p_id = project.id
 
-    date = '2015-11-13'
+    date = '2016-01-05'
     assert project['$schema'] == Project.get_record_schema()
     assert project['date'] == date
     assert project['publication_date'] == date
@@ -130,8 +130,8 @@ def test_migrate_record(api_app, location, datadir, es, users):
     assert Project._schema in deposit_project['$schema']
     assert project.revision_id == deposit_project[
         '_deposit']['pid']['revision_id']
-    assert deposit_project['_deposit']['created_by'] == -1
-    assert deposit_project['_deposit']['owners'] == [-1]
+    assert deposit_project['_deposit']['created_by'] == 1
+    assert deposit_project['_deposit']['owners'] == [1]
     assert deposit_project['_files'] == []
 
     # create the video
@@ -139,11 +139,12 @@ def test_migrate_record(api_app, location, datadir, es, users):
     dump = CDSRecordDump(data=data[0])
 
     def load_video(*args, **kwargs):
-        return open(join(datadir, 'test.mp4'), 'rb')
+        path = join(datadir, 'test.mp4')
+        return open(path, 'rb'), None  # getsize(path)
 
     with mock.patch.object(DataCiteProvider, 'register'), \
             mock.patch.object(
-                CDSRecordDumpLoader, '_get_migration_file_stream',
+                CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
                 return_value=load_video()):
         video = CDSRecordDumpLoader.create(dump=dump)
         # assert mock_datacite.called is True
@@ -158,7 +159,7 @@ def test_migrate_record(api_app, location, datadir, es, users):
         {'$ref': 'https://cds.cern.ch/api/record/1495143'}
     ]
     assert video['$schema'] == Video.get_record_schema()
-    date = '2012-11-20'
+    date = '2017-07-13'
     assert video['date'] == date
     assert video['publication_date'] == date
     assert video['_project_id'] == '2093596'
@@ -270,6 +271,7 @@ def test_migrate_record(api_app, location, datadir, es, users):
         '_deposit']['pid']['revision_id']
     assert deposit_video['_deposit']['created_by'] == users[0]
     assert deposit_video['_deposit']['owners'] == [users[0]]
+    assert deposit_video['_project_id'] == '2093596'
     assert len(video['_files']) == 2
     assert len(deposit_video['_files']) == 2
     check_files(video)
