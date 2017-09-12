@@ -27,11 +27,14 @@
 
 from __future__ import absolute_import, print_function
 
+import logging
 import os
 from copy import deepcopy
+from time import sleep
 
 import arrow
-from time import sleep
+from cds_dojson.marc21 import marc21
+from cds_dojson.marc21.utils import create_record
 from flask import current_app
 from invenio_accounts.models import User
 from invenio_db import db
@@ -40,14 +43,11 @@ from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
                                        ObjectVersionTag, as_bucket,
                                        as_object_version)
 from invenio_jsonschemas import current_jsonschemas
+from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
 from invenio_records.api import Record
 from invenio_records_files.models import RecordsBuckets
-
-from cds_dojson.marc21 import marc21
-from cds_dojson.marc21.utils import create_record
-from invenio_migrator.records import RecordDump, RecordDumpLoader
 
 from ..deposit.api import Project, Video, record_build_url
 from ..deposit.tasks import datacite_register
@@ -59,6 +59,8 @@ from ..records.serializers.smil import generate_smil_file
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractMetadataTask
 from .utils import process_fireroles, update_access
+
+logger = logging.getLogger('cds-record-migration')
 
 
 class CDSRecordDump(RecordDump):
@@ -180,7 +182,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         cls._resolve_cds(record=record)
 
         record.commit()
-        #  db.session.commit()
+        db.session.commit()
 
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
@@ -212,6 +214,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     def _resolve_contributors(cls, video):
         """Resolve contributors or inherit from project."""
         if 'contributors' not in video:
+            logging.debug(
+                'Video without contributors, fetching them from project')
             _, project = record_resolver.resolve(video['_project_id'])
             video['contributors'] = deepcopy(project['contributors'])
 
@@ -232,6 +236,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
         """Extract metadata from the video."""
+        logging.debug('Running metadata extraction.')
         master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
         master = as_object_version(master_video['version_id'])
         extracted_metadata = cls._run_extracted_metadata(master=master)
@@ -241,6 +246,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_datacite_register(cls, record):
         """Register datacite."""
+        logging.debug('Registering in DataCite')
         video_pid = PersistentIdentifier.query.filter_by(
             pid_type='recid', object_uuid=record.id,
             object_type='rec').one()
@@ -249,6 +255,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_cds(cls, record):
         """Build _cds."""
+        logging.debug('Adding _cds field.')
         user_id = cls._resolve_user_id(email=record.pop('modified_by', None))
         record['_cds'] = {
             "state": {
@@ -263,12 +270,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     def _resolve_description(cls, record):
         """Build description."""
         if 'description' not in record:
+            logging.debug('Adding empty description.')
             record['description'] = ''
 
     @classmethod
     def _resolve_publication_date(cls, record):
         """Build publication date."""
         if 'publication_date' not in record:
+            logging.debug(
+                'Record without publication date, adding creation date')
             record['publication_date'] = record.created.replace(
                 tzinfo=None).strftime("%Y-%m-%d")
         record['date'] = record['publication_date']
@@ -276,28 +286,37 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_license_copyright(cls, record):
         """Build license and copyright for video."""
+        logging.debug('Verifying video license and copyright.')
+
         if 'copyright' not in record:
+            logging.debug('Adding default CERN copyright.')
             record['copyright'] = {
                 'holder': 'CERN',
                 'year': str(record.created.year),
                 'url': 'http://copyright.web.cern.ch',
             }
-        if record['copyright']['holder'] == 'CERN':
+        if record['copyright']['holder'] == 'CERN' and not record[
+                'copyright'].get('url') == 'http://copyright.web.cern.ch':
             record['copyright']['url'] = 'http://copyright.web.cern.ch'
             # video license
-            if 'license' not in record:
-                record['license'] = []
-            without_general_license = all(
-                [bool(l.get('material')) for l in record.get('license', [])])
-            if record['license'] == [] or without_general_license:
-                record['license'].append({
-                    'license': 'CERN',
-                    'url': 'http://copyright.web.cern.ch',
-                })
+
+        if 'license' not in record:
+            record['license'] = []
+        without_general_license = all(
+            [bool(l.get('material')) for l in record.get('license', [])])
+        if record['license'] == [] or without_general_license:
+            logging.debug('Adding default license.')
+            holder = record['copyright']['holder']
+            record['license'].append({
+                'license': 'CERN' if holder == 'CERN' else 'unknown',
+                'url': 'http://copyright.web.cern.ch'
+                if holder == 'CERN' else '#',
+            })
 
     @classmethod
     def _resolve_schema(cls, deposit, record):
         """Build bucket."""
+        logging.debug('Setting correct schema.')
         if isinstance(record['$schema'], dict):
             record['$schema'] = record['$schema']['$ref']
         if Video.get_record_schema() == record['$schema']:
@@ -309,14 +328,17 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_bucket(cls, deposit, record):
         """Build bucket."""
+        logging.debug('Creating new buckets, record and deposit.')
         bucket = Bucket.create(location=Location.get_by_name('videos'))
         deposit['_buckets'] = {'deposit': str(bucket.id)}
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         record['_buckets'] = deepcopy(deposit['_buckets'])
+        db.session.commit()
 
     @classmethod
     def _resolve_deposit(cls, deposit, record):
         """Build _deposit."""
+        logging.debug('Creating new deposit.')
         record_pid = PersistentIdentifier.query.filter_by(
             object_type='rec', object_uuid=record.id, pid_type='recid').one()
         deposit_pid = deposit_minter(record_uuid=deposit.id, data=deposit)
@@ -339,6 +361,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_files(cls, deposit, record):
         """Create files."""
+        logging.info('Moving files from DFS.')
         # build deposit files
         bucket = as_bucket(deposit['_buckets']['deposit'])
         # build objects/tags from marc21 metadata
@@ -388,6 +411,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_smil(cls, record):
         """Build smil file."""
+        logging.debug('Generating smil file.')
         bucket = cls._get_bucket(record=record)
         was_locked = bucket.locked
         bucket.locked = False
@@ -439,10 +463,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_file(cls, deposit, bucket, file_):
         """Resolve file."""
+        def progress_callback(size, total):
+            logging.debug('Moving file {0} of {1}'.format(total, size))
+
         # create object
         stream = cls._get_migration_file_stream(file_=file_)
         obj = ObjectVersion.create(
-            bucket=bucket, key=file_['key'], stream=stream)
+            bucket=bucket, key=file_['key'], stream=stream,
+            progress_callback=progress_callback)
         # resolve preset info
         tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
         if tags_to_guess_preset:
@@ -459,6 +487,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _update_timestamp(cls, deposit):
         """Update timestamp from percentage to seconds."""
+        logging.debug('Set correct timestamp for frames.')
         duration = float(deposit['_cds']['extracted_metadata']['duration'])
         bucket = CDSRecordDumpLoader._get_bucket(record=deposit)
         for obj in ObjectVersion.get_by_bucket(bucket=bucket):
@@ -469,6 +498,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_preset(cls, obj, clues):
         """Resolve preset."""
+        logging.debug('Set correct preset names.')
+
         def guess_preset(preset_name, clues):
             presets = current_app.config['CDS_SORENSON_PRESETS']
             for ratio, subpreset in presets.items():
@@ -494,6 +525,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_user_id(cls, email=None):
         """Resolve the owner id."""
+        logging.debug('Set correct user id from email {0}.'.format(email))
         if not email:
             return -1
         return User.query.filter_by(email=email.lower()).one().id
