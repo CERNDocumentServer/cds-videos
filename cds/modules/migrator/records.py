@@ -45,16 +45,14 @@ from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
 from invenio_jsonschemas import current_jsonschemas
 from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_pidstore.resolver import Resolver
 from invenio_records.api import Record
 from invenio_records_files.models import RecordsBuckets
 
-from ..deposit.api import Project, Video, record_build_url
+from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
-from ..records.resolver import record_resolver
 from ..records.serializers.smil import generate_smil_file
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractMetadataTask
@@ -152,7 +150,7 @@ class CDSRecordDump(RecordDump):
         it = [self.data['record'][0]] if self.latest_only \
             else self.data['record']
 
-        for i in it:
+        for i in it[:-1]:
             self.revisions.append(self._prepare_intermediate_revision(i))
 
         self.revisions.append(self._prepare_final_revision(it[-1]))
@@ -177,8 +175,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._resolve_license_copyright(record=record)
             cls._resolve_description(record=record)
             _doi_minter(record_uuid=record.id, data=record)
-            cls._resolve_project(record)
-            cls._resolve_contributors(video=record)
+            cls._resolve_project_id(video=record)
         cls._resolve_cds(record=record)
 
         record.commit()
@@ -186,12 +183,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
-        deposit = cls._create_deposit(record=record)
-        if Video._schema in deposit['$schema']:
-            cls._resolve_project_deposit(deposit)
+        cls._create_deposit(record=record)
 
         db.session.commit()
         return record
+
+    @classmethod
+    def _resolve_project_id(cls, video):
+        """Resolve project id."""
+        video['_project_id'] = record_unbuild_url(video['_project_id'])
 
     @classmethod
     def _create_deposit(cls, record):
@@ -209,15 +209,6 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         record.commit()
         #  db.session.commit()
         return deposit
-
-    @classmethod
-    def _resolve_contributors(cls, video):
-        """Resolve contributors or inherit from project."""
-        if 'contributors' not in video:
-            logging.debug(
-                'Video without contributors, fetching them from project')
-            _, project = record_resolver.resolve(video['_project_id'])
-            video['contributors'] = deepcopy(project['contributors'])
 
     @classmethod
     def _run_extracted_metadata(cls, master, retry=10):
@@ -453,12 +444,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                     obj, 'master', master_video['version_id'])
 
     @classmethod
-    def _get_migration_file_stream(cls, file_):
+    def _get_migration_file_stream_and_size(cls, file_):
         """Build the full file path."""
         return open(os.path.join(
             current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
             file_['filepath']), 'rb'
-        )
+        ), os.path.getsize(file_['filepath'])
 
     @classmethod
     def _resolve_file(cls, deposit, bucket, file_):
@@ -467,10 +458,10 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             logging.debug('Moving file {0} of {1}'.format(total, size))
 
         # create object
-        stream = cls._get_migration_file_stream(file_=file_)
+        stream, size = cls._get_migration_file_stream_and_size(file_=file_)
         obj = ObjectVersion.create(
             bucket=bucket, key=file_['key'], stream=stream,
-            progress_callback=progress_callback)
+            size=size, progress_callback=progress_callback)
         # resolve preset info
         tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
         if tags_to_guess_preset:
@@ -530,69 +521,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             return -1
         return User.query.filter_by(email=email.lower()).one().id
 
-    @classmethod
-    def _resolve_project(cls, video):
-        """Resolve project on video."""
-        # get record video pid/rn
-        video_pid = PersistentIdentifier.query.filter_by(
-            pid_type='recid', object_uuid=video.id, object_type='rec').one()
-        video_rn = PersistentIdentifier.query.filter_by(
-            pid_type='rn', object_uuid=video.id, object_type='rec').one()
-        project_rn = video.get('_project_id')
-        if project_rn:
-            pid_rn = PersistentIdentifier.query.filter_by(
-                pid_type='rn', pid_value=project_rn).first()
-            if pid_rn:
-                # resolve project pid from report number
-                pid_rec = PersistentIdentifier.query.filter_by(
-                    pid_type='recid', object_uuid=pid_rn.object_uuid,
-                    object_type='rec').one()
-                video['_project_id'] = pid_rec.pid_value
-                project = Record.get_record(pid_rec.object_uuid)
-                # update video reference inside project video list
-                for index, ref in enumerate(project.get('videos', [])):
-                    if ref['$ref'] == video_rn.pid_value:
-                        project['videos'][index][
-                            '$ref'] = record_build_url(video_pid.pid_value)
-                project.commit()
-
-    @classmethod
-    def _resolve_project_id(cls, video):
-        """Resolve project depid."""
-        project_id = video['_project_id']
-        # get the record project
-        _, record = record_resolver.resolve(project_id)
-        return record['_deposit']['id']
-
-    @classmethod
-    def _resolve_project_deposit(cls, video):
-        """Resolve project deposit from the video."""
-        video = Video(video)
-        # get deposit project (as record)
-        project_depid = cls._resolve_project_id(video=video)
-        _, project = Resolver(
-            pid_type='depid', object_type='rec', getter=Record.get_record
-        ).resolve(project_depid)
-        # get record video pid/rn
-        video_pid, record = video.fetch_published()
-        video_rn = PersistentIdentifier.query.filter_by(
-            pid_type='rn', object_uuid=record.id, object_type='rec').one()
-        # update video reference inside project video list
-        for index, ref in enumerate(project.get('videos', [])):
-            if ref['$ref'] == video_rn.pid_value:
-                project['videos'][index][
-                    '$ref'] = record_build_url(video_pid.pid_value)
-        project.commit()
-
 
 class DryRunCDSRecordDumpLoader(CDSRecordDumpLoader):
     """Dry run."""
 
     @classmethod
-    def _get_migration_file_stream(cls, file_):
+    def _get_migration_file_stream_and_size(cls, file_):
         """Build the full file path."""
         from six import BytesIO
-        return BytesIO(b'hello')
+        return BytesIO(b'hello'), 5
 
     @classmethod
     def _run_extracted_metadata(cls, master):

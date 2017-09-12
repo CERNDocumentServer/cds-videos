@@ -142,6 +142,7 @@ install_requires = [
     'celery<4.0,>=3.1',                 # FIXME: invenio-indexer
     'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
     'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
+    'simplekv==0.10',                   # FIXME: see inspire-next/2744
 ]
 
 packages = find_packages()
