@@ -29,7 +29,7 @@ import os
 import uuid
 from os.path import splitext
 
-from flask import current_app, url_for, request
+from flask import current_app, url_for
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
@@ -66,12 +66,12 @@ def dump_object(obj):
 
 def _build_file_links(obj):
     """Return a dict with file links."""
-
     return dict(self=(
             u'{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}'
                 .format(
-                    scheme=request.scheme,
-                    host=request.host.rstrip('/'),
+                    # TODO: JSONSchema host is not the best solution here.
+                    scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
+                    host=current_app.config['JSONSCHEMAS_HOST'],
                     api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
                     bucket=obj.bucket_id,
                     key=obj.key,
