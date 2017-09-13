@@ -157,7 +157,9 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   function authorFromUser(query) {
-    var re = /^(\w*,\s\w*):\s(\w*)$/
+    // Match Lastname, Firstname:Affiliation
+    // i.e. Uni, Corn: Pink Clouds
+    var re = /^(\w*,\w*):(\w*)$/
     var [fullName, affiliation] = query.split(re).splice(1, 2)
     if (!(fullName && affiliation)) {
       return null;
