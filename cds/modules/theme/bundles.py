@@ -65,12 +65,13 @@ js = NpmBundle(
         'node_modules/lodash/lodash.js',
         'node_modules/d3/d3.js',
         'node_modules/angular-loading-bar/build/loading-bar.js',
-        'js/cds/module.js',
         'node_modules/invenio-search-js/dist/invenio-search-js.js',
         'node_modules/angular-sanitize/angular-sanitize.js',
         'node_modules/angular-mass-autocomplete/massautocomplete.js',
         'node_modules/angular-local-storage/dist/angular-local-storage.js',
         'node_modules/angularjs-toaster/toaster.js',
+        'node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js',
+        'js/cds/module.js',
         'js/main.js',
         filters='jsmin',
     ),
@@ -92,6 +93,7 @@ js = NpmBundle(
         'angular-mass-autocomplete': '~0.5.0',
         'angular-local-storage': '~0.5.2',
         'angularjs-toaster': '~2.1.0',
+        "angular-ui-bootstrap": "~2.5.0",
     }
 )
 """Default JavaScript bundle."""

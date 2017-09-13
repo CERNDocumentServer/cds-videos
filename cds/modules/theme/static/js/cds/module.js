@@ -21,7 +21,11 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-var app = angular.module('cds', ['ngclipboard']);
+var app = angular.module('cds', [
+  'ngclipboard',
+  'ui.bootstrap.dropdown',
+]);
+
 app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
   return function(text, reportNumber, external) {
     var _url = '/video/' + reportNumber;
