@@ -12,6 +12,7 @@
     </div>
   </div>
 </div>
+
 <!-- Alerts -->
 <!-- Fill metadata suggestion -->
 <div class="alert alert-warning alert-dismissible" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
@@ -163,11 +164,11 @@
                     Access rights
                   </a>
                 </li>
-                <li ng-init="openDropdown=false" role="presentation" ng-class="{'open': openDropdown}" class="dropdown pull-right">
-                  <a class="dropdown-toggle" title="More options" data-toggle="dropdown" ng-click="openDropdown=!openDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <li role="presentation" class="dropdown pull-right" uib-dropdown is-open="status.isopen">
+                  <a id="inherit-button" type="button" class="btn btn-link" uib-dropdown-toggle ng-disabled="disabled">
                     <i class="fa fa-cog"></i>
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="inherit-button">
                     <li><a ng-click="forceInherit = true">Inherit metadata from the project</a></li>
                     <li><a ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(['contributors'])">Inherit contributors from the project</a></li>
                   </ul>
