@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Webhooks utilities."""
+"""XrootD utilities."""
 
 from flask import current_app
 
@@ -42,3 +42,26 @@ def replace_xrootd(path):
             current_app.config['VIDEOS_LOCATION'],
         )
     return path
+
+
+def file_opener_xrootd(path):
+    """File opener from XRootD path.
+
+    :param path: The file path for the opener.
+    :returns: an open file
+
+    .. note::
+
+        This will return an open file via ``XRootDPyFS`` if XRootD is
+        enabled.
+    """
+    if current_app.config['XROOTD_ENABLED']:
+        from xrootdpyfs import XRootDPyFS
+        # Get the filename
+        _filename = path.split('/')[-1]
+        # Remove filename from the path
+        path.replace(_filename, '')
+        fs = XRootDPyFS(path)
+        return fs.open('data')
+    # No XrootD return a normal file
+    return open(path, 'r')
