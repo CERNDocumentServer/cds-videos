@@ -57,10 +57,10 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from .utils import replace_xrootd
 
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
+from ..xrootd.utils import replace_xrootd
 
 logger = get_task_logger(__name__)
 
