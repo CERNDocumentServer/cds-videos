@@ -446,10 +446,10 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _get_migration_file_stream_and_size(cls, file_):
         """Build the full file path."""
-        return open(os.path.join(
+        path = os.path.join(
             current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
-            file_['filepath']), 'rb'
-        ), os.path.getsize(file_['filepath'])
+            file_['filepath'])
+        return open(path, 'rb'), os.path.getsize(path)
 
     @classmethod
     def _resolve_file(cls, deposit, bucket, file_):
