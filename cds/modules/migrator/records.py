@@ -228,16 +228,19 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             if retry < 1:
                 raise
             retry = retry - 1
+            logging.debug(
+                'Video not ready to run FFMPEG try {0} times.'.format(retry))
             sleep(10 - retry)
-            cls._run_extracted_metadata(master, retry=retry)
+            return cls._run_extracted_metadata(master, retry=retry)
 
     @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
         """Extract metadata from the video."""
-        logging.debug('Running metadata extraction.')
         master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
         master = as_object_version(master_video['version_id'])
         extracted_metadata = cls._run_extracted_metadata(master=master)
+        logging.debug(
+            'Adding extracted metadata {0}'.format(extracted_metadata))
         deposit['_cds']['extracted_metadata'] = extracted_metadata
         record['_cds']['extracted_metadata'] = extracted_metadata
 
