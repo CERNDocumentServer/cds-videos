@@ -43,7 +43,7 @@ Are you sure you want publish the video?<br>
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
-    ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+    ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
     class="btn btn-xs btn-default "
     ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
   Edit
