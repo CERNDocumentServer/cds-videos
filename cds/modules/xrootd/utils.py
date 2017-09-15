@@ -60,7 +60,7 @@ def file_opener_xrootd(path):
         # Get the filename
         _filename = path.split('/')[-1]
         # Remove filename from the path
-        path.replace(_filename, '')
+        path = path.replace(_filename, '')
         fs = XRootDPyFS(path)
         return fs.open('data')
     # No XrootD return a normal file
