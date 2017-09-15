@@ -271,6 +271,18 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         var categories = that._categories;
         that.types.resolve({ data: [].concat.apply([], categories.map(
           function (category) {
+            // Legacy and Migration ``type`` work around
+            // Check if it has current ``type`` and if it's not part of the types
+            // this means it is a legacy type and we should include it into
+            // the list just for preservation proposes. Please note that
+            // this value will not be visible again if you change the ``type``
+            // and refresh the page.
+            if (that.cdsDepositCtrl.record.type) {
+              var index = category.metadata.types.indexOf(that.cdsDepositCtrl.record.type);
+              if (index === -1) {
+                category.metadata.types.push(that.cdsDepositCtrl.record.type);
+              }
+            }
             return category.metadata.types.map(
               function (type) {
                 return {
