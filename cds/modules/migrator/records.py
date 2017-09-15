@@ -54,6 +54,7 @@ from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
 from ..records.serializers.smil import generate_smil_file
+from ..records.symlinks import SymlinksCreator
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractMetadataTask
 from .utils import process_fireroles, update_access
@@ -184,9 +185,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
         cls._create_deposit(record=record)
+        cls._create_symlinks(record=record)
 
         db.session.commit()
         return record
+
+    @classmethod
+    def _create_symlinks(cls, record):
+        """Create symlinks."""
+        SymlinksCreator().create(prev_record=record, new_record=record)
 
     @classmethod
     def _resolve_project_id(cls, video):
