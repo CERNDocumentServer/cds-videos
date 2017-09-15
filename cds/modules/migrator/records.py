@@ -29,6 +29,9 @@ from __future__ import absolute_import, print_function
 
 import logging
 import os
+import shutil
+import tempfile
+
 from copy import deepcopy
 from time import sleep
 
@@ -41,13 +44,14 @@ from invenio_db import db
 from invenio_deposit.minters import deposit_minter
 from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
                                        ObjectVersionTag, as_bucket,
-                                       as_object_version)
+                                       FileInstance, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
 from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.api import Record
 from invenio_records_files.models import RecordsBuckets
 
+from .utils import process_fireroles, update_access
 from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
@@ -56,8 +60,9 @@ from ..records.minters import _doi_minter
 from ..records.serializers.smil import generate_smil_file
 from ..records.symlinks import SymlinksCreator
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import ExtractMetadataTask
-from .utils import process_fireroles, update_access
+from ..webhooks.tasks import ExtractMetadataTask, ExtractFramesTask
+from ..xrootd.utils import replace_xrootd
+
 
 logger = logging.getLogger('cds-record-migration')
 
@@ -184,15 +189,41 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
-        cls._create_deposit(record=record)
+        record, deposit = cls._create_deposit(record=record)
         cls._create_symlinks(record=record)
+        if Video.get_record_schema() == record['$schema']:
+            cls._create_gif(video=record)
+            cls._create_gif(video=deposit)
 
+        # commit!
+        deposit.commit()
+        record.commit()
         db.session.commit()
         return record
 
     @classmethod
+    def _create_gif(cls, video):
+        """Create GIF."""
+        logging.debug('Create gif for {0}'.format(str(video.id)))
+        # get master
+        master_video = CDSVideosFilesIterator.get_master_video_file(video)
+        # get deposit bucket
+        bucket = cls._get_bucket(record=video)
+        # get frames
+        frames = [replace_xrootd(FileInstance.get(f['file_id']).uri)
+                  for f in CDSVideosFilesIterator.get_video_frames(
+            master_file=master_video)]
+        # create GIF
+        output_folder = tempfile.mkdtemp()
+        ExtractFramesTask._create_gif(bucket=bucket, frames=frames,
+                                      output_dir=output_folder,
+                                      master_id=master_video['version_id'])
+        shutil.rmtree(output_folder)
+
+    @classmethod
     def _create_symlinks(cls, record):
         """Create symlinks."""
+        logging.debug('Create symlinks')
         SymlinksCreator().create(prev_record=record, new_record=record)
 
     @classmethod
@@ -203,6 +234,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _create_deposit(cls, record):
         """Create a deposit from the record."""
+        logging.debug('Create deposit')
         data = deepcopy(record)
         cls._resolve_schema(deposit=data, record=record)
         deposit = Record.create(data, validator=PartialDraft4Validator)
@@ -211,11 +243,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         cls._resolve_files(deposit=deposit, record=record)
         # generate files list
         cls._resolve_dumps(record=record)
-        # commit!
-        deposit.commit()
-        record.commit()
         #  db.session.commit()
-        return deposit
+        return record, deposit
 
     @classmethod
     def _run_extracted_metadata(cls, master, retry=10):

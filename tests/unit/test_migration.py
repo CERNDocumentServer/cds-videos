@@ -50,8 +50,9 @@ from cds.modules.records.symlinks import SymlinksCreator
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
-from cds.modules.records.api import dump_object, CDSVideosFilesIterator
-from cds.modules.webhooks.tasks import ExtractMetadataTask
+from cds.modules.records.api import dump_object, CDSVideosFilesIterator, \
+    CDSRecord
+from cds.modules.webhooks.tasks import ExtractMetadataTask, ExtractFramesTask
 from cds.modules.migrator.cli import \
     sequence_generator as cli_sequence_generator
 
@@ -149,11 +150,32 @@ def test_migrate_record(api_app, location, datadir, es, users):
                 symlinks_creator._symlinks_location, video, file_['key'])
             assert os.path.lexists(path)
 
+    def check_gif(video, mock_gif):
+        [call1, call2] = mock_gif.mock_calls
+        # check gif record
+        video = CDSRecord(dict(video), video.model)
+        (_, _, args) = call1
+        master_video = CDSVideosFilesIterator.get_master_video_file(video)
+        assert args['master_id'] == master_video['version_id']
+        assert args['bucket'].id == video.files.bucket.id
+        assert len(args['frames']) == 10
+        assert 'output_dir' in args
+        # check gif deposit
+        deposit = deposit_video_resolver(video['_deposit']['id'])
+        (_, _, args) = call2
+        master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
+        assert args['master_id'] == master_video['version_id']
+        assert args['bucket'].id == deposit.files.bucket.id
+        assert len(args['frames']) == 10
+        assert 'output_dir' in args
+
     def load_video(*args, **kwargs):
         path = join(datadir, 'test.mp4')
         return open(path, 'rb'), None  # getsize(path)
 
     with mock.patch.object(DataCiteProvider, 'register'), \
+            mock.patch.object(
+                ExtractFramesTask, '_create_gif') as mock_gif, \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
                 return_value=load_video()):
@@ -166,6 +188,8 @@ def test_migrate_record(api_app, location, datadir, es, users):
     assert '<video src' in storage.open().read().decode('utf-8')
     # check video symlinks
     check_symlinks(video)
+    # check gif
+    check_gif(video, mock_gif)
     # check project
     project = Record.get_record(p_id)
     assert project['videos'] == [
