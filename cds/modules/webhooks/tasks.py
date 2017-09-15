@@ -412,12 +412,13 @@ class ExtractFramesTask(AVCTask):
             os.listdir(output_folder),
             key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
 
-        [self._create_object(bucket=self.object.bucket, key=filename,
-                             stream=open(in_output(filename), 'rb'),
-                             size=os.path.getsize(in_output(filename)),
-                             media_type='image', context_type='frame',
-                             master_id=self.obj_id,
-                             timestamp=start_time + (i + 1) * time_step)
+        [self._create_object(
+            bucket=self.object.bucket, key=filename,
+            stream=file_opener_xrootd(in_output(filename), 'rb'),
+            size=os.path.getsize(in_output(filename)),
+            media_type='image', context_type='frame',
+            master_id=self.obj_id,
+            timestamp=start_time + (i + 1) * time_step)
          for i, filename in enumerate(frames)]
 
         # Generate GIF images
@@ -445,7 +446,7 @@ class ExtractFramesTask(AVCTask):
         gif_fullpath = os.path.join(output_dir, gif_filename)
         gif_image.save(gif_fullpath, save_all=True)
         cls._create_object(bucket=bucket, key=gif_filename,
-                           stream=open(gif_fullpath, 'rb'),
+                           stream=file_opener_xrootd(gif_fullpath, 'rb'),
                            size=os.path.getsize(gif_fullpath),
                            media_type='image', context_type='frames-preview',
                            master_id=master_id)
