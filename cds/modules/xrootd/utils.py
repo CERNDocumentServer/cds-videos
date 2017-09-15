@@ -44,7 +44,7 @@ def replace_xrootd(path):
     return path
 
 
-def file_opener_xrootd(path):
+def file_opener_xrootd(path, *args, **kwargs):
     """File opener from XRootD path.
 
     :param path: The file path for the opener.
@@ -62,6 +62,6 @@ def file_opener_xrootd(path):
         # Remove filename from the path
         path = path.replace(_filename, '')
         fs = XRootDPyFS(path)
-        return fs.open('data')
+        return fs.open('data', *args, **kwargs)
     # No XrootD return a normal file
-    return open(path, 'r')
+    return open(path, *args, **kwargs)
