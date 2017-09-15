@@ -397,19 +397,6 @@ class ExtractFramesTask(AVCTask):
 
             self.update_state(state=STARTED, meta=meta)
 
-        def create_object(key, media_type, context_type, **tags):
-            """Create object versions with given type and tags."""
-            obj = ObjectVersion.create(
-                bucket=self.object.bucket,
-                key=key,
-                stream=open(in_output(key), 'rb'),
-                size=os.path.getsize(in_output(key))
-            )
-            ObjectVersionTag.create(obj, 'master', self.obj_id)
-            ObjectVersionTag.create(obj, 'media_type', media_type)
-            ObjectVersionTag.create(obj, 'context_type', context_type)
-            [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
-
         try:
             # Generate frames
             ff_frames(input_file=replace_xrootd(self.object.file.uri),
@@ -425,28 +412,54 @@ class ExtractFramesTask(AVCTask):
             os.listdir(output_folder),
             key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
 
-        [create_object(filename, 'image', 'frame',
-                       timestamp=start_time + (i + 1) * time_step)
+        [self._create_object(bucket=self.object.bucket, key=filename,
+                             stream=open(in_output(filename), 'rb'),
+                             size=os.path.getsize(in_output(filename)),
+                             media_type='image', context_type='frame',
+                             master_id=self.obj_id,
+                             timestamp=start_time + (i + 1) * time_step)
          for i, filename in enumerate(frames)]
 
         # Generate GIF images
+        self._create_gif(bucket=self.object.bucket, frames=frames,
+                         output_dir=output_folder, master_id=self.obj_id)
+
+        # Cleanup
+        shutil.rmtree(output_folder)
+        db.session.commit()
+
+    @classmethod
+    def _create_gif(cls, bucket, frames, output_dir, master_id):
+        """Generate a gif image."""
         gif_filename = 'frames.gif'
 
         images = []
         for f in frames:
-            image = Image.open(in_output(f))
+            image = Image.open(os.path.join(output_dir, f))
             # Convert image for better quality
             im = image.convert('RGB').convert(
                 'P', palette=Image.ADAPTIVE, colors=255
             )
             images.append(im)
         gif_image = create_gif_from_frames(images)
-        gif_image.save(in_output(gif_filename), save_all=True)
-        create_object(gif_filename, 'image', 'frames-preview')
+        gif_fullpath = os.path.join(output_dir, gif_filename)
+        gif_image.save(gif_fullpath, save_all=True)
+        cls._create_object(bucket=bucket, key=gif_filename,
+                           stream=open(gif_fullpath, 'rb'),
+                           size=os.path.getsize(gif_fullpath),
+                           media_type='image', context_type='frames-preview',
+                           master_id=master_id)
 
-        # Cleanup
-        shutil.rmtree(output_folder)
-        db.session.commit()
+    @classmethod
+    def _create_object(cls, bucket, key, stream, size, media_type,
+                       context_type, master_id, **tags):
+        """Create object versions with given type and tags."""
+        obj = ObjectVersion.create(
+            bucket=bucket, key=key, stream=stream, size=size)
+        ObjectVersionTag.create(obj, 'master', master_id)
+        ObjectVersionTag.create(obj, 'media_type', media_type)
+        ObjectVersionTag.create(obj, 'context_type', context_type)
+        [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
 
 
 class TranscodeVideoTask(AVCTask):
