@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 import mock
+import os
 
 from os.path import join
 
@@ -45,6 +46,7 @@ from invenio_accounts.models import User
 from flask_security import login_user
 
 from cds.cli import cli
+from cds.modules.records.symlinks import SymlinksCreator
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
@@ -102,7 +104,7 @@ def test_migrate_pids(app, location, datadir, users):
 
 def test_migrate_record(api_app, location, datadir, es, users):
     """Test migrate date."""
-    # create the project
+    # [[ migrate the project ]]
     data = load_json(datadir, 'cds_records_demo_1_project.json')
     dump = CDSRecordDump(data=data[0])
     project = CDSRecordDumpLoader.create(dump=dump)
@@ -134,9 +136,18 @@ def test_migrate_record(api_app, location, datadir, es, users):
     assert deposit_project['_deposit']['owners'] == [1]
     assert deposit_project['_files'] == []
 
-    # create the video
+    # [[ migrate the video ]]
     data = load_json(datadir, 'cds_records_demo_1_video.json')
     dump = CDSRecordDump(data=data[0])
+
+    def check_symlinks(video):
+        symlinks_creator = SymlinksCreator()
+        files = list(symlinks_creator._get_list_files(record=video))
+        assert len(files) == 1
+        for file_ in files:
+            path = symlinks_creator._build_link_path(
+                symlinks_creator._symlinks_location, video, file_['key'])
+            assert os.path.lexists(path)
 
     def load_video(*args, **kwargs):
         path = join(datadir, 'test.mp4')
@@ -153,6 +164,8 @@ def test_migrate_record(api_app, location, datadir, es, users):
         key='CERN-MOVIE-2012-193-001.smil', is_head=True).one()
     storage = smil_obj.file.storage()
     assert '<video src' in storage.open().read().decode('utf-8')
+    # check video symlinks
+    check_symlinks(video)
     # check project
     project = Record.get_record(p_id)
     assert project['videos'] == [
