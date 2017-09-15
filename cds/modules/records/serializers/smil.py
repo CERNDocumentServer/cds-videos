@@ -94,7 +94,8 @@ def generate_smil_file(record_id, record, bucket, master_object, **kwargs):
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
         obj = ObjectVersion.create(
-            bucket=bucket, key=smil_key, stream=BytesIO(smil_content.encode()))
+            bucket=bucket, key=smil_key, stream=BytesIO(smil_content.encode()),
+            size=len(smil_content))  # TODO: verify!
         ObjectVersionTag.create(obj, 'master', str(master_object.version_id))
         ObjectVersionTag.create(obj, 'context_type', 'playlist')
         ObjectVersionTag.create(obj, 'media_type', 'text')
