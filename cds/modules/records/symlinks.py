@@ -32,7 +32,9 @@ from invenio_files_rest.models import FileInstance, Location
 
 
 class SymlinksCreator(object):
-    """."""
+    """Create symlinks for files."""
+
+    accepted_context_types = ['master']
 
     def __init__(self):
         """Init."""
@@ -40,15 +42,19 @@ class SymlinksCreator(object):
 
     def create(self, prev_record, new_record):
         """Create the video symlink with a human readable path."""
-        accepted_context_types = ['master']
-
         # delete old symlink for previous record if any
         if prev_record:
-            self._delete_prev_symlink(prev_record, accepted_context_types)
+            self._delete_prev_symlink(prev_record, self.accepted_context_types)
+        # create new symlinks
+        for _file in self._get_list_files(record=new_record):
+            self._create_symlink_for_file(_file, new_record)
 
-        for _file in new_record.get('_files', []):
-            if _file.get('context_type', '') in accepted_context_types:
-                self._create_symlink_for_file(_file, new_record)
+    @classmethod
+    def _get_list_files(cls, record):
+        """Get the list of file that need symlinks."""
+        for _file in record.get('_files', []):
+            if _file.get('context_type', '') in cls.accepted_context_types:
+                yield _file
 
     def _create_symlink_for_file(self, file, record):
         # fetch file location
