@@ -27,6 +27,7 @@ from __future__ import absolute_import
 
 import fnmatch
 import hashlib
+import logging
 import os
 import shutil
 import signal
@@ -57,10 +58,9 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
-from ..xrootd.utils import replace_xrootd
+from ..xrootd.utils import file_opener_xrootd, replace_xrootd
 
 logger = get_task_logger(__name__)
 
@@ -109,6 +109,7 @@ class AVCTask(Task):
         super(AVCTask, self).update_state(task_id, state, meta)
         sse_publish_event(channel=self.sse_channel, type_=self._type,
                           state=state, meta=meta)
+        logging.debug('Update State: {0} {1}'.format(state, meta))
 
     def _meta_exception_envelope(self, exc):
         """Create a envelope for exceptions.
@@ -128,6 +129,7 @@ class AVCTask(Task):
             exception = self._meta_exception_envelope(exc=exc)
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
             self._update_record()
+            logging.debug('Failure: {0}'.format(exception))
 
     def on_success(self, exc, task_id, *args, **kwargs):
         """When end correctly, attach useful information to the state."""
@@ -135,6 +137,7 @@ class AVCTask(Task):
             meta = dict(message=str(exc), payload=self._base_payload)
             self.update_state(task_id=task_id, state=SUCCESS, meta=meta)
             self._update_record()
+            logging.debug('Success: {0}'.format(meta))
 
     def _update_record(self):
         # update record state
@@ -597,7 +600,7 @@ class TranscodeVideoTask(AVCTask):
                 state=STARTED,
                 meta=dict(
                     payload=dict(**job_info),
-                    message='Transcoding {0}'.format(percentage)))
+                    message='{1} {0}'.format(status, percentage)))
 
             time.sleep(sleep_time)
 
@@ -605,7 +608,7 @@ class TranscodeVideoTask(AVCTask):
         self._clean_file_name(output_file)
         with db.session.begin_nested():
             uri = output_file
-            with open(uri, 'rb') as transcoded_file:
+            with file_opener_xrootd(uri, 'rb') as transcoded_file:
                 digest = hashlib.md5(transcoded_file.read()).hexdigest()
             size = os.path.getsize(uri)
             checksum = '{0}:{1}'.format('md5', digest)
