@@ -21,7 +21,6 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """XrootD utilities."""
 
 from flask import current_app
@@ -39,8 +38,7 @@ def replace_xrootd(path):
     if current_app.config['XROOTD_ENABLED']:
         return path.replace(
             current_app.config['VIDEOS_XROOTD_PREFIX'],
-            current_app.config['VIDEOS_LOCATION'],
-        )
+            current_app.config['VIDEOS_LOCATION'], )
     return path
 
 
@@ -55,7 +53,8 @@ def file_opener_xrootd(path, *args, **kwargs):
         This will return an open file via ``XRootDPyFS`` if XRootD is
         enabled.
     """
-    if current_app.config['XROOTD_ENABLED']:
+    if current_app.config['XROOTD_ENABLED'] and \
+            'root://eospublic.cern.ch/' in path:
         from xrootdpyfs import XRootDPyFS
         # Get the filename
         _filename = path.split('/')[-1]
