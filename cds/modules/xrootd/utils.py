@@ -24,6 +24,7 @@
 """XrootD utilities."""
 
 from flask import current_app
+import os
 
 
 def replace_xrootd(path):
@@ -64,3 +65,18 @@ def file_opener_xrootd(path, *args, **kwargs):
         return fs.open('data', *args, **kwargs)
     # No XrootD return a normal file
     return open(path, *args, **kwargs)
+
+
+def file_move_xrootd(src, dst, *args, **kwargs):
+    """Move file."""
+    if current_app.config['XROOTD_ENABLED'] and \
+            'root://eospublic.cern.ch/' in src:
+        from xrootdpyfs import XRootDPyFS
+        # Get the filename
+        _filename_src = src.split('/')[-1]
+        _filename_dst = src.split('/')[-1]
+        # Remove filename from the path
+        path = src.replace(_filename_src, '')
+        fs = XRootDPyFS(path)
+        return fs.move(_filename_src, _filename_dst)
+    return os.rename(src, dst)

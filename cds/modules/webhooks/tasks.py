@@ -60,7 +60,7 @@ from werkzeug.utils import import_string
 
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
-from ..xrootd.utils import file_opener_xrootd, replace_xrootd
+from ..xrootd.utils import file_move_xrootd, file_opener_xrootd, replace_xrootd
 
 logger = get_task_logger(__name__)
 
@@ -497,8 +497,8 @@ class TranscodeVideoTask(AVCTask):
         folder = os.path.dirname(replace_xrootd(uri))
         for file_ in os.listdir(folder):
             if fnmatch.fnmatch(file_, 'data.*'):
-                os.rename(os.path.join(folder, file_),
-                          os.path.join(folder, 'data'))
+                file_move_xrootd(os.path.join(os.path.dirname(uri), file_),
+                                 os.path.join(os.path.dirname(uri), 'data'))
 
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
