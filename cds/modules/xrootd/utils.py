@@ -74,7 +74,7 @@ def file_move_xrootd(src, dst, *args, **kwargs):
         from xrootdpyfs import XRootDPyFS
         # Get the filename
         _filename_src = src.split('/')[-1]
-        _filename_dst = src.split('/')[-1]
+        _filename_dst = dst.split('/')[-1]
         # Remove filename from the path
         path = src.replace(_filename_src, '')
         fs = XRootDPyFS(path)
