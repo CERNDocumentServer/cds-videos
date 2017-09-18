@@ -624,7 +624,7 @@ class TranscodeVideoTask(AVCTask):
             uri = output_file
             with file_opener_xrootd(uri, 'rb') as transcoded_file:
                 digest = hashlib.md5(transcoded_file.read()).hexdigest()
-            size = os.path.getsize(uri)
+            size = os.path.getsize(replace_xrootd(uri))
             checksum = '{0}:{1}'.format('md5', digest)
             file_instance.set_uri(uri, size, checksum)
             as_object_version(
