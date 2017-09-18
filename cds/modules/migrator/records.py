@@ -213,6 +213,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         frames = [replace_xrootd(FileInstance.get(f['file_id']).uri)
                   for f in CDSVideosFilesIterator.get_video_frames(
             master_file=master_video)]
+        logging.debug(
+            'Create gif for {0} using {1}'.format(str(video.id), frames))
         # create GIF
         output_folder = tempfile.mkdtemp()
         ExtractFramesTask._create_gif(bucket=bucket, frames=frames,
@@ -420,12 +422,13 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._resolve_smil(record=record)
             # update tag 'master'
             cls._update_tag_master(record=record)
-            # create gif
-            cls._create_gif(video=record)
-            cls._create_gif(video=deposit)
             # create the full smil file
             cls._resolve_dumps(record=record)
             cls._resolve_smil(record=record)
+            # create gif
+            cls._create_gif(video=record)
+            cls._create_gif(video=deposit)
+            cls._resolve_dumps(record=record)
 
     @classmethod
     def _get_bucket(cls, record):
