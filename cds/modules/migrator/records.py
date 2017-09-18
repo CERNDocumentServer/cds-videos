@@ -191,9 +191,6 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._resolve_datacite_register(record=record)
         record, deposit = cls._create_deposit(record=record)
         cls._create_symlinks(record=record)
-        if Video.get_record_schema() == record['$schema']:
-            cls._create_gif(video=record)
-            cls._create_gif(video=deposit)
 
         # commit!
         deposit.commit()
@@ -209,6 +206,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         master_video = CDSVideosFilesIterator.get_master_video_file(video)
         # get deposit bucket
         bucket = cls._get_bucket(record=video)
+        # open bucket
+        was_locked = bucket.locked
+        bucket.locked = False
         # get frames
         frames = [replace_xrootd(FileInstance.get(f['file_id']).uri)
                   for f in CDSVideosFilesIterator.get_video_frames(
@@ -219,6 +219,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                                       output_dir=output_folder,
                                       master_id=master_video['version_id'])
         shutil.rmtree(output_folder)
+        # lock bucket
+        bucket.locked = was_locked
+        db.session.merge(bucket)
 
     @classmethod
     def _create_symlinks(cls, record):
@@ -417,6 +420,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._resolve_smil(record=record)
             # update tag 'master'
             cls._update_tag_master(record=record)
+            # create gif
+            cls._create_gif(video=record)
+            cls._create_gif(video=deposit)
             # create the full smil file
             cls._resolve_dumps(record=record)
             cls._resolve_smil(record=record)
