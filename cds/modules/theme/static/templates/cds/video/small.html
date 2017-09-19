@@ -7,7 +7,7 @@
           gif-src="{{ record | iiif:true:[330,190] }}"
           img-src="{{ record | iiif:false:[330,190] }}"
           ng-src="{{ record | iiif:false:[330,190] }}"
-          err-src="//unsplash.it/1024/576>?random&blur"
+          err-src="//unsplash.it/1024/576?random&blur"
           image-progressive-loading
         />
         <span ng-hide="!record.metadata.duration" class="cds-video-duration">{{ record.metadata.duration }}</span>

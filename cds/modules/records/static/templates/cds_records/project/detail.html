@@ -1,4 +1,4 @@
-<div ng-init="record=record.metadata.metadata" class="cds-detail-video bg-n mt--20 pb-20">
+<div ng-init="record=record.metadata.metadata" class="cds-detail-video cds-detail-video-wrapper bg-n mt--20 pb-20">
   <!-- Metadata Section -->
   <div class="container">
     <div class="row">
@@ -7,15 +7,24 @@
         <!-- Section -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20">
           <!-- DOI and report number -->
-          <div class="text-right">
-            <ul class="list-inline">
-              <li ng-if="record.metadata.doi">
-                <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
-              </li>
-              <li class="pr-0" ng-if="record.metadata.report_number[0]">
-                <ng-include src="'/static/templates/cds_records/report_number.html'"></ng-include>
-              </li>
-            </ul>
+          <div class="row">
+            <div class="col-md-4">
+              <ul ng-show="record.links.project_edit" class="list-inline">
+                <li>
+                  <a ng-href="{{ ::record.links.project_edit }}" title="Edit the record"><i class="fa fa-edit"></i> edit</a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-8">
+              <ul class="list-inline text-right">
+                <li ng-if="record.metadata.doi">
+                  <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
+                </li>
+                <li class="pr-0" ng-if="record.metadata.report_number[0]">
+                  <ng-include src="'/static/templates/cds_records/report_number.html'"></ng-include>
+                </li>
+              </ul>
+            </div>
           </div>
           <!-- /DOI and report number -->
           <!-- Title -->
@@ -23,9 +32,10 @@
             <hgroup>
               <h1 class="mb-0 f4 fw-n t-b">
                 {{ ::record.metadata.title.title }}
-                <span class="f9" ng-show="!!record.links.project_edit"><a ng-href="{{ ::record.links.project_edit }}">edit</a></span>
               </h1>
-              <h2 class="cds-detail-secondary-title text-muted mt-0 f4 fw-n"><em>{{ ::record.metadata.title.title }}</em></h2>
+              <h2 class="mb-0 mt-0 fw-n t-b f5 text-muted text-italic" ng-if="record.metadata.translations.length > 0">
+                <em>{{ ::record.metadata.translations[0].title.title }}</em>
+              </h2>
             </hgroup>
           </div>
           <!-- /Title -->
@@ -47,7 +57,7 @@
                   <img
                     class="img-responsive"
                     ng-src="{{ video | iiif:gif:[330,190] }}"
-                    error-src="//unsplash.it/1024/576>?random&blur"
+                    err-src="//unsplash.it/1024/576?random&blur"
                     ng-init="gif=false"
                     ng-mouseover="gif=true"
                     ng-mouseleave="gif=false"

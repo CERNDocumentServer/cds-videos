@@ -39,7 +39,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-a[ng-click]{
+a[ng-click], a[ng-href]{
   cursor: pointer;
 }
 
