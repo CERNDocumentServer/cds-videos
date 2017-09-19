@@ -428,8 +428,8 @@ RECORD_VIDEOS_FACETS = {
             'type': {
                 'terms': {'field': 'type.untouched'},
             },
-            'license': {
-                'terms': {'field': 'license.license.untouched'},
+            'language': {
+                'terms': {'field': 'language'},
             },
             'years': {
                 'date_histogram': {
@@ -445,7 +445,7 @@ RECORD_VIDEOS_FACETS = {
         'post_filters': {
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
-            'license': terms_filter('license.license.untouched'),
+            'language': terms_filter('language'),
             'years': range_filter('date', format='yyyy', end_date_math='/y'),
         },
     }
