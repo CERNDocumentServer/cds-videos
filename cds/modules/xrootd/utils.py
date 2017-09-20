@@ -23,8 +23,32 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """XrootD utilities."""
 
-from flask import current_app
+import logging
 import os
+from functools import wraps
+from time import sleep
+
+from flask import current_app
+
+
+def eos_retry(times):
+    """Re-run the function in case DOS Fuse is not ready."""
+
+    def _eos_retry(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except Exception:
+                # EOS probably was not ready, retry few more times
+                if times < 1:
+                    raise
+                logging.debug('EOS not ready for {0} try again {1} times'.
+                              format(f, times))
+                sleep(5)
+                return eos_retry(times - 1)(f)(*args, **kwargs)
+        return wrapper
+    return _eos_retry
 
 
 def replace_xrootd(path):
