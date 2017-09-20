@@ -103,7 +103,12 @@ def test_migrate_pids(app, location, datadir, users):
     assert sorted(pids) == expected
 
 
-def test_migrate_record(api_app, location, datadir, es, users):
+@pytest.mark.parametrize('frames_required', [
+    10,   # normal number of frames
+    100,  # force migrator to rebuild frames
+])
+def test_migrate_record(frames_required, api_app, location, datadir, es,
+                        users):
     """Test migrate date."""
     # [[ migrate the project ]]
     data = load_json(datadir, 'cds_records_demo_1_project.json')
@@ -179,14 +184,26 @@ def test_migrate_record(api_app, location, datadir, es, users):
                 path = join(datadir, 'frame-1.jpg')
         return open(path, 'rb'), os.path.getsize(path)
 
+    def get_frames(*args, **kwargs):
+        # list of frames to mock recreation
+        return [{'key': 'frame-{0}.jpg'.format(index),
+                 'tags': {'context_type': 'frame', 'content_type': 'jpg',
+                          'media_type': 'image'},
+                 'tags_to_transform': {'timestamp': (index * 10) - 5},
+                 'filepath': '/path/to/file'} for index in range(1, 11)]
+
     with mock.patch.object(DataCiteProvider, 'register'), \
+            mock.patch.object(CDSRecordDumpLoader, '_create_frame',
+                              side_effect=get_frames), \
+            mock.patch.object(CDSRecordDumpLoader, '_get_minimum_frames',
+                              return_value=frames_required) as mock_frames, \
             mock.patch.object(
                 ExtractFramesTask, '_create_gif') as mock_gif, \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
                 side_effect=load_video):
         video = CDSRecordDumpLoader.create(dump=dump)
-        # assert mock_datacite.called is True
+        assert mock_frames.called is True
     # check smil file
     smil_obj = ObjectVersion.query.filter_by(
         key='CERN-MOVIE-2012-193-001.smil', is_head=True).one()
