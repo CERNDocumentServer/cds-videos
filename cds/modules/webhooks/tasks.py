@@ -60,7 +60,8 @@ from werkzeug.utils import import_string
 
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
-from ..xrootd.utils import file_move_xrootd, file_opener_xrootd, replace_xrootd
+from ..xrootd.utils import (eos_retry, file_move_xrootd, file_opener_xrootd,
+                            replace_xrootd)
 
 logger = get_task_logger(__name__)
 
@@ -485,6 +486,7 @@ class TranscodeVideoTask(AVCTask):
 
     # FIXME maybe we need to move this part to CDS-Sorenson
     @staticmethod
+    @eos_retry(10)
     def _clean_file_name(uri):
         """Remove file extension from file name.
 
