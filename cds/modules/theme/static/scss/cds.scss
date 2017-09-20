@@ -88,6 +88,11 @@ i.sort-handle {
   border: 1px $bg-gray solid !important
 }
 
+.ng-modal-dialog-content > .ng-scope {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 /////////
 
 // /record/{recid}
