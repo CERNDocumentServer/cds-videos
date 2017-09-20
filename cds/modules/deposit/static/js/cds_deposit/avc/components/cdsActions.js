@@ -87,7 +87,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
       }
 
       function notifyUpdateCompleted(responseList) {
-        responseList.forEach(function (response) {
+        (responseList || []).forEach(function (response) {
             depositsCtrl.broadcastEvent('cds.deposit.project.updated', {
                 'depositId': response.data.metadata._deposit.id,
                 'response': response
