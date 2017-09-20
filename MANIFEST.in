@@ -60,6 +60,7 @@ recursive-include cds *.woff
 recursive-include cds *.xml
 recursive-include docker *
 recursive-include scripts *.sh
+recursive-include tests *.jpg
 recursive-include tests *.json
 recursive-include tests *.mov
 recursive-include tests *.mp4
