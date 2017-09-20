@@ -270,6 +270,7 @@
         "cursor": "move",
         "axis": "y"
       },
+      "firstItemMessage": "General license",
       "add": "Add another licence",
       "inline": true,
       "items": [

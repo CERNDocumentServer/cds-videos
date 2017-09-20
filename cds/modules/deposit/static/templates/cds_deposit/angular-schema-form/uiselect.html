@@ -20,7 +20,7 @@
     ng-disabled="evalExpr(form.readonly)"
     on-select="$$value$$=$item.value; select_model.selected=$item"  class="{{form.options.uiClass}}">
       <ui-select-match placeholder="{{ form.placeholder || form.schema.placeholder || ('placeholders.select' | translate)}}">
-        {{ $$value$$.name }}
+        {{ $$value$$ | parseAutocomplete }}
       </ui-select-match>
       <ui-select-choices
         minimum-input-length="{{ form.minLength || 3 }}"
