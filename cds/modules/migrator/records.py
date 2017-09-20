@@ -46,7 +46,7 @@ from invenio_files_rest.models import (Bucket, FileInstance, Location,
 from invenio_jsonschemas import current_jsonschemas
 from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_records.api import Record
+from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
 
 from ..deposit.api import Project, Video, record_unbuild_url
@@ -196,6 +196,13 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return record
 
     @classmethod
+    def _get_frames(cls, master_video):
+        """Get Frames."""
+        return [replace_xrootd(FileInstance.get(f['file_id']).uri)
+                for f in CDSVideosFilesIterator.get_video_frames(
+                    master_file=master_video)]
+
+    @classmethod
     def _create_gif(cls, video):
         """Create GIF."""
         logging.debug('Create gif for {0}'.format(str(video.id)))
@@ -207,9 +214,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         was_locked = bucket.locked
         bucket.locked = False
         # get frames
-        frames = [replace_xrootd(FileInstance.get(f['file_id']).uri)
-                  for f in CDSVideosFilesIterator.get_video_frames(
-            master_file=master_video)]
+        frames = cls._get_frames(master_video=master_video)
         logging.debug(
             'Create gif for {0} using {1}'.format(str(video.id), frames))
         # create GIF
@@ -387,9 +392,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         logging.info('Moving files from DFS.')
         # build deposit files
         bucket = as_bucket(deposit['_buckets']['deposit'])
+        if Video.get_record_schema() == record['$schema']:
+            # create/update frames
+            cls._create_or_update_frames(record=record)
         # build objects/tags from marc21 metadata
         for file_ in record.get('_files', []):
-            cls._resolve_file(deposit=deposit, bucket=bucket, file_=file_)
+            cls._resolve_file(bucket=bucket, file_=file_)
         # attach the master tag to the proper dependent files
         cls._resolve_master_tag(deposit=deposit)
         if Video.get_record_schema() == record['$schema']:
@@ -417,6 +425,62 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._create_gif(video=record)
             cls._create_gif(video=deposit)
             cls._resolve_dumps(record=record)
+
+    @classmethod
+    def _clean_file(cls, frame):
+        """Clean object and file."""
+        obj = ObjectVersion.query.filter_by(
+            version_id=frame['version_id']).one()
+        ObjectVersion.delete(bucket=obj.bucket, key=obj.key)
+
+    @classmethod
+    def _get_minimum_frames(cls):
+        """Get minimum frames."""
+        return 10
+
+    @classmethod
+    def _get_frames_info(cls, record):
+        """Get frames info."""
+        # get master
+        master_video = CDSVideosFilesIterator.get_master_video_file(record)
+        # get frames
+        return (master_video,
+                [f for f in CDSVideosFilesIterator.get_video_frames(
+                    master_file=master_video)])
+
+    @classmethod
+    def _create_or_update_frames(cls, record):
+        """Check and rebuild frames if needed."""
+        files = record.get('_files', [])
+        filtered = [f for f in files
+                    if f['tags']['media_type'] != 'image'
+                    or f['tags']['context_type'] != 'frame']
+        if len(files) - len(filtered) < cls._get_minimum_frames():
+            # filter frames if there are
+            record['_files'] = filtered
+            # get the master video file path
+            [master_video] = [f for f in record['_files']
+                              if f['tags']['context_type'] == 'master']
+            filepath = cls._get_full_path(master_video['filepath'])
+            # create frames and add them inside the record
+            record['_files'] = record['_files'] + cls._create_frame(
+                uri=filepath)
+
+    @classmethod
+    def _create_frame(cls, uri):
+        """Create a temporary frame to migrate."""
+        # get metadata from the master file
+        metadata = ExtractMetadataTask.get_metadata_tags(
+            uri=replace_xrootd(uri))
+        # get time informations
+        options = ExtractFramesTask._time_position(
+            duration=metadata['duration'])
+        # recreate frames
+        output_folder = tempfile.mkdtemp()
+        return ExtractFramesTask._create_tmp_frames(
+            duration=metadata['duration'], uri=uri,
+            output_dir=output_folder, **options
+        )
 
     @classmethod
     def _get_bucket(cls, record):
@@ -480,15 +544,20 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                     obj, 'master', master_video['version_id'])
 
     @classmethod
+    def _get_full_path(cls, filepath):
+        """Get full path."""
+        return os.path.join(
+            current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
+            filepath)
+
+    @classmethod
     def _get_migration_file_stream_and_size(cls, file_):
         """Build the full file path."""
-        path = os.path.join(
-            current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
-            file_['filepath'])
+        path = cls._get_full_path(filepath=file_['filepath'])
         return open(path, 'rb'), os.path.getsize(path)
 
     @classmethod
-    def _resolve_file(cls, deposit, bucket, file_):
+    def _resolve_file(cls, bucket, file_):
         """Resolve file."""
         def progress_callback(size, total):
             logging.debug('Moving file {0} of {1}'.format(total, size))
