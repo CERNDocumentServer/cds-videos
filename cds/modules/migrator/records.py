@@ -31,9 +31,7 @@ import logging
 import os
 import shutil
 import tempfile
-
 from copy import deepcopy
-from time import sleep
 
 import arrow
 from cds_dojson.marc21 import marc21
@@ -42,16 +40,15 @@ from flask import current_app
 from invenio_accounts.models import User
 from invenio_db import db
 from invenio_deposit.minters import deposit_minter
-from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
-                                       ObjectVersionTag, as_bucket,
-                                       FileInstance, as_object_version)
+from invenio_files_rest.models import (Bucket, FileInstance, Location,
+                                       ObjectVersion, ObjectVersionTag,
+                                       as_bucket, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
 from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records.api import Record
 from invenio_records_files.models import RecordsBuckets
 
-from .utils import process_fireroles, update_access
 from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
@@ -60,9 +57,9 @@ from ..records.minters import _doi_minter
 from ..records.serializers.smil import generate_smil_file
 from ..records.symlinks import SymlinksCreator
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import ExtractMetadataTask, ExtractFramesTask
-from ..xrootd.utils import replace_xrootd
-
+from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
+from ..xrootd.utils import eos_retry, replace_xrootd
+from .utils import process_fireroles, update_access
 
 logger = logging.getLogger('cds-record-migration')
 
@@ -252,20 +249,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return record, deposit
 
     @classmethod
-    def _run_extracted_metadata(cls, master, retry=10):
+    @eos_retry(10)
+    def _run_extracted_metadata(cls, master):
         """Run extract metadata from the video."""
-        try:
-            return ExtractMetadataTask.create_metadata_tags(
-                object_=master, keys=ExtractMetadataTask._all_keys)
-        except Exception:
-            # EOS probably was not ready, retry few more times
-            if retry < 1:
-                raise
-            retry = retry - 1
-            logging.debug(
-                'Video not ready to run FFMPEG try {0} times.'.format(retry))
-            sleep(10 - retry)
-            return cls._run_extracted_metadata(master, retry=retry)
+        return ExtractMetadataTask.create_metadata_tags(
+            object_=master, keys=ExtractMetadataTask._all_keys)
 
     @classmethod
     def _resolve_extracted_metadata(cls, deposit, record):
