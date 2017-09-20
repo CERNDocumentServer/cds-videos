@@ -272,12 +272,17 @@ class ExtractMetadataTask(AVCTask):
                     recid, c))
 
     @classmethod
+    def get_metadata_tags(cls, uri=None):
+        """Get metadata tags."""
+        # Extract video's metadata using `ff_probe`
+        metadata = ff_probe_all(uri)
+        return dict(metadata['format'], **metadata['streams'][0])
+
+    @classmethod
     def create_metadata_tags(cls, object_, keys, uri=None):
         """Extract metadata from the video and create corresponding tags."""
         uri = uri or replace_xrootd(object_.file.uri)
-        # Extract video's metadata using `ff_probe`
-        metadata = ff_probe_all(uri)
-        extracted_dict = dict(metadata['format'], **metadata['streams'][0])
+        extracted_dict = cls.get_metadata_tags(uri=uri)
         # Add technical information to the ObjectVersion as Tags
         [ObjectVersionTag.create_or_update(object_, k, v)
          for k, v in extracted_dict.items()
@@ -373,54 +378,42 @@ class ExtractFramesTask(AVCTask):
             default 10.
         """
         output_folder = tempfile.mkdtemp()
-        in_output = partial(os.path.join, output_folder)
 
         # Remove temporary directory on abrupt execution halts.
         self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
                                                       ignore_errors=True))
 
         # Calculate time positions
-        duration = float(self._base_payload['tags']['duration'])
-        time_step = duration * frames_gap / 100
-        start_time = duration * frames_start / 100
-        end_time = (duration * frames_end / 100) + 0.01
-
-        number_of_frames = ((frames_end - frames_start) / frames_gap) + 1
+        options = self._time_position(
+            duration=self._base_payload['tags']['duration'],
+            frames_start=frames_start, frames_end=frames_end,
+            frames_gap=frames_gap
+        )
 
         def progress_updater(current_frame):
             """Progress reporter."""
+            percentage = current_frame / options['number_of_frames'] * 100
             meta = dict(
                 payload=dict(
-                    size=duration,
-                    percentage=current_frame / number_of_frames * 100, ),
+                    size=options['duration'],
+                    percentage=percentage
+                ),
                 message='Extracting frames [{0} out of {1}]'.format(
-                    current_frame, number_of_frames), )
-
+                    current_frame, options['number_of_frames']),
+            )
             self.update_state(state=STARTED, meta=meta)
 
         try:
-            # Generate frames
-            ff_frames(input_file=replace_xrootd(self.object.file.uri),
-                      start=start_time, end=end_time, step=time_step,
-                      duration=duration, progress_callback=progress_updater,
-                      output=os.path.join(output_folder, 'frame-{:d}.jpg'))
+            frames = self._create_frames(frames=self._create_tmp_frames(
+                uri=self.object.file.uri,
+                output_dir=output_folder,
+                progress_updater=progress_updater, **options
+            ), object_=self.object, **options)
         except Exception as exc:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
+            self.clean(version_id=self.obj_id)
             raise self.retry(max_retries=5, countdown=5, exc=exc)
-
-        frames = sorted(
-            os.listdir(output_folder),
-            key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
-
-        [self._create_object(
-            bucket=self.object.bucket, key=filename,
-            stream=file_opener_xrootd(in_output(filename), 'rb'),
-            size=os.path.getsize(in_output(filename)),
-            media_type='image', context_type='frame',
-            master_id=self.obj_id,
-            timestamp=start_time + (i + 1) * time_step)
-         for i, filename in enumerate(frames)]
 
         # Generate GIF images
         self._create_gif(bucket=self.object.bucket, frames=frames,
@@ -429,6 +422,54 @@ class ExtractFramesTask(AVCTask):
         # Cleanup
         shutil.rmtree(output_folder)
         db.session.commit()
+
+    @classmethod
+    def _time_position(cls, duration, frames_start=5, frames_end=95,
+                       frames_gap=10):
+        """Calculate time positions."""
+        duration = float(duration)
+        time_step = duration * frames_gap / 100
+        start_time = duration * frames_start / 100
+        end_time = (duration * frames_end / 100) + 0.01
+
+        number_of_frames = ((frames_end - frames_start) / frames_gap) + 1
+
+        return {
+            'duration': duration, 'start_time': start_time,
+            'end_time': end_time, 'time_step': time_step,
+            'number_of_frames': number_of_frames,
+        }
+
+    @classmethod
+    def _create_tmp_frames(cls, uri, start_time, end_time, time_step,
+                           duration, output_dir, progress_updater=None,
+                           **kwargs):
+        """Create frames in temporary files."""
+        # Generate frames
+        ff_frames(input_file=replace_xrootd(uri),
+                  start=start_time, end=end_time, step=time_step,
+                  duration=duration, progress_callback=progress_updater,
+                  output=os.path.join(output_dir, 'frame-{:d}.jpg'))
+        # sort them
+        sorted_ff_frames = sorted(
+            os.listdir(output_dir),
+            key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
+        # return full path
+        return [os.path.join(output_dir, path) for path in sorted_ff_frames]
+
+    @classmethod
+    def _create_frames(cls, frames, object_, start_time, time_step, **kwargs):
+        """Create frames."""
+        [cls._create_object(
+            bucket=object_.bucket, key=os.path.basename(filename),
+            stream=file_opener_xrootd(filename, 'rb'),
+            size=os.path.getsize(filename),
+            media_type='image', context_type='frame',
+            master_id=object_.version_id,
+            timestamp=start_time + (i + 1) * time_step)
+         for i, filename in enumerate(frames)]
+
+        return frames
 
     @classmethod
     def _create_gif(cls, bucket, frames, output_dir, master_id):
@@ -458,7 +499,7 @@ class ExtractFramesTask(AVCTask):
         """Create object versions with given type and tags."""
         obj = ObjectVersion.create(
             bucket=bucket, key=key, stream=stream, size=size)
-        ObjectVersionTag.create(obj, 'master', master_id)
+        ObjectVersionTag.create(obj, 'master', str(master_id))
         ObjectVersionTag.create(obj, 'media_type', media_type)
         ObjectVersionTag.create(obj, 'context_type', context_type)
         [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]

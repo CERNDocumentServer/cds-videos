@@ -199,7 +199,8 @@ def ff_frames(input_file, start, end, step, duration, output,
         run_command(cmd, error_class=FrameExtractionExecutionError)
 
         # Report progress
-        progress_callback(i + 1)
+        if progress_callback:
+            progress_callback(i + 1)
 
 
 #
