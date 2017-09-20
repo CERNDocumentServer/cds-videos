@@ -99,7 +99,8 @@
                       </modal-dialog>
                     </span>
                     <span ng-switch-default>
-                      <a target="_blank" ng-href="{{ licenses[0].url }}">{{ licenses[0].license }}</a>
+                      <a ng-show="licenses[0].url" target="_blank" ng-href="{{ licenses[0].url }}">{{ licenses[0].license }}</a>
+                      <span ng-hide="licenses[0].url" >{{ licenses[0].license }}</span>
                     </span>
                   </span>
                 </span>
