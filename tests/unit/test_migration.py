@@ -170,15 +170,21 @@ def test_migrate_record(api_app, location, datadir, es, users):
         assert 'output_dir' in args
 
     def load_video(*args, **kwargs):
-        path = join(datadir, 'test.mp4')
-        return open(path, 'rb'), None  # getsize(path)
+        if kwargs['file_']['tags']['media_type'] == 'video':
+            path = join(datadir, 'test.mp4')
+        elif kwargs['file_']['tags']['media_type'] == 'image':
+            if kwargs['file_']['tags']['context_type'] == 'frame':
+                path = join(datadir, kwargs['file_']['key'])
+            else:
+                path = join(datadir, 'frame-1.jpg')
+        return open(path, 'rb'), os.path.getsize(path)
 
     with mock.patch.object(DataCiteProvider, 'register'), \
             mock.patch.object(
                 ExtractFramesTask, '_create_gif') as mock_gif, \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
-                return_value=load_video()):
+                side_effect=load_video):
         video = CDSRecordDumpLoader.create(dump=dump)
         # assert mock_datacite.called is True
     # check smil file
