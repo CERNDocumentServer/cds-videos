@@ -24,11 +24,12 @@ from __future__ import absolute_import, print_function
 from flask import Blueprint, abort, current_app, request
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
-from invenio_previewer.extensions import default
 from invenio_previewer.proxies import current_previewer
 from invenio_previewer.api import PreviewFile
 
 from .api import CDSPreviewDepositFile, CDSPreviewRecordFile
+from .extensions import default
+
 
 blueprint = Blueprint(
     'cds_previewer',

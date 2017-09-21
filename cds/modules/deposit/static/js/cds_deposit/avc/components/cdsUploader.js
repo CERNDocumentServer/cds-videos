@@ -504,6 +504,13 @@ function cdsUploaderCtrl(
     );
   }
 
+  this.validateSubtitles = function(_file) {
+    // Check if the file has the pattern *_[a-zA-Z]{2}.vtt
+    // i.e. jessica_jones_en.vtt
+    var match = _file.name.match(/_[a-zA-Z]{2}.vtt/g) || [];
+    return match.length === 1;
+  }
+
   this.updateFile = function(key, data, force) {
     var index = this.findFileIndex(that.files, key);
     if (index != -1) {
