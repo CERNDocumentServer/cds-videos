@@ -1,0 +1,21 @@
+{% extends config.THEME_BASE_TEMPLATE %}
+
+{%- block page_header %}{% endblock page_header %}
+{% block page_body %}
+<div class="cds-404 flex-container">
+  <div class="flex-item mt--20 py-20">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="text-center">
+            <p class="f1 t-w">CDS</p>
+            <p class="glitch" data-text=":-(">:-(</p>
+            <p class="cds-not-found-label f3 t-w pa-5 pt-40">{{_('Cannot preview file')}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{%- block page_footer %}{%- endblock page_footer %}
