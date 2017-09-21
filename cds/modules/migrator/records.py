@@ -407,24 +407,24 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             cls._update_timestamp(deposit=deposit)
         # build a partial files dump
         cls._resolve_dumps(record=deposit)
+        if Video.get_record_schema() == record['$schema']:
+            # create gif
+            cls._create_gif(video=deposit)
+            cls._resolve_dumps(record=deposit)
         # snapshot them to record bucket
         snapshot = bucket.snapshot(lock=True)
         db.session.add(RecordsBuckets(
             record_id=record.id, bucket_id=snapshot.id
         ))
+        cls._resolve_dumps(record=record)
         if Video.get_record_schema() == record['$schema']:
-            # create an empty smil file
-            cls._resolve_dumps(record=record)
-            cls._resolve_smil(record=record)
             # update tag 'master'
             cls._update_tag_master(record=record)
+            # create an empty smil file
+            cls._resolve_smil(record=record)
             # create the full smil file
             cls._resolve_dumps(record=record)
             cls._resolve_smil(record=record)
-            # create gif
-            cls._create_gif(video=record)
-            cls._create_gif(video=deposit)
-            cls._resolve_dumps(record=record)
 
     @classmethod
     def _clean_file(cls, frame):
