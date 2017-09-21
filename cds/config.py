@@ -409,7 +409,7 @@ DEPOSIT_PROJECT_FACETS = {
             },
             'created_by': created_by_me_aggs,
         },
-        'post_filters': {
+        'filters': {
             'status': terms_filter('_deposit.status'),
             'category': terms_filter('category.untouched'),
             'transcode': terms_filter('_cds.state.file_transcode'),
@@ -441,8 +441,6 @@ RECORD_VIDEOS_FACETS = {
         },
         'filters': {
             'keyword': terms_filter('keywords.name'),
-        },
-        'post_filters': {
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
             'license': terms_filter('license.license.untouched'),
