@@ -176,10 +176,6 @@ setup(
             'cds_deposit_js = cds.modules.deposit.bundles:js_deposit',
             'cds_deposit_common_js = '
             'cds.modules.deposit.bundles:js_deposit_common',
-            'cds_previewer_theoplayer_css = '
-            'cds.modules.previewer.bundles:theoplayer_css',
-            'cds_previewer_theoplayer_js = '
-            'cds.modules.previewer.bundles:theoplayer_js',
             'cds_previewer_video_css = '
             'cds.modules.previewer.bundles:video_css',
             'cds_record_js = cds.modules.records.bundles:js',
@@ -252,6 +248,7 @@ setup(
             'cds.modules.previewer.extensions.video:embed_video',
             'cds_deposit_video = '
             'cds.modules.previewer.extensions.video:deposit_video',
+            'cds_default = cds.modules.previewer.extensions.default',
         ],
         'invenio_sse.integrations': [
             'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
