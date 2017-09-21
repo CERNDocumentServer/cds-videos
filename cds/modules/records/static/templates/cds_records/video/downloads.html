@@ -6,18 +6,6 @@
 </div>
 <!-- Subformat -->
 <div class="cds-video-subformats">
-  <div class="row">
-    <div class="col-md-12">
-      <p class="f8 display-block" >
-        Files
-      </p>
-    </div>
-  </div>
-
-  <div ng-hide="(((record | findMaster).subformat | groupDownloadable).download||[]).length > 0" class="text-center">
-    <p class="text-muted">Not available files</p>
-  </div>
-
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).download||[]).length > 0" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <div ng-repeat="(type, subs) in ((record | findMaster).subformat | groupDownloadable).download |  groupBy:'tags.type':'others'">
