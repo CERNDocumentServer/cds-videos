@@ -156,18 +156,11 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
             assert os.path.lexists(path)
 
     def check_gif(video, mock_gif):
-        [call1, call2] = mock_gif.mock_calls
+        (_, _, args) = mock_gif.mock_calls[0]  # called only once for deposit
         # check gif record
         video = CDSRecord(dict(video), video.model)
-        (_, _, args) = call1
-        master_video = CDSVideosFilesIterator.get_master_video_file(video)
-        assert args['master_id'] == master_video['version_id']
-        assert args['bucket'].id == video.files.bucket.id
-        assert len(args['frames']) == 10
-        assert 'output_dir' in args
         # check gif deposit
         deposit = deposit_video_resolver(video['_deposit']['id'])
-        (_, _, args) = call2
         master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
         assert args['master_id'] == master_video['version_id']
         assert args['bucket'].id == deposit.files.bucket.id
