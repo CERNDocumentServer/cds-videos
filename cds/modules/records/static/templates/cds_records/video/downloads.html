@@ -18,7 +18,7 @@
   </div>
   <!-- Master file -->
   <div class="cds-video-master-file mb-20">
-    <a ng-click="dialogShown = true" class="btn btn-block btn-default">Download Master file ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
+    <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
   </div>
 </div>
 <!-- /Subformat -->
@@ -28,7 +28,7 @@
   <div class="row">
     <div class="col-md-12">
       <a class="f8 display-block" ng-click="showAllOtherFiles = !showAllOtherFiles">
-        Other formats
+        Other video formats
         <p class="pull-right">
           <span ng-show="showAllOtherFiles"><i class="fa f5 fa-angle-up"></i></span>
           <span ng-show="!showAllOtherFiles"><i class="fa f5 fa-angle-down"></i></span>
