@@ -1,3 +1,3 @@
-<a class="get-badge" ng-if="record.metadata.report_number[0]" ng-href="{{ ::record.id}}">
+<a ngclipboard uib-tooltip-html="'<b>Click</b> to copy the Report Number.'" data-clipboard-text="{{ record.metadata.report_number[0] }}" class="get-badge" ng-if="record.metadata.report_number[0]" ng-click>
   <img ng-src="/badge/rn/{{ ::record.metadata.report_number[0] }}.svg" alt="{{ ::record.metadata.title.title }}" />
 </a>
