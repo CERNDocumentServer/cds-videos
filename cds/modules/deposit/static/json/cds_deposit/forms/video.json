@@ -112,6 +112,10 @@
           "name":  "Русский"
         },
         {
+          "value":  "silent",
+          "name":  "Silent"
+        },
+        {
           "value":  "sk",
           "name":  "Slovensky"
         },
