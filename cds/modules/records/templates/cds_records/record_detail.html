@@ -58,7 +58,7 @@
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
-        record-views='/api/stats/views/{{record.recid}}'
+        record-views='/api/stats/{{record.recid}}/views'
         media-download-event-url="{{ user_action_media_download_url }}"
     ></cds-record-view>
   </div>
