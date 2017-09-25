@@ -477,22 +477,23 @@ function cdsDepositCtrl(
     // Error message
 
     // Messages Success
-    $scope.$on('cds.deposit.success', function(evt, customMessage) {
+    $scope.$on('cds.deposit.success', function(evt, message) {
       if (evt.currentScope === evt.targetScope) {
         that.alerts = [];
         that.alerts.push({
           message: 'Success!',
           type: 'success'
         });
-        // Push a notification
-        var popTitle = that.record.title ? that.record.title.title : 'Video',
-          popBody = (typeof customMessage === 'undefined') ? 'Success!' : customMessage;
-        toaster.pop({
-          type: 'success',
-          title: popTitle,
-          body: popBody,
-          bodyOutputType: 'trustedHtml'
-        });
+        console.log('cds.deposit.success', message);
+        // Push a notification only if a custom message exists
+        if (message !== undefined) {
+          toaster.pop({
+            type: 'success',
+            title: that.record.title ? that.record.title.title : 'Video',
+            body: message,
+            bodyOutputType: 'trustedHtml'
+          });
+        }
       }
     });
     // Messages Error
@@ -700,11 +701,11 @@ function cdsDepositCtrl(
     that.loading = false;
   };
 
-  this.onSuccessAction = function(response) {
+  this.onSuccessAction = function(response, message) {
     // Post success process
     that.postSuccessProcess(response);
     // Inform the parents
-    $scope.$emit('cds.deposit.success');
+    $scope.$emit('cds.deposit.success', message);
     // Make the form pristine again
     that.setPristine();
   };
@@ -721,10 +722,6 @@ function cdsDepositCtrl(
       if (args.response.status === 200) {
         that.postSuccessProcess(args.response);
         that.setPristine();
-        // show only 1 notification with success, and not per project and videos
-        if (that.master) {
-          $scope.$emit('cds.deposit.success', "Project and Videos updated!");
-        }
       } else {
         that.postErrorProcess(args.response);
         $scope.$emit('cds.deposit.error', response);

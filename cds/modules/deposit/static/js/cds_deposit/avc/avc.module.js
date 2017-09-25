@@ -247,5 +247,6 @@ angular
     'afkl.lazyImage',
     'hl.sticky',
     'duScroll',
-    'toaster'
+    'toaster',
+    'angular-loading-bar',
   ]);
