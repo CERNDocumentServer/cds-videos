@@ -264,7 +264,12 @@ class CDSDeposit(Deposit):
 
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a deposit."""
-        self['_cds']['modified_by'] = int(current_user.get_id())
+        try:
+            self['_cds']['modified_by'] = int(current_user.get_id())
+        except AttributeError:
+                current_app.logger.warning(
+                    'No current user found, keeping previous value for'
+                    ' _cds.modified_by')
         if 'publication_date' not in self:
             now = datetime.datetime.utcnow().date().isoformat()
             self['publication_date'] = now
