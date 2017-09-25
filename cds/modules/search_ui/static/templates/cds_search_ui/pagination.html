@@ -1,6 +1,6 @@
 <ul class="pagination" ng-if="vm.invenioSearchResults.hits.total">
   <li ng-class="paginationHelper.getPrevClass()">
-    <a href="#" ng-click="paginationHelper.changePage(paginationHelper.previous())" aria-label="Previous">
+    <a ng-click="paginationHelper.getPrevClass() != 'disabled' && paginationHelper.changePage(paginationHelper.previous())" aria-label="Previous">
       <span aria-hidden="true">Previous</span>
     </a>
   </li>
@@ -8,7 +8,7 @@
     <a href="#" ng-click="paginationHelper.changePage(page.value)" alt="{{ page.title }}">{{ page.value }}</a>
   </li>
   <li ng-class="paginationHelper.getNextClass()">
-    <a href="#" ng-click="paginationHelper.changePage(paginationHelper.next())" aria-label="Next">
+    <a ng-click="paginationHelper.getNextClass() != 'disabled' && paginationHelper.changePage(paginationHelper.next())" aria-label="Next">
       <span aria-hidden="true">Next</span>
     </a>
   </li>
