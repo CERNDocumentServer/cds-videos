@@ -321,3 +321,13 @@ app.filter('isoToLanguage', function () {
     return languages[code] || code;
   };
 });
+
+// Join array or return the String
+app.filter('joinArray', function () {
+  return function (item) {
+    if (_.isArray(item)) {
+      return item.join(', ');
+    }
+    return item;
+  }
+});
