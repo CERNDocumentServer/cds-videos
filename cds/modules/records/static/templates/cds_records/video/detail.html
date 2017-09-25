@@ -155,19 +155,22 @@
                     </ul>
                   </div>
                 </div>
-                <!-- License -->
-                <!-- Language -->
-                <p class="mb-0" ng-if="record.metadata.language">
-                  <strong>Language: </strong> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language | isoToLanguage }}</a>
-                </p>
-                <!-- Language -->
-                <!-- Project link -->
-                <p class="mt-30">
-                  <a ng-href="{{ record.links.project_html ? record.links.project_html : '/search?q=_project_id:' + record.metadata._project_id }}">
-                    More videos in the project
-                  </a>
-                </p>
-                <!-- Project link -->
+                <div class="mt-30">
+                  <ul class="list-inline">
+                    <li ng-if="record.metadata.language">
+                        <i class="fa fa-globe text-muted"></i> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language | isoToLanguage }}</a>
+                    </li>
+                    <li ng-if="record.metadata.language">
+                      ·
+                    </li>
+                    <li>
+                      <i class="fa fa-list-ul text-muted"></i>
+                      <a ng-href="{{ record.links.project_html ? record.links.project_html : '/search?q=_project_id:' + record.metadata._project_id }}">
+                        More videos in the project
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
             <!-- Related links -->
