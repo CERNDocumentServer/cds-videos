@@ -48,7 +48,7 @@ class StatsResource(MethodView):
 
     @pass_record
     @need_record_permission('read_permission_factory')
-    def get(self, pid, type, record, **kwargs):
+    def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
 
         es = Elasticsearch(CFG_ELASTICSEARCH_SEARCH_HOST)
@@ -56,7 +56,7 @@ class StatsResource(MethodView):
         results = {};
 
         # Get total number of pageviews for a specific CDS record
-        if type == 'views':
+        if stat == 'views':
             query = {
                 "query": {
                     "bool": {
@@ -78,7 +78,7 @@ class StatsResource(MethodView):
             results = es.count(index=ES_INDEX, body=query).get('count', 0)
 
         # Get timestamp-aggregated downloads for specific CDS record
-        elif type == 'downloads':
+        elif stat == 'downloads':
             key_type = 'date'
             query = {
                 "query": {
@@ -120,11 +120,11 @@ class StatsResource(MethodView):
             }
             results = self.transform(
                 es.search(index=ES_INDEX, body=query),
-                type,
+                stat,
                 key_type)
 
         # Get timestamp-aggregated pageviews for specific CDS record
-        elif type == 'pageviews':
+        elif stat == 'pageviews':
             key_type = 'date'
             query = {
                 "query": {
@@ -166,7 +166,7 @@ class StatsResource(MethodView):
             }
             results = self.transform(
                 es.search(index=ES_INDEX, body=query),
-                type,
+                stat,
                 key_type)
 
         return make_response(jsonify(results), 200)
@@ -194,6 +194,6 @@ class StatsResource(MethodView):
 
 blueprint.add_url_rule(
     '<pid(recid, record_class="cds.modules.records.api:CDSRecord"):pid_value>/'
-    '<type>/',
+    '<stat>',
     view_func=StatsResource.as_view('record_stats')
 )
