@@ -36,10 +36,10 @@
               <div class="col-md-10">
                 <ul class="list-inline text-right">
                   <li ng-show="record.metadata|isPublic">
-                    <span class="label label-success">Public</span>
+                    <span uib-tooltip-html="'This record is <b>public</b>.'" class="label label-success">Public</span>
                   </li>
                   <li ng-hide="record.metadata|isPublic">
-                    <span class="label label-warning">Restricted</span>
+                    <span uib-tooltip-html="'This record is <b>restricted</b>.'" class="label label-warning">Restricted</span>
                   </li>
                   <li ng-if="record.metadata.doi">
                     <ng-include src="'/static/templates/cds_records/doi.html'"></ng-include>
@@ -65,14 +65,14 @@
           </div>
           <!-- /Title -->
           <!-- Date & Views -->
-          <hr / />
+          <hr />
           <div class="cds-detail-date cds-detail-video-date mb-30 px-20 my-20 f8">
             <ul class="list-inline mb-0">
-              <li>
+              <li uib-tooltip-html="'Copyright'">
                 <i class="fa fa-copyright text-muted"></i> {{ ::record.metadata.copyright.year }} {{ ::record.metadata.copyright.holder }}
               </li>
-              <li ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material == 'other'">
-                <i class="fa fa-certificate text-muted"></i>
+              <li uib-tooltip-html="'License'" ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material == 'other'">
+                <i  class="fa fa-certificate text-muted"></i>
                 <span ng-if="!licenses[0].license">
                   <a ng-click="noLicense = true">Unknown</a>
                   <modal-dialog show="noLicense" dialog-title="Unknown" width="50%">
@@ -105,13 +105,13 @@
                   </span>
                 </span>
               </li>
-              <li>
+              <li uib-tooltip-html="'Date'">
                 <i class="fa fa-calendar text-muted"></i> {{ ::record.metadata.date }}
               </li>
-              <li>
+              <li uib-tooltip-html="'Duration'">
                 <i class="fa fa-clock-o text-muted"></i> {{ ::record.metadata.duration }}
               </li>
-              <li class="pull-right">
+              <li class="pull-right" uib-tooltip-html="'Views'">
                 <i class="fa fa-eye text-muted"></i> {{ ::recordViews }}
               </li>
             </ul>
