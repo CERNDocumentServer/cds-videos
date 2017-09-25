@@ -30,7 +30,7 @@ import os
 
 from invenio_files_rest.models import FileInstance, Location
 
-from cds.modules.xrootd.utils import replace_xrootd
+from cds.modules.xrootd.utils import replace_xrootd, eos_retry
 
 logger = logging.getLogger("cds-symlink-creator")
 
@@ -44,6 +44,7 @@ class SymlinksCreator(object):
         """Init."""
         self._symlinks_location = self._get_symlinks_location()
 
+    @eos_retry(5)
     def create(self, prev_record, new_record):
         """Create the video symlink with a human readable path."""
         # delete old symlink for previous record if any
