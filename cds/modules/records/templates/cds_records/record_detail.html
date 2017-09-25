@@ -1,5 +1,5 @@
 {%- extends config.RECORDS_UI_BASE_TEMPLATE %}
-{%- set title = '%s | %s'|format(record.title.title, config.THEME_SITENAME) or 'CDS' -%}
+{%- set title = record.title.title -%}
 {%- set type = 'video' if record._project_id else 'project'%}
 {%- block head_meta %}
     {{ super() }}
