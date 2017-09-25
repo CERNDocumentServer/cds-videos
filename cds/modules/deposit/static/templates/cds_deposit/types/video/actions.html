@@ -14,6 +14,9 @@ Are you sure you want publish the video?<br>
   </p>
 </modal-dialog>
 <div class="text-right">
+  <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
+    <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
+  </span> 
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"

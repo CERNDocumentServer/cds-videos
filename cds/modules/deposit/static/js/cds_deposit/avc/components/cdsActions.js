@@ -7,23 +7,34 @@ function cdsActionsCtrl($scope, cdsAPI) {
       var method = _.isArray(actions) ? 'makeMultipleActions' : 'makeSingleAction';
       return that.cdsDepositCtrl[method](actions)
         .then(
-          that.cdsDepositCtrl.onSuccessAction,
+          function(response) {
+            var _check = method === 'makeMultipleActions' ? actions : [actions];
+            var message;
+            if (_check.indexOf('DELETE') > -1) {
+              message = 'Succefully deleted.'
+            } else if (_check.indexOf('PUBLISH') > -1) {
+              message = 'Succefully published.'
+            }
+            that.cdsDepositCtrl.onSuccessAction(response, message);
+          },
           that.cdsDepositCtrl.onErrorAction
         )
         .finally(that.cdsDepositCtrl.postActions);
     };
 
     this.deleteDeposit = function () {
-      that.actionHandler('DELETE').then(function () {
-        var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
-        for (var i in children) {
-          if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
-            children.splice(i, 1);
+      that.actionHandler('DELETE').then(
+        function () {
+          var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
+          for (var i in children) {
+            if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
+              children.splice(i, 1);
+            }
           }
+          delete that.cdsDepositCtrl.cdsDepositsCtrl.overallState[that.cdsDepositCtrl.id];
         }
-        delete that.cdsDepositCtrl.cdsDepositsCtrl.overallState[that.cdsDepositCtrl.id];
-      });
-    };
+      );
+  };
 
     this.saveAllPartial = function () {
       var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,

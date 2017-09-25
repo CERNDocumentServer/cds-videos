@@ -1,4 +1,7 @@
 <div class="text-right">
+  <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
+    <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
+  </span>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isPristine()'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
@@ -6,7 +9,6 @@
     ng-click="$ctrl.saveAllPartial()">
   Save All
   </button>
-
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
@@ -14,7 +16,6 @@
     ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish Project
   </button>
-
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"

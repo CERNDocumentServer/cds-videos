@@ -39,6 +39,7 @@ js_main = NpmBundle(
     'node_modules/angular/angular.js',
     'node_modules/angular-sanitize/angular-sanitize.js',
     'node_modules/lodash/lodash.js',
+    'node_modules/angular-loading-bar/build/loading-bar.js',
     'node_modules/angular-elastic/elastic.js',
     'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
     'node_modules/ngmodal/dist/ng-modal.js',
