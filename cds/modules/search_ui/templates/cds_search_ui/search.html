@@ -1,6 +1,6 @@
 {% extends "cds_theme/page.html" %}
 {%- set suggest_app = false -%}
-{%- set title = '%s | %s'|format(_('Search'), config.THEME_SITENAME) or 'CDS' -%}
+{%- set title = _('Search') -%}
 {%- block css %}
     {{ super() }}
     {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
