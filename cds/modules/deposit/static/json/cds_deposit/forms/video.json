@@ -290,7 +290,8 @@
         {
           "key": "license[].material",
           "placeholder": "Material",
-          "title": "Material"
+          "title": "Material",
+          "condition": "arrayIndex !=0"
         },
         {
           "key": "license[].credit",
