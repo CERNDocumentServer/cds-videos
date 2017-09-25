@@ -97,10 +97,14 @@
                 </a>
               </li>
             </ul>
-            <div class="text-center">
-              <a du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
+            <div class="text-center text-muted">
+              <a ng-if="$ctrl.master.metadata._deposit.status !== 'published'" du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
                 <i class="fa fa-plus"></i> Add videos
               </a>
+              <p class="text-muted" ng-if="$ctrl.master.metadata._deposit.status == 'published'">
+                <hr />
+                <i class="fa fa-info-circle"></i> Click <strong>Edit Project</strong> to add more videos.
+              </p>
             </div>
           </div>
           <toaster-container toaster-options="{'close-html':'<button>Close</button>',  'showCloseButton':true, 'position-class': 'toast-top-right'}"></toaster-container>
