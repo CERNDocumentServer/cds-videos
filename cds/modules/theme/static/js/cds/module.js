@@ -169,7 +169,7 @@ app.filter('iiif', function($filter) {
         ext: showGif ? 'gif' : 'png',
       });
     } catch(error) {
-      return '//unsplash.it/1024/576?random&blur';
+      return '/static/img/not_found.png';
     }
 
   }
