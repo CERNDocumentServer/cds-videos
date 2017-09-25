@@ -1,5 +1,5 @@
 {%- extends "cds_theme/page.html" %}
-{%- set title = '%s | %s'|format( record.get('title', {}).get('title', 'Project'), config.THEME_SITENAME) or 'CDS' -%}
+{%- set title = record.get('title', {}).get('title', 'Project') -%}
 {%- set container_class = 'container-fluid cds-max-fluid-width' -%}
 
 {%- block css %}
