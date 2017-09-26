@@ -312,7 +312,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                 'Record without publication date, adding creation date')
             record['publication_date'] = record.created.replace(
                 tzinfo=None).strftime("%Y-%m-%d")
-        record['date'] = record['publication_date']
+        # Projects only have publication date
+        if Video.get_record_schema() == record['$schema']:
+            record.setdefault('date', record['publication_date'])
 
     @classmethod
     def _resolve_license_copyright(cls, record):
