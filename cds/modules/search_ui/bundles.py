@@ -38,7 +38,7 @@ js = NpmBundle(
     npm={
         'angular-loading-bar': '~0.9.0',
         'd3': '^3.5.17',
-        'invenio-search-js': '~1.2.1',
+        'invenio-search-js': '~1.2.2',
     },
 )
 
