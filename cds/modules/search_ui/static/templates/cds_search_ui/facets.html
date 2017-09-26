@@ -9,11 +9,13 @@
             ng-class="{'cds-facets-item-link-checked': values.indexOf(item.key) > -1}"
             ng-click="handleClick(key, item.key)">
               {{ (key === 'language') ? (item.key | isoToLanguage) : item.key }}
-              <span class="cds-facets-item-link-counter pull-right fw-b"><span ng-show="values.indexOf(item.key) > -1">
-                <i class="fa fa-remove"></i>
-              </span>
-              <span ng-hide="values.indexOf(item.key) > -1">
-                {{item.doc_count }}
+              <span class="cds-facets-item-link-counter pull-right fw-b">
+                <span ng-show="values.indexOf(item.key) > -1">
+                  <i class="fa fa-remove"></i>
+                </span>
+                <span ng-hide="values.indexOf(item.key) > -1">
+                  {{item.doc_count }}
+                </span>
               </span>
           </a>
         </li>
