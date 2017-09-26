@@ -51,11 +51,10 @@ function cdsActionsCtrl($scope, cdsAPI) {
 
         that.cdsDepositCtrl.preActions();
         cdsAPI.chainedActions(videoActions)
-          .then(function success(responseList) {
-            notifyUpdateCompleted(responseList);
-          }, function error(errorList) {
-            notifyUpdateCompleted(errorList);
-          })
+          .then(
+            that.cdsDepositCtrl.onSuccessAction,
+            that.cdsDepositCtrl.onErrorAction
+          )
           .finally(that.cdsDepositCtrl.postActions);
       }
 
@@ -95,15 +94,6 @@ function cdsActionsCtrl($scope, cdsAPI) {
               cleanedProject
             );
           };
-      }
-
-      function notifyUpdateCompleted(responseList) {
-        (responseList || []).forEach(function (response) {
-            depositsCtrl.broadcastEvent('cds.deposit.project.updated', {
-                'depositId': response.data.metadata._deposit.id,
-                'response': response
-              });
-          });
       }
     };
   };

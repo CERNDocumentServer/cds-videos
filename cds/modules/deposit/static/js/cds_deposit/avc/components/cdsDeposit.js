@@ -717,18 +717,6 @@ function cdsDepositCtrl(
     $scope.$emit('cds.deposit.error', response);
   };
 
-  $scope.$on('cds.deposit.project.updated', function(evt, args) {
-    if (args.depositId === that.record._deposit.id) {
-      if (args.response.status === 200) {
-        that.postSuccessProcess(args.response);
-        that.setPristine();
-      } else {
-        that.postErrorProcess(args.response);
-        $scope.$emit('cds.deposit.error', response);
-      }
-    }
-  });
-
   // Form status
   this.isPristine = function() {
     return that.depositFormModels.every(_.property('$pristine'))
