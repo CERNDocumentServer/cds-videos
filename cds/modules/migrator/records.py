@@ -59,7 +59,8 @@ from ..records.symlinks import SymlinksCreator
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
 from ..xrootd.utils import eos_retry, replace_xrootd
-from .utils import process_fireroles, update_access
+from .utils import process_fireroles, update_access, \
+    cern_movie_to_video_pid_fetcher
 
 logger = logging.getLogger('cds-record-migration')
 
@@ -75,7 +76,8 @@ class CDSRecordDump(RecordDump):
                  dojson_model=marc21):
         """Initialize."""
         pid_fetchers = [
-            report_number_fetcher
+            report_number_fetcher,
+            cern_movie_to_video_pid_fetcher,
         ]
         super(self.__class__, self).__init__(data, source_type, latest_only,
                                              pid_fetchers, dojson_model)

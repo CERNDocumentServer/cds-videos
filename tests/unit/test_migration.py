@@ -55,6 +55,7 @@ from cds.modules.records.api import dump_object, CDSVideosFilesIterator, \
 from cds.modules.webhooks.tasks import ExtractMetadataTask, ExtractFramesTask
 from cds.modules.migrator.cli import \
     sequence_generator as cli_sequence_generator
+from cds.modules.migrator.utils import cern_movie_to_video_pid_fetcher
 
 from helpers import load_json
 
@@ -312,6 +313,16 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
                    for form in master['subformat']])
         assert dar == {'16:9'}
 
+    def check_pids(record):
+        """Check pids."""
+        assert record['report_number'][0] == 'CERN-VIDEO-2012-193-001'
+        assert PersistentIdentifier.query.filter_by(
+            pid_value='CERN-VIDEO-2012-193-001').count() == 1
+        assert PersistentIdentifier.query.filter_by(
+            pid_value='CERN-MOVIE-2012-193-001').count() == 1
+
+    db.session.commit()
+
     # check video deposit
     deposit_video_uuid = PersistentIdentifier.query.filter(
         PersistentIdentifier.pid_type == 'depid',
@@ -332,6 +343,7 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     check_buckets(video, deposit_video)
     check_first_level_files(video)
     check_first_level_files(deposit_video)
+    check_pids(video)
 
     # try to edit video
     deposit_video = deposit_video_resolver(deposit_video['_deposit']['id'])
@@ -405,3 +417,31 @@ def test_retry_run_extracted_metadata(app):
             side_effect=Exception):
         with pytest.raises(Exception):
             CDSRecordDumpLoader._run_extracted_metadata(master={}, retry=1)
+
+
+def test_multiple_pid_for_movie():
+    """Check multiple pid for movie and videoclip."""
+    # check video
+    data = {'report_number': ['CERN-VIDEO-2017']}
+    assert cern_movie_to_video_pid_fetcher(
+        None, data
+    ) is None
+    assert data['report_number'] == ['CERN-VIDEO-2017']
+    # check videoclip
+    data = {'report_number': ['CERN-VIDEOCLIP-2017']}
+    assert cern_movie_to_video_pid_fetcher(
+        None, data
+    ).pid_value == 'CERN-VIDEO-2017'
+    assert data['report_number'] == ['CERN-VIDEO-2017']
+    # check movie
+    data = {'report_number': ['CERN-MOVIE-2017']}
+    assert cern_movie_to_video_pid_fetcher(
+        None, data
+    ).pid_value == 'CERN-VIDEO-2017'
+    assert data['report_number'] == ['CERN-VIDEO-2017']
+    # check others
+    data = {'report_number': ['CERN-FOOTAGE-2017']}
+    assert cern_movie_to_video_pid_fetcher(
+        None, data
+    ) is None
+    assert data['report_number'] == ['CERN-FOOTAGE-2017']
