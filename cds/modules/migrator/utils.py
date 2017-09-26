@@ -25,6 +25,9 @@
 
 from flask import current_app
 
+from invenio_pidstore.fetchers import FetchedPID
+from ..records.providers import CDSReportNumberProvider
+
 
 def process_fireroles(fireroles):
     """Extract firerole definitions."""
@@ -75,3 +78,20 @@ def update_access(data, *access):
             current_rules[k] = list(current_x_rules)
 
     data['_access'] = current_rules
+
+
+def cern_movie_to_video_pid_fetcher(record_uuid, data):
+    """Create a parallel pid for CERN movie and videoclip pid."""
+    splitted = str(data['report_number'][0]).split('-')
+    if len(splitted) > 2 and splitted[1] in ['MOVIE', 'VIDEOCLIP']:
+        splitted[1] = 'VIDEO'
+        report_number = '-'.join(splitted)
+
+        # update report number
+        data['report_number'][0] = report_number
+        # and create a new one with the new value
+        return FetchedPID(
+            provider=CDSReportNumberProvider,
+            pid_type='rn',
+            pid_value=report_number,
+        )
