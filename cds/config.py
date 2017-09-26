@@ -529,7 +529,8 @@ FORMATTER_BADGES_ENABLE = True
 # Display a homepage.
 FRONTPAGE_ENDPOINT = 'cds_home.index'
 # Featured query
-FRONTPAGE_FEATURED_QUERY = '/api/records/?featured=1&size=1&sort=mostrecent'
+FRONTPAGE_FEATURED_QUERY = \
+    '/api/records/?q=feature:true&size=1&sort=mostrecent'
 # Recent videos query
 FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent'
 # Queries for the boxes
