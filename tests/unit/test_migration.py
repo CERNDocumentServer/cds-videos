@@ -116,10 +116,8 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     project = CDSRecordDumpLoader.create(dump=dump)
     p_id = project.id
 
-    date = '2016-01-05'
     assert project['$schema'] == Project.get_record_schema()
-    assert project['date'] == date
-    assert project['publication_date'] == date
+    assert project['publication_date'] == '2016-01-05'
     assert 'license' not in project
     assert 'copyright' not in project
     assert project['_cds'] == {
@@ -212,9 +210,8 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
         {'$ref': 'https://cds.cern.ch/api/record/1495143'}
     ]
     assert video['$schema'] == Video.get_record_schema()
-    date = '2017-07-13'
-    assert video['date'] == date
-    assert video['publication_date'] == date
+    assert video['date'] == '2012-11-21'  # metadata data
+    assert video['publication_date'] == '2017-07-13'  # creation date (DB)
     assert video['_project_id'] == '2093596'
     assert video['license'] == [{
         'license': 'CERN',

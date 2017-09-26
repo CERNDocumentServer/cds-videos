@@ -55,7 +55,7 @@ from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
 from ..records.serializers.smil import generate_smil_file
-from ..records.symlinks import SymlinksCreator
+from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
 from ..xrootd.utils import eos_retry, replace_xrootd
@@ -187,12 +187,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_datacite_register(record=record)
         record, deposit = cls._create_deposit(record=record)
-        cls._create_symlinks(record=record)
 
         # commit!
         deposit.commit()
         record.commit()
         db.session.commit()
+        cls._create_symlinks(record=record)
         return record
 
     @classmethod
@@ -230,8 +230,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _create_symlinks(cls, record):
         """Create symlinks."""
-        logging.debug('Create symlinks')
-        SymlinksCreator().create(prev_record=record, new_record=record)
+        logging.debug('Schedule tasks to create symlinks.')
+        # create file symlinks delayed (waiting the commit)
+        create_symlinks.s(
+            previous_record=record, record_uuid=str(record.id)
+        ).apply_async(countdown=90)
 
     @classmethod
     def _resolve_project_id(cls, video):
