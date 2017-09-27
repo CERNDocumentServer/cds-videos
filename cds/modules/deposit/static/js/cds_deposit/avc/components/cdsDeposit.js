@@ -484,7 +484,6 @@ function cdsDepositCtrl(
           message: 'Success!',
           type: 'success'
         });
-        console.log('cds.deposit.success', message);
         // Push a notification only if a custom message exists
         if (message !== undefined) {
           toaster.pop({

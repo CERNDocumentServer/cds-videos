@@ -98,12 +98,11 @@
               </li>
             </ul>
             <div class="text-center text-muted">
-              <a ng-if="$ctrl.master.metadata._deposit.status !== 'published'" du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
+              <a ng-show="$ctrl.master.metadata._deposit.status !== 'published'" du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
                 <i class="fa fa-plus"></i> Add videos
               </a>
-              <p class="text-muted" ng-if="$ctrl.master.metadata._deposit.status == 'published'">
-                <hr />
-                <i class="fa fa-info-circle"></i> Click <strong>Edit Project</strong> to add more videos.
+              <p class="text-muted mt-40" ng-hide="$ctrl.master.metadata._deposit.status !== 'published'">
+                <i class="fa fa-info-circle"></i> <a ng-click="$ctrl.makeAction(['EDIT', 'SAVE_PARTIAL'])">Edit Project</a> to add more videos.
               </p>
             </div>
           </div>
