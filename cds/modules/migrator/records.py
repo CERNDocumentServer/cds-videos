@@ -49,15 +49,18 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
 
-from ..deposit.api import Project, Video, record_unbuild_url
+from ..deposit.api import Project, Video, record_unbuild_url, \
+    deposit_video_resolver
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
+from ..records.resolver import record_resolver
 from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
+from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask, \
+    TranscodeVideoTask
 from ..xrootd.utils import eos_retry, replace_xrootd
 from .utils import process_fireroles, update_access, \
     cern_movie_to_video_pid_fetcher
@@ -194,6 +197,10 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         deposit.commit()
         record.commit()
         db.session.commit()
+
+        if Video.get_record_schema() == record['$schema']:
+            cls._create_missing_subformats(record=record, deposit=deposit)
+
         cls._create_symlinks(record=record)
         return record
 
@@ -221,7 +228,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             'Create gif for {0} using {1}'.format(str(video.id), frames))
         # create GIF
         output_folder = tempfile.mkdtemp()
-        ExtractFramesTask._create_gif(bucket=bucket, frames=frames,
+        ExtractFramesTask._create_gif(bucket=str(bucket.id), frames=frames,
                                       output_dir=output_folder,
                                       master_id=master_video['version_id'])
         shutil.rmtree(output_folder)
@@ -619,6 +626,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             ratio, preset_quality, options = guess_preset(
                 preset_name=preset, clues=myclues)
             if ratio:
+                # copy preset informations
                 mypreset = deepcopy(options)
                 mypreset['display_aspect_ratio'] = ratio
                 mypreset['preset_quality'] = preset_quality
@@ -632,6 +640,48 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if not email:
             return -1
         return User.query.filter_by(email=email.lower()).one().id
+
+    @classmethod
+    def _create_missing_subformats(cls, record, deposit):
+        """Crete missing subformats."""
+        # get master
+        master = CDSVideosFilesIterator.get_master_video_file(deposit)
+        # get the preset info from sorenson
+        ratio = master['tags']['display_aspect_ratio']
+        max_width = int(master['tags']['width'])
+        max_height = int(master['tags']['height'])
+        preset = current_app.config['CDS_SORENSON_PRESETS'][ratio]
+        # get required presets
+        prq = [key for (key, value) in preset.items()
+               if value['width'] < max_width or value['height'] < max_height]
+        # get subformat preset qualities
+        pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        # find missing subformats
+        missing = set(prq) - set(pqs)
+
+        # run tasks for missing
+
+        class TranscodeVideoTaskQuiet(TranscodeVideoTask):
+            """Transcode without index or send sse messages."""
+
+            def on_success(self, *args, **kwargs):
+                # get deposit and record
+                deposit_id = args[3]['deposit_id']
+                video = deposit_video_resolver(deposit_id)
+                rec_video = record_resolver.resolve(video['recid'])[1]
+                # sync deposit --> record
+                video._sync_record_files(record=rec_video)
+                video.commit()
+                rec_video.commit()
+
+            def _update_record(self, *args, **kwargs):
+                pass
+
+        for miss in missing:
+            TranscodeVideoTaskQuiet().s(
+                version_id=master['version_id'], preset_quality=miss,
+                deposit_id=deposit['_deposit']['id']
+            ).apply_async()
 
 
 class DryRunCDSRecordDumpLoader(CDSRecordDumpLoader):

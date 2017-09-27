@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import copy
 import json
+import os
 import random
 import uuid
 from time import sleep
@@ -509,3 +510,26 @@ def get_local_file(bucket, datadir, filename):
     version_id = object_version.version_id
     db.session.commit()
     return version_id
+
+
+def get_frames(*args, **kwargs):
+    """list of frames of a master video."""
+    return [{'key': 'frame-{0}.jpg'.format(index),
+             'tags': {'context_type': 'frame', 'content_type': 'jpg',
+                      'media_type': 'image'},
+             'tags_to_transform': {'timestamp': (index * 10) - 5},
+             'filepath': '/path/to/file'} for index in range(1, 11)]
+
+
+def get_migration_streams(datadir):
+    """Get migration files streams."""
+    def migration_streams(*args, **kwargs):
+        if kwargs['file_']['tags']['media_type'] == 'video':
+            path = join(datadir, 'test.mp4')
+        elif kwargs['file_']['tags']['media_type'] == 'image':
+            if kwargs['file_']['tags']['context_type'] == 'frame':
+                path = join(datadir, kwargs['file_']['key'])
+            else:
+                path = join(datadir, 'frame-1.jpg')
+        return open(path, 'rb'), os.path.getsize(path)
+    return migration_streams
