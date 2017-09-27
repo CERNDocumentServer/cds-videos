@@ -50,14 +50,16 @@ from cds.modules.records.symlinks import SymlinksCreator
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
+from cds.modules.records.resolver import record_resolver
 from cds.modules.records.api import dump_object, CDSVideosFilesIterator, \
     CDSRecord
-from cds.modules.webhooks.tasks import ExtractMetadataTask, ExtractFramesTask
+from cds.modules.webhooks.tasks import ExtractMetadataTask, \
+    ExtractFramesTask, TranscodeVideoTask
 from cds.modules.migrator.cli import \
     sequence_generator as cli_sequence_generator
 from cds.modules.migrator.utils import cern_movie_to_video_pid_fetcher
 
-from helpers import load_json
+from helpers import load_json, get_frames, get_migration_streams
 
 
 @pytest.mark.skip(reason='Wait fix cds-dojson')
@@ -145,6 +147,7 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     # [[ migrate the video ]]
     data = load_json(datadir, 'cds_records_demo_1_video.json')
     dump = CDSRecordDump(data=data[0])
+    db.session.commit()
 
     def check_symlinks(video):
         symlinks_creator = SymlinksCreator()
@@ -156,35 +159,20 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
             assert os.path.lexists(path)
 
     def check_gif(video, mock_gif):
-        (_, _, args) = mock_gif.mock_calls[0]  # called only once for deposit
+        # called only once for deposit
+        (_, _, mock_args) = mock_gif.mock_calls[0]
         # check gif record
         video = CDSRecord(dict(video), video.model)
         # check gif deposit
         deposit = deposit_video_resolver(video['_deposit']['id'])
         master_video = CDSVideosFilesIterator.get_master_video_file(deposit)
-        assert args['master_id'] == master_video['version_id']
-        assert args['bucket'].id == deposit.files.bucket.id
-        assert len(args['frames']) == 10
-        assert 'output_dir' in args
+        assert mock_args['master_id'] == master_video['version_id']
+        assert str(deposit.files.bucket.id) == mock_args['bucket']
+        #  assert mock_args['bucket'].id == deposit.files.bucket.id
+        assert len(mock_args['frames']) == 10
+        assert 'output_dir' in mock_args
 
-    def load_video(*args, **kwargs):
-        if kwargs['file_']['tags']['media_type'] == 'video':
-            path = join(datadir, 'test.mp4')
-        elif kwargs['file_']['tags']['media_type'] == 'image':
-            if kwargs['file_']['tags']['context_type'] == 'frame':
-                path = join(datadir, kwargs['file_']['key'])
-            else:
-                path = join(datadir, 'frame-1.jpg')
-        return open(path, 'rb'), os.path.getsize(path)
-
-    def get_frames(*args, **kwargs):
-        # list of frames to mock recreation
-        return [{'key': 'frame-{0}.jpg'.format(index),
-                 'tags': {'context_type': 'frame', 'content_type': 'jpg',
-                          'media_type': 'image'},
-                 'tags_to_transform': {'timestamp': (index * 10) - 5},
-                 'filepath': '/path/to/file'} for index in range(1, 11)]
-
+    migration_streams = get_migration_streams(datadir=datadir)
     with mock.patch.object(DataCiteProvider, 'register'), \
             mock.patch.object(CDSRecordDumpLoader, '_create_frame',
                               side_effect=get_frames), \
@@ -194,9 +182,11 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
                 ExtractFramesTask, '_create_gif') as mock_gif, \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
-                side_effect=load_video):
+                side_effect=migration_streams):
         video = CDSRecordDumpLoader.create(dump=dump)
         assert mock_frames.called is True
+    db.session.add(video.model)
+    video_id = video.id
     # check smil file
     smil_obj = ObjectVersion.query.filter_by(
         key='CERN-MOVIE-2012-193-001.smil', is_head=True).one()
@@ -329,6 +319,7 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     ).one().object_uuid
     deposit_video = Video.get_record(str(deposit_video_uuid))
     assert Video._schema in deposit_video['$schema']
+    video = Record.get_record(video_id)
     assert video.revision_id == deposit_video[
         '_deposit']['pid']['revision_id']
     assert deposit_video['_deposit']['created_by'] == users[0]
@@ -443,3 +434,41 @@ def test_multiple_pid_for_movie():
         None, data
     ) is None
     assert data['report_number'] == ['CERN-FOOTAGE-2017']
+
+
+def test_subformat_creation_if_missing(api_app, location, datadir, es, users):
+    """Test subformat creation if missing."""
+    # [[ migrate the video ]]
+    migration_streams = get_migration_streams(datadir=datadir)
+    data = load_json(datadir, 'cds_records_demo_1_video.json')
+    dump = CDSRecordDump(data=data[0])
+    with mock.patch.object(DataCiteProvider, 'register'), \
+            mock.patch.object(CDSRecordDumpLoader, '_create_frame',
+                              side_effect=get_frames), \
+            mock.patch.object(ExtractFramesTask, '_create_gif'), \
+            mock.patch.object(
+                CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
+                side_effect=migration_streams):
+        video = CDSRecordDumpLoader.create(dump=dump)
+    db.session.commit()
+
+    with mock.patch.object(TranscodeVideoTask, 'run') as mock_transcode:
+        deposit = deposit_video_resolver(video['_deposit']['id'])
+        deposit_id = deposit.id
+        # simulate the missing of a subformat
+        del deposit['_files'][0]['subformat'][0]
+        assert len(deposit['_files'][0]['subformat']) == 4
+        #  recreate 240p format
+        CDSRecordDumpLoader._create_missing_subformats(
+            record=video, deposit=deposit)
+        db.session.commit()
+        # check subformats
+        deposit = Video.get_record(deposit_id)
+        rec_video = record_resolver.resolve(video['recid'])[1]
+        #  rec_video = record_resolver.resolve(video['recid'])[1]
+        assert len(deposit['_files'][0]['subformat']) == 5
+        assert len(rec_video['_files'][0]['subformat']) == 5
+        # check if transcoding is called properly
+        assert mock_transcode.called is True
+        [(_, call_args)] = mock_transcode.call_args_list
+        assert call_args == {'preset_quality': '240p'}
