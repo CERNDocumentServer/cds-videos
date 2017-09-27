@@ -48,7 +48,8 @@ from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
-                                       ObjectVersionTag, as_object_version)
+                                       ObjectVersionTag, as_object_version,
+                                       as_bucket)
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
@@ -416,7 +417,7 @@ class ExtractFramesTask(AVCTask):
             raise self.retry(max_retries=5, countdown=5, exc=exc)
 
         # Generate GIF images
-        self._create_gif(bucket=self.object.bucket, frames=frames,
+        self._create_gif(bucket=str(self.object.bucket.id), frames=frames,
                          output_dir=output_folder, master_id=self.obj_id)
 
         # Cleanup
@@ -475,6 +476,7 @@ class ExtractFramesTask(AVCTask):
     def _create_gif(cls, bucket, frames, output_dir, master_id):
         """Generate a gif image."""
         gif_filename = 'frames.gif'
+        bucket = as_bucket(bucket)
 
         images = []
         for f in frames:
