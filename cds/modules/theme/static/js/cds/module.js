@@ -103,6 +103,7 @@ app.filter('stripTags', function() {
   }
 });
 
+
 app.filter('toMinutes', function() {
   return function(seconds) {
     try {
@@ -349,5 +350,14 @@ app.filter('joinArray', function () {
       return item.join(', ');
     }
     return item;
+  }
+});
+
+// String duration ``.000``
+app.filter('replace', function () {
+  return function (text, replaceText, replaceWith) {
+    if (text) {
+      return text.replace(replaceText, replaceWith);
+    }
   }
 });
