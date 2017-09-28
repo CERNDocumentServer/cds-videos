@@ -92,6 +92,7 @@ function cdsDepositsConfig(
     'keywords',
     'license',
     'title.title',
+    'translations',
   ]);
 
   taskRepresentationsProvider.setValues({

@@ -504,11 +504,13 @@ function cdsDepositCtrl(
           type: 'danger',
           errors: response.data.errors || []
         });
+        var message = (String(response.status || '').startsWith('5')) ?
+          'Internal Sever Error' : response.data.message
         // Push a notification
         toaster.pop({
           type: 'error',
           title: that.record.title ? that.record.title.title : 'Video',
-          body: response.data.message,
+          body: message,
           bodyOutputType: 'trustedHtml'
         });
       }
