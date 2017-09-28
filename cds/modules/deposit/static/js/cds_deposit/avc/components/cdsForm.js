@@ -105,14 +105,12 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Response handler
     function(data) {
       return data.data['text'][0]['options'].map(function(license) {
-          var value = license['payload'].id;
-          return {
-            text: value,
-            value: {
-              name: value
-            }
-          };
-        });
+        var value = license['payload'].id;
+        return {
+          text: value,
+          value: value
+        };
+      });
     }
   );
 
