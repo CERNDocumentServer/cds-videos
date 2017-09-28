@@ -32,6 +32,7 @@ import os
 import shutil
 import tempfile
 from copy import deepcopy
+from datetime import datetime, timedelta
 
 import arrow
 from cds_dojson.marc21 import marc21
@@ -677,11 +678,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             def _update_record(self, *args, **kwargs):
                 pass
 
+        # execute them at 18h00
+        now = datetime.utcnow()
+        afternoon = now + timedelta(hours=(18 - now.hour))
         for miss in missing:
             TranscodeVideoTaskQuiet().s(
                 version_id=master['version_id'], preset_quality=miss,
                 deposit_id=deposit['_deposit']['id']
-            ).apply_async()
+            ).apply_async(eta=afternoon)
 
 
 class DryRunCDSRecordDumpLoader(CDSRecordDumpLoader):
