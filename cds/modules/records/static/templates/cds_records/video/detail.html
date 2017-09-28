@@ -57,22 +57,32 @@
             <hgroup>
               <h1 class="mb-0 mt-0 f4 fw-n t-b">
                 {{ ::record.metadata.title.title }}
+                <a
+                 uib-tooltip-html="'Title and description are available in more languages, please click to see them all.'"
+                 ng-show="record.metadata.translations.length > 0"
+                 class="f8"
+                 ng-click="showTranslations=true">
+                  <i class="fa fa-info-circle"></i>
+                </a>
               </h1>
-              <h2 class="mb-0 mt-0 fw-n t-b f5 text-muted text-italic" ng-if="record.metadata.translations.length > 0">
-                <em>{{ ::record.metadata.translations[0].title.title }}</em>
-              </h2>
+              <modal-dialog show="showTranslations" dialog-title="Available transations" width="50%">
+                <div ng-repeat="translation in record.metadata.translations">
+                  <strong>{{translation.language | isoToLanguage}}</strong>
+                  <h4>{{translation.title.title}}</h4>
+                  <p>{{translation.description}}</p>
+                </div>
+              </modal-dialog>
             </hgroup>
           </div>
           <!-- /Title -->
           <!-- Date & Views -->
-          <hr />
           <div class="cds-detail-date cds-detail-video-date mb-30 px-20 my-20 f8">
             <ul class="list-inline mb-0">
               <li uib-tooltip-html="'Copyright'">
                 <i class="fa fa-copyright text-muted"></i> {{ ::record.metadata.copyright.year }} {{ ::record.metadata.copyright.holder }}
               </li>
               <li uib-tooltip-html="'License'" ng-repeat="(material, licenses) in record.metadata.license | groupBy:'material':'other'" ng-if="material == 'other'">
-                <i  class="fa fa-certificate text-muted"></i>
+                <i class="fa fa-certificate text-muted"></i>
                 <span ng-if="!licenses[0].license">
                   <a ng-click="noLicense = true">Unknown</a>
                   <modal-dialog show="noLicense" dialog-title="Unknown" width="50%">
@@ -106,24 +116,23 @@
                 </span>
               </li>
               <li uib-tooltip-html="'Date'">
-                <i class="fa fa-calendar text-muted"></i> {{ ::record.metadata.date }}
+                <i class="fa fa-calendar text-muted"></i> {{ ::record.metadata.date | date:'dd MMMM yyyy' }}
               </li>
-              <li uib-tooltip-html="'Duration'">
-                <i class="fa fa-clock-o text-muted"></i> {{ ::record.metadata.duration }}
+              <li uib-tooltip-html="'Video duration'">
+                <i class="fa fa-clock-o text-muted"></i> {{ ::record.metadata.duration | replace:'.000':'' }}
               </li>
-              <li class="pull-right" uib-tooltip-html="'Views'">
-                <i class="fa fa-eye text-muted"></i> {{ ::recordViews }}
+              <li class="pull-right">
+                {{ ::recordViews || 0 }} Views
               </li>
             </ul>
           </div>
+          <hr />
           <!-- Date & Views -->
           <!-- Description -->
           <div ng-init="showFullDescription=false" class="cds-detail-description cds-detail-video-description t-b px-20">
             <p class="mb-30" ng-bind-html="(record.metadata.description | stripTags | trustHtml) || 'No description'"></p>
             <!-- Hidden content -->
-            <div ng-show="showFullDescription">
-
-              <hr />
+            <div class="mt-20" ng-show="showFullDescription">
               <!-- Contributors -->
               <div class="mb-20">
                 <p><strong>Contributors</strong></p>
@@ -156,18 +165,22 @@
                   </div>
                 </div>
                 <!-- License -->
-                <!-- Language -->
-                <p class="mb-0" ng-if="record.metadata.language">
-                  <strong>Language: </strong> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language | isoToLanguage }}</a>
-                </p>
-                <!-- Language -->
-                <!-- Project link -->
-                <p class="mt-30">
-                  <a ng-href="{{ record.links.project_html ? record.links.project_html : '/search?q=_project_id:' + record.metadata._project_id }}">
-                    More videos in the project
-                  </a>
-                </p>
-                <!-- Project link -->
+                <div class="mt-30">
+                 <ul class="list-inline pt-20 f8">
+                   <li uib-tooltip-html="'Video Language'" ng-if="record.metadata.language">
+                      <i class="fa fa-globe text-muted"></i> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language | isoToLanguage }}</a>
+                   </li>
+                   <li ng-if="record.metadata.language">
+                     ·
+                   </li>
+                   <li>
+                     <i class="fa fa-list-ul text-muted"></i>
+                     <a ng-href="{{ record.links.project_html ? record.links.project_html : '/search?q=_project_id:' + record.metadata._project_id }}">
+                       More videos in the project
+                     </a>
+                   </li>
+                 </ul>
+               </div>
               </div>
             </div>
             <!-- Related links -->
