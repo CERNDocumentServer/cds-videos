@@ -167,12 +167,19 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
         assert res.status_code == 200
 
         # try get drupal
+        report_number = u'CERN-MOVIE-2017-1-1'
         file_frame = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
         with mock.patch('cds.modules.records.api.CDSFileObject._link',
                         return_value=file_frame):
             res = client.get(url2, headers=drupal_headers)
+            # test legacy api/mediaexport url
+            legacy_url = u'/mediaexport?id={id}'.format(id=report_number)
+            assert client.get(legacy_url, follow_redirects=False) \
+                .status_code == 301
+            res_legacy = client.get(legacy_url, follow_redirects=True)
 
         assert res.status_code == 200
+        assert res_legacy.status_code == 200
         drupal = json.loads(res.data.decode('utf-8'))
         thumbnail = u'http://cds.cern.ch/api/files/123/frame-1.jpg'
         expected = {
@@ -186,7 +193,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'creation_date': u'2017-03-02',
                         u'directors': u'paperone, pluto',
                         u'entry_date': u'2017-09-25',
-                        u'id': u'CERN-MOVIE-2017-1-1',
+                        u'id': report_number,
                         u'keywords': u'keyword1, keyword2',
                         u'license_body': u'GPLv2',
                         u'license_url': u'http://license.cern.ch',
@@ -202,6 +209,8 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
             ]
         }
         assert expected == drupal
+        drupal_legacy = json.loads(res_legacy.data.decode('utf-8'))
+        assert expected == drupal_legacy
 
         # try get datacite
         res = client.get(url2, headers=datacite_headers)

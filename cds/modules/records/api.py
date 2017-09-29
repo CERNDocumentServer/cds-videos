@@ -72,7 +72,7 @@ def _build_file_links(obj):
                     # TODO: JSONSchema host is not the best solution here.
                     scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
                     host=current_app.config['JSONSCHEMAS_HOST'],
-                    api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
+                    api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
                     bucket=obj.bucket_id,
                     key=obj.key,
                     version_id=obj.version_id,
@@ -101,8 +101,13 @@ class CDSFileObject(FileObject):
 
     @classmethod
     def _link(cls, bucket_id, key, _external=True):
-        return url_for('invenio_files_rest.object_api',
-                       bucket_id=bucket_id, key=key, _external=_external)
+        return u'{scheme}://{host}/{api}/{bucket_id}/{key}'.format(
+                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
+                host=current_app.config['JSONSCHEMAS_HOST'],
+                api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
+                bucket_id=bucket_id,
+                key=key,
+            )
 
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
