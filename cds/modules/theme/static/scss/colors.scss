@@ -24,6 +24,10 @@
 // Backgrounds
 
 // Background normal
+// background black
+.bg-b {
+  background-color: #000 !important
+}
 .bg-n {
   background-color: $cds-primary-color !important;
 }
@@ -45,7 +49,6 @@
 .bg-warn {
   background-color: #fcf8e3 !important;
 }
-
 // Background white
 .bg-w {
   background-color: white !important;
