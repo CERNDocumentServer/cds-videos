@@ -62,11 +62,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   });
 
-  // Set form dirty when reordering UI-sortable arrays.
-  this.onSortableReorder = function(event, ui) {
-    that.cdsDepositCtrl.setDirty();
-  }
-
   this.removeValidationMessage = function(fieldValue, form) {
     // Reset validation only if the filed has been changed
     if (form.validationMessage) {

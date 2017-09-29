@@ -83,7 +83,6 @@
         "description": "",
         "required": true,
         "sortOptions": {
-          "disabled": true,
           "handle": "i.sort-handle",
           "cursor": "move",
           "axis": "y"
@@ -191,12 +190,6 @@
       "key": "license",
       "notitle": true,
       "description": "",
-      "sortOptions": {
-        "disabled": true,
-        "handle": "i.sort-handle",
-        "cursor": "move",
-        "axis": "y"
-      },
       "firstItemMessage": "General license",
       "add": "Add another licence",
       "inline": true,
