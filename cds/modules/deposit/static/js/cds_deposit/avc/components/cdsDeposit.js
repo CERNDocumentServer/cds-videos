@@ -531,6 +531,13 @@ function cdsDepositCtrl(
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
     $scope.$watch('$ctrl.record._cds.state', that.refreshStateQueue, true);
+    // What the order of contributors and check make it dirty, throttle the
+    // function for 1sec
+    $scope.$watch(
+      '$ctrl.record.contributors',
+      _.throttle(that.setDirty, 1000),
+      true
+    );
     $scope.$watch('$ctrl.record._deposit.status', function() {
       if (CKEDITOR) {
         $timeout(function() {
