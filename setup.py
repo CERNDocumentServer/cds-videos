@@ -121,10 +121,10 @@ install_requires = [
     'invenio-previewer>=1.0.0a11',
     'invenio-query-parser>=0.6.0',
     'invenio-records-files>=1.0.0a9',
-    'invenio-records-rest>=1.0.0b1',
+    'invenio-records-rest>=1.0.0b2',
     'invenio-records-ui>=1.0.0b1',
     'invenio-records[postgresql]>=1.0.0b2',
-    'invenio-rest[cors]>=1.0.0b1',
+    'invenio-rest[cors]>=1.0.0b2',
     'invenio-search-ui>=1.0.0a7',
     'invenio-search>=1.0.0a10',
     'invenio-sequencegenerator>=1.0.0a2',
@@ -193,6 +193,7 @@ setup(
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
             'cds_stats = cds.modules.stats.views:blueprint',
+            'cds_redirector = cds.modules.redirector.views:api_blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',

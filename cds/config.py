@@ -290,6 +290,13 @@ RECORDS_REST_ENDPOINTS = dict(
             'application/x-datacite+xml': (
                 'cds.modules.records.serializers.datacite_v31_response'),
         },
+        record_serializers_aliases={
+            'json': 'application/json',
+            'smil': 'application/smil',
+            'vtt': 'text/vtt',
+            'drupal': 'x-application/drupal',
+            'dcite': 'application/x-datacite+xml'
+        },
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_search'),
@@ -364,6 +371,8 @@ RECORDS_REST_ENDPOINTS = dict(
 )
 
 RECORDS_REST_ENDPOINTS.update(OPENDEFINITION_REST_ENDPOINTS)
+# Query arg name to be able to export records in the specified format
+REST_MIMETYPE_QUERY_ARG_NAME = 'format'
 
 # Sort options records REST API.
 RECORDS_REST_SORT_OPTIONS = dict(
