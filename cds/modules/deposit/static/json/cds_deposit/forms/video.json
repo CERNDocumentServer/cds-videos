@@ -150,11 +150,9 @@
       "required": true,
       "description": "",
       "sortOptions": {
-        "disabled": false,
         "handle": "i.sort-handle",
         "cursor": "move",
         "axis": "y",
-        "update": "$ctrl.onSortableReorder"
       },
       "add": "Add another contributor",
       "items": [
@@ -268,12 +266,6 @@
       "key": "license",
       "notitle": true,
       "description": "",
-      "sortOptions": {
-        "disabled": false,
-        "handle": "i.sort-handle",
-        "cursor": "move",
-        "axis": "y"
-      },
       "firstItemMessage": "General license",
       "add": "Add another licence",
       "inline": true,
