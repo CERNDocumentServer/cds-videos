@@ -39,6 +39,8 @@ import jsonresolver
 from os.path import dirname, join
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
+from cds.modules.redirector.views import api_blueprint \
+    as cds_api_blueprint
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds_sorenson.api import get_preset_id
 from cds_sorenson.error import InvalidResolutionError
@@ -115,6 +117,7 @@ def app():
         THEO_LICENCE_KEY='CHANGE_ME',
     )
     app.register_blueprint(files_rest_blueprint)
+    app.register_blueprint(cds_api_blueprint)
 
     with app.app_context():
         yield app

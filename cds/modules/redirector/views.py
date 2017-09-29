@@ -26,7 +26,10 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, redirect, request, url_for
+from flask import Blueprint, current_app, redirect, request, url_for, Response
+from six.moves.urllib.parse import urlencode
+from six.moves.urllib.parse import urlparse
+
 from invenio_pidstore.models import PersistentIdentifier
 
 blueprint = Blueprint(
@@ -34,6 +37,11 @@ blueprint = Blueprint(
     __name__,
     template_folder='templates',
     static_folder='static',
+)
+
+api_blueprint = Blueprint(
+    'cds_api_redirector',
+    __name__,
 )
 
 
@@ -63,11 +71,20 @@ def video_embed_alias(report_number):
 
 # /record/<:id:>/export/drupal
 # /api/mediaexport?id=<report_number>
-@blueprint.route('/api/mediaexport')
+@api_blueprint.route('/mediaexport')
 def drupal_export_alias():
     """Redirect from the old drupal export URL to the new one."""
     rn = request.args.get('id', '')
-    return redirect(url_for(
-        'invenio_records_ui.recid_export',
-        pid_value=recid_from_rn(rn), format='drupal', raw=True
-    ), code=301)
+
+    api_url = url_for('invenio_records_rest.recid_item',
+                      pid_value=recid_from_rn(rn), _external=True)
+
+    arg_name = current_app.config['REST_MIMETYPE_QUERY_ARG_NAME']
+    format_param = {arg_name: 'drupal'}
+
+    api_url += ('&' if urlparse(api_url).query else '?') + urlencode(
+        format_param)
+
+    return redirect(api_url, code=301)
+
+
