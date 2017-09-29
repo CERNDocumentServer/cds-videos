@@ -1,23 +1,20 @@
-<div class="cds-detail-video cds-detail-video-wrapper bg-n mt--20 pb-20">
+<div class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Video Section -->
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <!-- Embed Video -->
-        <div ng-if="record.metadata.recid" class="embed-responsive embed-responsive-16by9">
-          <iframe class="embed-responsive-item"
-                  frameborder="0"
-                  ng-src="{{ '' | previewIframeSrc: record.metadata.recid:(record | findMaster).key }}"
-                  allowfullscreen>
-          </iframe>
-        </div>
-        <!-- ./Embed Video -->
-      </div>
+  <div class="bg-b">
+    <div class="cds-video-iframe text-center">
+      <iframe scrolling="no"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              ng-src="{{ '' | previewIframeSrc: record.metadata.recid:(record | findMaster).key }}"
+              allowfullscreen>
+      </iframe>
     </div>
+
   </div>
   <!-- /Video Section -->
   <!-- Metadata Section -->
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
       <!-- Left Column -->
       <div class="col-md-8">
@@ -217,12 +214,12 @@
       <!-- Right Column -->
       <div class="col-md-4">
         <!-- Section Download -->
-        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mt-20 t-b">
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>
         </div>
         <!-- /Section Download -->
         <!-- Section Technical Metadata -->
-        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mt-20 t-b">
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/technical_metadata.html'"></ng-include>
         </div>
         <!-- /Section Technical Metadata -->

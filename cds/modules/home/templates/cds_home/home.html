@@ -3,8 +3,8 @@
 {%- block page_body %}
   <div class="flex-item">
     {% block home_featured_video %}
-    <div id="cds-featured-video" class="cds-home-video-featured bg-n">
-      <div class="container">
+    <div id="cds-featured-video" class="cds-home-video-featured bg-b">
+      <div class="{{container_class}}">
         <!-- List group -->
         <invenio-search
             disable-url-handler="true"
@@ -25,7 +25,7 @@
     {% endblock home_featured_video %}
     <!-- Recent videos -->
     <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
-      <div class="container">
+      <div class="{{container_class}}">
         <div class="row">
           <div class="col-md-12">
             <!-- Title -->
@@ -56,8 +56,8 @@
     <!-- Recent videos -->
 
     <!-- Channels -->
-    <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section pt-20 pb-20">
-      <div class="container">
+    <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pt-20 pb-20">
+      <div class="{{container_class}}">
         <div class="row">
           <div class="col-md-12">
             <!-- Title -->

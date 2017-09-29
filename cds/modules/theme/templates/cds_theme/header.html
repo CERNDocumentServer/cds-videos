@@ -1,7 +1,7 @@
 <header>
   {%- block navbar %}
-  <nav class="navbar navbar-default navbar-static-top">
-    <div class="{{ container_class if container_class else 'container'  }}">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="{{ container_class if container_class else 'container-fluid' }}">
       {%- block navbar_header %}
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#cds-navbar" aria-expanded="false" aria-controls="navbar">
