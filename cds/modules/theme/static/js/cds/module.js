@@ -53,7 +53,7 @@ app.filter('previewIframe', ['$sce', '$window', function($sce, $window) {
       _url = $window.location.origin + _url;
     }
     var iframe = _.template(
-      '<iframe src="<%= src %>" width="560" height="315"' +
+      '<iframe scrolling="no"  src="<%= src %>" width="560" height="315"' +
       ' frameborder="0" allowfullscreen></iframe>'
     );
     return iframe({

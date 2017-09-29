@@ -92,7 +92,7 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
   };
 });
 
-
+// Make sure navigation is on focus
 $(document).ready(function() {
   $('#cds-navbar-form-input').focus(function() {
     $(".cds-navbar-form").addClass('cds-active-search');
@@ -100,4 +100,34 @@ $(document).ready(function() {
   .blur(function() {
     $(".cds-navbar-form").removeClass('cds-active-search');
   });
-})
+
+  // Focus when pressing ``l``
+  Mousetrap.bind('l', function() {
+    $('#cds-navbar-form-input').focus();
+    setTimeout(function() {
+      $('#cds-navbar-form-input').val('');
+    },0);
+  });
+
+  Mousetrap.bind('c d s g r e a t', function() {
+    // Start rainbow show
+    rainbowShow();
+  });
+  function rainbowShow() {
+    var _c = '.unicorn-rainbow';
+    if ($(_c).length == 0) {
+      $('body').append(
+        $('<img>', {
+          class: 'unicorn-rainbow',
+          src: '/static/img/unicorn.png'
+        })
+      );
+    }
+    $(_c).css({left:0}).show();
+    $(_c).animate({
+      left: $(window).width(),
+    }, 1000, function() {
+      $(_c).hide();
+    });
+  }
+});

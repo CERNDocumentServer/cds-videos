@@ -24,8 +24,9 @@
 
 {% extends config.BASE_TEMPLATE %}
 
-{%- set html_css_classes=['cover-page'] %}
-{%- set body_css_classes=['cover-page'] %}
+{%- set html_css_classes=['cover-page'] -%}
+{%- set body_css_classes=['cover-page'] -%}
+{%- set cover_page = True -%}
 
 {%- block body %}
 {%- block browserupgrade %}
@@ -33,7 +34,7 @@
   <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
 {%- endblock browserupgrade %}
-<div class="site-wrapper">
+<div class="site-wrapper cds-cover">
   {% block page_header %}{% endblock page_header%}
   {%- block page_body %}
     {%- block flashmessages %}
