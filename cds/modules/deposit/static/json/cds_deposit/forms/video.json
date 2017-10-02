@@ -152,7 +152,7 @@
       "sortOptions": {
         "handle": "i.sort-handle",
         "cursor": "move",
-        "axis": "y",
+        "axis": "y"
       },
       "add": "Add another contributor",
       "items": [
