@@ -249,7 +249,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _resolve_project_id(cls, video):
         """Resolve project id."""
-        video['_project_id'] = record_unbuild_url(video['_project_id'])
+        try:
+            video['_project_id'] = record_unbuild_url(video['_project_id'])
+        except KeyError:
+            # The video doesn't have projet
+            logging.error(
+                '#MISSING_PROJECT for record {0}'.format(video['recid']))
 
     @classmethod
     def _create_deposit(cls, record):
