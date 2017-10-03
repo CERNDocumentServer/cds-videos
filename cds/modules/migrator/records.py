@@ -49,6 +49,7 @@ from invenio_migrator.records import RecordDump, RecordDumpLoader
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
+from sqlalchemy.orm.exc import NoResultFound
 
 from ..deposit.api import Project, Video, record_unbuild_url, \
     deposit_video_resolver
@@ -645,7 +646,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         logging.debug('Set correct user id from email {0}.'.format(email))
         if not email:
             return -1
-        return User.query.filter_by(email=email.lower()).one().id
+        try:
+            return User.query.filter_by(email=email.lower()).one().id
+        except NoResultFound:
+            logging.error('Email not found {0}'.format(email))
+            # cds.support@cern.ch user id
+            return 1257250
 
     @classmethod
     def _create_missing_subformats(cls, record, deposit):
