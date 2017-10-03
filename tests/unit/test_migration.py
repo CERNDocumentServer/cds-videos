@@ -182,7 +182,8 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
                 ExtractFramesTask, '_create_gif') as mock_gif, \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
-                side_effect=migration_streams):
+                side_effect=migration_streams), \
+            mock.patch.object(CDSRecordDumpLoader, '_clean_file_list'):
         video = CDSRecordDumpLoader.create(dump=dump)
         assert mock_frames.called is True
     db.session.add(video.model)
@@ -446,6 +447,7 @@ def test_subformat_creation_if_missing(api_app, location, datadir, es, users):
             mock.patch.object(CDSRecordDumpLoader, '_create_frame',
                               side_effect=get_frames), \
             mock.patch.object(ExtractFramesTask, '_create_gif'), \
+            mock.patch.object(CDSRecordDumpLoader, '_clean_file_list'), \
             mock.patch.object(
                 CDSRecordDumpLoader, '_get_migration_file_stream_and_size',
                 side_effect=migration_streams):

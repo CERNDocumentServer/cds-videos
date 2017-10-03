@@ -288,6 +288,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             'Adding extracted metadata {0}'.format(extracted_metadata))
         deposit['_cds']['extracted_metadata'] = extracted_metadata
         record['_cds']['extracted_metadata'] = extracted_metadata
+        # TODO: fix duration
 
     @classmethod
     def _resolve_datacite_register(cls, record):
@@ -407,37 +408,50 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         record['_deposit'] = deepcopy(deposit['_deposit'])
 
     @classmethod
+    def _clean_file_list(cls, record):
+        """Remove unreachable files from the list."""
+        logging.info('Cleaning file list.')
+        new_file_list = []
+        for f in record.get('_files', []):
+            if os.path.isfile(f['filepath']):
+                new_file_list.append(f)
+            else:
+                logging.error('#FILE_ERROR cannot open {0}'.format(f))
+            record['_files'] = new_file_list
+
+    @classmethod
     def _resolve_files(cls, deposit, record):
         """Create files."""
+        cls._clean_file_list(record)
         logging.info('Moving files from DFS.')
-        # build deposit files
         bucket = as_bucket(deposit['_buckets']['deposit'])
         if Video.get_record_schema() == record['$schema']:
-            # create/update frames
-            cls._create_or_update_frames(record=record)
-        # build objects/tags from marc21 metadata
-        for file_ in record.get('_files', []):
-            cls._resolve_file(bucket=bucket, file_=file_)
-        # attach the master tag to the proper dependent files
-        cls._resolve_master_tag(deposit=deposit)
-        if Video.get_record_schema() == record['$schema']:
-            # probe metadata from video
-            cls._resolve_extracted_metadata(deposit=deposit, record=record)
-            # update tag 'timestamp'
-            cls._update_timestamp(deposit=deposit)
-        # build a partial files dump
+            has_master = cls._resolve_master_file(record, bucket)
+
+            if has_master:
+                cls._create_or_update_frames(record=record)
+                # build objects/tags from marc21 metadata
+                for file_ in record.get('_files', []):
+                    if file_['tags']['context_type'] != 'master':
+                        cls._resolve_file(bucket=bucket, file_=file_)
+                # attach the master tag to the proper dependent files
+                cls._resolve_master_tag(deposit=deposit)
+                # probe metadata from video
+                cls._resolve_extracted_metadata(deposit=deposit, record=record)
+                # update tag 'timestamp'
+                cls._update_timestamp(deposit=deposit)
+                # build a partial files dump
+                cls._resolve_dumps(record=deposit)
+                # create gif
+                cls._create_gif(video=deposit)
         cls._resolve_dumps(record=deposit)
-        if Video.get_record_schema() == record['$schema']:
-            # create gif
-            cls._create_gif(video=deposit)
-            cls._resolve_dumps(record=deposit)
         # snapshot them to record bucket
         snapshot = bucket.snapshot(lock=True)
         db.session.add(RecordsBuckets(
             record_id=record.id, bucket_id=snapshot.id
         ))
         cls._resolve_dumps(record=record)
-        if Video.get_record_schema() == record['$schema']:
+        if Video.get_record_schema() == record['$schema'] and has_master:
             # update tag 'master'
             cls._update_tag_master(record=record)
             # create an empty smil file
@@ -577,6 +591,19 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return open(path, 'rb'), os.path.getsize(path)
 
     @classmethod
+    def _resolve_master_file(cls, record, bucket):
+        """Resolve a given context type file type."""
+        try:
+            [master_video] = [f for f in record['_files']
+                              if f['tags']['context_type'] == 'master']
+            cls._resolve_file(bucket=bucket, file_=master_video)
+            return True
+        except Exception as e:
+            # Either the file doesn't exist or can't be read.
+            logging.error('#MASTER_FILE_ERROR {0}'.format(e))
+            return False
+
+    @classmethod
     def _resolve_file(cls, bucket, file_):
         """Resolve file."""
         def progress_callback(size, total):
@@ -652,6 +679,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         """Crete missing subformats."""
         # get master
         master = CDSVideosFilesIterator.get_master_video_file(deposit)
+        if not master:
+            return
         # get the preset info from sorenson
         ratio = master['tags']['display_aspect_ratio']
         max_width = int(master['tags']['width'])
