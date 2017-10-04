@@ -21,22 +21,22 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Migration CLI."""
 
 from __future__ import absolute_import, print_function
 
-import click
 import json
-
-from invenio_db import db
-from invenio_migrator.cli import dumps, _loadrecord
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_pidstore.errors import PIDAlreadyExists
-from invenio_sequencegenerator.api import Sequence
 from datetime import datetime
+
+import click
 from flask import current_app
 from flask.cli import with_appcontext
+from invenio_db import db
+from invenio_migrator.cli import _loadrecord, dumps
+from invenio_migrator.proxies import current_migrator
+from invenio_pidstore.errors import PIDAlreadyExists
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_sequencegenerator.api import Sequence
 
 from ...modules.deposit.api import Project
 
@@ -67,6 +67,7 @@ def load_records(sources, source_type, eager):
 @with_appcontext
 def sequence_generator():
     """Update sequences according to current report numbers in pidstore."""
+
     def get_pids(year):
         """Get project and video pids registered this year."""
         query = PersistentIdentifier.query.filter(
@@ -80,8 +81,7 @@ def sequence_generator():
 
     def get_cats_types(projects, videos):
         """Get category/type list for projects and videos."""
-        cats_types = set(
-            ["-".join(pid.split('-')[0:2]) for pid in projects])
+        cats_types = set(["-".join(pid.split('-')[0:2]) for pid in projects])
         cats_types_video = set(
             ["-".join(pid.split('-')[0:2]) for pid in videos])
         # check category/type list are the same
@@ -90,8 +90,8 @@ def sequence_generator():
 
     def find_next(cat_type, pids):
         max_count = max([
-            int(pid.split('-')[-1])
-            for pid in pids if pid.startswith(cat_type)])
+            int(pid.split('-')[-1]) for pid in pids if pid.startswith(cat_type)
+        ])
         return max_count + 1
 
     def update_counter(next_counter, **sequence_kwargs):
@@ -108,9 +108,12 @@ def sequence_generator():
     for cat_type in cats_types:
         [cat, type_] = cat_type.split('-')
         update_counter(
-            next_counter=find_next(cat_type, project_pids), **{
-                'template': Project.sequence_name, 'year': year,
-                'category': cat, 'type': type_
+            next_counter=find_next(cat_type, project_pids),
+            **{
+                'template': Project.sequence_name,
+                'year': year,
+                'category': cat,
+                'type': type_
             })
 
     db.session.commit()
@@ -118,11 +121,17 @@ def sequence_generator():
 
 @dumps.command()
 @click.argument('sources', type=click.File('r'), nargs=-1)
-@click.option('--source-type', '-t',  type=click.Choice(['json', 'marcxml']),
-              default='marcxml', help='Whether to use JSON or MARCXML.')
-@click.option('--recid', '-r',
-              help='Record ID to load (NOTE: will load only one record!).',
-              default=None)
+@click.option(
+    '--source-type',
+    '-t',
+    type=click.Choice(['json', 'marcxml']),
+    default='marcxml',
+    help='Whether to use JSON or MARCXML.')
+@click.option(
+    '--recid',
+    '-r',
+    help='Record ID to load (NOTE: will load only one record!).',
+    default=None)
 @with_appcontext
 def dryrun(sources, source_type, recid):
     """Load records migration dump."""
@@ -135,13 +144,73 @@ def dryrun(sources, source_type, recid):
     load_records(sources=sources, source_type=source_type, eager=True)
 
 
+def _clean_record(data, source_type):
+    """."""
+    try:
+        source_type = source_type or 'marcxml'
+        assert source_type in ['marcxml', 'json']
+
+        recorddump = current_migrator.records_dump_cls(
+            data,
+            source_type=source_type,
+            pid_fetchers=current_migrator.records_pid_fetchers, )
+        current_migrator.records_dumploader_cls.clean(
+            recorddump, delete_files=True)
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+
 @dumps.command()
 @click.argument('sources', type=click.File('r'), nargs=-1)
-@click.option('--source-type', '-t',  type=click.Choice(['json', 'marcxml']),
-              default='marcxml', help='Whether to use JSON or MARCXML.')
-@click.option('--recid', '-r',
-              help='Record ID to load (NOTE: will load only one record!).',
-              default=None)
+@click.option(
+    '--source-type',
+    '-t',
+    type=click.Choice(['json', 'marcxml']),
+    default='marcxml',
+    help='Whether to use JSON or MARCXML.')
+@click.option(
+    '--recid',
+    '-r',
+    help='Record ID to load (NOTE: will load only one record!).',
+    default=None)
+@with_appcontext
+def cleanrecords(sources, source_type, recid):
+    """Clean everything a given dump has done."""
+    if recid is not None:
+        for source in sources:
+            records = json.load(source)
+            for item in records:
+                if str(item['recid']) == str(recid):
+                    _clean_record(item, source_type)
+                    click.echo("Record '{recid}' cleaned.".format(recid=recid))
+                    return
+        click.echo("Record '{recid}' not found.".format(recid=recid))
+    else:
+        for idx, source in enumerate(sources, 1):
+            click.echo('Loading dump {0} of {1} ({2})'.format(
+                idx, len(sources), source.name))
+            data = json.load(source)
+            with click.progressbar(data) as records:
+                for item in records:
+                    _clean_record(item, source_type)
+
+
+@dumps.command()
+@click.argument('sources', type=click.File('r'), nargs=-1)
+@click.option(
+    '--source-type',
+    '-t',
+    type=click.Choice(['json', 'marcxml']),
+    default='marcxml',
+    help='Whether to use JSON or MARCXML.')
+@click.option(
+    '--recid',
+    '-r',
+    help='Record ID to load (NOTE: will load only one record!).',
+    default=None)
 @with_appcontext
 def run(sources, source_type, recid):
     """Load records migration dump."""
