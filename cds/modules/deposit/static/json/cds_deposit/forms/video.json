@@ -60,6 +60,10 @@
           "name":  "Català"
         },
         {
+          "value":  "da",
+          "name":  "Danish"
+        },
+        {
           "value":  "de",
           "name":  "Deutsch"
         },
@@ -348,6 +352,10 @@
             {
               "value":  "ca",
               "name":  "Català"
+            },
+            {
+              "value":  "da",
+              "name":  "Danish"
             },
             {
               "value":  "de",
