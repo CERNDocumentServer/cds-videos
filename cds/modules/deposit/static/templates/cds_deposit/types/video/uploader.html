@@ -127,6 +127,7 @@
   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
   ngf-pattern="'.vtt'"
   ngf-accept="'text/vtt'"
+  ngf-validate-fn="$ctrl.validateSubtitles($file)"
   ngf-max-size="20GB"
   ngf-multiple="true"
   ng-switch="($ctrl.files | findBy:'context_type':'subtitle' || []).length"
