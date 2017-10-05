@@ -319,6 +319,7 @@ app.filter('isoToLanguage', function () {
       'bg': 'Bulgarian',
       'ca': 'Catalan',
       'ch': 'Chamorro',
+      'da': 'Danish',
       'de': 'German',
       'el': 'Greek',
       'en': 'English',

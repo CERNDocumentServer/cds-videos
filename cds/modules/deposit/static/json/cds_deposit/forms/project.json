@@ -256,6 +256,10 @@
               "name":  "Catalan"
             },
             {
+              "value":  "da",
+              "name":  "Danish"
+            },
+            {
               "value":  "de",
               "name":  "German"
             },
