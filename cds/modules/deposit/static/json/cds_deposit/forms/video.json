@@ -76,6 +76,10 @@
           "name":  "Español"
         },
         {
+          "value":  "fi",
+          "name":  "Finnish"
+        },
+        {
           "value":  "fr",
           "name": "Français"
         },
@@ -364,6 +368,10 @@
             {
               "value":  "es",
               "name":  "Español"
+            },
+            {
+              "value":  "fi",
+              "name":  "Finnish"
             },
             {
               "value":  "fr",

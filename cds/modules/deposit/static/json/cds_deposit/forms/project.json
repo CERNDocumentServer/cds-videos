@@ -272,6 +272,10 @@
               "name":  "Español"
             },
             {
+              "value":  "fi",
+              "name":  "Finnish"
+            },
+            {
               "value":  "fr",
               "name": "Français"
             },
