@@ -150,7 +150,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     return {
       text: stripCommas(author.name),
       value: author,
-      name: author.name
+      name: author.name,
+      email: author.email
     };
   }
 
@@ -240,20 +241,26 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
 
   this.autocompleteAccess = function(query) {
-    var options = {
-      url: '//cds.cern.ch/submit/get_authors',
-      refreshDelay: 100,
-      extraParams: {
-        'relative_curdir': 'cdslabs/videos'
-      }
-    };
-    that.autocompleteAuthors(options, query).then(function(results) {
-      that.accessSuggestions = results.data.map(function(res) {
-        return {
-          name: res.value.name,
-          email: res.value.email,
+    var userInput = query.length ? [{ name: query, email: query, isUserInput: true }] : [],
+      options = {
+        url: '//cds.cern.ch/submit/get_authors',
+        extraParams: {
+          'relative_curdir': 'cdslabs/videos'
         }
-      });
+      };
+
+    that.accessSuggestions = userInput;
+
+    that.autocompleteAuthors(options, query).then(function(results) {
+      // put the current query as first if no results found for custom input
+      var mappedResults = results.data.map(function(res) {
+            return {
+              name: res.value.name,
+              email: res.value.email,
+              isUserInput: false
+            }
+          });
+      that.accessSuggestions = _.concat(userInput, mappedResults);
     });
   };
 
@@ -376,8 +383,11 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   // Handle change of access rights
   this.changeAccess = function() {
-    // Delete any previous permissions
-    delete that.cdsDepositCtrl.record._access.read;
+    // Delete any previous permissions to read (if exists), without changing the update permissions
+    if (that.cdsDepositCtrl.record._access) {
+      delete that.cdsDepositCtrl.record._access.read;
+    }
+
     that.selectedRestricted = [];
     // If is restricted then copy the access
     if (that.permissions === 'restricted') {

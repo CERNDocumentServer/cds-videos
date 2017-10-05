@@ -263,11 +263,12 @@
                             {{ $item.email || $item }}
                           </ui-select-match>
                            <ui-select-choices
-                            repeat="suggestion.email as suggestion in $ctrl.accessSuggestions | orderBy:'name'"
+                            repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
                             refresh="$ctrl.autocompleteAccess($select.search)"
+                            refresh-delay="100"
                            >
                              <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
-                             <small><{{suggestion.email}}></small>
+                             <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>
                            </ui-select-choices>
                            <ui-select-no-choice>
                              <p class="pa-5 mb-0">

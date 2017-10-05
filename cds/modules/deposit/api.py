@@ -681,7 +681,10 @@ class Project(CDSDeposit):
                 and project_access:
             changed = True
             # sync access rights
-            video['_access']['update'] = deepcopy(project_access)
+            if '_access' in video:
+                video['_access']['update'] = deepcopy(project_access)
+            else:
+                video['_access'] = dict(update=deepcopy(project_access))
 
         if video['_deposit'].get('created_by') != project_created_by:
             changed = True
