@@ -53,19 +53,19 @@
       "titleMap": [
         {
           "value":  "bg",
-          "name":  "Български"
+          "name":  "Bulgarian"
         },
         {
           "value":  "ca",
-          "name":  "Català"
+          "name":  "Catalan"
         },
         {
           "value":  "de",
-          "name":  "Deutsch"
+          "name":  "German"
         },
         {
           "value":  "el",
-          "name":  "Ελληνικά"
+          "name":  "Greek"
         },
         {
           "value":  "en",
@@ -73,7 +73,7 @@
         },
         {
           "value":  "es",
-          "name":  "Español"
+          "name":  "Spanish"
         },
         {
           "value":  "fi",
@@ -81,59 +81,59 @@
         },
         {
           "value":  "fr",
-          "name": "Français"
+          "name": "French"
         },
         {
           "value":  "hr",
-          "name":  "Hrvatski"
+          "name":  "Croatian"
+        },
+        {
+          "value":  "hu",
+          "name":  "Hungarian"
         },
         {
           "value":  "it",
-          "name":  "Italiano"
+          "name":  "Italian"
         },
         {
           "value":  "ja",
-          "name":  "日本語"
+          "name":  "Japanese"
         },
         {
           "value":  "ka",
-          "name":  "ქართული"
+          "name":  "Georgian"
         },
         {
           "value":  "no",
-          "name":  "Norsk/Bokmål"
+          "name":  "Norwegian"
         },
         {
           "value":  "pl",
-          "name":  "Polski"
+          "name":  "Polish"
         },
         {
           "value":  "pt",
-          "name":  "Português"
+          "name":  "Portuguese"
         },
         {
           "value":  "ru",
-          "name":  "Русский"
-        },
-        {
-          "value":  "silent",
-          "name":  "Silent"
+          "name":  "Russian"
         },
         {
           "value":  "sk",
-          "name":  "Slovensky"
+          "name":  "Slovak"
         },
         {
           "value":  "sv",
-          "name":  "Svenska"
+          "name":  "Swedish"
         },
         {
           "value":  "zh_CN",
-          "name":  "中文(简)"
+          "name":  "Chinese"
         },
         {
           "value":  "zh_TW",
-          "name":  "中文(繁)"
+          "name":  "Chinese (Taiwan)"
         }
       ]
     },
@@ -347,19 +347,19 @@
           "titleMap": [
             {
               "value":  "bg",
-              "name":  "Български"
+              "name":  "Bulgarian"
             },
             {
               "value":  "ca",
-              "name":  "Català"
+              "name":  "Catalan"
             },
             {
               "value":  "de",
-              "name":  "Deutsch"
+              "name":  "German"
             },
             {
               "value":  "el",
-              "name":  "Ελληνικά"
+              "name":  "Greek"
             },
             {
               "value":  "en",
@@ -367,7 +367,7 @@
             },
             {
               "value":  "es",
-              "name":  "Español"
+              "name":  "Spanish"
             },
             {
               "value":  "fi",
@@ -375,55 +375,59 @@
             },
             {
               "value":  "fr",
-              "name": "Français"
+              "name": "French"
             },
             {
               "value":  "hr",
-              "name":  "Hrvatski"
+              "name":  "Croatian"
+            },
+            {
+              "value":  "hu",
+              "name":  "Hungarian"
             },
             {
               "value":  "it",
-              "name":  "Italiano"
+              "name":  "Italian"
             },
             {
               "value":  "ja",
-              "name":  "日本語"
+              "name":  "Japanese"
             },
             {
               "value":  "ka",
-              "name":  "ქართული"
+              "name":  "Georgian"
             },
             {
               "value":  "no",
-              "name":  "Norsk/Bokmål"
+              "name":  "Norwegian"
             },
             {
               "value":  "pl",
-              "name":  "Polski"
+              "name":  "Polish"
             },
             {
               "value":  "pt",
-              "name":  "Português"
+              "name":  "Portuguese"
             },
             {
               "value":  "ru",
-              "name":  "Русский"
+              "name":  "Russian"
             },
             {
               "value":  "sk",
-              "name":  "Slovensky"
+              "name":  "Slovak"
             },
             {
               "value":  "sv",
-              "name":  "Svenska"
+              "name":  "Swedish"
             },
             {
               "value":  "zh_CN",
-              "name":  "中文(简)"
+              "name":  "Chinese"
             },
             {
               "value":  "zh_TW",
-              "name":  "中文(繁)"
+              "name":  "Chinese (Taiwan)"
             }
           ]
         }

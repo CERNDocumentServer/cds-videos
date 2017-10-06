@@ -324,7 +324,9 @@ app.filter('isoToLanguage', function () {
       'en': 'English',
       'en-fr': 'English/French',
       'es': 'Spanish',
+      'fi': 'Finnish',
       'fr': 'French',
+      'hu': 'Hungarian',
       'hr': 'Croatian',
       'it': 'Italian',
       'ja': 'Japanese',
@@ -337,7 +339,7 @@ app.filter('isoToLanguage', function () {
       'sk': 'Slovak',
       'sv': 'Swedish',
       'zh_CN': 'Chinese',
-      'zh_TW': 'Chinese',
+      'zh_TW': 'Chinese (Taiwan)',
     };
     return languages[code] || code;
   };
