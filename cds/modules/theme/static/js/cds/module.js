@@ -339,6 +339,7 @@ app.filter('isoToLanguage', function () {
       'ru': 'Russian',
       'silent': 'Silent',
       'sk': 'Slovak',
+      'sr': 'Serbian',
       'sv': 'Swedish',
       'zh_CN': 'Chinese',
       'zh_TW': 'Chinese (Taiwan)',
