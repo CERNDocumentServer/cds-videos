@@ -108,6 +108,10 @@
           "name":  "Georgian"
         },
         {
+          "value":  "ko",
+          "name":  "Korean"
+        },
+        {
           "value":  "no",
           "name":  "Norwegian"
         },
@@ -404,6 +408,10 @@
             {
               "value":  "ka",
               "name":  "Georgian"
+            },
+            {
+              "value":  "ko",
+              "name":  "Korean"
             },
             {
               "value":  "no",

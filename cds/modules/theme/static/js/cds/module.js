@@ -332,6 +332,7 @@ app.filter('isoToLanguage', function () {
       'it': 'Italian',
       'ja': 'Japanese',
       'ka': 'Georgian',
+      'ko': 'Korean',
       'no': 'Norwegian',
       'pl': 'Polish',
       'pt': 'Portuguese',
