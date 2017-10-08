@@ -132,6 +132,10 @@
           "name":  "Slovak"
         },
         {
+          "value":  "sr",
+          "name":  "Serbian"
+        },
+        {
           "value":  "sv",
           "name":  "Swedish"
         },
@@ -432,6 +436,10 @@
             {
               "value":  "sk",
               "name":  "Slovak"
+            },
+            {
+              "value":  "sr",
+              "name":  "Serbian"
             },
             {
               "value":  "sv",
