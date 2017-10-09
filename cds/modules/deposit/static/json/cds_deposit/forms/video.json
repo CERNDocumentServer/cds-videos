@@ -140,6 +140,10 @@
           "name":  "Swedish"
         },
         {
+          "value":  "tr",
+          "name":  "Turkish"
+        },
+        {
           "value":  "zh_CN",
           "name":  "Chinese"
         },
@@ -444,6 +448,10 @@
             {
               "value":  "sv",
               "name":  "Swedish"
+            },
+            {
+              "value":  "tr",
+              "name":  "Turkish"
             },
             {
               "value":  "zh_CN",
