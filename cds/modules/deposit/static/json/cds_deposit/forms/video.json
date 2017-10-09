@@ -144,6 +144,10 @@
           "name":  "Turkish"
         },
         {
+          "value":  "uk",
+          "name":  "Ukrainian"
+        },
+        {
           "value":  "zh_CN",
           "name":  "Chinese"
         },
@@ -452,6 +456,10 @@
             {
               "value":  "tr",
               "name":  "Turkish"
+            },
+            {
+              "value":  "uk",
+              "name":  "Ukrainian"
             },
             {
               "value":  "zh_CN",
