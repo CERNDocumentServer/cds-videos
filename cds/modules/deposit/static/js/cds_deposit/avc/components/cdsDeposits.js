@@ -170,14 +170,15 @@ function cdsDepositsCtrl(
 
   this.filterOutFiles = function(files) {
     // Separate videos from other files
-    var [videos, other] = _.partition(files, function(f) {
-      return that.isVideoFile(f.name);
-    });
+    var partition = _.partition(files, function(f) {
+        return that.isVideoFile(f.name);
+      }),
+      // Index videos by their key
+      videos = _.keyBy(partition[0], function(video) {
+        return that.isVideoFile(video.name);
+      }),
+      other = partition[1];
 
-    // Index videos by their key
-    var videos = _.keyBy(videos, function(video) {
-      return that.isVideoFile(video.name);
-    });
     angular.forEach(videos, function(video) {
       if (!video.key) {
         video.key = video.name;
