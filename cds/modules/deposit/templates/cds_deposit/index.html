@@ -88,6 +88,9 @@
           </invenio-search-facets>
       </div><!-- ./col-md-3 -->
       <div class="col-md-9">
+          <div id="cds-deposit-ie-warning" class="hidden">
+            <div class="alert alert-danger" role="alert">IE browser below <b>Edge</b> is not supported! Please use the latest version of Safari, Chrome or Firefox.</div>
+          </div>
           <invenio-search-results
             class="list-group"
             template="{{ url_for('static', filename='templates/cds_deposit/search/results.html') }}">

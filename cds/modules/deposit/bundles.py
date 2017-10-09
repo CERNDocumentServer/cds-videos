@@ -78,6 +78,7 @@ js_jquery = NpmBundle(
 )
 
 js_deposit_common = Bundle(
+    'js/cds_deposit/main.js',
     'js/cds_deposit/avc/avc.module.js',
     'js/cds_deposit/avc/filters/mergeObjects.js',
     'js/cds_deposit/avc/filters/orderTasks.js',
