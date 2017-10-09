@@ -336,6 +336,14 @@
               "name":  "Swedish"
             },
             {
+              "value":  "sv",
+              "name":  "Swedish"
+            },
+            {
+              "value":  "tr",
+              "name":  "Turkish"
+            },
+            {
               "value":  "zh_CN",
               "name":  "Chinese"
             },
