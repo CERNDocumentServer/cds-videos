@@ -111,7 +111,7 @@ i.sort-handle {
 }
 
 .flex-item {
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 .cds-footer-separator {
@@ -277,14 +277,14 @@ i.sort-handle {
 #invenio-search {
   invenio-search {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     flex-direction: column;
   }
 }
 #cds-deposit-index {
   invenio-search {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     flex-direction: column;
   }
 }
@@ -546,6 +546,11 @@ i.sort-handle {
 
 .ui-select-multiple.ui-select-bootstrap {
   min-height: 34px !important;
+}
+
+#cds-deposit-ie-warning {
+  margin: 50px;
+  text-align: center;
 }
 
 // General
