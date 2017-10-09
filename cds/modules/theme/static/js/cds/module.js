@@ -341,6 +341,7 @@ app.filter('isoToLanguage', function () {
       'sk': 'Slovak',
       'sr': 'Serbian',
       'sv': 'Swedish',
+      'tr': 'Turkish',
       'zh_CN': 'Chinese',
       'zh_TW': 'Chinese (Taiwan)',
     };
