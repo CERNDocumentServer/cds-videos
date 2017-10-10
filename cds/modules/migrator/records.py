@@ -414,7 +414,8 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         logging.info('Cleaning file list.')
         new_file_list = []
         for f in record.get('_files', []):
-            if os.path.isfile(f['filepath']):
+            path = cls._get_full_path(filepath=f['filepath'])
+            if os.path.isfile(path):
                 new_file_list.append(f)
             else:
                 logging.error('#FILE_ERROR cannot open {0}'.format(f))
