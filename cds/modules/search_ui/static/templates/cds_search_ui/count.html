@@ -4,10 +4,10 @@
       <i class="fa fa-search f2"></i>
     </div>
     <p class="f5">
-      No results found for
+      no results found
       <div ng-repeat="(key, value) in vm.invenioSearchCurrentArgs.params" ng-if="['page', 'size'].indexOf(key) == -1">
         <p class="f6" ng-if="key=='q' && value!=''">
-          "<em>{{value}}</em>"
+           for "<em>{{value}}</em>"
         </p>
         <p ng-if="key!='q'">
           <strong class="text-capitalize">{{ key == 'q' ? '' : key + ':'}}</strong> <em>{{value | joinArray | isoToLanguage}}</em>
