@@ -4,23 +4,21 @@
   <div class="flex-item">
     {% block home_featured_video %}
     <div id="cds-featured-video" class="cds-home-video-featured bg-b">
-      <div class="{{container_class}}">
-        <!-- List group -->
-        <invenio-search
-            disable-url-handler="true"
-          search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
-        >
-          <div class="text-center">
-            <invenio-search-loading
-                template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-                message="">
-            </invenio-search-loading>
-          </div>
-          <invenio-search-results
-            template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
-          </invenio-search-results>
-        </invenio-search>
-      </div>
+      <!-- List group -->
+      <invenio-search
+        disable-url-handler="true"
+        search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
+      >
+        <div class="text-center">
+          <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message="">
+          </invenio-search-loading>
+        </div>
+        <invenio-search-results
+          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
+        </invenio-search-results>
+      </invenio-search>
     </div>
     {% endblock home_featured_video %}
     <!-- Recent videos -->
