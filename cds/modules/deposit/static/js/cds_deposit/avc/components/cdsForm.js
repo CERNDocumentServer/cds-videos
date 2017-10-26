@@ -381,6 +381,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
         ? 'public' : 'restricted';
     // Change Access
     that.changeAccess();
+    that.saveAllChanges();
   }
 
   // Handle change of access rights
@@ -406,6 +407,14 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       $scope.$emit(
         'cds.deposit.project.permissions.update', that.cdsDepositCtrl.record._access, that.permissions
       );
+    }
+  }
+
+  // Broadcast event to perform the save partials action
+  this.saveAllChanges = function() {
+    // save when type (of category) is set
+    if (that.cdsDepositCtrl.record.type) {
+      $scope.$broadcast('cds.deposit.project.saveAll');
     }
   }
 
