@@ -667,6 +667,13 @@ function cdsDepositCtrl(
     that.loading = false;
   };
 
+  this.onSuccessActionMultiple = function(response, message) {
+    // Emit an event for all deposits
+    $scope.$broadcast('cds.deposit.pristine.all', that.id);
+    // Go trhour the normal proccess
+    that.onSuccessAction(response, message);
+  };
+
   this.onSuccessAction = function(response, message) {
     // Post success process
     that.postSuccessProcess(response);
@@ -726,6 +733,14 @@ function cdsDepositCtrl(
   this.cleanLocalStorage = function() {
     localStorageService.remove(that.id);
   };
+
+  $scope.$on('cds.deposit.pristine.all', function(evt, id) {
+    // If the id is not the same as the id of the deposit sent this broadcast
+    if (id != that.id) {
+      // Set that to pristine
+      that.setPristine();
+    }
+  });
 }
 
 cdsDepositCtrl.$inject = [
