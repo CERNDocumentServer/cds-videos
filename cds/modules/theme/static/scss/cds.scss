@@ -51,6 +51,12 @@ html, body {
   max-width: 1600px;
 }
 
+.cds-deposit-panel {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .container-fluid {
   @extend .cds-max-fluid-width;
 }

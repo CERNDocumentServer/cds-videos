@@ -83,32 +83,7 @@
     <!-- Top status bar -->
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-3">
-          <div hl-sticky media-query="min-width: 990px" offset-top="20" class="cds-deposit-box">
-            <a offset="200" du-scrollspy="{{$ctrl.master.metadata._deposit.id}}" du-smooth-scroll ng-href="#{{$ctrl.master.metadata._deposit.id}}" class="active f8 mt-5 mb-10 cds-deposit-side-nav-item-header">
-            <i class="fa fa-list-ul"></i>  {{ ($ctrl.master.metadata.title.title) ?  ($ctrl.master.metadata.title.title | limitTo:45) : 'No project title' }} <span ng-show="$ctrl.master.metadata.title.title.length > 45">[...]</span>
-            </a>
-            <ul class="mt-10 list-unstyled" ng-repeat="vid in $ctrl.master.metadata.videos">
-              <li ng-init="state=(vid._cds.state | overallState)">
-                <a offset="200" du-scrollspy="{{vid._deposit.id}}" du-smooth-scroll ng-href="#{{vid._deposit.id}}" class="cds-deposit-side-nav-item-link f8">
-                  <i class="fa text-muted fa-video-camera"></i> {{ (vid.title.title | limitTo:30) || 'Video #' + ($index + 1) }} <span ng-show="vid.title.title.length > 30">[...]</span> <span class="pull-right fw-b">
-                  <i class="fa pl-5 {{ (vid._cds.state | overallState) | progressIcon:vid._deposit.status }} {{ (vid._cds.state | overallState) | progressClass:vid._deposit.status }}"></i>
-                  </span>
-                </a>
-              </li>
-            </ul>
-            <div class="text-center text-muted">
-              <a ng-show="$ctrl.master.metadata._deposit.status !== 'published'" du-smooth-scroll ng-href="#cds-deposit-main-uploader" class="btn btn-link">
-                <i class="fa fa-plus"></i> Add videos
-              </a>
-              <p class="text-muted mt-40" ng-hide="$ctrl.master.metadata._deposit.status !== 'published'">
-                <i class="fa fa-info-circle"></i> <a ng-click="$ctrl.makeAction(['EDIT', 'SAVE_PARTIAL'])">Edit Project</a> to add more videos.
-              </p>
-            </div>
-          </div>
-          <toaster-container toaster-options="{'close-html':'<button>Close</button>',  'showCloseButton':true, 'position-class': 'toast-top-right'}"></toaster-container>
-        </div>
-        <div class="col-md-9">
+        <div class="col-md-12">
           <!-- Draft Project -->
           <cds-form
             template="/static/templates/cds_deposit/types/project/form.html"
@@ -154,7 +129,7 @@
               schema="$ctrl.childrenSchemaResolved"
               record="child"
             >
-              <div class="panel panel-default">
+              <div class="cds-deposit-panel panel panel-default">
                 <div class="panel-heading text-muted pa-10">
                   <span class="text-muted">
                     <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
