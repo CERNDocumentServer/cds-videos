@@ -1,26 +1,21 @@
-<div class="text-right">
-  <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
-    <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
-  </span>
-  <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isPristine()'
-    ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-default btn-sm"
-    ng-click="$ctrl.saveAllPartial()">
-  Save All
-  </button>
-  <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
-    ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-primary btn-sm"
-    ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
-  Publish Project
-  </button>
-  <button
-    ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
-    ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-default btn-sm"
-    ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
-  Edit Project
-  </button>
-</div>
+<button
+  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isPristine()'
+  ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+  class="btn btn-success"
+  ng-click="$ctrl.saveAllPartial()">
+Save
+</button>
+<button
+  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
+  ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+  class="btn btn-primary"
+  ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
+Publish Project
+</button>
+<button
+  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
+  ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+  class="btn btn-default"
+  ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
+Edit Project
+</button>
