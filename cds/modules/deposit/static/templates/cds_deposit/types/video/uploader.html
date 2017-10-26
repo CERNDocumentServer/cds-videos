@@ -5,6 +5,7 @@
     <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
   </p>
 </modal-dialog>
+
 <!-- Master video and subformats -->
 <div ng-show="$ctrl.files.length > 0" class="panel panel-default">
   <div class="panel-heading">
@@ -120,16 +121,7 @@
 <!-- Thumbnail -->
 <!-- Subtitles -->
 <div class="panel panel-default"
-  ngf-drag-over-class="'cds-deposit-dragover'"
-  ngf-model-options="{allowInvalid: false}"
-  ngf-drop=""
-  ngf-select=""
-  ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
-  ngf-pattern="'.vtt'"
-  ngf-accept="'text/vtt'"
-  ngf-validate-fn="$ctrl.validateSubtitles($file)"
-  ngf-max-size="20GB"
-  ngf-multiple="true"
+
   ng-switch="($ctrl.files | findBy:'context_type':'subtitle' || []).length"
   >
   <div class="panel-heading">
@@ -147,26 +139,40 @@
       ><i class="fa fa-plus-square"></i></a>
     </span>
   </div>
-  <div class="panel-body text-center" ng-switch-when="0">
+  <div
+  ngf-drag-over-class="'cds-deposit-dragover'"
+  ngf-model-options="{allowInvalid: false}"
+  ngf-drop=""
+  ngf-select=""
+  ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
+  ngf-pattern="'.vtt'"
+  ngf-accept="'text/vtt'"
+  ngf-validate-fn="$ctrl.validateSubtitles($file)"
+  ngf-max-size="20GB"
+  ngf-multiple="true"
+
+    class="panel-body text-center" ng-switch-when="0">
     <p class="text-muted text-center f7">
       No subtitles.
     </p>
-    <p class="text-muted text-center f8">
-      Drag & Drop <mark>vtt</mark> or <a ng-click=""
+    <p class="text-muted text-center f8"
+
+    >
+      Drag & Drop or <a ng-click=""
         ngf-model-options="{allowInvalid: false}"
         ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
         ngf-select=""
         ngf-pattern="'.vtt'"
         ngf-accept="'.vtt'"
         ngf-validate-fn="$ctrl.validateSubtitles($file)"
-        ngf-max-size="20GB">select</a> files.
-        <hr />
-        <p class="text-muted">
-          <small>
-            Subtitle filename should end with the two letter language code.
-            For example for French subtitles <mark>subtitles_fr.vtt</mark>
-          </small>
-        </p>
+        ngf-max-size="20GB">select</a> <mark>.vtt</mark> files.
+        <hr class="my-10" />
+        <div class="text-muted text-left">
+          <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
+          <ul>
+            <li>Subtitle filename should have language code. Example: <mark>subtitles_fr.vtt</mark> </li>
+          </ul>
+        </div>
     </p>
   </div>
   <table ng-switch-default class="table">
@@ -245,49 +251,44 @@
     </tr>
   </table>
 </div>
-<!-- Other -->
-<hr />
-<div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
-  <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
-    <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
-    <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
-  </ul>
-  <div class="tab-content">
-    <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
-      <div
-           ngf-drag-over-class="'cds-deposit-dragover'"
-           ngf-drop=""
-           ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-           ngf-select=""
-           ngf-model-options="{allowInvalid: false}"
-           ngf-max-size="20GB"
-           ngf-multiple="true"
-      >
-        <div class="cds-deposit-box-upload-wrapper text-center">
-          <p class="cds-deposit-box-upload-icon">
-            <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
-          </p>
-          <div class="cds-deposit-box-upload-content">
-            <div class="cds-deposit-box-upload-title">
-              <h4>Select files to upload</h4>
-            </div>
-            <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
-          </div>
-        </div>
-      </div>
-      </div>
-    <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
-        <div ng-transclude></div>
-    </div>
-  </div>
-</div>
-<div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
-  <p>
-    Multiple files with the same filename are not allowed:
-  </p>
+<hr class="my-20" />
+<!-- Error alert -->
+<div class="alert alert-danger" ng-if="$ctrl.duplicateFiles.length" uib-alert dismiss-on-timeout="10000" close="$ctrl.duplicateFiles=[]">
+  <strong>Multiple files with the same filename are not allowed:</strong>
   <ul>
     <li ng-repeat="file in $ctrl.duplicateFiles">
       {{ file }}
     </li>
   </ul>
+</div>
+<!-- Error alert -->
+<div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+  <div
+       ngf-drag-over-class="'cds-deposit-dragover'"
+       ngf-drop=""
+       ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+       ngf-select=""
+       ngf-model-options="{allowInvalid: false}"
+       ngf-max-size="20GB"
+       ngf-multiple="true"
+  >
+    <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
+      <p class="cds-deposit-box-upload-icon mb-20">
+        <i class="fa fa-3x fa-files-o" aria-hidden="true"></i>
+      </p>
+      <div class="cds-deposit-box-upload-content">
+        <div class="cds-deposit-box-upload-title">
+          <h4>Upload complimentary files for this video</h4>
+        </div>
+        <p class="cds-deposit-box-upload-description"> Or Drag & Drop files</p>
+      </div>
+    </div>
+  </div>
+  <hr class="my-10" />
+  <div class="text-muted">
+    <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
+    <ul>
+      <li>To replace the video file, just upload another video.</li>
+    </ul>
+  </div>
 </div>

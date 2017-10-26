@@ -1,39 +1,43 @@
 <div ng-if="!$ctrl.initialized && !$ctrl.permissionDenied">
   <div class="container-fluid py-20">
     <div class="row">
-      <div class="col-md-offset-2 col-md-8">
+      <div class="col-md-offset-3 col-md-6">
         <div class="cds-deposit-box cds-deposit-box-upload-intro">
-          <ul class="nav nav-pills cds-pills-center" ng-init="active_uploader='local'">
-            <li ng-class="{active: active_uploader=='local'}"><a ng-click="active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
-            <li ng-class="{active: active_uploader=='remote'}"><a ng-click="active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
-          </ul>
-          <div class="tab-content">
-            <div class="tab-pane" ng-class="{active: active_uploader=='local'}">
-              <div
-                   ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
-                   ngf-drop=""
-                   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-                   ngf-select=""
-                   ngf-max-size="20GB"
-                   ngf-multiple="true"
-                   ngf-accept="'{{$ctrl.videoExtensions}}'"
-                   ngf-pattern="'{{$ctrl.videoExtensions}}'"
-              >
-                <div class="cds-deposit-box-upload-wrapper text-center">
-                  <p class="cds-deposit-box-upload-icon">
-                    <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
-                  </p>
-                  <div class="cds-deposit-box-upload-content">
-                    <div class="cds-deposit-box-upload-title">
-                      <h4>Select videos to upload</h4>
-                    </div>
-                    <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
-                    <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
+          <!-- Drag&Drop upload -->
+            <div
+               ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
+               ngf-drop=""
+               ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+               ngf-select=""
+               ngf-max-size="20GB"
+               ngf-multiple="true"
+               ngf-accept="'{{$ctrl.videoExtensions}}'"
+               ngf-pattern="'{{$ctrl.videoExtensions}}'"
+            >
+              <div class="cds-deposit-box-upload-wrapper text-center">
+                <p class="cds-deposit-box-upload-icon">
+                  <i class="fa fa-4x fa-video-camera" aria-hidden="true"></i>
+                </p>
+                <div class="cds-deposit-box-upload-content">
+                  <div class="cds-deposit-box-upload-title">
+                    <h3>Select videos to upload</h3>
                   </div>
+                  <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
+                  <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                 </div>
               </div>
             </div>
-            <div class="tab-pane" ng-class="{active: active_uploader=='remote'}">
+            <div ng-show="active_uploader!='remote'">
+              <p class="text-center pb-40 mb-0 f5 text-muted">
+                <strong>— OR —</strong>
+              </p>
+              <p class="text-center">
+                <a class="btn btn-primary" ng-click="active_uploader='remote'">Upload by URL</a>
+              </p>
+            </div>
+            <!-- Remote uploader -->
+            <div ng-if="active_uploader=='remote'">
+              <hr class="mt-0 mb-40" />
               <cds-remote-uploader
                   template="/static/templates/cds_deposit/remote_upload.html"
                   dropbox-enabled="true"
@@ -45,7 +49,8 @@
                 <div class="dropbox-upload"></div>
               </cds-remote-uploader>
             </div>
-          </div>
+            <!-- Remote uploader -->
+          <!-- Drag&Drop upload -->
         </div>
       </div>
     </div>
@@ -61,7 +66,7 @@
       record="$ctrl.master.metadata"
     >
     <!-- Top status bar -->
-    <div hl-sticky offset-top="65" class="cds-deposit-avc-overall-status mb-20">
+    <div class="cds-deposit-avc-overall-status mb-20">
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-9">
@@ -129,8 +134,8 @@
               schema="$ctrl.childrenSchemaResolved"
               record="child"
             >
-              <div class="cds-deposit-panel panel panel-default">
-                <div class="panel-heading text-muted pa-10">
+              <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
+                <div  hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted pa-20">
                   <span class="text-muted">
                     <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
                   </span>
@@ -171,39 +176,43 @@
           </div>
           <!-- /ADD children -->
           <!-- Uploader Extra -->
-          <div id="cds-deposit-main-uploader" class="cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
-            <ul class="nav nav-pills cds-pills-center" ng-init="global_active_uploader='local'">
-              <li ng-class="{active: global_active_uploader=='local'}"><a ng-click="global_active_uploader='local'" role="tab" data-toggle="tab">Upload local files</a></li>
-              <li ng-class="{active: global_active_uploader=='remote'}"><a ng-click="global_active_uploader='remote'" role="tab" data-toggle="tab">Upload by URL</a></li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane" ng-class="{active: global_active_uploader=='local'}">
-                <div
-                     ngf-drag-over-class="'cds-deposit-dragover'"
-                     ngf-drop=""
-                     ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-                     ngf-model-options="{allowInvalid: false}"
-                     ngf-select=""
-                     ngf-accept="'{{$ctrl.videoExtensions}}'"
-                     ngf-pattern="'{{$ctrl.videoExtensions}}'"
-                     ngf-max-size="20GB"
-                     ngf-multiple="true"
-                >
-                  <div class="cds-deposit-box-upload-wrapper text-center">
-                    <p class="cds-deposit-box-upload-icon">
-                      <i class="fa fa-3x fa-cloud-upload" aria-hidden="true"></i>
-                    </p>
-                    <div class="cds-deposit-box-upload-content">
-                      <div class="cds-deposit-box-upload-title">
-                        <h4>Select videos to upload</h4>
-                      </div>
-                      <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
-                      <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
+          <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
+            <!-- Drag&Drop upload -->
+            <div
+                 ngf-drag-over-class="'cds-deposit-dragover'"
+                 ngf-drop=""
+                 ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+                 ngf-model-options="{allowInvalid: false}"
+                 ngf-select=""
+                 ngf-accept="'{{$ctrl.videoExtensions}}'"
+                 ngf-pattern="'{{$ctrl.videoExtensions}}'"
+                 ngf-max-size="20GB"
+                 ngf-multiple="true"
+            >
+                <div class="cds-deposit-box-upload-wrapper text-center">
+                  <p class="cds-deposit-box-upload-icon">
+                    <i class="fa fa-4x fa-video-camera" aria-hidden="true"></i>
+                  </p>
+                  <div class="cds-deposit-box-upload-content">
+                    <div class="cds-deposit-box-upload-title">
+                      <h3>Select more videos to upload</h3>
                     </div>
+                    <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
+                    <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                   </div>
                 </div>
-                </div>
-              <div class="tab-pane" ng-class="{active: global_active_uploader=='remote'}">
+              </div>
+              <div ng-show="active_uploader!='remote'">
+                <p class="text-center pb-40 mb-0 f5 text-muted">
+                  <strong>— OR —</strong>
+                </p>
+                <p class="text-center">
+                  <a class="btn btn-primary" ng-click="active_uploader='remote'">Upload by URL</a>
+                </p>
+              </div>
+              <!-- Remote uploader -->
+              <div ng-if="active_uploader=='remote'">
+                <hr class="mt-0 mb-40" />
                 <cds-remote-uploader
                     template="/static/templates/cds_deposit/remote_upload.html"
                     dropbox-enabled="true"
@@ -215,7 +224,8 @@
                   <div class="dropbox-upload"></div>
                 </cds-remote-uploader>
               </div>
-            </div>
+              <!-- Remote uploader -->
+            <!-- Drag&Drop upload -->
           </div>
           <div ng-if="$ctrl.duplicateVideos.length" class="alert alert-danger">
             <p>

@@ -16,38 +16,38 @@ Are you sure you want publish the video?<br>
 <div class="text-right">
   <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
     <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
-  </span> 
+  </span>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-default btn-xs mr-10" ng-click="form.infoShown = true">
+    class="btn btn-default btn-sm mr-10" ng-click="form.infoShown = true">
     <i class="fa fa-trash-o text-muted"></i>
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isPristine()'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-xs btn-default "
+    class="btn btn-sm btn-success"
     ng-click="$ctrl.actionHandler('SAVE_PARTIAL')">
   Save
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
-    class="btn btn-xs btn-primary "
+    class="btn btn-sm btn-primary "
     ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
   Publish
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
     ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-xs btn-primary"
+    class="btn btn-sm btn-primary"
     ng-click="form.publishInfoShown = true">
   Publish
   </button>
   <button
     ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
     ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-    class="btn btn-xs btn-default "
+    class="btn btn-sm btn-default "
     ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
   Edit
   </button>

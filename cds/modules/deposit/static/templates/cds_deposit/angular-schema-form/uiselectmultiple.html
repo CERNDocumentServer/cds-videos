@@ -8,7 +8,7 @@
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
     <ui-select
         ng-init="form.$$selectedObjects=$$value$$"
-        ng-if="!(evalExpr(form.options.tagging)||false)"
+        ng-if="!form.options.tagging"
         multiple
         ng-model="form.$$selectedObjects"
         sortable="form.options.sortable||false"
@@ -35,16 +35,15 @@
     </ui-select>
     <ui-select
         ng-init="form.$$selectedObjects=$$value$$"
-        ng-if="(evalExpr(form.options.tagging)||false)"
+        ng-if="form.options.tagging == true"
         multiple
-        tagging
         tagging-label="(custom 'new')"
         ng-model="form.$$selectedObjects"
         sortable="form.options.sortable||false"
         theme="bootstrap"
         ng-disabled="evalExpr(form.readonly)"
-        on-select="form.$$selectedValues.push($item.value);"
-        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value), 1)"
+        on-select="form.$$selectedValues.push($item.value)"
+        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value || $item), 1)"
         class="{{form.options.uiClass}}">
         <ui-select-match
             placeholder="{{

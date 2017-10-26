@@ -26,6 +26,7 @@ var app = angular.module('cds', [
   'ui.bootstrap.dropdown',
   'ui.bootstrap.tooltip',
   'ui.bootstrap.popover',
+  'ui.bootstrap.alert',
 ]);
 
 app.run(function($templateCache) {
@@ -43,6 +44,15 @@ app.run(function($templateCache) {
     '<h3 class="popover-title" ng-bind="uibTitle" ng-if="uibTitle"></h3>' +
     '<div class="popover-content" ng-bind-html="contentExp()"></div>' +
     '</div>'
+  );
+  // Template Cache for bootstrap alert
+  $templateCache.put(
+    'uib/template/alert/alert.html',
+    '<button ng-show="closeable" type="button" class="close" ng-click="close({$event: $event})">' +
+    '<span aria-hidden="true">&times;</span>' +
+    '<span class="sr-only">Close</span>' +
+    '</button>' +
+    '<div ng-transclude></div>'
   );
 });
 
