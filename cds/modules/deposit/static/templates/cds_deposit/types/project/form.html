@@ -1,21 +1,18 @@
 <div class="cds-deposit-panel panel panel-primary">
   <div class="panel-heading"><i class="fa fa-list-ul"></i> Project</div>
     <div class="panel-body">
-      <!-- Alerts -->
+      <!-- Error alert -->
       <div class="alerts" ng-repeat="alert in $ctrl.cdsDepositCtrl.alerts">
         <div ng-if="alert.errors.length > 0 && alert.type == 'danger'">
-          <div class="panel panel-danger">
-             <div class="panel-heading">Errors</div>
-             <div class="panel-body">
-               {{ alert.message }}
-             </div>
-             <ul class="list-group">
-              <li ng-repeat="error in alert.errors" class="list-group-item text-danger"><b>{{ error.field }}</b> {{error.message}}</li>
+          <div class="alert alert-danger" uib-alert close="$ctrl.cdsDepositCtrl.alerts.splice($index, 1)">
+            <strong>{{ alert.message }}</strong>
+            <ul>
+              <li ng-repeat="error in alert.errors"><b>{{ error.field }}</b> {{error.message}}</li>
             </ul>
           </div>
         </div>
       </div>
-      <!-- Alerts -->
+      <!-- Error alert -->
       <!-- Main -->
       <div class="row">
         <div class="col-sm-12">
@@ -57,7 +54,7 @@
             </li>
           </ul>
           <!-- Tab panes -->
-          <div class="tab-content cds-tab-content pa-20 ">
+          <div class="tab-content cds-tab-content pa-20">
             <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
               <div class="row">
                 <div class="col-sm-6">

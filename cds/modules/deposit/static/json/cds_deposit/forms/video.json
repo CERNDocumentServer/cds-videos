@@ -41,6 +41,7 @@
       "placeholder": "Keywords",
       "options": {
         "refreshDelay": 100,
+        "tagging": true,
         "asyncCallback": "$ctrl.autocompleteKeywords",
         "url": "/api/keywords/_suggest"
       }
@@ -346,6 +347,7 @@
       "key": "translations",
       "type": "array",
       "add": "Add translations",
+      "description": "Add metadata translations.",
       "required": false,
       "items": [
         {
@@ -478,8 +480,7 @@
     {
       "key": "related_links",
       "type": "array",
-      "add": "Add related link",
-      "readonly": "model._deposit.status == 'published'",
+      "add": "Add related links",
       "items": [
         {
           "title": "Name",
