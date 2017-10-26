@@ -52,7 +52,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
         that.cdsDepositCtrl.preActions();
         cdsAPI.chainedActions(videoActions)
           .then(
-            that.cdsDepositCtrl.onSuccessAction,
+            that.cdsDepositCtrl.onSuccessActionMultiple,
             that.cdsDepositCtrl.onErrorAction
           )
           .finally(that.cdsDepositCtrl.postActions);
