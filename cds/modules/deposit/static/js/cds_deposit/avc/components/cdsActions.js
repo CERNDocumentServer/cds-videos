@@ -34,7 +34,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
           delete that.cdsDepositCtrl.cdsDepositsCtrl.overallState[that.cdsDepositCtrl.id];
         }
       );
-  };
+    };
 
     this.saveAllPartial = function () {
       var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,
@@ -97,6 +97,11 @@ function cdsActionsCtrl($scope, cdsAPI) {
       }
     };
   };
+
+  $scope.$on('cds.deposit.project.saveAll', function(evt) {
+    that.saveAllPartial();
+  });
+
 }
 
 cdsActionsCtrl.$inject = ['$scope', 'cdsAPI'];
