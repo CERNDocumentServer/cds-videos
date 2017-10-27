@@ -30,8 +30,7 @@
               "removePlugins": "elementspath",
               "removeButtons": ""
             },
-            "description": "Required.",
-            "minLength": 1
+            "description": ""
           }
         ]
       },
@@ -69,6 +68,7 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
+        "onChange": "$ctrl.saveAllChanges(modelValue, form)",
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
         "options": {
           "filterTriggers": ["model.category"],
@@ -181,6 +181,40 @@
           }
         ],
         "startEmpty": false
+      }
+    ]
+  },
+  "collapsed": {
+    "leftColumn": [
+      {
+        "key": "category",
+        "placeholder": "Category",
+        "title": "Category",
+        "type": "strapselect",
+        "htmlClass": "cds-deposit-strap-select",
+        "onChange": "$ctrl.setPermissions(modelValue, form)",
+        "options": {
+          "url": "/api/categories/",
+          "asyncCallback": "$ctrl.autocompleteCategories"
+        },
+        "description": ""
+      }
+    ],
+    "rightColumn": [
+      {
+        "key": "type",
+        "placeholder": "Type",
+        "title": "Type",
+        "type": "strapselect",
+        "htmlClass": "cds-deposit-strap-select",
+        "onChange": "$ctrl.saveAllChanges(modelValue, form)",
+        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
+        "options": {
+          "filterTriggers": ["model.category"],
+          "filter" : "item.category == model.category",
+          "asyncCallback": "$ctrl.autocompleteType"
+        },
+        "description": ""
       }
     ]
   },
