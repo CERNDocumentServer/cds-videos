@@ -52,6 +52,9 @@ function cdsDepositCtrl(
   // Failed subformats list
   that.failedSubformatKeys = [];
 
+  // Action loading
+  that.actionLoading = false;
+
   // Deposit type
   Object.defineProperty(this, 'depositType', {
     get: function() {
@@ -90,6 +93,8 @@ function cdsDepositCtrl(
   // The deposit can have the following depositStates
   this.$onInit = function() {
 
+    // loading
+    this.loading = false;
     this.findFilesByContextType = function(type) {
       return _.find(that.record._files, {'context_type': type});
     }
@@ -699,12 +704,14 @@ function cdsDepositCtrl(
     // Stop loading
     $scope.$emit('cds.deposit.loading.start');
     that.loading = true;
+    that.actionLoading = true;
   };
 
   this.postActions = function() {
     // Stop loading
     $scope.$emit('cds.deposit.loading.stop');
     that.loading = false;
+    that.actionLoading = false;
   };
 
   this.onSuccessActionMultiple = function(response, message) {

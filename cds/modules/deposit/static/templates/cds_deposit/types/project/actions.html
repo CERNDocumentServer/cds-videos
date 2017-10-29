@@ -3,19 +3,19 @@
   ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
   class="btn btn-success"
   ng-click="$ctrl.saveAllPartial()">
-Save
+{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading ? 'Saving ...' : 'Save' }}
 </button>
 <button
   ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
   ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
   class="btn btn-primary"
   ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
-Publish Project
+{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading ? 'Publishing ...' : 'Publish Project' }}
 </button>
 <button
   ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status== "draft"'
   ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
   class="btn btn-default"
   ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
-Edit Project
+{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading ? 'Editing ...' : 'Edit Project' }}
 </button>
