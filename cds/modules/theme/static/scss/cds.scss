@@ -328,8 +328,6 @@ i.sort-handle {
   }
 }
 
-
-
 // login
 
 .cds-login {
@@ -418,7 +416,7 @@ i.sort-handle {
   .cds-deposit-box-upload-icon {
     font-size: 35px;
     i {
-      color: #c5c5c5;
+      color: $btn-info-bg;
     }
   }
 
