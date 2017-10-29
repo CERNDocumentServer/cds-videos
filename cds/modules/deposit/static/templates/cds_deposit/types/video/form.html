@@ -41,39 +41,54 @@
         </div>
         <!-- Category and type -->
         <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-          <dl>
-            <dt>Category</dt>
-            <dd><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></dd>
-            <dt>Type</dt>
-            <dd><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></dd>
-          </dl>
-          <hr class="my-10" />
-          <dl>
-            <dt>Video status</dt>
-            <dd>
-              <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
-                <p class="text-muted mb-0"><span class="label label-primary">Published</span></p>
-              </div>
-              <div ng-hide="$ctrl.cdsDepositCtrl.isPublished()" class="text-muted">
-                The video is <strong>not</strong> published.
-              </div>
-            </dd>
-          </dl>
-          <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
-            <hr class="my-10" />
-            <p class="mt-10">
-              <i class="fa text-muted fa-link"></i>
-              <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
-                Visit video page
-              </a>
-            </p>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-0">Category</p>
+              <p><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-0">Type</p>
+              <p><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
+            </div>
           </div>
+          <hr class="my-10" />
+        </div>
+        <p class="text-muted mb-0">
+          <strong>Video status:</strong>
+        </p>
+        <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
+          <p class="text-muted mb-0"><span class="label label-primary">Published</span></p>
+        </div>
+        <div ng-hide="$ctrl.cdsDepositCtrl.isPublished()" class="text-muted">
+          The video is <strong>not</strong> published.
+        </div>
+        <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
+          <hr class="my-10" />
+          <p class="mt-10">
+            <i class="fa text-muted fa-link"></i>
+            <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+              Visit video page
+            </a>
+          </p>
         </div>
         <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
           <i class="fa fa-info-circle"></i> For publishing the video please select category from the
           <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
         </div>
         <!-- Category and type -->
+        <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.title" class="text-center">
+          <hr class="mt-10 mb-20" />
+          <!-- Inherit button if project is filled in -->
+          <a ng-click="forceInherit = true" class="btn btn-sm btn-info">Inherit metadata from project</a>
+          <modal-dialog show="forceInherit" dialog-title="Inherit metadata from the project" width="50%">
+            <p class="text-left">Please select if you would like to replace all metadata of this video or inherit only the missing metadata from the project.</p>
+            <p class="pull-right">
+              <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, false) ; $parent.hideModal()">Only the missing fields</button>
+              <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, true) ; $parent.hideModal()">Replace all metadata</button>
+            </p>
+          </modal-dialog>
+          <!-- Inherit button if project is filled in -->
+        </div>
       </div>
       <!-- Progress -->
       <div class="col-sm-9">
