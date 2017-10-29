@@ -98,8 +98,49 @@ function cdsDepositCtrl(
       return this.findFilesByContextType('master');
     };
 
+    function accessElement(obj, elem, value) {
+      // Find an element inside an object given a path of properties
+      // If value is given, set element to value
+      var lastPart, parentObj = obj;
+      angular.forEach(ObjectPath.parse(elem), function(part) {
+        if (!obj) {
+          return null;
+        }
+        lastPart = part;
+        parentObj = obj;
+        if (!obj[part] && value) {
+          obj[part] = {};
+        }
+        obj = obj[part];
+      });
+      if (value) {
+        parentObj[lastPart] = value;
+      }
+      return obj;
+    };
+
     var hasNoProperties = function(obj) {
       return Object.getOwnPropertyNames(obj).length == 0;
+    };
+
+    this.inheritMetadata = function(specific, forceInherit) {
+      // Inherit metadata from project
+      var record = that.record;
+      var master = that.cdsDepositsCtrl.master.metadata;
+      var paths = (specific !== undefined ) ? specific : inheritedProperties;
+      angular.forEach(paths, function(propPath) {
+        var inheritedVal = accessElement(master, propPath);
+        var ownElement = accessElement(record, propPath);
+        if ((inheritedVal && !ownElement) || (inheritedVal && forceInherit === true)) {
+          accessElement(record, propPath, inheritedVal);
+        } else if (ownElement instanceof Array &&
+            ownElement.every(hasNoProperties)) {
+          var inheritedArray = angular.copy(inheritedVal);
+          accessElement(record, propPath, inheritedArray);
+        }
+      });
+      // Set form dirty
+      that.setDirty();
     };
 
     this.getTaskFeedback = function(eventId, taskName, taskStatus) {
@@ -669,7 +710,7 @@ function cdsDepositCtrl(
   this.onSuccessActionMultiple = function(response, message) {
     // Emit an event for all deposits
     $scope.$broadcast('cds.deposit.pristine.all');
-    // Go trhour the normal proccess
+    // Go through the normal proccess
     that.onSuccessAction(response, message);
   };
 

@@ -23,7 +23,6 @@
                     <h3>Select videos to upload</h3>
                   </div>
                   <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
-                  <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                 </div>
               </div>
             </div>
@@ -51,6 +50,13 @@
             </div>
             <!-- Remote uploader -->
           <!-- Drag&Drop upload -->
+          <hr class="my-30" />
+          <div class="text-muted">
+            <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
+            <ul>
+              <li>Supported videos are <mark>{{ $ctrl.videoExtensions }}</mark></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -132,7 +138,7 @@
               record="child"
             >
               <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
-                <div  hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted pa-20">
+                <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted pa-20">
                   <span class="text-muted">
                     <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
                   </span>
