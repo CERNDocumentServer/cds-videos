@@ -394,6 +394,9 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     that.selectedRestricted = [];
     // If is restricted then copy the access
     if (that.permissions === 'restricted') {
+      if (!that.cdsDepositCtrl.record._access){
+          that.cdsDepositCtrl.record._access = {}
+      }
       that.cdsDepositCtrl.record._access.read = angular.copy(
         that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted
       );
