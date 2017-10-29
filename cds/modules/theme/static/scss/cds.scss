@@ -60,7 +60,7 @@ html, body {
     // the height of the navbar
     margin-top: 65px !important;
   }
-  .panel-heading {
+  & > .panel-heading {
     line-height: 35px;
   }
 }
