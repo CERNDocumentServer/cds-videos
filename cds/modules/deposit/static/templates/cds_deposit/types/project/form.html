@@ -126,20 +126,6 @@
                   ></form>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-sm-12 pr-0">
-                  <hr class="mb-15" />
-                  <div class="pull-right">
-                      <button
-                        class="btn btn-default"
-                        ng-click="projectCollapsed=!projectCollapsed">
-                        Hide details
-                    </button>
-                    <cds-actions template="/static/templates/cds_deposit/types/project/actions.html">
-                    </cds-actions>
-                  </div>
-                </div>
-              </div>
             </div>
             <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
               <div ng-transclude></div>
@@ -275,6 +261,18 @@
             </div>
           </div>
           <!-- Tab panes -->
+          <div class="col-sm-12 pa-5">
+            <hr class="mb-15" />
+            <div class="pull-right">
+                <button
+                  class="btn btn-default"
+                  ng-click="projectCollapsed=!projectCollapsed">
+                  Hide details
+              </button>
+              <cds-actions template="/static/templates/cds_deposit/types/project/actions.html">
+              </cds-actions>
+            </div>
+          </div>
         </div>
       </div>
       <!-- /Expanded -->
