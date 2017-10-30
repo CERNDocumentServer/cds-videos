@@ -397,7 +397,10 @@ def record_unbuild_url(url):
 def is_deposit(url):
     """Check if it's a deposit or a record."""
     # TODO can we improve check?
-    return 'deposit' in url
+    try:
+        return 'deposit' in url
+    except TypeError:
+        return False
 
 
 def get_master_object(bucket):

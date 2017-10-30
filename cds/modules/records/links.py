@@ -85,8 +85,10 @@ def _fill_video_extra_links(record, links):
 
 def record_link_factory(pid):
     """Record link creation."""
-    links = default_links_factory(pid=pid)
-    _, record = record_resolver.resolve(pid_value=pid.pid_value)
-    _fill_video_extra_links(record=record, links=links)
-
-    return links
+    try:
+        links = default_links_factory(pid=pid)
+        _, record = record_resolver.resolve(pid_value=pid.pid_value)
+        _fill_video_extra_links(record=record, links=links)
+        return links
+    except Exception:
+        return {}
