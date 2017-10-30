@@ -26,7 +26,7 @@
 
 {% set theo_config = {'socialSharing': False} %}
 {% set video_classes = '' %}
-{%- set path = file.file.obj.file.uri | replace(config.VIDEOS_LOCATION, '') %}
+{%- set path = file.file.obj.file.uri | replace(config.VIDEOS_XROOTD_PREFIX, '') %}
 {%- set m3u8_url = config.WOWZA_VIDEO_URL | format(path) %}
 {%- set subtitles = file.subtitles %}
 {% set log_media_views = False %}
