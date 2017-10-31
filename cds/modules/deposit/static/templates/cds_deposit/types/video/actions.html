@@ -11,7 +11,7 @@
   Are you sure you want publish the video?<br>
     <p class="pull-right">
       <button class="btn btn-default" ng-click="$parent.hideModal()">No</button>
-      <button class="btn btn-success" ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit'); $parent.hideModal()">Yes</button>
+      <button class="btn btn-success" ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit'); ;$ctrl.cdsDepositCtrl.changeShowAll(true); $parent.hideModal()">Yes</button>
     </p>
   </modal-dialog>
   <div class="text-right">
@@ -35,7 +35,7 @@
       ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
       ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
       class="btn btn-sm btn-primary "
-      ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit')">
+      ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit');$ctrl.cdsDepositCtrl.changeShowAll(true)">
       {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
     </button>
     <button
@@ -49,7 +49,7 @@
       ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
       ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-sm btn-default "
-      ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit')">
+      ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit');$ctrl.cdsDepositCtrl.changeShowAll(false)">
     {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Editing ...' : 'Edit' }}
     </button>
   </div>
