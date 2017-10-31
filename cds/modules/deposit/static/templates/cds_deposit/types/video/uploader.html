@@ -100,6 +100,7 @@
         ngf-accept="'image/*'"
         ngf-pattern="'image/*'"
         ngf-max-size="20GB"
+        ng-if="!$ctrl.cdsDepositCtrl.isPublished()"
       ><i class="fa fa-plus-square"></i></a>
     </span>
   </div>
@@ -128,6 +129,7 @@
     Subtitles
     <span class="pull-right">
       <a
+        ng-if="!$ctrl.cdsDepositCtrl.isPublished()"
         ng-click=""
         ngf-model-options="{allowInvalid: false}"
         ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
@@ -139,10 +141,16 @@
       ><i class="fa fa-plus-square"></i></a>
     </span>
   </div>
+  <div ng-switch-when="0" class="panel-body text-center" ng-if="$ctrl.cdsDepositCtrl.isPublished()">
+    <p class="text-muted text-center f7">
+      No subtitles.
+    </p>
+  </div>
   <div
   ngf-drag-over-class="'cds-deposit-dragover'"
   ngf-model-options="{allowInvalid: false}"
   ngf-drop=""
+  ng-if="!$ctrl.cdsDepositCtrl.isPublished()"
   ngf-select=""
   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles, {'X-Invenio-File-Tags': 'context_type=subtitle;media_type=subtitle'})"
   ngf-pattern="'.vtt'"
@@ -150,12 +158,11 @@
   ngf-validate-fn="$ctrl.validateSubtitles($file)"
   ngf-max-size="20GB"
   ngf-multiple="true"
-
     class="panel-body text-center" ng-switch-when="0">
     <p class="text-muted text-center f7">
       No subtitles.
     </p>
-    <p class="text-muted text-center f8"
+    <p  class="text-muted text-center f8"
 
     >
       Drag & Drop or <a ng-click=""
@@ -291,4 +298,10 @@
       <li>To replace the video file, just upload another video.</li>
     </ul>
   </div>
+</div>
+<div ng-if="$ctrl.cdsDepositCtrl.isPublished()" class="cds-deposit-box text-muted">
+  <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
+  <ul>
+    <li>Click the <strong>Edit</strong> button on the top right corner to add more files.</li>
+  </ul>
 </div>

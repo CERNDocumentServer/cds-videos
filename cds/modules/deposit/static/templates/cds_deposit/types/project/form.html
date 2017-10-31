@@ -1,6 +1,6 @@
 <div class="panel cds-deposit-panel panel-default">
-  <div class="panel-heading">
-    <i class="fa fa-list-ul"></i> Project
+  <div class="panel-heading px-20 py-10">
+    <span class=" text-muted"><i class="fa fa-list-ul"></i> Project</span>
     <div class="pull-right">
       <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
       <modal-dialog show="dialogShown" dialog-title="What is a project?" width="50%">
@@ -168,6 +168,7 @@
                    on-remove="$ctrl.onRemoveValue($item, $model, '_access.update');$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update"
                    ng-model="$ctrl.selectedShare"
                    theme="bootstrap"
+                   ng-disabled="$ctrl.cdsDepositCtrl.isPublished()"
                    title="Search for names"
                   >
                    <ui-select-match
