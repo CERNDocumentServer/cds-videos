@@ -103,6 +103,11 @@ function cdsDepositCtrl(
     this.initShowAll();
     // loading
     this.loading = false;
+
+    // save previous values for category and type to detect when the user has changed his selection
+    this.projectPreviousCategory = this.record.category;
+    this.projectPreviousType = this.record.type;
+
     this.findFilesByContextType = function(type) {
       return _.find(that.record._files, {'context_type': type});
     }
@@ -643,14 +648,10 @@ function cdsDepositCtrl(
     this.postSuccessProcess = function(responses) {
       // Get only the latest response (in case of multiple actions)
       var response = (responses[responses.length - 1] || responses).data;
-      // Update record
-      if (this.updateRecordAfterSuccess) {
-        this.record = angular.merge({}, this.record, response.metadata);
-      }
+      // Update record: use _ and not ng because otherwise it will destroy references to the parent record
+      that.record = _.merge(that.record, response.metadata);
       // Update links
-      if (this.updateLinksAfterSuccess) {
-        this.links = response.links;
-      }
+      that.links = response.links;
     };
 
     this.postErrorProcess = function(response) {
@@ -673,7 +674,7 @@ function cdsDepositCtrl(
   };
 
   // Do a single action at once
-  this.makeSingleAction = function(action, redirect) {
+  this.makeSingleAction = function(action) {
     var cleanRecord = cdsAPI.cleanData(that.record),
       url = cdsAPI.guessEndpoint(cleanRecord, that.depositType, action, that.links);
 
@@ -686,7 +687,7 @@ function cdsDepositCtrl(
   };
 
   // Do multiple actions at once
-  this.makeMultipleActions = function(actions, redirect) {
+  this.makeMultipleActions = function(actions) {
     var promises = [];
     var cleanRecord = cdsAPI.cleanData(that.record);
     angular.forEach(
@@ -821,7 +822,6 @@ cdsDepositCtrl.$inject = [
  *   ``children`` a new ``cds-deposit`` directive will be generated.
  * @attr {String} index - The deposit index in the list of deposits.
  * @attr {Boolean} master - If this deposit is the ``master``.
- * @attr {Boolean} updateRecordAfterSuccess - Update the record after action.
  * @attr {Integer} updateRecordInBackground - Update the record in background.
  * @attr {String} schema - The URI for the deposit type schema.
  * @attr {Object} links - The deposit action links (i.e. ``self``).
@@ -831,7 +831,6 @@ cdsDepositCtrl.$inject = [
  *  <cds-deposit
  *   master="true"
  *   links="$ctrl.master.links"
- *   update-record-after-success="true"
  *   schema="{{ $ctrl.masterSchema }}"
  *   record="$ctrl.master.metadata"
  *  ></cds-deposit>
@@ -843,7 +842,6 @@ function cdsDeposit() {
       index: '=',
       master: '@',
       // Interface related
-      updateRecordAfterSuccess: '@',
       updateRecordInBackground: '@?',
       // Deposit related
       id: '=',

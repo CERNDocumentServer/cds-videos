@@ -36,6 +36,10 @@ function cdsActionsCtrl($scope, cdsAPI) {
       );
     };
 
+    /*
+     * Save videos first, then save project: this is because the save project
+     * response will contain also the videos metadata, which must be up-to-date.
+     */
     this.saveAllPartial = function () {
       var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,
         master = depositsCtrl.master,
@@ -57,51 +61,46 @@ function cdsActionsCtrl($scope, cdsAPI) {
           )
           .finally(that.cdsDepositCtrl.postActions);
       }
-
-      function getVideoActions(actionName, videos) {
-        return videos
-            .filter(function (video) {
-              return video._deposit.status === 'draft';
-            })
-            .map(function (video) {
-              return cdsAPI.cleanData(video);
-            })
-            .map(function (cleanedVideo) {
-              var depositType = 'video',
-                url = cdsAPI.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
-
-              return function () {
-                return cdsAPI.makeAction(
-                  url,
-                  depositType,
-                  actionName,
-                  cleanedVideo
-                );
-              };
-            });
-      }
-
-      function getProjectAction(actionName, master, project) {
-        var cleanedProject = cdsAPI.cleanData(project),
-          depositType = 'project',
-          url = cdsAPI.guessEndpoint(cleanedProject, depositType, actionName, master.links);
-
-          return function () {
-            return cdsAPI.makeAction(
-              url,
-              depositType,
-              actionName,
-              cleanedProject
-            );
-          };
-      }
     };
+
+    function getVideoActions(actionName, videos) {
+      return videos
+          .filter(function (video) {
+            return video._deposit.status === 'draft';
+          })
+          .map(function (video) {
+            return cdsAPI.cleanData(video);
+          })
+          .map(function (cleanedVideo) {
+            var depositType = 'video',
+              url = cdsAPI.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
+
+            return function () {
+              return cdsAPI.makeAction(
+                url,
+                depositType,
+                actionName,
+                cleanedVideo
+              );
+            };
+          });
+    }
+
+    function getProjectAction(actionName, master, project) {
+      var cleanedProject = cdsAPI.cleanData(project),
+        depositType = 'project',
+        url = cdsAPI.guessEndpoint(cleanedProject, depositType, actionName, master.links);
+
+        return function () {
+          return cdsAPI.makeAction(
+            url,
+            depositType,
+            actionName,
+            cleanedProject
+          );
+        };
+    }
   };
-
-  $scope.$on('cds.deposit.project.saveAll', function(evt) {
-    that.saveAllPartial();
-  });
-
 }
 
 cdsActionsCtrl.$inject = ['$scope', 'cdsAPI'];

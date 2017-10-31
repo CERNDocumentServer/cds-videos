@@ -371,21 +371,84 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     }
   }
 
-  // Get access rights based on category
-  this.setPermissions = function(modelValue, form) {
+  function getVideosAlreadyPublished() {
+    var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,
+      project = depositsCtrl.master.metadata,
+      videos = project.videos;
+      return videos
+        .filter(function (video) {
+          return video._deposit.status === 'published';
+        })
+        .map(function (video) {
+          return video.title.title;
+        });
+  }
+
+  // handle category/type changes
+  this.alreadyPublishedVideosTitles = []
+  this.showCategoryTypeChangeDialog = false;
+  this.updateCategoryAndPermissions = function(modelValue, form) {
+    // invalidate any previously selected type
+    that.cdsDepositCtrl.record.type = undefined;
+
+    if (!waitForAlreadyPublishedVideosWarning()) {
+      this.updateCategoryTypeAndPermissions();
+    }
+  }
+
+  this.updateTypeAndPermissions = function(modelValue, form) {
+    if (!waitForAlreadyPublishedVideosWarning()) {
+      this.updateCategoryTypeAndPermissions();
+    }
+  }
+
+  this.rollbackCategoryTypeChange = function() {
+    if (that.cdsDepositCtrl.depositType === 'project') {
+      that.cdsDepositCtrl.record.category = that.cdsDepositCtrl.projectPreviousCategory;
+      that.cdsDepositCtrl.record.type = that.cdsDepositCtrl.projectPreviousType;
+    }
+  }
+
+  function waitForAlreadyPublishedVideosWarning() {
+    // check if any video is already published
+    that.alreadyPublishedVideosTitles = getVideosAlreadyPublished();
+    if (that.alreadyPublishedVideosTitles.length > 0) {
+      // trigger the visualization of the dialog to ask confirmation
+      that.showCategoryTypeChangeDialog = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // category or type changed
+  this.updateCategoryTypeAndPermissions = function() {
+    if (that.cdsDepositCtrl.depositType === 'project') {
+      // update previous values to current
+      that.cdsDepositCtrl.projectPreviousCategory = that.cdsDepositCtrl.record.category;
+      that.cdsDepositCtrl.projectPreviousType = that.cdsDepositCtrl.record.type;
+
+      // save project
+      makeActionWithPreAndPost('SAVE_PARTIAL')
+        // update permissions/access rights
+        .then(function() {
+          updatePermissions();
+          that.applyNewAccessRights();
+        });
+    }
+  }
+
+  function updatePermissions() {
     // Get new access rights
-    this.getPermissionsFromCategory();
+    that.getPermissionsFromCategory();
     // Set permission for the new access rights
     that.permissions =
       that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public
         ? 'public' : 'restricted';
-    // Change Access
-    that.changeAccess();
-    that.saveAllChanges();
   }
 
-  // Handle change of access rights
-  this.changeAccess = function() {
+  // Compute new access rights and emit event to update all videos
+  this.applyNewAccessRights = function() {
     // Delete any previous permissions to read (if exists), without changing the update permissions
     if (that.cdsDepositCtrl.record._access) {
       delete that.cdsDepositCtrl.record._access.read;
@@ -406,36 +469,50 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Set the form dirty
     that.cdsDepositCtrl.setDirty();
     // Update permissions to videos
-    if (that.cdsDepositCtrl.master) {
+    if (that.cdsDepositCtrl.depositType === 'project') {
       $scope.$emit(
         'cds.deposit.project.permissions.update', that.cdsDepositCtrl.record._access, that.permissions
       );
     }
   }
 
-  // Broadcast event to perform the save partials action
-  this.saveAllChanges = function() {
-    // save when type (of category) is set
-    if (that.cdsDepositCtrl.record.type) {
-      $scope.$broadcast('cds.deposit.project.saveAll');
-    }
-  }
-
-  // Listen for permission change
+  // Listen for permission/access rights change
   $scope.$on('cds.deposit.video.permissions.update', function(evt, _access, permissions) {
-    if (!that.cdsDepositCtrl.master) {
-      // Set the access
-      that.cdsDepositCtrl.record._access = angular.copy(
-        _access || {}
-      );
-      // Update also the model
-      that.selectedRestricted = that.cdsDepositCtrl.record._access.read;
-      // Set the permissions
-      that.permissions = angular.copy(permissions);
-      // Set the form dirty
-      that.cdsDepositCtrl.setDirty();
+    var ctrl = that.cdsDepositCtrl;
+    if (ctrl.depositType === 'video') {
+      var deferred = $q.defer();
+        actions = deferred.promise;
+
+      // if needed, unpublish the video first
+      if (ctrl.isPublished()) {
+        actions.then(makeActionWithPreAndPost('EDIT'));
+      }
+
+      // Apply the new access rights
+      actions
+        .then(function () {
+          that.cdsDepositCtrl.record._access = angular.copy(
+            _access || {}
+          );
+          // Update also the model
+          that.selectedRestricted = that.cdsDepositCtrl.record._access.read;
+          // Set the permissions
+          that.permissions = angular.copy(permissions);
+          // Set the form dirty
+          that.cdsDepositCtrl.setDirty();
+        });
+
+        deferred.resolve();
     }
   });
+
+  function makeActionWithPreAndPost(actionName) {
+    var ctrl = that.cdsDepositCtrl;
+    ctrl.preActions();
+    return ctrl.makeSingleAction(actionName)
+      .then(ctrl.onSuccessAction, ctrl.onErrorAction)
+      .finally(ctrl.postActions);
+  }
 }
 
 cdsFormCtrl.$inject = [

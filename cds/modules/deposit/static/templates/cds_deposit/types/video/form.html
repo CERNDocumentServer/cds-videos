@@ -279,7 +279,7 @@
                 <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
                   <select
                     ng-model="$ctrl.permissions"
-                    ng-change="$ctrl.changeAccess()"
+                    ng-change="$ctrl.applyNewAccessRights()"
                     class="form-control"
                     ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
                   >
@@ -347,7 +347,7 @@
   <div ng-show="$ctrl.cdsDepositCtrl.isPublished()" class="row">
     <div class="col-sm-12 text-center">
       <div class="px-20">
-        <hr class="my-20" />
+        <hr class="mb-15" />
         <button class="btn btn-sm btn-default" ng-click="$ctrl.cdsDepositCtrl.showAll = !$ctrl.cdsDepositCtrl.showAll">
           {{ $ctrl.cdsDepositCtrl.showAll ? 'Show less' : 'Show more' }}
         </button>

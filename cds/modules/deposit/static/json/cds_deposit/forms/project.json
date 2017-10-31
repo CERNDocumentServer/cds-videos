@@ -56,7 +56,7 @@
         "title": "Category",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.setPermissions(modelValue, form)",
+        "onChange": "$ctrl.updateCategoryAndPermissions(modelValue, form)",
         "options": {
           "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
@@ -68,7 +68,7 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.saveAllChanges(modelValue, form)",
+        "onChange": "$ctrl.updateTypeAndPermissions(modelValue, form)",
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
         "options": {
           "filterTriggers": ["model.category"],
@@ -192,7 +192,7 @@
         "title": "Category",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.setPermissions(modelValue, form)",
+        "onChange": "$ctrl.updateCategoryAndPermissions(modelValue, form)",
         "options": {
           "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
@@ -207,7 +207,7 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.saveAllChanges(modelValue, form)",
+        "onChange": "$ctrl.updateTypeAndPermissions(modelValue, form)",
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
         "options": {
           "filterTriggers": ["model.category"],
