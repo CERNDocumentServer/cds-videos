@@ -59,7 +59,7 @@
           <div class="col-sm-12 text-center">
             <hr class="mb-15" />
             <button
-              class="btn btn-default"
+              class="btn btn-sm btn-default"
               ng-click="projectCollapsed=!projectCollapsed">
               Show details
             </button>
@@ -74,7 +74,7 @@
             <li role="presentation" ng-class="{active: active=='metadata'}">
               <a ng-click="active='metadata'" role="tab" data-toggle="tab">
                 Basic Info
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[0].$invalid || $ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-circle text-danger"></i></small>
+                <small uib-tooltip-html="'Validation error, check metadata.'" ng-show="$ctrl.cdsDepositCtrl.depositFormModels[0].$invalid || $ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='files'}">
@@ -85,19 +85,19 @@
             <li role="presentation" ng-class="{active: active=='licenses'}">
               <a ng-click="active='licenses'" role="tab" data-toggle="tab">
                 Licences
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[2].$invalid"><i class="fa fa-circle text-danger"></i></small>
+                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[2].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='translations'}">
               <a ng-click="active='translations'" role="tab" data-toggle="tab">
                 Translations
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[3].$invalid"><i class="fa fa-circle text-danger"></i></small>
+                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[3].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='access'}">
               <a ng-click="active='access'" role="tab" data-toggle="tab">
                 Access rights
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[4].$invalid"><i class="fa fa-circle text-danger"></i></small>
+                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[4].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
           </ul>
@@ -266,7 +266,7 @@
             <hr class="mb-15" />
             <div class="pull-right">
                 <button
-                  class="btn btn-default"
+                  class="btn btn-sm btn-default"
                   ng-click="projectCollapsed=!projectCollapsed">
                   Hide details
               </button>
