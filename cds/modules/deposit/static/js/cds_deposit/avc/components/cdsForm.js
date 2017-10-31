@@ -63,12 +63,20 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   });
 
   this.removeValidationMessage = function(fieldValue, form) {
-    // Reset validation only if the filed has been changed
-    if (form.validationMessage) {
-      // If the field has changed remove the error
+    // If the field has changed remove the error
+    $scope.$broadcast(
+      'schemaForm.error.' + form.key.join('.'),
+      'backendValidationError',
+      true
+    );
+    // This removes the error from the whole array, this is for now applies
+    // to ``contributors`` because we change the whole object instead of
+    // an attribute (i.e. ``name``).
+    if (form.key && form.key[0] === 'contributors') {
+      form.key.pop();
       $scope.$broadcast(
         'schemaForm.error.' + form.key.join('.'),
-        'backendValidationError',
+        'tv4-302',
         true
       );
     }
@@ -240,7 +248,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Make it dirty
     that.cdsDepositCtrl.setDirty();
   }
-
 
   this.autocompleteAccess = function(query) {
     var userInput = query.length ? [{ name: query, email: query, isUserInput: true }] : [],
