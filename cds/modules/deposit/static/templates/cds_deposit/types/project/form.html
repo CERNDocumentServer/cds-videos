@@ -25,9 +25,27 @@
         </div>
       </div>
       <!-- /Alerts -->
+      <!-- Modal: change category/type warning -->
+      <modal-dialog show="$ctrl.showCategoryTypeChangeDialog" dialog-title="Are you sure you want to change the category/type?" width="50%">
+        <p class="text-left">
+          You are about to change the category or the type of videos.<br />
+          The following videos are already <strong>published</strong>:
+          <ul>
+              <li ng-repeat="title in $ctrl.alreadyPublishedVideosTitles">
+                  {{ title }}
+              </li>
+          </ul>
+          If you confirm this change, videos will be changed to "draft" status first, their category
+          and type will be updated to your new selection and you will need to republish the videos to apply the change.
+        </p>
+        <p class="pull-right">
+          <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.rollbackCategoryTypeChange()">Cancel</button>
+          <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.updateCategoryTypeAndPermissions()">Confirm</button>
+        </p>
+      </modal-dialog>
+      <!-- /Modal -->
       <!-- Collapsed -->
-      <div  ng-init="projectCollapsed=true" ng-show="projectCollapsed">
-
+      <div ng-init="projectCollapsed=true" ng-show="projectCollapsed">
         <div class="row">
           <div class="col-sm-6">
             <form
@@ -202,7 +220,7 @@
                   <div ng-show="$ctrl.cdsDepositCtrl.record.category">
                     <select
                       ng-model="$ctrl.permissions"
-                      ng-change="$ctrl.changeAccess()"
+                      ng-change="$ctrl.applyNewAccessRights()"
                       class="form-control"
                       ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
                     >
