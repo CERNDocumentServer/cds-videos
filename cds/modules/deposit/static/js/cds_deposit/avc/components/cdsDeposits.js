@@ -114,7 +114,7 @@ function cdsDepositsCtrl(
       // Do some magic
       var data = JSON.parse(evt.data || '{}');
       var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
-      console.info('RECEIVED', evt.type, data);
+      console.debug('RECEIVED', evt.type, data);
       $scope.$broadcast(deposit_, evt.type, data);
     };
 
@@ -128,7 +128,7 @@ function cdsDepositsCtrl(
     };
 
     that.sseListener.onopen = function(msg) {
-      console.info('SEE connection has been opened', msg);
+      console.debug('SEE connection has been opened', msg);
     };
 
     angular.forEach(depositSSEEvents, function(type, index) {
@@ -425,10 +425,6 @@ function cdsDepositsCtrl(
       );
     }
   );
-
-  this.broadcastEvent = function (eventName, args) {
-    $scope.$broadcast(eventName, args);
-  };
 
 }
 
