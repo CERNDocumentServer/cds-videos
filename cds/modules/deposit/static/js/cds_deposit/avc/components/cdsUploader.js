@@ -318,8 +318,7 @@ function cdsUploaderCtrl(
           type: 'error',
           title: 'Duplicate file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
           body: that.duplicateFiles.join(', '),
-          bodyOutputType: 'trustedHtml',
-          timeout: 6000
+          bodyOutputType: 'trustedHtml'
         });
       }
 
@@ -329,8 +328,7 @@ function cdsUploaderCtrl(
           type: 'error',
           title: 'Invalid file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
           body: _.map(invalidFiles, 'name').join(', '),
-          bodyOutputType: 'trustedHtml',
-          timeout: 6000
+          bodyOutputType: 'trustedHtml'
         });
       }
 
@@ -376,8 +374,7 @@ function cdsUploaderCtrl(
                 toaster.pop({
                   type: 'error',
                   title: 'Error replacing the file: worflow failing to start.',
-                  bodyOutputType: 'trustedHtml',
-                  timeout: 8000
+                  bodyOutputType: 'trustedHtml'
                 });
               }
             );
@@ -451,8 +448,7 @@ function cdsUploaderCtrl(
                 type: 'info',
                 title: 'The file(s) has been successfully uploaded.',
                 body: (_.map(response, 'data.key') || []).join(', '),
-                bodyOutputType: 'trustedHtml',
-                timeout: 8000
+                bodyOutputType: 'trustedHtml'
               });
             },
             function error(response) {
@@ -463,8 +459,7 @@ function cdsUploaderCtrl(
                 type: 'error',
                 title: 'Error uploading the file(s).',
                 body: (_.map(response, 'config.data.key') || []).join(', '),
-                bodyOutputType: 'trustedHtml',
-                timeout: 8000
+                bodyOutputType: 'trustedHtml'
               });
             }
           ).finally(
@@ -576,8 +571,7 @@ function cdsUploaderCtrl(
             toaster.pop({
               type: 'success',
               title: 'The file has been succesfuly deleted.',
-              bodyOutputType: 'trustedHtml',
-              timeout: 8000
+              bodyOutputType: 'trustedHtml'
             });
           },
           function error(response) {
@@ -587,8 +581,7 @@ function cdsUploaderCtrl(
             toaster.pop({
               type: 'error',
               title: 'Error deleting the file.',
-              bodyOutputType: 'trustedHtml',
-              timeout: 8000
+              bodyOutputType: 'trustedHtml'
             });
           }
         );

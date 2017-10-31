@@ -267,8 +267,7 @@ function cdsDepositsCtrl(
           type: 'error',
           title: 'Invalid file(s)',
           body: _.map(invalidFiles, 'name').join(', '),
-          bodyOutputType: 'trustedHtml',
-          timeout: 6000
+          bodyOutputType: 'trustedHtml'
         });
       }
       // for each files create child
