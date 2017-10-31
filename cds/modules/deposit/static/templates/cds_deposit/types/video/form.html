@@ -11,27 +11,31 @@
 </div>
 <!-- Error alert -->
 <!-- Fill metadata suggestion -->
-<div uib-alert close="$ctrl.cdsDepositCtrl.metadataToFill=[]" class="alert alert-warning" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
-  Extracted metadata can be used to automatically fill part of the form. <a ng-click="metadataModal = true">Click here to see the extracted metadata</a>
+<div ng-show="!$ctrl.cdsDepositCtrl.isPublished()">
+  <div uib-alert close="$ctrl.cdsDepositCtrl.metadataToFill=[]" class="alert alert-warning" role="alert" ng-show="$ctrl.cdsDepositCtrl.metadataToFill">
+    Extracted metadata can be used to automatically fill part of the form. <a ng-click="metadataModal = true">Click here to see the extracted metadata</a>
+  </div>
+  <modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="50%">
+    <ul>
+      <li ng-repeat="(key,value) in $ctrl.cdsDepositCtrl.getMetadataToDisplay()">
+        <strong>{{key}}</strong> {{value}}
+      </li>
+    </ul>
+    <p class="pull-right">
+      <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
+      <button class="btn btn-success" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(true) ; $parent.hideModal()">Yes</button>
+    </p>
+  </modal-dialog>
 </div>
-<modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="50%">
-  <ul>
-    <li ng-repeat="(key,value) in $ctrl.cdsDepositCtrl.getMetadataToDisplay()">
-      <strong>{{key}}</strong> {{value}}
-    </li>
-  </ul>
-  <p class="pull-right">
-    <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
-    <button class="btn btn-success" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(true) ; $parent.hideModal()">Yes</button>
-  </p>
-</modal-dialog>
-<!-- Main form -->
+<!-- Fill metadata suggestion -->
+<!-- Waiting for Upload -->
 <div class="row" ng-show="!$ctrl.cdsDepositCtrl.waitingUpload">
-  <div class="col-sm-12">
+  <!-- Brief view -->
+  <div ng-show="$ctrl.cdsDepositCtrl.isPublished() && !$ctrl.cdsDepositCtrl.showAll" class="col-sm-12">
     <div class="row">
       <div class="col-sm-3">
-        <div
-         class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
+        <!-- Video preview -->
+        <div class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
          ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
           <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
             <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
@@ -39,290 +43,321 @@
           </div>
           <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
         </div>
-        <!-- Category and type -->
-        <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-0">Category</p>
-              <p><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
-            </div>
-            <div class="col-md-6">
-              <p class="mb-0">Type</p>
-              <p><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
-            </div>
-          </div>
-          <hr class="my-10" />
-        </div>
-        <p class="text-muted mb-0">
-          <strong>Video status:</strong>
-        </p>
-        <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
-          <p class="text-muted mb-0"><span class="label label-primary">Published</span></p>
-        </div>
-        <div ng-hide="$ctrl.cdsDepositCtrl.isPublished()" class="text-muted">
-          The video is <strong>not</strong> published.
-        </div>
-        <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
-          <hr class="my-10" />
-          <p class="mt-10">
-            <i class="fa text-muted fa-link"></i>
-            <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
-              Visit video page
-            </a>
-          </p>
-        </div>
-        <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-          <i class="fa fa-info-circle"></i> For publishing the video please select category from the
-          <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
-        </div>
-        <!-- Category and type -->
-        <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.title" class="text-center">
-          <hr class="mt-10 mb-20" />
-          <!-- Inherit button if project is filled in -->
-          <a ng-click="forceInherit = true" class="btn btn-sm btn-info">Inherit metadata from project</a>
-          <modal-dialog show="forceInherit" dialog-title="Inherit metadata from the project" width="50%">
-            <p class="text-left">Please select if you would like to replace all metadata of this video or inherit only the missing metadata from the project.</p>
-            <p class="pull-right">
-              <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, false) ; $parent.hideModal()">Only the missing fields</button>
-              <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, true) ; $parent.hideModal()">Replace all metadata</button>
-            </p>
-          </modal-dialog>
-          <!-- Inherit button if project is filled in -->
-        </div>
+        <!-- Video preview -->
       </div>
-      <!-- Progress -->
       <div class="col-sm-9">
-        <div class="col-sm-12">
-          <!-- FAILURE -->
-          <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
-            <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
-                <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
-            </div>
-          </div>
-          <!-- Failed transcodings -->
-          <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
-            <div class="pull-left">
-              <b>Failed transcodings:</b>
-              <ul>
-                <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
-                  {{ key }}
-                </li>
-              </ul>
-            </div>
-            <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
-              <i class="fa fa-undo"></i>
-            </button>
-          </div>
-          <!-- PENDING -->
-          <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
-            <div class="progress">
-              <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                Loading ...
-              </div>
-            </div>
-          </div>
-          <!-- STARTED -->
-          <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
-            <div class="progress">
-                <div ng-hide="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                  {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }}
-                </div>
-                <div ng-show="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage || 100}}%;">
-                  {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
-                </div>
-            </div>
-          </div>
-          <!-- SUCCESS -->
-          <div ng-show="$ctrl.cdsDepositCtrl.displaySuccess()" class="row">
-            <div class="progress">
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
-                <strong>Success</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Published view -->
-          <div ng-hide="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && showAll)">
-            <div class="row">
-              <div class="col-sm-12">
-                <h4 class="mb-5 mt-0">
-                  <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
-                    {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
-                  </a>
-                </h4>
-                <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description | stripTags | trustHtml) || 'No description'"></p>
-              </div>
-            </div>
-          </div>
-          <!-- Published view -->
-          <!-- Edit view -->
-          <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && showAll)">
-            <div class="col-sm-12">
-              <!-- Nav tabs -->
-              <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
-                <li role="presentation" ng-class="{active: active=='metadata'}">
-                  <a ng-click="active='metadata'" role="tab" data-toggle="tab">
-                    Basic Info
-                    <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[0].$invalid"><i class="fa fa-circle text-danger"></i></small>
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='files'}">
-                  <a ng-click="active='files'" role="tab" data-toggle="tab">
-                    Files
-                    <small ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length || $ctrl.cdsDepositCtrl.stateReporter.file_video_metadata_extraction.status == 'FAILURE' || $ctrl.cdsDepositCtrl.stateReporter.file_video_extract_frames.status == 'FAILURE'"><i class="fa fa-circle text-danger"></i></small>
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='licenses'}">
-                  <a ng-click="active='licenses'" role="tab" data-toggle="tab">
-                    Licences
-                    <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-circle text-danger"></i></small>
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='translations'}">
-                  <a ng-click="active='translations'" role="tab" data-toggle="tab">
-                    Translations
-                    <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[2].$invalid"><i class="fa fa-circle text-danger"></i></small>
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='related_links'}">
-                  <a ng-click="active='related_links'" role="tab" data-toggle="tab">
-                    Related links
-                    <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[3].$invalid"><i class="fa fa-circle text-danger"></i></small>
-                  </a>
-                </li>
-                <li role="presentation" ng-class="{active: active=='access'}">
-                  <a ng-click="active='access'" role="tab" data-toggle="tab">
-                    Access rights
-                  </a>
-                </li>
-              </ul>
-              <!-- Tab panes -->
-              <div class="tab-content cds-tab-content pa-20">
-                <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
-                  <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModels[0]"
-                    class="form"
-                    sf-schema="$ctrl.cdsDepositCtrl.schema"
-                    sf-form="$ctrl.form.basic"
-                    sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="$ctrl.sfOptions"
-                  ></form>
-                </div>
-                <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
-                  <div ng-transclude></div>
-                </div>
-                <div ng-show="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
-                  <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModels[1]"
-                    class="form"
-                    sf-schema="$ctrl.cdsDepositCtrl.schema"
-                    sf-form="$ctrl.form.licenses"
-                    sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="$ctrl.sfOptions"
-                  ></form>
-                </div>
-                <div ng-show="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
-                  <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModels[2]"
-                    class="form"
-                    sf-schema="$ctrl.cdsDepositCtrl.schema"
-                    sf-form="$ctrl.form.translations"
-                    sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="$ctrl.sfOptions"
-                  ></form>
-                </div>
-                <div ng-show="active=='related_links'" role="tabpanel" ng-class="{active: active=='related_links'}"  class="tab-pane">
-                  <form
-                    name="$ctrl.cdsDepositCtrl.depositFormModels[3]"
-                    class="form"
-                    sf-schema="$ctrl.cdsDepositCtrl.schema"
-                    sf-form="$ctrl.form.related_links"
-                    sf-model="$ctrl.cdsDepositCtrl.record"
-                    sf-options="$ctrl.sfOptions"
-                  ></form>
-                </div>
-                <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
-                  <div class="row">
-                    <div class="col-sm-12">
-                      <h4>Record restrictions</h4>
-                      <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
-                        <select
-                          ng-model="$ctrl.permissions"
-                          ng-change="$ctrl.changeAccess()"
-                          class="form-control"
-                          ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
-                        >
-                          <option value="public" ng-selected="$ctrl.permissions === 'public'">
-                            Public
-                          </option>
-                          <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
-                            Restricted
-                          </option>
-                        </select>
-                        <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read" class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
-                          <label class="control-label ng-binding">
-                            Choose who has access to the record
-                          </label>
-                          <ui-select
-                           multiple
-                           theme="bootstrap"
-                           ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
-                           title="Search for names"
-                           on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
-                           on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
-                           ng-model="$ctrl.selectedRestricted"
-                          >
-                           <ui-select-match
-                            ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
-                            placeholder="Search for names"
-                          >
-                            {{ $item.email || $item }}
-                          </ui-select-match>
-                           <ui-select-choices
-                            repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
-                            refresh="$ctrl.autocompleteAccess($select.search)"
-                            refresh-delay="100"
-                           >
-                             <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
-                             <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>
-                           </ui-select-choices>
-                           <ui-select-no-choice>
-                             <p class="pa-5 mb-0">
-                               <span ng-show="$select.search">
-                                 Not results for "{{$select.search}}"
-                               </span>
-                               <span ng-show="!$select.search">
-                                 Start typing a name ...
-                               </span>
-                             </p>
-                           </ui-select-no-choice>
-                         </ui-select>
-                        </div>
-                      </div>
-                      <div ng-show="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
-                        Please select a category for the project.
-                      </div>
-                    </div>
-                    <!-- Record permissions -->
-                  </div>
-                </div>
-            </div>
-          </div>
-        </div>
-        <!-- EDIT view -->
+        <ul class="list-inline">
+          <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+          <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+          <li><span class="label label-primary">Published</span></li>
+        </ul>
+        <h4 class="mb-5 mt-0">
+          <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+            {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
+          </a>
+        </h4>
+        <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description | stripTags | trustHtml) || 'No description'"></p>
       </div>
     </div>
-    <div ng-show="$ctrl.cdsDepositCtrl.isPublished()" class="row">
-      <hr class="mb-15">
-      <div class="col-sm-12 text-center">
-        <a class="btn btn-sm btn-default" ng-click="showAll = !showAll">
-          {{ showAll ? 'Show less' : 'Show more' }}
-        </a>
+  </div>
+  <!-- Brief View -->
+  <!-- Detail View -->
+  <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && $ctrl.cdsDepositCtrl.showAll)" class="col-sm-12">
+    <div class="row">
+      <!-- Alerts -->
+      <div class="col-sm-12">
+        <!-- FAILURE -->
+        <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
+          <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
+              <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
+          </div>
+        </div>
+        <!-- Failed transcodings -->
+        <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
+          <div class="pull-left">
+            <b>Failed transcodings:</b>
+            <ul>
+              <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
+                {{ key }}
+              </li>
+            </ul>
+          </div>
+          <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
+            <i class="fa fa-undo"></i>
+          </button>
+        </div>
+        <!-- PENDING -->
+        <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+              Loading ...
+            </div>
+          </div>
+        </div>
+        <!-- STARTED -->
+        <div ng-show="$ctrl.cdsDepositCtrl.displayStarted()" class="row">
+          <div class="progress">
+              <div ng-hide="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }}
+              </div>
+              <div ng-show="($ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt) > 0" class="progress-bar progress-bar-striped active text-left" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage || 100}}%;">
+                {{ $ctrl.cdsDepositCtrl.stateCurrent | taskRepr }} {{$ctrl.cdsDepositCtrl.stateReporter[$ctrl.cdsDepositCtrl.stateCurrent].payload.percentage | toInt}} %
+              </div>
+          </div>
+        </div>
+        <!-- SUCCESS -->
+        <div ng-show="$ctrl.cdsDepositCtrl.displaySuccess()" class="row">
+          <div class="progress">
+            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+              <strong>Success</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Alerts -->
+    <div class="row">
+      <div class="col-sm-3">
+        <!-- Video preview -->
+        <div class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
+         ng-class="{'preview-failed': $ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE}">
+          <div class="cds-deposit-box-video-preview-with-icon" ng-show="!$ctrl.cdsDepositCtrl.previewer">
+            <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
+            <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
+          </div>
+          <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+        </div>
+        <!-- Video preview -->
+        <!-- Extra information -->
+        <div>
+          <!-- Category & Type -->
+          <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+            <div class="row">
+              <div class="col-md-6">
+                <p class="mb-0">Category</p>
+                <p><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-0">Type</p>
+                <p><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
+              </div>
+            </div>
+            <hr class="my-10" />
+          </div>
+          <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
+            <i class="fa fa-info-circle"></i> For publishing the video please select category from the
+            <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
+            <hr class="my-10" />
+          </div>
+          <!-- Category & Type -->
+          <!-- Status -->
+          <p class="text-muted mb-0">
+            <strong>Video status:</strong>
+          </p>
+          <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
+            <p class="text-muted mb-0"><span class="label label-primary">Published</span></p>
+            <hr class="my-10" />
+            <p class="mt-10">
+              <i class="fa text-muted fa-link"></i>
+              <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+                Visit video page
+              </a>
+            </p>
+          </div>
+          <div ng-hide="$ctrl.cdsDepositCtrl.isPublished()" class="text-muted">
+            The video is <strong>not</strong> published.
+          </div>
+          <!-- Status -->
+          <!-- Inherit button -->
+          <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.title && !$ctrl.cdsDepositCtrl.isPublished()" class="text-center">
+            <hr class="mt-10 mb-20" />
+            <!-- Inherit button if project is filled in -->
+            <a ng-click="forceInherit = true" class="btn btn-sm btn-info">Inherit metadata from project</a>
+            <modal-dialog show="forceInherit" dialog-title="Inherit metadata from the project" width="50%">
+              <p class="text-left">Please select if you would like to replace all metadata of this video or inherit only the missing metadata from the project.</p>
+              <p class="pull-right">
+                <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, false) ; $parent.hideModal()">Only the missing fields</button>
+                <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, true) ; $parent.hideModal()">Replace all metadata</button>
+              </p>
+            </modal-dialog>
+            <!-- Inherit button if project is filled in -->
+          </div>
+          <!-- Inherit button -->
+        </div>
+        <!-- Extra information -->
+      </div>
+      <div class="col-sm-9">
+      <!-- Main form -->
+      <div class="col-sm-12">
+        <!-- Nav tabs -->
+        <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
+          <li role="presentation" ng-class="{active: active=='metadata'}">
+            <a ng-click="active='metadata'" role="tab" data-toggle="tab">
+              Basic Info
+              <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[0].$invalid"><i class="fa fa-circle text-danger"></i></small>
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='files'}">
+            <a ng-click="active='files'" role="tab" data-toggle="tab">
+              Files
+              <small ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length || $ctrl.cdsDepositCtrl.stateReporter.file_video_metadata_extraction.status == 'FAILURE' || $ctrl.cdsDepositCtrl.stateReporter.file_video_extract_frames.status == 'FAILURE'"><i class="fa fa-circle text-danger"></i></small>
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='licenses'}">
+            <a ng-click="active='licenses'" role="tab" data-toggle="tab">
+              Licences
+              <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-circle text-danger"></i></small>
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='translations'}">
+            <a ng-click="active='translations'" role="tab" data-toggle="tab">
+              Translations
+              <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[2].$invalid"><i class="fa fa-circle text-danger"></i></small>
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='related_links'}">
+            <a ng-click="active='related_links'" role="tab" data-toggle="tab">
+              Related links
+              <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[3].$invalid"><i class="fa fa-circle text-danger"></i></small>
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='access'}">
+            <a ng-click="active='access'" role="tab" data-toggle="tab">
+              Access rights
+            </a>
+          </li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content cds-tab-content pa-20">
+          <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
+            <form
+              name="$ctrl.cdsDepositCtrl.depositFormModels[0]"
+              class="form"
+              sf-schema="$ctrl.cdsDepositCtrl.schema"
+              sf-form="$ctrl.form.basic"
+              sf-model="$ctrl.cdsDepositCtrl.record"
+              sf-options="$ctrl.sfOptions"
+            ></form>
+          </div>
+          <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
+            <div ng-transclude></div>
+          </div>
+          <div ng-show="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
+            <form
+              name="$ctrl.cdsDepositCtrl.depositFormModels[1]"
+              class="form"
+              sf-schema="$ctrl.cdsDepositCtrl.schema"
+              sf-form="$ctrl.form.licenses"
+              sf-model="$ctrl.cdsDepositCtrl.record"
+              sf-options="$ctrl.sfOptions"
+            ></form>
+          </div>
+          <div ng-show="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
+            <form
+              name="$ctrl.cdsDepositCtrl.depositFormModels[2]"
+              class="form"
+              sf-schema="$ctrl.cdsDepositCtrl.schema"
+              sf-form="$ctrl.form.translations"
+              sf-model="$ctrl.cdsDepositCtrl.record"
+              sf-options="$ctrl.sfOptions"
+            ></form>
+          </div>
+          <div ng-show="active=='related_links'" role="tabpanel" ng-class="{active: active=='related_links'}"  class="tab-pane">
+            <form
+              name="$ctrl.cdsDepositCtrl.depositFormModels[3]"
+              class="form"
+              sf-schema="$ctrl.cdsDepositCtrl.schema"
+              sf-form="$ctrl.form.related_links"
+              sf-model="$ctrl.cdsDepositCtrl.record"
+              sf-options="$ctrl.sfOptions"
+            ></form>
+          </div>
+          <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
+            <div class="row">
+              <div class="col-sm-12">
+                <h4>Record restrictions</h4>
+                <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
+                  <select
+                    ng-model="$ctrl.permissions"
+                    ng-change="$ctrl.changeAccess()"
+                    class="form-control"
+                    ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
+                  >
+                    <option value="public" ng-selected="$ctrl.permissions === 'public'">
+                      Public
+                    </option>
+                    <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
+                      Restricted
+                    </option>
+                  </select>
+                  <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read" class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
+                    <label class="control-label ng-binding">
+                      Choose who has access to the record
+                    </label>
+                    <ui-select
+                     multiple
+                     theme="bootstrap"
+                     ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
+                     title="Search for names"
+                     on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                     on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                     ng-model="$ctrl.selectedRestricted"
+                    >
+                     <ui-select-match
+                      ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
+                      placeholder="Search for names"
+                    >
+                      {{ $item.email || $item }}
+                    </ui-select-match>
+                     <ui-select-choices
+                      repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
+                      refresh="$ctrl.autocompleteAccess($select.search)"
+                      refresh-delay="100"
+                     >
+                       <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
+                       <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>
+                     </ui-select-choices>
+                     <ui-select-no-choice>
+                       <p class="pa-5 mb-0">
+                         <span ng-show="$select.search">
+                           Not results for "{{$select.search}}"
+                         </span>
+                         <span ng-show="!$select.search">
+                           Start typing a name ...
+                         </span>
+                       </p>
+                     </ui-select-no-choice>
+                   </ui-select>
+                  </div>
+                </div>
+                <div ng-show="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
+                  Please select a category for the project.
+                </div>
+              </div>
+              <!-- Record permissions -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Main form -->
+      </div>
+    </div>
+  </div>
+  <!-- Detail View -->
+  <div ng-show="$ctrl.cdsDepositCtrl.isPublished()" class="row">
+    <div class="col-sm-12 text-center">
+      <div class="px-20">
+        <hr class="my-20" />
+        <button class="btn btn-sm btn-default" ng-click="$ctrl.cdsDepositCtrl.showAll = !$ctrl.cdsDepositCtrl.showAll">
+          {{ $ctrl.cdsDepositCtrl.showAll ? 'Show less' : 'Show more' }}
+        </button>
       </div>
     </div>
   </div>
 </div>
+<!-- Waiting for Upload -->
+
+<!-- Not waiting for Upload -->
 <div class="row" ng-show="$ctrl.cdsDepositCtrl.waitingUpload">
   <div class="col-md-12">
     <div class="progress">
@@ -339,3 +374,4 @@
     </p>
   </div>
 </div>
+<!-- Not waiting for Upload -->

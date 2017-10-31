@@ -75,6 +75,13 @@ function cdsDepositCtrl(
     return !that.record.category;
   }
 
+  this.initShowAll = function (){
+    that.showAll = !that.isPublished();
+  }
+
+  this.changeShowAll = function(hide) {
+    that.showAll = (hide) ? false : true;
+  }
   // Initilize stateCurrent
   this.stateCurrent = null;
 
@@ -92,7 +99,8 @@ function cdsDepositCtrl(
 
   // The deposit can have the following depositStates
   this.$onInit = function() {
-
+    // Init showAll
+    this.initShowAll();
     // loading
     this.loading = false;
     this.findFilesByContextType = function(type) {
@@ -508,7 +516,7 @@ function cdsDepositCtrl(
           errors: response.data.errors || []
         });
         var message = (String(response.status || '').startsWith('5')) ?
-          'Internal Sever Error' : response.data.message
+          'Internal Sever Error' : response.data.message;
         // Push a notification
         toaster.pop({
           type: 'error',
