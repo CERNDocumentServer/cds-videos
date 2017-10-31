@@ -259,11 +259,10 @@
   ],
   "translations": [
     {
-      "notitle": true,
       "key": "translations",
       "type": "array",
       "add": "Add translations",
-      "description": "Add metadata translations.",
+      "title": "Add metadata translations",
       "items": [
         {
           "title": "Title",
