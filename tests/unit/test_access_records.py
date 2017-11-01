@@ -65,13 +65,18 @@ from cds.modules.records.permissions import (has_admin_permission,
     ({'_access': {'update': []}}, 'update', False),
     # Only admin can delete records
     ({'foo': 'bar'}, 'delete', False),
+    ({'foo': 'bar'}, 'read-eos-path', False),
+    ({'eos': 'true'}, 'read-eos-path', True),
 ])
 def test_record_access(db, users, access, action, is_allowed):
     """Test access control for records."""
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
-        identity.provides |= set([RoleNeed('test-egroup@cern.ch')])
+        roles = [RoleNeed('test-egroup@cern.ch')]
+        if 'eos' in access:
+            roles.append(RoleNeed('audiovisual-support@cern.ch'))
+        identity.provides |= set(roles)
 
     def login_and_test(user_id):
         login_user(User.query.get(user_id))

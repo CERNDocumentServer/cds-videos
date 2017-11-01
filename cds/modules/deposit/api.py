@@ -74,6 +74,7 @@ PRESERVE_FIELDS = (
     'publication_date',
     '_project_id',
     'doi',
+    '_eos_library_path',
 )
 
 

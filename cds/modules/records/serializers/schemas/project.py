@@ -72,6 +72,7 @@ class ProjectSchema(StrictKeysSchema):
     _access = fields.Nested(AccessSchema)
     _buckets = fields.Nested(BucketSchema)
     _oai = fields.Nested(OaiSchema)
+    _eos_library_path = fields.Str()
     contributors = fields.Nested(ContributorSchema, many=True, required=True)
     doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)

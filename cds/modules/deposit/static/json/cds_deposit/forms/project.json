@@ -47,6 +47,11 @@
           "asyncCallback": "$ctrl.autocompleteKeywords",
           "url": "/api/keywords/_suggest"
         }
+      },
+      {
+        "title": "EOS library path",
+        "key": "_eos_library_path",
+        "condition": "$ctrl.showEOS == true"
       }
     ],
     "rightColumn": [
