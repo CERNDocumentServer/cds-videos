@@ -701,8 +701,21 @@ VIDEO_POSTER_SIZE = (180, 101)
 # File system location of videos
 VIDEOS_LOCATION = '/eos/workspace/c/cds/test/videos/files/'
 # XRootD prefix for videos
-VIDEOS_XROOTD_PREFIX = 'root://eospublic.cern.ch//eos/workspace/c/cds/test/videos/files/'
-
+VIDEOS_XROOTD_PREFIX = 'root://eospublic.cern.ch//eos/workspace/c/cds/test/' \
+                       'videos/files/'
+# EOS path for video library `e-groups`
+VIDEOS_EOS_PATH_EGROUPS = [
+    "audiovisual-support@cern.ch",
+    "it-dep-uds-avc@cern.ch",
+    "editorial-group@cern.ch",
+    "hr-video-group@cern.ch",
+    "visualmedia-office@cern.ch",
+    "vmo-restictedrights@cern.ch"
+]
+"""
+By default, this field is hidden and disabled. It becomes visible only to
+the users that are part of the e-groups in VIDEOS_EOS_PATH_EGROUPS and admins.
+"""
 ###############################################################################
 # Logging
 ###############################################################################

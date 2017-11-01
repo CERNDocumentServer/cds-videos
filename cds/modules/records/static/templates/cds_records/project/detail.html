@@ -1,11 +1,10 @@
-<div ng-init="record=record.metadata.metadata" class="cds-detail-video cds-detail-video-wrapper bg-n  pb-20">
+<div ng-init="record=record.metadata.metadata" class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Metadata Section -->
   <div class="container">
     <div class="row">
-      <!-- Left Column -->
       <div class="col-md-12">
         <!-- Section -->
-        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-20">
+        <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-20 mt-30">
           <!-- DOI and report number -->
           <div class="row">
             <div class="col-md-4">
@@ -75,9 +74,31 @@
           </div>
         </div>
       </div>
-        <!-- /Section -->
-      <!-- /Left Column -->
+      <!-- /Section -->
     </div>
   </div>
   <!-- /Metadata Section -->
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <!-- EOS (ONLY IF USER HAS ACCESS) -->
+        <div ng-if="record.metadata._eos_library_path">
+          <div class="cds-detail cds-detail-video cds-div-shadow bg-gl bt bw-1 bc-ccc pt-10 pb-20 px-20">
+            <div class="cds-detail-title cds-detail-video-title">
+              <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20"><i class="fa fa-folder-open"></i> EOS path to library</h3>
+            </div>
+            <div class="cds-detail-video-embed">
+              <div class="input-group">
+                <input id="copyEmbed" type="text" class="form-control bg-w" value="{{ record.metadata._eos_library_path }}" readonly />
+                <span class="input-group-btn">
+                  <button ngclipboard class="btn btn-default" data-clipboard-target="#copyEmbed" type="button"><i class="fa fa-copy"></i></button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- EOS (ONLY IF USER HAS ACCESS) -->
+      </div>
+    </div>
+  </div>
 </div>

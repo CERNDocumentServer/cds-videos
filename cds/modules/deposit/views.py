@@ -26,9 +26,11 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, current_app, url_for
-from flask import render_template
+from flask import Blueprint, current_app, url_for, render_template
+from flask_security import current_user
 from invenio_records_ui.signals import record_viewed
+
+from cds.modules.records.permissions import has_read_record_eos_path_permission
 
 from .api import CDSDeposit
 
@@ -53,6 +55,12 @@ def project_view(pid, record, template=None, **kwargs):
         record=record,
         record_type='project',
     )
+
+
+@blueprint.app_template_filter()
+def strip_eos_path_field(record):
+    """Check if user has permission to see EOS video library path."""
+    return has_read_record_eos_path_permission(current_user, record)
 
 
 @blueprint.app_template_filter('tolinksjs')

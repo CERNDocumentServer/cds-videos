@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import current_app
 from flask_security import current_user
 from invenio_access import DynamicPermission
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
@@ -81,6 +82,11 @@ def record_create_permission_factory(record=None):
 def record_read_permission_factory(record=None):
     """Read permission factory."""
     return record_permission_factory(record=record, action='read')
+
+
+def record_read_eos_path_permission_factory(record=None):
+    """Read permission factory."""
+    return record_permission_factory(record=record, action='read-eos-path')
 
 
 def record_read_files_permission_factory(record=None):
@@ -205,6 +211,7 @@ class RecordPermission(object):
     create_actions = ['create']
     read_actions = ['read']
     read_files_actions = ['read-files']
+    read_eos_path_actions = ['read-eos-path']
     update_actions = ['update']
     delete_actions = ['delete']
 
@@ -225,6 +232,8 @@ class RecordPermission(object):
             return cls(record, allow, user)
         elif action in cls.read_actions:
             return cls(record, has_read_record_permission, user)
+        elif action in cls.read_eos_path_actions:
+            return cls(record, has_read_record_eos_path_permission, user)
         elif action in cls.read_files_actions:
             return cls(record, has_read_files_permission, user)
         elif action in cls.update_actions:
@@ -309,6 +318,17 @@ def has_read_record_permission(user, record):
         return True
 
     return has_admin_permission()
+
+
+def has_read_record_eos_path_permission(user, record):
+    """Check if user has eos path permissions."""
+    user_provides = get_user_provides()
+    # Allow e-group members only
+    read_access_groups = current_app.config.get('VIDEOS_EOS_PATH_EGROUPS', [])
+
+    if not set(user_provides).isdisjoint(set(read_access_groups)):
+        return True
+    return has_admin_permission(user, record)
 
 
 def has_update_permission(user, record):
