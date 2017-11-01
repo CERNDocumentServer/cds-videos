@@ -463,6 +463,8 @@ function cdsDeposits() {
       dropboxAppKey: '@',
       // Accepted video file extensions
       videoExtensions: '@?',
+      // Show eos folder
+      showEosFolder: '=?',
     },
     controller: cdsDepositsCtrl,
     templateUrl: function($element, $attrs) {

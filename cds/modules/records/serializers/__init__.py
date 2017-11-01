@@ -29,9 +29,9 @@ from __future__ import absolute_import, print_function
 from invenio_records_rest.serializers.datacite import DataCite31Serializer
 from invenio_records_rest.serializers.response import record_responsify
 from invenio_records_rest.serializers.schemas.json import RecordSchemaJSONV1
-from invenio_records_rest.serializers.json import JSONSerializer
 
 from .drupal import DrupalSerializer
+from .json import CDSJSONSerializer as JSONSerializer
 from .schemas.datacite import DataCiteSchemaV1
 from .smil import SmilSerializer
 from .vtt import VTTSerializer

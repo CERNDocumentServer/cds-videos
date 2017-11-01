@@ -19,6 +19,9 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   this.$onInit = function() {
 
+    // Show the EOS
+    that.showEOS = that.cdsDepositCtrl.cdsDepositsCtrl.showEosFolder;
+
     this.checkCopyright = function(value, form) {
       if (that.cdsDepositCtrl.cdsDepositsCtrl.copyright) {
         if ((value || '').toLowerCase() ===
