@@ -77,7 +77,7 @@
         <div class="row">
           <div class="col-md-9">
             <ul class="list-inline text-left">
-              <li ng-repeat="(task, status) in ($ctrl.aggregatedState | orderTasks)">
+              <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks)">
                 <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
               </li>
             </ul>
@@ -139,7 +139,7 @@
               <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
                 <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted px-20 py-10">
                   <span class="text-muted">
-                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}}
+                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
                   </span>
                   <span class="pull-right">
                     <cds-actions template="/static/templates/cds_deposit/types/video/actions.html">
