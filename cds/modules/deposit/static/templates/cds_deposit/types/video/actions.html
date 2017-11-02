@@ -14,6 +14,13 @@
       <button class="btn btn-success" ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit'); ;$ctrl.cdsDepositCtrl.changeShowAll(true); $parent.hideModal()">Yes</button>
     </p>
   </modal-dialog>
+  <modal-dialog show="$ctrl.showCannotEditVideoDialog" dialog-title="Cannot edit the video" width="50%">
+    You cannot edit the video if the project is published.<br>
+    Please <strong>edit the project first</strong>, and then edit the video.<br>
+    <p class="pull-right">
+      <button class="btn btn-primary" ng-click="$ctrl.showCannotEditVideoDialog=false">Close</button>
+    </p>
+  </modal-dialog>
   <div class="text-right">
     <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
       <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
@@ -48,8 +55,8 @@
     <button
       ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
       ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-      class="btn btn-sm btn-default "
-      ng-click="$ctrl.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit');$ctrl.cdsDepositCtrl.changeShowAll(false)">
+      class="btn btn-sm btn-default"
+      ng-click="$ctrl.editPublished()">
     {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Editing ...' : 'Edit' }}
     </button>
   </div>
