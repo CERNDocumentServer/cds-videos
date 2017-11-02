@@ -1,5 +1,6 @@
 function cdsActionsCtrl($scope, cdsAPI) {
   var that = this;
+
   this.$onInit = function () {
 
     this.actionHandler = function (actions, redirect) {
@@ -35,6 +36,19 @@ function cdsActionsCtrl($scope, cdsAPI) {
         }
       );
     };
+
+    /*
+     * Show a warning message if user wants to edit a published video but the project is already published
+     */
+    this.showCannotEditVideoDialog = false;
+    this.editPublished = function () {
+      if (that.cdsDepositCtrl.depositType === 'video' && that.cdsDepositCtrl.isProjectPublished()) {
+        that.showCannotEditVideoDialog = true;
+      } else {
+        that.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit');
+        that.cdsDepositCtrl.changeShowAll(false);
+      }
+    }
 
     /*
      * Save videos first, then save project: this is because the save project
