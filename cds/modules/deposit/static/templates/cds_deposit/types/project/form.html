@@ -1,8 +1,9 @@
-<div class="panel cds-deposit-panel panel-default">
+<div class="panel cds-deposit-panel cds-deposit-panel-project panel-default">
   <div class="panel-heading px-20 py-10">
     <span class=" text-muted"><i class="fa fa-list-ul"></i> Project</span>
     <div class="pull-right">
-      <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
+      <button  class="btn btn-sm btn-default" ng-click="dialogShown = true"><i class="fa fa-info"></i></button>
+      <cds-actions template="/static/templates/cds_deposit/types/project/actions.html"></cds-actions>
       <modal-dialog show="dialogShown" dialog-title="What is a project?" width="50%">
         <p class="text-left">
           A project is a set of metadata common to a collection of videos.<br />
@@ -46,33 +47,51 @@
       <!-- /Modal -->
       <!-- Collapsed -->
       <div ng-init="projectCollapsed=true" ng-show="projectCollapsed">
-        <div class="row">
-          <div class="col-sm-6">
-            <form
-              name="$ctrl.cdsDepositCtrl.depositFormModels[4]"
-              class="form"
-              sf-schema="$ctrl.cdsDepositCtrl.schema"
-              sf-form="$ctrl.form.collapsed.leftColumn"
-              sf-model="$ctrl.cdsDepositCtrl.record"
-              sf-options="$ctrl.sfOptions"
-            ></form>
-          </div>
-          <div class="col-sm-6">
+        <div ng-show="$ctrl.cdsDepositCtrl.isPublished()">
+          <ul class="list-inline">
+            <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+            <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+            <li><span class="label label-primary">Published</span></li>
+          </ul>
+          <hr class="my-15" />
+          <h3 class="mb-5 mt-0">
+            <a ng-href="{{ $ctrl.cdsDepositCtrl.cdsDepositsCtrl.getRecordUrl($ctrl.cdsDepositCtrl.record.recid) }}">
+              {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
+            </a>
+          </h3>
+          <p class="f6" ng-bind-html="($ctrl.cdsDepositCtrl.record.description | stripTags | trustHtml) || 'No description'"></p>
+        </div>
+        <!-- Not published -->
+        <div ng-show="!$ctrl.cdsDepositCtrl.isPublished()">
+          <div class="row">
+            <div class="col-sm-6">
               <form
-              name="$ctrl.cdsDepositCtrl.depositFormModels[5]"
-              class="form"
-              sf-schema="$ctrl.cdsDepositCtrl.schema"
-              sf-form="$ctrl.form.collapsed.rightColumn"
-              sf-model="$ctrl.cdsDepositCtrl.record"
-              sf-options="$ctrl.sfOptions"
-            ></form>
+                name="$ctrl.cdsDepositCtrl.depositFormModels[4]"
+                class="form"
+                sf-schema="$ctrl.cdsDepositCtrl.schema"
+                sf-form="$ctrl.form.collapsed.leftColumn"
+                sf-model="$ctrl.cdsDepositCtrl.record"
+                sf-options="$ctrl.sfOptions"
+              ></form>
+            </div>
+            <div class="col-sm-6">
+                <form
+                name="$ctrl.cdsDepositCtrl.depositFormModels[5]"
+                class="form"
+                sf-schema="$ctrl.cdsDepositCtrl.schema"
+                sf-form="$ctrl.form.collapsed.rightColumn"
+                sf-model="$ctrl.cdsDepositCtrl.record"
+                sf-options="$ctrl.sfOptions"
+              ></form>
+            </div>
+          </div>
+          <div class="row">
+              <div class="col-sm-12 text-center">
+                <span class="text-muted">Select category and type, they will be applied to the project and all videos.</span>
+              </div>
           </div>
         </div>
-        <div class="row">
-            <div class="col-sm-12 text-center">
-              <span class="text-muted">Select category and type, they will be applied to the project and all videos.</span>
-            </div>
-        </div>
+        <!-- Not published -->
         <div class="row">
           <div class="col-sm-12 text-center">
             <hr class="mb-15" />
@@ -282,14 +301,12 @@
           <!-- Tab panes -->
           <div class="col-sm-12 pa-5">
             <hr class="mb-15" />
-            <div class="pull-right">
+            <div class="text-center">
                 <button
                   class="btn btn-sm btn-default"
                   ng-click="projectCollapsed=!projectCollapsed">
                   Hide details
               </button>
-              <cds-actions template="/static/templates/cds_deposit/types/project/actions.html">
-              </cds-actions>
             </div>
           </div>
         </div>
