@@ -67,6 +67,17 @@ function cdsDepositCtrl(
     return that.record._deposit.status === 'published';
   };
 
+  this.isProjectPublished = function() {
+    var isPublished;
+    if (that.depositType === 'project') {
+      isPublished = that.isPublished();
+    } else {
+      var master = that.cdsDepositsCtrl.master.metadata;
+      isPublished = master._deposit.status === 'published';
+    }
+    return isPublished;
+  }
+
   this.isDraft = function() {
     return that.record._deposit.status === 'draft';
   };
