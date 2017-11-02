@@ -661,8 +661,6 @@ function cdsDepositCtrl(
       var response = (responses[responses.length - 1] || responses).data;
       // Update record: use _ and not ng because otherwise it will destroy references to the parent record
       that.record = _.merge(that.record, response.metadata);
-      // Update links
-      that.links = response.links;
     };
 
     this.postErrorProcess = function(response) {
