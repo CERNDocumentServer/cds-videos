@@ -120,35 +120,36 @@
 </div>
 <hr class="my-20" />
 <div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
-    <div
-         ngf-drag-over-class="'cds-deposit-dragover'"
-         ngf-drop=""
-         ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-         ngf-select=""
-         ngf-model-options="{allowInvalid: false}"
-         ngf-max-size="20GB"
-         ngf-multiple="true"
-    >
-      <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
-        <p class="cds-deposit-box-upload-icon mb-20">
-          <i class="fa fa-3x fa-files-o" aria-hidden="true"></i>
-        </p>
-        <div class="cds-deposit-box-upload-content">
-          <div class="cds-deposit-box-upload-title">
-            <h4>Upload complimentary files for this project</h4>
-          </div>
-          <p class="cds-deposit-box-upload-description"> Or Drag & Drop files</p>
+  <div
+       ngf-drag-over-class="'cds-deposit-dragover'"
+       ngf-drop=""
+       ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+       ngf-select=""
+       ngf-model-options="{allowInvalid: false}"
+       ngf-max-size="20GB"
+       ngf-multiple="true"
+  >
+    <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
+      <p class="cds-deposit-box-upload-icon mb-20">
+        <i class="fa fa-3x fa-files-o" aria-hidden="true"></i>
+      </p>
+      <div class="cds-deposit-box-upload-content">
+        <div class="cds-deposit-box-upload-title">
+          <h4>Upload complimentary files for this project</h4>
         </div>
+        <p class="cds-deposit-box-upload-description"> Or Drag & Drop files</p>
       </div>
     </div>
-    <hr class="my-10" />
-    <div class="text-muted">
-      <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
-      <ul>
-        <li>You can upload files related to the project.</li>
-      </ul>
-    </div>
-</div><div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
+  </div>
+  <hr class="my-10" />
+  <div class="text-muted">
+    <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
+    <ul>
+      <li>You can upload files related to the project.</li>
+    </ul>
+  </div>
+</div>
+<div ng-if="$ctrl.duplicateFiles.length" class="alert alert-danger">
   <p>
     Multiple files with the same filename are not allowed:
   </p>

@@ -1,5 +1,6 @@
 function cdsDepositCtrl(
   $scope,
+  $window,
   $q,
   $timeout,
   $interval,
@@ -210,7 +211,6 @@ function cdsDepositCtrl(
     this.restartFailedSubformats = function(subformatKeys) {
       var master = that.findMasterFile();
       var eventId = master.tags._event_id;
-
       master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
@@ -543,10 +543,6 @@ function cdsDepositCtrl(
       }
     });
 
-    this.refreshStateQueue = function() {
-      $scope.$emit('cds.deposit.status.changed', that.id, that.record._cds.state);
-    };
-
     this.currentMasterFile = this.findMasterFile();
     // Initialize state reporter
     this.initializeStateReported();
@@ -557,7 +553,6 @@ function cdsDepositCtrl(
     // Update subformat statuses
     that.fetchCurrentStatuses();
     that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
-    $scope.$watch('$ctrl.record._cds.state', that.refreshStateQueue, true);
     // What the order of contributors and check make it dirty, throttle the
     // function for 1sec
     $scope.$watch(
@@ -802,11 +797,20 @@ function cdsDepositCtrl(
   $scope.$on('cds.deposit.pristine.all', function(evt) {
     // Set that to pristine
     that.setPristine();
-  })
+  });
+
+  $window.onbeforeunload = function() {
+    // Warn the user if there are any unsaved changes
+    if (!that.cdsDepositsCtrl.onExit && !that.isPristine()) {
+      that.cdsDepositsCtrl.onExit = true;
+      return 'Unsaved changes have been detected.';
+    }
+  }
 }
 
 cdsDepositCtrl.$inject = [
   '$scope',
+  '$window',
   '$q',
   '$timeout',
   '$interval',

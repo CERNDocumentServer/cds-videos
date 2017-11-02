@@ -47,6 +47,8 @@ function cdsDepositsCtrl(
     SUCCESS: [],
     REVOKED: [],
   }
+  // Show message when window is closing
+  this.onExit = false;
 
   this.overallState = {};
 
@@ -371,45 +373,6 @@ function cdsDepositsCtrl(
       return child._cds.state[task] === status;
     };
   };
-
-  var getOverallState = function(children) {
-    var taskStates = {};
-    if (!children.length) {
-      return;
-    }
-    depositStates.forEach(function(task) {
-      if (children.every(checkStatus(task, 'SUCCESS'))) {
-        taskStates[task] = 'SUCCESS';
-      } else if (children.some(checkStatus(task, 'FAILURE'))) {
-        taskStates[task] = 'FAILURE';
-      } else if (children.some(checkStatus(task, 'STARTED')) ||
-        children.some(checkStatus(task, 'SUCCESS'))) {
-        taskStates[task] = 'STARTED';
-      } else if (!children.every(checkStatus(task, undefined))) {
-        taskStates[task] = 'PENDING';
-      }
-    });
-    return taskStates;
-  };
-
-  $scope.$on('cds.deposit.status.changed', function(evt, id, state) {
-    that.overallState[id] = that.overallState[id] || {};
-    var thisState = that.overallState[id];
-    for (var key in state) {
-      thisState[key] = _.uniq((thisState[key] || []).concat(state[key]));
-    }
-    var statesOrder = ['PENDING', 'STARTED', 'FAILURE', 'SUCCESS'];
-    statesOrder.forEach(function(curState) {
-      statesOrder.some(function(prevState) {
-        if (prevState == curState) {
-          return true;
-        }
-        thisState[prevState] = _.difference(
-          thisState[prevState], thisState[curState]);
-      });
-    });
-    that.aggregatedState = getOverallState(that.master.metadata.videos);
-  });
 
   this.getRecordUrl = function(recid) {
     return urlBuilder.record({recid: recid});

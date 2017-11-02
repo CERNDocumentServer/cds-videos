@@ -64,6 +64,13 @@ html, body {
     line-height: 35px;
   }
 }
+.cds-deposit-panel-project {
+  & > .panel-heading {
+    background-color: $btn-info-bg !important;
+    color: $btn-info-color !important;
+  }
+}
+
 
 .container-fluid {
   @extend .cds-max-fluid-width;
