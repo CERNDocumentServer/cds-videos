@@ -45,7 +45,7 @@
       ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
       ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
       class="btn btn-sm btn-primary "
-      ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit');$ctrl.cdsDepositCtrl.changeShowAll(true)">
+      ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH']);$ctrl.cdsDepositCtrl.changeShowAll(true)">
       {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
     </button>
     <button
