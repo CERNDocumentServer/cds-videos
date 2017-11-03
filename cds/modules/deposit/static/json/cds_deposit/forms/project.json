@@ -51,7 +51,7 @@
       {
         "title": "EOS library path",
         "key": "_eos_library_path",
-        "condition": "$ctrl.showEOS == true"
+        "condition": "$ctrl.showRestricted == true"
       }
     ],
     "rightColumn": [
@@ -230,7 +230,7 @@
       "notitle": true,
       "description": "",
       "firstItemMessage": "General license",
-      "add": "Add another licence",
+      "add": "Add licences",
       "inline": true,
       "items": [
         {

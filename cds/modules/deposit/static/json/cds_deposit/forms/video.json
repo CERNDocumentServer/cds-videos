@@ -277,7 +277,8 @@
     },
     {
       "title": "Feature this video on the home page",
-      "key": "featured"
+      "key": "featured",
+      "condition": "$ctrl.showRestricted == true"
     },
     {
       "title": "This video is 360",
@@ -292,7 +293,7 @@
       "notitle": true,
       "description": "",
       "firstItemMessage": "General license",
-      "add": "Add another licence",
+      "add": "Add licences",
       "inline": true,
       "items": [
         {

@@ -58,7 +58,7 @@ def project_view(pid, record, template=None, **kwargs):
 
 
 @blueprint.app_template_filter()
-def strip_eos_path_field(record):
+def check_avc_permissions(record):
     """Check if user has permission to see EOS video library path."""
     return has_read_record_eos_path_permission(current_user, record)
 
