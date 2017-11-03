@@ -57,7 +57,7 @@
       template="{{ url_for('static', filename='templates/cds_deposit/deposits.html') }}"
       form-templates='{{ config.DEPOSIT_FORM_TEMPLATES | tojson }}'
       form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
-      show-eos-folder="{{ record | strip_eos_path_field | lower }}"
+      show-avc-restricted-fields="{{ record | check_avc_permissions | lower }}"
   >
   </cds-deposits>
   {{ jwt() }}
