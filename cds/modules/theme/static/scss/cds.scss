@@ -71,6 +71,10 @@ html, body {
   }
 }
 
+.ng-modal-dialog {
+  width: 100%!important;
+  max-width: 900px;
+}
 
 .container-fluid {
   @extend .cds-max-fluid-width;

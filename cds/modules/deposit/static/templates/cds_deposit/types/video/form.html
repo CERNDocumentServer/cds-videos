@@ -16,12 +16,13 @@
     <button type="button" class="close" ng-click="$ctrl.cdsDepositCtrl.metadataToFill=false" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     Extracted metadata can be used to automatically fill part of the form. <a ng-click="metadataModal = true">Click here to see the extracted metadata</a>
   </div>
-  <modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" width="50%">
+  <modal-dialog show="metadataModal" dialog-title="Are you sure you want to use the following metadata?" >
     <ul>
       <li ng-repeat="(key,value) in $ctrl.cdsDepositCtrl.getMetadataToDisplay()">
         <strong>{{key}}</strong> {{value}}
       </li>
     </ul>
+    <hr class="mt-30 mb-10" />
     <p class="pull-right">
       <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(false) ; $parent.hideModal()">No</button>
       <button class="btn btn-success" ng-click="$ctrl.cdsDepositCtrl.fillMetadata(true) ; $ctrl.cdsDepositCtrl.metadataToFill=false; $parent.hideModal()">Yes</button>
@@ -135,11 +136,11 @@
             <div class="row">
               <div class="col-md-6">
                 <p class="mb-0">Category</p>
-                <p><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
+                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category"><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
               </div>
               <div class="col-md-6">
                 <p class="mb-0">Type</p>
-                <p><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
+                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type"><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
               </div>
             </div>
             <hr class="my-10" />
@@ -169,12 +170,15 @@
           </div>
           <!-- Status -->
           <!-- Inherit button -->
-          <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.title && !$ctrl.cdsDepositCtrl.isPublished()" class="text-center">
+          <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.title && !$ctrl.cdsDepositCtrl.isPublished()">
             <hr class="mt-10 mb-20" />
             <!-- Inherit button if project is filled in -->
-            <button ng-click="forceInherit = true" class="btn btn-sm btn-info">Inherit metadata from project</button>
-            <modal-dialog show="forceInherit" dialog-title="Inherit metadata from the project" width="50%">
+            <div class="text-center">
+              <button ng-click="forceInherit = true" class="btn btn-sm btn-info">Inherit metadata from project</button>
+            </div>
+            <modal-dialog show="forceInherit" dialog-title="Inherit metadata from the project" >
               <p class="text-left">Please select if you would like to replace all metadata of this video or inherit only the missing metadata from the project.</p>
+              <hr class="mt-30 mb-10" />
               <p class="pull-right">
                 <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, false) ; $parent.hideModal()">Only the missing fields</button>
                 <button class="btn btn-default" ng-click="$ctrl.cdsDepositCtrl.inheritMetadata(undefined, true) ; $parent.hideModal()">Replace all metadata</button>

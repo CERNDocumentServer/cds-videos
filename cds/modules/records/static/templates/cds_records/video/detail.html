@@ -63,7 +63,7 @@
                   <i class="fa fa-info-circle"></i>
                 </a>
               </h1>
-              <modal-dialog show="showTranslations" dialog-title="Available transations" width="50%">
+              <modal-dialog show="showTranslations" dialog-title="Available transations" >
                 <div ng-repeat="translation in record.metadata.translations">
                   <strong>{{translation.language | isoToLanguage}}</strong>
                   <h4>{{translation.title.title}}</h4>
@@ -83,7 +83,7 @@
                 <i class="fa fa-certificate text-muted"></i>
                 <span ng-if="!licenses[0].license">
                   <a ng-click="noLicense = true">Unknown</a>
-                  <modal-dialog show="noLicense" dialog-title="Unknown" width="50%">
+                  <modal-dialog show="noLicense" dialog-title="Unknown" >
                     <div>
                       <p>
                         This resource is copyrighted as non-CERN and unfortunately we don't have enough information about its licence. None of CERN's terms of use will apply. Please contact the copyright holder directly for more information.
@@ -98,7 +98,7 @@
                     </span>
                     <span ng-switch-when='unknown'>
                       <a ng-click="noLicense = true">Unknown Licence</a>
-                      <modal-dialog show="noLicense" dialog-title="Unknown Licence" width="50%">
+                      <modal-dialog show="noLicense" dialog-title="Unknown Licence" >
                         <div>
                           <p>
                             This resource is copyrighted as non-CERN and unfortunately we don't have enough information about its licence. None of CERN's terms of use will apply. Please contact the copyright holder directly for more information.
