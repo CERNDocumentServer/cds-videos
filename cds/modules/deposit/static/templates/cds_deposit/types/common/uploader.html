@@ -1,7 +1,8 @@
-<modal-dialog show="$ctrl.confirmNewMaster" width="50%">
+<modal-dialog dialog-title="Replace master file" show="$ctrl.confirmNewMaster" >
   <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
+  <hr class="mt-30 mb-10" />
   <p class="pull-right">
-      <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">Cancel</button>
+    <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">Cancel</button>
     <button class="btn btn-success" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.resolve()">Yes</button>
   </p>
 </modal-dialog>
@@ -56,7 +57,7 @@
         </a>
         <span ng-show="f.context_type ==='master' || f.percentage < 100">
           <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
-          <modal-dialog show="dialogShown" dialog-title="How to update the video file" width="50%">
+          <modal-dialog show="dialogShown" dialog-title="How to update the video file" >
             <p class="text-left">To replace the video file, just upload another video file.</p>
           </modal-dialog>
         </span>

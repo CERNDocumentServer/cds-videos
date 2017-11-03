@@ -37,6 +37,8 @@
         ng-init="form.$$selectedObjects=$$value$$"
         ng-if="form.options.tagging == true"
         multiple
+        tagging="form.formatTokenTags"
+        tagging-tokens="SPACE|,|/"
         tagging-label="(custom 'new')"
         ng-model="form.$$selectedObjects"
         sortable="form.options.sortable||false"

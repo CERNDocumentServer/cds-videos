@@ -193,6 +193,17 @@ angular.module('schemaForm')
   .controller('invenioDynamicSelectController', ['$scope', '$controller', '$select', '$http',
     function ($scope, $controller, $select, $http) {
       $controller('dynamicSelectController', {$scope: $scope});
+
+      // Formats tags tokens in ``uiselectmultiple``
+      $scope.form.formatTokenTags = function(item) {
+        return {
+          name: item,
+          value: {
+            name: item
+          }
+        }
+      }
+
       // Use this only in multiple select
       if ($scope.form.type === 'uiselectmultiple') {
         $scope.$watchCollection('ngModel.$modelValue', function(newValue) {
@@ -202,7 +213,7 @@ angular.module('schemaForm')
         }, true);
 
         $scope.$watchCollection('form.$$selectedObjects', function(newValue) {
-          if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)){
+          if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)) {
             $scope.ngModel.$setViewValue(_.uniq(newValue));
             $scope.ngModel.$commitViewValue();
             $scope.ngModel.$render();

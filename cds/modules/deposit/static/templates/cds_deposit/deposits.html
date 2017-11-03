@@ -32,7 +32,7 @@
                 <strong>— OR —</strong>
               </p>
               <p class="text-center">
-                <a class="btn btn-info" ng-click="active_uploader='remote'">Upload by URL</a>
+                <button class="btn btn-info" ng-click="active_uploader='remote'">Upload by URL</button>
               </p>
             </div>
             <!-- Remote uploader -->
@@ -176,6 +176,12 @@
           </div>
           <!-- /ADD children -->
           <!-- Uploader Extra -->
+          <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status == 'published'">
+            <p class="f5 text-center text-muted">
+              <strong>Everything is published.</strong>
+            </p>
+            <p class="f8 text-center text-muted">Click <strong>Edit Project</strong> to add more videos</p>
+          </div>
           <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
             <!-- Drag&Drop upload -->
             <div

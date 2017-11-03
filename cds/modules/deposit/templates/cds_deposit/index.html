@@ -70,9 +70,9 @@
                template="{{ url_for('static', filename='templates/cds_deposit/selectbox.html') }}"
                >
              </invenio-search-select-box>
-            <a class="btn btn-success" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
+            <button class="btn btn-success" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
               <i class="glyphicon glyphicon-upload"></i> {{ _('New Upload') }}
-            </a>
+            </button>
           </div>
         </div>
       </div>

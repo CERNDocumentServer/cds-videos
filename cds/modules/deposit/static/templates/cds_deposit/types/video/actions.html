@@ -1,22 +1,25 @@
 <div ng-show="!$ctrl.cdsDepositCtrl.waitingUpload">
-  <modal-dialog show="form.infoShown" dialog-title="Delete video" width="50%">
+  <modal-dialog show="form.infoShown" dialog-title="Delete video" >
     Are you sure you want permanently delete the video?
+    <hr class="mt-30 mb-10" />
     <p class="pull-right">
       <button class="btn btn-success" ng-click="$ctrl.deleteDeposit(); $parent.hideModal()">Yes</button>
       <button class="btn btn-danger" ng-click="$parent.hideModal()">No</button>
     </p>
   </modal-dialog>
-  <modal-dialog show="form.publishInfoShown" dialog-title="Publish video" width="50%">
+  <modal-dialog show="form.publishInfoShown" dialog-title="Publish video" >
   The video workflow is still processing.<br>
   Are you sure you want publish the video?<br>
+  <hr class="mt-30 mb-10" />
     <p class="pull-right">
       <button class="btn btn-default" ng-click="$parent.hideModal()">No</button>
       <button class="btn btn-success" ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH'], '/deposit'); ;$ctrl.cdsDepositCtrl.changeShowAll(true); $parent.hideModal()">Yes</button>
     </p>
   </modal-dialog>
-  <modal-dialog show="$ctrl.showCannotEditVideoDialog" dialog-title="Cannot edit the video" width="50%">
+  <modal-dialog show="$ctrl.showCannotEditVideoDialog" dialog-title="Cannot edit the video" >
     You cannot edit the video if the project is published.<br>
     Please <strong>edit the project first</strong>, and then edit the video.<br>
+    <hr class="mt-30 mb-10" />
     <p class="pull-right">
       <button class="btn btn-primary" ng-click="$ctrl.showCannotEditVideoDialog=false">Close</button>
     </p>
