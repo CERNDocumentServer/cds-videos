@@ -1,26 +1,30 @@
-function cdsActionsCtrl($scope, cdsAPI) {
+function cdsActionsCtrl($scope, $q, cdsAPI) {
   var that = this;
 
   this.$onInit = function () {
 
-    this.actionHandler = function (actions, redirect) {
+    this.actionHandler = function (userActions) {
+      var hasMultipleActions = _.isArray(userActions),
+          method = hasMultipleActions ? 'makeMultipleActions' : 'makeSingleAction';
+
       that.cdsDepositCtrl.preActions();
-      var method = _.isArray(actions) ? 'makeMultipleActions' : 'makeSingleAction';
-      return that.cdsDepositCtrl[method](actions)
-        .then(
-          function(response) {
-            var _check = method === 'makeMultipleActions' ? actions : [actions];
-            var message;
-            if (_check.indexOf('DELETE') > -1) {
-              message = 'Succefully deleted.'
-            } else if (_check.indexOf('PUBLISH') > -1) {
-              message = 'Succefully published.'
-            }
-            that.cdsDepositCtrl.onSuccessAction(response, message);
-          },
-          that.cdsDepositCtrl.onErrorAction
-        )
-        .finally(that.cdsDepositCtrl.postActions);
+      return chainExtraActions(userActions)
+        .then(function(response) {
+          return that.cdsDepositCtrl[method](userActions)
+            .then(function(response) {
+                var _check = hasMultipleActions ? userActions : [userActions],
+                    message;
+                if (_check.indexOf('DELETE') > -1) {
+                  message = 'Succefully deleted.'
+                } else if (_check.indexOf('PUBLISH') > -1) {
+                  message = 'Succefully published.'
+                }
+                that.cdsDepositCtrl.onSuccessAction(response, message);
+              },
+              that.cdsDepositCtrl.onErrorAction
+            )
+            .finally(that.cdsDepositCtrl.postActions);
+        });
     };
 
     this.deleteDeposit = function () {
@@ -45,7 +49,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
       if (that.cdsDepositCtrl.depositType === 'video' && that.cdsDepositCtrl.isProjectPublished()) {
         that.showCannotEditVideoDialog = true;
       } else {
-        that.actionHandler(['EDIT', 'SAVE_PARTIAL'], '/deposit');
+        that.actionHandler(['EDIT', 'SAVE_PARTIAL']);
         that.cdsDepositCtrl.changeShowAll(false);
       }
     }
@@ -55,20 +59,11 @@ function cdsActionsCtrl($scope, cdsAPI) {
      * response will contain also the videos metadata, which must be up-to-date.
      */
     this.saveAllPartial = function () {
-      var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,
-        master = depositsCtrl.master,
-        project = master.metadata,
-        videos = project.videos;
+      var saveActions = getSaveAllMakeActions();
 
-      if (that.cdsDepositCtrl.master) {
-        var actionName = 'SAVE_PARTIAL',
-          videoActions = getVideoActions(actionName, videos),
-          projectAction = getProjectAction(actionName, master, project);
-
-        videoActions.push(projectAction);
-
+      if (that.cdsDepositCtrl.depositType === 'project') {
         that.cdsDepositCtrl.preActions();
-        cdsAPI.chainedActions(videoActions)
+        return cdsAPI.chainedActions(saveActions)
           .then(
             that.cdsDepositCtrl.onSuccessActionMultiple,
             that.cdsDepositCtrl.onErrorAction
@@ -77,19 +72,51 @@ function cdsActionsCtrl($scope, cdsAPI) {
       }
     };
 
-    function getVideoActions(actionName, videos) {
+    /*
+     * If user is publishing a project, save videos and project first
+     */
+    function chainExtraActions(actions) {
+      var arrayActions = _.isArray(actions) ? actions : [actions],
+          isPublishing = arrayActions.indexOf('PUBLISH') > -1,
+          extraActionPromises;
+
+      if (isPublishing && that.cdsDepositCtrl.depositType === 'project') {
+        extraActionPromises = cdsAPI.chainedActions(getSaveAllMakeActions());
+      } else {
+        // empty promise
+        extraActionPromises = $q.when();
+      }
+      return extraActionPromises;
+    }
+
+    /*
+      * Return actions to save videos and project
+      */
+    function getSaveAllMakeActions() {
+      var depositsCtrl = that.cdsDepositCtrl.cdsDepositsCtrl,
+          master = depositsCtrl.master,
+          project = master.metadata,
+          videos = project.videos,
+          actionName = 'SAVE_PARTIAL',
+          videoActions = getVideoMakeActions(actionName, videos),
+          projectAction = getProjectMakeAction(actionName, master, project);
+
+      videoActions.push(projectAction);
+
+      return videoActions;
+    }
+
+    function getVideoMakeActions(actionName, videos) {
       return videos
           .filter(function (video) {
             return video._deposit.status === 'draft';
           })
           .map(function (video) {
-            return cdsAPI.cleanData(video);
-          })
-          .map(function (cleanedVideo) {
-            var depositType = 'video',
-              url = cdsAPI.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
-
             return function () {
+              var depositType = 'video',
+                  cleanedVideo = cdsAPI.cleanData(video);
+                  url = cdsAPI.guessEndpoint(cleanedVideo, depositType, actionName, cleanedVideo.links);
+
               return cdsAPI.makeAction(
                 url,
                 depositType,
@@ -100,12 +127,12 @@ function cdsActionsCtrl($scope, cdsAPI) {
           });
     }
 
-    function getProjectAction(actionName, master, project) {
-      var cleanedProject = cdsAPI.cleanData(project),
-        depositType = 'project',
-        url = cdsAPI.guessEndpoint(cleanedProject, depositType, actionName, master.links);
-
+    function getProjectMakeAction(actionName, master, project) {
         return function () {
+          var depositType = 'project',
+              cleanedProject = cdsAPI.cleanData(project),
+              url = cdsAPI.guessEndpoint(cleanedProject, depositType, actionName, master.links);
+
           return cdsAPI.makeAction(
             url,
             depositType,
@@ -117,7 +144,7 @@ function cdsActionsCtrl($scope, cdsAPI) {
   };
 }
 
-cdsActionsCtrl.$inject = ['$scope', 'cdsAPI'];
+cdsActionsCtrl.$inject = ['$scope', '$q', 'cdsAPI'];
 
 function cdsActions() {
   return {
