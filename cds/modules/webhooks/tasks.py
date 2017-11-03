@@ -650,8 +650,8 @@ class TranscodeVideoTask(AVCTask):
         while status != 'Finished':
             # Get job status
             status, percentage = get_encoding_status(job_id)
-            if status == 'Error':
-                raise RuntimeError('Error transcoding')
+            if status in ['Error', 'Canceled']:
+                raise RuntimeError('Error transcoding: {0}'.format(status))
             job_info['percentage'] = percentage
 
             # Update task's state for this preset
