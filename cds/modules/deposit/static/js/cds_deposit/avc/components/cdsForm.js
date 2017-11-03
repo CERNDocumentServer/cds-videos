@@ -19,8 +19,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
 
   this.$onInit = function() {
 
-    // Show the EOS
-    that.showEOS = that.cdsDepositCtrl.cdsDepositsCtrl.showEosFolder;
+    // Show resticted fields
+    that.showRestricted = that.cdsDepositCtrl.cdsDepositsCtrl.showAvcRestrictedFields;
 
     this.checkCopyright = function(value, form) {
       if (that.cdsDepositCtrl.cdsDepositsCtrl.copyright) {

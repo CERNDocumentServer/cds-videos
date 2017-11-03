@@ -133,8 +133,7 @@
             </li>
             <li role="presentation" ng-class="{active: active=='access'}">
               <a ng-click="active='access'" role="tab" data-toggle="tab">
-                Access rights
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[4].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
+                Share
               </a>
             </li>
           </ul>
@@ -161,6 +160,70 @@
                     sf-model="$ctrl.cdsDepositCtrl.record"
                     sf-options="$ctrl.sfOptions"
                   ></form>
+
+                </div>
+                <div class="col-sm-12">
+                  <hr class="my-15" />
+                  <div class="alert alert-info">
+                    <h4>Record restrictions</h4>
+                    <div ng-show="$ctrl.cdsDepositCtrl.record.category">
+                      <select
+                        ng-model="$ctrl.permissions"
+                        ng-change="$ctrl.applyNewAccessRights()"
+                        class="form-control"
+                        ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
+                      >
+                        <option value="public" ng-selected="$ctrl.permissions === 'public'">
+                          Public
+                        </option>
+                        <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
+                          Restricted
+                        </option>
+                      </select>
+                      <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"  class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
+                        <label class="control-label ng-binding">
+                          Choose who has access to the record
+                        </label>
+                        <ui-select
+                         multiple
+                         theme="bootstrap"
+                         ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
+                         title="Search for names"
+                         on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                         on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
+                         ng-model="$ctrl.selectedRestricted"
+                        >
+                         <ui-select-match
+                          ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
+                          placeholder="Search for names"
+                        >
+                          {{ $item.email || $item }}
+                        </ui-select-match>
+                         <ui-select-choices
+                          repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
+                          refresh="$ctrl.autocompleteAccess($select.search)"
+                          refresh-delay="100"
+                         >
+                           <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
+                           <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>
+                         </ui-select-choices>
+                         <ui-select-no-choice>
+                           <p class="pa-5 mb-0">
+                             <span ng-show="$select.search">
+                               Not results for "{{$select.search}}"
+                             </span>
+                             <span ng-show="!$select.search">
+                               Start typing a name ...
+                             </span>
+                           </p>
+                         </ui-select-no-choice>
+                       </ui-select>
+                      </div>
+                    </div>
+                    <div ng-show="!$ctrl.cdsDepositCtrl.record.category">
+                      Please select a category from the Basic Info tab.
+                    </div>
+                  </div> <!-- Alert -->
                 </div>
               </div>
             </div>
@@ -197,7 +260,7 @@
             </div>
             <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
               <div ng-init="$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update" class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12">
                   <h4>Grant access to the project</h4>
                   <ui-select
                    multiple
@@ -233,68 +296,6 @@
                    </ui-select-no-choice>
                  </ui-select>
                 </div>
-                <!-- Record permissions -->
-                <div class="col-sm-6">
-                  <h4>Record restrictions</h4>
-                  <div ng-show="$ctrl.cdsDepositCtrl.record.category">
-                    <select
-                      ng-model="$ctrl.permissions"
-                      ng-change="$ctrl.applyNewAccessRights()"
-                      class="form-control"
-                      ng-disabled="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public || $ctrl.cdsDepositCtrl.isPublished()"
-                    >
-                      <option value="public" ng-selected="$ctrl.permissions === 'public'">
-                        Public
-                      </option>
-                      <option value="restricted" ng-selected="$ctrl.permissions === 'restricted'">
-                        Restricted
-                      </option>
-                    </select>
-                    <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"  class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
-                      <label class="control-label ng-binding">
-                        Choose who has access to the record
-                      </label>
-                      <ui-select
-                       multiple
-                       theme="bootstrap"
-                       ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
-                       title="Search for names"
-                       on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
-                       on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
-                       ng-model="$ctrl.selectedRestricted"
-                      >
-                       <ui-select-match
-                        ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
-                        placeholder="Search for names"
-                      >
-                        {{ $item.email || $item }}
-                      </ui-select-match>
-                       <ui-select-choices
-                        repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
-                        refresh="$ctrl.autocompleteAccess($select.search)"
-                        refresh-delay="100"
-                       >
-                         <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
-                         <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>
-                       </ui-select-choices>
-                       <ui-select-no-choice>
-                         <p class="pa-5 mb-0">
-                           <span ng-show="$select.search">
-                             Not results for "{{$select.search}}"
-                           </span>
-                           <span ng-show="!$select.search">
-                             Start typing a name ...
-                           </span>
-                         </p>
-                       </ui-select-no-choice>
-                     </ui-select>
-                    </div>
-                  </div>
-                  <div ng-show="!$ctrl.cdsDepositCtrl.record.category">
-                    Please select a category from the Basic Info tab.
-                  </div>
-                </div>
-                <!-- Record permissions -->
               </div>
             </div>
           </div>
