@@ -109,11 +109,19 @@ function cdsDepositCtrl(
     } catch (error) {}
   };
 
+  this.$postLink = function() {
+    // Set pristine the form
+    $timeout(function () {
+      that.setPristine();
+    }, 1500);
+  }
+
   // The deposit can have the following depositStates
   this.$onInit = function() {
     // Init showAll
     this.initShowAll();
-    // loading
+
+    // Loading
     this.loading = false;
 
     // save previous values for category and type to detect when the user has changed his selection
