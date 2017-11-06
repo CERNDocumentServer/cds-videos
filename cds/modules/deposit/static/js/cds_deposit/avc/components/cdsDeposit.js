@@ -656,7 +656,8 @@ function cdsDepositCtrl(
 
     this.displaySuccess = function() {
       return that.depositStatusCurrent === that.depositStatuses.SUCCESS &&
-        !that.isPublished();
+        !that.isPublished() &&
+        !that.record.recid;
     };
 
     this.postSuccessProcess = function(responses) {
