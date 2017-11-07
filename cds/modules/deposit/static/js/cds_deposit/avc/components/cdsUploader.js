@@ -588,11 +588,12 @@ function cdsUploaderCtrl(
     }
   };
 
-  this.thumbnailPreview = function(key) {
+  this.thumbnailPreview = function(frame) {
     return urlBuilder.iiif({
       deposit: that.cdsDepositCtrl.record._buckets.deposit,
-      key: key,
-      res: '150,100'
+      key: frame.key,
+      res: '150,100',
+      version: frame.version_id
     });
   };
 
