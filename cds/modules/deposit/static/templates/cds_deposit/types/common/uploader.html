@@ -111,7 +111,7 @@
         <div class="row cds-deposit-thumbnail-pad">
           <div class="cds-deposit-frame-thumbnail" ng-repeat="frame in $ctrl.cdsDepositCtrl.currentMasterFile.frame">
             <a ng-href="{{ frame.links.self }}" target="_blank">
-              <img ng-if="showFrames" width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame.key) }}" />
+              <img ng-if="showFrames" width="100%" ng-src="{{ $ctrl.thumbnailPreview(frame) }}" />
             </a>
           </div>
         </div>
