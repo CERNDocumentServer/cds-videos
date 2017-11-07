@@ -37,7 +37,7 @@ def image_opener(uuid):
     bucket, _file = uuid.split(':', 1)
     ret = ObjectVersion.get(bucket, _file).file.uri
     # Open the Image
-    opened_image = file_opener_xrootd(ret)
+    opened_image = file_opener_xrootd(ret, 'rb')
     if '.' in _file:
         ext = _file.split('.')[-1]
         if ext in ['txt', 'pdf']:
