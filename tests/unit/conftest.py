@@ -115,10 +115,6 @@ def app():
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
         THEO_LICENCE_KEY='CHANGE_ME',
-        CDS_FILE_TOKEN_SUPER_USER='admin@inveniosoftware.org',
-        FILES_REST_OBJECT_API_ENDPOINT=(
-            'http://localhost/api/files/{bucket_id}/{key}?access_token'
-            '={access_token}'),
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
@@ -760,7 +756,8 @@ def mock_sorenson():
         except InvalidResolutionError as e:
             raise e
 
-        shutil.copyfile(input_file, output_file)  # just copy file
+        # just copy file
+        shutil.copyfile(input_file, '{0}.mp4'.format(output_file))
         return '1234'
 
     mock.patch(

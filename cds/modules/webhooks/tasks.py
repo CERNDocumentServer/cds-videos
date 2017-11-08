@@ -25,7 +25,6 @@
 
 from __future__ import absolute_import
 
-import fnmatch
 import hashlib
 import logging
 import os
@@ -48,8 +47,8 @@ from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
-                                       ObjectVersionTag, as_object_version,
-                                       as_bucket)
+                                       ObjectVersionTag, as_bucket,
+                                       as_object_version)
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
@@ -59,12 +58,11 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from .utils import get_download_file_url
-
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
-from ..xrootd.utils import (eos_retry, file_move_xrootd, file_opener_xrootd,
-                            replace_xrootd)
+from ..xrootd.utils import (file_move_xrootd, file_opener_xrootd,
+                            file_size_xrootd)
+from .utils import move_file_into_local
 
 logger = get_task_logger(__name__)
 
@@ -274,18 +272,29 @@ class ExtractMetadataTask(AVCTask):
                 'Failed to apply JSON Patch to deposit {0}: {1}'.format(
                     recid, c))
 
+        # Delete tmp file if any
+        obj = as_object_version(version_id)
+        temp_location = obj.get_tags().get('temp_location', None)
+        if temp_location:
+            shutil.rmtree(temp_location)
+            ObjectVersionTag.delete(obj, 'temp_location')
+            db.session.commit()
+
     @classmethod
-    def get_metadata_tags(cls, uri=None):
+    def get_metadata_tags(cls, object_=None, uri=None):
         """Get metadata tags."""
         # Extract video's metadata using `ff_probe`
-        metadata = ff_probe_all(uri)
+        if uri:
+            metadata = ff_probe_all(uri)
+        else:
+            with move_file_into_local(object_, delete=False) as url:
+                metadata = ff_probe_all(url)
         return dict(metadata['format'], **metadata['streams'][0])
 
     @classmethod
     def create_metadata_tags(cls, object_, keys, uri=None):
         """Extract metadata from the video and create corresponding tags."""
-        uri = uri or replace_xrootd(object_.file.uri)
-        extracted_dict = cls.get_metadata_tags(uri=uri)
+        extracted_dict = cls.get_metadata_tags(object_=object_, uri=uri)
         # Add technical information to the ObjectVersion as Tags
         [ObjectVersionTag.create_or_update(object_, k, v)
          for k, v in extracted_dict.items()
@@ -301,7 +310,6 @@ class ExtractMetadataTask(AVCTask):
         store under ``_cds`` as ``extracted_metadata``.
 
         :param self: reference to instance of task base class
-        :param uri: URL of the file to extract metadata from.
         """
         recid = str(PersistentIdentifier.get(
             'depid', self.deposit_id).object_uuid)
@@ -311,9 +319,9 @@ class ExtractMetadataTask(AVCTask):
         try:
             extracted_dict = self.create_metadata_tags(
                 uri=uri, object_=self.object, keys=self._all_keys)
-        except Exception as exc:
+        except Exception:
             db.session.rollback()
-            raise self.retry(max_retries=5, countdown=5, exc=exc)
+            raise
 
         tags = self.object.get_tags()
 
@@ -408,16 +416,15 @@ class ExtractFramesTask(AVCTask):
 
         try:
             frames = self._create_frames(frames=self._create_tmp_frames(
-                uri=self.object.file.uri,
+                object_=self.object,
                 output_dir=output_folder,
                 progress_updater=progress_updater, **options
             ), object_=self.object, **options)
-        except Exception as exc:
+        except Exception:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
             self.clean(version_id=self.obj_id)
-            raise self.retry(max_retries=5, countdown=5, exc=exc)
-
+            raise
         # Generate GIF images
         self._create_gif(bucket=str(self.object.bucket.id), frames=frames,
                          output_dir=output_folder, master_id=self.obj_id)
@@ -444,15 +451,16 @@ class ExtractFramesTask(AVCTask):
         }
 
     @classmethod
-    def _create_tmp_frames(cls, uri, start_time, end_time, time_step,
+    def _create_tmp_frames(cls, object_, start_time, end_time, time_step,
                            duration, output_dir, progress_updater=None,
                            **kwargs):
         """Create frames in temporary files."""
         # Generate frames
-        ff_frames(input_file=replace_xrootd(uri),
-                  start=start_time, end=end_time, step=time_step,
-                  duration=duration, progress_callback=progress_updater,
-                  output=os.path.join(output_dir, 'frame-{:d}.jpg'))
+        with move_file_into_local(object_) as url:
+            ff_frames(input_file=url,
+                      start=start_time, end=end_time, step=time_step,
+                      duration=duration, progress_callback=progress_updater,
+                      output=os.path.join(output_dir, 'frame-{:d}.jpg'))
         # sort them
         sorted_ff_frames = sorted(
             os.listdir(output_dir),
@@ -482,7 +490,7 @@ class ExtractFramesTask(AVCTask):
 
         images = []
         for f in frames:
-            image = Image.open(os.path.join(output_dir, f))
+            image = Image.open(file_opener_xrootd(f, 'rb'))
             # Convert image for better quality
             im = image.convert('RGB').convert(
                 'P', palette=Image.ADAPTIVE, colors=255
@@ -492,7 +500,7 @@ class ExtractFramesTask(AVCTask):
         gif_fullpath = os.path.join(output_dir, gif_filename)
         gif_image.save(gif_fullpath, save_all=True)
         cls._create_object(bucket=bucket, key=gif_filename,
-                           stream=file_opener_xrootd(gif_fullpath, 'rb'),
+                           stream=open(gif_fullpath, 'rb'),
                            size=os.path.getsize(gif_fullpath),
                            media_type='image', context_type='frames-preview',
                            master_id=master_id)
@@ -531,9 +539,8 @@ class TranscodeVideoTask(AVCTask):
 
     # FIXME maybe we need to move this part to CDS-Sorenson
     @staticmethod
-    @eos_retry(10)
     def _clean_file_name(uri):
-        """Remove file extension from file name.
+        """Remove the .mp4 file extension from file name.
 
         For some reason the Sorenson Server adds the extension to the output
         file, creating ``data.mp4``. Our file storage does not use extensions
@@ -541,11 +548,8 @@ class TranscodeVideoTask(AVCTask):
         The best/dirtiest solution is to remove the file extension once the
         transcoded file is created.
         """
-        folder = os.path.dirname(replace_xrootd(uri))
-        for file_ in os.listdir(folder):
-            if fnmatch.fnmatch(file_, 'data.*'):
-                file_move_xrootd(os.path.join(os.path.dirname(uri), file_),
-                                 os.path.join(os.path.dirname(uri), 'data'))
+        file_move_xrootd("{0}.mp4".format(uri),
+                         os.path.join(os.path.dirname(uri), 'data'))
 
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
@@ -598,6 +602,7 @@ class TranscodeVideoTask(AVCTask):
             input_file = self.object.file.uri
             # XRootDPyFS doesn't implement root_path
             try:
+                # XRootD Safe
                 output_file = os.path.join(
                     directory.root_url + directory.base_path, filename)
             except AttributeError:
@@ -652,8 +657,15 @@ class TranscodeVideoTask(AVCTask):
         while status != 'Finished':
             # Get job status
             status, percentage = get_encoding_status(job_id)
-            if status in ['Error', 'Canceled']:
+            if status == 'Error':
                 raise RuntimeError('Error transcoding: {0}'.format(status))
+            elif status == 'Canceled':
+                self.update_state(
+                    state='CANCELED',
+                    meta=dict(
+                        payload=dict(**job_info),
+                        message='Job Canceled.'))
+                raise Ignore()
             job_info['percentage'] = percentage
 
             # Update task's state for this preset
@@ -671,7 +683,7 @@ class TranscodeVideoTask(AVCTask):
             uri = output_file
             with file_opener_xrootd(uri, 'rb') as transcoded_file:
                 digest = hashlib.md5(transcoded_file.read()).hexdigest()
-            size = os.path.getsize(replace_xrootd(uri))
+            size = file_size_xrootd(uri)
             checksum = '{0}:{1}'.format('md5', digest)
             file_instance.set_uri(uri, size, checksum)
             as_object_version(

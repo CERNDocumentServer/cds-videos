@@ -104,3 +104,17 @@ def file_move_xrootd(src, dst, *args, **kwargs):
         fs = XRootDPyFS(path)
         return fs.move(_filename_src, _filename_dst)
     return os.rename(src, dst)
+
+
+def file_size_xrootd(path, *args, **kwargs):
+    """File size."""
+    if current_app.config['XROOTD_ENABLED'] and \
+            'root://eospublic.cern.ch/' in path:
+        from XRootD import client
+        f = client.File()
+        status, response = f.open(path)
+        assert status.ok
+        status, response = f.stat()
+        assert status.ok
+        return response.size
+    return os.path.getsize(path)
