@@ -61,7 +61,8 @@
         "title": "Category",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.updateCategoryAndPermissions(modelValue, form)",
+        "onChange": "$ctrl.updateCategory(modelValue, form)",
+        "readonly": "$ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
@@ -73,8 +74,8 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.updateTypeAndPermissions(modelValue, form)",
-        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
+        "onChange": "$ctrl.updateType(modelValue, form)",
+        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",
@@ -197,7 +198,8 @@
         "title": "Category",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.updateCategoryAndPermissions(modelValue, form)",
+        "onChange": "$ctrl.updateCategory(modelValue, form)",
+        "readonly": "$ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "url": "/api/categories/",
           "asyncCallback": "$ctrl.autocompleteCategories"
@@ -212,8 +214,8 @@
         "title": "Type",
         "type": "strapselect",
         "htmlClass": "cds-deposit-strap-select",
-        "onChange": "$ctrl.updateTypeAndPermissions(modelValue, form)",
-        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.cdsDepositCtrl.isPublished()",
+        "onChange": "$ctrl.updateType(modelValue, form)",
+        "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "filterTriggers": ["model.category"],
           "filter" : "item.category == model.category",
