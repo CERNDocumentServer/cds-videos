@@ -72,6 +72,10 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
       }
     };
 
+    $scope.$on('cds.deposit.project.saveAll', function() {
+      that.saveAllPartial();
+    });
+
     /*
      * If user is publishing a project, save videos and project first
      */
