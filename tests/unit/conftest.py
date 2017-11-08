@@ -115,6 +115,10 @@ def app():
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
         THEO_LICENCE_KEY='CHANGE_ME',
+        CDS_FILE_TOKEN_SUPER_USER='admin@inveniosoftware.org',
+        FILES_REST_OBJECT_API_ENDPOINT=(
+            'http://localhost/api/files/{bucket_id}/{key}?access_token'
+            '={access_token}'),
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
