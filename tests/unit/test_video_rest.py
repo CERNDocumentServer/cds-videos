@@ -481,6 +481,7 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
         }
 
 
+@pytest.mark.skip(reason='Review when EOS FUSE is stable enough')
 def test_video_publish_symlinks(location, api_project, api_app, users):
     """Test video publish creates symlinks."""
     def _random_string():

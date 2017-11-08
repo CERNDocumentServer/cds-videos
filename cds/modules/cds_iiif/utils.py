@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,11 +21,11 @@
 
 import tempfile
 
+from invenio_records_files.api import ObjectVersion
 from wand.image import Image
 
-from invenio_records_files.api import ObjectVersion
+from ..xrootd.utils import file_opener_xrootd
 
-from ..xrootd.utils import replace_xrootd, file_opener_xrootd
 
 def image_opener(uuid):
     """ Find a file based on its UUID.
@@ -44,9 +44,9 @@ def image_opener(uuid):
             img = Image(opened_image)
             # Get the first page from text and pdf files
             first_page = Image(img.sequence[0])
-            tempfile = tempfile.TemporaryFile()
+            tempfile_ = tempfile.TemporaryFile()
             with first_page.convert(format='png') as converted:
-                converted.save(file=tempfile)
-            return tempfile
+                converted.save(file=tempfile_)
+            return tempfile_
     # Return an open file to IIIF
     return opened_image

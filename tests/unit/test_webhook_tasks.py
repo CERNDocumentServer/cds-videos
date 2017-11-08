@@ -40,7 +40,6 @@ from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
-from invenio_oauth2server.models import Token
 from six import BytesIO, next
 from celery.exceptions import Retry, Ignore
 from sqlalchemy.orm.exc import ConcurrentModificationError
@@ -51,7 +50,6 @@ from cds.modules.webhooks.tasks import (DownloadTask,
                                         ExtractMetadataTask,
                                         TranscodeVideoTask,
                                         sync_records_with_deposit_files)
-from cds.modules.webhooks.utils import get_download_file_url
 from cds.modules.deposit.api import deposit_video_resolver, Video, Project, \
     deposit_project_resolver
 
@@ -541,23 +539,3 @@ def test_sync_records_with_deposits(app, db, location, users,
     re_edited_files = edited_files + ['obj_4']
     check_deposit_record_files(deposit, edited_files, record,
                                re_edited_files)
-
-
-def test_temp_file_url(api_app, db, bucket, video, users):
-    """Test temporary file download url."""
-    obj = ObjectVersion.create(
-        bucket=bucket, key='video.mp4', stream=open(video, 'rb'))
-    db.session.commit()
-    assert ObjectVersion.query.count() == 1
-    admin_user_id = users[2]
-    # Generate url with the access token
-    with get_download_file_url(obj) as url:
-        access_token = Token.query.filter_by(
-            user_id=admin_user_id).first().access_token
-        assert access_token in url
-        assert str(obj.bucket_id) in url
-        assert obj.key in url
-    # Make sure the access token has been deleted
-    access_token = Token.query.filter_by(
-        user_id=admin_user_id).one_or_none()
-    assert access_token is None

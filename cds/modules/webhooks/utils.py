@@ -27,39 +27,44 @@
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-from time import time
+import tempfile
+import shutil
+import os
 
-from flask import current_app
-
-from invenio_accounts.models import User
 from invenio_db import db
-from invenio_oauth2server.models import Token
+from invenio_files_rest.models import ObjectVersionTag
+from ..xrootd.utils import file_opener_xrootd
 
 
 @contextmanager
-def get_download_file_url(obj):
-    """Create a token and return the url.
+def move_file_into_local(obj, delete=True):
+    """Move file from XRootD accessed file system into a local path
 
-    :param obj: The ObjectVersion instance.
+    :param obj: Object version to make locally available.
+    :param delete: Whether or not the tmp file should be deleted on exit.
     """
-    # Create the token for the super user
-    with db.session.begin_nested():
-        user_token_id = User.query.filter_by(
-            email=current_app.config.get('CDS_FILE_TOKEN_SUPER_USER', '')
-        ).first().id
-        token = Token.create_personal(
-            'temp-file-download-{0}'.format(int(time())),
-            user_token_id,
-            is_internal=True,
-        )
-    db.session.commit()
-    # Return the url
-    yield current_app.config.get('FILES_REST_OBJECT_API_ENDPOINT', '').format(
-        bucket_id=obj.bucket_id,
-        key=obj.key,
-        access_token=token.access_token
-    )
-    # Delete the token
-    with db.session.begin_nested():
-        db.session.delete(token)
-    db.session.commit()
+
+    temp_location = obj.get_tags().get('temp_location', None)
+    if not temp_location:
+        temp_folder = tempfile.mkdtemp()
+        temp_location = os.path.join(temp_folder, 'data')
+
+        with open(temp_location, 'wb') as dst:
+            shutil.copyfileobj(file_opener_xrootd(obj.file.uri, 'rb'), dst)
+
+        ObjectVersionTag.create(obj, 'temp_location', temp_location)
+        db.session.commit()
+    else:
+        temp_folder = os.path.dirname(temp_location)
+
+    try:
+        yield temp_location
+    except:
+        shutil.rmtree(temp_folder)
+        ObjectVersionTag.delete(obj, 'temp_location')
+        db.session.commit()
+    else:
+        if delete:
+            shutil.rmtree(temp_folder)
+            ObjectVersionTag.delete(obj, 'temp_location')
+            db.session.commit()

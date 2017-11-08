@@ -142,5 +142,6 @@ def keywords_harvesting(self, max_retries=5, countdown=5):
 @shared_task(ignore_result=True, default_retry_delay=10 * 60)
 def create_symlinks(previous_record, record_uuid):
     """Create video symlinks."""
-    record_new = CDSRecord.get_record(record_uuid)
-    SymlinksCreator().create(previous_record, record_new)
+    # FIXME: couldn't find a way to create symlinks with xrootd
+    # record_new = CDSRecord.get_record(record_uuid)
+    # SymlinksCreator().create(previous_record, record_new)
