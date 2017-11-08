@@ -59,6 +59,8 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
+from .utils import get_download_file_url
+
 from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..xrootd.utils import (eos_retry, file_move_xrootd, file_opener_xrootd,
