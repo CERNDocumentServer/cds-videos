@@ -45,6 +45,7 @@ from celery import Task, shared_task
 from celery.exceptions import Ignore
 from celery.states import FAILURE, REVOKED, STARTED, SUCCESS
 from celery.utils.log import get_task_logger
+from flask import current_app
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
@@ -63,6 +64,11 @@ from ..deposit.api import deposit_video_resolver
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..xrootd.utils import (eos_retry, file_move_xrootd, file_opener_xrootd,
                             replace_xrootd)
+
+try:
+    from math import gcd
+except ImportError:
+    from fractions import gcd
 
 logger = get_task_logger(__name__)
 
@@ -510,6 +516,9 @@ class ExtractFramesTask(AVCTask):
 class TranscodeVideoTask(AVCTask):
     """Transcode video task."""
 
+    _computed_aspect_ratios = {}
+    _computed_aspect_ratios_sorted = []
+
     def __init__(self):
         """Init."""
         self._type = 'file_transcode'
@@ -554,6 +563,55 @@ class TranscodeVideoTask(AVCTask):
             bucket_id=object_version.bucket_id, key=obj_key).first()
         dispose_object_version(object_version)
 
+    def _compute_aspect_ratios(self):
+        """Keep computed aspect ratios and sort them."""
+        for ar in current_app.config['CDS_SORENSON_PRESETS']:
+            sorenson_w, sorenson_h = ar.split(':')
+            sorenson_ar_float = float(sorenson_w) / float(sorenson_h)
+            self._computed_aspect_ratios.setdefault(sorenson_ar_float, ar)
+
+        self._computed_aspect_ratios_sorted = sorted(
+            self._computed_aspect_ratios.keys())
+
+        logger.debug("Sorenson presets aspect ratios map built: {0}".format(
+            self._computed_aspect_ratios))
+
+    def _get_closest_aspect_ratio(self, ar, width, height):
+        """Find the closest available aspect ratio for transcoding.
+
+        Return the input aspect ratio if it is known and configured in the
+        current app configuration, otherwise return the closest aspect ratio
+        to the input one by findind the closest to the input width and height.
+
+        :param ar: video aspect ratio
+        :param width: video width
+        :param height: video height
+        """
+        if ar not in current_app.config['CDS_SORENSON_PRESETS']:
+            # init aspect ratios map
+            if not self._computed_aspect_ratios:
+                self._compute_aspect_ratios()
+
+            den = gcd(width, height)
+            ar_w = width / den
+            ar_h = height / den
+            # calculate the aspect ratio based on width and height
+            # e.g. w=720, h=512, den=16, ar= (720/16) / (512/16) = 1.40625
+            unknown_ar_float = float(ar_w) / ar_h
+
+            closest_ar = min(self._computed_aspect_ratios_sorted,
+                             key=lambda x: abs(x - unknown_ar_float))
+            closest = self._computed_aspect_ratios[closest_ar]
+
+            logger.warning(
+                "Video aspect ratio '{ar}' not recognized, falling back to "
+                "closest aspect ratio '{new_ar}'.".format(
+                    ar=ar, new_ar=closest))
+
+            return closest
+        else:
+            return ar
+
     def run(self, preset_quality, sleep_time=5, *args, **kwargs):
         """Launch video transcoding.
 
@@ -579,6 +637,11 @@ class TranscodeVideoTask(AVCTask):
         # Get master file's width x height
         width = int(tags['width']) if 'width' in tags else None
         height = int(tags['height']) if 'height' in tags else None
+
+        if width and height:
+            # match unknown aspect ratio to the most similar
+            aspect_ratio = self._get_closest_aspect_ratio(aspect_ratio, width,
+                                                          height)
 
         with db.session.begin_nested():
             # Create FileInstance

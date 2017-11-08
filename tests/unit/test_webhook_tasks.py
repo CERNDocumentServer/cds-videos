@@ -539,3 +539,22 @@ def test_sync_records_with_deposits(app, db, location, users,
     re_edited_files = edited_files + ['obj_4']
     check_deposit_record_files(deposit, edited_files, record,
                                re_edited_files)
+
+
+def test_get_closest_aspect_ratio_for_unknown(app):
+    """Test aspect ratio fallback for unknown aspect ratios."""
+    task = TranscodeVideoTask()
+
+    # known aspect ratio
+    assert task._get_closest_aspect_ratio('16:9', 720, 480) == '16:9'
+    # unknown aspect ratios
+    assert task._get_closest_aspect_ratio('15:11', 720, 480) == '3:2'
+    assert task._get_closest_aspect_ratio('1958:1467', 352, 288) == '4:3'
+    assert task._get_closest_aspect_ratio('20:11', 720, 480) == '3:2'
+    assert task._get_closest_aspect_ratio('25:14', 400, 224) == '16:9'
+    assert task._get_closest_aspect_ratio('295:162', 720, 576) == '4:3'
+    assert task._get_closest_aspect_ratio('295:216', 720, 576) == '4:3'
+    assert task._get_closest_aspect_ratio('320:243', 720, 486) == '3:2'
+    assert task._get_closest_aspect_ratio('5:4', 400, 320) == '4:3'
+    assert task._get_closest_aspect_ratio('5:4', 360, 288) == '4:3'
+    assert task._get_closest_aspect_ratio('5:4', 320, 256) == '4:3'
