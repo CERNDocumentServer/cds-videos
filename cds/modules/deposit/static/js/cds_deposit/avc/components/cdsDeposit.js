@@ -124,10 +124,6 @@ function cdsDepositCtrl(
     // Loading
     this.loading = false;
 
-    // save previous values for category and type to detect when the user has changed his selection
-    this.projectPreviousCategory = this.record.category;
-    this.projectPreviousType = this.record.type;
-
     this.findFilesByContextType = function(type) {
       return _.find(that.record._files, {'context_type': type});
     }
