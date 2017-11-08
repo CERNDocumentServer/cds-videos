@@ -67,7 +67,6 @@ from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.tasks import (ExtractFramesTask, ExtractMetadataTask,
                               TranscodeVideoTask)
-from ..xrootd.utils import eos_retry, replace_xrootd
 from .utils import (cern_movie_to_video_pid_fetcher, process_fireroles,
                     update_access)
 
@@ -306,7 +305,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _get_frames(cls, master_video):
         """Get Frames."""
-        return [replace_xrootd(FileInstance.get(f['file_id']).uri)
+        return [FileInstance.get(f['file_id']).uri
                 for f in CDSVideosFilesIterator.get_video_frames(
                     master_file=master_video)]
 
@@ -370,7 +369,6 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return record, deposit
 
     @classmethod
-    @eos_retry(10)
     def _run_extracted_metadata(cls, master):
         """Run extract metadata from the video."""
         return ExtractMetadataTask.create_metadata_tags(
@@ -507,11 +505,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
     @classmethod
     def _clean_file_list(cls, record):
-        """Remove unreachable files from the list."""
+        """Remove unreachable files from the list (on DFS)."""
         logging.info('Cleaning file list.')
         new_file_list = []
         for f in record.get('_files', []):
             path = cls._get_full_path(filepath=f['filepath'])
+            # No XRootD, accesing DFS
             if os.path.isfile(path):
                 new_file_list.append(f)
             else:
@@ -594,23 +593,22 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             # get the master video file path
             [master_video] = [f for f in record['_files']
                               if f['tags']['context_type'] == 'master']
-            filepath = cls._get_full_path(master_video['filepath'])
             # create frames and add them inside the record
             record['_files'] = record['_files'] + cls._create_frame(
-                uri=filepath)
+                object_=master_video)
 
     @classmethod
-    def _create_frame(cls, uri):
+    def _create_frame(cls, object_):
         """Create a temporary frame to migrate."""
         # get metadata from the master file
         metadata = ExtractMetadataTask.get_metadata_tags(
-            uri=replace_xrootd(uri))
-        # get time information
+            object_=object_)
+        # get time informations
         options = ExtractFramesTask._time_position(
             duration=metadata['duration'])
         # recreate frames
         output_folder = tempfile.mkdtemp()
-        return ExtractFramesTask._create_tmp_frames(uri=uri,
+        return ExtractFramesTask._create_tmp_frames(object_=object_,
                                                     output_dir=output_folder,
                                                     **options)
 
@@ -678,6 +676,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _get_full_path(cls, filepath):
         """Get full path."""
+        # No XRootD, accesing DFS
         return os.path.join(
             current_app.config['CDS_MIGRATION_RECORDS_BASEPATH'],
             filepath)
@@ -685,6 +684,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     @classmethod
     def _get_migration_file_stream_and_size(cls, file_):
         """Build the full file path."""
+        # No XRootD, accesing DFS
         path = cls._get_full_path(filepath=file_['filepath'])
         return open(path, 'rb'), os.path.getsize(path)
 

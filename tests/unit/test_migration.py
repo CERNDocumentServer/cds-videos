@@ -46,7 +46,7 @@ from invenio_accounts.models import User
 from flask_security import login_user
 
 from cds.cli import cli
-from cds.modules.records.symlinks import SymlinksCreator
+# from cds.modules.records.symlinks import SymlinksCreator
 from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
@@ -149,14 +149,14 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     dump = CDSRecordDump(data=data[0])
     db.session.commit()
 
-    def check_symlinks(video):
-        symlinks_creator = SymlinksCreator()
-        files = list(symlinks_creator._get_list_files(record=video))
-        assert len(files) == 1
-        for file_ in files:
-            path = symlinks_creator._build_link_path(
-                symlinks_creator._symlinks_location, video, file_['key'])
-            assert os.path.lexists(path)
+    # def check_symlinks(video):
+    #     symlinks_creator = SymlinksCreator()
+    #     files = list(symlinks_creator._get_list_files(record=video))
+    #     assert len(files) == 1
+    #     for file_ in files:
+    #         path = symlinks_creator._build_link_path(
+    #             symlinks_creator._symlinks_location, video, file_['key'])
+    #         assert os.path.lexists(path)
 
     def check_gif(video, mock_gif):
         # called only once for deposit
@@ -194,7 +194,8 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     storage = smil_obj.file.storage()
     assert '<video src' in storage.open().read().decode('utf-8')
     # check video symlinks
-    check_symlinks(video)
+    # TODO: review symlink creation once FUSE is stable
+    # check_symlinks(video)
     # check gif
     check_gif(video, mock_gif)
     # check project

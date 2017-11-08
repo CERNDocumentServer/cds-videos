@@ -54,9 +54,6 @@ def _(x):
     return x
 
 
-# CDS TOKEN SUPER USER
-CDS_FILE_TOKEN_SUPER_USER = 'admin@test.ch'
-
 ###############################################################################
 # Translations & Time
 ###############################################################################
@@ -519,9 +516,6 @@ RECORDS_ID_PROVIDER_ENDPOINT = None
 FILES_REST_PERMISSION_FACTORY = \
     'cds.modules.records.permissions:files_permission_factory'
 
-# Endpoint for object api
-FILES_REST_OBJECT_API_ENDPOINT = 'http://localhost:5000/api/files/' \
-    '{bucket_id}/{key}?access_token={access_token}'
 # Files storage
 FIXTURES_FILES_LOCATION = os.environ.get('APP_FIXTURES_FILES_LOCATION', '/tmp')
 
