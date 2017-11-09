@@ -24,9 +24,6 @@ function cdsDepositCtrl(
   // The Upload Queue
   this.filesQueue = [];
 
-  // Auto data update timeout
-  this.autoUpdateTimeout = null;
-
   // Checkout
   this.lastUpdated = new Date();
 
@@ -57,11 +54,7 @@ function cdsDepositCtrl(
   that.actionLoading = false;
 
   // Deposit type
-  Object.defineProperty(this, 'depositType', {
-    get: function() {
-      return that.master ? 'project' : 'video';
-    }
-  });
+  that.depositType = that.master ? 'project' : 'video';
 
   // Deposit status
   this.isPublished = function() {
@@ -99,13 +92,9 @@ function cdsDepositCtrl(
 
   this.$onDestroy = function() {
     try {
-      // Clear local storage
-      that.cleanLocalStorage();
-
       // Destroy listener
       that.sseEventListener();
       $interval.cancel(that.fetchStatusInterval);
-      $timeout.cancel(that.autoUpdateTimeout);
     } catch (error) {}
   };
 
@@ -346,11 +335,10 @@ function cdsDepositCtrl(
 
     // Refresh tasks from feedback endpoint
     this.fetchCurrentStatuses = function() {
-      var masterFile = that.findMasterFile();
-      if (masterFile) {
-        var tags = masterFile.tags;
-        if (tags && tags._event_id) {
-          var eventId = tags._event_id;
+      // Update only if it is ``draft``
+      if (that.isDraft()){
+        var eventId = _.get(that.findMasterFile(), 'tags._event_id', undefined);
+        if (eventId) {
           that.getTaskFeedback(eventId)
             .then(function(data) {
               var groupedTasks = _.groupBy(data, 'name');
@@ -384,13 +372,14 @@ function cdsDepositCtrl(
 
     // Update deposit based on extracted metadata from task
     this.fillMetadata = function(answer) {
-      [metadataToFill, metadataToFill_values] = that.metadataToFill;
+      var metadataToFill = that.metadataToFill[0];
+      var metadataToFill_values = that.metadataToFill[1];
       if (answer) {
         // Merge the data
         angular.merge(that.record, metadataToFill);
         that.preActions();
         // Make a partial Save
-        return that.makeSingleAction('SAVE_PARTIAL')
+        that.makeSingleAction('SAVE_PARTIAL')
           .then(
             that.onSuccessAction,
             that.onErrorAction
@@ -438,8 +427,7 @@ function cdsDepositCtrl(
     // Pre-fill changes to display to the user
     this.getMetadataToDisplay = function() {
         if(that.metadataToFill){
-          [metadataToFill, metadataToFill_values] = that.metadataToFill;
-          return metadataToFill_values;
+          return that.metadataToFill[1];
         }
         return {}
     };
@@ -783,7 +771,7 @@ function cdsDepositCtrl(
   // Local storage
   this.getFromLocalStorage = function(key) {
     try {
-      return localStorageService.get(that.id)[key];
+      return _.get(localStorageService.get(that.id), key, undefined);
     } catch (error) {
       return null;
     }
@@ -802,6 +790,21 @@ function cdsDepositCtrl(
   $scope.$on('cds.deposit.pristine.all', function(evt) {
     // Set that to pristine
     that.setPristine();
+  });
+
+  // Listen for any changes in the record state
+  $scope.$watch('$ctrl.record._cds.state', function(newVal, oldVal, scope) {
+    if (!_.isEqual(newVal, oldVal)){
+      // The states have been changed
+      that.calculateCurrentState();
+    }
+  }, true);
+  // Listen for any updates
+  $scope.$on('cds.deposit.metadata.update.' + that.id, function(evt, data) {
+    // Update only if it's draft
+    if (that.isDraft()) {
+      that.updateDeposit(data);
+    }
   });
 
   $window.onbeforeunload = function() {
