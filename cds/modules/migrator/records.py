@@ -37,6 +37,7 @@ from datetime import datetime, timedelta
 import arrow
 from cds_dojson.marc21 import marc21
 from cds_dojson.marc21.utils import create_record
+from cds_sorenson.api import get_closest_aspect_ratio
 from flask import current_app
 from invenio_accounts.models import User
 from invenio_db import db
@@ -788,7 +789,13 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         ratio = master['tags']['display_aspect_ratio']
         max_width = int(master['tags']['width'])
         max_height = int(master['tags']['height'])
+
+        if ratio not in current_app.config['CDS_SORENSON_PRESETS']:
+            ratio = get_closest_aspect_ratio(max_height, max_width)
+
+        assert ratio in current_app.config['CDS_SORENSON_PRESETS']
         preset = current_app.config['CDS_SORENSON_PRESETS'][ratio]
+
         # get required presets
         prq = [key for (key, value) in preset.items()
                if value['width'] < max_width or value['height'] < max_height]
