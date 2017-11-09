@@ -64,10 +64,18 @@ html, body {
     line-height: 35px;
   }
 }
+
 .cds-deposit-panel-project {
   & > .panel-heading {
     background-color: $btn-info-bg !important;
     color: $btn-info-color !important;
+  }
+}
+
+.cds-deposit-metadata-extraction-alert {
+  line-height: 33px;
+  span {
+    line-height: 33px;
   }
 }
 

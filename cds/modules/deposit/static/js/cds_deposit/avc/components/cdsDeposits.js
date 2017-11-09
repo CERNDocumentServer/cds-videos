@@ -5,12 +5,14 @@ function cdsDepositsCtrl(
   $window,
   $location,
   $element,
+  $interval,
   depositStates,
   depositSSEEvents,
   cdsAPI,
   urlBuilder,
   localStorageService,
-  toaster
+  toaster,
+  jwt
 ) {
   var that = this;
   this.edit = false;
@@ -32,8 +34,12 @@ function cdsDepositsCtrl(
   that.childrenFormResolved = {};
   that.masterFormResolved = {};
 
+  // Interval Autoupdate
+  this.autoUpdateInterval = null;
+
   this.$onDestroy = function() {
     try {
+      $interval.cancel(that.autoUpdateInterval);
       // On destroy delete the event listener
       delete $window.onbeforeunload;
       that.sseListener.close();
@@ -50,7 +56,26 @@ function cdsDepositsCtrl(
   // Show message when window is closing
   this.onExit = false;
 
-  this.overallState = {};
+  // Fetch the latest record data (only if it's a project)
+  this.fetchRecord = function() {
+    // Fetch only if it is in ``draft`` mode
+    if (that.master.metadata._deposit.status === 'draft') {
+      cdsAPI.action(that.master.links.self || that.masterLinks.self , 'GET', {}, jwt).then(function(data) {
+        // Metadata for the project
+        $scope.$broadcast(
+          'cds.deposit.metadata.update.' + data.data.metadata._deposit.id,
+          data.data.metadata
+        );
+        // Metadata for the videos
+        data.data.metadata.videos.forEach(function(_metadata) {
+          $scope.$broadcast(
+            'cds.deposit.metadata.update.' + _metadata._deposit.id,
+            _metadata
+          );
+        })
+      });
+    }
+  }
 
   this.$onInit = function() {
     // Check the if the app is on top;
@@ -106,6 +131,8 @@ function cdsDepositsCtrl(
       this.master = deposit;
       // Initialized
       this.initialized = true;
+      // Start sync metadata
+      that.autoUpdateInterval = $interval(that.fetchRecord, 30000);
       if (this.master.links.html) {
         this.handleRedirect(this.master.links.html, true);
       }
@@ -150,9 +177,6 @@ function cdsDepositsCtrl(
   this.addChildren = function(deposit, files) {
     deposit.metadata._files = files || [];
     this.master.metadata.videos.push(deposit.metadata);
-    this.overallState[deposit.metadata._deposit.id] = angular.copy(
-      that.initState
-    );
   };
 
   this.isVideoFile = function(key) {
@@ -398,12 +422,14 @@ cdsDepositsCtrl.$inject = [
   '$window',
   '$location',
   '$element',
+  '$interval',
   'depositStates',
   'depositSSEEvents',
   'cdsAPI',
   'urlBuilder',
   'localStorageService',
   'toaster',
+  'jwt',
 ];
 
 function cdsDeposits() {

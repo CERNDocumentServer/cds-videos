@@ -36,7 +36,6 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
               children.splice(i, 1);
             }
           }
-          delete that.cdsDepositCtrl.cdsDepositsCtrl.overallState[that.cdsDepositCtrl.id];
         }
       );
     };
