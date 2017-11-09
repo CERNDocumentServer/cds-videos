@@ -76,9 +76,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // to ``contributors`` because we change the whole object instead of
     // an attribute (i.e. ``name``).
     if (form.key && form.key[0] === 'contributors') {
-      form.key.pop();
+      var errorKey = _.clone(form.key || [])
+      errorKey.splice(-1, 1);
       $scope.$broadcast(
-        'schemaForm.error.' + form.key.join('.'),
+        'schemaForm.error.' + errorKey.join('.'),
         'tv4-302',
         true
       );
