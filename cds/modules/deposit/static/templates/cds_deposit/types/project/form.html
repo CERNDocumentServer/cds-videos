@@ -93,7 +93,6 @@
             <li role="presentation" ng-class="{active: active=='metadata'}">
               <a ng-click="active='metadata'" role="tab" data-toggle="tab">
                 Basic Info
-                <small uib-tooltip-html="'Validation error, check metadata.'" ng-show="$ctrl.cdsDepositCtrl.depositFormModels[0].$invalid || $ctrl.cdsDepositCtrl.depositFormModels[1].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='files'}">
@@ -104,13 +103,11 @@
             <li role="presentation" ng-class="{active: active=='licenses'}">
               <a ng-click="active='licenses'" role="tab" data-toggle="tab">
                 Licences
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[2].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='translations'}">
               <a ng-click="active='translations'" role="tab" data-toggle="tab">
                 Translations
-                <small ng-show="$ctrl.cdsDepositCtrl.depositFormModels[3].$invalid"><i class="fa fa-exclamation-circle text-danger"></i></small>
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='access'}">
