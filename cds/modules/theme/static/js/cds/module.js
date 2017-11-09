@@ -264,60 +264,99 @@ app.filter('isPublic', function () {
     return (_.get(record, '_access') === undefined || _.get(record, '_access.read') === undefined || _.get(record, '_access.read').length == 0);
   };
 });
-
 // Image loading with fallback
 app.directive('imageProgressiveLoading', ['$timeout', function($timeout) {
 
-  function linkFunction(scope, element, attr) {
+  // Load image async
+  function loadImage(src) {
+    return new Promise(function(resolve, reject) {
+      var _img = new Image();
+      _img.src = src;
+      _img.onload = function() {
+        return resolve(src);
+      };
+      _img.onerror = function() {
+        return reject(src);
+      }
+    })
+  }
+
+  function linkFunction(scope, element, attr){
     var timer;
-    // Add the blur class
     element.addClass('cds-blur');
-    // Initialize vars
+    // Is the image loaded
     scope.isLoaded = false;
-    scope.hasError = false;
-    var _img = new Image();
-    _img.src = attr.imgSrc;
-    _img.onload = function() {
-      element[0].src = attr.imgSrc;
-      attr.$set('src', attr.imgSrc);
-      element.removeClass('cds-blur');
-    }
-    // If there is gif replace it with the main image
-    if (attr.gifSrc) {
-      // Mouse out
-      element.bind('blur', function (e) {
-        $timeout.cancel(timer);
-        attr.$set('src', attr.imgSrc);
-      });
-      element.bind('mouseleave', function (e) {
-        $timeout.cancel(timer);
-        attr.$set('src', attr.imgSrc);
-      });
-      // Mouse over
-      element.bind('mouseover', function (e) {
-        timer = $timeout(function() {
-          if (scope.isLoaded) {
-            element[0].src = attr.gifSrc;
-          } else if(!scope.hasError) {
-            var img = new Image();
-            img.src = attr.gifSrc;
-            img.onload = function() {
-              scope.isLoaded = true;
+    // Is the gif loaded
+    scope.isGifLoaded = false;
+    // Has gif error
+    scope.hasGifError = false;
+    // Has image error
+    scope.hasImageError = false;
+    // Is over the element
+    scope.isOverTheElement = false;
+    // Element mouseover listener
+    var mouseOverListener = null;
+
+    // Replace the blurred image with the actual image
+    loadImage(attr.imgSrc)
+      .then(
+        function(src) {
+          // The image has been loaded
+          scope.isLoaded = true;
+          element[0].src = src;
+          attr.$set('src', src);
+          element.removeClass('cds-blur');
+        },
+        function() {
+          scope.hasImageError = true;
+        }
+      );
+      // If there is a gif then
+      if (attr.gifSrc) {
+        // When the mouse is out of the element
+        element.bind('mouseleave', function() {
+          // Mouse left the element
+          scope.isOverTheElement = false;
+          // Return back the image
+          element[0].src = attr.imgSrc;
+          attr.$set('src', attr.imgSrc);
+        });
+        // When the mouse is over the  element
+        element.bind('mouseover', function() {
+          if (!scope.hasGifError) {
+            // Mouse is over the element
+            scope.isOverTheElement = true;
+            if (!scope.isGifLoaded) {
+              loadImage(attr.gifSrc)
+                .then(
+                  function() {
+                    scope.isGifLoaded = true;
+                    // Check if the user is still Waiting
+                    if (scope.isOverTheElement) {
+                      // Put the gif up
+                      element[0].src = attr.gifSrc;
+                      attr.$set('src', attr.gifSrc);
+                    }
+                  },
+                  function() {
+                    // Gif error
+                    scope.hasGifError = true;
+                  }
+                )
+            } else {
+              // Put the gif up
+              element[0].src = attr.gifSrc;
               attr.$set('src', attr.gifSrc);
             }
-            img.onerror = function() {
-              scope.hasError = true;
-            }
           }
-        }, 800);
-      });
-    }
+        });
+      }
   }
   return {
       restrict: 'A',
       link: linkFunction
   };
-}]);
+}])
 
 // Filter to translage ISO languages to language name
 // i.e. en -> English , fr -> French
