@@ -836,6 +836,10 @@ i.sort-handle {
 .navbar {
   z-index: 99999;
 }
+#loading-bar,
+#loading-bar-spinner {
+  z-index: 999999;
+}
 
 @media (min-width: $screen-sm-min) {
   #cds-navbar {
