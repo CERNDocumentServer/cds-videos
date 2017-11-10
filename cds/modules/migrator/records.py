@@ -605,15 +605,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         # get metadata from the master file
         metadata = ExtractMetadataTask.get_metadata_tags(
             uri=replace_xrootd(uri))
-        # get time informations
+        # get time information
         options = ExtractFramesTask._time_position(
             duration=metadata['duration'])
         # recreate frames
         output_folder = tempfile.mkdtemp()
-        return ExtractFramesTask._create_tmp_frames(
-            duration=metadata['duration'], uri=uri,
-            output_dir=output_folder, **options
-        )
+        return ExtractFramesTask._create_tmp_frames(uri=uri,
+                                                    output_dir=output_folder,
+                                                    **options)
 
     @classmethod
     def _get_bucket(cls, record):
