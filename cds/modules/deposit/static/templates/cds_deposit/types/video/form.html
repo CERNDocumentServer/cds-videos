@@ -66,8 +66,8 @@
   <!-- Brief View -->
   <!-- Detail View -->
   <div ng-show="!$ctrl.cdsDepositCtrl.isPublished() || ($ctrl.cdsDepositCtrl.isPublished() && $ctrl.cdsDepositCtrl.showAll)" class="col-sm-12">
-    <!-- Alerts -->
-    <div class="col-sm-12">
+    <div class="row">
+      <div class="col-sm-12">
       <!-- FAILURE -->
       <div ng-show="$ctrl.cdsDepositCtrl.displayFailure()">
         <div class="alert alert-danger" ng-repeat="status in $ctrl.cdsDepositCtrl.stateQueue.FAILURE" ng-if="status != 'file_transcode'">
@@ -113,8 +113,6 @@
         </div>
       </div>
     </div>
-    <!-- Alerts -->
-    <div class="row">
       <div class="col-sm-3">
         <!-- Video preview -->
         <div class="cds-deposit-box-video-preview embed-responsive embed-responsive-16by9"
@@ -192,9 +190,8 @@
         </div>
         <!-- Extra information -->
       </div>
-      <div class="col-sm-9">
       <!-- Main form -->
-      <div class="col-sm-12">
+      <div class="col-sm-9">
         <!-- Nav tabs -->
         <ul ng-init="active='metadata'" class="nav nav-tabs" role="tablist">
           <li role="presentation" ng-class="{active: active=='metadata'}">
@@ -342,7 +339,6 @@
         </div>
       </div>
       <!-- Main form -->
-      </div>
     </div>
   </div>
   <!-- Detail View -->

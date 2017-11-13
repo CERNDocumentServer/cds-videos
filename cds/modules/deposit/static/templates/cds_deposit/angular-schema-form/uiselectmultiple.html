@@ -7,45 +7,18 @@
     class="form-group">
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
     <ui-select
-        ng-init="form.$$selectedObjects=$$value$$"
-        ng-if="!form.options.tagging"
-        multiple
-        ng-model="form.$$selectedObjects"
-        sortable="form.options.sortable||false"
-        theme="bootstrap"
-        ng-disabled="evalExpr(form.readonly)"
-        on-select="form.$$selectedValues.push($item.value)"
-        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value), 1)"
-        class="{{form.options.uiClass}}">
-        <ui-select-match
-            placeholder="{{
-                form.placeholder ||
-                form.schema.placeholder ||
-                ('placeholders.select' | translate)
-            }}">
-            {{$item.name}}
-        </ui-select-match>
-        <ui-select-choices
-            refresh="populateTitleMap(form, $select.search)"
-            refresh-delay="form.options.refreshDelay"
-            group-by="form.options.groupBy"
-            repeat="item in form.titleMap | propsFilter: {name: $select.search}">
-            <div ng-bind-html="item.name | highlight: $select.search"></div>
-        </ui-select-choices>
-    </ui-select>
-    <ui-select
-        ng-init="form.$$selectedObjects=$$value$$"
+        ng-init="internalModelTags=$$value$$"
         ng-if="form.options.tagging == true"
         multiple
         tagging="form.formatTokenTags"
         tagging-tokens="SPACE|,|/"
         tagging-label="(custom 'new')"
-        ng-model="form.$$selectedObjects"
+        ng-model="internalModelTags"
         sortable="form.options.sortable||false"
         theme="bootstrap"
         ng-disabled="evalExpr(form.readonly)"
-        on-select="form.$$selectedValues.push($item.value)"
-        on-remove="form.$$selectedValues.splice(form.$$selectedValues.indexOf($item.value || $item), 1)"
+        on-select="$$value$$.push($item)"
+        on-remove="$$value$$.splice($$value$$.indexOf($item), 1)"
         class="{{form.options.uiClass}}">
         <ui-select-match
             placeholder="{{
@@ -67,7 +40,7 @@
         type="hidden"
         name="{{form.key.slice(-1)[0]}}"
         toggle-multiple-model
-        ng-model="$$value$$"
+        ng-model="internalModelTags"
         form="form"
         sf-changed="form"
         schema-validate="form"/>

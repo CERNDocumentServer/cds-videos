@@ -140,7 +140,7 @@ function cdsDepositCtrl(
         parentObj[lastPart] = value;
       }
       return obj;
-    };
+    }
 
     var hasNoProperties = function(obj) {
       return Object.getOwnPropertyNames(obj).length == 0;
@@ -337,7 +337,8 @@ function cdsDepositCtrl(
     this.fetchCurrentStatuses = function() {
       // Update only if it is ``draft``
       if (that.isDraft()){
-        var eventId = _.get(that.findMasterFile(), 'tags._event_id', undefined);
+        var masterFile = that.findMasterFile();
+        var eventId = _.get(masterFile, 'tags._event_id', undefined);
         if (eventId) {
           that.getTaskFeedback(eventId)
             .then(function(data) {
