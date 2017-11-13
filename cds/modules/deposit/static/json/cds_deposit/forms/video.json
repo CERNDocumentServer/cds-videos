@@ -41,6 +41,7 @@
       "placeholder": "Keywords",
       "options": {
         "refreshDelay": 100,
+        "mergeObjects": true,
         "tagging": true,
         "asyncCallback": "$ctrl.autocompleteKeywords",
         "url": "/api/keywords/_suggest"
