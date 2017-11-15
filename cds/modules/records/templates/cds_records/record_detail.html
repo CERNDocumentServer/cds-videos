@@ -1,6 +1,6 @@
 {%- extends config.RECORDS_UI_BASE_TEMPLATE %}
 {%- set title = record.title.title -%}
-{%- set type = 'video' if 'video' in record['$schema'] else 'project'%}
+{%- set type = 'video-v1.0.0' if 'video' in record['$schema'] else 'project'%}
 {%- block head_meta %}
     {{ super() }}
     <meta property="og:url" content="{{ url_for('invenio_records_ui.recid', pid_value=record['recid'], _external=True) }}" />
