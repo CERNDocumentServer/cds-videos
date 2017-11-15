@@ -44,7 +44,7 @@ def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
             {'creatorName': 'pluto'},
             {'creatorName': 'zio paperino'}
         ],
-        'dates': [{u'date': u'2017-03-02', u'dateType': u'Published'}],
+        'dates': [{u'date': u'2017-03-02', u'dateType': u'Issued'}],
         'descriptions': [
             {
                 'description': 'in tempor reprehenderit enim eiusmod',

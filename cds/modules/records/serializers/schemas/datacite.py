@@ -122,5 +122,5 @@ class DataCiteSchemaV1(Schema):
         s = DateSchema()
         return [s.dump({
             'date': obj['metadata']['publication_date'],
-            'type': 'Published',
+            'type': 'Issued',
         }).data]
