@@ -70,7 +70,7 @@ class DataCiteSchemaV1(Schema):
         """Get resource type."""
         return {
             'resourceType': None,
-            'resourceTypeGeneral': 'video',
+            'resourceTypeGeneral': 'Audiovisual',
         }
 
     def get_subjects(self, obj):

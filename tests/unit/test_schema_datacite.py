@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 from invenio_records.api import Record
+
 from cds.modules.records.serializers import datacite_v31
 
 
@@ -57,7 +58,9 @@ def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
         'language': 'en',
         'publisher': 'CERN',
         'publicationYear': '2017',
-        'resourceType': {'resourceTypeGeneral': 'video', 'resourceType': None},
+        'resourceType': {
+            'resourceTypeGeneral': 'Audiovisual', 'resourceType': None
+        },
         'subjects': [
             {'subject': 'keyword1'},
             {'subject': 'keyword2'}

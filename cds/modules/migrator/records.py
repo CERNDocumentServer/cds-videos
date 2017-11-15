@@ -393,7 +393,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         video_pid = PersistentIdentifier.query.filter_by(
             pid_type='recid', object_uuid=record.id,
             object_type='rec').one()
-        datacite_register.apply(args=[video_pid.pid_value, str(record.id)])
+        datacite_register.s(video_pid.pid_value, str(record.id)).apply_async()
 
     @classmethod
     def _resolve_cds(cls, record):
