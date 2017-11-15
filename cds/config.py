@@ -53,6 +53,9 @@ def _(x):
     """Identity function."""
     return x
 
+# CDS Enviroments
+CDS_ENV_PROD = False
+CDS_ENV_TEST = False
 
 ###############################################################################
 # Translations & Time
@@ -639,6 +642,9 @@ CERN_APP_CREDENTIALS = dict(
     consumer_key='CHANGE_ME',
     consumer_secret='CHANGE_ME',
 )
+
+# Set the template
+OAUTH2SERVER_SETTINGS_TEMPLATE = 'cds_theme/settings.html'
 
 ###############################################################################
 # Theme
