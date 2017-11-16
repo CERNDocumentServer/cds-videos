@@ -670,6 +670,10 @@ THEME_404_TEMPLATE = 'cds_theme/error/404.html'
 THEME_500_TEMPLATE = 'cds_theme/error/500.html'
 # Error template
 THEME_ERROR_TEMPLATE = 'cds_theme/error/base.html'
+# Tracking template
+THEME_TRACKINGCODE_TEMPLATE = 'cds_theme/trackingcode.html'
+# Piwik tracking code: set None to disabled it
+THEME_PIWIK_ID = None
 
 ###############################################################################
 # Previewer
