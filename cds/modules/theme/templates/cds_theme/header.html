@@ -66,10 +66,17 @@
               <li{{ ' class="active"'|safe if item.active and loop.depth == 1 else '' }}><a href="{{ item.url }}">{{ item.text|safe }}</a></li>
             {%- endif %}
             {%- endfor %}
-
             {%- if config['ACCOUNTS'] %}
               {%- if not current_user.is_authenticated %}
-                <li><a href=" {{url_for_security('login', next=request.path)}}"><strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong></a></li>
+                {%- if config.DEBUG -%}
+                  <li><a href=" {{url_for_security('login', next=request.path)}}"><strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong></a></li>
+                {%- else %}
+                  <li>
+                    <a href="{{url_for('invenio_oauthclient.login', remote_app='cern', next=request.path)}}">
+                       <strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong>
+                    </a>
+                  </li>
+                {%- endif %}
               {%- else %}
                 {%- if config['USERPROFILES'] %}
                   <li class="dropdown">
