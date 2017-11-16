@@ -26,7 +26,7 @@ from invenio_jsonschemas import current_jsonschemas
 from ....deposit.api import Project, deposit_video_resolver
 from .common import \
     AccessSchema, BucketSchema, ContributorSchema, \
-    DepositSchema, LicenseSchema, \
+    DepositSchema, ExternalSystemIdentifiersField, LicenseSchema, \
     OaiSchema, StrictKeysSchema, TitleSchema, \
     TranslationsSchema, KeywordsSchema
 from .doi import DOI
@@ -82,6 +82,9 @@ class ProjectSchema(StrictKeysSchema):
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     publication_date = fields.Str()
+    external_system_identifiers = fields.Nested(
+        ExternalSystemIdentifiersField, many=True)
+
 
     @post_load(pass_many=False)
     def post_load(self, data):

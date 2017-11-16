@@ -143,3 +143,10 @@ class RelatedLinksSchema(StrictKeysSchema):
 
     name = fields.Str()
     url = fields.Str()
+
+
+class ExternalSystemIdentifiersField(StrictKeysSchema):
+    """Field physical medium."""
+
+    value = fields.Str()
+    schema = fields.Str()
