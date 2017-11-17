@@ -25,13 +25,13 @@ remove_devel(){
 }
 
 # production env
-remove_topical requirements.pinned.txt > .travis-production-requirements.txt
-cat requirements.topical.branches.txt >> .travis-production-requirements.txt
+remove_topical requirements.pinned.txt > .travis-prod-requirements.txt
+cat requirements.topical.branches.txt >> .travis-prod-requirements.txt
 
-# release env
-requirements-builder --level=pypi setup.py > .travis-release-requirements.txt.tmp
-remove_topical .travis-release-requirements.txt.tmp > .travis-release-requirements.txt
-cat requirements.topical.branches.txt >> .travis-release-requirements.txt
+# qa env
+requirements-builder --level=pypi setup.py > .travis-qa-requirements.txt.tmp
+remove_topical .travis-qa-requirements.txt.tmp > .travis-qa-requirements.txt
+cat requirements.topical.branches.txt >> .travis-qa-requirements.txt
 
 # devel env
 requirements-builder --level=dev --req requirements.devel.txt setup.py > .travis-devel-requirements.txt.tmp
