@@ -65,11 +65,16 @@ def ff_probe_all(input_filename):
     * *-show_format -print_format json* output in JSON format
     * *-show_streams -select_streams v:0* show information for video streams
     """
+    cmd = 'ffprobe -v quiet -show_format -print_format json -show_streams ' \
+          '-select_streams v:0 {0}'.format(input_filename)
     metadata = run_command(
-        'ffprobe -v error -show_format -print_format json -show_streams '
-        '-select_streams v:0 {0}'.format(input_filename),
-        error_class=MetadataExtractionExecutionError
+        cmd, error_class=MetadataExtractionExecutionError
     ).decode('utf-8')
+
+    if not metadata:
+        raise MetadataExtractionExecutionError(
+            'No metadata extracted running {0}, '
+            'try to increase verbosity to see the errors')
 
     return _refactoring_metadata(_patch_aspect_ratio(json.loads(metadata)))
 
