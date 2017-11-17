@@ -55,18 +55,16 @@ from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..deposit.api import (Project, Video, deposit_video_resolver,
-                           record_unbuild_url)
+from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
-from ..records.resolver import record_resolver
 from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import (ExtractFramesTask, ExtractMetadataTask,
-                              TranscodeVideoTask)
+from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
+from .tasks import TranscodeVideoTaskQuiet
 from .utils import (cern_movie_to_video_pid_fetcher, process_fireroles,
                     update_access)
 
@@ -804,23 +802,6 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         missing = set(prq) - set(pqs)
 
         # run tasks for missing
-
-        class TranscodeVideoTaskQuiet(TranscodeVideoTask):
-            """Transcode without index or send sse messages."""
-
-            def on_success(self, *args, **kwargs):
-                # get deposit and record
-                deposit_id = args[3]['deposit_id']
-                video = deposit_video_resolver(deposit_id)
-                rec_video = record_resolver.resolve(video['recid'])[1]
-                # sync deposit --> record
-                video._sync_record_files(record=rec_video)
-                video.commit()
-                rec_video.commit()
-
-            def _update_record(self, *args, **kwargs):
-                pass
-
         # execute them at 18h00
         now = datetime.utcnow()
         afternoon = now + timedelta(hours=(18 - now.hour))
