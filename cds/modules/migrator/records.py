@@ -522,10 +522,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         logging.info('Moving files from DFS.')
         bucket = as_bucket(deposit['_buckets']['deposit'])
         if Video.get_record_schema() == record['$schema']:
-            has_master = cls._resolve_master_file(record, bucket)
-
-            if has_master:
-                cls._create_or_update_frames(record=record)
+            master = cls._resolve_master_file(record, bucket)
+            if master:
+                cls._create_or_update_frames(record=record, master_file=master)
                 # build objects/tags from marc21 metadata
                 for file_ in record.get('_files', []):
                     if file_['tags']['context_type'] != 'master':
@@ -547,7 +546,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             record_id=record.id, bucket_id=snapshot.id
         ))
         cls._resolve_dumps(record=record)
-        if Video.get_record_schema() == record['$schema'] and has_master:
+        if Video.get_record_schema() == record['$schema'] and master:
             # update tag 'master'
             cls._update_tag_master(record=record)
             # create an empty smil file
@@ -579,7 +578,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                     master_file=master_video)])
 
     @classmethod
-    def _create_or_update_frames(cls, record):
+    def _create_or_update_frames(cls, record, master_file):
         """Check and rebuild frames if needed."""
         files = record.get('_files', [])
         filtered = [f for f in files
@@ -588,12 +587,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if len(files) - len(filtered) < cls._get_minimum_frames():
             # filter frames if there are
             record['_files'] = filtered
-            # get the master video file path
-            [master_video] = [f for f in record['_files']
-                              if f['tags']['context_type'] == 'master']
             # create frames and add them inside the record
             record['_files'] = record['_files'] + cls._create_frame(
-                object_=master_video)
+                object_=as_object_version(master_file))
 
     @classmethod
     def _create_frame(cls, object_):
@@ -606,9 +602,17 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             duration=metadata['duration'])
         # recreate frames
         output_folder = tempfile.mkdtemp()
-        return ExtractFramesTask._create_tmp_frames(object_=object_,
-                                                    output_dir=output_folder,
-                                                    **options)
+        frames = ExtractFramesTask._create_tmp_frames(object_=object_,
+                                                      output_dir=output_folder,
+                                                      **options)
+        return [
+            dict(filepath=f,
+                 key=os.path.basename(f).split('.')[0],
+                 tags={'content_type': 'jpg',
+                       'context_type': 'frame',
+                       'media_type': 'image'},
+                 tags_to_transform={'timestamp': ((i+1)*10)-5})
+            for i, f in enumerate(frames)]
 
     @classmethod
     def _get_bucket(cls, record):
@@ -692,12 +696,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         try:
             [master_video] = [f for f in record['_files']
                               if f['tags']['context_type'] == 'master']
-            cls._resolve_file(bucket=bucket, file_=master_video)
-            return True
+            return cls._resolve_file(bucket=bucket, file_=master_video)
         except Exception as e:
             # Either the file doesn't exist or can't be read.
             logging.error('#MASTER_FILE_ERROR {0}'.format(e))
-            return False
+            return None
 
     @classmethod
     def _resolve_file(cls, bucket, file_):
@@ -719,9 +722,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         # resolve timestamp
         if 'timestamp' in tags_to_transform:
             file_['tags']['timestamp'] = tags_to_transform['timestamp']
+        # Add DFS path to run ffmpeg without copying the file
+        file_['tags']['dfs_path'] = cls._get_full_path(
+            filepath=file_['filepath'])
         # create tags
         for key, value in file_.get('tags', {}).items():
             ObjectVersionTag.create(obj, key, value)
+
+        db.session.commit()
+        return obj.version_id
 
     @classmethod
     def _update_timestamp(cls, deposit):
