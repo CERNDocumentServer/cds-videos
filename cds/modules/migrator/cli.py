@@ -33,10 +33,10 @@ from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
 from invenio_migrator.cli import _loadrecord, dumps
-from invenio_migrator.proxies import current_migrator
 from invenio_pidstore.errors import PIDAlreadyExists
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_sequencegenerator.api import Sequence
+from .tasks import clean_record
 
 from ...modules.deposit.api import Project
 
@@ -144,25 +144,6 @@ def dryrun(sources, source_type, recid):
     load_records(sources=sources, source_type=source_type, eager=True)
 
 
-def _clean_record(data, source_type):
-    """."""
-    try:
-        source_type = source_type or 'marcxml'
-        assert source_type in ['marcxml', 'json']
-
-        recorddump = current_migrator.records_dump_cls(
-            data,
-            source_type=source_type,
-            pid_fetchers=current_migrator.records_pid_fetchers, )
-        current_migrator.records_dumploader_cls.clean(
-            recorddump, delete_files=True)
-
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-
-
 @dumps.command()
 @click.argument('sources', type=click.File('r'), nargs=-1)
 @click.option(
@@ -184,7 +165,7 @@ def cleanrecords(sources, source_type, recid):
             records = json.load(source)
             for item in records:
                 if str(item['recid']) == str(recid):
-                    _clean_record(item, source_type)
+                    clean_record.delay(item, source_type)
                     click.echo("Record '{recid}' cleaned.".format(recid=recid))
                     return
         click.echo("Record '{recid}' not found.".format(recid=recid))
@@ -195,7 +176,7 @@ def cleanrecords(sources, source_type, recid):
             data = json.load(source)
             with click.progressbar(data) as records:
                 for item in records:
-                    _clean_record(item, source_type)
+                    clean_record.delay(item, source_type)
 
 
 @dumps.command()

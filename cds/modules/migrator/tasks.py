@@ -24,6 +24,10 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Record migration special."""
 
+from celery import shared_task
+from invenio_db import db
+from invenio_migrator.proxies import current_migrator
+
 from ..deposit.api import deposit_video_resolver
 from ..records.resolver import record_resolver
 from ..webhooks.tasks import TranscodeVideoTask
@@ -44,3 +48,26 @@ class TranscodeVideoTaskQuiet(TranscodeVideoTask):
 
     def _update_record(self, *args, **kwargs):
         pass
+
+
+@shared_task(ignore_result=True)
+def clean_record(data, source_type):
+    """Delete all information related with a given record.
+
+    Note: files are deleted from the file system
+    """
+    try:
+        source_type = source_type or 'marcxml'
+        assert source_type in ['marcxml', 'json']
+
+        recorddump = current_migrator.records_dump_cls(
+            data,
+            source_type=source_type,
+            pid_fetchers=current_migrator.records_pid_fetchers, )
+        current_migrator.records_dumploader_cls.clean(
+            recorddump, delete_files=True)
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
