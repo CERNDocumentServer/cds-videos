@@ -263,7 +263,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if record_bucket:
             bucket = as_bucket(record_bucket.bucket_id)
             record_bucket.bucket.locked = False
-            files = [obj.file.id for obj in bucket.objects]
+            # Make files writable
+            for obj in bucket.objects:
+                files.append(obj.file.id)
+                obj.file.writable = True
+                db.session.add(obj.file)
             bucket.remove()
         db.session.commit()
         cls.clean_files(files)
