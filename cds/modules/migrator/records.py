@@ -38,6 +38,7 @@ import arrow
 from cds_dojson.marc21 import marc21
 from cds_dojson.marc21.utils import create_record
 from cds_sorenson.api import get_closest_aspect_ratio
+from celery.utils.log import get_task_logger
 from flask import current_app
 from invenio_accounts.models import User
 from invenio_db import db
@@ -49,28 +50,27 @@ from invenio_files_rest.models import (Bucket, BucketTag, FileInstance,
 from invenio_files_rest.tasks import remove_file_data
 from invenio_jsonschemas import current_jsonschemas
 from invenio_migrator.records import RecordDump, RecordDumpLoader
+from invenio_migrator.tasks.records import import_record
 from invenio_pidstore.models import PersistentIdentifier, RecordIdentifier
 from invenio_records.models import RecordMetadata
 from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..deposit.api import (Project, Video, deposit_video_resolver,
-                           record_unbuild_url)
+from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
 from ..records.minters import _doi_minter
-from ..records.resolver import record_resolver
 from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import (ExtractFramesTask, ExtractMetadataTask,
-                              TranscodeVideoTask)
+from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
+from .tasks import TranscodeVideoTaskQuiet
 from .utils import (cern_movie_to_video_pid_fetcher, process_fireroles,
                     update_access)
 
-logger = logging.getLogger('cds-record-migration')
+logger = get_task_logger(import_record.__name__)
 
 
 class CDSRecordDump(RecordDump):
@@ -214,10 +214,12 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         """Clean a record with all connected objects."""
         logging.debug('Clean record {0}'.format(dump.recid))
         record = dump.resolver.resolve(dump.data['recid'])[1]
-        # clean deposit
-        cls.clean_deposit(record=record, delete_files=delete_files)
-        # clean record
-        cls.clean_record(dump=dump, record=record, delete_files=delete_files)
+        record_uuid = record.id
+        deposit = cls._get_deposit(record)
+        if deposit:
+            # clean deposit
+            cls.clean_record(deposit.id)
+        cls.clean_record(record_uuid, recid=dump.data['recid'])
 
     @classmethod
     def _get_deposit(cls, record):
@@ -243,64 +245,39 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         return None
 
     @classmethod
-    def clean_deposit(cls, record, delete_files):
-        """Clean deposit."""
-        logging.debug('Clean deposit for record {0}'.format(record.id))
-        deposit = cls._get_deposit(record=record)
-        if deposit:
-            cls.clean_buckets(record=deposit, delete_files=delete_files)
-            cls.clean_pids(deposit)
-            db.session.delete(deposit.model)
-
-    @classmethod
-    def clean_record(cls, dump, record, delete_files):
+    def clean_record(cls, uuid, recid=None):
         """Clean record."""
-        cls.clean_buckets(record, delete_files=delete_files)
-        cls.clean_pids(record)
-        RecordIdentifier.query.filter_by(recid=dump.recid).delete()
-        db.session.delete(record.model)
+        logging.debug('Clean record {1}:{0}'.format(uuid, recid or 'deposit'))
+        record_bucket = RecordsBuckets.query.filter(
+            RecordsBuckets.record_id == uuid).one_or_none()
+        PersistentIdentifier.query.filter(
+            PersistentIdentifier.object_uuid == uuid).delete()
+        RecordsBuckets.query.filter(RecordsBuckets.record_id == uuid).delete()
+        RecordMetadata.query.filter(RecordMetadata.id == uuid).delete()
+
+        if recid:
+            RecordIdentifier.query.filter(
+                RecordIdentifier.recid == recid).delete()
+
+        files = []
+        if record_bucket:
+            bucket = as_bucket(record_bucket.bucket_id)
+            record_bucket.bucket.locked = False
+            # Make files writable
+            for obj in bucket.objects:
+                files.append(obj.file.id)
+                obj.file.writable = True
+                db.session.add(obj.file)
+            bucket.remove()
+        db.session.commit()
+        cls.clean_files(files)
 
     @classmethod
-    def clean_files(cls, bucket, delete_files):
+    def clean_files(cls, file_ids):
         """Clean files."""
-        for obj in ObjectVersion.query.filter_by(bucket=bucket).all():
-            objs_to_file = ObjectVersion.query.filter_by(
-                file_id=obj.file_id).count()
-            obj.file.writable = True
-            db.session.delete(obj)
-            if objs_to_file == 1:
-                if delete_files:
-                    remove_file_data.s(file_id=obj.file_id).apply()
-                else:
-                    obj.file.delete()
-
-    @classmethod
-    def clean_buckets(cls, record, delete_files):
-        """Clean buckets."""
-        logging.debug('Clean bucket for record {0}'.format(record.id))
-        for rb in RecordsBuckets.query.filter_by(record_id=record.id).all():
-            bucket = rb.bucket
-            logging.debug('Clean files for bucket {0}'.format(bucket.id))
-            cls.clean_files(bucket=bucket, delete_files=delete_files)
-            logging.debug('Clean tags for bucket {0}'.format(bucket.id))
-            for tag in BucketTag.query.filter_by(bucket=bucket).all():
-                db.session.delete(tag)
-            db.session.delete(rb)
-            db.session.delete(bucket)
-
-    @classmethod
-    def _get_pids(cls, record):
-        """Get all pids."""
-        return PersistentIdentifier.query.filter_by(
-            object_type='rec', object_uuid=record.id).all()
-
-    @classmethod
-    def clean_pids(cls, record):
-        """Clean all pids."""
-        logging.debug('Clean pids and record identifier for '
-                      'record {0}'.format(record.id))
-        for pid in cls._get_pids(record):
-            db.session.delete(pid)
+        logging.debug('Clean files: {0}'.format(file_ids))
+        for file_id in file_ids:
+            remove_file_data.s(file_id).apply()
 
     @classmethod
     def _get_frames(cls, master_video):
@@ -524,10 +501,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         logging.info('Moving files from DFS.')
         bucket = as_bucket(deposit['_buckets']['deposit'])
         if Video.get_record_schema() == record['$schema']:
-            has_master = cls._resolve_master_file(record, bucket)
-
-            if has_master:
-                cls._create_or_update_frames(record=record)
+            master = cls._resolve_master_file(record, bucket)
+            if master:
+                cls._create_or_update_frames(record=record, master_file=master)
                 # build objects/tags from marc21 metadata
                 for file_ in record.get('_files', []):
                     if file_['tags']['context_type'] != 'master':
@@ -549,7 +525,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             record_id=record.id, bucket_id=snapshot.id
         ))
         cls._resolve_dumps(record=record)
-        if Video.get_record_schema() == record['$schema'] and has_master:
+        if Video.get_record_schema() == record['$schema'] and master:
             # update tag 'master'
             cls._update_tag_master(record=record)
             # create an empty smil file
@@ -581,7 +557,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
                     master_file=master_video)])
 
     @classmethod
-    def _create_or_update_frames(cls, record):
+    def _create_or_update_frames(cls, record, master_file):
         """Check and rebuild frames if needed."""
         files = record.get('_files', [])
         filtered = [f for f in files
@@ -590,12 +566,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if len(files) - len(filtered) < cls._get_minimum_frames():
             # filter frames if there are
             record['_files'] = filtered
-            # get the master video file path
-            [master_video] = [f for f in record['_files']
-                              if f['tags']['context_type'] == 'master']
             # create frames and add them inside the record
             record['_files'] = record['_files'] + cls._create_frame(
-                object_=master_video)
+                object_=as_object_version(master_file))
 
     @classmethod
     def _create_frame(cls, object_):
@@ -608,9 +581,17 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             duration=metadata['duration'])
         # recreate frames
         output_folder = tempfile.mkdtemp()
-        return ExtractFramesTask._create_tmp_frames(object_=object_,
-                                                    output_dir=output_folder,
-                                                    **options)
+        frames = ExtractFramesTask._create_tmp_frames(object_=object_,
+                                                      output_dir=output_folder,
+                                                      **options)
+        return [
+            dict(filepath=f,
+                 key=os.path.basename(f).split('.')[0],
+                 tags={'content_type': 'jpg',
+                       'context_type': 'frame',
+                       'media_type': 'image'},
+                 tags_to_transform={'timestamp': ((i+1)*10)-5})
+            for i, f in enumerate(frames)]
 
     @classmethod
     def _get_bucket(cls, record):
@@ -694,12 +675,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         try:
             [master_video] = [f for f in record['_files']
                               if f['tags']['context_type'] == 'master']
-            cls._resolve_file(bucket=bucket, file_=master_video)
-            return True
+            return cls._resolve_file(bucket=bucket, file_=master_video)
         except Exception as e:
             # Either the file doesn't exist or can't be read.
             logging.error('#MASTER_FILE_ERROR {0}'.format(e))
-            return False
+            return None
 
     @classmethod
     def _resolve_file(cls, bucket, file_):
@@ -707,23 +687,32 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         def progress_callback(size, total):
             logging.debug('Moving file {0} of {1}'.format(total, size))
 
+        # resolve preset info
+        tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
+        if tags_to_guess_preset:
+            file_['tags'].update(**cls._resolve_preset(
+                obj=None, clues=tags_to_guess_preset))
+            # we cannot deal with it now delete the file
+            if 'preset_quality' not in file_['tags']:
+                return None
         # create object
         stream, size = cls._get_migration_file_stream_and_size(file_=file_)
         obj = ObjectVersion.create(
             bucket=bucket, key=file_['key'], stream=stream,
             size=size, progress_callback=progress_callback)
-        # resolve preset info
-        tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
-        if tags_to_guess_preset:
-            file_['tags'].update(**cls._resolve_preset(
-                obj=obj, clues=tags_to_guess_preset))
         tags_to_transform = file_.get('tags_to_transform', {})
         # resolve timestamp
         if 'timestamp' in tags_to_transform:
             file_['tags']['timestamp'] = tags_to_transform['timestamp']
+        # Add DFS path to run ffmpeg without copying the file
+        file_['tags']['dfs_path'] = cls._get_full_path(
+            filepath=file_['filepath'])
         # create tags
         for key, value in file_.get('tags', {}).items():
             ObjectVersionTag.create(obj, key, value)
+
+        db.session.commit()
+        return obj.version_id
 
     @classmethod
     def _update_timestamp(cls, deposit):
@@ -798,29 +787,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         # get required presets
         prq = [key for (key, value) in preset.items()
                if value['width'] < max_width or value['height'] < max_height]
-        # get subformat preset qualities
-        pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        try:
+            # get subformat preset qualities
+            pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        except KeyError:
+            pqs = []
         # find missing subformats
         missing = set(prq) - set(pqs)
 
         # run tasks for missing
-
-        class TranscodeVideoTaskQuiet(TranscodeVideoTask):
-            """Transcode without index or send sse messages."""
-
-            def on_success(self, *args, **kwargs):
-                # get deposit and record
-                deposit_id = args[3]['deposit_id']
-                video = deposit_video_resolver(deposit_id)
-                rec_video = record_resolver.resolve(video['recid'])[1]
-                # sync deposit --> record
-                video._sync_record_files(record=rec_video)
-                video.commit()
-                rec_video.commit()
-
-            def _update_record(self, *args, **kwargs):
-                pass
-
         # execute them at 18h00
         now = datetime.utcnow()
         afternoon = now + timedelta(hours=(18 - now.hour))

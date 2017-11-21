@@ -5,7 +5,7 @@
   </h3>
 </div>
 <!-- Subformat -->
-<div class="cds-video-subformats">
+<div ng-if="(record | findMaster).key" class="cds-video-subformats">
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).download||[]).length > 0" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <div ng-repeat="(type, subs) in ((record | findMaster).subformat | groupDownloadable).download |  groupBy:'tags.type':'others'">
@@ -20,6 +20,11 @@
   <div class="cds-video-master-file mb-20">
     <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
   </div>
+</div>
+<div ng-if="!(record | findMaster).key" class="cds-video-subformats">
+  <p class="text-muted text-center">
+    No master file available.
+  </p>
 </div>
 <!-- /Subformat -->
 
@@ -36,9 +41,6 @@
       </a>
     </div>
   </div>
-  <div ng-hide="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0" class="text-center">
-    <p class="text-muted">Not available.</p>
-  </div>
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <div ng-repeat="file in ((record | findMaster).subformat | groupDownloadable).additional">
@@ -51,7 +53,7 @@
 </div>
 <!-- /Other formats -->
 <!-- Frame -->
-<div class="cds-video-subformats bt bw-1 bc-gl pt-20">
+<div ng-if="(record | findMaster).frame.length > 0" class="cds-video-subformats bt bw-1 bc-gl pt-20">
   <div class="row">
     <div class="col-md-12">
       <a class="f8 display-block" ng-click="showAllFrames = !showAllFrames">
@@ -62,9 +64,6 @@
         </p>
       </a>
     </div>
-  </div>
-  <div ng-hide="(record | findMaster).frame.length > 0" class="text-center">
-    <p class="text-muted">Not available thumbnails.</p>
   </div>
   <div ng-show="(record | findMaster).frame.length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group" >

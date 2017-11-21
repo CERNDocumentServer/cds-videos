@@ -238,6 +238,7 @@ setup(
         ],
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.webhooks.tasks',
+            'cds_migration_tasks = cds.modules.migrator.tasks',
         ],
         'invenio_webhooks.receivers': [
             'avc = cds.modules.webhooks.receivers:AVCWorkflow',

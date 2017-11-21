@@ -53,6 +53,9 @@ def _(x):
     """Identity function."""
     return x
 
+# CDS Enviroments
+CDS_ENV_PROD = False
+CDS_ENV_TEST = False
 
 ###############################################################################
 # Translations & Time
@@ -640,6 +643,9 @@ CERN_APP_CREDENTIALS = dict(
     consumer_secret='CHANGE_ME',
 )
 
+# Set the template
+OAUTH2SERVER_SETTINGS_TEMPLATE = 'cds_theme/settings.html'
+
 ###############################################################################
 # Theme
 ###############################################################################
@@ -664,6 +670,10 @@ THEME_404_TEMPLATE = 'cds_theme/error/404.html'
 THEME_500_TEMPLATE = 'cds_theme/error/500.html'
 # Error template
 THEME_ERROR_TEMPLATE = 'cds_theme/error/base.html'
+# Tracking template
+THEME_TRACKINGCODE_TEMPLATE = 'cds_theme/trackingcode.html'
+# Piwik tracking code: set None to disabled it
+THEME_PIWIK_ID = None
 
 ###############################################################################
 # Previewer

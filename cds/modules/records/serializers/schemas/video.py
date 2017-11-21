@@ -26,7 +26,8 @@ from marshmallow import Schema, fields, post_load
 from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import (AccessSchema, BucketSchema, ContributorSchema,
-                     DepositSchema, KeywordsSchema, LicenseSchema, OaiSchema,
+                     DepositSchema, ExternalSystemIdentifiersField,
+                     KeywordsSchema, LicenseSchema, OaiSchema,
                      RelatedLinksSchema, StrictKeysSchema, TitleSchema,
                      TranslationsSchema)
 from .doi import DOI
@@ -95,13 +96,6 @@ class PhysicalMediumSchema(StrictKeysSchema):
     note = fields.Str()
     sequence_number = fields.Str()
     shelf = fields.Str()
-
-
-class ExternalSystemIdentifiersField(StrictKeysSchema):
-    """Field physical medium."""
-
-    value = fields.Str()
-    schema = fields.Str()
 
 
 class VideoSchema(StrictKeysSchema):

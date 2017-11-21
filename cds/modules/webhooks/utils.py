@@ -43,28 +43,35 @@ def move_file_into_local(obj, delete=True):
     :param obj: Object version to make locally available.
     :param delete: Whether or not the tmp file should be deleted on exit.
     """
-
-    temp_location = obj.get_tags().get('temp_location', None)
-    if not temp_location:
-        temp_folder = tempfile.mkdtemp()
-        temp_location = os.path.join(temp_folder, 'data')
-
-        with open(temp_location, 'wb') as dst:
-            shutil.copyfileobj(file_opener_xrootd(obj.file.uri, 'rb'), dst)
-
-        ObjectVersionTag.create(obj, 'temp_location', temp_location)
-        db.session.commit()
+    if os.path.exists(obj.file.uri):
+        yield obj.file.uri
+    # TODO: remove migration hack
+    # Check if we are migrating
+    elif obj.get_tags().get('dfs_path', None):
+        # This is a special situation!
+        yield obj.get_tags().get('dfs_path', None)
     else:
-        temp_folder = os.path.dirname(temp_location)
+        temp_location = obj.get_tags().get('temp_location', None)
+        if not temp_location:
+            temp_folder = tempfile.mkdtemp()
+            temp_location = os.path.join(temp_folder, 'data')
 
-    try:
-        yield temp_location
-    except:
-        shutil.rmtree(temp_folder)
-        ObjectVersionTag.delete(obj, 'temp_location')
-        db.session.commit()
-    else:
-        if delete:
+            with open(temp_location, 'wb') as dst:
+                shutil.copyfileobj(file_opener_xrootd(obj.file.uri, 'rb'), dst)
+
+            ObjectVersionTag.create(obj, 'temp_location', temp_location)
+            db.session.commit()
+        else:
+            temp_folder = os.path.dirname(temp_location)
+        try:
+            yield temp_location
+        except:
             shutil.rmtree(temp_folder)
             ObjectVersionTag.delete(obj, 'temp_location')
             db.session.commit()
+            raise
+        else:
+            if delete:
+                shutil.rmtree(temp_folder)
+                ObjectVersionTag.delete(obj, 'temp_location')
+                db.session.commit()

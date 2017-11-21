@@ -61,5 +61,5 @@
   {% endblock page_footer %}
 </div>
 {%- block javascript %}{% include "invenio_theme/javascript.html" %}{% endblock javascript %}
-{%- block trackingcode %}{% include "invenio_theme/trackingcode.html" %}{% endblock %}
+{%- block trackingcode %}{% include config.THEME_TRACKINGCODE_TEMPLATE %}{% endblock %}
 {%- endblock body %}
