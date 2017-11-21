@@ -687,16 +687,19 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         def progress_callback(size, total):
             logging.debug('Moving file {0} of {1}'.format(total, size))
 
+        # resolve preset info
+        tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
+        if tags_to_guess_preset:
+            file_['tags'].update(**cls._resolve_preset(
+                obj=None, clues=tags_to_guess_preset))
+            # we cannot deal with it now delete the file
+            if 'preset_quality' not in file_['tags']:
+                return None
         # create object
         stream, size = cls._get_migration_file_stream_and_size(file_=file_)
         obj = ObjectVersion.create(
             bucket=bucket, key=file_['key'], stream=stream,
             size=size, progress_callback=progress_callback)
-        # resolve preset info
-        tags_to_guess_preset = file_.get('tags_to_guess_preset', {})
-        if tags_to_guess_preset:
-            file_['tags'].update(**cls._resolve_preset(
-                obj=obj, clues=tags_to_guess_preset))
         tags_to_transform = file_.get('tags_to_transform', {})
         # resolve timestamp
         if 'timestamp' in tags_to_transform:
@@ -784,8 +787,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         # get required presets
         prq = [key for (key, value) in preset.items()
                if value['width'] < max_width or value['height'] < max_height]
-        # get subformat preset qualities
-        pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        try:
+            # get subformat preset qualities
+            pqs = [form['tags']['preset_quality'] for form in master['subformat']]
+        except KeyError:
+            pqs = []
         # find missing subformats
         missing = set(prq) - set(pqs)
 
