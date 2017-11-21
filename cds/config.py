@@ -267,7 +267,7 @@ OAISERVER_RECORD_INDEX = 'records'
 RECORDS_UI_TOMBSTONE_TEMPLATE = 'invenio_records_ui/tombstone.html'
 
 CDS_RECORDS_RELATED_QUERY = \
-    '/api/records/?size=3&sort=mostrecent&q={0}'
+    '/api/records/?size=3&sort=mostrecent&q=%s'
 
 # Endpoints for record API.
 _Record_PID = 'pid(recid, record_class="cds.modules.records.api:CDSRecord")'
