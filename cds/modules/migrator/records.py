@@ -606,9 +606,11 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         bucket = cls._get_bucket(record=record)
         master_video = CDSVideosFilesIterator.get_master_video_file(record)
         for obj in ObjectVersion.get_by_bucket(bucket=bucket):
-            if obj.get_tags()['context_type'] in cls.dependent_objs:
-                ObjectVersionTag.create_or_update(
-                    obj, 'master', master_video['version_id'])
+            obj_tags = obj.get_tags()
+            if bool(obj_tags):
+                if obj_tags['context_type'] in cls.dependent_objs:
+                    ObjectVersionTag.create_or_update(
+                        obj, 'master', master_video['version_id'])
 
     @classmethod
     def _resolve_smil(cls, record):
@@ -631,12 +633,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         bucket = cls._get_bucket(record=record)
         files = []
         for o in ObjectVersion.get_by_bucket(bucket=bucket):
-            # skip for dependent objs (like subformats)
-            if o.get_tags()['context_type'] not in cls.dependent_objs:
-                dump = {}
-                dump_generic_object(obj=o, data=dump)
-                if dump:
-                    files.append(dump)
+            obj_tags = o.get_tags()
+            if bool(obj_tags):
+                # skip for dependent objs (like subformats)
+                if o.get_tags()['context_type'] not in cls.dependent_objs:
+                    dump = {}
+                    dump_generic_object(obj=o, data=dump)
+                    if dump:
+                        files.append(dump)
         record['_files'] = files
 
     @classmethod
