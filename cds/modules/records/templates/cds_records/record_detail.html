@@ -38,15 +38,15 @@
 {%- endblock page_footer %}
 
 {%- block page_body %}
-  {% set refer_query = "and -recid:{0}".format(record['recid']) %}
+  {% set refer_query = "and -recid:%s" % record['recid'] %}
   {% if record['keywords'] %}
     {% set keywords = [] %}
     {% for keyword in record['keywords'] %}
       {% set keywords = keywords.append(keyword['name']) %}
     {% endfor %}
-    {% set refer_query = "keywords.name:{0} {1}".format(",".join(keywords), refer_query) %}
+    {% set refer_query = "keywords.name:%s %s" % (",".join(keywords), refer_query) %}
   {% else %}
-    {% set refer_query = "category:{0} {1}".format(record['category'], refer_query) %}
+    {% set refer_query = "category:%s %s" % (record['category'], refer_query) %}
   {% endif %}
   <div id="cds-record">
     {% if config.LOG_USER_ACTIONS_ENABLED %}
@@ -77,7 +77,7 @@
       <!-- List group -->
       <invenio-search
         disable-url-handler="true"
-        search-endpoint='{{ config.CDS_RECORDS_RELATED_QUERY.format(refer_query) }}'
+        search-endpoint='{{ config.CDS_RECORDS_RELATED_QUERY % refer_query }}'
       >
         <div class="text-center">
           <invenio-search-loading
