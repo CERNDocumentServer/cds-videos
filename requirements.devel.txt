@@ -48,7 +48,7 @@
 -e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter[badges]
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
 -e git+https://github.com/inveniosoftware/invenio-jsonschemas.git#egg=invenio-jsonschemas
--e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging[sentry]
+-e git+https://github.com/inveniosoftware/invenio-logging.git#egg=invenio-logging
 -e git+https://github.com/inveniosoftware/invenio-mail.git#egg=invenio-mail
 # FIXME #75
 # -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator

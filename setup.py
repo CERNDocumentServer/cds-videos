@@ -109,7 +109,7 @@ install_requires = [
     # 'invenio-i18n>=1.0.0b1',
     'invenio-indexer>=1.0.0a10',
     'invenio-jsonschemas>=1.0.0a5',
-    'invenio-logging[sentry]>=1.0.0b3',
+    'invenio-logging>=1.0.0b3',
     'invenio-mail>=1.0.0b1',
     # FIXME topical branch
     #  'invenio-migrator>=1.0.0a10',
@@ -136,7 +136,7 @@ install_requires = [
     'jsonref>=0.1',
     'jsonresolver>=0.2.1',
     'marshmallow>=2.5.0',
-    'raven<=5.1.0',
+    'raven>=6.3.0',
     'requests>=2.11.1',
     'Wand>=0.4.2',
     'celery<4.0,>=3.1',                 # FIXME: invenio-indexer
