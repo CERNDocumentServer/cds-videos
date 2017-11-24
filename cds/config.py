@@ -726,12 +726,6 @@ VIDEOS_EOS_PATH_EGROUPS = [
 By default, this field is hidden and disabled. It becomes visible only to
 the users that are part of the e-groups in VIDEOS_EOS_PATH_EGROUPS and admins.
 """
-###############################################################################
-# Logging
-###############################################################################
-
-#: Overwrite default Sentry extension class to support Sentry 6.
-LOGGING_SENTRY_CLASS = 'invenio_logging.sentry6:Sentry6'
 
 ###############################################################################
 # JSON Schemas
