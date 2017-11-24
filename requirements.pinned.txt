@@ -75,7 +75,7 @@ invenio-formatter==1.0.0b3
 invenio-i18n==1.0.0b4     # via invenio-accounts, invenio-theme
 invenio-indexer==1.0.0a10
 invenio-jsonschemas==1.0.0a5
-invenio-logging[sentry]==1.0.0b3
+invenio-logging==1.0.0b3
 invenio-mail==1.0.0b1
 invenio-oauth2server==1.0.0b1
 invenio-oauthclient==1.0.0b2
@@ -126,7 +126,7 @@ python-dateutil==2.6.1    # via alembic, aniso8601, arrow, elasticsearch-dsl, in
 python-editor==1.0.3      # via alembic
 python-slugify==1.2.4
 pytz==2017.2              # via babel, celery, flask-restful, invenio-indexer
-raven[flask]==5.4.4
+raven==6.3.0
 redis==2.10.6             # via invenio-accounts, invenio-celery, invenio-sse
 requests-oauthlib==0.8.0  # via flask-oauthlib
 requests==2.18.4
