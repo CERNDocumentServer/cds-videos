@@ -26,6 +26,8 @@
 from flask import current_app
 
 from invenio_pidstore.fetchers import FetchedPID
+from invenio_pidstore.models import PersistentIdentifier
+
 from ..records.providers import CDSReportNumberProvider
 
 
@@ -56,8 +58,8 @@ def process_fireroles(fireroles):
                         'Not possible to migrate groups based on regular'
                         ' expressions: {0}.'.format(expr))
                     continue
-                clean_name = expr[
-                    :-len(' [CERN]')].lower().strip().replace(' ', '-')
+                clean_name = expr[:-len(' [CERN]')].lower().strip().replace(
+                    ' ', '-')
                 rigths.add('{0}@cern.ch'.format(clean_name))
     return rigths
 
@@ -80,6 +82,17 @@ def update_access(data, *access):
     data['_access'] = current_rules
 
 
+def _get_next_project_report_number(category, type_, year):
+    """Find the next valid project report number."""
+    query = PersistentIdentifier.query.filter(
+        PersistentIdentifier.pid_value.contains('{0}-{1}-{2}'.format(
+            category, type_, year)))
+    projects = [pid for pid in query.all() if pid.count('-') == 3]
+    max_count = max([int(pid.split('-')[-1]) for pid in projects])
+
+    return '{0}-{1}-{2}-{3}'.format(category, type_, year, max_count + 1)
+
+
 def cern_movie_to_video_pid_fetcher(record_uuid, data):
     """Create a parallel pid for CERN movie and videoclip pid."""
     splitted = str(data['report_number'][0]).split('-')
@@ -87,11 +100,20 @@ def cern_movie_to_video_pid_fetcher(record_uuid, data):
         splitted[1] = 'VIDEO'
         report_number = '-'.join(splitted)
 
+        if PersistentIdentifier.query.filter(
+                PersistentIdentifier.pid_value == report_number).one_or_none():
+            # The new report number is already in use.
+            category, type_, year = report_number.split('-')[0:3]
+            is_video = report_number.count('-') == 4
+            report_number = _get_next_project_report_number(
+                category, type_, year)
+            if is_video:
+                report_number = '{0}-001'.format(report_number)
+
         # update report number
         data['report_number'][0] = report_number
         # and create a new one with the new value
         return FetchedPID(
             provider=CDSReportNumberProvider,
             pid_type='rn',
-            pid_value=report_number,
-        )
+            pid_value=report_number, )
