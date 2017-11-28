@@ -287,7 +287,7 @@ class ExtractMetadataTask(AVCTask):
         if uri:
             metadata = ff_probe_all(uri)
         else:
-            with move_file_into_local(object_, delete=False) as url:
+            with move_file_into_local(object_) as url:
                 metadata = ff_probe_all(url)
         return dict(metadata['format'], **metadata['streams'][0])
 
