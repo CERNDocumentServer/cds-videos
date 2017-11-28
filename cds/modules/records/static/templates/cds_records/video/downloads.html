@@ -20,6 +20,30 @@
   <div class="cds-video-master-file mb-20">
     <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
   </div>
+  <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" >
+    <div>
+      <p>Use of CERN audiovisual media denotes agreement with the following terms: </p>
+        <ol>
+          <li>CERN provides the image free of charge for educational and informational use.</li>
+          <li>The image is provided “as-is” and the user shall hold CERN free and harmless in connection with its use.</li>
+          <li>CERN is to be credited as the source of the image.</li>
+          <li>CERN retains copyright in the image. Download and use of the image does not amount to a transfer of intellectual property.</li>
+          <li>The image may not be used in a misleading, inappropriate or offensive manner, in a military context, in advertising or promotion, or in a manner that suggests any kind of endorsement by CERN or its personnel.</li>
+          <li>The image may not be sold, distributed or otherwise made available for use by third parties.</li>
+          <li>The CERN logo is legally protected. CERN’s prior written approval shall be obtained for its use or for the use of any image primarily featuring the logo.</li>
+          <li>CERN reserves the right to alter or delete images without notice.</li>
+          <li>Please contact us by using the contact form if you have any questions or comments with respect to CERN content; if you are unsure whether your intended use meets these terms; or, if you seek permission for use of the CERN logo or any other use that does not fall within these terms.</li>
+          <li>CERN appreciates your interest in its work.  More information about CERN is available at www.cern.ch.</li>
+        </ol>
+      <p>Copyright abuse should be reported using the contact form.</p>
+    </div>
+    <p class="mt-20 pull-right">
+      <button class="btn btn-default" ng-click="$parent.hideModal()">Disagree</button>
+      <a ng-href="{{ (record | findMaster).links.self }}" download>
+        <button class="btn btn-success" ng-click="$parent.hideModal(); logMediaDownload(record | findMaster);">Agree</button>
+      </a>
+    </p>
+  </modal-dialog>
 </div>
 <div ng-if="!(record | findMaster).key" class="cds-video-subformats">
   <p class="text-muted text-center">
@@ -96,29 +120,4 @@
   </div>
 </div>
 <!-- /Additional files -->
-<modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" >
-  <div>
-    <p>Use of CERN audiovisual media denotes agreement with the following terms: </p>
-      <ol>
-        <li>CERN provides the image free of charge for educational and informational use.</li>
-        <li>The image is provided “as-is” and the user shall hold CERN free and harmless in connection with its use.</li>
-        <li>CERN is to be credited as the source of the image.</li>
-        <li>CERN retains copyright in the image. Download and use of the image does not amount to a transfer of intellectual property.</li>
-        <li>The image may not be used in a misleading, inappropriate or offensive manner, in a military context, in advertising or promotion, or in a manner that suggests any kind of endorsement by CERN or its personnel.</li>
-        <li>The image may not be sold, distributed or otherwise made available for use by third parties.</li>
-        <li>The CERN logo is legally protected. CERN’s prior written approval shall be obtained for its use or for the use of any image primarily featuring the logo.</li>
-        <li>CERN reserves the right to alter or delete images without notice.</li>
-        <li>Please contact us by using the contact form if you have any questions or comments with respect to CERN content; if you are unsure whether your intended use meets these terms; or, if you seek permission for use of the CERN logo or any other use that does not fall within these terms.</li>
-        <li>CERN appreciates your interest in its work.  More information about CERN is available at www.cern.ch.</li>
-      </ol>
-    <p>Copyright abuse should be reported using the contact form.</p>
-  </div>
-  <p class="pull-right">
-    <button class="btn btn-default" ng-click="$parent.hideModal()">Disagree</button>
-    <a ng-href="{{ (record | findMaster).links.self }}" download>
-      <button class="btn btn-success" ng-click="$parent.hideModal(); logMediaDownload(record | findMaster);">Agree</button>
-    </a>
-
-  </p>
-</modal-dialog>
 <!-- /Download -->
