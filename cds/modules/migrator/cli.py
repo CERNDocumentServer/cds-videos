@@ -196,3 +196,9 @@ def cleanrecords(sources, source_type, recid):
 def run(sources, source_type, recid):
     """Load records migration dump."""
     load_records(sources=sources, source_type=source_type, eager=False)
+
+
+@dumps.command()
+@with_appcontext
+def checkrecords():
+    """Integrity check for records and files."""
