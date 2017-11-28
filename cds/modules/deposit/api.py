@@ -38,12 +38,11 @@ import arrow
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
-from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag,
                                        as_bucket)
 from invenio_jsonschemas import current_jsonschemas
-from invenio_pidstore.errors import (PIDInvalidAction, PIDDoesNotExistError,
+from invenio_pidstore.errors import (PIDDoesNotExistError, PIDInvalidAction,
                                      ResolverError)
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
@@ -52,11 +51,14 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord)
+from invenio_deposit.api import Deposit, has_status, preserve
+from invenio_deposit.utils import mark_as_action
+
+from ..records.api import CDSFileObject, CDSFilesIterator, CDSRecord
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
-from ..records.validators import PartialDraft4Validator
 from ..records.tasks import create_symlinks
+from ..records.validators import PartialDraft4Validator
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
                                get_tasks_status_by_task,
                                iterate_events_results, merge_tasks_status)
@@ -264,6 +266,7 @@ class CDSDeposit(Deposit):
         else:
             yield
 
+    @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a deposit."""
         try:
@@ -554,6 +557,7 @@ class Project(CDSDeposit):
             video.patch(patch).commit()
         return record
 
+    @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a project.
 
@@ -569,6 +573,7 @@ class Project(CDSDeposit):
         # publish project
         return super(Project, self).publish(pid=pid, id_=id_, **kwargs)
 
+    @mark_as_action
     def discard(self, pid=None):
         """Discard project changes."""
         _, record = self.fetch_published()
@@ -782,6 +787,7 @@ class Video(CDSDeposit):
         iterate_events_results(events=events, fun=global_status)
         return global_status.status
 
+    @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a video and update the related project."""
         # save a copy of the old PID
@@ -830,6 +836,7 @@ class Video(CDSDeposit):
 
         return video_published
 
+    @mark_as_action
     def edit(self, pid=None):
         """Edit a video and update the related project."""
         # save a copy of the recid
@@ -866,6 +873,7 @@ class Video(CDSDeposit):
         project.commit()
         return video_deleted
 
+    @mark_as_action
     def discard(self, pid=None):
         """Discard a video."""
         video_old_ref = self.ref
