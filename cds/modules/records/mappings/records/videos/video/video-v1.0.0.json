@@ -299,6 +299,51 @@
         "report_number": {
           "type": "string"
         },
+        "physical_medium": {
+          "type": "object",
+          "properties": {
+            "shelf": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "copy_number": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "arrangement": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "note": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "camera": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "location": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "bar_code": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "medium_standard": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "sequence_number": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "internal_note": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
         "language": {
           "type": "string"
         },
