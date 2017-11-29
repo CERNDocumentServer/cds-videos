@@ -126,7 +126,7 @@ SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 ###############################################################################
-# Debugbar
+# Debug
 ###############################################################################
 DEBUG = True
 DEBUG_TB_ENABLED = True
@@ -662,8 +662,6 @@ THEME_LOGO = False
 BASE_TEMPLATE = 'cds_theme/page.html'
 # Header template for entire site.
 HEADER_TEMPLATE = 'cds_theme/header.html'
-# RequireJS configuration.
-REQUIREJS_CONFIG = 'js/cds-build.js'
 # Endpoint for breadcrumb root.
 THEME_BREADCRUMB_ROOT_ENDPOINT = 'cds_home.index'
 # Cover template
