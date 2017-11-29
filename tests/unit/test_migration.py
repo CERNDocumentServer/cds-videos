@@ -368,7 +368,7 @@ def test_sequence_number_update_after_migration(app, location, script_info):
 
     # run seq number update
     runner = CliRunner()
-    res = runner.invoke(cli_sequence_generator, [], obj=script_info)
+    res = runner.invoke(cli_sequence_generator, ['2017'], obj=script_info)
 
     # no counter should be created
     assert res.exit_code == 0
@@ -390,7 +390,7 @@ def test_sequence_number_update_after_migration(app, location, script_info):
 
     # run seq number update
     runner = CliRunner()
-    res = runner.invoke(cli_sequence_generator, [], obj=script_info)
+    res = runner.invoke(cli_sequence_generator, ['2017'], obj=script_info)
 
     # no counter should be created
     assert res.exit_code == 0

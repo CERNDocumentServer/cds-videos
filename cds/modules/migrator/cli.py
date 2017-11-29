@@ -38,7 +38,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_sequencegenerator.api import Sequence
 from .tasks import clean_record
 
-from ...modules.deposit.api import Project
+from ...modules.deposit.api import Project, Video
 
 
 def load_records(sources, source_type, eager):
@@ -64,8 +64,9 @@ def load_records(sources, source_type, eager):
 
 
 @dumps.command()
+@click.argument('year')
 @with_appcontext
-def sequence_generator():
+def sequence_generator(year):
     """Update sequences according to current report numbers in pidstore."""
 
     def get_pids(year):
@@ -86,7 +87,9 @@ def sequence_generator():
             ["-".join(pid.split('-')[0:2]) for pid in videos])
         # check category/type list are the same
         assert all([ct in cats_types for ct in cats_types_video])
-        return cats_types
+        cats_types_video = set(
+            ["-".join(pid.split('-')[0:4]) for pid in videos])
+        return cats_types, cats_types_video
 
     def find_next(cat_type, pids):
         max_count = max([
@@ -101,11 +104,11 @@ def sequence_generator():
         db.session.add(counter)
         return counter
 
-    year = datetime.now().year
     project_pids, video_pids = get_pids(year=year)
-    cats_types = get_cats_types(project_pids, video_pids)
+    cats_types_project, cats_types_project_video = get_cats_types(
+        project_pids, video_pids)
 
-    for cat_type in cats_types:
+    for cat_type in cats_types_project:
         [cat, type_] = cat_type.split('-')
         update_counter(
             next_counter=find_next(cat_type, project_pids),
@@ -115,7 +118,15 @@ def sequence_generator():
                 'category': cat,
                 'type': type_
             })
+    db.session.commit()
 
+    for cat_type_proj in cats_types_project_video:
+        update_counter(
+            next_counter=find_next(cat_type_proj, video_pids),
+            **{
+                'template': Video.sequence_name,
+                Project.sequence_name: cat_type_proj,
+            })
     db.session.commit()
 
 
