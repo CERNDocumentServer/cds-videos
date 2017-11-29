@@ -143,7 +143,6 @@ function cdsDepositsCtrl(
       // Do some magic
       var data = JSON.parse(evt.data || '{}');
       var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
-      console.debug('RECEIVED', evt.type, data);
       $scope.$broadcast(deposit_, evt.type, data);
     };
 
@@ -153,11 +152,11 @@ function cdsDepositsCtrl(
     );
 
     that.sseListener.onerror = function(msg) {
-      console.error('SSE connection error', msg);
+      // console.error('SSE connection error', msg);
     };
 
     that.sseListener.onopen = function(msg) {
-      console.debug('SEE connection has been opened', msg);
+      // console.debug('SEE connection has been opened', msg);
     };
 
     angular.forEach(depositSSEEvents, function(type, index) {

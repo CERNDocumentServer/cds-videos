@@ -90,7 +90,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   function autocomplete(paramsProvider, responseHandler) {
     return function(options, query) {
       if (query) {
-        query = encodeURIComponent(query);
         return $http.get(options.url, {
           params: paramsProvider(query, options)
         }).then(function(data) {
