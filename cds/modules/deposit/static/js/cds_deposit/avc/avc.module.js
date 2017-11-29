@@ -132,13 +132,23 @@ function cdsDepositsConfig(
   var authorized_token = document.getElementsByName('authorized_token');
   if (authorized_token.length > 0) {
     token = authorized_token[0].value;
+    // No cache on API requests
     var headers = {
       'Authorization': 'Bearer ' + token,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
-    jwtProvider.setHeader(headers);
+    // Add no cache on all ``GET`` requests
+    var _get = _.merge(
+      headers,
+      {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': 0
+      }
+    );
+    jwtProvider.setHeader(_get);
     $httpProvider.defaults.headers['delete'] = headers;
-    $httpProvider.defaults.headers['post']= headers;
+    $httpProvider.defaults.headers['post'] = headers;
     $httpProvider.defaults.headers['put'] = headers;
   }
 
