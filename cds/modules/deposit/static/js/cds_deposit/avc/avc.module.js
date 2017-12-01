@@ -105,7 +105,7 @@ function cdsDepositsConfig(
 
   // Initialize url builder
   urlBuilderProvider.setBlueprints({
-    iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>/full/<%=res%>/0/default.png?version=<%=version%>',
+    iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>:<%=version%>/full/<%=res%>/0/default.png',
     sse: '/api/deposits/project/<%=id%>/sse',
     categories: '/api/categories',
     video: '/deposit/<%=deposit%>/preview/video/<%=key%>',
