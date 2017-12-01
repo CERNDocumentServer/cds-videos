@@ -303,7 +303,7 @@ RECORDS_REST_ENDPOINTS = dict(
             'dcite': 'application/x-datacite+xml'
         },
         search_serializers={
-            'application/json': ('invenio_records_rest.serializers'
+            'application/json': ('cds.modules.records.serializers'
                                  ':json_v1_search'),
         },
         list_route='/records/',

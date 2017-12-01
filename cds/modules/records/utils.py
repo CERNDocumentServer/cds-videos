@@ -27,6 +27,8 @@
 from __future__ import absolute_import, print_function
 
 from flask import g
+from six.moves.html_parser import HTMLParser
+
 from invenio_search import current_search
 from invenio_search.utils import schema_to_index
 
@@ -53,3 +55,28 @@ def is_deposit(record):
 def get_user_provides():
     """Extract the user's provides from g."""
     return [need.value for need in g.identity.provides]
+
+
+def remove_html_tags(html_tag_remover, value):
+    """Remove any HTML tags."""
+    html_tag_remover.reset()
+    html_tag_remover.feed(value)
+    return html_tag_remover.get_data()
+
+
+class HTMLTagRemover(HTMLParser):
+    """Remove all HTML tags by keeping only the value within the tag."""
+    values = []
+
+    def reset(self):
+        """Reset the list of values."""
+        HTMLParser.reset(self)
+        self.values = []
+
+    def handle_data(self, data):
+        """Append only the value within the tags."""
+        self.values.append(data)
+
+    def get_data(self):
+        """Return only values."""
+        return ''.join(self.values)

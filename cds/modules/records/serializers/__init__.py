@@ -27,7 +27,8 @@
 from __future__ import absolute_import, print_function
 
 from invenio_records_rest.serializers.datacite import DataCite31Serializer
-from invenio_records_rest.serializers.response import record_responsify
+from invenio_records_rest.serializers.response import record_responsify, \
+    search_responsify
 from invenio_records_rest.serializers.schemas.json import RecordSchemaJSONV1
 
 from .drupal import DrupalSerializer
@@ -77,5 +78,7 @@ datacite_v31_response = record_responsify(
 cdsdeposit_json_v1_response = record_responsify(cdsdeposit_json_v1,
                                                 'application/json')
 
-#: JSON response bunlider
+#: JSON response bundler
 json_v1_response = record_responsify(json_v1, 'application/json')
+
+json_v1_search = search_responsify(json_v1, 'application/json')

@@ -31,6 +31,7 @@ from invenio_records_rest.serializers.json import JSONSerializer
 from ...records.api import CDSVideosFilesIterator
 from ...deposit.api import Project, Video
 from ..api import CDSFileObject
+from ..utils import HTMLTagRemover, remove_html_tags
 
 
 def format_datetime(datetime):
@@ -43,6 +44,7 @@ def format_datetime(datetime):
 
 class VideoDrupal(object):
     """Video converter into drupal format."""
+    html_tag_remover = HTMLTagRemover()
 
     def __init__(self, record):
         """Init video drupal."""
@@ -51,9 +53,22 @@ class VideoDrupal(object):
     def format(self):
         """Format video."""
         record = self._record
+
+        title_en = record.get('title', {}).get('title', '')
+        title_fr = self.get_translation('title', 'title', 'fr')
+        caption_en = record.get('description', '')
+        caption_fr = self.get_translation('description', None, 'fr')
+
+        # sanitize title by unescaping and stripping html tags
+        title_en = self.html_tag_remover.unescape(title_en)
+        title_en = remove_html_tags(self.html_tag_remover, title_en)
+
+        caption_en = self.html_tag_remover.unescape(caption_en)
+        caption_fr = self.html_tag_remover.unescape(caption_fr)
+
         entry = {
-            'caption_en': record.get('description', ''),
-            'caption_fr': self.get_translation('description', None, 'fr'),
+            'caption_en': caption_en,
+            'caption_fr': caption_fr,
             'copyright_date': record.get('copyright', {}).get('year', ''),
             'copyright_holder': record.get('copyright', {}).get('holder', ''),
             'creation_date': self.creation_date,
@@ -66,8 +81,8 @@ class VideoDrupal(object):
             'producer': self.contributors('Producer'),
             'record_id': record['_deposit']['pid']['value'],
             'thumbnail': self.thumbnail,
-            'title_en': record.get('title', {}).get('title', ''),
-            'title_fr': self.get_translation('title', 'title', 'fr'),
+            'title_en': title_en,
+            'title_fr': title_fr,
             'type': self.type_,
             'video_length': self.video_length,
         }
