@@ -410,7 +410,7 @@ def deposit_metadata():
                 "role": "Camera Operator"
             }
         ],
-        '_cds': {},
+        '_cds': {}
     }
 
 
@@ -608,7 +608,7 @@ def extra_metadata():
             'year': '2017'
         },
         'title': {
-            'title': 'My english title'
+            'title': 'My <b>english</b> title'
         },
         'title_translations': [
             {

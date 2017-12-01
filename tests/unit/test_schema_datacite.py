@@ -48,7 +48,8 @@ def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
         'dates': [{u'date': u'2017-03-02', u'dateType': u'Issued'}],
         'descriptions': [
             {
-                'description': 'in tempor reprehenderit enim eiusmod',
+                'description': 'in tempor reprehenderit enim eiusmod &lt;b&gt;'
+                               '<i>html</i>&lt;/b&gt;',
                 'descriptionType': 'Abstract',
             }
         ],
@@ -66,7 +67,7 @@ def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
             {'subject': 'keyword2'}
         ],
         'titles': [
-            {u'title': u'My english title'}
+            {u'title': u'My <b>english</b> title'}
         ],
     }
     assert expected == obj

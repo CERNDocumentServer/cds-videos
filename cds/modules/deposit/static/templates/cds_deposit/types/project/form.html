@@ -40,7 +40,7 @@
               {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
             </a>
           </h3>
-          <p class="f6" ng-bind-html="($ctrl.cdsDepositCtrl.record.description | stripTags | trustHtml) || 'No description'"></p>
+          <p class="f6" ng-bind-html="($ctrl.cdsDepositCtrl.record.description | trustHtml) || 'No description'"></p>
         </div>
         <!-- Not published -->
         <div ng-show="!$ctrl.cdsDepositCtrl.isPublished()">

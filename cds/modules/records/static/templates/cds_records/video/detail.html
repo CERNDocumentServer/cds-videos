@@ -126,7 +126,7 @@
           <!-- Date & Views -->
           <!-- Description -->
           <div ng-init="showFullDescription=false" class="cds-detail-description cds-detail-video-description t-b px-20">
-            <p class="mb-30" ng-bind-html="(record.metadata.description | stripTags | trustHtml) || 'No description'"></p>
+            <p class="mb-30" ng-bind-html="(record.metadata.description | trustHtml) || 'No description'"></p>
             <!-- Hidden content -->
             <div class="mt-20" ng-show="showFullDescription">
               <!-- Contributors -->

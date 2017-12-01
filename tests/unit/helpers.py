@@ -279,9 +279,10 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
     project_data.update(deposit_metadata)
     project_video_1 = {
         'title': {
-            'title': 'video 1',
+            'title': '&lt;b&gt;<i>video 1</i>&lt;/b&gt;',
         },
-        'description': 'in tempor reprehenderit enim eiusmod',
+        'description': 'in tempor reprehenderit enim eiusmod &lt;b&gt;<i>html'
+                       '</i>&lt;/b&gt;',
         'featured': True,
         'vr': True,
         'language': 'en',
