@@ -365,6 +365,7 @@ function cdsUploaderCtrl(
             var old_event_id = old_master[0]['tags']['_event_id']
             that.deleteEvent(old_event_id).then(
               function success(response) {
+                that.cdsDepositCtrl.previewer = null;
                 that.upload();
               },
               function error(response) {
