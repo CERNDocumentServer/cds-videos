@@ -34,7 +34,10 @@ def image_opener(uuid):
     :returns: a file path or handle to the file or its preview image
     :rtype: string or handle
     """
-    bucket, _file = uuid.split(':', 1)
+    # Drop the "version" that comes after the second ":" - we use this version
+    # only as key in redis cache
+    bucket, _file = uuid.split(':')[:2]
+
     ret = ObjectVersion.get(bucket, _file).file.uri
     # Open the Image
     opened_image = file_opener_xrootd(ret, 'rb')
