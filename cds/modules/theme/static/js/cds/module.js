@@ -162,13 +162,6 @@ app.filter('toInt', function() {
   }
 });
 
-app.filter('stripTags', function() {
-  return function(text) {
-    return text ? String(text).replace(/<[^>]+>/gm, '') : '';
-  }
-});
-
-
 app.filter('toMinutes', function() {
   return function(seconds) {
     try {

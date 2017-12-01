@@ -87,7 +87,7 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
         ],
     })
     expected = dict(
-        caption_en='in tempor reprehenderit enim eiusmod',
+        caption_en='in tempor reprehenderit enim eiusmod <b><i>html</i></b>',
         caption_fr='france caption',
         copyright_date='2017',
         copyright_holder='CERN',

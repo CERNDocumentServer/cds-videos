@@ -152,6 +152,13 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
         assert project_dict[
             'metadata']['_deposit']['id'] == project['_deposit']['id']
 
+        res = client.get(url2, headers=json_headers)
+        assert res.status_code == 200
+        video_dict = json.loads(res.data.decode('utf-8'))
+        assert video_dict['metadata']['title']['title'] == 'My english title'
+        expect_desc = 'in tempor reprehenderit enim eiusmod <b><i>html</i></b>'
+        assert video_dict['metadata']['description'] == expect_desc
+
         # try get smil
         res = client.get(url, headers=smil_headers)
         assert res.status_code == 400
@@ -186,7 +193,8 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
             u'entries': [
                 {
                     u'entry': {
-                        u'caption_en': u'in tempor reprehenderit enim eiusmod',
+                        u'caption_en': u'in tempor reprehenderit enim '
+                                       u'eiusmod <b><i>html</i></b>',
                         u'caption_fr': u'france caption',
                         u'copyright_date': u'2017',
                         u'copyright_holder': u'CERN',
@@ -237,7 +245,8 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
             u'entries': [
                 {
                     u'entry': {
-                        u'caption_en': u'in tempor reprehenderit enim eiusmod',
+                        u'caption_en': u'in tempor reprehenderit enim '
+                                       u'eiusmod <b><i>html</i></b>',
                         u'caption_fr': u'',
                         u'copyright_date': u'2017',
                         u'copyright_holder': u'CERN',

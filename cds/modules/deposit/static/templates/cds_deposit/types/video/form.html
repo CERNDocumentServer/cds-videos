@@ -59,7 +59,7 @@
             {{ $ctrl.cdsDepositCtrl.record.title.title || 'No video title'}}
           </a>
         </h4>
-        <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description | stripTags | trustHtml) || 'No description'"></p>
+        <p ng-bind-html="($ctrl.cdsDepositCtrl.record.description | trustHtml) || 'No description'"></p>
       </div>
     </div>
   </div>

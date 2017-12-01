@@ -30,6 +30,7 @@ from invenio_records_rest.serializers.json import JSONSerializer
 
 from ..api import CDSRecord
 from ..permissions import has_read_record_eos_path_permission
+from ..utils import HTMLTagRemover, remove_html_tags
 
 
 class CDSJSONSerializer(JSONSerializer):
@@ -37,6 +38,7 @@ class CDSJSONSerializer(JSONSerializer):
 
     Adds or removes fields  depending on access rights.
     """
+    html_tag_remover = HTMLTagRemover()
 
     def preprocess_record(self, pid, record, links_factory=None):
         """Include ``_eos_library_path`` for single record retrievals."""
@@ -44,8 +46,47 @@ class CDSJSONSerializer(JSONSerializer):
             pid, record, links_factory=links_factory
         )
         # Add/remove files depending on access right.
-        if isinstance(record, CDSRecord) and '_eos_library_path' in record:
-            if not has_request_context() or not has_read_record_eos_path_permission(
-                    current_user, record):
-                result['metadata'].pop('_eos_library_path')
+        if isinstance(record, CDSRecord):
+            metadata = result['metadata']
+            if '_eos_library_path' in record and (not has_request_context() or
+                not has_read_record_eos_path_permission(current_user, record)):
+                metadata.pop('_eos_library_path')
+
+            # sanitize title by unescaping and stripping html tags
+            try:
+                title = metadata['title']['title']
+                title = self.html_tag_remover.unescape(title)
+                metadata['title']['title'] = remove_html_tags(
+                    self.html_tag_remover, title)
+
+                # decode html entities
+                metadata['description'] = self.html_tag_remover.unescape(
+                    metadata['description'])
+            except KeyError:
+                # ignore error if keys are missing in the metadata
+                pass
+
+        return result
+
+    def preprocess_search_hit(self, pid, record_hit, links_factory=None):
+        """."""
+        result = super(CDSJSONSerializer, self).preprocess_search_hit(
+            pid, record_hit, links_factory=links_factory
+        )
+
+        if 'metadata' in result:
+            metadata = result['metadata']
+
+            try:
+                title = metadata['title']['title']
+                title = self.html_tag_remover.unescape(title)
+                metadata['title']['title'] = remove_html_tags(
+                    self.html_tag_remover, title)
+
+                metadata['description'] = self.html_tag_remover.unescape(
+                    metadata['description'])
+            except KeyError:
+                # ignore error if keys are missing in the metadata
+                pass
+
         return result
