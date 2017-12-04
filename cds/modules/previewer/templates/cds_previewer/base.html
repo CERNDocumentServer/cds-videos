@@ -51,7 +51,8 @@
     {%- endblock %}
   </head>
   <body>
-    {% set theo_config = {} %}
+    {% set theo_config_socialSharing = theo_config_socialSharing|default(True) %}
+    {% set theo_config_fluid = theo_config_fluid|default(True) %}
     {% set video_classes = '' %}
     {%- block page_body %}{% endblock %}
     {%- block javascript %}
