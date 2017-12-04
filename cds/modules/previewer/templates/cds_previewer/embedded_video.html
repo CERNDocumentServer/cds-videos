@@ -25,5 +25,17 @@
 
 {%- extends "cds_previewer/video.html" %}
 
-{% set theo_config = {'socialSharing': True} %}
+{% set theo_config_fluid = False %}
 {% set video_classes = '' %}
+
+{%- block css %}
+  {{ super() }}
+  {% if config.THEO_LICENCE_KEY %}
+    <style>
+      .videoplayer-container {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    </style>
+  {% endif %}
+{%- endblock css %}

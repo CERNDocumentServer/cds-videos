@@ -24,7 +24,7 @@
 #}
 {%- extends "cds_previewer/video.html" %}
 
-{% set theo_config = {'socialSharing': False} %}
+{% set theo_config_socialSharing = False %}
 {% set video_classes = '' %}
 {%- set path = file.file.obj.file.uri | replace(config.VIDEOS_XROOTD_PREFIX, '') %}
 {%- set m3u8_url = config.WOWZA_VIDEO_URL | format(path) %}
