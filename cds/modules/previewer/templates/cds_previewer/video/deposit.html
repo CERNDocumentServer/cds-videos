@@ -1,7 +1,7 @@
 {# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -23,7 +23,19 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
 
-{%- extends "cds_previewer/video.html" %}
+{%- extends "cds_previewer/video/video.html" %}
 
-{% set theo_config = {'socialSharing': True} %}
-{% set video_classes = '' %}
+{%- from "cds_previewer/macros/player.html" import theo_player %}
+
+{%- block javascript %}
+  {{ super() }}
+
+  {%- set theo_config = {} -%}
+
+  {# Strip eos path for the ``uri`` #}
+  {%- set path = file.file.obj.file.uri | replace(config.VIDEOS_XROOTD_PREFIX, '') %}
+  {%- set source = config.WOWZA_VIDEO_URL | format(path) -%}
+
+  {# Initialize theo player #}
+  {{ theo_player(file, theo_config, record=record, video_source=source) }}
+{%- endblock javascript %}
