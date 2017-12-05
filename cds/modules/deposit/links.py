@@ -26,10 +26,8 @@
 
 from __future__ import absolute_import, print_function
 
-import invenio_deposit.links
 from flask import current_app, request, url_for
 from invenio_records_files.links import default_bucket_link_factory
-from functools import partial
 
 
 def deposit_links_factory(pid, deposit_type=None):
@@ -63,8 +61,13 @@ def deposit_links_factory(pid, deposit_type=None):
     return links
 
 
-project_links_factory = partial(deposit_links_factory, deposit_type='project')
-"""Project factory for links generation."""
+def project_links_factory(pid):
+    """Project factory for links generation."""
+    # cannot use partial func because of invenio-records-rest#183
+    return deposit_links_factory(pid, deposit_type='project')
 
-video_links_factory = partial(deposit_links_factory, deposit_type='video')
-"""Video factory for links generation."""
+
+def video_links_factory(pid):
+    """Video factory for links generation."""
+    # cannot use partial func because of invenio-records-rest#183
+    return deposit_links_factory(pid, deposit_type='video')

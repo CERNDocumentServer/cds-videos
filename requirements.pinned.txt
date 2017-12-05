@@ -93,7 +93,7 @@ invenio-pidstore==1.0.0b2
 invenio-previewer==1.0.0a11
 invenio-query-parser==0.6.0
 invenio-records-files==1.0.0a9
-invenio-records-rest==1.0.0b3
+invenio-records-rest==1.0.0b5
 invenio-records-ui==1.0.0b1
 invenio-records[postgresql]==1.0.0b4
 invenio-rest[cors]==1.0.0b2
