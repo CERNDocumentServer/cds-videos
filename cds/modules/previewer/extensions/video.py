@@ -34,9 +34,8 @@ class VideoExtension(object):
 
     previewable_extensions = ['mp4', 'webm', 'mov', 'avi', 'mpg']
 
-    def __init__(self, template=None, embed=False):
+    def __init__(self, template=None):
         """Init video previewer."""
-        self.embed = embed
         self.template = template
 
     @staticmethod
@@ -58,21 +57,14 @@ class VideoExtension(object):
         return render_template(
             self.template,
             file=file,
-            video_url=file.uri,
-            m3u8_url=getattr(file, 'm3u8_uri', None),
-            thumbnails_url=getattr(file, 'thumbnails_uri', None),
-            poster_url=getattr(file, 'poster_uri', None),
-            embed_url=getattr(file, 'embed_uri', None),
-            subtitles=getattr(file, 'subtitles', []),
-            embed=self.embed,
-            vr=getattr(file, 'vr', False),
             css_bundles=['cds_previewer_video_css'],
             file_extension=file_extension,
             recid=record.get('recid', ''),
             report_number=report_number,
+            record=record,
         )
 
 
-video = VideoExtension('cds_previewer/video.html')
-embed_video = VideoExtension('cds_previewer/embedded_video.html', embed=True)
-deposit_video = VideoExtension('cds_previewer/deposit_video.html')
+video = VideoExtension('cds_previewer/video/internal.html')
+embed_video = VideoExtension('cds_previewer/video/embed.html')
+deposit_video = VideoExtension('cds_previewer/video/deposit.html')

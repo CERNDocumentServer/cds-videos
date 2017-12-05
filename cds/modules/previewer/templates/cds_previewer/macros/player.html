@@ -1,0 +1,112 @@
+{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None) -%}
+  {% if config.THEO_LICENCE_KEY %}
+    <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
+    <script type="text/javascript">
+      var element = document.createElement('div');
+      element.className = 'video-js theo-social-available vjs-fluid theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
+      {% if append_to_element %}
+        document.getElementById("{{ append_to_element }}").appendChild(element);
+      {% else %}
+        document.body.appendChild(element);
+      {% endif %}
+      var player = new THEOplayer.Player(element, {
+        libraryLocation : '//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/',
+        ui : {
+          width : '100%',
+          height: '100%',
+          fluid : true
+        },
+        preload: 'auto',
+      });
+      // Preload
+      player.source = {
+        sources: [
+          {
+            {% if video_source %}
+              src: "{{ video_source }}",
+              type: 'application/x-mpegURL'
+            {% elif obj.m3u8_uri %}
+              src: '{{ obj.m3u8_uri }}',
+              type: 'application/x-mpegURL'
+            {% else %}
+              src: '{{ obj.uri }}',
+              type: 'video/mp4'
+            {% endif %}
+          },
+        ],
+        textTracks: [
+          {
+            kind: 'metadata',
+            src: '{{ obj.thumbnails_uri }}',
+            label: 'thumbnails',
+            default: true,
+          },
+          {% for uri, lang in obj.subtitles %}
+          {
+            kind: 'subtitles',
+            src: '{{ uri }}',
+            label: '{{ lang }}',
+            srclang: '{{ lang }}',
+          },
+          {% endfor %}
+        ],
+        poster: '{{ obj.poster_uri }}',
+        {% if obj.vr %}
+        vr: {
+          360: true
+        },
+        {% endif %}
+        {% if theo_config.embed %}
+        isEmbeddable: true,
+        {% endif %}
+      };
+      {% if theo_config.socialSharing %}
+        player.social.items = [
+           {
+             label : '{{ _("Video link") }}',
+             src : '{{ url_for("invenio_records_ui.recid", pid_value=record.get("recid", ""), _external=True) }}',
+           },
+           {
+             label : '{{ _("Embed") }}',
+             text : '<iframe scrolling="no"  width="640" height="360" src="{{ obj.embed_uri }}" frameborder="0" allowfullscreen></iframe>',
+           }
+       ];
+      {% endif %}
+      {% if theo_config.showTitle %}
+        // Append the title div
+        var title = document.createElement('div');
+        title.id = 'cds-video-overlay-title';
+        title.innerHTML = '{{ record.get("title", {}).get("title", "") }}'
+        document.body.appendChild(title);
+        // Show/Hide the title on play
+        player.addEventListener('play', function() {
+          // Hide video title
+          document.getElementById('cds-video-overlay-title').style.visibility = 'hidden';
+        });
+        player.addEventListener('pause', function() {
+          // Show video title
+          document.getElementById('cds-video-overlay-title').style.visibility = 'visible';
+        });
+      {% endif %}
+      // Log view
+      {% if log_media_views_url and config.LOG_USER_ACTIONS_ENABLED %}
+        (function(player) {
+          var url = '{{ log_media_views_url | safe }}';
+          function onPlay() {
+            var r = new XMLHttpRequest();
+            r.open('GET', url, true);
+            r.onload = function() {
+              if (r.status >= 200 && r.status < 400) {
+                player.removeEventListener('play', onPlay);
+              }
+            };
+            r.send();
+          }
+          if (url) {
+            player.addEventListener('play', onPlay);
+          }
+        })(player);
+      {% endif %}
+    </script>
+  {% endif %}
+{%- endmacro %}
