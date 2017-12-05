@@ -279,6 +279,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_type='recid',
         pid_minter='cds_recid',
         pid_fetcher='cds_recid',
+        indexer_class=None,
         search_type=None,
         search_class=RecordVideosSearch,
         search_factory_imp='invenio_records_rest.query.es_search_factory',
@@ -317,6 +318,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_type='catid',
         pid_minter='cds_catid',
         pid_fetcher='cds_catid',
+        indexer_class=None,
         search_index='categories',
         search_type=None,
         search_class=RecordVideosSearch,
@@ -347,6 +349,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_type='kwid',
         pid_minter='cds_kwid',
         pid_fetcher='cds_kwid',
+        indexer_class=None,
         search_index='keywords',
         search_type=None,
         search_class=NotDeletedKeywordSearch,
@@ -817,6 +820,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/deposits/',
+        indexer_class=None,
         item_route='/deposits/<{0}:pid_value>'.format(_CDSDeposit_PID),
         file_list_route='/deposits/<{0}:pid_value>/files'.format(
             _CDSDeposit_PID),
@@ -868,6 +872,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/deposits/project/',
+        indexer_class=None,
         item_route='/deposits/project/<{0}:pid_value>'.format(_Project_PID),
         file_list_route='/deposits/project/<{0}:pid_value>/files'.format(
             _Project_PID),
@@ -918,6 +923,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
                                  ':json_v1_search'),
         },
         list_route='/deposits/video/',
+        indexer_class=None,
         item_route='/deposits/video/<{0}:pid_value>'.format(_Video_PID),
         file_list_route='/deposits/video/<{0}:pid_value>/files'.format(
             _Video_PID),
