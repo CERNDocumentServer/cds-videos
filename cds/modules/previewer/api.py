@@ -44,6 +44,11 @@ class CDSPreviewRecordFile(PreviewFile):
     """Preview record files implementation."""
 
     @property
+    def subformats(self):
+        """Get the subformats."""
+        return self.file.dumps().get('subformat', [])
+
+    @property
     def uri(self):
         """Get file download link."""
         return url_for(

@@ -2,6 +2,7 @@
   {% if config.THEO_LICENCE_KEY %}
     <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
     <script type="text/javascript">
+
       var element = document.createElement('div');
       element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
       {% if append_to_element %}
@@ -12,8 +13,6 @@
       var player = new THEOplayer.Player(element, {
         libraryLocation : '//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/',
         ui : {
-          width : '100%',
-          height: '100%',
           {% if theo_config.fluid %}
           fluid: true
           {% endif %}
@@ -27,7 +26,7 @@
             {% if video_source %}
               src: "{{ video_source }}",
               type: 'application/x-mpegURL'
-            {% elif obj.m3u8_uri %}
+            {% elif obj.m3u8_uri and obj.subformats|length > 0 %}
               src: '{{ obj.m3u8_uri }}',
               type: 'application/x-mpegURL'
             {% else %}
