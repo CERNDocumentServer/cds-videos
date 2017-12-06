@@ -29,6 +29,61 @@ var app = angular.module('cds', [
   'ui.bootstrap.alert',
 ]);
 
+
+// Image loading with fallback
+app.directive('cdsSearchResults', ['$sce', '$window', function($sce, $window) {
+  function linkFunction(scope, element, attr) {
+    // Find poster
+    scope.findPoster = function(record) {
+      var poster = scope.findContextType(record, 'poster');
+      if (poster) {
+        return poster;
+      } else {
+        var masterFile = scope.findContextType(record, 'master');
+        return _.find(masterFile['frame'], function (frame) {
+          return frame.key === 'frame-1.jpg'
+        })
+      }
+    }
+    // Find gif
+    scope.findGif = function(record) {
+      var masterFile = scope.findContextType(record, 'master');
+      return _.find(masterFile['frames-preview'], function (gif) {
+        return gif.key === 'frames.gif'
+      })
+    }
+    // Find context type
+    scope.findContextType = function(record, context_type) {
+      if (!_.isEmpty(record)) {
+        var _files = record.metadata ? record.metadata._files : record._files;
+        return _.find(_files, function (file) {
+          return file.context_type === context_type;
+        })
+      }
+    }
+    // Get image preview
+    scope.getImagePreview = function(record, showGif, size) {
+      try {
+        var file = showGif ? scope.findGif(record) : scope.findPoster(record);
+        return _.template(
+          "/api/iiif/v2/<%=bucket%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
+        )({
+          bucket: file.bucket_id,
+          key: file.key,
+          size: size.join(','),
+          ext: showGif ? 'gif' : 'png',
+        });
+      } catch(error) {
+        return '/static/img/not_found.png';
+      }
+    }
+  }
+  return {
+    restrict: 'A',
+    link: linkFunction
+  };
+}])
+
 app.run(function($templateCache) {
   // Template Cache for bootstrap tooltip
   $templateCache.put(
@@ -164,9 +219,8 @@ app.filter('findPoster', function($filter) {
   return function(record) {
     var poster = $filter('findContextType')(record, 'poster');
     if (poster) {
-        return poster;
-    }
-    else {
+      return poster;
+    } else {
       var masterFile = $filter('findMaster')(record);
       return _.find(masterFile['frame'], function (frame) {
         return frame.key === 'frame-1.jpg'

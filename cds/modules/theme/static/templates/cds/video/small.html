@@ -1,18 +1,18 @@
-<div class="row">
+<div cds-search-results class="row">
   <div ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <div class="col-md-4 mb-20">
       <a class="cds-video-title l-b" target="_self" ng-href="/record/{{ record.id }}">
         <img
           class="img-responsive"
-          gif-src="{{ record | iiif:true:[330,190] }}"
-          img-src="{{ record | iiif:false:[330,190] }}"
-          ng-src="{{ record | iiif:false:[330,190] }}"
+          gif-src="{{ getImagePreview(record, true, [330,190]) }}"
+          img-src="{{ getImagePreview(record, false, [330,190]) }}"
+          ng-src="{{ getImagePreview(record, false, [330,190]) }}"
           err-src="/static/img/not_found.png"
           image-progressive-loading
         />
         <span ng-hide="!record.metadata.duration" class="cds-video-duration">{{ record.metadata.duration }}</span>
         <p>
-          {{ record.metadata.title.title || 'No title :(' | limitTo: 60}} {{ record.metadata.title.title.length > 60 ? ' [...]' : '' }}
+        {{ record.metadata.title.title || 'No title :(' | limitTo: 60}} {{ record.metadata.title.title.length > 60 ? ' [...]' : '' }}
         </p>
       </a>
     </div>
