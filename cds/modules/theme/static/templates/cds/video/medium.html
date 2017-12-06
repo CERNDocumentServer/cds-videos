@@ -1,4 +1,4 @@
-<div class="row">
+<div cds-search-results class="row">
   <div class="col-md-4" ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
     <a class="cds-transition cds-video-title l-b cds-line-height-100"
        target="_self"
@@ -8,9 +8,9 @@
        ng-href="/record/{{ record.id }}">
       <img
         class="img-responsive"
-        gif-src="{{ record | iiif:true:[400,224] }}"
-        img-src="{{ record | iiif:false:[400,224] }}"
-        ng-src="{{ record | iiif:false:[400,224] }}"
+        gif-src="{{ getImagePreview(record, true, [400,224]) }}"
+        img-src="{{ getImagePreview(record, false, [400,224]) }}"
+        ng-src="{{ getImagePreview(record, false, [400,224]) }}"
         err-src="/static/img/not_found.png"
         image-progressive-loading
       />
