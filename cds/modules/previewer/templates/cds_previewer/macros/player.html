@@ -3,7 +3,7 @@
     <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
     <script type="text/javascript">
       var element = document.createElement('div');
-      element.className = 'video-js theo-social-available vjs-fluid theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
+      element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
       {% if append_to_element %}
         document.getElementById("{{ append_to_element }}").appendChild(element);
       {% else %}
@@ -14,7 +14,9 @@
         ui : {
           width : '100%',
           height: '100%',
-          fluid : true
+          {% if theo_config.fluid %}
+          fluid: true
+          {% endif %}
         },
         preload: 'auto',
       });
