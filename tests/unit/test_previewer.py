@@ -90,9 +90,11 @@ def test_preview_video(previewer_app, es, db, cds_jsonresolver, users,
         smil_obj = ObjectVersion.get(new_bucket, '{}.smil'.format(basename))
         assert smil_obj
 
-        wowza_url = previewer_app.config['WOWZA_PLAYLIST_URL'].format(
-            filepath=get_relative_path(smil_obj))
-        success_list.append(wowza_url)
+        file_url = url_for(
+            'invenio_records_ui.recid_files',
+            pid_value=pid.pid_value,
+            filename=obj.key)
+        success_list.append(file_url)
     else:
         assert video_1.status == 'draft'
         pid = PersistentIdentifier.get('depid', video_1['_deposit']['id'])
