@@ -474,4 +474,4 @@ def test_subformat_creation_if_missing(api_app, location, datadir, es, users):
         # check if transcoding is called properly
         assert mock_transcode.called is True
         [(_, call_args)] = mock_transcode.call_args_list
-        assert call_args == {'preset_quality': '240p'}
+        assert call_args == {'preset_quality': '240p', 'sleep_time': 5}
