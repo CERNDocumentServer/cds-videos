@@ -103,7 +103,7 @@ def check_record(data, source_type):
 
     # First verify if the record exists
     recid_pid = PersistentIdentifier.query.filter(
-        PersistentIdentifier.pid_value == recorddump.recid,
+        PersistentIdentifier.pid_value == str(recorddump.recid),
         PersistentIdentifier.pid_type == 'recid').one_or_none()
     if not recid_pid:
         check_record_logger.error(
@@ -114,7 +114,7 @@ def check_record(data, source_type):
     # The record exists
     assert record
 
-    _chec_files(record, recorddump)
+    _check_files(record, recorddump)
     _check_web(record)
     _check_es(record)
 
@@ -142,8 +142,8 @@ def _check_web(record):
     url_info = {'recid': record['recid'], 'rn': record['report_number'][0]}
 
     for url in urls:
-        url = url.format(url_info)
-        response = requests.get(url)
+        url = url.format(**url_info)
+        response = requests.get(url, verify=False)
         if response.status_code == 401:
             if is_public(record, 'read'):
                 check_record_logger.error('Record {0} should be public in {1}'.
@@ -162,7 +162,7 @@ def _check_es(record):
             'Record not indexed {0}'.format(record['recid']))
 
 
-def _chec_files(record, recorddump):
+def _check_files(record, recorddump):
     """Check file integrity."""
     old_files = recorddump.revisions[-1][1].get('_files')
     if not old_files:
@@ -192,7 +192,7 @@ def _chec_files(record, recorddump):
     master_obj = ObjectVersion.get(record_bucket.bucket, master_file['key'])
     if not master_obj:
         # Before raising verify the master is accessible on DFS
-        if not (os.path.isfile(master_file_path) and
+        if (os.path.isfile(master_file_path) and
                 os.access(master_file_path, os.R_OK)):
             check_record_logger.error(
                 'Master file found but not migrated: {0}'.format(
@@ -204,12 +204,13 @@ def _chec_files(record, recorddump):
                 'Master file found in dump but not on DFS: {0}'.format(
                     recorddump.recid))
             return
-    # Verify master object checksum
-    old_master_md5 = _md5(master_file_path)
-    if master_obj.file.checksum != old_master_md5:
-        check_record_logger.error(
-            'Master file checksum not correct: {0}'.format(recorddump.recid))
-        raise Exception('Wrong checksum {0}'.format(recorddump.recid))
+    # CHECKSUM VERIFICATION TAKES TOO LONG, LET'S SKIP IT!
+    # # Verify master object checksum
+    # old_master_md5 = _md5(master_file_path)
+    # if master_obj.file.checksum != old_master_md5:
+    #     check_record_logger.error(
+    #         'Master file checksum not correct: {0}'.format(recorddump.recid))
+    #     raise Exception('Wrong checksum {0}'.format(recorddump.recid))
 
     # At this point we know the master file is correct, check the other files
     master_file = CDSVideosFilesIterator.get_master_video_file(record)
