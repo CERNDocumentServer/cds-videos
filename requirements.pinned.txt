@@ -22,7 +22,7 @@ blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flas
 cairocffi==0.8.0          # via cairosvg
 cairosvg==1.0.22
 cchardet==2.1.1           # via invenio-previewer
-cds-dojson==0.5.0
+cds-dojson==0.6.0
 cds-sorenson==0.1.2
 celery==3.1.25
 certifi==2017.11.5        # via requests
@@ -78,7 +78,6 @@ invenio-celery==1.0.0b3
 invenio-communities==1.0.0a16
 invenio-config==1.0.0b3
 invenio-db[postgresql,versioning]==1.0.0b8
-invenio-files-rest==1.0.0a21  # via invenio-communities, invenio-records-files
 invenio-formatter[badges]==1.0.0b3
 invenio-i18n==1.0.0b4     # via invenio-accounts, invenio-theme
 invenio-indexer==1.0.0a10

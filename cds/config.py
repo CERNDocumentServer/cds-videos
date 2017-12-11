@@ -390,12 +390,24 @@ RECORDS_REST_SORT_OPTIONS = dict(
             default_order='asc',
             order=1,
         ),
+        mostrecent=dict(
+            fields=['-_created'],
+            title='Most recent',
+            default_order='asc',
+            order=2,
+        ),
+        publication_date=dict(
+            fields=['publication_date'],
+            title='Publication date',
+            default_order='desc',
+            order=3,
+        ),
     )
 )
 
 # Default sort for records REST API.
 RECORDS_REST_DEFAULT_SORT = {
-    'records': dict(query='bestmatch'),
+    'records': dict(query='bestmatch', noquery='mostrecent'),
     'deposits-records-videos-project': dict(
         query='bestmatch',
         noquery='mostrecent',
@@ -548,7 +560,7 @@ FRONTPAGE_ENDPOINT = 'cds_home.index'
 FRONTPAGE_FEATURED_QUERY = \
     '/api/records/?q=featured:true&size=1&sort=mostrecent'
 # Recent videos query
-FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent'
+FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent&type=MOVIE'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
     {'size': 5, 'page': 1},

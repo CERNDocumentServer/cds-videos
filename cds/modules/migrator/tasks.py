@@ -36,15 +36,23 @@ from ..webhooks.tasks import TranscodeVideoTask
 class TranscodeVideoTaskQuiet(TranscodeVideoTask):
     """Transcode without index or send sse messages."""
 
-    def on_success(self, *args, **kwargs):
+    def run(self, preset_quality, sleep_time=5, *args, **kwargs):
+        super(TranscodeVideoTaskQuiet, self).run(
+            preset_quality=preset_quality,
+            sleep_time=sleep_time,
+            *args,
+            **kwargs)
         # get deposit and record
-        deposit_id = args[3]['deposit_id']
-        video = deposit_video_resolver(deposit_id)
+        video = deposit_video_resolver(self.deposit_id)
         rec_video = record_resolver.resolve(video['recid'])[1]
         # sync deposit --> record
         video._sync_record_files(record=rec_video)
         video.commit()
         rec_video.commit()
+        db.session.commit()
+
+    def on_success(self, *args, **kwargs):
+        pass
 
     def _update_record(self, *args, **kwargs):
         pass
