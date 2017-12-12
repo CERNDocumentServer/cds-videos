@@ -604,7 +604,7 @@ FRONTPAGE_CHANNELS = [
                    '/Movies/CERN/2015/CERN-MOVIE-2015-025/CERN-MOVIE-2015-025'
                    '-011/CERN-MOVIE-2015-025-011-posterframe-640x360-at-5'
                    '-percent.jpg',
-        'keyword': 'physic'
+        'keyword': 'physics'
     },
     {
         'label': 'Accelerators',
