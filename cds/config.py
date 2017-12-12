@@ -382,36 +382,39 @@ RECORDS_REST_ENDPOINTS.update(OPENDEFINITION_REST_ENDPOINTS)
 REST_MIMETYPE_QUERY_ARG_NAME = 'format'
 
 # Sort options records REST API.
-RECORDS_REST_SORT_OPTIONS = dict(
-    records=dict(
-        bestmatch=dict(
-            title='Best match',
-            fields=['-_score'],
-            default_order='asc',
-            order=1,
-        ),
-        mostrecent=dict(
-            fields=['-_created'],
-            title='Most recent',
-            default_order='asc',
-            order=2,
-        ),
-        publication_date=dict(
-            fields=['publication_date'],
-            title='Publication date',
-            default_order='desc',
-            order=3,
-        ),
-    )
-)
+RECORDS_REST_SORT_OPTIONS = {
+    'records-videos-video': {
+        'bestmatch': {
+            'title': 'Best match',
+            'fields': ['-_score'],
+            'default_order': 'asc',
+            'order': 1,
+        },
+        'mostrecent': {
+            'title': 'Most recent',
+            'fields': ['-_created'],
+            'default_order': 'asc',
+            'order': 2,
+        },
+        'publication_date': {
+            'title': 'Publication date',
+            'fields': ['publication_date'],
+            'default_order': 'desc',
+            'order': 3,
+        }
+    }
+}
 
 # Default sort for records REST API.
 RECORDS_REST_DEFAULT_SORT = {
-    'records': dict(query='bestmatch', noquery='mostrecent'),
-    'deposits-records-videos-project': dict(
-        query='bestmatch',
-        noquery='mostrecent',
-    )
+    'records-videos-video': {
+        'query': 'bestmatch',
+        'noquery': 'mostrecent',
+    },
+    'deposits-records-videos-project': {
+        'query': 'bestmatch',
+        'noquery': 'mostrecent',
+    }
 }
 
 # Defined facets for records REST API.
