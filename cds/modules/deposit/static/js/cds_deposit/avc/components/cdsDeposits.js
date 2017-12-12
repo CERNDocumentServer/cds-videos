@@ -453,6 +453,8 @@ function cdsDeposits() {
       videoExtensions: '@?',
       // Show restricted fields
       showAvcRestrictedFields: '=?',
+      // Show admin Interface
+      showAdminInterface: '=?',
     },
     controller: cdsDepositsCtrl,
     templateUrl: function($element, $attrs) {
