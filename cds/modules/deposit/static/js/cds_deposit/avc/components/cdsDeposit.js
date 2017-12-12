@@ -61,6 +61,12 @@ function cdsDepositCtrl(
     return that.record._deposit.status === 'published';
   };
 
+  // Webhooks available tasks
+  this.webhookAvailableEventTasks = {};
+
+  // Webhooks event_id
+  this.webhookEventId = null;
+
   this.isProjectPublished = function() {
     var isPublished;
     if (that.depositType === 'project') {
@@ -181,24 +187,17 @@ function cdsDepositCtrl(
       });
     };
 
+    this.triggerRestartEvent = function(eventId, taskId) {
+      that.restartEvent(eventId, taskId)
+        .then(function() {
+          // Fetch feedback to update the Interface
+          that.fetchCurrentStatuses();
+        })
+    }
+
     this.restartEvent = function(eventId, taskId) {
       var url = urlBuilder.restartEvent({ taskId: taskId, eventId: eventId });
       return cdsAPI.action(url, 'PUT');
-    };
-
-    this.restartMetadataExtraction = function() {
-      var master = that.findMasterFile();
-      if (master) {
-        var eventId = master.tags._event_id;
-        that.getTaskFeedback(eventId, 'file_video_metadata_extraction',
-          'FAILURE').then(function (data) {
-          data.forEach(function (taskInfo) {
-            var eventId = taskInfo.info.payload.event_id;
-            var taskId = taskInfo.id;
-            that.restartEvent(eventId, taskId);
-          });
-        });
-      }
     };
 
     this.restartFailedSubformats = function(subformatKeys) {
@@ -339,10 +338,13 @@ function cdsDepositCtrl(
       if (that.isDraft()){
         var masterFile = that.findMasterFile();
         var eventId = _.get(masterFile, 'tags._event_id', undefined);
+        that.webhookEventId = eventId;
         if (eventId) {
           that.getTaskFeedback(eventId)
             .then(function(data) {
               var groupedTasks = _.groupBy(data, 'name');
+              // Update the available task events
+              that.webhookAvailableEventTasks = groupedTasks;
               var transcodeTasks = groupedTasks.file_transcode;
               // Update the state reporter with all the new info
               data.forEach(function(task) {

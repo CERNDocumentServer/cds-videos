@@ -188,7 +188,6 @@
           </div>
           <!-- Inherit button -->
         </div>
-        <!-- Extra information -->
       </div>
       <!-- Main form -->
       <div class="col-sm-9">
@@ -218,6 +217,11 @@
           <li role="presentation" ng-class="{active: active=='related_links'}">
             <a ng-click="active='related_links'" role="tab" data-toggle="tab">
               Related links
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
+            <a ng-click="active='admin'" role="tab" data-toggle="tab">
+              <i class="fa fa-bug" aria-hidden="true"></i> Admin
             </a>
           </li>
         </ul>
@@ -336,6 +340,51 @@
               sf-options="$ctrl.sfOptions"
             ></form>
           </div>
+          <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
+            <div class="panel panel-default">
+              <div class="panel-heading">Restart tasks</div>
+              <div class="panel-body">
+                <div class="alert alert-warning">
+                  Please note restarting tasks might not work as expected due to the webhooks limitations.
+                </div>
+                <ul class="list-group" ng-repeat="(name, data) in $ctrl.cdsDepositCtrl.webhookAvailableEventTasks">
+                  <span ng-switch="name">
+                    <span ng-switch-when="file_transcode">
+                      <li class="list-group-item">
+                        <p><strong>{{name}}</strong></p>
+                          <ul class="list-group" ng-repeat="task in data">
+                            <li class="list-group-item">
+                              {{task.info.payload.preset_quality}} <span class="label label-default">{{ task.status }}</span>
+                              <a class="pull-right" ng-click="$ctrl.cdsDepositCtrl.triggerRestartEvent($ctrl.cdsDepositCtrl.webhookEventId, task.id)">
+                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                              </a>
+                            </li>
+                          </ul>
+                        </li>
+                      </span>
+                      <span ng-switch-default>
+                        <li class="list-group-item">
+                          <strong>{{name}}</strong> <span class="label label-default" >{{ data[0].status }}</span>
+                          <a class="pull-right" ng-click="$ctrl.cdsDepositCtrl.triggerRestartEvent($ctrl.cdsDepositCtrl.webhookEventId, data[0].id)">
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          </a>
+                        </li>
+                      </span>
+                  </span>
+                </ul>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading">Record metadata</div>
+              <div class="panel-body">
+                <div class="text-center">
+                  <a ng-click="adminShowMetadata=!adminShowMetadata"> {{adminShowMetadata? 'Hide': 'Show'}} metadata</a>
+                </div>
+                <span ng-show="adminShowMetadata"><pre>{{$ctrl.cdsDepositCtrl.record | json}}</pre></span>
+              </div>
+            </div>
+          </div>
+          <!-- Extra information -->
         </div>
       </div>
       <!-- Main form -->

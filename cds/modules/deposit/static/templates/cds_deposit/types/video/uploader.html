@@ -70,7 +70,7 @@
         <span ng-show="f.completed && !f.errored" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
-        <span ng-show="f.errored">
+        <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
           <a ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats([f.key])">
             <i class="fa fa-undo"></i>
           </a>

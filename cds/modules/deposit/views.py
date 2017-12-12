@@ -30,7 +30,8 @@ from flask import Blueprint, current_app, url_for, render_template
 from flask_security import current_user
 from invenio_records_ui.signals import record_viewed
 
-from cds.modules.records.permissions import has_read_record_eos_path_permission
+from cds.modules.records.permissions import has_admin_permission, \
+    has_read_record_eos_path_permission
 
 from .api import CDSDeposit
 
@@ -61,6 +62,12 @@ def project_view(pid, record, template=None, **kwargs):
 def check_avc_permissions(record):
     """Check if user has permission to see EOS video library path."""
     return has_read_record_eos_path_permission(current_user, record)
+
+
+@blueprint.app_template_filter()
+def check_if_super_admin(record):
+    """Check if user is super admin."""
+    return has_admin_permission(current_user, record)
 
 
 @blueprint.app_template_filter('tolinksjs')
