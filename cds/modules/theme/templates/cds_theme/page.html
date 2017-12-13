@@ -1,4 +1,4 @@
-{%- set title = '%s | %s'|format(_(title), config.THEME_SITENAME) or 'CDS' -%}
+{%- set title = '%s | %s'|format(_(title), config.THEME_SITENAME) if title else config.THEME_SITENAME -%}
 {%- set suggest_app = true -%}
 {%- set body_css_classes = ['flex-container', 'bootstrap-padding-top'] -%}
 {%- set container_class = 'container-fluid' -%}
