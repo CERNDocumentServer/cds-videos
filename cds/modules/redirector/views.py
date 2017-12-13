@@ -26,9 +26,10 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import Blueprint, current_app, redirect, request, url_for, Response
+from flask import Blueprint, abort, current_app, redirect, request, url_for
 from six.moves.urllib.parse import urlencode
 from six.moves.urllib.parse import urlparse
+from sqlalchemy.orm.exc import NoResultFound
 
 from invenio_pidstore.models import PersistentIdentifier
 
@@ -60,24 +61,32 @@ def recid_from_rn(report_number):
 
 # /record/<pid_value>/embed/<filename>
 # /video/<report_number>
-@blueprint.route('/video/<report_number>')
+@blueprint.route('/video/<report_number>', strict_slashes=False)
 def video_embed_alias(report_number):
     """Redirect from the old video embed URL to the new one."""
+    try:
+        recid = recid_from_rn(report_number)
+    except NoResultFound:
+        abort(404)
+
     return redirect(url_for(
-        'invenio_records_ui.recid_embed_default',
-        pid_value=recid_from_rn(report_number)
-    ), code=301)
+        'invenio_records_ui.recid_embed_default', pid_value=recid), code=301)
 
 
 # /record/<:id:>/export/drupal
 # /api/mediaexport?id=<report_number>
-@api_blueprint.route('/mediaexport')
+@api_blueprint.route('/mediaexport', strict_slashes=False)
 def drupal_export_alias():
     """Redirect from the old drupal export URL to the new one."""
     rn = request.args.get('id', '')
 
-    api_url = url_for('invenio_records_rest.recid_item',
-                      pid_value=recid_from_rn(rn), _external=True)
+    try:
+        recid = recid_from_rn(rn)
+    except NoResultFound:
+        abort(404)
+
+    api_url = url_for('invenio_records_rest.recid_item', pid_value=recid,
+                      _external=True)
 
     arg_name = current_app.config['REST_MIMETYPE_QUERY_ARG_NAME']
     format_param = {arg_name: 'drupal'}
