@@ -65,3 +65,4 @@ recursive-include tests *.json
 recursive-include tests *.mov
 recursive-include tests *.mp4
 recursive-include tests *.py
+recursive-include benchmarks *.py

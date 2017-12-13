@@ -168,18 +168,18 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   function authorFromUser(query) {
-    // Match Lastname, Firstname:Affiliation
-    // i.e. Uni, Corn: Pink Clouds
-    var re = /^(\w*,\w*):(\w*)$/,
-        nameAffiliation = query.split(re).splice(1, 2);
+    // Match Lastname, Firstname
+    // i.e. Uni Uni , Corn Corn
+    // return (3) [" Uni Uni , Corn Corn ", " Uni Uni ", " Corn Corn ", index: 0, input: " Uni Uni , Corn Corn"]
+    var re = /^(.*),(.*)$/,
+        authorName = query.match(re);
 
-    if (nameAffiliation.length !== 2) {
+    if (!authorName || authorName.length !== 3) {
       return null;
     }
 
     return formAuthor({
-      name: nameAffiliation[0],
-      affiliations: [nameAffiliation[1]],
+      name: authorName[1].trim() + ',' + authorName[2].trim()
     });
   }
 
