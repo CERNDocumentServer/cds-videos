@@ -563,7 +563,7 @@ FRONTPAGE_ENDPOINT = 'cds_home.index'
 FRONTPAGE_FEATURED_QUERY = \
     '/api/records/?q=featured:true&size=1&sort=mostrecent'
 # Recent videos query
-FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent&type=MOVIE'
+FRONTPAGE_RECENT_QUERY = '/api/records/?size=3&sort=mostrecent&type=VIDEO'
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
     {'size': 5, 'page': 1},
