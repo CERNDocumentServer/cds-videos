@@ -187,6 +187,11 @@ function cdsDepositCtrl(
       });
     };
 
+    this.triggerRestartAllEvents = function() {
+      // Trigger restart workflow
+      $scope.$broadcast('cds.deposit.workflow.restart');
+    }
+
     this.triggerRestartEvent = function(eventId, taskId) {
       that.restartEvent(eventId, taskId)
         .then(function() {
