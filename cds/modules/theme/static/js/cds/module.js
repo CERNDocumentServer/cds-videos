@@ -253,6 +253,15 @@ app.filter('iiif', function($filter) {
   }
 });
 
+app.filter('ellipsis', function () {
+  return function (text, length) {
+      if (text.length > length) {
+          return text.substr(0, length) + " [...]";
+      }
+      return text;
+  }
+});
+
 // Trust as html
 app.filter('trustHtml', ['$sce', function($sce) {
   return function(text) {
@@ -407,44 +416,11 @@ app.directive('imageProgressiveLoading', ['$timeout', function($timeout) {
 
 // Filter to translage ISO languages to language name
 // i.e. en -> English , fr -> French
-app.filter('isoToLanguage', function () {
+app.filter('isoToLanguage', ['isoLanguages', function (isoLanguages) {
   return function (code) {
-    // Based on https://www.loc.gov/standards/iso639-2/php/code_list.php
-    var languages = {
-      'ar': 'Arabic',
-      'bg': 'Bulgarian',
-      'ca': 'Catalan',
-      'ch': 'Chamorro',
-      'da': 'Danish',
-      'de': 'German',
-      'el': 'Greek',
-      'en': 'English',
-      'en-fr': 'English/French',
-      'es': 'Spanish',
-      'fi': 'Finnish',
-      'fr': 'French',
-      'hu': 'Hungarian',
-      'hr': 'Croatian',
-      'it': 'Italian',
-      'ja': 'Japanese',
-      'ka': 'Georgian',
-      'ko': 'Korean',
-      'no': 'Norwegian',
-      'pl': 'Polish',
-      'pt': 'Portuguese',
-      'ru': 'Russian',
-      'silent': 'Silent',
-      'sk': 'Slovak',
-      'sr': 'Serbian',
-      'sv': 'Swedish',
-      'tr': 'Turkish',
-      'uk': 'Ukrainian',
-      'zh_CN': 'Chinese',
-      'zh_TW': 'Chinese (Taiwan)',
-    };
-    return languages[code] || code;
+    return isoLanguages[code] || code;
   };
-});
+}]);
 
 // Join array or return the String
 app.filter('joinArray', function () {
@@ -461,6 +437,46 @@ app.filter('replace', function () {
   return function (text, replaceText, replaceWith) {
     if (text) {
       return text.replace(replaceText, replaceWith);
+    }
+  }
+});
+
+app.provider('isoLanguages', function () {
+  return {
+    $get: function () {
+      // Based on https://www.loc.gov/standards/iso639-2/php/code_list.php
+      return {
+        'ar': 'Arabic',
+        'bg': 'Bulgarian',
+        'ca': 'Catalan',
+        'ch': 'Chamorro',
+        'da': 'Danish',
+        'de': 'German',
+        'el': 'Greek',
+        'en': 'English',
+        'en-fr': 'English/French',
+        'es': 'Spanish',
+        'fi': 'Finnish',
+        'fr': 'French',
+        'hu': 'Hungarian',
+        'hr': 'Croatian',
+        'it': 'Italian',
+        'ja': 'Japanese',
+        'ka': 'Georgian',
+        'ko': 'Korean',
+        'no': 'Norwegian',
+        'pl': 'Polish',
+        'pt': 'Portuguese',
+        'ru': 'Russian',
+        'silent': 'Silent',
+        'sk': 'Slovak',
+        'sr': 'Serbian',
+        'sv': 'Swedish',
+        'tr': 'Turkish',
+        'uk': 'Ukrainian',
+        'zh_CN': 'Chinese',
+        'zh_TW': 'Chinese (Taiwan)',
+      };
     }
   }
 });
