@@ -261,6 +261,32 @@ function cdsUploaderCtrl(
     }
   }
 
+  /*
+   * Restart workflow for the existing master file
+   */
+
+  function restartWorkflow() {
+    var file = that.cdsDepositCtrl.findMasterFile() || {};
+    var args = _prepareLocalFileWebhooks(file, {data: {version_id: file.version_id}});
+    $http(args)
+      .then(
+        function success() {
+          toaster.pop({
+            type: 'info',
+            title: 'Workflow has been restarted!',
+            bodyOutputType: 'trustedHtml'
+          });
+        },
+        function error() {
+          toaster.pop({
+            type: 'info',
+            title: 'Workflow cannot be restarted!',
+            bodyOutputType: 'trustedHtml'
+          });
+        },
+      );
+  }
+
   // On Component init
   this.$onInit = function() {
     // The Uploader queue
@@ -602,7 +628,10 @@ function cdsUploaderCtrl(
     return (that.files || []).every(function(file) {
       return file.completed;
     });
-  }
+  };
+
+  // Restart the whole workflow
+  $scope.$on('cds.deposit.workflow.restart', restartWorkflow);
 }
 
 cdsUploaderCtrl.$inject = [
