@@ -342,7 +342,7 @@
           </div>
           <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
             <div class="panel panel-default">
-              <div class="panel-heading">Restart tasks</div>
+              <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartAllEvents()" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
               <div class="panel-body">
                 <div class="alert alert-warning">
                   Please note restarting tasks might not work as expected due to the webhooks limitations.

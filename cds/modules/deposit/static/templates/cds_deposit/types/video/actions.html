@@ -43,14 +43,14 @@
     </button>
     <button
       ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
-      ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
+      ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.depositStatusCurrent !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
       class="btn btn-sm btn-primary "
       ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH']);$ctrl.cdsDepositCtrl.changeShowAll(true)">
       {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
     </button>
     <button
       ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
-      ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-sm btn-primary"
       ng-click="form.publishInfoShown = true">
     {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
