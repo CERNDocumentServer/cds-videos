@@ -15,9 +15,9 @@
         image-progressive-loading
       />
       <p>
-        {{ record.metadata.title.title || 'No title :(' | limitTo: 60}} {{ record.metadata.title.title.length > 60 ? ' [...]' : '' }}
+        {{ record.metadata.title.title || 'No title' | ellipsis: 60}}
       </p>
     </a>
-    <p ng-bind-html="(record.metadata.description | limitTo: 60 | trustHtml) || 'No description'" ng-class="{'cds-visibility-visible': show, 'cds-visibility-hidden': !show}" class="cds-transition t-w"></p>
+    <p ng-bind-html="record.metadata.description | ellipsis: 60 | trustHtml" ng-class="{'cds-visibility-visible': show, 'cds-visibility-hidden': !show}" class="cds-transition t-w"></p>
   </div>
 </div>

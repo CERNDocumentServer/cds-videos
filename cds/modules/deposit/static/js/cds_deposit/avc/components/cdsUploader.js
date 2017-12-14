@@ -6,7 +6,8 @@ function cdsUploaderCtrl(
   $timeout,
   urlBuilder,
   jwt,
-  toaster
+  toaster,
+  isoLanguages
 ) {
   var that = this;
 
@@ -527,10 +528,10 @@ function cdsUploaderCtrl(
   }
 
   this.validateSubtitles = function(_file) {
-    // Check if the file has the pattern *(_|-)[a-zA-Z]{2,}.vtt
-    // i.e. jessica_jones_en.vtt
-    var match = _file.name.match(/(_|-)[a-zA-Z]{2,}.vtt/g) || [];
-    return match.length === 1;
+    // Check if the filename matches the pattern and is a valid ISO language
+    // i.e. jessica_jones-en.vtt
+    var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2}).vtt/) || [];
+    return (match.length > 1 && match[1] in isoLanguages);
   }
 
   this.updateFile = function(key, data, force) {
@@ -642,7 +643,8 @@ cdsUploaderCtrl.$inject = [
   '$timeout',
   'urlBuilder',
   'jwt',
-  'toaster'
+  'toaster',
+  'isoLanguages'
 ];
 
 function cdsUploader() {

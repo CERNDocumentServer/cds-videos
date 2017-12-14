@@ -114,7 +114,7 @@
   <div ng-show="record.metadata._files.length > 1 && showAllAdditionalFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"  ng-hide="file.context_type == 'master'" target="_blank">
-        {{ file.key | limitTo: 25 }} <span ng-show="file.key.length > 25">[...]</span> <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
+        {{ file.key | ellipsis: 25 }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
       </a>
     </div>
   </div>

@@ -109,7 +109,7 @@ class CDSPreviewRecordFile(PreviewFile):
         """Get video's subtitles."""
         return [(f['links']['self'], f['tags']['language'])
                 for f in self.record['_files']
-                if f['context_type'] == 'subtitle']
+                if f['context_type'] == 'subtitle' and 'language' in f['tags']]
 
     @property
     def smil_file_object(self):
