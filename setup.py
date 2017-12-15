@@ -96,6 +96,7 @@ install_requires = [
     'invenio-admin>=1.0.0b4',
     'invenio-assets>=1.0.0b6',
     'invenio-base>=1.0.0a15',
+    'invenio-cache>=1.0.0b1',
     'invenio-celery>=1.0.0b3',
     'invenio-communities>=1.0.0a15',
     'invenio-config>=1.0.0b3',
