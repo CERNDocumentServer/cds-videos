@@ -839,6 +839,11 @@ class Video(CDSDeposit):
     @mark_as_action
     def edit(self, pid=None):
         """Edit a video and update the related project."""
+        # fail if project is already published to avoid unexpected behaviours
+        if self.project.is_published():
+            raise ValidationError(message='cannot edit a video if its project '
+                                          'is already published')
+
         # save a copy of the recid
         video_old_id = self['recid']
         # edit the video
