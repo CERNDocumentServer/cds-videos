@@ -30,9 +30,9 @@ from flask import current_app, request, url_for
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_rest.links import default_links_factory
 
-from .resolver import record_resolver
-from .permissions import deposit_update_permission_factory
-from ..deposit.api import project_resolver, is_project_record
+from cds.modules.deposit.api import is_project_record, project_resolver
+from cds.modules.records.permissions import deposit_update_permission_factory
+from cds.modules.records.resolver import record_resolver
 
 
 def _build_record_project_links(project_pid):
@@ -62,23 +62,29 @@ def _build_deposit_project_links(deposit_project):
 
 def _fill_video_extra_links(record, links):
     """Add extra links if it's a video."""
-    record_project = None
+    project = None
     try:
-        pid, record_project = record_resolver.resolve(record['_project_id'])
+        pid, project = record_resolver.resolve(record['_project_id'])
         # include record project links
         links.update(**_build_record_project_links(
             project_pid=pid))
-    except (KeyError, PIDDoesNotExistError):
-        # The project has not been published yet.
+    except KeyError:
+        # Most likely are dealing with a project
         if is_project_record(record):
-            record_project = record
+            project = record
+    except PIDDoesNotExistError:
+        # The project has not being published yet
+        try:
+            pid, project = project_resolver.resolve(record['_project_id'])
+        except PIDDoesNotExistError:
+            pass
 
     try:
         # include deposit project links
-        if record_project:
+        if project:
             links.update(**_build_deposit_project_links(
                 deposit_project=project_resolver.resolve(
-                    record_project['_deposit']['id'])))
+                    project['_deposit']['id'])))
     except (KeyError, PIDDoesNotExistError):
         pass
 
