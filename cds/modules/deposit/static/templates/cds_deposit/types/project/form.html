@@ -115,6 +115,11 @@
                 Share
               </a>
             </li>
+            <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
+              <a ng-click="active='admin'" role="tab" data-toggle="tab">
+                <i class="fa fa-bug" aria-hidden="true"></i> Admin
+              </a>
+            </li>
           </ul>
           <!-- Tab panes -->
           <div class="tab-content cds-tab-content pt-20 px-20">
@@ -277,6 +282,13 @@
                 </div>
               </div>
             </div>
+            <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
+              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface" class="panel panel-danger">
+                <div class="panel-heading">Danger Zone</div>
+                <div class="panel-body">
+                  <cds-actions template="/static/templates/cds_deposit/types/project/admin_actions.html"></cds-actions>
+                </div>
+              </div>
           </div>
           <!-- Tab panes -->
           <div class="col-sm-12 pa-5">
