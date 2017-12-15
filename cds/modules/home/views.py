@@ -25,6 +25,8 @@ from flask import Blueprint, render_template
 from flask_babelex import lazy_gettext as _
 from flask_menu import current_menu
 
+from .decorators import cached_unless_authenticated_or_flashes
+
 blueprint = Blueprint(
     'cds_home',
     __name__,
@@ -45,6 +47,7 @@ def init_menu():
 
 
 @blueprint.route('/')
+@cached_unless_authenticated_or_flashes(timeout=600, key_prefix='homepage')
 def index():
     """CDS home page."""
     return render_template(
