@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015, 2016, 2017 CERN.
+ * Copyright (C) 2015, 2016, 2017, 2018 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -94,6 +94,9 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
 
 // Make sure navigation is on focus
 $(document).ready(function() {
+  // load and show any announcement message
+  toggleAnnouncement();
+
   $('#cds-navbar-form-input').focus(function() {
     $(".cds-navbar-form").addClass('cds-active-search');
   })
@@ -128,6 +131,22 @@ $(document).ready(function() {
       left: $(window).width(),
     }, 1000, function() {
       $(_c).hide();
+    });
+  }
+
+  function toggleAnnouncement() {
+    $.get('/api/announcement', { pathname: location.pathname }, function (result) {
+      if (result && result.message) {
+        $('#announcement')
+          .addClass('alert-' + result.style)
+          .removeClass('hidden')
+          .html(result.message);
+
+        // hack to fix wrong margin on deposit view
+        $('#cds-deposit').addClass('fix-margin-top');
+      } else {
+        $('#announcement').addClass('hidden');
+      }
     });
   }
 });
