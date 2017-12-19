@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -48,7 +48,7 @@ tests_require = [
     'pytest-flask>=0.10.0',
     'pytest-pep8>=1.0.6',
     'pytest-runner>=2.7.0',
-    'pytest>=2.8.0',
+    'pytest>=3.3.2',
     'selenium>=2.53.6',
     'simplejson>=3.10',
     'six>=1.10.0',
@@ -172,6 +172,10 @@ setup(
         'console_scripts': [
             'cds = cds.cli:cli',
         ],
+        'invenio_admin.views': [
+            'cds_admin = '
+            'cds.modules.announcements.admin:announcements_adminview',
+        ],
         'invenio_assets.bundles': [
             'cds_deposit_jquery_js = cds.modules.deposit.bundles:js_jquery',
             'cds_deposit_js = cds.modules.deposit.bundles:js_deposit',
@@ -195,6 +199,8 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_stats = cds.modules.stats.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:api_blueprint',
+            'cds_announcements = '
+            'cds.modules.announcements.views:api_blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
@@ -214,6 +220,9 @@ setup(
             'cds_theme = cds.modules.theme.views:blueprint',
             'cds_webhooks = cds.modules.webhooks.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
+        ],
+        'invenio_db.alembic': [
+            'cds_announcements = cds.modules.announcements:alembic',
         ],
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',
