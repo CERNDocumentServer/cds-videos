@@ -33,8 +33,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from invenio_pidstore.models import PersistentIdentifier
 
-from cds.modules.records.api import Record
-
 blueprint = Blueprint(
     'cds_redirector',
     __name__,
@@ -49,17 +47,16 @@ api_blueprint = Blueprint(
 
 
 def recid_from_rn(report_number):
-    """Retrieve a report number's corresponding record ID."""
+    """Retrieves a report number's corresponding record ID."""
     object_uuid = PersistentIdentifier.query.filter_by(
         pid_type='rn',
         pid_value=report_number
     ).one().object_uuid
-
-    record = Record.get_record(object_uuid).replace_refs()
-    videos = record.get('videos')
-    if videos:
-        return videos[0]['recid']
-    return record.get('recid')
+    return PersistentIdentifier.query.filter_by(
+        pid_type='recid',
+        object_type='rec',
+        object_uuid=object_uuid
+    ).one().pid_value
 
 
 # /record/<pid_value>/embed/<filename>
