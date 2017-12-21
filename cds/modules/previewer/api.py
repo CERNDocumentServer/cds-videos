@@ -22,8 +22,7 @@
 from __future__ import absolute_import, print_function
 
 import re
-from os import symlink
-from os.path import exists, join, relpath, split
+from os.path import join, relpath, split
 
 from flask import current_app, url_for
 from invenio_files_rest.models import ObjectVersion, as_object_version
@@ -90,12 +89,9 @@ class CDSPreviewRecordFile(PreviewFile):
     @property
     def embed_uri(self):
         """Get the embed uri."""
-        return url_for(
-            'invenio_records_ui.recid_preview',
-            pid_value=self.pid.pid_value,
-            filename=self.file.key,
-            _external=True
-        )
+        rn = self.record.get('report_number', [''])[0]
+        return url_for('cds_redirector.video_embed_alias', report_number=rn,
+                       _external=True)
 
     @property
     def thumbnails_uri(self):
@@ -109,7 +105,7 @@ class CDSPreviewRecordFile(PreviewFile):
         """Get video's subtitles."""
         return [(f['links']['self'], f['tags']['language'])
                 for f in self.record['_files']
-                if f['context_type'] == 'subtitle']
+                if f['context_type'] == 'subtitle' and 'language' in f['tags']]
 
     @property
     def smil_file_object(self):

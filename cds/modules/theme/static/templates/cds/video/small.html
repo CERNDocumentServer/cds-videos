@@ -12,7 +12,7 @@
         />
         <span ng-hide="!record.metadata.duration" class="cds-video-duration">{{ record.metadata.duration }}</span>
         <p>
-        {{ record.metadata.title.title || 'No title :(' | limitTo: 60}} {{ record.metadata.title.title.length > 60 ? ' [...]' : '' }}
+        {{ record.metadata.title.title || 'No title' | ellipsis: 60 }}
         </p>
       </a>
     </div>

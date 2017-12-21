@@ -6,7 +6,8 @@ function cdsUploaderCtrl(
   $timeout,
   urlBuilder,
   jwt,
-  toaster
+  toaster,
+  isoLanguages
 ) {
   var that = this;
 
@@ -311,13 +312,6 @@ function cdsUploaderCtrl(
           file.headers = extraHeaders;
         }
       });
-      // Get keys from existing files
-      var existingFiles = that.files.map(function(file) {
-        return file.key
-      });
-
-      // Exclude files that already exist
-      that.duplicateFiles = [];
 
       // Add the files to the list
       var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
@@ -327,26 +321,16 @@ function cdsUploaderCtrl(
 
       // Exclude video files
       _files = _.difference(_files, videoFiles);
-      // Remove any duplicate files
-      _files = _.reject(_files, function(file) {
-        if (existingFiles.includes(file.key)) {
-          that.duplicateFiles.push(file.key);
-          return true;
-        }
-        existingFiles.push(file.key);
-        return false;
-      });
 
-      // Send an alert for duplicate videos
-      if (that.duplicateFiles.length > 0) {
-        // Push a notification
-        toaster.pop({
-          type: 'error',
-          title: 'Duplicate file(s) for ' + (that.cdsDepositCtrl.record.title.title || 'video.'),
-          body: that.duplicateFiles.join(', '),
-          bodyOutputType: 'trustedHtml'
+      // Find if any of the existing files has been replaced
+      // (file with same filename), and if yes remove it from the existing
+      // file list (aka from the interface).
+      _files = _.each(_files, function(file) {
+        // Remove the existing file from the list
+        _.remove(that.files, function(_f) {
+          return _f.key === file.key
         });
-      }
+      });
 
       if ((invalidFiles || []).length > 0) {
         // Push a notification
@@ -527,10 +511,10 @@ function cdsUploaderCtrl(
   }
 
   this.validateSubtitles = function(_file) {
-    // Check if the file has the pattern *(_|-)[a-zA-Z]{2,}.vtt
-    // i.e. jessica_jones_en.vtt
-    var match = _file.name.match(/(_|-)[a-zA-Z]{2,}.vtt/g) || [];
-    return match.length === 1;
+    // Check if the filename matches the pattern and is a valid ISO language
+    // i.e. jessica_jones-en.vtt
+    var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2}).vtt/) || [];
+    return (match.length > 1 && match[1] in isoLanguages);
   }
 
   this.updateFile = function(key, data, force) {
@@ -642,7 +626,8 @@ cdsUploaderCtrl.$inject = [
   '$timeout',
   'urlBuilder',
   'jwt',
-  'toaster'
+  'toaster',
+  'isoLanguages'
 ];
 
 function cdsUploader() {

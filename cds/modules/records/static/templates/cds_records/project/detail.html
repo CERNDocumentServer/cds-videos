@@ -62,7 +62,7 @@
                   />
                   <span ng-hide="!video.duration" class="cds-video-duration">{{ video.duration }}</span>
                   <p>
-                    {{ ::video.title.title || 'No title :(' | limitTo: 120}} {{ video.title.title.length > 120 ? ' [...]' : '' }}
+                    {{ ::video.title.title || 'No title' | ellipsis: 120}}
                   </p>
                 </a>
               </div>

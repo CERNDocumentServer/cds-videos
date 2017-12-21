@@ -1,0 +1,6 @@
+<button
+  class="btn btn-lg btn-danger"
+  ng-disabled="$ctrl.cdsDepositCtrl.actionLoading"
+  ng-click="$ctrl.deleteDeposit()">
+  {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Deleting ...' : 'Delete Project' }}
+</button>
