@@ -27,11 +27,11 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, abort, current_app, redirect, request, url_for
-from six.moves.urllib.parse import urlencode
-from six.moves.urllib.parse import urlparse
+from invenio_pidstore.errors import PIDRedirectedError
 from sqlalchemy.orm.exc import NoResultFound
 
-from invenio_pidstore.models import PersistentIdentifier
+from cds.modules.records.resolver import record_report_number_resolver
+from six.moves.urllib.parse import urlencode, urlparse
 
 blueprint = Blueprint(
     'cds_redirector',
@@ -47,16 +47,17 @@ api_blueprint = Blueprint(
 
 
 def recid_from_rn(report_number):
-    """Retrieves a report number's corresponding record ID."""
-    object_uuid = PersistentIdentifier.query.filter_by(
-        pid_type='rn',
-        pid_value=report_number
-    ).one().object_uuid
-    return PersistentIdentifier.query.filter_by(
-        pid_type='recid',
-        object_type='rec',
-        object_uuid=object_uuid
-    ).one().pid_value
+    """Retrieve a report number's corresponding record ID."""
+    try:
+        record = record_report_number_resolver.resolve(report_number)
+    except PIDRedirectedError as redirect:
+        record = record_report_number_resolver.resolve(
+            redirect.destination_pid.pid_value)
+
+    videos = record.get('videos')
+    if videos:
+        return videos[0]['recid']
+    return record.get('recid')
 
 
 # /record/<pid_value>/embed/<filename>
