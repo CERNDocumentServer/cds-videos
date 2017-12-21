@@ -128,7 +128,7 @@ function cdsDepositsCtrl(
       if (_.isEmpty(deposit.metadata._files)) {
         deposit.metadata._files = files || [];
       }
-      this.master = deposit;
+      this.master = cleanUpInputDeposit(deposit);
       // Initialized
       this.initialized = true;
       // Start sync metadata
@@ -136,6 +136,24 @@ function cdsDepositsCtrl(
       if (this.master.links.html) {
         this.handleRedirect(this.master.links.html, true);
       }
+    }
+
+    function cleanUpInputDeposit(deposit) {
+      // add empty `keywords` field if missing, to avoid issue of keywords not added/saved
+      if (deposit.metadata) {
+        if (!('keywords' in deposit.metadata)) {
+          deposit.metadata.keywords = [];
+        }
+        if (deposit.metadata.videos) {
+          deposit.metadata.videos.map(function (video) {
+            if (!(video.keywords)) {
+              video.keywords = [];
+            }
+            return video;
+          });
+        }
+      }
+      return deposit;
     }
 
     // SSE
