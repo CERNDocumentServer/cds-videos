@@ -17,7 +17,7 @@
           fluid: true
           {% endif %}
         },
-        preload: 'auto',
+        isEmbeddable: true
       });
       // Preload
       player.source = {
@@ -57,9 +57,7 @@
           360: true
         },
         {% endif %}
-        {% if theo_config.embed %}
-        isEmbeddable: true,
-        {% endif %}
+        preload: 'auto'
       };
       {% if theo_config.socialSharing %}
         player.social.items = [
