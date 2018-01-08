@@ -30,7 +30,7 @@
 {%- block javascript %}
   {{ super() }}
 
-  {%- set theo_config = {'socialSharing': True, 'showTitle': True, 'embed': True} -%}
+  {%- set theo_config = {'socialSharing': True, 'showTitle': True} -%}
 
   {# Initialize theo player #}
   {{ theo_player(file, theo_config, record=record) }}
