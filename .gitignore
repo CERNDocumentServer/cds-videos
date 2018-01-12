@@ -60,3 +60,11 @@ dump.rdb
 # OAuth
 *.crt
 *.key
+
+# vscode
+.vscode
+
+# IDE
+.idea
+package-lock.json
+

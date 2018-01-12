@@ -879,6 +879,9 @@ i.sort-handle {
     margin: 0;
     .cds-navbar-form-icon {
       flex: 1 1 auto;
+      background-color: transparent;
+      border: none;
+      outline: 0;
     }
     .form-group {
       margin: 0;
@@ -912,5 +915,15 @@ i.sort-handle {
   }
   .cds-navbar-nav {
     flex: 0 0 auto;
+  }
+}
+
+@media (max-width: $screen-sm-min) {
+  .cds-navbar-form-icon-xs {
+    width: 100%;
+    margin-top: 10px;
+    i {
+      margin-right: 4px;
+    }
   }
 }
