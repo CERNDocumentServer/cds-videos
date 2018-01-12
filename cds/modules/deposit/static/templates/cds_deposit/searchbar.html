@@ -4,9 +4,6 @@
   role="search"
   ng-class="{'cds-active-search': vm.userQuery !== '' || focused}"
 >
-  <div class="hidden-xs hidden-sm cds-navbar-form-icon">
-    <i class="t-w fa fa-search"></i>
-  </div>
   <span class="label label-primary">Deposit</span>
   <div class="form-group">
     <input
@@ -21,4 +18,10 @@
       ng-keyup="$event.keyCode == 13 && updateQuery()"
     />
   </div>
+  <button class="hidden-xs cds-navbar-form-icon" ng-click="updateQuery()">
+    <i class="t-w fa fa-search"></i>
+  </button>
+  <button class="visible-xs btn btn-default cds-navbar-form-icon-xs" ng-click="updateQuery()">
+    <i class="fa fa-search"></i>Search
+  </button>
 </form>
