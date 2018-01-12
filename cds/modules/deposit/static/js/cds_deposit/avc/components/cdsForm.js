@@ -406,17 +406,11 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   // category or type changed
   function updateCategoryTypeAndPermissions() {
     if (that.cdsDepositCtrl.depositType === 'project') {
-      // save project
-      makeActionWithPreAndPost('SAVE_PARTIAL')
-        // update permissions/access rights
-        .then(function() {
-          updatePermissions();
-          that.applyNewAccessRights();
-        })
-        .then(function() {
-          $scope.$broadcast('cds.deposit.project.saveAll');
-          $scope.$broadcast('cds.deposit.pristine.all');
-        });
+      updatePermissions();
+      that.applyNewAccessRights();
+
+      $scope.$broadcast('cds.deposit.project.saveAll');
+      $scope.$broadcast('cds.deposit.pristine.all');
     }
   }
 
@@ -480,6 +474,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     return ctrl.makeSingleAction(actionName)
       .then(ctrl.onSuccessAction, ctrl.onErrorAction)
       .finally(ctrl.postActions);
+  }
+
+  this.deleteProject = function () {
+    $scope.$broadcast('cds.deposit.project.delete');
   }
 }
 

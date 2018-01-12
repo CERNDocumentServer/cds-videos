@@ -286,7 +286,12 @@
               <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface" class="panel panel-danger">
                 <div class="panel-heading">Danger Zone</div>
                 <div class="panel-body">
-                  <cds-actions template="/static/templates/cds_deposit/types/project/admin_actions.html"></cds-actions>
+                    <button
+                      class="btn btn-lg btn-danger"
+                      ng-disabled="$ctrl.cdsDepositCtrl.actionLoading"
+                      ng-click="$ctrl.deleteProject()">
+                      {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Deleting ...' : 'Delete Project' }}
+                    </button>
                 </div>
               </div>
           </div>
