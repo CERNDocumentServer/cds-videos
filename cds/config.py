@@ -30,6 +30,8 @@ import os
 from datetime import timedelta
 
 from celery.schedules import crontab
+from flask import current_app, session
+from flask_login import current_user
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
@@ -114,6 +116,12 @@ CACHE_REDIS_URL = os.environ.get(
     'APP_CACHE_REDIS_URL',
     'redis://localhost:6379/0')
 CACHE_TYPE = 'redis'
+# We use `invenio_cache.cached_unless_authenticated` decorator
+# for cahcing the home page. As a result we use the below config
+# variable from invenio_cache module to define our caching conditions.
+# See <https://github.com/inveniosoftware/invenio-cache/blob/master/invenio_cache/decorators.py#L41>
+CACHE_IS_AUTHENTICATED_CALLBACK = lambda: '_flashes' in session or \
+    current_user.is_authenticated or current_app.debug
 
 ###############################################################################
 # Database
