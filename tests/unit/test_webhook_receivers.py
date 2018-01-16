@@ -1020,6 +1020,7 @@ def test_serializer():
     """Test result serializer on event."""
     event = Event()
     event.response = {}
+    event.response_headers = {}
 
     result = chain(
         simple_add.s(1, 2),

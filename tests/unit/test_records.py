@@ -120,7 +120,7 @@ def test_records_ui_export(app, project_published, video_record_metadata):
             RecordIdProvider.create)
 def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                       datacite_headers, json_headers, smil_headers,
-                      drupal_headers, extra_metadata, _deposit_metadata):
+                      drupal_headers, extra_metadata, _deposit_metadata, current_year):
     """Test view."""
     indexer = RecordIndexer()
     (project, video_1, video_2) = api_project_published
@@ -174,7 +174,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
         assert res.status_code == 200
 
         # try get drupal
-        report_number = u'CERN-MOVIE-2017-1-1'
+        report_number = u'CERN-MOVIE-{0}-1-1'.format(current_year)
         file_frame = 'http://cds.cern.ch/api/files/123/frame-1.jpg'
         with mock.patch('cds.modules.records.api.CDSFileObject._link',
                         return_value=file_frame):
@@ -253,7 +253,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'creation_date': u'2017-03-02',
                         u'directors': u'paperone, pluto',
                         u'entry_date': u'2017-09-25',
-                        u'id': u'CERN-MOVIE-2017-1-1',
+                        u'id': u'CERN-MOVIE-{0}-1-1'.format(current_year),
                         u'keywords': u'keyword1, keyword2',
                         u'license_body': u'GPLv2',
                         u'license_url': u'http://license.cern.ch',

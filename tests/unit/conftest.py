@@ -35,6 +35,7 @@ import requests
 import mock
 import pytest
 import jsonresolver
+from datetime import datetime
 
 from os.path import dirname, join
 from cds.factory import create_app
@@ -1113,3 +1114,9 @@ def demo_ffmpeg_metadata():
             }
         }
     }
+
+
+@pytest.fixture()
+def current_year():
+    """Returns the current year."""
+    return str(datetime.now().year)

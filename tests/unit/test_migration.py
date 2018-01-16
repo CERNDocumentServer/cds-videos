@@ -352,7 +352,7 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     assert record_video['title']['title'] == 'test'
 
 
-def test_sequence_number_update_after_migration(app, location, script_info):
+def test_sequence_number_update_after_migration(app, location, script_info, current_year):
     """Test sequence number update after migration."""
     # simulate a import of record < now(year)
     pid11 = PersistentIdentifier(
@@ -368,7 +368,7 @@ def test_sequence_number_update_after_migration(app, location, script_info):
 
     # run seq number update
     runner = CliRunner()
-    res = runner.invoke(cli_sequence_generator, ['2017'], obj=script_info)
+    res = runner.invoke(cli_sequence_generator, [current_year], obj=script_info)
 
     # no counter should be created
     assert res.exit_code == 0
@@ -376,12 +376,11 @@ def test_sequence_number_update_after_migration(app, location, script_info):
     assert len(TemplateDefinition.query.all()) == 2
 
     # simulate a import of record == now(year)
-    year = datetime.now().year
     pid11 = PersistentIdentifier(
         pid_type='recid', pid_value='2093597', status=PIDStatus.REGISTERED,
         object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb950')
     pid12 = PersistentIdentifier(
-        pid_type='rn', pid_value='CERN-MOVIE-{0}-5'.format(year),
+        pid_type='rn', pid_value='CERN-MOVIE-{0}-5'.format(current_year),
         status=PIDStatus.REGISTERED,
         object_type='rec', object_uuid='e5428b04324b4c9fbfed02fbf78bb959')
     db.session.add(pid11)
@@ -390,14 +389,15 @@ def test_sequence_number_update_after_migration(app, location, script_info):
 
     # run seq number update
     runner = CliRunner()
-    res = runner.invoke(cli_sequence_generator, ['2017'], obj=script_info)
+    res = runner.invoke(cli_sequence_generator, [current_year], obj=script_info)
 
     # no counter should be created
     assert res.exit_code == 0
     [counter] = Counter.query.all()
     assert counter.counter == 6
     assert counter.definition_name == 'project-v1_0_0'
-    assert counter.template_instance == 'CERN-MOVIE-2017-{counter}'
+    assert counter.template_instance == 'CERN-MOVIE-{0}-{{counter}}' \
+        .format(current_year)
     assert len(TemplateDefinition.query.all()) == 2
 
 
@@ -410,32 +410,36 @@ def test_retry_run_extracted_metadata(app):
             CDSRecordDumpLoader._run_extracted_metadata(master={}, retry=1)
 
 
-def test_multiple_pid_for_movie():
+def test_multiple_pid_for_movie(current_year):
     """Check multiple pid for movie and videoclip."""
+    cern_video = 'CERN-VIDEO-{0}'.format(current_year)
+    cern_videoclip = 'CERN-VIDEOCLIP-{0}'.format(current_year)
+    cern_movie = 'CERN-MOVIE-{0}'.format(current_year)
+    cern_footage = 'CERN-FOOTAGE-{0}'.format(current_year)
     # check video
-    data = {'report_number': ['CERN-VIDEO-2017']}
+    data = {'report_number': [cern_video]}
     assert cern_movie_to_video_pid_fetcher(
         None, data
     ) is None
-    assert data['report_number'] == ['CERN-VIDEO-2017']
+    assert data['report_number'] == [cern_video]
     # check videoclip
-    data = {'report_number': ['CERN-VIDEOCLIP-2017']}
+    data = {'report_number': [cern_videoclip]}
     assert cern_movie_to_video_pid_fetcher(
         None, data
-    ).pid_value == 'CERN-VIDEO-2017'
-    assert data['report_number'] == ['CERN-VIDEO-2017']
+    ).pid_value == cern_video
+    assert data['report_number'] == [cern_video]
     # check movie
-    data = {'report_number': ['CERN-MOVIE-2017']}
+    data = {'report_number': [cern_movie]}
     assert cern_movie_to_video_pid_fetcher(
         None, data
-    ).pid_value == 'CERN-VIDEO-2017'
-    assert data['report_number'] == ['CERN-VIDEO-2017']
+    ).pid_value == cern_video
+    assert data['report_number'] == [cern_video]
     # check others
-    data = {'report_number': ['CERN-FOOTAGE-2017']}
+    data = {'report_number': [cern_footage]}
     assert cern_movie_to_video_pid_fetcher(
         None, data
     ) is None
-    assert data['report_number'] == ['CERN-FOOTAGE-2017']
+    assert data['report_number'] == [cern_footage]
 
 
 def test_subformat_creation_if_missing(api_app, location, datadir, es, users):
