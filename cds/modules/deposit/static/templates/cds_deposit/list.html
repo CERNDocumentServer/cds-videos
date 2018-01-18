@@ -4,7 +4,7 @@
  ngf-drag-over-class="'dragover'"
  ngf-drop=""
  ngf-change="filesVM.addFiles($newFiles)"
- ngf-max-size="50GB"
+ ngf-max-size="500GB"
  ngf-allow-dir="false"
  ngf-include-dir="false"
  ngf-max-files="100"
@@ -26,7 +26,7 @@
           </span>
           <button class="btn btn-xs btn-danger" type="submit" ng-show="filesVM.invenioFilesBusy" ng-click="filesVM.cancel()"><i class="fa fa-times icon-white"></i> Cancel</button>
           <button class="btn btn-xs btn-default"
-            ngf-max-size="50GB"
+            ngf-max-size="500GB"
             ngf-multiple="true"
             ngf-allow-dir="false"
             ngf-include-dir="false"
@@ -85,7 +85,7 @@
         <h4 ng-show="files.dropSupported" class="text-muted">&mdash; or &mdash;</h4>
         <h1>
           <button class="btn btn-lg btn-primary"
-            ngf-max-size="50GB"
+            ngf-max-size="500GB"
             ngf-multiple="true"
             ngf-allow-dir="false"
             ngf-include-dir="false"
