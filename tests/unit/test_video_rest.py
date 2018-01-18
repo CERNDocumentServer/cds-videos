@@ -447,13 +447,15 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
         # get a record video (with no published project)
         url = url_for('invenio_records_rest.recid_item',
                       pid_value=rec_pid.pid_value, _external=True)
+        url_prj_edit = 'http://localhost/deposit/project/{0}'.format(pid)
         res = client.get(url, headers=json_headers)
         assert res.status_code == 200
 
         # check video record
         data = json.loads(res.data.decode('utf-8'))
         assert data['links'] == {
-            'self': url
+            'self': url,
+            'project_edit': url_prj_edit,
         }
 
         # publish the project
@@ -472,7 +474,6 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
         data = json.loads(res.data.decode('utf-8'))
         url_api_prj = 'http://localhost/record/3'
         url_prj = 'http://localhost/record/3'
-        url_prj_edit = 'http://localhost/deposit/project/{0}'.format(pid)
         assert data['links'] == {
             'self': url,
             'project': url_api_prj,
