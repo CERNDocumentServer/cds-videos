@@ -36,7 +36,7 @@ from invenio_migrator.cli import _loadrecord, dumps
 from invenio_pidstore.errors import PIDAlreadyExists
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_sequencegenerator.api import Sequence
-from .tasks import clean_record
+from .tasks import clean_record, check_record
 
 from ...modules.deposit.api import Project, Video
 
@@ -207,3 +207,23 @@ def cleanrecords(sources, source_type, recid):
 def run(sources, source_type, recid):
     """Load records migration dump."""
     load_records(sources=sources, source_type=source_type, eager=False)
+
+
+@dumps.command()
+@click.argument('sources', type=click.File('r'), nargs=-1)
+@click.option(
+    '--source-type',
+    '-t',
+    type=click.Choice(['json', 'marcxml']),
+    default='marcxml',
+    help='Whether to use JSON or MARCXML.')
+@with_appcontext
+def checkrecords(sources, source_type):
+    """Integrity check for records and files."""
+    for idx, source in enumerate(sources, 1):
+        click.echo('Loading dump {0} of {1} ({2})'.format(
+            idx, len(sources), source.name))
+        data = json.load(source)
+        with click.progressbar(data) as records:
+            for item in records:
+                check_record.delay(item, source_type)
