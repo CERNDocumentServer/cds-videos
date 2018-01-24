@@ -420,6 +420,19 @@ RECORDS_REST_DEFAULT_SORT = {
 # Defined facets for records REST API.
 RECORDS_REST_FACETS = dict()
 
+# This is required because of elasticsearch 2.1 error response.
+# From 2.2 this is not needed.
+RECORDS_REST_ELASTICSEARCH_ERROR_HANDLERS = {
+    'query_parsing_exception': (
+        'invenio_records_rest.views'
+        ':elasticsearch_query_parsing_exception_handler'
+    ),
+    'token_mgr_error': (
+        'invenio_records_rest.views'
+        ':elasticsearch_query_parsing_exception_handler'
+    ),
+}
+
 RECORD_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # Facets for the specific index
