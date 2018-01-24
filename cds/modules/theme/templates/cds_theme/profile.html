@@ -36,13 +36,6 @@
     {% if current_userprofile %}
         <div> <strong> Username </strong> {{ current_userprofile._username }} </div>
         <div> <strong> Full name </strong> {{ current_userprofile.full_name }} </div>
-        <div> <strong> Groups </strong>
-            <ul>
-            {% for group in g.identity.provides %}
-                <li> {{ group.value }} </li>
-            {% endfor %}
-            </ul>
-        </div>
     {% else %}
         {{ super() }}
     {% endif %}
