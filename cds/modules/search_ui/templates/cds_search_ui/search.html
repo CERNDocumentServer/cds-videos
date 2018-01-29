@@ -14,8 +14,9 @@
 {%- block body_inner %}
 <div id="invenio-search">
   <invenio-search
+   disable-url-handler="true"
    search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}"
-   search-extra-params='{% if search_extra_params %}{{search_extra_params|tojson}}{% endif %}'
+   search-extra-params='{% if config.SEARCH_UI_SEARCH_EXTRA_PARAMS %}{{config.SEARCH_UI_SEARCH_EXTRA_PARAMS|tojson}}{% endif %}'
    search-hidden-params='{% if search_hidden_params %}{{search_hidden_params|tojson}}{% endif %}'
    search-headers='{"Accept": "{{ config.SEARCH_UI_SEARCH_MIMETYPE|default('application/json')}}"}'
   >
