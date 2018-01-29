@@ -36,7 +36,8 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson.api import (get_encoding_status, get_preset_info,
+from cds_sorenson.api import (get_closest_aspect_ratio,
+                              get_encoding_status, get_preset_info,
                               start_encoding, stop_encoding)
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
@@ -609,6 +610,10 @@ class TranscodeVideoTask(AVCTask):
                 output_file = os.path.join(directory.root_path, filename)
 
             try:
+                # check if aspect_ratio in the presets or find closest
+                aspect_ratio = current_app.config['CDS_SORENSON_PRESETS'] \
+                    .get(aspect_ratio) or \
+                    get_closest_aspect_ratio(height, width)
                 # Start Sorenson
                 job_id = start_encoding(input_file, output_file,
                                         preset_quality, aspect_ratio,
