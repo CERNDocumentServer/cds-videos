@@ -150,6 +150,10 @@ SEARCH_UI_SEARCH_API = '/api/records/'
 SEARCH_UI_SEARCH_TEMPLATE = 'cds_search_ui/search.html'
 # Default base template for search UI
 SEARCH_UI_BASE_TEMPLATE = 'cds_theme/page.html'
+# Default search parameters for search UI
+SEARCH_UI_SEARCH_EXTRA_PARAMS = {
+    "size": 21 # page size
+}
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
 # Do not map any keywords.
