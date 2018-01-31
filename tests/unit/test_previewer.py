@@ -275,7 +275,8 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
         record_id=video_record.id).one().bucket_id
 
     # Check that SMIL file has been properly generated
-    smil_obj = ObjectVersion.get(new_bucket, '{}.smil'.format(basename))
+    smil_obj = ObjectVersion.get(new_bucket, '{}.smil'.format(
+        video_1['report_number'][0]))
     assert smil_obj
     assert ObjectVersionTag.query.filter_by(
         object_version=smil_obj, key='context_type', value='playlist'
