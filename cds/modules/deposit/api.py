@@ -33,6 +33,7 @@ import uuid
 from contextlib import contextmanager
 from copy import deepcopy
 from functools import partial, wraps
+from os.path import splitext
 
 import arrow
 from flask import current_app
@@ -40,7 +41,7 @@ from flask_security import current_user
 from invenio_db import db
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag,
-                                       as_bucket)
+                                       as_bucket, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import (PIDDoesNotExistError, PIDInvalidAction,
                                      ResolverError)
@@ -54,7 +55,12 @@ from jsonschema.exceptions import ValidationError
 from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_deposit.utils import mark_as_action
 
-from ..records.api import CDSFileObject, CDSFilesIterator, CDSRecord
+from ..records.api import (
+    CDSFileObject,
+    CDSFilesIterator,
+    CDSVideosFilesIterator,
+    CDSRecord
+)
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
@@ -272,9 +278,9 @@ class CDSDeposit(Deposit):
         try:
             self['_cds']['modified_by'] = int(current_user.get_id())
         except AttributeError:
-                current_app.logger.warning(
-                    'No current user found, keeping previous value for'
-                    ' _cds.modified_by')
+            current_app.logger.warning(
+                'No current user found, keeping previous value for'
+                ' _cds.modified_by')
         if 'publication_date' not in self:
             now = datetime.datetime.utcnow().date().isoformat()
             self['publication_date'] = now
@@ -450,8 +456,8 @@ class Project(CDSDeposit):
             data['_access']['update'] = [current_user.email]
             data['_cds']['current_user_mail'] = current_user.email
         except AttributeError:
-                current_app.logger.warning(
-                    'No current user found, _access.update will stay empty.')
+            current_app.logger.warning(
+                'No current user found, _access.update will stay empty.')
         return super(Project, cls).create(data, id_=id_, **kwargs)
 
     @property
@@ -788,6 +794,48 @@ class Video(CDSDeposit):
         events = get_deposit_events(deposit_id=self['_deposit']['id'])
         iterate_events_results(events=events, fun=global_status)
         return global_status.status
+
+    def _rename_subtitles(self):
+        """Rename subtitles."""
+        # Pattern to extract subtitle's filename and iso language
+        pattern = re.compile('.*_(?P<iso_lang>[a-zA-Z]{2})\.vtt$')
+        subtitles = CDSVideosFilesIterator.get_video_subtitles(self)
+        for subtitle_file in subtitles:
+            subtitle_obj = as_object_version(subtitle_file['version_id'])
+            match = pattern.match(subtitle_file['key'])
+            if match:
+                subtitle_obj.key = '{}_{}.vtt'.format(self['report_number'][0],
+                                                      match.group('iso_lang'))
+                db.session.add(subtitle_obj)
+
+    def _rename_master_file(self, master_file):
+        """Rename master file."""
+        master_obj = as_object_version(master_file['version_id'])
+        master_obj.key = '{}.{}'.format(
+            self['report_number'][0],
+            master_file.get('content_type')
+            or splitext(master_file['key'])[1][1:].lower())
+        db.session.add(master_obj)
+
+    def _publish_new(self, id_=None):
+        """Rename master file and subtitles and publish for the first time."""
+        id_ = id_ or uuid.uuid4()
+        self.mint_report_number(id_)
+        self['_files'] = self.files.dumps()
+
+        master_file = CDSVideosFilesIterator.get_master_video_file(self)
+        # This is needed because in tests there is not always a master file
+        # FIXME refactor tests to include always a master file when publishing
+        if master_file:
+            self._rename_master_file(master_file)
+            self._rename_subtitles()
+        return super(CDSDeposit, self)._publish_new(id_)
+
+    def _publish_edited(self):
+        """Rename subtitles and publish."""
+        self['_files'] = self.files.dumps()
+        self._rename_subtitles()
+        return super(Video, self)._publish_edited()
 
     @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
