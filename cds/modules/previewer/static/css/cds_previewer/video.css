@@ -28,3 +28,12 @@ video {
   z-index: 99999;
   top: 0;
 }
+
+/* Override default yellow color for player */
+.theo-primary-color, .vjs-selected {
+  color: #ffffff !important;
+}
+
+.theo-primary-background {
+  background-color: #d9d9d9 !important;
+}
