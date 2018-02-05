@@ -53,6 +53,8 @@ function cdsDepositCtrl(
   // Action loading
   that.actionLoading = false;
 
+  this.framesReady = false;
+
   // Deposit type
   that.depositType = that.master ? 'project' : 'video';
 
@@ -580,6 +582,8 @@ function cdsDepositCtrl(
         var allMetadata = data.payload.extracted_metadata
         that.setOnLocalStorage('metadata', allMetadata);
         that.metadataToFill = that.getMetadataToFill(allMetadata);
+      } else if (type == 'file_video_extract_frames' && status == 'SUCCESS') {
+        that.framesReady = true;
       }
     });
     // Register related events from sse
