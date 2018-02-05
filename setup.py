@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -48,7 +48,7 @@ tests_require = [
     'pytest-flask>=0.10.0',
     'pytest-pep8>=1.0.6',
     'pytest-runner>=2.7.0',
-    'pytest>=2.8.0',
+    'pytest>=3.3.2',
     'selenium>=2.53.6',
     'simplejson>=3.10',
     'six>=1.10.0',
@@ -87,7 +87,7 @@ install_requires = [
     'Flask-WTF>=0.13.1',
     'Flask>=0.11.1',
     'cds-dojson>=0.6.0',
-    'cds-sorenson>=0.1.2',
+    'cds-sorenson>=0.1.3',
     'datacite>=0.2.1',
     'dcxml>=0.1.0',
     'idutils>=0.2.3',
@@ -115,13 +115,13 @@ install_requires = [
     # FIXME topical branch
     #  'invenio-migrator>=1.0.0a10',
     'invenio-oauth2server>=1.0.0b1',
-    'invenio-oauthclient>=1.0.0b2',
+    'invenio-oauthclient>=1.0.0b4',
     'invenio-opendefinition>=1.0.0a4',
     'invenio-pages>=1.0.0a4',
     'invenio-pidstore>=1.0.0b2',
     'invenio-previewer>=1.0.0a11',
     'invenio-query-parser>=0.6.0',
-    'invenio-records-files>=1.0.0a9',
+    'invenio-records-files>=1.0.0a10',
     'invenio-records-rest>=1.0.0b5',
     'invenio-records-ui>=1.0.0b1',
     'invenio-records[postgresql]>=1.0.0b2',
@@ -172,6 +172,10 @@ setup(
         'console_scripts': [
             'cds = cds.cli:cli',
         ],
+        'invenio_admin.views': [
+            'cds_admin = '
+            'cds.modules.announcements.admin:announcements_adminview',
+        ],
         'invenio_assets.bundles': [
             'cds_deposit_jquery_js = cds.modules.deposit.bundles:js_jquery',
             'cds_deposit_js = cds.modules.deposit.bundles:js_deposit',
@@ -195,6 +199,8 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_stats = cds.modules.stats.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:api_blueprint',
+            'cds_announcements = '
+            'cds.modules.announcements.views:api_blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
@@ -214,6 +220,9 @@ setup(
             'cds_theme = cds.modules.theme.views:blueprint',
             'cds_webhooks = cds.modules.webhooks.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
+        ],
+        'invenio_db.alembic': [
+            'cds_announcements = cds.modules.announcements:alembic',
         ],
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',

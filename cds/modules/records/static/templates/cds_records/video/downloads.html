@@ -18,7 +18,7 @@
   </div>
   <!-- Master file -->
   <div class="cds-video-master-file mb-20">
-    <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable }})</a>
+    <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable}}) {{(record | findMaster) | findResolution}}</a>
   </div>
   <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" >
     <div>

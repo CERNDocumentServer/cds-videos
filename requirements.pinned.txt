@@ -23,7 +23,7 @@ cairocffi==0.8.0          # via cairosvg
 cairosvg==1.0.22
 cchardet==2.1.1           # via invenio-previewer
 cds-dojson==0.6.0
-cds-sorenson==0.1.2
+cds-sorenson==0.1.3
 celery==3.1.25
 certifi==2017.11.5        # via requests
 cffi==1.11.2              # via cairocffi, cryptography
@@ -31,7 +31,7 @@ chardet==3.0.4            # via binaryornot, requests
 click==6.7                # via cookiecutter, dojson, flask, invenio-opendefinition
 configparser==3.5.0       # via entrypoints
 cookiecutter==1.6.0       # via invenio-base
-cryptography==2.1.3       # via invenio-accounts, invenio-oauthclient, sqlalchemy-utils
+cryptography==2.1.4       # via invenio-accounts, invenio-oauthclient, sqlalchemy-utils
 datacite==0.3.0
 dcxml==0.1.0
 decorator==4.1.2          # via ipython, traitlets, validators
@@ -70,7 +70,7 @@ idutils==0.2.4
 infinity==1.4             # via intervals
 intervals==0.8.0          # via wtforms-components
 invenio-access==1.0.0b1
-invenio-accounts==1.0.0b10
+invenio-accounts==1.0.0b12
 invenio-admin==1.0.0b4
 invenio-assets==1.0.0b7
 invenio-base==1.0.0a16
@@ -86,13 +86,13 @@ invenio-logging==1.0.0b3
 invenio-jsonschemas==1.0.0a7
 invenio-mail==1.0.0b1
 invenio-oauth2server==1.0.0b2
-invenio-oauthclient==1.0.0b3
+invenio-oauthclient==1.0.0b4
 invenio-opendefinition==1.0.0a4
 invenio-pages==1.0.0a4
 invenio-pidstore==1.0.0b2
 invenio-previewer==1.0.0a11
 invenio-query-parser==0.6.0
-invenio-records-files==1.0.0a9
+invenio-records-files==1.0.0a10
 invenio-records-rest==1.0.0b5
 invenio-records-ui==1.0.0b1
 invenio-records[postgresql]==1.0.0b4

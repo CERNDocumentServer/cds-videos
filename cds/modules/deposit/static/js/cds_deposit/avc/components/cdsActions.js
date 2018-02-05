@@ -27,18 +27,20 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
         });
     };
 
-    this.deleteDeposit = function () {
-      that.actionHandler('DELETE').then(
-        function () {
-          var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
-          for (var i in children) {
-            if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
-              children.splice(i, 1);
+    $scope.$on('cds.deposit.project.delete', function () {
+      if (that.cdsDepositCtrl.depositType === 'project') {
+        that.actionHandler('DELETE').then(
+          function () {
+            var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
+            for (var i in children) {
+              if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
+                children.splice(i, 1);
+              }
             }
           }
-        }
-      );
-    };
+        );
+      }
+    });
 
     /*
      * Show a warning message if user wants to edit a published video but the project is already published
@@ -54,13 +56,12 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
     }
 
     /*
-     * Save videos first, then save project: this is because the save project
-     * response will contain also the videos metadata, which must be up-to-date.
-     */
-    this.saveAllPartial = function () {
-      var saveActions = getSaveAllMakeActions();
-
+      * Save videos first, then save project: this is because the save project
+      * response will contain also the videos metadata, which must be up-to-date.
+      */
+    $scope.$on('cds.deposit.project.saveAll', function() {
       if (that.cdsDepositCtrl.depositType === 'project') {
+        var saveActions = getSaveAllMakeActions();
         that.cdsDepositCtrl.preActions();
         return cdsAPI.chainedActions(saveActions)
           .then(
@@ -69,10 +70,6 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
           )
           .finally(that.cdsDepositCtrl.postActions);
       }
-    };
-
-    $scope.$on('cds.deposit.project.saveAll', function() {
-      that.saveAllPartial();
     });
 
     /*

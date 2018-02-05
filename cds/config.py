@@ -30,6 +30,8 @@ import os
 from datetime import timedelta
 
 from celery.schedules import crontab
+from flask import current_app, session
+from flask_login import current_user
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
@@ -114,6 +116,12 @@ CACHE_REDIS_URL = os.environ.get(
     'APP_CACHE_REDIS_URL',
     'redis://localhost:6379/0')
 CACHE_TYPE = 'redis'
+# We use `invenio_cache.cached_unless_authenticated` decorator
+# for cahcing the home page. As a result we use the below config
+# variable from invenio_cache module to define our caching conditions.
+# See <https://github.com/inveniosoftware/invenio-cache/blob/master/invenio_cache/decorators.py#L41>
+CACHE_IS_AUTHENTICATED_CALLBACK = lambda: '_flashes' in session or \
+    current_user.is_authenticated or current_app.debug
 
 ###############################################################################
 # Database
@@ -142,6 +150,10 @@ SEARCH_UI_SEARCH_API = '/api/records/'
 SEARCH_UI_SEARCH_TEMPLATE = 'cds_search_ui/search.html'
 # Default base template for search UI
 SEARCH_UI_BASE_TEMPLATE = 'cds_theme/page.html'
+# Default search parameters for search UI
+SEARCH_UI_SEARCH_EXTRA_PARAMS = {
+    "size": 21 # page size
+}
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
 # Do not map any keywords.
@@ -420,6 +432,19 @@ RECORDS_REST_DEFAULT_SORT = {
 # Defined facets for records REST API.
 RECORDS_REST_FACETS = dict()
 
+# This is required because of elasticsearch 2.1 error response.
+# From 2.2 this is not needed.
+RECORDS_REST_ELASTICSEARCH_ERROR_HANDLERS = {
+    'query_parsing_exception': (
+        'invenio_records_rest.views'
+        ':elasticsearch_query_parsing_exception_handler'
+    ),
+    'token_mgr_error': (
+        'invenio_records_rest.views'
+        ':elasticsearch_query_parsing_exception_handler'
+    ),
+}
+
 RECORD_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # Facets for the specific index
@@ -648,6 +673,8 @@ SECURITY_LOGIN_SALT = 'CHANGE_ME'
 # Override profile template.
 USERPROFILES_PROFILE_TEMPLATE = 'cds_theme/profile.html'
 USERPROFILES_EMAIL_ENABLED = False
+# This is needed to ensure the correct template for profile page.
+SETTINGS_TEMPLATE= 'invenio_theme/page_settings.html'
 
 ###############################################################################
 # OAuth

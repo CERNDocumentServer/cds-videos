@@ -1,7 +1,7 @@
-{# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2016, 2018 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -21,23 +21,33 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-#}
-{%- extends config.USERPROFILES_SETTINGS_TEMPLATE %}
 
-{% from "invenio_userprofiles/settings/_macros.html" import render_field, form_errors %}
+"""CDS announcements api views."""
 
-{% set panel_title = _("Profile") %}
-{% set panel_icon = "fa fa-user" %}
+from __future__ import absolute_import, print_function
 
-{%- block settings_form %}
+from flask import Blueprint, jsonify, request
 
-    <h3 class="text-center panel-free-title">{{_('Profile') }}</h3>
+from cds.modules.announcements.models import Announcement
 
-    {% if current_userprofile %}
-        <div> <strong> Username </strong> {{ current_userprofile._username }} </div>
-        <div> <strong> Full name </strong> {{ current_userprofile.full_name }} </div>
-    {% else %}
-        {{ super() }}
-    {% endif %}
+api_blueprint = Blueprint(
+    'cds_api_announcements',
+    __name__,
+)
 
-{%- endblock settings_form %}
+
+@api_blueprint.route('/announcement')
+def get_announcement():
+    """."""
+    path = request.args.get('pathname', None)
+
+    result = {}
+    if path:
+        first = Announcement.get_for(path)
+        if first:
+            result = {
+                'message': first.message,
+                'style': first.style
+            }
+
+    return jsonify(result)

@@ -207,6 +207,29 @@ app.filter('findMaster', function($filter) {
   }
 });
 
+// Find closest video resolution
+app.filter('findResolution', function($filter) {
+  return function(record) {
+    height = record['tags']['height'];
+    selectedResolution = height.concat('p');
+    configuredResolutions = {
+      '240': '240p',
+      '360': '360p',
+      '480': '480p',
+      '720': 'HD 720',
+      '1080': 'HD 1080',
+      '2160': '2K',
+      '4096': '4K'
+    }
+    Object.keys(configuredResolutions).forEach(function(resolution) {
+      if (height >= resolution) {
+        selectedResolution = configuredResolutions[resolution]
+      }
+    });
+    return selectedResolution;
+  }
+});
+
 // Find first frame of master video file
 app.filter('findPoster', function($filter) {
   return function(record) {

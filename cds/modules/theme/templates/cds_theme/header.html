@@ -38,9 +38,6 @@
                 {%- else %}
                   <form class="cds-navbar-form navbar-form" action="{{ config.THEME_SEARCH_ENDPOINT }}" role="search">
                 {%- endif %}
-                  <div class="hidden-xs hidden-sm cds-navbar-form-icon">
-                    <i class="t-w fa fa-search"></i>
-                  </div>
                   <div mass-autocomplete class="form-group">
                     <input
                       autocomplete="off"
@@ -49,6 +46,12 @@
                       id="cds-navbar-form-input"
                       type="text" class="form-control" name="q" placeholder="{{ _('Search CDS') }}">
                   </div>
+                  <button type="submit" class="hidden-xs cds-navbar-form-icon">
+                    <i class="t-w fa fa-search"></i>
+                  </button>
+                  <button type="submit" class="visible-xs btn btn-default cds-navbar-form-icon-xs">
+                    <i class="fa fa-search">Search</i>
+                  </button>
                 </form>
               {%- endblock navbar_search %}
             </div>
@@ -101,6 +104,7 @@
     </div>
   </nav>
   {%- endblock navbar %}
+  <div id="announcement" class="alert hidden text-center"></div>
 </header>
 {%- block flashmessages %}
   {%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}

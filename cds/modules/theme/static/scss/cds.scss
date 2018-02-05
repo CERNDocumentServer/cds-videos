@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015, 2016, 2017 CERN.
+ * Copyright (C) 2015, 2016, 2017, 2018 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -484,6 +484,12 @@ i.sort-handle {
   }
 }
 
+#cds-deposit.fix-margin-top {
+  .cds-deposit-avc-overall-status {
+    margin-top: -15px;
+  }
+}
+
 .cds-deposit-side-nav-item-header {
   text-decoration: none !important;
   display: block;
@@ -558,6 +564,11 @@ i.sort-handle {
   }
 }
 
+#announcement {
+  margin-top: -5px;
+  margin-bottom: 15px;
+}
+
 .cds-home-video-featured {
   margin-top: -15px;
   .cds-home-video-iframe {
@@ -618,6 +629,7 @@ i.sort-handle {
   }
   p {
     margin-top: 10px;
+    hyphens: auto;
   }
 }
 
@@ -879,6 +891,9 @@ i.sort-handle {
     margin: 0;
     .cds-navbar-form-icon {
       flex: 1 1 auto;
+      background-color: transparent;
+      border: none;
+      outline: 0;
     }
     .form-group {
       margin: 0;
@@ -912,5 +927,15 @@ i.sort-handle {
   }
   .cds-navbar-nav {
     flex: 0 0 auto;
+  }
+}
+
+@media (max-width: $screen-sm-min) {
+  .cds-navbar-form-icon-xs {
+    width: 100%;
+    margin-top: 10px;
+    i {
+      margin-right: 4px;
+    }
   }
 }

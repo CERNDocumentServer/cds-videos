@@ -87,13 +87,16 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   }
 
   // Wrapper for functions used for autocompletion
-  function autocomplete(paramsProvider, responseHandler) {
+  function autocomplete(paramsProvider, responseHandler, resultSize) {
+    if (!resultSize) {
+      resultSize = 10;
+    }
     return function(options, query) {
       if (query) {
         return $http.get(options.url, {
           params: paramsProvider(query, options)
         }).then(function(data) {
-          return {data: responseHandler(data, query).slice(0, 10)};
+          return {data: responseHandler(data, query).slice(0, resultSize)};
         });
       } else {
         return $q.when({data: []});
@@ -227,7 +230,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       prependUserInput(userInput, suggestions);
 
       return suggestions;
-    }
+    },
+    50
   );
 
   this.onRemoveValue = function(item, model, path) {
@@ -406,17 +410,11 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   // category or type changed
   function updateCategoryTypeAndPermissions() {
     if (that.cdsDepositCtrl.depositType === 'project') {
-      // save project
-      makeActionWithPreAndPost('SAVE_PARTIAL')
-        // update permissions/access rights
-        .then(function() {
-          updatePermissions();
-          that.applyNewAccessRights();
-        })
-        .then(function() {
-          $scope.$broadcast('cds.deposit.project.saveAll');
-          $scope.$broadcast('cds.deposit.pristine.all');
-        });
+      updatePermissions();
+      that.applyNewAccessRights();
+
+      $scope.$broadcast('cds.deposit.project.saveAll');
+      $scope.$broadcast('cds.deposit.pristine.all');
     }
   }
 
@@ -480,6 +478,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     return ctrl.makeSingleAction(actionName)
       .then(ctrl.onSuccessAction, ctrl.onErrorAction)
       .finally(ctrl.postActions);
+  }
+
+  this.deleteProject = function () {
+    $scope.$broadcast('cds.deposit.project.delete');
   }
 }
 
