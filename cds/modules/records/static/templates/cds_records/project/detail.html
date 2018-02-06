@@ -41,7 +41,9 @@
           <!-- Description -->
           <hr />
           <div class="cds-detail-description cds-detail-video-description t-b">
-            <p class="f7 mb-20">{{ ::record.metadata.description }}</p>
+            <p class="f7 mb-20" ng-bind-html="(record.metadata.description | trustHtml)
+              || 'No description'">
+            </p>
           </div>
           <!-- /Description -->
           <!-- More -->
