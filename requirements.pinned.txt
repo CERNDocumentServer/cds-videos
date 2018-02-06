@@ -85,6 +85,7 @@ invenio-indexer==1.0.0a10
 invenio-logging==1.0.0b3
 invenio-jsonschemas==1.0.0a7
 invenio-mail==1.0.0b1
+invenio-oaiserver==1.0.0b2
 invenio-oauth2server==1.0.0b2
 invenio-oauthclient==1.0.0b4
 invenio-opendefinition==1.0.0a4
