@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2018 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -36,8 +36,8 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson.api import (get_encoding_status, get_preset_info,
-                              start_encoding, stop_encoding)
+from cds_sorenson.api import (get_closest_aspect_ratio, get_encoding_status,
+                              get_preset_info, start_encoding, stop_encoding)
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import Task, shared_task
@@ -580,11 +580,14 @@ class TranscodeVideoTask(AVCTask):
         master_key = self.object.key
 
         tags = self.object.get_tags()
-        # Get master file's aspect ratio
-        aspect_ratio = tags['display_aspect_ratio']
         # Get master file's width x height
         width = int(tags['width']) if 'width' in tags else None
         height = int(tags['height']) if 'height' in tags else None
+        # Get master file's aspect ratio
+        aspect_ratio = tags['display_aspect_ratio']
+        # HACK: correct aspect ratio in case not in the list
+        if width is not None and height is not None:
+            aspect_ratio = get_closest_aspect_ratio(width, height)
 
         with db.session.begin_nested():
             # Create FileInstance
