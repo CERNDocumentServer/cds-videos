@@ -27,19 +27,21 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
         });
     };
 
-    $scope.$on('cds.deposit.project.delete', function () {
-      if (that.cdsDepositCtrl.depositType === 'project') {
-        that.actionHandler('DELETE').then(
-          function () {
-            var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
-            for (var i in children) {
-              if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
-                children.splice(i, 1);
-              }
+    this.deleteVideo = function () {
+      that.actionHandler('DELETE').then(
+        function () {
+          var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
+          for (var i in children) {
+            if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
+              children.splice(i, 1);
             }
           }
-        );
-      }
+        }
+      );
+    }
+
+    $scope.$on('cds.deposit.delete', function () {
+      that.deleteVideo();
     });
 
     /*
