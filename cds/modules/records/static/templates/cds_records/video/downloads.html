@@ -10,7 +10,7 @@
     <div class="list-group">
       <div ng-repeat="(type, subs) in ((record | findMaster).subformat | groupDownloadable).download |  groupBy:'tags.type':'others'">
         <p class='mt-10 tw-b text-uppercase text-muted'>{{ type }}</p>
-        <a ng-repeat="file in subs" class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)"  target="_blank">
+        <a ng-repeat="file in subs" class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" download>
           {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
         </a>
       </div>
@@ -68,7 +68,7 @@
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
       <div ng-repeat="file in ((record | findMaster).subformat | groupDownloadable).additional">
-        <a class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" target="_blank">
+        <a class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" download>
           {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
         </a>
       </div>
@@ -91,7 +91,7 @@
   </div>
   <div ng-show="(record | findMaster).frame.length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group" >
-      <a ng-repeat="file in (record | findMaster).frame" class="list-group-item" ng-href="{{ file.links.self }}" target="_blank">
+      <a ng-repeat="file in (record | findMaster).frame" class="list-group-item" ng-href="{{ file.links.self }}" download>
         {{ file.key }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
       </a>
     </div>
@@ -113,7 +113,7 @@
   </div>
   <div ng-show="record.metadata._files.length > 1 && showAllAdditionalFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
-      <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"  ng-hide="file.context_type == 'master'" target="_blank">
+      <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"  ng-hide="file.context_type == 'master'" download>
         {{ file.key | ellipsis: 25 }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
       </a>
     </div>
