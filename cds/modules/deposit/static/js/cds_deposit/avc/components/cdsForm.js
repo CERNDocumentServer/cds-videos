@@ -480,8 +480,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       .finally(ctrl.postActions);
   }
 
-  this.deleteProject = function () {
-    $scope.$broadcast('cds.deposit.project.delete');
+  this.deleteDeposit = function () {
+    $scope.$broadcast('cds.deposit.delete');
   }
 }
 
