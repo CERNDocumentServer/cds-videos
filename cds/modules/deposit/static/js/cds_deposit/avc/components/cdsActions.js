@@ -55,21 +55,25 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
       }
     }
 
-    /*
-      * Save videos first, then save project: this is because the save project
-      * response will contain also the videos metadata, which must be up-to-date.
-      */
-    $scope.$on('cds.deposit.project.saveAll', function() {
+    this.saveAllPartial = function() {
       if (that.cdsDepositCtrl.depositType === 'project') {
         var saveActions = getSaveAllMakeActions();
         that.cdsDepositCtrl.preActions();
         return cdsAPI.chainedActions(saveActions)
           .then(
-            that.cdsDepositCtrl.onSuccessActionMultiple,
-            that.cdsDepositCtrl.onErrorAction
+          that.cdsDepositCtrl.onSuccessActionMultiple,
+          that.cdsDepositCtrl.onErrorAction
           )
           .finally(that.cdsDepositCtrl.postActions);
       }
+    }
+
+    /*
+    * Save videos first, then save project: this is because the save project
+    * response will contain also the videos metadata, which must be up-to-date.
+    */
+    $scope.$on('cds.deposit.project.saveAll', function() {
+      that.saveAllPartial();
     });
 
     /*
