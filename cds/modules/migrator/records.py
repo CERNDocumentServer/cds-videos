@@ -773,6 +773,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         master = CDSVideosFilesIterator.get_master_video_file(deposit)
         if not master:
             return
+
         # get the preset info from sorenson
         ratio = master['tags']['display_aspect_ratio']
         max_width = int(master['tags']['width'])
@@ -786,7 +787,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
         # get required presets
         prq = [key for (key, value) in preset.items()
-               if value['width'] < max_width or value['height'] < max_height]
+               if value['width'] <= max_width or value['height'] <= max_height]
         try:
             # get subformat preset qualities
             pqs = [form['tags']['preset_quality'] for form in master['subformat']]
@@ -796,14 +797,14 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         missing = set(prq) - set(pqs)
 
         # run tasks for missing
-        # execute them at 18h00
-        now = datetime.utcnow()
-        afternoon = now + timedelta(hours=(18 - now.hour))
         for miss in missing:
             TranscodeVideoTaskQuiet().s(
                 version_id=master['version_id'], preset_quality=miss,
                 deposit_id=deposit['_deposit']['id']
-            ).apply_async(eta=afternoon)
+            ).apply_async()
+
+        # return the missing subformats labels, if any
+        return missing
 
 
 class DryRunCDSRecordDumpLoader(CDSRecordDumpLoader):
