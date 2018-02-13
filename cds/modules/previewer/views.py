@@ -51,7 +51,18 @@ def preview_depid(pid, record, template=None, **kwargs):
 
 
 def preview_recid_embed(pid, record, template=None, **kwargs):
-    """Return embedded player for video file."""
+    """Return embedded player for video file.
+
+    NOTE: Some of the old embed links were pointing to project report numbers
+          and therefore they resolve to a project. This is the port of the HACK
+          done on CDS to resolve this to the first video.
+          The situation appear when the projects were included and some of the
+          videos got a new report number without keeping the old one, which now
+          belongs to a project.
+    """
+    if record.get('videos'):
+        # Get the first video from the project, see the note
+        record = record.replace_refs()['videos'][0]
     return preview(pid, record, preview_file_class=CDSPreviewRecordFile,
                    previewer='cds_embed_video')
 

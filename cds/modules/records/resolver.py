@@ -51,5 +51,10 @@ record_resolver = Resolver(
     getter=partial(CDSRecord.get_record, with_deleted=True)
 )
 
+record_report_number_resolver = Resolver(
+    pid_type='rn', object_type='rec',
+    getter=partial(CDSRecord.get_record, with_deleted=True)
+)
+
 
 get_record_pid = partial(get_pid, pid_type='recid')
