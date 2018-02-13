@@ -444,9 +444,11 @@ class Project(CDSDeposit):
         data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
         data.setdefault('videos', [])
         data.setdefault('_access', {})
+        data.setdefault('_cds', {})
         # Add the current user to the ``_access.update`` list
         try:
             data['_access']['update'] = [current_user.email]
+            data['_cds']['current_user_mail'] = current_user.email
         except AttributeError:
                 current_app.logger.warning(
                     'No current user found, _access.update will stay empty.')

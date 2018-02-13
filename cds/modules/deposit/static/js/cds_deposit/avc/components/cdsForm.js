@@ -432,7 +432,18 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Delete any previous permissions to read (if exists), without changing the update permissions
     if (that.cdsDepositCtrl.record._access) {
       delete that.cdsDepositCtrl.record._access.read;
+      delete that.cdsDepositCtrl.record._access.update;
     }
+    var responsible = angular.copy(
+      that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.responsible
+    );
+    that.cdsDepositCtrl.record._access.update = [that.cdsDepositCtrl.record._cds.current_user_mail];
+
+    if (responsible) {
+      that.cdsDepositCtrl.record._access.update = that.cdsDepositCtrl.record._access.update.concat(responsible);
+    }
+    // Update also the shared access tags
+    that.selectedShare = that.cdsDepositCtrl.record._access.update;
 
     that.selectedRestricted = [];
     // If is restricted then copy the access
@@ -443,6 +454,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       that.cdsDepositCtrl.record._access.read = angular.copy(
         that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted
       );
+
       // Update also the model
       that.selectedRestricted = that.cdsDepositCtrl.record._access.read;
     }
