@@ -197,8 +197,10 @@ def ff_frames(input_file, start, end, step, duration, output,
     timestamps = takewhile(lambda t: t <= end, count(start, step))
     for i, timestamp in enumerate(timestamps):
         # Construct ffmpeg command
-        cmd = 'ffmpeg -accurate_seek -ss {0} -i {1} -vframes 1 {2}'.format(
-            timestamp, input_file, output.format(i + 1))
+        cmd = (
+            'ffmpeg -accurate_seek -ss {0} -i {1} -vframes 1 {2} '
+            '-qscale:v 1'
+            ).format(timestamp, input_file, output.format(i + 1))
 
         # Run ffmpeg command
         run_command(cmd, error_class=FrameExtractionExecutionError)
