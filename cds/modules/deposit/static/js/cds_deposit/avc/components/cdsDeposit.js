@@ -170,6 +170,8 @@ function cdsDepositCtrl(
           accessElement(record, propPath, inheritedArray);
         }
       });
+
+      $scope.$broadcast('cds.deposit.form.keywords.inherit', record);
       // Set form dirty
       that.setDirty();
     };

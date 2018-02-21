@@ -6,14 +6,15 @@
     }"
     class="form-group">
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
+    {{$ctrl}}
     <ui-select
-        ng-init="internalModelTags=$$value$$"
+        ng-init="form.internalModelTags=$$value$$"
         ng-if="form.options.tagging == true"
         multiple
         tagging="form.formatTokenTags"
         tagging-tokens="SPACE|,|/"
         tagging-label="(custom 'new')"
-        ng-model="internalModelTags"
+        ng-model="form.internalModelTags"
         sortable="form.options.sortable||false"
         theme="bootstrap"
         ng-disabled="evalExpr(form.readonly)"
@@ -40,7 +41,7 @@
         type="hidden"
         name="{{form.key.slice(-1)[0]}}"
         toggle-multiple-model
-        ng-model="internalModelTags"
+        ng-model="form.internalModelTags"
         form="form"
         sf-changed="form"
         schema-validate="form"/>
