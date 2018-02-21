@@ -65,7 +65,7 @@
                 <div ng-repeat="translation in record.metadata.translations">
                   <strong>{{translation.language | isoToLanguage}}</strong>
                   <h4>{{translation.title.title}}</h4>
-                  <p>{{translation.description}}</p>
+                  <p ng-bind-html="(translation.description | trustHtml) || 'No description'"></p>
                 </div>
               </modal-dialog>
             </hgroup>
