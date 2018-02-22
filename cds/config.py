@@ -753,10 +753,12 @@ WOWZA_VIDEO_URL = \
 # Size
 VIDEO_POSTER_SIZE = (180, 101)
 # File system location of videos
-VIDEOS_LOCATION = '/eos/workspace/c/cds/test/videos/files/'
+VIDEOS_LOCATION = '/eos/media/cds/test/videos/files/'
 # XRootD prefix for videos
-VIDEOS_XROOTD_PREFIX = 'root://eospublic.cern.ch//eos/workspace/c/cds/test/' \
-                       'videos/files/'
+VIDEOS_XROOTD_ENDPOINT = 'root://eosmedia.cern.ch/'
+# Ex. root://eosmedia.cern.ch//eos/media/cds/test/videos/files/
+VIDEOS_XROOTD_PREFIX = '{endpoint}{location}'.format(
+    endpoint=VIDEOS_XROOTD_ENDPOINT, location=VIDEOS_LOCATION)
 # EOS path for video library `e-groups`
 VIDEOS_EOS_PATH_EGROUPS = [
     "audiovisual-support@cern.ch",
