@@ -39,6 +39,7 @@ blueprint = Blueprint(
     url_prefix='/stats/',
 )
 
+
 class StatsResource(MethodView):
     """Statistics of resources."""
 
@@ -51,9 +52,10 @@ class StatsResource(MethodView):
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
 
+        report_number = record.get('report_number')[0]
         es = Elasticsearch(CFG_ELASTICSEARCH_SEARCH_HOST)
-        query = {};
-        results = {};
+        query = {}
+        results = {}
 
         # Get total number of pageviews for a specific CDS record
         if stat == 'views':
@@ -88,20 +90,20 @@ class StatsResource(MethodView):
                                 "must": [
                                     {
                                         "match": {
-                                            "id_bibrec": pid.pid_value
+                                            "file": report_number
                                         }
                                     },
                                     {
                                         "match": {
-                                            "_type": "events.downloads"
+                                            "_type": "events.media_download"
                                         }
                                     }
                                 ]
                             }
                         },
                         "filter": {
-                            "range":{
-                                "@timestamp":{
+                            "range": {
+                                "@timestamp": {
                                     "from": 0,
                                     "to": "now"
                                 }
@@ -146,8 +148,8 @@ class StatsResource(MethodView):
                             }
                         },
                         "filter": {
-                            "range":{
-                                "@timestamp":{
+                            "range": {
+                                "@timestamp": {
                                     "from": 0,
                                     "to": "now"
                                 }
@@ -191,6 +193,7 @@ class StatsResource(MethodView):
             # 'buckets' array holds the input data passed to the graph
             graph_data[metric]['buckets'].append(temp)
         return graph_data
+
 
 blueprint.add_url_rule(
     '<pid(recid, record_class="cds.modules.records.api:CDSRecord"):pid_value>/'
