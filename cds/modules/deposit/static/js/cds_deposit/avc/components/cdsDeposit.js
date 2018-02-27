@@ -812,6 +812,11 @@ function cdsDepositCtrl(
       // The states have been changed
       that.calculateCurrentState();
     }
+    if (newVal['file_video_extract_frames'] === 'SUCCESS') {
+      that.framesReady = true;
+    } else {
+      that.framesReady = false;
+    }
   }, true);
   // Listen for any updates
   $scope.$on('cds.deposit.metadata.update.' + that.id, function(evt, data) {
