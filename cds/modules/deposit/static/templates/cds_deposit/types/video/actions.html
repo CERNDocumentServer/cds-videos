@@ -50,7 +50,7 @@
     </button>
     <button
       ng-hide='$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
-      ng-disabled="!$ctrl.cdsDepositsCtrl.framesReady ||$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      ng-disabled="!$ctrl.cdsDepositCtrl.framesReady ||$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-sm btn-primary"
       ng-click="form.publishInfoShown = true">
     {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
