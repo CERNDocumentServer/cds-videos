@@ -27,10 +27,7 @@
     "types": ["FOOTAGE", "VIDEO"],
     "access": {
       "public": true,
-      "restricted": ["atlas-readaccess-active-members@cern.ch"],
-      "responsible": [
-        "atlas-outreach-cds-access@cern.ch"
-      ]
+      "restricted": ["atlas-readaccess-active-members@cern.ch"]
     },
     "_record_type":  ["PROJECT"],
     "_access": {
@@ -42,10 +39,7 @@
     "types": ["VIDEO"],
     "access": {
       "public": true,
-      "restricted": [],
-      "responsible": [
-        "cms-outreach-cds-access@cern.ch"
-      ]
+      "restricted": []
     },
     "_record_type":  ["PROJECT"],
     "_access": {
