@@ -11,6 +11,9 @@
         "hr-video-group@cern.ch",
         "visualmedia-office@cern.ch",
         "vmo-restictedrights@cern.ch"
+      ],
+      "responsible": [
+        "vmo-restictedrights@cern.ch"
       ]
     },
     "_record_type": ["PROJECT"],
