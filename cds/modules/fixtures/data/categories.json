@@ -16,7 +16,6 @@
         "vmo-restictedrights@cern.ch"
       ]
     },
-
     "_record_type": ["PROJECT"],
     "_access": {
       "read": ["vmo-restictedrights@cern.ch"]
