@@ -26,7 +26,7 @@
 from __future__ import absolute_import, print_function
 
 import json
-from datetime import datetime
+import warnings
 
 import click
 from flask import current_app
@@ -39,6 +39,10 @@ from invenio_sequencegenerator.api import Sequence
 from .tasks import clean_record
 
 from ...modules.deposit.api import Project, Video
+
+warnings.warn(
+    "The migrator module is now deprecated. Use it at your own risk!",
+    DeprecationWarning)
 
 
 def load_records(sources, source_type, eager):

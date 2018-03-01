@@ -267,7 +267,8 @@ def check_video_transcode_restart(api_app, event_id, access_token,
 
     # Create + restart transcode (clean + create)
     assert ObjectVersion.query.count() == get_object_count() + 2
-    assert ObjectVersionTag.query.count() == get_tag_count() + 13
+    # if changed, copy magic number 14 from helpers::get_tag_count
+    assert ObjectVersionTag.query.count() == get_tag_count() + 14
 
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)

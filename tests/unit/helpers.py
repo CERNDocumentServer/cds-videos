@@ -208,23 +208,26 @@ def get_object_count(download=True, frames=True, transcode=True):
 def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
                   is_local=False):
     """Get number of ObjectVersionTags, based on executed tasks."""
-    # download: event_id, uri_origin, context_type, media_type, preview
+    # download: _event_id, uri_origin, context_type, media_type, preview
     tags_download = 5
     if is_local:
-        # uri_origin doesn't exists
+        # uri_origin doesn't exists if not downloaded
         tags_download = tags_download - 1
 
     # metadata
     tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
         len(ExtractMetadataTask.stream_keys)
 
+    # transcode
+    # number of keys inside object `tags` (basically, the number of tags)
+    tags_keys = 14
+
     return sum([
         tags_download if download else 0,
         tags_extract_metadata if download and metadata else 0,
         ((10 * 4) + 3) if frames else 0,
         # count the presets with width x height < 640x320 (video resolution)
-        # FIXME 13
-        ((len(get_presets_applied())) * 14) - 2 if transcode else 0,
+        (len(get_presets_applied())) * tags_keys if transcode else 0,
     ])
 
 

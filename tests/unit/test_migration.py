@@ -62,7 +62,7 @@ from cds.modules.migrator.utils import cern_movie_to_video_pid_fetcher
 from helpers import load_json, get_frames, get_migration_streams
 
 
-@pytest.mark.skip(reason='Wait fix cds-dojson')
+@pytest.mark.skip(reason='Wait fix cds-dojson. Deprecated module.')
 def test_record_files_migration(app, location, script_info, datadir):
     """Test CDS records and files migrations."""
     runner = CliRunner()
@@ -94,6 +94,7 @@ def test_record_files_migration(app, location, script_info, datadir):
     assert record['_files'][0]['doctype'] == 'CTH_FILE'
 
 
+@pytest.mark.skip(reason='Deprecated module.')
 def test_migrate_pids(app, location, datadir, users):
     """Test migrate pids."""
     data = load_json(datadir, 'cds_records_demo_1_project.json')
@@ -111,6 +112,7 @@ def test_migrate_pids(app, location, datadir, users):
     10,   # normal number of frames
     100,  # force migrator to rebuild frames
 ])
+@pytest.mark.skip(reason='Deprecated module.')
 def test_migrate_record(frames_required, api_app, location, datadir, es,
                         users):
     """Test migrate date."""
@@ -352,6 +354,7 @@ def test_migrate_record(frames_required, api_app, location, datadir, es,
     assert record_video['title']['title'] == 'test'
 
 
+@pytest.mark.skip(reason='Deprecated module.')
 def test_sequence_number_update_after_migration(app, location, script_info, current_year):
     """Test sequence number update after migration."""
     # simulate a import of record < now(year)
@@ -401,6 +404,7 @@ def test_sequence_number_update_after_migration(app, location, script_info, curr
     assert len(TemplateDefinition.query.all()) == 2
 
 
+@pytest.mark.skip(reason='Deprecated module.')
 def test_retry_run_extracted_metadata(app):
     """Test retry is working properly."""
     with mock.patch.object(
@@ -410,6 +414,7 @@ def test_retry_run_extracted_metadata(app):
             CDSRecordDumpLoader._run_extracted_metadata(master={}, retry=1)
 
 
+@pytest.mark.skip(reason='Deprecated module.')
 def test_multiple_pid_for_movie(current_year):
     """Check multiple pid for movie and videoclip."""
     cern_video = 'CERN-VIDEO-{0}'.format(current_year)
@@ -442,6 +447,7 @@ def test_multiple_pid_for_movie(current_year):
     assert data['report_number'] == [cern_footage]
 
 
+@pytest.mark.skip(reason='Deprecated module.')
 def test_subformat_creation_if_missing(api_app, location, datadir, es, users):
     """Test subformat creation if missing."""
     # [[ migrate the video ]]

@@ -37,7 +37,6 @@ from cds.modules.ffmpeg.ffmpeg import _refactoring_metadata
 from cds.modules.ffmpeg.errors import (FrameExtractionExecutionError,
                                        FrameExtractionInvalidArguments,
                                        MetadataExtractionExecutionError)
-from cds_sorenson.api import get_available_aspect_ratios
 
 
 def test_error_report(datadir):
@@ -183,12 +182,3 @@ def test_ffprobe_all(online_video):
     format_keys = ['filename', 'nb_streams', 'format_name', 'format_long_name',
                    'start_time', 'duration', 'size', 'bit_rate', 'tags']
     assert all([key in information['format'] for key in format_keys])
-
-
-def test_aspect_ratio(video, online_video):
-    """Test calculation of video's aspect ratio."""
-    for video in [video, online_video]:
-        metadata = ff_probe_all(video)['streams'][0]
-        for aspect_ratio in [ff_probe(video, 'display_aspect_ratio'),
-                             metadata['display_aspect_ratio']]:
-            assert aspect_ratio in get_available_aspect_ratios()
