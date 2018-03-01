@@ -153,6 +153,12 @@ class CDSVideosFilesIterator(CDSFilesIterator):
                     'context_type'] == 'subformat']
 
     @staticmethod
+    def get_video_subtitles(record):
+        """Get list of video subtitles."""
+        return [f for f in record['_files']
+                if f['context_type'] == 'subtitle' and 'language' in f['tags']]
+
+    @staticmethod
     def get_video_frames(master_file):
         """Get sorted list of video frames."""
         return sorted(master_file.get('frame', []),

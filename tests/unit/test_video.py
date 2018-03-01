@@ -756,7 +756,8 @@ def test_deposit_smil_tag_generation(api_app, db, api_project, users):
         _, record = video.fetch_published()
         master = CDSVideosFilesIterator.get_master_video_file(record)
         playlist = master['playlist']
-        assert playlist[0]['key'] == 'test.smil'
+        assert playlist[0]['key'] == '{}.smil'. \
+                                     format(record['report_number'][0])
         assert playlist[0]['content_type'] == 'smil'
         assert playlist[0]['context_type'] == 'playlist'
         assert playlist[0]['media_type'] == 'text'
@@ -792,6 +793,29 @@ def test_deposit_smil_tag_generation(api_app, db, api_project, users):
 
     # check smil
     check_smil(video_1)
+
+
+def test_video_name_after_publish(api_app, db, api_project, users):
+    project, video_1, video_2 = api_project
+    video_1_depid = video_1['_deposit']['id']
+    master_video_filename = 'test.mp4'
+
+    # insert a master file inside the video
+    add_master_to_video(
+        video_deposit=video_1,
+        filename=master_video_filename,
+        stream=BytesIO(b'1234'), video_duration='15'
+    )
+
+    # publish the video
+    prepare_videos_for_publish([video_1])
+    video_1 = deposit_video_resolver(video_1_depid)
+    login_user(User.query.get(users[0]))
+    video_1 = video_1.publish()
+
+    _, record = video_1.fetch_published()
+    master = CDSVideosFilesIterator.get_master_video_file(record)
+    assert master['key'] == '{}.mp4'.format(record['report_number'][0])
 
 
 def check_object_tags(obj, video, **tags):

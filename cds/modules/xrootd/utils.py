@@ -79,7 +79,7 @@ def file_opener_xrootd(path, *args, **kwargs):
         enabled.
     """
     if current_app.config['XROOTD_ENABLED'] and \
-            'root://eospublic.cern.ch/' in path:
+            current_app.config['VIDEOS_XROOTD_ENDPOINT'] in path:
         from xrootdpyfs import XRootDPyFS
         # Get the filename
         _filename = path.split('/')[-1]
@@ -94,7 +94,7 @@ def file_opener_xrootd(path, *args, **kwargs):
 def file_move_xrootd(src, dst, *args, **kwargs):
     """Move file."""
     if current_app.config['XROOTD_ENABLED'] and \
-            'root://eospublic.cern.ch/' in src:
+            current_app.config['VIDEOS_XROOTD_ENDPOINT'] in src:
         from xrootdpyfs import XRootDPyFS
         # Get the filename
         _filename_src = src.split('/')[-1]
@@ -109,7 +109,7 @@ def file_move_xrootd(src, dst, *args, **kwargs):
 def file_size_xrootd(path, *args, **kwargs):
     """File size."""
     if current_app.config['XROOTD_ENABLED'] and \
-            'root://eospublic.cern.ch/' in path:
+            current_app.config['VIDEOS_XROOTD_ENDPOINT'] in path:
         from XRootD import client
         f = client.File()
         status, response = f.open(path)

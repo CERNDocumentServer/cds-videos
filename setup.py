@@ -115,8 +115,8 @@ install_requires = [
     # FIXME topical branch
     #  'invenio-migrator>=1.0.0a10',
     'invenio-oaiserver>=1.0.0b2',
-    'invenio-oauth2server>=1.0.0b1',
-    'invenio-oauthclient>=1.0.0b4',
+    'invenio-oauth2server>=1.0.0b4',
+    'invenio-oauthclient>=1.0.0b5',
     'invenio-opendefinition>=1.0.0a4',
     'invenio-pages>=1.0.0a4',
     'invenio-pidstore>=1.0.0b2',
