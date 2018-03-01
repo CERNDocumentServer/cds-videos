@@ -133,7 +133,7 @@ def test_publish_process_files(api_app, db, location):
     for i in range(number_of_slaves):
         slave_obj = ObjectVersion.create(
             bucket=bucket,
-            key='slave{}.mp4'.format(i + 1),
+            key='{0}.mp4'.format(i + 1),
             _file_id=FileInstance.create())
         ObjectVersionTag.create(slave_obj, 'master', master_obj.version_id)
         ObjectVersionTag.create(slave_obj, 'media_type', 'video')

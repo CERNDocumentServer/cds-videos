@@ -87,7 +87,7 @@ install_requires = [
     'Flask-WTF>=0.13.1',
     'Flask>=0.11.1',
     'cds-dojson>=0.6.0',
-    'cds-sorenson>=0.1.3',
+    'cds-sorenson>=0.1.5',
     'datacite>=0.2.1',
     'dcxml>=0.1.0',
     'idutils>=0.2.3',
@@ -173,6 +173,9 @@ setup(
         'console_scripts': [
             'cds = cds.cli:cli',
         ],
+        'flask.commands': [
+            'subformats = cds.modules.maintenance.cli:subformats',
+        ],
         'invenio_admin.views': [
             'cds_admin = '
             'cds.modules.announcements.admin:announcements_adminview',
@@ -250,6 +253,7 @@ setup(
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.webhooks.tasks',
             'cds_migration_tasks = cds.modules.migrator.tasks',
+            'cds_maintenance_tasks = cds.modules.maintenance.tasks',
         ],
         'invenio_webhooks.receivers': [
             'avc = cds.modules.webhooks.receivers:AVCWorkflow',

@@ -246,8 +246,7 @@ class CDSDeposit(Deposit):
     def dumps(self, **kwargs):
         """Return pure Python dictionary with record metadata."""
         self._update_tasks_status()
-        data = super(CDSDeposit, self).dumps(**kwargs)
-        return data
+        return super(CDSDeposit, self).dumps(**kwargs)
 
     def _update_tasks_status(self):
         """Update tasks status."""
@@ -910,6 +909,7 @@ class Video(CDSDeposit):
         for event in events:
             event.receiver.delete(event=event)
 
+    @mark_as_action
     def delete(self, force=True, pid=None):
         """Delete a video."""
         ref_old = self.ref

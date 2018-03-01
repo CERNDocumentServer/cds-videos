@@ -38,12 +38,14 @@ import jsonresolver
 from datetime import datetime
 
 from os.path import dirname, join
+
+from cds_sorenson.api import _get_quality_preset
+
 from cds.factory import create_app
 from cds.modules.deposit.api import Project
 from cds.modules.redirector.views import api_blueprint \
     as cds_api_blueprint
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds_sorenson.api import get_preset_id
 from cds_sorenson.error import InvalidResolutionError
 from celery import chain
 from celery import group
@@ -752,14 +754,14 @@ def mock_sorenson():
                         max_height=None, max_width=None):
         # Check if options are valid
         try:
-            get_preset_id(preset_name, aspect_ratio, max_height=max_height,
-                          max_width=max_width)
+            ar, preset_config = _get_quality_preset(preset_name, aspect_ratio,
+                                                    max_height, max_width)
         except InvalidResolutionError as e:
             raise e
 
         # just copy file
         shutil.copyfile(input_file, '{0}.mp4'.format(output_file))
-        return '1234'
+        return '1234', ar, preset_config
 
     mock.patch(
         'cds.modules.webhooks.tasks.start_encoding'

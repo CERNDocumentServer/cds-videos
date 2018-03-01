@@ -23,10 +23,16 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Migration utils."""
 
+import warnings
+
 from flask import current_app
 
 from invenio_pidstore.fetchers import FetchedPID
 from ..records.providers import CDSReportNumberProvider
+
+warnings.warn(
+    "The migrator module is now deprecated. Use it at your own risk!",
+    DeprecationWarning)
 
 
 def process_fireroles(fireroles):

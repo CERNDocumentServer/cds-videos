@@ -36,8 +36,7 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson.api import (get_closest_aspect_ratio, get_encoding_status,
-                              get_preset_info, start_encoding, stop_encoding)
+from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import Task, shared_task
@@ -533,9 +532,9 @@ class TranscodeVideoTask(AVCTask):
             deposit_id=self._base_payload['deposit_id']).apply_async()
 
     @staticmethod
-    def _build_slave_key(preset_quality, master_key):
+    def _build_subformat_key(preset_quality):
         """Build the object version key connected with the transcoding."""
-        return 'slave_{0}.mp4'.format(preset_quality)
+        return '{0}.mp4'.format(preset_quality)
 
     # FIXME maybe we need to move this part to CDS-Sorenson
     @staticmethod
@@ -554,8 +553,7 @@ class TranscodeVideoTask(AVCTask):
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
         object_version = as_object_version(version_id)
-        obj_key = self._build_slave_key(
-            preset_quality=preset_quality, master_key=object_version.key)
+        obj_key = self._build_subformat_key(preset_quality=preset_quality)
         object_version = ObjectVersion.query.filter_by(
             bucket_id=object_version.bucket_id, key=obj_key).first()
         dispose_object_version(object_version)
@@ -576,8 +574,6 @@ class TranscodeVideoTask(AVCTask):
         # Get master file's bucket_id
         bucket_id = self.object.bucket_id
         bucket_location = self.object.bucket.location.uri
-        # Get master file's key
-        master_key = self.object.key
 
         tags = self.object.get_tags()
         # Get master file's width x height
@@ -585,17 +581,13 @@ class TranscodeVideoTask(AVCTask):
         height = int(tags['height']) if 'height' in tags else None
         # Get master file's aspect ratio
         aspect_ratio = tags['display_aspect_ratio']
-        # HACK: correct aspect ratio in case not in the list
-        if width is not None and height is not None:
-            aspect_ratio = get_closest_aspect_ratio(width, height)
 
         with db.session.begin_nested():
             # Create FileInstance
             file_instance = FileInstance.create()
 
             # Create ObjectVersion
-            obj_key = self._build_slave_key(
-                preset_quality=preset_quality, master_key=master_key)
+            obj_key = self._build_subformat_key(preset_quality=preset_quality)
             obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
 
             # Extract new location
@@ -613,9 +605,12 @@ class TranscodeVideoTask(AVCTask):
 
             try:
                 # Start Sorenson
-                job_id = start_encoding(input_file, output_file,
-                                        preset_quality, aspect_ratio,
-                                        max_height=height, max_width=width)
+                job_id, ar, preset_config = start_encoding(input_file,
+                                                           output_file,
+                                                           preset_quality,
+                                                           aspect_ratio,
+                                                           max_height=height,
+                                                           max_width=width)
             except (InvalidResolutionError, TooHighResolutionError) as e:
                 exception = self._meta_exception_envelope(exc=e)
                 self.update_state(state=REVOKED, meta=exception)
@@ -630,8 +625,8 @@ class TranscodeVideoTask(AVCTask):
             ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
             ObjectVersionTag.create(obj, 'media_type', 'video')
             ObjectVersionTag.create(obj, 'context_type', 'subformat')
-            preset_info = get_preset_info(aspect_ratio, preset_quality)
-            for key, value in preset_info.items():
+            ObjectVersionTag.create(obj, 'display_aspect_ratio', ar)
+            for key, value in preset_config.items():
                 ObjectVersionTag.create(obj, key, value)
 
             # Information necessary for monitoring
@@ -682,6 +677,7 @@ class TranscodeVideoTask(AVCTask):
 
         # Set file's location, if job has completed
         self._clean_file_name(output_file)
+
         with db.session.begin_nested():
             uri = output_file
             with file_opener_xrootd(uri, 'rb') as transcoded_file:
