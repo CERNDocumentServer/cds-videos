@@ -272,7 +272,7 @@
             }
           },
           {
-            "key": "slave_240p.mp4",
+            "key": "240p.mp4",
             "tags": {
               "context_type": "subformat",
               "media_type": "video",
@@ -287,7 +287,7 @@
             }
           },
           {
-            "key": "slave_360p.mp4",
+            "key": "360p.mp4",
             "tags": {
               "context_type": "subformat",
               "media_type": "video",
@@ -301,7 +301,7 @@
             }
           },
           {
-            "key": "slave_480p.mp4",
+            "key": "480p.mp4",
             "tags": {
               "context_type": "subformat",
               "media_type": "video",
@@ -315,7 +315,7 @@
             }
           },
           {
-            "key": "slave_720p.mp4",
+            "key": "720p.mp4",
             "tags": {
               "context_type": "subformat",
               "media_type": "video",
@@ -329,7 +329,7 @@
             }
           },
           {
-            "key": "slave_1080p.mp4",
+            "key": "1080p.mp4",
             "tags": {
               "context_type": "subformat",
               "media_type": "video",

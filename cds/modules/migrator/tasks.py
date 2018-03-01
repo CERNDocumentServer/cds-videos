@@ -24,6 +24,8 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Record migration special."""
 
+import warnings
+
 from celery import shared_task
 from invenio_db import db
 from invenio_migrator.proxies import current_migrator
@@ -31,6 +33,10 @@ from invenio_migrator.proxies import current_migrator
 from ..deposit.api import deposit_video_resolver
 from ..records.resolver import record_resolver
 from ..webhooks.tasks import TranscodeVideoTask
+
+warnings.warn(
+    "The migrator module is now deprecated. Use it at your own risk!",
+    DeprecationWarning)
 
 
 class TranscodeVideoTaskQuiet(TranscodeVideoTask):

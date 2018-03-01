@@ -29,7 +29,7 @@ from __future__ import absolute_import
 from copy import deepcopy
 
 from flask_security import current_user
-from cds_sorenson.api import get_available_preset_qualities
+from cds_sorenson.api import get_all_distinct_qualities
 from celery import chain, group
 from celery.result import AsyncResult
 from invenio_db import db
@@ -424,14 +424,14 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def _second_step(self, event):
         """Define second step."""
-        preset_qualities = get_available_preset_qualities()
-        event.response['presets'] = preset_qualities
+        all_distinct_qualities = get_all_distinct_qualities()
+        event.response['presets'] = all_distinct_qualities
         return group(
             self.run_task(event=event, task_name='file_video_extract_frames'),
             *[self.run_task(
                 event=event, task_name='file_transcode',
                 preset_quality=preset_quality)
-              for preset_quality in preset_qualities]
+              for preset_quality in all_distinct_qualities]
         )
 
     def _workflow(self, event):
@@ -494,7 +494,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
     def clean(self, event):
         """Delete tasks and everything created by them."""
         self.clean_task(event=event, task_name='file_video_extract_frames')
-        for preset_quality in get_available_preset_qualities():
+        for preset_quality in get_all_distinct_qualities():
             self.clean_task(
                 event=event, task_name='file_transcode',
                 preset_quality=preset_quality)

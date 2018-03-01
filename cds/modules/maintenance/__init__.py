@@ -21,10 +21,5 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-"""Migrator Module."""
 
-import warnings
-
-warnings.warn(
-    "The migrator module is now deprecated. Use it at your own risk!",
-    DeprecationWarning)
+"""CDS Videos maintenance module"""

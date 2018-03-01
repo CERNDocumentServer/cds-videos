@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
-from cds_sorenson.api import get_available_preset_qualities
+from cds_sorenson.api import get_all_distinct_qualities
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
 from flask_security import current_user
@@ -219,7 +219,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     bucket_id = video_1['_buckets']['deposit']
     video_size = 5510872
     master_key = 'test.mp4'
-    slave_keys = ['slave_{0}.mp4'.format(quality)
+    slave_keys = ['{0}.mp4'.format(quality)
                   for quality in get_presets_applied()
                   if quality != '1024p']
     with api_app.test_request_context():
@@ -250,7 +250,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert data['tags']['uri_origin'] == online_video
         assert data['key'] == master_key
         assert 'version_id' in data
-        assert data.get('presets') == get_available_preset_qualities()
+        assert data.get('presets') == get_all_distinct_qualities()
         assert 'links' in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()
@@ -474,7 +474,7 @@ def test_avc_workflow_receiver_local_file_pass(
         version_id=local_file).one().bucket_id
     video_size = 5510872
     master_key = 'test.mp4'
-    slave_keys = ['slave_{0}.mp4'.format(quality)
+    slave_keys = ['{0}.mp4'.format(quality)
                   for quality in get_presets_applied().keys()
                   if quality != '1024p']
     with api_app.test_request_context():
@@ -506,7 +506,7 @@ def test_avc_workflow_receiver_local_file_pass(
         assert '_tasks' in data
         assert data['key'] == master_key
         assert 'version_id' in data
-        assert data.get('presets') == get_available_preset_qualities()
+        assert data.get('presets') == get_all_distinct_qualities()
         assert 'links' in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()
@@ -842,7 +842,8 @@ def test_avc_workflow_receiver_clean_video_transcode(
         assert ObjectVersion.query.count() == (
             get_object_count() + len(presets) + i
         )
-        assert ObjectVersionTag.query.count() == get_tag_count() + (i * 13)
+        # if changed, copy magic number 14 from helpers::get_tag_count
+        assert ObjectVersionTag.query.count() == get_tag_count() + (i * 14)
 
 
 @mock.patch('flask_login.current_user', mock_current_user)

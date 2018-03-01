@@ -32,12 +32,11 @@ import os
 import shutil
 import tempfile
 from copy import deepcopy
-from datetime import datetime, timedelta
 
 import arrow
 from cds_dojson.marc21 import marc21
 from cds_dojson.marc21.utils import create_record
-from cds_sorenson.api import get_closest_aspect_ratio
+from cds_sorenson.api import get_all_distinct_qualities
 from celery.utils.log import get_task_logger
 from flask import current_app
 from invenio_accounts.models import User
@@ -768,19 +767,15 @@ class CDSRecordDumpLoader(RecordDumpLoader):
 
     @classmethod
     def _create_missing_subformats(cls, record, deposit):
-        """Crete missing subformats."""
+        """Create missing subformats."""
         # get master
         master = CDSVideosFilesIterator.get_master_video_file(deposit)
         if not master:
             return
 
-        # get the preset info from sorenson
         ratio = master['tags']['display_aspect_ratio']
         max_width = int(master['tags']['width'])
         max_height = int(master['tags']['height'])
-
-        if ratio not in current_app.config['CDS_SORENSON_PRESETS']:
-            ratio = get_closest_aspect_ratio(max_height, max_width)
 
         assert ratio in current_app.config['CDS_SORENSON_PRESETS']
         preset = current_app.config['CDS_SORENSON_PRESETS'][ratio]

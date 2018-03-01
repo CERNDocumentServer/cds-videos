@@ -27,11 +27,12 @@
 from __future__ import absolute_import
 
 import json
+from fractions import gcd
+
 from flask import current_app as app
 from itertools import count, takewhile
 from subprocess import STDOUT, CalledProcessError, check_output
 
-from cds_sorenson.api import get_available_aspect_ratios
 from .errors import FrameExtractionInvalidArguments, FFmpegExecutionError, \
     MetadataExtractionExecutionError, FrameExtractionExecutionError
 
@@ -88,22 +89,18 @@ def probe_aspect_ratio(input_filename):
     return metadata['streams'][0]['display_aspect_ratio']
 
 
-def _calculate_aspect_ratio(width, height):
+def _fallback_aspect_ratio(width, height):
     """Calculate a video's aspect ratio from its dimensions."""
-    ratios = get_available_aspect_ratios(pairs=True)
-    for (w, h) in ratios:
-        if w / h == width / height:
-            return '{0}:{1}'.format(w, h)
-    raise RuntimeError('Video dimensions do not correspond to any valid '
-                       'aspect ratio.')
+    common = gcd(width, height)
+    return '{0}:{1}'.format(int(width / common), int(height / common))
 
 
 def _patch_aspect_ratio(metadata):
     """Replace invalid aspect ratio(i.e. '0:1') with calculated one."""
     sinfo = metadata['streams'][0]
     key = 'display_aspect_ratio'
-    if sinfo[key] == '0:1':
-        sinfo[key] = _calculate_aspect_ratio(sinfo['width'], sinfo['height'])
+    if key not in sinfo or not sinfo[key] or sinfo[key] == '0:1':
+        sinfo[key] = _fallback_aspect_ratio(sinfo['width'], sinfo['height'])
     return metadata
 
 
