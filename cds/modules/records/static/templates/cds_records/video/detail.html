@@ -118,7 +118,7 @@
                 <i class="fa fa-clock-o text-muted"></i> {{ ::record.metadata.duration | replace:'.000':'' }}
               </li>
               <li class="pull-right">
-                {{ recordViews || 0 }} Views
+                <a ng-href="{{record.metadata.recid}}/stats">{{ recordViews || 0 }} Views</a>
               </li>
             </ul>
           </div>
