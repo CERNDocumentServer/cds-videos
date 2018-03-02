@@ -26,11 +26,11 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import g
-from six.moves.html_parser import HTMLParser
-
+from flask import current_app, g, request
 from invenio_search import current_search
 from invenio_search.utils import schema_to_index
+from six.moves.html_parser import HTMLParser
+from six.moves.urllib.parse import urlparse
 
 
 def schema_prefix(schema):
@@ -62,6 +62,23 @@ def remove_html_tags(html_tag_remover, value):
     html_tag_remover.reset()
     html_tag_remover.feed(value)
     return html_tag_remover.get_data()
+
+
+def format_pid_link(url_template, pid_value):
+    """Format a pid url."""
+    if request:
+        return url_template.format(
+            host=request.host,
+            scheme=request.scheme,
+            pid_value=pid_value,
+        )
+    else:
+        r = urlparse(current_app.config['THEME_SITEURL'])
+        return url_template.format(
+            host=r.netloc,
+            scheme=r.scheme,
+            pid_value=pid_value,
+        )
 
 
 class HTMLTagRemover(HTMLParser):

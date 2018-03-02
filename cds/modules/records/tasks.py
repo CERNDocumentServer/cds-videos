@@ -27,14 +27,22 @@
 from __future__ import absolute_import, print_function
 
 import json
-import requests
-from flask import current_app
-from celery import shared_task
-from requests.exceptions import RequestException
-from invenio_indexer.api import RecordIndexer
-from invenio_db import db
+from datetime import datetime
 
-from .api import Keyword, CDSRecord
+import requests
+import sqlalchemy as sa
+from cds.modules.records.utils import format_pid_link
+from celery import shared_task
+from flask import current_app
+from flask_mail import Message
+from invenio_db import db
+from invenio_files_rest.models import FileInstance
+from invenio_indexer.api import RecordIndexer
+from requests.exceptions import RequestException
+from invenio_records_files.models import RecordsBuckets
+from cds.modules.records.utils import is_deposit, is_record
+
+from .api import CDSRecord, Keyword
 from .search import KeywordSearch, query_to_objects
 from .symlinks import SymlinksCreator
 
@@ -145,3 +153,71 @@ def create_symlinks(previous_record, record_uuid):
     # FIXME: couldn't find a way to create symlinks with xrootd
     # record_new = CDSRecord.get_record(record_uuid)
     # SymlinksCreator().create(previous_record, record_new)
+
+
+def format_file_integrity_report(report):
+    """Format the email body for the file integrity report."""
+    lines = []
+    for entry in report:
+        f = entry['file']
+        lines.append('ID: {}'.format(str(f.id)))
+        lines.append('URI: {}'.format(f.uri))
+        lines.append('Name: {}'.format(entry.get('filename')))
+        lines.append('Created: {}'.format(f.created))
+        lines.append('Checksum: {}'.format(f.checksum))
+        lines.append('Last Check: {}'.format(f.last_check_at))
+        if 'record' in entry:
+            lines.append(u'Record: {}'.format(format_pid_link(
+                         current_app.config['RECORDS_UI_ENDPOINT'],
+                         entry['record'].get('recid'))))
+        if 'deposit' in entry:
+            lines.append(u'Deposit: {}'.format(format_pid_link(
+                         current_app.config['DEPOSIT_UI_ENDPOINT'],
+                         entry['deposit'].get('_deposit', {}).get('id'))))
+        lines.append(('-' * 80) + '\n')
+    return '\n'.join(lines)
+
+
+@shared_task
+def file_integrity_report():
+    """Send a report of uhealthy/missing files to CDS admins."""
+    # First retry verifying files that errored during their last check
+    files = FileInstance.query.filter(FileInstance.last_check.is_(None))
+    for f in files:
+        try:
+            f.clear_last_check()
+            db.session.commit()
+            f.verify_checksum(throws=False)
+            db.session.commit()
+        except Exception:
+            pass  # Don't fail sending the report in case of some file error
+
+    report = []
+    unhealthy_files = (
+        FileInstance.query
+        .filter(sa.or_(FileInstance.last_check.is_(None),
+                       FileInstance.last_check.is_(False)))
+        .order_by(FileInstance.created.desc()))
+
+    for f in unhealthy_files:
+        entry = {'file': f}
+        for o in f.objects:
+            entry['filename'] = o.key
+            # Find records/deposits for the files
+            rb = RecordsBuckets.query.filter(
+                RecordsBuckets.bucket_id == o.bucket_id).one_or_none()
+            if rb and rb.record and rb.record.json:
+                if is_deposit(rb.record.json):
+                    entry['deposit'] = rb.record.json
+                elif is_record(rb.record.json):
+                    entry['record'] = rb.record.json
+        report.append(entry)
+
+    if report:
+        # Format and send the email
+        subject = u'[CDS Videos] Files integrity report [{}]'.format(datetime.now())
+        body = format_file_integrity_report(report)
+        sender = current_app.config['NOREPLY_EMAIL']
+        recipients = [current_app.config['CDS_ADMIN_EMAIL']]
+        msg = Message(subject, sender=sender, recipients=recipients, body=body)
+        current_app.extensions['mail'].send(msg)
