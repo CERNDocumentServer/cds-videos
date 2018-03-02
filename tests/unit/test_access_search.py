@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2018 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -29,13 +29,12 @@ from __future__ import absolute_import, print_function
 import json
 from time import sleep
 
+from cds.modules.records.search import RecordVideosSearch
 from flask import g, url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
-
-from cds.modules.records.search import RecordVideosSearch
 
 
 def mock_provides(needs):
@@ -46,13 +45,13 @@ def mock_provides(needs):
 
 def test_es_filter(es, users):
     """Test query filter based on CERN groups."""
-    mock_provides([UserNeed('test@test.ch'), RoleNeed('groupX')])
+    mock_provides([UserNeed('test@test.ch'), RoleNeed('groupx')])
     assert RecordVideosSearch().to_dict()['query']['bool']['filter'] == [
         {'bool': {'filter': [{'bool': {
             'should': [
                 {'missing': {'field': '_access.read'}},
-                {'terms': {'_access.read': ['test@test.ch', 'groupX']}},
-                {'terms': {'_access.update': ['test@test.ch', 'groupX']}},
+                {'terms': {'_access.read': ['test@test.ch', 'groupx']}},
+                {'terms': {'_access.update': ['test@test.ch', 'groupx']}},
                 {'match': {'_deposit.created_by': 0}}
             ]
         }}]}}

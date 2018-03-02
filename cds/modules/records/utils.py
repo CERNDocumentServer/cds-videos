@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017, 2018 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,10 +27,11 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app, g, request
-from invenio_search import current_search
-from invenio_search.utils import schema_to_index
 from six.moves.html_parser import HTMLParser
 from six.moves.urllib.parse import urlparse
+
+from invenio_search import current_search
+from invenio_search.utils import schema_to_index
 
 
 def schema_prefix(schema):
@@ -54,7 +55,14 @@ def is_deposit(record):
 
 def get_user_provides():
     """Extract the user's provides from g."""
-    return [need.value for need in g.identity.provides]
+    provides = []
+    for need in g.identity.provides:
+        try:
+            provides.append(need.value.lower())
+        except AttributeError:
+            # Add the user ID (integer) to the list
+            provides.append(need.value)
+    return provides
 
 
 def remove_html_tags(html_tag_remover, value):
