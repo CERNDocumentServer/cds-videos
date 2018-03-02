@@ -59,6 +59,12 @@ def _(x):
 CDS_ENV_PROD = False
 CDS_ENV_TEST = False
 
+#: Email address for admins.
+CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
+#: Email address for no-reply.
+NOREPLY_EMAIL = "no-reply@cern.ch"
+MAIL_SUPPRESS_SEND = True
+
 ###############################################################################
 # Translations & Time
 ###############################################################################
@@ -103,6 +109,32 @@ CELERYBEAT_SCHEDULE = {
     'tasks_status': {
         'task': 'cds.modules.deposit.tasks.preserve_celery_states_on_db',
         'schedule': crontab(minute=5, hour=0),
+    },
+    'file-checks': {
+        'task': 'invenio_files_rest.tasks.schedule_checksum_verification',
+        'schedule': timedelta(hours=1),
+        'kwargs': {
+            'batch_interval': {'hours': 1},
+            'frequency': {'days': 14},
+            'max_count': 0,
+        },
+    },
+    'hard-file-checks': {
+        'task': 'invenio_files_rest.tasks.schedule_checksum_verification',
+        'schedule': timedelta(hours=1),
+        'kwargs': {
+            'batch_interval': {'hours': 1},
+            # Manually check and calculate checksums of files biannually
+            'frequency': {'days': 180},
+            # Split batches based on total files size
+            'max_size': 0,
+            # Actual checksum calculation, instead of relying on a EOS query
+            'checksum_kwargs': {'use_default_impl': True},
+        },
+    },
+    'file-integrity-report': {
+        'task': 'cds.modules.records.tasks.file_integrity_report',
+        'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
     },
 }
 
@@ -697,6 +729,8 @@ OAUTH2SERVER_SETTINGS_TEMPLATE = 'cds_theme/settings.html'
 
 # The site name
 THEME_SITENAME = _('CERN Document Server')
+# Default site URL (used only when not in a context - e.g. like celery tasks).
+THEME_SITEURL = "https://videos.cern.ch"
 # The theme logo.
 THEME_LOGO = False
 # The base template.
