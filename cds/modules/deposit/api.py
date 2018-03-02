@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2018 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -40,6 +40,8 @@ from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
+from invenio_deposit.api import Deposit, has_status, preserve
+from invenio_deposit.utils import mark_as_action
 from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag,
                                        as_bucket, as_object_version)
@@ -53,15 +55,8 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from invenio_deposit.api import Deposit, has_status, preserve
-from invenio_deposit.utils import mark_as_action
-
-from ..records.api import (
-    CDSFileObject,
-    CDSFilesIterator,
-    CDSVideosFilesIterator,
-    CDSRecord
-)
+from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
+                           CDSVideosFilesIterator)
 from ..records.minters import is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
@@ -186,6 +181,12 @@ class CDSDeposit(Deposit):
     @preserve(result=False, fields=PRESERVE_FIELDS)
     def update(self, *args, **kwargs):
         """Update only drafts."""
+        def lower(l):
+            return [s.lower() for s in l]
+        # use always lower case in the access rights to prevent problems
+        if '_access' in self:
+            self['_access']['read'] = lower(self['_access'].get('read', []))
+            self['_access']['update'] = lower(self['_access'].get('update', []))
         super(CDSDeposit, self).update(*args, **kwargs)
 
     @preserve(result=False, fields=PRESERVE_FIELDS)

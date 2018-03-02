@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2018 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,15 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
 import uuid
 
+import pytest
+from cds.modules.records.permissions import (has_admin_permission,
+                                             record_permission_factory)
 from flask_principal import RoleNeed, identity_loaded
 from flask_security import login_user
 from invenio_accounts.models import User
 from invenio_records.api import Record
-from cds.modules.records.permissions import (has_admin_permission,
-                                             record_permission_factory)
 
 
 @pytest.mark.parametrize('access,action,is_allowed', [
@@ -73,7 +73,7 @@ def test_record_access(db, users, access, action, is_allowed):
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
-        roles = [RoleNeed('test-egroup@cern.ch')]
+        roles = [RoleNeed('Test-Egroup@cern.ch')]
         if 'eos' in access:
             roles.append(RoleNeed('vmo-restictedrights@cern.ch'))
         identity.provides |= set(roles)
