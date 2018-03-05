@@ -64,11 +64,11 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
     });
     return deferred.promise;
   }
-  function onSelect(selected) {
+  function onSelect(selected, preventFormSubmit) {
     if (selected && !_.isEmpty(selected.value)){
       try {
         var searches = localStorageService.get('cds.search.history') || [];
-        var exists = _.findWhere(searches, {value: selected.value});
+        var exists = _.find(searches, {value: selected.value});
         if (exists === undefined) {
           if (searches.length > 4){
             searches.pop();
@@ -77,13 +77,24 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
           searches.push(selected);
           localStorageService.set('cds.search.history', searches);
         }
+        // submit form to trigger search
+        if (!preventFormSubmit) {
+          // it is needed because when you selected an option by clicking not
+          // hiting enter angular was throwing na `Error: [$rootScope:inprog]
+          // $apply already in progress` trying to use $apply when angular is
+          // running a $digest cycle. The error probably is comming from
+          // massautocomplete.js that we use for autocompletion
+          setTimeout(function() {
+            $("[name='cdsSearchFormSuggest']").submit();
+          });
+        }
       } catch(error) {
         // Error no worries..
       }
     }
   }
   $scope.updateHistory = function() {
-    onSelect({label: $scope.dirty.value, value: $scope.dirty.value});
+    onSelect({label: $scope.dirty.value, value: $scope.dirty.value}, true);
   }
   $scope.autocomplete_options = {
     suggest: suggest_state_remote,
