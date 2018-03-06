@@ -37,17 +37,42 @@ from cds.modules.records.serializers.vtt import VTT
 def test_smil_serializer(video_record_metadata):
     """Test smil serializer."""
     rec = video_record_metadata
-    serializer = Smil(record=rec)
-    data = serializer.format()
-    root = ET.fromstring(data)
-    assert root.tag == 'smil'
-    assert len(root[1][0]) == 4
-    for child in root[1][0]:
-        assert child.tag == 'video'
-        assert 'system-bitrate' in child.attrib
-        assert 'width' in child.attrib
-        assert 'height' in child.attrib
-        assert 'src' in child.attrib
+
+    def parse_and_test(rec, subformats_num, first_playlist_quality):
+        serializer = Smil(record=rec)
+        data = serializer.format()
+        root = ET.fromstring(data)
+        assert root.tag == 'smil'
+        assert len(root[1][0]) == subformats_num
+        for child in root[1][0]:
+            assert child.tag == 'video'
+            assert 'system-bitrate' in child.attrib
+            assert 'width' in child.attrib
+            assert 'height' in child.attrib
+            assert 'src' in child.attrib
+        # check if the first files has the first playlist quality
+        # of 720 / 480 / 240 after deleting the subformats one by one
+        assert root[1][0][0].get('height') == first_playlist_quality
+
+    parse_and_test(rec, 4, '720')
+
+    # remove the file that has the first playlist quality of 720
+    rec['_files'][0]['subformat'] = list(
+        filter(
+            lambda subformat: subformat['tags']['height'] != 720,
+            rec['_files'][0]['subformat']
+        )
+    )
+    parse_and_test(rec, 3, '480')
+
+    # remove the file that has the first playlist quality of 480
+    rec['_files'][0]['subformat'] = list(
+        filter(
+            lambda subformat: subformat['tags']['height'] != 480,
+            rec['_files'][0]['subformat']
+        )
+    )
+    parse_and_test(rec, 2, '240')
 
 
 def test_vtt_serializer(video_record_metadata):

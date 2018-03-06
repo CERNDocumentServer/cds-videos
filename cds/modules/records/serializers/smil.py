@@ -65,11 +65,38 @@ class Smil(object):
         videos_data = self._format_videos(self.record)
         return render_template('cds_records/video.smil', videos=videos_data)
 
-    @staticmethod
-    def _format_videos(record):
+    def _sort(self, subformats):
+        """Returns the subformats sorted in a specific order.
+
+        The video with resolution of 720p will be at the top.
+        If there is no such resolution the next subformat smaller
+        than 720p will be added (480p).
+
+        :param subformats: List of subformats that will be sorted.
+        """
+        index = None
+        for idx, subformat in enumerate(subformats):
+            # get the index of the 720p video subformat video
+            if (subformat.get('tags', {}).get('height') == 720):
+                index = idx
+                break
+            # get the index of the 480p video subformat video
+            if (subformat.get('tags', {}).get('height') == 480):
+                index = idx
+
+        # move the 720p/480p video subformat to the beginning
+        if index:
+            subformats.insert(0, subformats.pop(index))
+
+        return subformats
+
+    def _format_videos(self, record):
         """Format each video subformat."""
         master_file = CDSVideosFilesIterator.get_master_video_file(record)
-        for video in CDSVideosFilesIterator.get_video_subformats(master_file):
+        sorted_subformats = self._sort(
+            CDSVideosFilesIterator.get_video_subformats(master_file)
+        )
+        for video in sorted_subformats:
             tags = video['tags']
             # If the 'smil' config variable is False,
             # don't add this video to the SMIL file
