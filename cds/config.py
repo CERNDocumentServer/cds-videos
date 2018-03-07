@@ -62,7 +62,7 @@ CDS_ENV_TEST = False
 #: Email address for admins.
 CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
 #: Email address for no-reply.
-NOREPLY_EMAIL = "no-reply@cern.ch"
+NOREPLY_EMAIL = "cds-no-reply@cern.ch"
 MAIL_SUPPRESS_SEND = True
 
 ###############################################################################
@@ -730,7 +730,7 @@ OAUTH2SERVER_SETTINGS_TEMPLATE = 'cds_theme/settings.html'
 # The site name
 THEME_SITENAME = _('CERN Document Server')
 # Default site URL (used only when not in a context - e.g. like celery tasks).
-THEME_SITEURL = "https://videos.cern.ch"
+THEME_SITEURL = "http://localhost:5000"
 # The theme logo.
 THEME_LOGO = False
 # The base template.
