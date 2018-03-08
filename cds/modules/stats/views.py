@@ -47,12 +47,51 @@ class StatsResource(MethodView):
         """Init."""
         self.read_permission_factory = record_read_permission_factory
 
+    def build_subquery(report_number):
+        """Elasticsearch subquery for download statistics.
+        Because the report number was changed for consistency reasons,
+        we had to build a workaround so that we can target old videos
+        by report number.
+
+        :param report_number: the report number of a record
+        """
+
+        if 'VIDEO' in report_number:
+            report_number_movie = report_number.replace(
+                'VIDEO', 'MOVIE'
+            )
+            report_number_videoclip = report_number.replace(
+                'VIDEO', 'VIDEOCLIP'
+            )
+            subquery = {
+                "should": [
+                    {"match": {"file": report_number}},
+                    {"match": {"file": report_number_movie}},
+                    {"match": {"file": report_number_videoclip}},
+                    {"match": {"_type": "events.media_download"}}
+                ],
+                "minimum_should_match": 2
+            }
+
+        if 'FOOTAGE' in report_number:
+            report_number_videorush = report_number.replace(
+                'FOOTAGE', 'VIDEORUSH'
+            )
+            subquery = {
+                "should": [
+                    {"match": {"file": report_number}},
+                    {"match": {"file": report_number_videorush}},
+                    {"match": {"_type": "events.media_download"}}
+                ],
+                "minimum_should_match": 2
+            }
+        return subquery
+
     @pass_record
     @need_record_permission('read_permission_factory')
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
 
-        report_number = record.get('report_number')[0]
         es = Elasticsearch(CFG_ELASTICSEARCH_SEARCH_HOST)
         query = {}
         results = {}
@@ -81,25 +120,13 @@ class StatsResource(MethodView):
 
         # Get timestamp-aggregated downloads for specific CDS record
         elif stat == 'downloads':
+            report_number = record.get('report_number')[0]
             key_type = 'date'
             query = {
                 "query": {
                     "filtered": {
                         "query": {
-                            "bool": {
-                                "must": [
-                                    {
-                                        "match": {
-                                            "file": report_number
-                                        }
-                                    },
-                                    {
-                                        "match": {
-                                            "_type": "events.media_download"
-                                        }
-                                    }
-                                ]
-                            }
+                            "bool": build_subquery(report_number)
                         },
                         "filter": {
                             "range": {
