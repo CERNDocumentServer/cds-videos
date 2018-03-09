@@ -415,7 +415,7 @@ def test_video_events_on_download_create(api_app, webhooks, db, api_project,
             access_token=access_token)
 
     with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer, \
             api_app.test_client() as client:
         file_size = 1024 * 1024
@@ -482,10 +482,9 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
     db.session.add(bucket)
 
     # registering receiver
-    sse_channel = 'mychannel'
     receiver_id = 'test_video_events_on_workflow'
     workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
+        api_app, db, video_1, receiver_id=receiver_id)
 
     with api_app.test_request_context():
         url = url_for(

@@ -76,13 +76,8 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
             access_token=access_token)
 
     with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer, \
+            mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
             api_app.test_client() as client:
-
-        sse_channel = 'mychannel'
-        mock_sse.return_value = None
 
         file_size = 1024
         mock_request.return_value = type(
@@ -94,8 +89,7 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
         payload = dict(
             uri='http://example.com/test.pdf',
             deposit_id=video_1_depid,
-            key='test.pdf',
-            sse_channel=sse_channel
+            key='test.pdf'
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -119,9 +113,6 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
         assert obj.file
         assert obj.file.size == file_size
 
-        # check sse is called
-        assert mock_sse.called
-
         def set_data(state, message, size, total, percentage, type_):
             return {
                 'state': state,
@@ -140,44 +131,11 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
                         'version_id': str(obj.version_id),
                         'size': size,
                         'total': total,
-                        'sse_channel': sse_channel,
                         'type': type_
                     }
                 }
             }
-        assert mock_sse.call_count == 7
-        mock_sse.assert_any_call(
-            data=set_data(
-                states.STARTED,
-                'Downloading {} of {}'.format(file_size, file_size),
-                file_size, file_size, 100, 'file_download'
-            ),
-            channel=u'mychannel',
-            type_='file_download'
-        )
-        mock_sse.assert_any_call(
-            data=set_data(
-                states.SUCCESS, str(obj.version_id), file_size, file_size, 100,
-                'file_download'
-            ),
-            channel=u'mychannel',
-            type_='file_download'
-        )
         deposit = deposit_video_resolver(video_1_depid)
-        mock_sse.assert_any_call(
-            channel='mychannel',
-            data={
-                'state': states.SUCCESS,
-                'meta': {
-                    'payload': {
-                        'event_id': str(tags['_event_id']),
-                        'deposit_id': video_1_depid,
-                        'deposit': deposit,
-                    }
-                }
-            },
-            type_='update_deposit',
-        )
 
         # check ElasticSearch is called
         ids = set(get_indexed_records_from_mock(mock_indexer))
@@ -189,10 +147,8 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
     # Test cleaning!
     url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
 
-    with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer, \
+    with mock.patch('requests.get'), \
+            mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
@@ -202,7 +158,6 @@ def test_download_receiver(api_app, db, api_project, access_token, webhooks,
         bucket = Bucket.query.first()
         assert bucket.size == 0
 
-        assert mock_sse.called is False
         assert mock_indexer.called is False
 
 
@@ -230,15 +185,12 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         )
 
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
@@ -319,51 +271,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         # check tags
         assert ObjectVersionTag.query.count() == get_tag_count()
 
-        # check sse is called
-        assert mock_sse.called
-
-        messages = [
-            (sse_channel, states.STARTED, 'file_download'),
-            (sse_channel, states.SUCCESS, 'file_download'),
-            (sse_channel, states.SUCCESS, 'file_video_metadata_extraction'),
-            (sse_channel, states.STARTED, 'file_transcode'),
-            (sse_channel, states.SUCCESS, 'file_transcode'),
-            (sse_channel, states.REVOKED, 'file_transcode'),  # ResolutionError
-            (sse_channel, states.STARTED, 'file_video_extract_frames'),
-            (sse_channel, states.SUCCESS, 'file_video_extract_frames'),
-            (sse_channel, states.SUCCESS, 'update_deposit'),
-        ]
-
-        call_args = []
-        for (_, kwargs) in mock_sse.call_args_list:
-            type_ = kwargs['type_']
-            state = kwargs['data']['state']
-            channel = kwargs['channel']
-            tuple_ = (channel, state, type_)
-            if tuple_ not in call_args:
-                call_args.append(tuple_)
-
-        assert len(call_args) == len(messages)
-        for message in messages:
-            assert message in call_args
-
         deposit = deposit_video_resolver(video_1_depid)
-
-        def filter_events(call_args):
-            _, x = call_args
-            return x['type_'] == 'update_deposit'
-
-        list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 12
-        _, kwargs = list_kwargs[10]
-        assert kwargs['type_'] == 'update_deposit'
-        assert kwargs['channel'] == 'mychannel'
-        assert kwargs['data']['state'] == states.SUCCESS
-        assert kwargs['data']['meta']['payload'] == {
-            'deposit_id': deposit['_deposit']['id'],
-            'event_id': data['tags']['_event_id'],
-            'deposit': deposit,
-        }
 
         # check ElasticSearch is called
         ids = set(get_indexed_records_from_mock(mock_indexer))
@@ -428,9 +336,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     # Test cleaning!
     url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
 
-    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer, \
+    with mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
@@ -455,8 +361,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert len(get_deposit_events(record.json['_deposit']['id'],
                                       _deleted=True)) == 1
 
-        # check no SSE message and reindexing is fired
-        assert mock_sse.called is False
+        # check no reindexing is fired
         assert mock_indexer.called is False
 
 
@@ -485,15 +390,12 @@ def test_avc_workflow_receiver_local_file_pass(
         )
 
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+            mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
             version_id=str(local_file),
         )
@@ -576,49 +478,7 @@ def test_avc_workflow_receiver_local_file_pass(
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
 
-        # check sse is called
-        assert mock_sse.called
-
-        messages = [
-            (sse_channel, states.SUCCESS, 'file_video_metadata_extraction'),
-            (sse_channel, states.STARTED, 'file_transcode'),
-            (sse_channel, states.SUCCESS, 'file_transcode'),
-            (sse_channel, states.REVOKED, 'file_transcode'),  # ResolutionError
-            (sse_channel, states.STARTED, 'file_video_extract_frames'),
-            (sse_channel, states.SUCCESS, 'file_video_extract_frames'),
-            (sse_channel, states.SUCCESS, 'update_deposit'),
-        ]
-
-        call_args = []
-        for (_, kwargs) in mock_sse.call_args_list:
-            type_ = kwargs['type_']
-            state = kwargs['data']['state']
-            channel = kwargs['channel']
-            tuple_ = (channel, state, type_)
-            if tuple_ not in call_args:
-                call_args.append(tuple_)
-
-        assert len(call_args) == len(messages)
-        for message in messages:
-            assert message in call_args
-
         deposit = deposit_video_resolver(video_1_depid)
-
-        def filter_events(call_args):
-            _, x = call_args
-            return x['type_'] == 'update_deposit'
-
-        list_kwargs = list(filter(filter_events, mock_sse.call_args_list))
-        assert len(list_kwargs) == 10
-        _, kwargs = list_kwargs[8]
-        assert kwargs['type_'] == 'update_deposit'
-        assert kwargs['channel'] == 'mychannel'
-        assert kwargs['data']['state'] == states.SUCCESS
-        assert kwargs['data']['meta']['payload'] == {
-            'deposit_id': deposit['_deposit']['id'],
-            'event_id': data['tags']['_event_id'],
-            'deposit': deposit,
-        }
 
         # check ElasticSearch is called
         ids = set(get_indexed_records_from_mock(mock_indexer))
@@ -633,9 +493,7 @@ def test_avc_workflow_receiver_local_file_pass(
     # Test cleaning!
     url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
 
-    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer, \
+    with mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
             api_app.test_client() as client:
         # [[ DELETE WORKFLOW ]]
         resp = client.delete(url, headers=json_headers)
@@ -662,8 +520,7 @@ def test_avc_workflow_receiver_local_file_pass(
         assert len(get_deposit_events(record.json['_deposit']['id'],
                                       _deleted=True)) == 1
 
-        # check no SSE message and reindexing is fired
-        assert mock_sse.called is False
+        # check no reindexing is fired
         assert mock_indexer.called is False
 
 
@@ -681,12 +538,10 @@ def test_avc_workflow_receiver_clean_download(
         )
 
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
@@ -732,12 +587,10 @@ def test_avc_workflow_receiver_clean_video_frames(
         )
 
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
@@ -792,12 +645,10 @@ def test_avc_workflow_receiver_clean_video_transcode(
         )
 
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
@@ -860,12 +711,10 @@ def test_avc_workflow_receiver_clean_extract_metadata(
         )
 
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         # [[ RUN ]]

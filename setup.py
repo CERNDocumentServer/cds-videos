@@ -130,7 +130,6 @@ install_requires = [
     'invenio-search-ui>=1.0.0a9',
     'invenio-search[elasticsearch2]>=1.0.0b4',
     'invenio-sequencegenerator>=1.0.0a2',
-    'invenio-sse>=1.0.0a2',
     'invenio-theme>=1.0.0b4',
     'invenio-userprofiles>=1.0.0b1',
     # FIXME topical branch
@@ -265,9 +264,6 @@ setup(
             'cds_deposit_video = '
             'cds.modules.previewer.extensions.video:deposit_video',
             'cds_default = cds.modules.previewer.extensions.default',
-        ],
-        'invenio_sse.integrations': [
-            'deposit = invenio_sse.contrib.deposit.ext:InvenioSSEDeposit',
         ],
         'invenio_records.jsonresolver': [
             'keywords = cds.modules.records.jsonresolver.keywords',

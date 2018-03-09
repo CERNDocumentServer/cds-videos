@@ -54,13 +54,11 @@ def test_tasks_status(api_app, db, bucket, cds_depid,
         )
 
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             bucket_id=str(bucket.id),
             deposit_id=cds_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
