@@ -59,7 +59,7 @@ def test_smil_serializer(video_record_metadata):
     # remove the file that has the first playlist quality of 720
     rec['_files'][0]['subformat'] = list(
         filter(
-            lambda subformat: subformat['tags']['height'] != 720,
+            lambda subformat: subformat['tags']['height'] != '720',
             rec['_files'][0]['subformat']
         )
     )
@@ -68,7 +68,7 @@ def test_smil_serializer(video_record_metadata):
     # remove the file that has the first playlist quality of 480
     rec['_files'][0]['subformat'] = list(
         filter(
-            lambda subformat: subformat['tags']['height'] != 480,
+            lambda subformat: subformat['tags']['height'] != '480',
             rec['_files'][0]['subformat']
         )
     )
