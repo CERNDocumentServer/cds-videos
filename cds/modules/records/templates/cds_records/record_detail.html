@@ -45,7 +45,7 @@
     {% for keyword in record['keywords'] %}
       {% set keywords = keywords.append(keyword['name']) %}
     {% endfor %}
-    {% set refer_query = '( keywords.name:"%s" %s )' % ('" OR keywords.name:"'.join(keywords), refer_query) %}
+    {% set refer_query = '( keywords.name:"%s" ) %s ' % ('" OR keywords.name:"'.join(keywords), refer_query) %}
   {% else %}
     {% set refer_query = "category:%s %s" % (record['category'], refer_query) %}
   {% endif %}
