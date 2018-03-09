@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018 CERN.
 #
 # CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,11 +77,11 @@ class Smil(object):
         index = None
         for idx, subformat in enumerate(subformats):
             # get the index of the 720p video subformat video
-            if (subformat.get('tags', {}).get('height') == 720):
+            if (subformat.get('tags', {}).get('height') == '720'):
                 index = idx
                 break
             # get the index of the 480p video subformat video
-            if (subformat.get('tags', {}).get('height') == 480):
+            if (subformat.get('tags', {}).get('height') == '480'):
                 index = idx
 
         # move the 720p/480p video subformat to the beginning
