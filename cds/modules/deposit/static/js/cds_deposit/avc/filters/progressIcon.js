@@ -17,7 +17,7 @@ function progressIcon() {
         return 'fa-times';
       case 'PENDING':
       case 'DEPOSIT_STATE/PENDING':
-        return 'fa-circle-thin';
+        return 'fa-spinner fa-spin';
     }
   };
 }

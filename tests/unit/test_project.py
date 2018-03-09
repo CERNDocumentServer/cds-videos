@@ -415,8 +415,7 @@ def test_inheritance(api_app, api_project, users):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_publish_with_workflow(
-        api_app, users, api_project, es):
+def test_project_publish_with_workflow(api_app, users, api_project, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = api_project
     prepare_videos_for_publish([video_1, video_2])
@@ -426,31 +425,18 @@ def test_project_publish_with_workflow(
     video_1_id = str(video_1.id)
     video_2_depid = video_2['_deposit']['id']
 
-    sse_channel = 'mychannel'
     receiver_id = 'test_project_publish_with_workflow'
     workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
+        api_app, db, video_1, receiver_id=receiver_id)
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
-    with mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
+    with mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer, \
             api_app.test_request_context(headers=headers, data=payload):
         event = Event.create(receiver_id=receiver_id)
         db.session.add(event)
         event.process()
-
-        # check messages are sent to the sse channel
-        assert mock_sse.called is True
-        args = list(mock_sse.mock_calls[0])[2]
-        assert args['channel'] == sse_channel
-        assert args['type_'] == 'update_deposit'
-        assert args['data']['meta']['payload']['deposit_id'] == video_1_depid
-        args = list(mock_sse.mock_calls[1])[2]
-        assert args['channel'] == sse_channel
-        assert args['type_'] == 'update_deposit'
-        assert args['data']['meta']['payload']['deposit_id'] == project_depid
 
         # check video and project are indexed
         assert mock_indexer.called is True

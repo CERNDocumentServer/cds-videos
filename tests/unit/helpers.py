@@ -36,6 +36,7 @@ from os.path import join
 
 import mock
 import pkg_resources
+import six
 from flask import current_app
 from celery import chain, group, shared_task, states
 from flask_security import login_user, current_user
@@ -231,8 +232,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
     ])
 
 
-def workflow_receiver_video_failing(api_app, db, video,
-                                    receiver_id, sse_channel=None):
+def workflow_receiver_video_failing(api_app, db, video, receiver_id):
     """Workflow receiver for video."""
     video_depid = video['_deposit']['id']
 
@@ -244,8 +244,6 @@ def workflow_receiver_video_failing(api_app, db, video,
 
             )
             event.payload['deposit_id'] = video_depid
-            if sse_channel:
-                event.payload['sse_channel'] = sse_channel
             with db.session.begin_nested():
                 event.response_headers = {}
                 flag_modified(event, 'response_headers')
@@ -330,9 +328,11 @@ def get_indexed_records_from_mock(mock_indexer):
     """Get indexed records from mock."""
     indexed = []
     for call in mock_indexer.call_args_list:
-        ((arg, ), _) = call
-        for id_ in arg:
-            indexed.append(id_)
+        ((arg,), _) = call
+        if isinstance(arg, six.string_types):
+            indexed.append(arg)
+        else:
+            indexed.extend(arg)
     return indexed
 
 

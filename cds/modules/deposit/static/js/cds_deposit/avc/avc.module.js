@@ -2,7 +2,6 @@ function cdsDepositsConfig(
   $locationProvider,
   depositExtractedMetadataProvider,
   depositStatesProvider,
-  depositSSEEventsProvider,
   depositStatusesProvider,
   depositActions,
   inheritedPropertiesProvider,
@@ -35,11 +34,6 @@ function cdsDepositsConfig(
 
   // Initialize the states
   depositStatesProvider.setValues(mainStatuses);
-
-  var additionalEvents = [ 'update_deposit' ];
-
-  // Extra SSE events to listen excluded from the statuses
-  depositSSEEventsProvider.setValues(mainStatuses.concat(additionalEvents));
 
   // Initialize statuses provider
   depositStatusesProvider.setValues({
@@ -106,7 +100,6 @@ function cdsDepositsConfig(
   // Initialize url builder
   urlBuilderProvider.setBlueprints({
     iiif: '/api/iiif/v2/<%=deposit%>:<%=key%>:<%=version%>/full/<%=res%>/0/default.png',
-    sse: '/api/deposits/project/<%=id%>/sse',
     categories: '/api/categories',
     video: '/deposit/<%=deposit%>/preview/video/<%=key%>',
     eventInfo: '/hooks/receivers/avc/events/<%=eventId%>',
@@ -161,7 +154,6 @@ cdsDepositsConfig.$inject = [
   '$locationProvider',
   'depositExtractedMetadataProvider',
   'depositStatesProvider',
-  'depositSSEEventsProvider',
   'depositStatusesProvider',
   'depositActionsProvider',
   'inheritedPropertiesProvider',

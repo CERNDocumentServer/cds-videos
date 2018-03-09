@@ -36,6 +36,7 @@ from functools import partial, wraps
 from os.path import splitext
 
 import arrow
+from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
@@ -254,7 +255,7 @@ class CDSDeposit(Deposit):
             self['_cds']['state'] = self._current_tasks_status()
 
     def _current_tasks_status(self):
-        """."""
+        """Return default. Override method to handle different task status."""
         return {}
 
     @contextmanager
@@ -725,6 +726,12 @@ class Video(CDSDeposit):
 
     _schema = 'deposits/records/videos/video/video-v1.0.0.json'
 
+    _tasks_initial_state = {
+        'file_transcode': states.PENDING,
+        'file_video_extract_frames': states.PENDING,
+        'file_video_metadata_extraction': states.PENDING
+    }
+
     @classmethod
     def create(cls, data, id_=None, **kwargs):
         """Create a video deposit.
@@ -740,6 +747,9 @@ class Video(CDSDeposit):
             'year': str(datetime.date.today().year),
             'url': 'http://copyright.web.cern.ch',
         })
+        data.setdefault('_cds', {})
+        data['_cds'].setdefault('state', cls._tasks_initial_state)
+
         project = deposit_project_resolver(project_id)
         # create video
         video_new = super(Video, cls).create(data, id_=id_, **kwargs)
