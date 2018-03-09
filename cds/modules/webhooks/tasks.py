@@ -49,9 +49,9 @@ from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_bucket,
                                        as_object_version)
 from invenio_indexer.api import RecordIndexer
+from invenio_indexer.tasks import index_record
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-from invenio_sse import current_sse
 from PIL import Image
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
@@ -66,15 +66,8 @@ from .utils import move_file_into_local
 logger = get_task_logger(__name__)
 
 
-def sse_publish_event(channel, type_, state, meta):
-    """Publish a message on SSE channel."""
-    if channel:
-        data = {'state': state, 'meta': meta}
-        current_sse.publish(data=data, type_=type_, channel=channel)
-
-
 class AVCTask(Task):
-    """Base class for tasks which might be sending SSE messages."""
+    """Base class for tasks."""
 
     abstract = True
 
@@ -84,13 +77,8 @@ class AVCTask(Task):
         return kwargs
 
     def __call__(self, *args, **kwargs):
-        """Extract SSE channel from keyword arguments.
-
-        .. note ::
-            the channel is extracted from the ``sse_channel`` keyword
-            argument.
-        """
-        arg_list = ['sse_channel', 'event_id', 'deposit_id', 'key']
+        """Extract keyword arguments."""
+        arg_list = ['event_id', 'deposit_id', 'key']
         kwargs = self._extract_call_arguments(arg_list, **kwargs)
 
         with self.app.flask_app.app_context():
@@ -108,8 +96,6 @@ class AVCTask(Task):
         self._base_payload.update(meta.get('payload', {}))
         meta['payload'] = self._base_payload
         super(AVCTask, self).update_state(task_id, state, meta)
-        sse_publish_event(channel=self.sse_channel, type_=self._type,
-                          state=state, meta=meta)
         logging.debug('Update State: {0} {1}'.format(state, meta))
 
     def _meta_exception_envelope(self, exc):
@@ -146,10 +132,7 @@ class AVCTask(Task):
             if 'deposit_id' in self._base_payload \
                     and self._base_payload['deposit_id']:
                 update_avc_deposit_state(
-                    deposit_id=self._base_payload.get('deposit_id'),
-                    event_id=self._base_payload.get('event_id'),
-                    sse_channel=self.sse_channel
-                )
+                    deposit_id=self._base_payload.get('deposit_id'))
 
     @staticmethod
     def set_revoke_handler(handler):
@@ -164,7 +147,6 @@ class AVCTask(Task):
         self._base_payload = {
             'deposit_id': self.deposit_id,
             'event_id': self.event_id,
-            'sse_channel': self.sse_channel,
             'type': self._type,
         }
         if self.object:
@@ -765,34 +747,19 @@ def get_patch_tasks_status(deposit):
     return patches
 
 
-def spread_deposit_update(deposit=None, event_id=None, sse_channel=None):
-    """If record is updated correctly, spread the news."""
+def _index_deposit(deposit):
+    """Index deposit if set."""
     if deposit:
-        # send a message to SSE
-        sse_publish_event(
-            channel=sse_channel, type_='update_deposit', state=SUCCESS,
-            meta={
-                'payload': {
-                    'deposit': deposit,
-                    'event_id': event_id,
-                    'deposit_id': deposit['_deposit']['id'],
-                }
-            })
-        # send deposit to the reindex queue
-        RecordIndexer().bulk_index(iter([str(deposit.id)]))
+        index_record.delay(str(deposit.id))
 
 
-def update_avc_deposit_state(deposit_id=None, event_id=None, sse_channel=None,
-                             **kwargs):
-    """Update deposit state on SSE and ElasticSearch."""
+def update_avc_deposit_state(deposit_id=None):
+    """Update deposit state on ElasticSearch."""
     if deposit_id:
-        # get video
         video = deposit_video_resolver(deposit_id)
-        # spread the news
-        spread_deposit_update(deposit=video, event_id=str(event_id),
-                              sse_channel=sse_channel),
-        spread_deposit_update(deposit=video.project, event_id=str(event_id),
-                              sse_channel=sse_channel)
+
+        _index_deposit(video)
+        _index_deposit(video.project)
 
 
 def dispose_object_version(object_version):

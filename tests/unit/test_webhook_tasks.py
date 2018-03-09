@@ -251,46 +251,6 @@ def test_video_extract_frames(app, db, bucket, video):
     assert len(frames_and_gif) == 11
 
 
-def test_task_failure(celery_not_fail_on_eager_app, db, cds_depid, bucket):
-    """Test SSE message for failure tasks."""
-    app = celery_not_fail_on_eager_app
-    sse_channel = 'test_channel'
-    obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
-
-    class Listener(threading.Thread):
-        def __init__(self):
-            super(Listener, self).__init__()
-            self._return = None
-
-        def await(self):
-            super(Listener, self).join()
-            return self._return
-
-        def run(self):
-            from invenio_sse import current_sse
-            with app.app_context():
-                pubsub = current_sse._redis.pubsub()
-                pubsub.subscribe(sse_channel)
-                messages = pubsub.listen()
-                next(messages)  # Skip subscribe message
-                self._return = next(messages)['data'].decode('utf-8')
-
-    # Establish connection
-    listener = Listener()
-    listener.start()
-    time.sleep(1)
-
-    ExtractMetadataTask().delay(
-        uri='invalid_uri',
-        version_id=str(obj.version_id),
-        deposit_id=cds_depid,
-        sse_channel=sse_channel)
-
-    message = listener.await()
-    assert '"state": "FAILURE"' in message
-    assert 'MetadataExtractionExecutionError' in message
-
-
 def test_transcode_too_high_resolutions(db, bucket):
     """Test trascoding task when it should discard some high resolutions."""
     filesize = 1024
@@ -438,9 +398,11 @@ def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     obj_id = create_file('test.mp4', preset, '16:9')
     db.session.commit()
 
-    TranscodeVideoTask().s(
-        version_id=obj_id, preset_quality=preset, sleep_time=0
-    ).apply()
+    with mock.patch(
+            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'):
+        TranscodeVideoTask().s(
+            version_id=obj_id, preset_quality=preset, sleep_time=0
+        ).apply()
 
     # Get the tags from the newly created slave
     tags = ObjectVersion.query.filter(
@@ -464,9 +426,11 @@ def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     obj_id = create_file('test.mp4', preset, '16:9')
     db.session.commit()
 
-    TranscodeVideoTask().s(
-        version_id=obj_id, preset_quality=preset, sleep_time=0
-    ).apply()
+    with mock.patch(
+            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'):
+        TranscodeVideoTask().s(
+            version_id=obj_id, preset_quality=preset, sleep_time=0
+        ).apply()
 
     # Get the tags from the newly created slave
     tags = ObjectVersion.query.filter(

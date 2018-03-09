@@ -17,17 +17,6 @@ function cdsUploaderCtrl(
   this.errors = [];
   // The ongoing uploads
   this.uploading = [];
-  // The SSE listener
-  this.sseEventListener = null;
-
-  this.$onDestroy = function() {
-    try {
-      // Destroy listener
-      that.sseEventListener();
-    } catch(error) {
-      // Ok probably already done
-    }
-  }
 
   function updateMasterFileUpload(state, percentage) {
     var masterFile = that.cdsDepositCtrl.findMasterFile();
@@ -139,6 +128,7 @@ function cdsUploaderCtrl(
               if (avcResponse) {
                 that.cdsDepositCtrl.presets = avcResponse.data.presets;
               }
+              that.cdsDepositsCtrl.fetchRecord();
               promise.resolve(response);
             }
           );
@@ -165,26 +155,6 @@ function cdsUploaderCtrl(
   function _remote(upload) {
     var args = that.prepareUpload(upload);
     var promise = $q.defer();
-    // Prepare the listener
-    that.sseEventListener = $scope.$on(
-      'sse.event.' + that.cdsDepositCtrl.record._deposit.id + '.' + upload.key,
-      function(event, data) {
-        switch (data.state) {
-          case 'FAILURE':
-            _error(upload.key);
-            break;
-          case 'SUCCESS':
-            _success(upload.key, data.meta.payload);
-            promise.resolve(data.meta.payload);
-            // Turn off that listener we don't need it any more
-            that.sseEventListener();
-          default:
-            _progress(
-              upload.key,
-              data.meta.payload.percentage
-            );
-        }
-      });
     $http(args)
       .then(
         function success(response) {
@@ -237,7 +207,6 @@ function cdsUploaderCtrl(
         key: file.key,
         bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
         deposit_id: that.cdsDepositCtrl.record._deposit.id,
-        sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
       }
     };
   }
@@ -257,7 +226,6 @@ function cdsUploaderCtrl(
         key: file.key,
         bucket_id: that.cdsDepositCtrl.record._buckets.deposit,
         deposit_id: that.cdsDepositCtrl.record._deposit.id,
-        sse_channel: '/api/deposits/' + that.cdsDepositsCtrl.master.metadata._deposit.id + '/sse',
       }
     }
   }
@@ -384,7 +352,7 @@ function cdsUploaderCtrl(
                 // Error uploading notification
                 toaster.pop({
                   type: 'error',
-                  title: 'Error replacing the file: worflow failing to start.',
+                  title: 'Error replacing the file: workflow failed to start.',
                   bodyOutputType: 'trustedHtml'
                 });
               }
@@ -414,7 +382,7 @@ function cdsUploaderCtrl(
       // add the logic here
       var args = {
         url:  url,
-        method: 'DELETE'  ,
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         }

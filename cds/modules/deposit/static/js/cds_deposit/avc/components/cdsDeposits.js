@@ -7,7 +7,6 @@ function cdsDepositsCtrl(
   $element,
   $interval,
   depositStates,
-  depositSSEEvents,
   cdsAPI,
   urlBuilder,
   localStorageService,
@@ -21,8 +20,6 @@ function cdsDepositsCtrl(
   this.master = {};
   // Global loading state
   this.loading = false;
-  // The connection
-  this.sseListener = {};
   // The access rights
   this.accessRights = {};
   // The last video upload promise
@@ -42,7 +39,6 @@ function cdsDepositsCtrl(
       $interval.cancel(that.autoUpdateInterval);
       // On destroy delete the event listener
       delete $window.onbeforeunload;
-      that.sseListener.close();
     } catch (error) {}
   };
 
@@ -132,7 +128,7 @@ function cdsDepositsCtrl(
       // Initialized
       this.initialized = true;
       // Start sync metadata
-      that.autoUpdateInterval = $interval(that.fetchRecord, 30000);
+      that.autoUpdateInterval = $interval(that.fetchRecord, 15000);
       if (this.master.links.html) {
         this.handleRedirect(this.master.links.html, true);
       }
@@ -155,40 +151,6 @@ function cdsDepositsCtrl(
       }
       return deposit;
     }
-
-    // SSE
-    this.sseEventListener = function(evt) {
-      // Do some magic
-      var data = JSON.parse(evt.data || '{}');
-      var deposit_ = 'sse.event.' + data.meta.payload.deposit_id;
-      $scope.$broadcast(deposit_, evt.type, data);
-    };
-
-    // SSE stuff - move to somewhere else
-    that.sseListener = new EventSource(
-      urlBuilder.sse({ id: that.master.metadata._deposit.id })
-    );
-
-    that.sseListener.onerror = function(msg) {
-      // console.error('SSE connection error', msg);
-    };
-
-    that.sseListener.onopen = function(msg) {
-      // console.debug('SEE connection has been opened', msg);
-    };
-
-    angular.forEach(depositSSEEvents, function(type, index) {
-      that.sseListener.addEventListener(type, that.sseEventListener, false);
-    });
-
-    // Make sure we kill the connection before reload
-    $window.onbeforeunload = function(event) {
-      // Make sure the connection is closed after the user reloads
-      try {
-        that.sseListener.close();
-      } catch (error) {}
-    };
-    // SSE
   };
 
   this.addChildren = function(deposit, files) {
@@ -441,7 +403,6 @@ cdsDepositsCtrl.$inject = [
   '$element',
   '$interval',
   'depositStates',
-  'depositSSEEvents',
   'cdsAPI',
   'urlBuilder',
   'localStorageService',

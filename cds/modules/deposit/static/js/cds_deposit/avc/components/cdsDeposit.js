@@ -27,9 +27,6 @@ function cdsDepositCtrl(
   // Checkout
   this.lastUpdated = new Date();
 
-  // Event Listener (only for destroy)
-  this.sseEventListener = null;
-
   // Add depositExtractedMetadata to the scope
   this.depositExtractedMetadata = depositExtractedMetadata;
 
@@ -101,7 +98,6 @@ function cdsDepositCtrl(
   this.$onDestroy = function() {
     try {
       // Destroy listener
-      that.sseEventListener();
       $interval.cancel(that.fetchStatusInterval);
     } catch (error) {}
   };
@@ -550,7 +546,7 @@ function cdsDepositCtrl(
     this.currentMasterFile = this.findMasterFile();
     // Initialize state reporter
     this.initializeStateReported();
-    // Set stateCurrent - If null -> Waiting SSE events
+    // Set stateCurrent
     that.stateCurrent = null;
     // Check for previewer
     that.videoPreviewer();
@@ -587,53 +583,6 @@ function cdsDepositCtrl(
       } else if (type == 'file_video_extract_frames' && status == 'SUCCESS') {
         that.framesReady = true;
       }
-    });
-    // Register related events from sse
-    var depositListenerName = 'sse.event.' + this.id;
-    this.sseEventListener = $scope.$on(depositListenerName, function(
-      evt,
-      type,
-      data
-    ) {
-      // Handle my state
-      $scope.$apply(function() {
-        if (type === 'update_deposit') {
-          that.updateDeposit(data.meta.payload.deposit);
-        } else if (type == 'file_video_metadata_extraction' ||
-                   type == 'file_video_extract_frames') {
-          that.updateStateReporter(type, data.meta, data.state);
-        } else if (type == 'file_download') {
-          var broadcastKey = depositListenerName + '.' + data.meta.payload.key;
-          $scope.$broadcast(broadcastKey, data);
-        } else if (type == 'file_transcode') {
-          var masterFile = that.findMasterFile();
-          if (masterFile) {
-            var subformats = masterFile.subformat;
-            if (!subformats) {
-              masterFile.subformat = [];
-              subformats = masterFile.subformat;
-            }
-            var curSubformat = _.find(subformats, {key: data.meta.payload.key});
-            if (curSubformat) {
-              curSubformat = angular.merge(curSubformat, data.meta.payload);
-            } else {
-              curSubformat = angular.copy(data.meta.payload);
-              subformats.push(curSubformat);
-            }
-
-            if (curSubformat.percentage === 100 && data.state === 'SUCCESS') {
-              curSubformat.completed = true;
-            } else if (data.state === 'FAILURE') {
-              curSubformat.errored = true;
-            }
-
-            that.processSubformats();
-          }
-          that.updateStateReporter(type, data.meta, data.state);
-        }
-      });
-      // Update deposit current state
-      that.calculateCurrentState();
     });
 
     this.displayFailure = function() {
@@ -858,7 +807,7 @@ cdsDepositCtrl.$inject = [
  * @ngdoc component
  * @name cdsDeposit
  * @description
- *   Handles the actions and SSE events for each ``deposit_id``. For each
+ *   Handles the actions for each ``deposit_id``. For each
  *   ``children`` a new ``cds-deposit`` directive will be generated.
  * @attr {String} index - The deposit index in the list of deposits.
  * @attr {Boolean} master - If this deposit is the ``master``.

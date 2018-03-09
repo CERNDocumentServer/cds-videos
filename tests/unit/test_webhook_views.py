@@ -62,15 +62,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index') \
-            as mock_indexer:
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.put(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay')as mock_indexer:
+        resp = client.put(url, headers=json_headers)
 
         assert resp.status_code == 201
 
@@ -82,9 +75,6 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     # check extracted metadata is there
     record = RecordMetadata.query.get(video_1_id)
     assert 'extracted_metadata' in record.json['_cds']
-
-    # check SSE
-    assert mock_sse.called is True
 
     # check elasticsearch
     assert mock_indexer.called is True
@@ -101,12 +91,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
             event_id=event_id,
         )
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.put(
-            url, headers=json_headers, data=json.dumps(payload))
+        resp = client.put(url, headers=json_headers)
         assert resp.status_code == 401
 
     # check feedback from another user without access
@@ -119,13 +104,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
             event_id=event_id,
         )
     with api_app.test_client() as client:
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
         login_user_via_session(client, email=user_2_email)
-        resp = client.put(
-            url, headers=json_headers, data=json.dumps(payload))
+        resp = client.put(url, headers=json_headers)
         assert resp.status_code == 403
 
     # check feedback from another user with access
@@ -148,13 +128,8 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
             if current_user.get_id() == user_2_id:
                 identity.provides.update([UserNeed(user_2_email)])
 
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
         login_user_via_session(client, email=user_2_email)
-        resp = client.put(
-            url, headers=json_headers, data=json.dumps(payload))
+        resp = client.put(url, headers=json_headers)
         assert resp.status_code == 201
 
 
@@ -177,14 +152,8 @@ def check_video_transcode_delete(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.delete(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 204
 
@@ -214,14 +183,8 @@ def check_video_transcode_delete(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.delete(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 204
 
@@ -252,18 +215,10 @@ def check_video_transcode_restart(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish') as mock_sse, \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.put(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.put(url, headers=json_headers)
 
         assert resp.status_code == 204
-
-        assert mock_sse.called is True
 
     # Create + restart transcode (clean + create)
     assert ObjectVersion.query.count() == get_object_count() + 2
@@ -298,14 +253,8 @@ def check_video_frames(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.delete(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 204
 
@@ -333,14 +282,8 @@ def check_video_download(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.delete(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 204
 
@@ -370,14 +313,8 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
             access_token=access_token
         )
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
-        payload = dict(
-            sse_channel=sse_channel
-        )
-        resp = client.delete(
-            url, headers=json_headers, data=json.dumps(payload))
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
+        resp = client.delete(url, headers=json_headers)
 
         assert resp.status_code == 204
 
@@ -415,14 +352,11 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
         )
 
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
         payload = dict(
             uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
@@ -458,9 +392,7 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
 
     with mock.patch('requests.get') as mock_request, \
             api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
         file_size = 1024
         mock_request.return_value = type(
             'Response', (object, ), {
@@ -473,7 +405,6 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
             uri='http://example.com/test.pdf',
             deposit_id=cds_depid,
             key='test.pdf',
-            sse_channel=sse_channel
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -499,8 +430,7 @@ def test_download_workflow_delete(api_app, db, cds_depid, access_token,
 
     with mock.patch('requests.get') as mock_request, \
             api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
         mock_request.return_value = type(
             'Response', (object, ), {
                 'raw': BytesIO(b'\x00' * file_size),
@@ -536,9 +466,7 @@ def test_webhooks_feedback(api_app, cds_depid, access_token, json_headers):
 
     with mock.patch('requests.get') as mock_request, \
             api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
         file_size = 1024
         mock_request.return_value = type(
             'Response', (object, ), {
@@ -550,7 +478,6 @@ def test_webhooks_feedback(api_app, cds_depid, access_token, json_headers):
             uri='http://example.com/test.pdf',
             deposit_id=cds_depid,
             key='test.pdf',
-            sse_channel=sse_channel
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -576,10 +503,9 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
                                    json_headers, api_project):
     """Test webhooks feedback with a failing task."""
     (project, video_1, video_2) = api_project
-    sse_channel = 'mychannel'
     receiver_id = 'test_feedback_with_workflow'
     workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id, sse_channel=sse_channel)
+        api_app, db, video_1, receiver_id=receiver_id)
 
     with api_app.test_request_context():
         url = url_for(
@@ -633,14 +559,11 @@ def test_webhooks_delete(api_app, access_token, json_headers,
     assert get_deposit_events(video_1_depid) == []
 
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
-        sse_channel = 'mychannel'
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
         payload = dict(
             uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
         )
 
@@ -678,6 +601,8 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                                 online_video, api_project, datadir,
                                 mock_sorenson):
     """Test webhooks reload master after publish/edit/publish."""
+    api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = False
+
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     master_key = 'test.mp4'
@@ -691,19 +616,16 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         )
 
     with api_app.test_client() as client, \
-            mock.patch('invenio_sse.ext._SSEState.publish'), \
-            mock.patch('invenio_indexer.api.RecordIndexer.bulk_index'):
+            mock.patch('invenio_indexer.tasks.index_record.delay'):
 
         # create local file
         local_file = get_local_file(bucket=video_1.files.bucket,
                                     datadir=datadir, filename='test.mp4')
 
-        sse_channel = 'mychannel'
         payload = dict(
             uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
-            sse_channel=sse_channel,
             sleep_time=0,
             version_id=str(local_file),
         )

@@ -175,11 +175,7 @@ class CeleryAsyncReceiver(Receiver):
 
             db.session.add(event)
         db.session.commit()
-        update_avc_deposit_state(
-            deposit_id=event.payload.get('deposit_id'),
-            event_id=event.id,
-            sse_channel=event.payload.get('sse_channel')
-        )
+        update_avc_deposit_state(deposit_id=event.payload.get('deposit_id'))
 
     def rerun_task(self, **payload):
         """Re-run a task."""
@@ -271,10 +267,6 @@ class Downloader(CeleryAsyncReceiver):
           * bucket_id
           * key, file name.
           * deposit_id
-
-        Optional:
-          * sse_channel, if set all the tasks will publish their status update
-            to it.
 
         For more info see the task
         :func: `~cds.modules.webhooks.tasks.DownloadTask` this
@@ -457,8 +449,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
           * deposit_id
 
         Optional:
-          * sse_channel, if set all the tasks will publish their status update
-            to it.
           * frames_start, if not set the default value will be used.
           * frames_end, if not set the default value will be used.
           * frames_gap, if not set the default value will be used.

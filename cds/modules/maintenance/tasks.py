@@ -31,7 +31,7 @@ logger = get_task_logger(__name__)
 
 
 class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
-    """Transcode without indexing or sending sse messages."""
+    """Transcode without indexing."""
 
     def run(self, preset_quality, sleep_time=5, *args, **kwargs):
         super(MaintenanceTranscodeVideoTask, self).run(

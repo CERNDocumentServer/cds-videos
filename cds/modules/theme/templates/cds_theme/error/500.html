@@ -3,15 +3,18 @@
 {%- block page_header %}{% endblock page_header %}
 {% block page_body %}
 <div class="cds-500 flex-container cds-cover">
-  <div class="flex-item  py-20">
+  <div class="flex-item py-20">
     <div class="container">
       <div class="row">
         <div class="col-md-12">
           <div class="text-center">
             <p class="f1 t-w">CDS</p>
             <p class="glitch" data-text="500">500</p>
-            <p class="cds-not-found-label f1 t-w pa-5 mb-40">{{_('Oups this is embarrassing, something wrong happend.')}}</p>
-            <p class="mt-40"><a href="/" title="{{_('Back to home')}}" class="btn btn-default">Back to safety</a></p>
+            <p class="cds-not-found-label f1 t-w pa-5">{{_('Oops this is embarrassing, something wrong happened.')}}</p>
+            {% if g.sentry_event_id %}
+              <p class="cds-not-found-label f7 t-w pa-5">{{_('Error identifier')}}: {{ g.sentry_event_id }}</p>
+            {% endif %}
+            <p class="mt-40"><a href="/" title="{{_('Back to home')}}" class="btn btn-default">Back to homepage</a></p>
           </div>
         </div>
       </div>
