@@ -471,7 +471,7 @@ def video_record_metadata(db, project_published, extra_metadata):
     bucket_id = video['_buckets']['deposit']
     # Create video objects in bucket
     master = 'test.mp4'
-    qualities = [240, 360, 480, 720]
+    qualities = ['240', '360', '480', '720']
     filesize = 123456
     slaves = ['test[{}p]'.format(quality) for quality in qualities]
     test_stream = BytesIO(b'\x00' * filesize)
