@@ -145,7 +145,6 @@ install_requires = [
     'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
     'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
     'node-semver>=0.1.1,<0.2.0',        # FIXME: node-semver 0.2.0
-    'simplekv==0.10',                   # FIXME: see inspire-next/2744
 ]
 
 packages = find_packages()
