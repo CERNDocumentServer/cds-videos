@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2018 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -127,7 +127,7 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
         record_id='1',
         title_en='My english title',
         title_fr='My french title',
-        type='video',
+        type='360 video',
         video_length=duration,
     )
 
