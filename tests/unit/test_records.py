@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2018 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,21 +26,20 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+import re
 from functools import partial
+from time import sleep
 
 import mock
-import json
-
-import re
-from invenio_indexer.api import RecordIndexer
-from invenio_db import db
-from time import sleep
 from flask import url_for
-from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
+from invenio_db import db
+from invenio_indexer.api import RecordIndexer
+from invenio_pidstore.providers.recordid import RecordIdProvider
 
-from helpers import get_files_metadata, assert_hits_len
+from helpers import assert_hits_len, get_files_metadata
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
@@ -210,8 +209,17 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'My french title',
-                        u'type': u'video',
+                        u'type': u'360 video',
                         u'video_length': u'00:01:00',
+                        # TODO: harmonize links URLs creation
+                        u'links': {
+                            '240p':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg',
+                            'original':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg',
+                            'self': 'http://localhost/record/1',
+                            'thumbnail':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg'},
                     }
                 }
             ]
@@ -262,8 +270,16 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                         u'thumbnail': thumbnail,
                         u'title_en': u'My english title',
                         u'title_fr': u'',
-                        u'type': u'video',
+                        u'type': u'360 video',
                         u'video_length': u'00:01:00',
+                        u'links': {
+                            '240p':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg',
+                            'original':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg',
+                            'self': 'http://localhost/record/1',
+                            'thumbnail':
+                            'http://cds.cern.ch/api/files/123/frame-1.jpg'},
                     }
                 }
             ]
