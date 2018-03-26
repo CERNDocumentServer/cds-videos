@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -302,6 +302,9 @@ RECORDS_UI_ENDPOINTS = dict(
         record_class='cds.modules.records.api:CDSRecord',
     ),
 )
+
+# Endpoint for record ui.
+RECORDS_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
