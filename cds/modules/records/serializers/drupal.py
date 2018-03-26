@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018 CERN.
 #
 # CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,19 @@
 # In applying this licence, CERN does not waive the privileges and immunities
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
-
 """Drupal serializer for records."""
 
 from __future__ import absolute_import, print_function
 
 import arrow
 from arrow.parser import ParserError
+from flask import current_app
 from invenio_records_rest.serializers.json import JSONSerializer
 
+from ...deposit.api import Video
 from ...records.api import CDSVideosFilesIterator
-from ...deposit.api import Project, Video
 from ..api import CDSFileObject
-from ..utils import HTMLTagRemover, remove_html_tags
+from ..utils import HTMLTagRemover, format_pid_link, remove_html_tags
 
 
 def format_datetime(datetime):
@@ -78,21 +78,23 @@ class VideoDrupal(object):
             'keywords': self.keywords,
             'license_body': record.get('license', [{}])[0].get('license', ''),
             'license_url': record.get('license', [{}])[0].get('url', ''),
+            'links': self.links,
             'producer': self.contributors('Producer'),
             'record_id': record['_deposit']['pid']['value'],
             'thumbnail': self.thumbnail,
             'title_en': title_en,
             'title_fr': title_fr,
-            'type': self.type_,
+            'type': 'video' if not record.get('vr', False) else '360 video',
             'video_length': self.video_length,
         }
         return {'entries': [{'entry': entry}]}
 
     def get_translation(self, field_name, subfield_name, lang_code):
         """Get title france."""
-        titles = list(filter(
-            lambda t: t.get('language') == lang_code,
-            self._record.get('{0}_translations'.format(field_name), [])))
+        titles = list(
+            filter(lambda t: t.get('language') == lang_code,
+                   self._record.get('{0}_translations'.format(field_name),
+                                    [])))
         if len(titles) != 0:
             if subfield_name:
                 return titles[0][subfield_name]
@@ -119,26 +121,42 @@ class VideoDrupal(object):
     @property
     def thumbnail(self):
         """Get thumbnail."""
-        frame = CDSVideosFilesIterator.get_master_video_file(
-            record=self._record)
+        frame = CDSVideosFilesIterator.get_video_posterframe(self._record)
         if frame:
             return CDSFileObject._link(
                 bucket_id=frame['bucket_id'], key=frame['key'], _external=True)
-
-    @property
-    def type_(self):
-        """Get type."""
-        if self._record['$schema'] == Video.get_record_schema():
-            return 'video'
-        if self._record['$schema'] == Project.get_record_schema():
-            return 'project'
-        return ''
 
     @property
     def keywords(self):
         """Get keywords."""
         keywords = self._record.get('keywords', [])
         return ", ".join([keyword['name'] for keyword in keywords])
+
+    @property
+    def links(self):
+        """All the video links, to self and sub-formats."""
+        _links = {}
+        _links['self'] = format_pid_link(
+            current_app.config['RECORDS_UI_ENDPOINT'],
+            self._record['recid'])
+        video_file = CDSVideosFilesIterator.get_master_video_file(
+            record=self._record)
+        if video_file:
+            _links['original'] = CDSFileObject._link(
+                bucket_id=video_file['bucket_id'], key=video_file['key'])
+
+            for preset in CDSVideosFilesIterator.get_video_subformats(
+                    video_file):
+                preset_quality = preset.get('tags', {}).get(
+                    'preset_quality', None)
+                if preset_quality:
+                    _links[preset_quality] = CDSFileObject._link(
+                        preset['bucket_id'], key=preset['key'])
+            thumbnail = CDSVideosFilesIterator.get_video_posterframe(
+                self._record)
+            _links['thumbnail'] = CDSFileObject._link(
+                thumbnail['bucket_id'], key=thumbnail['key'])
+        return _links
 
 
 class DrupalSerializer(JSONSerializer):
