@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017, 2018 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -21,7 +21,6 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-
 """Records tasks."""
 
 from __future__ import absolute_import, print_function
@@ -31,45 +30,41 @@ from datetime import datetime
 
 import requests
 import sqlalchemy as sa
-from cds.modules.records.utils import format_pid_link
+from cds.modules.records.utils import format_pid_link, is_deposit, is_record
 from celery import shared_task
 from flask import current_app
 from flask_mail import Message
 from invenio_db import db
 from invenio_files_rest.models import FileInstance
 from invenio_indexer.api import RecordIndexer
-from requests.exceptions import RequestException
 from invenio_records_files.models import RecordsBuckets
-from cds.modules.records.utils import is_deposit, is_record
+from requests.exceptions import RequestException
 
-from .api import CDSRecord, Keyword
+from .api import Keyword
 from .search import KeywordSearch, query_to_objects
-from .symlinks import SymlinksCreator
+
+# from .symlinks import SymlinksCreator
 
 
 def _get_keywords_from_api(url):
     """Get keywords list from API."""
-    request = requests.get(
-        url, headers={'User-Agent': 'cdslabs'}).text
+    request = requests.get(url, headers={'User-Agent': 'cdslabs'}).text
 
     keywords = {}
     for tag in json.loads(request)['tags']:
-        keywords[tag['id']] = dict(
-            name=tag['name'],
-            provenance=url
-        )
+        keywords[tag['id']] = dict(name=tag['name'], provenance=url)
     return keywords
 
 
 def _update_existing_keywords(indexer, keywords_api, keywords_db):
     """Update existing keywords."""
+
     def _keyword_data(values):
         """Prepare the keyword data."""
         return dict(
             name=values.get('name'),
             provenance=values.get('provenance', ''),
-            deleted=values.get('deleted', False)
-        )
+            deleted=values.get('deleted', False))
 
     def _check_if_updated(old_keyword, new_data):
         """Return True in the keyword should be updated."""
@@ -136,11 +131,13 @@ def keywords_harvesting(self, max_retries=5, countdown=5):
         indexer = RecordIndexer()
 
         _update_existing_keywords(
-            indexer=indexer, keywords_api=keywords_api, keywords_db=keywords_db
-        )
+            indexer=indexer,
+            keywords_api=keywords_api,
+            keywords_db=keywords_db)
         _delete_not_existing_keywords(
-            indexer=indexer, keywords_api=keywords_api, keywords_db=keywords_db
-        )
+            indexer=indexer,
+            keywords_api=keywords_api,
+            keywords_db=keywords_db)
 
         db.session.commit()
     except RequestException as exc:
@@ -167,13 +164,14 @@ def format_file_integrity_report(report):
         lines.append('Checksum: {}'.format(f.checksum))
         lines.append('Last Check: {}'.format(f.last_check_at))
         if 'record' in entry:
-            lines.append(u'Record: {}'.format(format_pid_link(
-                         current_app.config['RECORDS_UI_ENDPOINT'],
-                         entry['record'].get('recid'))))
+            lines.append(u'Record: {}'.format(
+                format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
+                                entry['record'].get('recid'))))
         if 'deposit' in entry:
-            lines.append(u'Deposit: {}'.format(format_pid_link(
-                         current_app.config['DEPOSIT_UI_ENDPOINT'],
-                         entry['deposit'].get('_deposit', {}).get('id'))))
+            lines.append(u'Deposit: {}'.format(
+                format_pid_link(current_app.config['DEPOSIT_UI_ENDPOINT'],
+                                entry['deposit'].get('_deposit',
+                                                     {}).get('id'))))
         lines.append(('-' * 80) + '\n')
     return '\n'.join(lines)
 
@@ -193,11 +191,11 @@ def file_integrity_report():
             pass  # Don't fail sending the report in case of some file error
 
     report = []
-    unhealthy_files = (
-        FileInstance.query
-        .filter(sa.or_(FileInstance.last_check.is_(None),
-                       FileInstance.last_check.is_(False)))
-        .order_by(FileInstance.created.desc()))
+    unhealthy_files = (FileInstance.query.filter(
+        sa.or_(
+            FileInstance.last_check.is_(None),
+            FileInstance.last_check.is_(False))).order_by(
+                FileInstance.created.desc()))
 
     for f in unhealthy_files:
         entry = {'file': f}
@@ -215,7 +213,8 @@ def file_integrity_report():
 
     if report:
         # Format and send the email
-        subject = u'[CDS Videos] Files integrity report [{}]'.format(datetime.now())
+        subject = u'[CDS Videos] Files integrity report [{}]'.format(
+            datetime.now())
         body = format_file_integrity_report(report)
         sender = current_app.config['NOREPLY_EMAIL']
         recipients = [current_app.config['CDS_ADMIN_EMAIL']]

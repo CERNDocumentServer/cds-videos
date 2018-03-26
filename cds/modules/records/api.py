@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017, 2018 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -29,7 +29,7 @@ import os
 import uuid
 from os.path import splitext
 
-from flask import current_app, url_for
+from flask import current_app
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
@@ -66,17 +66,18 @@ def dump_object(obj):
 
 def _build_file_links(obj):
     """Return a dict with file links."""
-    return dict(self=(
+    return dict(
+        self=(
             u'{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}'
-                .format(
-                    # TODO: JSONSchema host is not the best solution here.
-                    scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
-                    host=current_app.config['JSONSCHEMAS_HOST'],
-                    api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
-                    bucket=obj.bucket_id,
-                    key=obj.key,
-                    version_id=obj.version_id,
-                )))
+            .format(
+                # TODO: JSONSchema host is not the best solution here.
+                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
+                host=current_app.config['JSONSCHEMAS_HOST'],
+                api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
+                bucket=obj.bucket_id,
+                key=obj.key,
+                version_id=obj.version_id,
+            )))
 
 
 def dump_generic_object(obj, data):
@@ -84,14 +85,14 @@ def dump_generic_object(obj, data):
     obj_dump = dump_object(obj)
     # if it's a master, get all the depending object and add them inside
     # <context_type> as a list order by key.
-    for slave in ObjectVersion.query_heads_by_bucket(
-        bucket=obj.bucket).join(ObjectVersion.tags).filter(
-            ObjectVersion.file_id.isnot(None),
-            ObjectVersionTag.key == 'master',
-            ObjectVersionTag.value == str(obj.version_id)
-    ).order_by(func.length(ObjectVersion.key), ObjectVersion.key):
-        obj_dump.setdefault(
-            slave.get_tags()['context_type'], []).append(dump_object(slave))
+    for slave in ObjectVersion.query_heads_by_bucket(bucket=obj.bucket).join(
+            ObjectVersion.tags).filter(
+                ObjectVersion.file_id.isnot(None),
+                ObjectVersionTag.key == 'master',
+                ObjectVersionTag.value == str(obj.version_id)).order_by(
+                    func.length(ObjectVersion.key), ObjectVersion.key):
+        obj_dump.setdefault(slave.get_tags()['context_type'], []).append(
+            dump_object(slave))
     # Sort slaves by key within their lists
     data.update(obj_dump)
 
@@ -102,12 +103,12 @@ class CDSFileObject(FileObject):
     @classmethod
     def _link(cls, bucket_id, key, _external=True):
         return u'{scheme}://{host}/{api}/{bucket_id}/{key}'.format(
-                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
-                host=current_app.config['JSONSCHEMAS_HOST'],
-                api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
-                bucket_id=bucket_id,
-                key=key,
-            )
+            scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
+            host=current_app.config['JSONSCHEMAS_HOST'],
+            api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
+            bucket_id=bucket_id,
+            key=key,
+        )
 
     def dumps(self):
         """Create a dump of the metadata associated to the record."""
@@ -137,32 +138,48 @@ class CDSVideosFilesIterator(CDSFilesIterator):
     def get_master_video_file(record):
         """Get master video file from a Video record."""
         try:
-            return next(
-                f for f in record['_files']
-                if f['media_type'] == 'video'
-                and f['context_type'] == 'master')
+            return next(f for f in record['_files']
+                        if f['media_type'] == 'video'
+                        and f['context_type'] == 'master')
         except StopIteration:
             return {}
 
     @staticmethod
     def get_video_subformats(master_file):
         """Get list of video subformats."""
-        return [video
-                for video in master_file.get('subformat', [])
-                if video['media_type'] == 'video' and video[
-                    'context_type'] == 'subformat']
+        return [
+            video for video in master_file.get('subformat', [])
+            if video['media_type'] == 'video'
+            and video['context_type'] == 'subformat'
+        ]
 
     @staticmethod
     def get_video_subtitles(record):
         """Get list of video subtitles."""
-        return [f for f in record['_files']
-                if f['context_type'] == 'subtitle' and 'language' in f['tags']]
+        return [
+            f for f in record['_files']
+            if f['context_type'] == 'subtitle' and 'language' in f['tags']
+        ]
 
     @staticmethod
     def get_video_frames(master_file):
         """Get sorted list of video frames."""
-        return sorted(master_file.get('frame', []),
-                      key=lambda s: float(s['tags']['timestamp']))
+        return sorted(
+            master_file.get('frame', []),
+            key=lambda s: float(s['tags']['timestamp']))
+
+    @staticmethod
+    def get_video_posterframe(record):
+        """Get the video poster frame."""
+        # First check if we have a custom thumbnail for this video
+        for f in record.get('_files'):
+            if f.get('context_type') == 'poster' and f.get(
+                    'media_type') == 'image':
+                return f
+
+        # If not return the first frame from the list
+        master_file = CDSVideosFilesIterator.get_master_video_file(record)
+        return CDSVideosFilesIterator.get_video_frames(master_file)[0]
 
 
 class CDSRecord(Record):
@@ -184,9 +201,7 @@ class CDSRecord(Record):
     def depid(self):
         """Return depid of the record."""
         return PersistentIdentifier.get(
-            pid_type='depid',
-            pid_value=self.get('_deposit', {}).get('id')
-        )
+            pid_type='depid', pid_value=self.get('_deposit', {}).get('id'))
 
 
 class Keyword(Record):
