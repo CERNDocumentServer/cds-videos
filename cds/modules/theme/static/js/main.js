@@ -50,7 +50,7 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
         q: term
       }
     }).then(function(response) {
-      var results = localStorageService.get('cds.search.history') || [];
+      var results = [];
       if (response.data.hits.hits) {
         angular.forEach(response.data.hits.hits, function(value, index) {
           results.push({
@@ -59,7 +59,7 @@ app.controller('mainCtrl', function ($scope, $sce, $q, $http, localStorageServic
           })
         });
       }
-      results.reverse();
+      results = results.concat(localStorageService.get('cds.search.history') || []);
       deferred.resolve(results);
     });
     return deferred.promise;
