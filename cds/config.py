@@ -62,7 +62,7 @@ CDS_ENV_TEST = False
 #: Email address for admins.
 CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
 #: Email address for no-reply.
-NOREPLY_EMAIL = "cds-no-reply@cern.ch"
+NOREPLY_EMAIL = "no-reply@cern.ch"
 MAIL_SUPPRESS_SEND = True
 
 ###############################################################################
