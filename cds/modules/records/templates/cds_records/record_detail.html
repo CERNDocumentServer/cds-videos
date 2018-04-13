@@ -1,6 +1,9 @@
 {%- extends config.RECORDS_UI_BASE_TEMPLATE %}
 {# Please keep the double `striptags`: it is needed to clean up encoded html entities contained in a few migrated old records #}
-{%- set title = record.title.title|striptags|striptags -%}
+
+{%- set title_prefix = record.title.title|striptags|striptags -%}
+{%- set description = description|default('')|striptags|striptags -%}
+
 {%- set type = 'video' if 'video-v1.0.0' in record['$schema'] else 'project'%}
 {%- block head_meta %}
     {{ super() }}

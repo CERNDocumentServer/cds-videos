@@ -731,7 +731,9 @@ OAUTH2SERVER_SETTINGS_TEMPLATE = 'cds_theme/settings.html'
 ###############################################################################
 
 # The site name
-THEME_SITENAME = _('CERN Document Server')
+THEME_SITENAME = _(u'CDS Videos · CERN')
+THEME_SITEDESCRIPTION = _('CDS Videos is the CERN official repository to '
+                          'archive and disseminate videos.')
 # Default site URL (used only when not in a context - e.g. like celery tasks).
 THEME_SITEURL = "http://localhost:5000"
 # The theme logo.
