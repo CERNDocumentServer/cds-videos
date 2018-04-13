@@ -1,49 +1,54 @@
 <!-- Download -->
 <div class="cds-detail-title cds-detail-video-title">
-  <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20">
+  <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-0">
     <i class="fa fa-download"></i> Download
   </h3>
+  <p class="cds-detail-video-subtitle">
+    By download any of these files you accept
+    <a href="http://copyright.web.cern.ch/" class="cds-detail-video-link">CERN's Terms of Use</a>
+  </p>
 </div>
 <!-- Subformat -->
 <div ng-if="(record | findMaster).key" class="cds-video-subformats">
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).download||[]).length > 0" class="cds-detail-download-box cds-detail-video-download-box">
-    <div class="list-group">
+    <div class="download-list-wrapper">
       <div ng-repeat="(type, subs) in ((record | findMaster).subformat | groupDownloadable).download |  groupBy:'tags.type':'others'">
-        <p class='mt-10 tw-b text-uppercase text-muted'>{{ type }}</p>
-        <a ng-repeat="file in subs" class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)"  target="_blank">
-          {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
-        </a>
+        <div class="download-list-container">
+          <p class="mt-10 tw-b text-uppercase text-muted">{{ type }}</p>
+          <div class="download-list-group">
+            <div class="download-list-item" ng-repeat="file in subs" popover>
+              <span>{{ file.tags.preset_quality }}
+                <span class="download-list-fade">|</span> {{ file.size | bytesToHumanReadable }}</span>
+              <div class="download-list-item-container">
+                <a class="download-list-item-checksum" rel="popover" data-placement="bottom" data-content="79054025255fb1a26e4bc422aef54eb4">checksum</a>
+                <a class="download-list-item-button" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" target="_blank">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <!-- Master file -->
-  <div class="cds-video-master-file mb-20">
-    <a ng-click="dialogShown = true" class="btn btn-block btn-default">Master video ({{ (record | findMaster).size | bytesToHumanReadable}}) {{(record | findMaster) | findResolution}}</a>
-  </div>
-  <modal-dialog show="dialogShown" dialog-title="Terms of use for CERN audiovisual media" >
-    <div>
-      <p>Use of CERN audiovisual media denotes agreement with the following terms: </p>
-        <ol>
-          <li>CERN provides the image free of charge for educational and informational use.</li>
-          <li>The image is provided “as-is” and the user shall hold CERN free and harmless in connection with its use.</li>
-          <li>CERN is to be credited as the source of the image.</li>
-          <li>CERN retains copyright in the image. Download and use of the image does not amount to a transfer of intellectual property.</li>
-          <li>The image may not be used in a misleading, inappropriate or offensive manner, in a military context, in advertising or promotion, or in a manner that suggests any kind of endorsement by CERN or its personnel.</li>
-          <li>The image may not be sold, distributed or otherwise made available for use by third parties.</li>
-          <li>The CERN logo is legally protected. CERN’s prior written approval shall be obtained for its use or for the use of any image primarily featuring the logo.</li>
-          <li>CERN reserves the right to alter or delete images without notice.</li>
-          <li>Please contact us by using the contact form if you have any questions or comments with respect to CERN content; if you are unsure whether your intended use meets these terms; or, if you seek permission for use of the CERN logo or any other use that does not fall within these terms.</li>
-          <li>CERN appreciates your interest in its work.  More information about CERN is available at www.cern.ch.</li>
-        </ol>
-      <p>Copyright abuse should be reported using the contact form.</p>
-    </div>
-    <p class="mt-20 pull-right">
-      <button class="btn btn-default" ng-click="$parent.hideModal()">Disagree</button>
-      <a ng-href="{{ (record | findMaster).links.self }}" download>
-        <button class="btn btn-success" ng-click="$parent.hideModal(); logMediaDownload(record | findMaster);">Agree</button>
+  <div class="download-list-container">
+    <div class="download-list-header">
+      <p class="mt-10 tw-b text-uppercase text-muted">for broadcasters</p>
+      <a href="#">
+        <i class="fa fa-info-circle"></i>
       </a>
-    </p>
-  </modal-dialog>
+    </div>
+    <div class="download-list-group">
+      <div class="download-list-item">
+        <span>{{ (record | findMaster) | findResolution }}
+          <span class="download-list-fade">|</span> {{ (record | findMaster).size | bytesToHumanReadable}}</span>
+        <div class="download-list-item-container" popover>
+          <a class="download-list-item-checksum" rel="popover" data-placement="bottom" data-content="79054025255fb1a26e4bc422aef54eb4">checksum</a>
+          <a class="download-list-item-button" ng-href="{{ (record | findMaster).links.self }}" ng-click="logMediaDownload(record | findMaster);"
+            target="_blank">Download</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div ng-if="!(record | findMaster).key" class="cds-video-subformats">
   <p class="text-muted text-center">
@@ -59,18 +64,25 @@
       <a class="f8 display-block" ng-click="showAllOtherFiles = !showAllOtherFiles">
         Other video formats
         <p class="pull-right">
-          <span ng-show="showAllOtherFiles"><i class="fa f5 fa-angle-up"></i></span>
-          <span ng-show="!showAllOtherFiles"><i class="fa f5 fa-angle-down"></i></span>
+          <span ng-show="showAllOtherFiles">
+            <i class="fa f5 fa-angle-up"></i>
+          </span>
+          <span ng-show="!showAllOtherFiles">
+            <i class="fa f5 fa-angle-down"></i>
+          </span>
         </p>
       </a>
     </div>
   </div>
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box">
-    <div class="list-group">
-      <div ng-repeat="file in ((record | findMaster).subformat | groupDownloadable).additional">
-        <a class="list-group-item" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" target="_blank">
-          {{ file.tags.preset_quality }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
-        </a>
+    <div>
+      <div class="download-list-item" ng-repeat="file in ((record | findMaster).subformat | groupDownloadable).additional" popover>
+        <span>{{ file.tags.preset_quality }}
+          <span class="download-list-fade">|</span> {{ file.size | bytesToHumanReadable }}</span>
+        <div class="download-list-item-container">
+          <a class="download-list-item-checksum" rel="popover" data-placement="bottom" data-content="79054025255fb1a26e4bc422aef54eb4">checksum</a>
+          <a class="download-list-item-button" ng-href="{{ file.links.self }}" ng-click="logMediaDownload(file)" target="_blank">Download</a>
+        </div>
       </div>
     </div>
   </div>
@@ -83,16 +95,23 @@
       <a class="f8 display-block" ng-click="showAllFrames = !showAllFrames">
         Thumbnails
         <p class="pull-right">
-          <span ng-show="showAllFrames"><i class="fa f5 fa-angle-up"></i></span>
-          <span ng-show="!showAllFrames"><i class="fa f5 fa-angle-down"></i></span>
+          <span ng-show="showAllFrames">
+            <i class="fa f5 fa-angle-up"></i>
+          </span>
+          <span ng-show="!showAllFrames">
+            <i class="fa f5 fa-angle-down"></i>
+          </span>
         </p>
       </a>
     </div>
   </div>
   <div ng-show="(record | findMaster).frame.length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box">
-    <div class="list-group" >
+    <div class="list-group">
       <a ng-repeat="file in (record | findMaster).frame" class="list-group-item" ng-href="{{ file.links.self }}" target="_blank">
-        {{ file.key }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
+        {{ file.key }}
+        <span class="pull-right">
+          <small>{{ file.size | bytesToHumanReadable }}</small>
+        </span>
       </a>
     </div>
   </div>
@@ -105,16 +124,24 @@
       <a class="f8 display-block" ng-click="showAllAdditionalFiles = !showAllAdditionalFiles">
         Additional files
         <p class="pull-right">
-          <span ng-show="showAllAdditionalFiles"><i class="fa f5 fa-angle-up"></i></span>
-          <span ng-show="!showAllAdditionalFiles"><i class="fa f5 fa-angle-down"></i></span>
+          <span ng-show="showAllAdditionalFiles">
+            <i class="fa f5 fa-angle-up"></i>
+          </span>
+          <span ng-show="!showAllAdditionalFiles">
+            <i class="fa f5 fa-angle-down"></i>
+          </span>
         </p>
       </a>
     </div>
   </div>
   <div ng-show="record.metadata._files.length > 1 && showAllAdditionalFiles" class="cds-detail-download-box cds-detail-video-download-box">
     <div class="list-group">
-      <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"  ng-hide="file.context_type == 'master'" target="_blank">
-        {{ file.key | ellipsis: 25 }} <span class="pull-right"><small>{{ file.size | bytesToHumanReadable }}</small></span>
+      <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"
+        ng-hide="file.context_type == 'master'" target="_blank">
+        {{ file.key | ellipsis: 25 }}
+        <span class="pull-right">
+          <small>{{ file.size | bytesToHumanReadable }}</small>
+        </span>
       </a>
     </div>
   </div>

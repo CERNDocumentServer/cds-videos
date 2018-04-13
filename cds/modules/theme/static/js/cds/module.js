@@ -212,20 +212,65 @@ app.filter('findResolution', function($filter) {
   return function(record) {
     height = record['tags']['height'];
     selectedResolution = height.concat('p');
+
+    configuredResolutionsWidth = {
+      '1920': '1080p',
+      '2048': '2K'
+    }
+
     configuredResolutions = {
       '240': '240p',
       '360': '360p',
       '480': '480p',
-      '720': 'HD 720',
-      '1080': 'HD 1080',
-      '2160': '2K',
-      '4096': '4K'
+      '720': '720p',
+      '1024': '1024p',
+      '1080': '1080p',
+      '1080': '2K',
+      '2160': '4K',
+      '4320': '8K'
     }
+
     Object.keys(configuredResolutions).forEach(function(resolution) {
       if (height >= resolution) {
         selectedResolution = configuredResolutions[resolution]
       }
     });
+
+    if (selectedResolution === '2K')
+    return selectedResolution;
+  }
+});
+
+
+// Find closest video resolution
+app.filter('findResolution', function($filter) {
+  return function(record) {
+    height = record['tags']['height'];
+    width = record['tags']['width'];
+
+    selectedResolution = height.concat('p');
+
+    configuredResolutions = {
+      '240': '240p',
+      '360': '360p',
+      '480': '480p',
+      '720': '720p',
+      '1024': '1024p',
+      '1080': 'TBD',
+      '2160': '4K',
+      '4320': '8K'
+    }
+
+    Object.keys(configuredResolutions).forEach(function(resolution) {
+      if (height >= resolution) {
+        selectedResolution = configuredResolutions[resolution]
+      }
+    });
+
+    if (selectedResolution === 'TBD') {
+      return width <= '1920' ? '1080p' : '2K'
+    }
+
     return selectedResolution;
   }
 });
@@ -502,4 +547,11 @@ app.provider('isoLanguages', function () {
       };
     }
   }
+});
+
+// directive for bootstrap popover to work inside ng-repeat
+app.directive('popover', function() {
+  return function(scope, element, attrs) {
+      element.find('a[rel=popover]').popover();
+  };
 });
