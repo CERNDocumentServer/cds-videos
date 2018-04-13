@@ -51,8 +51,7 @@ def init_menu():
 def index():
     """CDS home page."""
     return render_template(
-        'cds_home/home.html',
-        title='Home'
+        'cds_home/home.html'
     )
 
 
