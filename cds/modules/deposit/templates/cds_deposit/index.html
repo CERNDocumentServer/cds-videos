@@ -1,5 +1,5 @@
 {%- extends "cds_theme/page.html" %}
-{%- set title = _('Deposits') -%}
+{%- set title_prefix = _('Deposits') -%}
 {%- block css %}
   {{ super() }}
   {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}

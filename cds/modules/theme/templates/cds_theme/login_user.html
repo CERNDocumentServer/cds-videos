@@ -23,7 +23,7 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 #}
 {% extends config.COVER_TEMPLATE %}
-{%- set title = _('Login') -%}
+{%- set title_prefix = _('Login') -%}
 {%- from "invenio_accounts/_macros.html" import render_field, form_errors -%}
 {%- from "cds_theme/_macros.html" import cds_oauth_button %}
 {%- block page_body -%}

@@ -1,4 +1,6 @@
-{%- set title = '%s | %s'|format(_(title), config.THEME_SITENAME) if title else config.THEME_SITENAME -%}
+{%- set title_prefix = '%s · '|format(title_prefix) if title_prefix else '' -%}
+{%- set title = '%s%s'|format(title_prefix, config.THEME_SITENAME) -%}
+{%- set description = description if description else config.THEME_SITEDESCRIPTION -%}
 {%- set suggest_app = true -%}
 {%- set body_css_classes = ['flex-container', 'bootstrap-padding-top'] -%}
 {%- set container_class = 'container-fluid' -%}
@@ -11,7 +13,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {%- if description %}<meta name="description" content="{{ description }}" />{% endif %}
+    <meta name="description" content="{{ description }}" />
     {%- if keywords %}<meta name="keywords" content="{{ keywords }}" />{% endif %}
     {%- if config.get('THEME_GOOGLE_SITE_VERIFICATION', None) %}
       {%- for google_id in config.THEME_GOOGLE_SITE_VERIFICATION %}

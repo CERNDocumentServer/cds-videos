@@ -1,4 +1,7 @@
 {%- extends 'cds_theme/page.html' %}
+
+{%- set title_prefix = '%s · %s'|format(_('Stats'), record.title.title|striptags|striptags) -%}
+
 {%- block css %}
   {{ super() }}
   {% assets "cds_record_stats_css" %}
