@@ -27,23 +27,25 @@ include *.rst
 include *.sh
 include *.txt
 include *.yml
+include .checkignore
+include .coveragerc
+include .dockerignore
+include .jshintignore
+include .jshintrc
 include COPYING
 include Dockerfile
 include Procfile
 include babel.cfg
 include pytest.ini
-include .checkignore
-include .dockerignore
-include .jshintignore
-include .jshintrc
-include .coveragerc
 
 recursive-include .github *
+recursive-include benchmarks *.py
 recursive-include cds *.css
 recursive-include cds *.eot
 recursive-include cds *.gif
 recursive-include cds *.gz
 recursive-include cds *.html
+recursive-include cds *.ico
 recursive-include cds *.jpg
 recursive-include cds *.js
 recursive-include cds *.json
@@ -51,7 +53,6 @@ recursive-include cds *.less
 recursive-include cds *.png
 recursive-include cds *.png
 recursive-include cds *.py
-recursive-include cds *.ico
 recursive-include cds *.scss
 recursive-include cds *.smil
 recursive-include cds *.svg
@@ -59,6 +60,7 @@ recursive-include cds *.ttf
 recursive-include cds *.vtt
 recursive-include cds *.woff
 recursive-include cds *.xml
+recursive-include cds *.xsl
 recursive-include docker *
 recursive-include scripts *.sh
 recursive-include tests *.jpg
@@ -66,4 +68,3 @@ recursive-include tests *.json
 recursive-include tests *.mov
 recursive-include tests *.mp4
 recursive-include tests *.py
-recursive-include benchmarks *.py
