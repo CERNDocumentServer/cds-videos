@@ -308,6 +308,8 @@ RECORDS_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
+# Relative URL to XSL Stylesheet, placed under `modules/records/static`.
+OAISERVER_XSL_URL= '/static/xsl/oai2.xsl'
 OAISERVER_RECORD_INDEX = 'records'
 
 # 404 template.
