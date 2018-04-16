@@ -4,7 +4,7 @@
     <i class="fa fa-download"></i> Download
   </h3>
   <p class="cds-detail-video-subtitle">
-    By download any of these files you accept
+    By downloading any of these files you accept
     <a href="http://copyright.web.cern.ch/" class="cds-detail-video-link">CERN's Terms of Use</a>
   </p>
 </div>
@@ -33,7 +33,7 @@
   <div class="download-list-container">
     <div class="download-list-header" popover>
       <p class="mt-10 tw-b text-uppercase text-muted">for broadcasters</p>
-      <a class="download-list-header-warning" rel="popover" data-placement="bottom" data-html="true" data-content="<strong>Warning: Big file!</strong><br>As no network or browser is 100% stable, we <em>strongly</em> recommend using a download manager (like <a href='http://www.freedownloadmanager.org/download.htm'>Free Download Manager</a> or the command line tool <a href='http://aria2.sourceforge.net/'>aria2</a>).<br><strong>Note:</strong><br>Crediting this video with the full credit line, in a visible way is MANDATORY, if you want to use it without paying a fee. The full credit line to use can be found in each video caption.">
+      <a class="download-list-header-warning" rel="popover" data-placement="bottom" data-html="true" data-content="<strong>Warning: Big file!</strong><br>As no network or browser is 100% stable, we <em>strongly</em> recommend using a download manager.">
         <i class="fa fa-info-circle"></i>
       </a>
     </div>
@@ -42,7 +42,7 @@
         <span>{{ (record | findMaster) | findResolution }}
           <span class="download-list-fade">|</span> {{ (record | findMaster).size | bytesToHumanReadable}}</span>
         <div class="download-list-item-container" popover>
-          <a class="download-list-item-checksum" rel="popover" title="md5 checksum" data-placement="bottom" data-content="{{file.checksum}}">checksum</a>
+          <a class="download-list-item-checksum" rel="popover" title="md5 checksum" data-placement="bottom" data-content="{{(record | findMaster).checksum}}">checksum</a>
           <a class="btn btn-default download-list-item-button" ng-href="{{ (record | findMaster).links.self }}" ng-click="logMediaDownload(record | findMaster);"
             target="_blank">Download</a>
         </div>
@@ -76,7 +76,8 @@
   </div>
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box mt-5">
     <div>
-      <div class="download-list-item" ng-repeat="file in (((record | findMaster).subformat | groupDownloadable).additional | sortVideosDescending)" popover>
+      <div class="download-list-item" ng-repeat="file in (((record | findMaster).subformat | groupDownloadable).additional | sortVideosDescending)"
+        popover>
         <span>{{ file.tags.preset_quality }}
           <span class="download-list-fade">|</span> {{ file.size | bytesToHumanReadable }}</span>
         <div class="download-list-item-container">
@@ -107,7 +108,7 @@
   </div>
   <div ng-show="(record | findMaster).frame.length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box  mt-5">
     <div class="list-group">
-      <a ng-repeat="file in (record | findMaster).frame" class="list-group-item" ng-href="{{ file.links.self }}" target="_blank">
+      <a ng-repeat="file in (record | findMaster).frame" class="download-list-item-other" ng-href="{{ file.links.self }}" target="_blank">
         {{ file.key }}
         <span class="pull-right">
           <small>{{ file.size | bytesToHumanReadable }}</small>
@@ -117,12 +118,12 @@
   </div>
 </div>
 <!-- /Frame -->
-<!-- Additional files -->
-<div ng-if="record.metadata._files.length > 1" class="cds-video-subformats bt bw-1 bc-gl pt-10 pb-10">
+<!-- Subtitles -->
+<div ng-if="(record.metadata._files | getFilesByType: ['subtitle']).length > 0" class="cds-video-subformats bt bw-1 bc-gl pt-10 pb-10">
   <div class="row">
     <div class="col-md-12">
       <a class="f8 display-block" ng-click="showAllAdditionalFiles = !showAllAdditionalFiles">
-        Additional files
+        Subtitles
         <p class="pull-right mb-0">
           <span ng-show="showAllAdditionalFiles">
             <i class="fa f5 fa-angle-up"></i>
@@ -136,9 +137,9 @@
   </div>
   <div ng-show="record.metadata._files.length > 1 && showAllAdditionalFiles" class="cds-detail-download-box cds-detail-video-download-box mt-5">
     <div class="list-group">
-      <a title="{{file.key}}" ng-repeat="file in record.metadata._files" class="list-group-item" ng-href="{{ file.links.self }}"
+      <a title="{{file.key}}" ng-repeat="file in (record.metadata._files | getFilesByType: ['subtitle'])" class="download-list-item-other" ng-href="{{ file.links.self }}"
         ng-hide="file.context_type == 'master'" target="_blank">
-        {{ file.key | ellipsis: 25 }}
+        {{ file.tags.language | isoToLanguage }}
         <span class="pull-right">
           <small>{{ file.size | bytesToHumanReadable }}</small>
         </span>
@@ -146,5 +147,35 @@
     </div>
   </div>
 </div>
-<!-- /Additional files -->
-<!-- /Download -->
+  <!-- /Subtitles -->
+  <!-- Additional files -->
+  <div ng-if="(record.metadata._files | getAllFilesExcept: ['subtitle']).length > 1" class="cds-video-subformats bt bw-1 bc-gl pt-10 pb-10">
+    <div class="row">
+      <div class="col-md-12">
+        <a class="f8 display-block" ng-click="showAllAdditionalFiles = !showAllAdditionalFiles">
+          Additional files
+          <p class="pull-right mb-0">
+            <span ng-show="showAllAdditionalFiles">
+              <i class="fa f5 fa-angle-up"></i>
+            </span>
+            <span ng-show="!showAllAdditionalFiles">
+              <i class="fa f5 fa-angle-down"></i>
+            </span>
+          </p>
+        </a>
+      </div>
+    </div>
+    <div ng-show="record.metadata._files.length > 1 && showAllAdditionalFiles" class="cds-detail-download-box cds-detail-video-download-box mt-5">
+      <div class="list-group">
+        <a title="{{file.key}}" ng-repeat="file in (record.metadata._files | getAllFilesExcept: ['subtitle'])" class="download-list-item-other" ng-href="{{ file.links.self }}"
+          ng-hide="file.context_type == 'master'" target="_blank">
+          {{ file.key | ellipsis: 25 }}
+          <span class="pull-right">
+            <small>{{ file.size | bytesToHumanReadable }}</small>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- /Additional files -->
+  <!-- /Download -->

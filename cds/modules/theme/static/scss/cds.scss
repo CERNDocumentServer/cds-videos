@@ -578,9 +578,8 @@ i.sort-handle {
   }
 }
 
-// download-list
 .download-list-fade {
-  color: #888;
+  color: $gray;
 }
 
 .download-list-container {
@@ -596,7 +595,7 @@ i.sort-handle {
     }
 
     .download-list-header-warning {
-      color: #888;
+      color: $gray;
       outline: none;
       cursor: pointer;
     }
@@ -608,7 +607,6 @@ i.sort-handle {
   }
 }
 
-// download-list-item
 .download-list-item-container {
   display: flex;
   align-items: center;
@@ -628,9 +626,28 @@ i.sort-handle {
   .download-list-item-checksum {
     font-size: 13px;
     margin-right: 10px;
-    color: #888;
+    color: $gray;
     outline: none;
     cursor: pointer;
+  }
+}
+
+.download-list-item-other {
+  position: relative;
+
+  display: block;
+
+  margin-bottom: -1px;
+  padding: 5px 15px;
+
+  color: $gray;
+  border: 1px solid $btn-border-color;
+  background-color: $light-color;
+
+  &:hover {
+    color: $gray;
+    background-color: #d4d4d4;
+    text-decoration: none;
   }
 }
 
@@ -653,7 +670,7 @@ i.sort-handle {
   font-size: 12px;
   margin-top: 5px;
   margin-bottom: 20px;
-  color: #888;
+  color: $gray;
 }
 
 .cds-detail-video-link {

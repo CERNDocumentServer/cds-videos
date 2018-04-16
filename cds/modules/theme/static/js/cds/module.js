@@ -210,47 +210,12 @@ app.filter('findMaster', function($filter) {
 // Find closest video resolution
 app.filter('findResolution', function($filter) {
   return function(record) {
-    height = record['tags']['height'];
-    selectedResolution = height.concat('p');
+    var height = record['tags']['height'];
+    var width = record['tags']['width'];
 
-    configuredResolutionsWidth = {
-      '1920': '1080p',
-      '2048': '2K'
-    }
+    var selectedResolution = height.concat('p');
 
-    configuredResolutions = {
-      '240': '240p',
-      '360': '360p',
-      '480': '480p',
-      '720': '720p',
-      '1024': '1024p',
-      '1080': '1080p',
-      '1080': '2K',
-      '2160': '4K',
-      '4320': '8K'
-    }
-
-    Object.keys(configuredResolutions).forEach(function(resolution) {
-      if (height >= resolution) {
-        selectedResolution = configuredResolutions[resolution]
-      }
-    });
-
-    if (selectedResolution === '2K')
-    return selectedResolution;
-  }
-});
-
-
-// Find closest video resolution
-app.filter('findResolution', function($filter) {
-  return function(record) {
-    height = record['tags']['height'];
-    width = record['tags']['width'];
-
-    selectedResolution = height.concat('p');
-
-    configuredResolutions = {
+    var heightsToQualities = {
       '240': '240p',
       '360': '360p',
       '480': '480p',
@@ -259,16 +224,25 @@ app.filter('findResolution', function($filter) {
       '1080': 'TBD',
       '2160': '4K',
       '4320': '8K'
-    }
+    };
 
-    Object.keys(configuredResolutions).forEach(function(resolution) {
+    Object.keys(heightsToQualities).forEach(function(resolution) {
       if (height >= resolution) {
-        selectedResolution = configuredResolutions[resolution]
+        selectedResolution = heightsToQualities[resolution];
       }
     });
 
     if (selectedResolution === 'TBD') {
-      return width <= '1920' ? '1080p' : '2K'
+      var widthToQualities = {
+        '1920': '1080p',
+        '2048': '2K'
+      };
+
+      Object.keys(widthToQualities).forEach(function(resolution) {
+        if (width >= resolution) {
+          selectedResolution = widthToQualities[resolution];
+        }
+      });
     }
 
     return selectedResolution;
@@ -284,7 +258,7 @@ app.filter('findPoster', function($filter) {
     } else {
       var masterFile = $filter('findMaster')(record);
       return _.find(masterFile['frame'], function (frame) {
-        return frame.key === 'frame-1.jpg'
+        return frame.key === 'frame-1.jpg';
       })
     }
   }
@@ -294,7 +268,7 @@ app.filter('findPoster', function($filter) {
 app.filter('findGif', function() {
   return function(masterFile) {
     return _.find(masterFile['frames-preview'], function (gif) {
-      return gif.key === 'frames.gif'
+      return gif.key === 'frames.gif';
     })
   }
 });
@@ -361,6 +335,44 @@ app.filter('sortVideosDescending', function() {
     return _.orderBy(videos, function(video) {
       return parseInt(video.tags.height);
     }, ['desc']);
+  }
+});
+
+/**
+ * Gett all files with types passed as argument
+ * @param {Array} files
+ * @param {Array} types the context type of a file
+ *
+ * ex:
+ * data.files | getFilesByType: ['subtitle']
+ * The function will filter all the files with the 'context_type' 'subtitle'
+ */
+app.filter('getFilesByType', function() {
+  return function(files, types) {
+    if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
+
+    return files.filter((file) => {
+      return types.indexOf(file.context_type) !== -1;
+    });
+  }
+});
+
+/**
+ * Gett all files except the the files with types passed as argument
+ * @param {Array} files
+ * @param {Array} types the context type of a file
+ *
+ * ex:
+ * data.files | getAllFilesExcept: ['subtitle']
+ * The function will filter all the files that have the 'context_type' not equal to 'subtitle'
+ */
+app.filter('getAllFilesExcept', function() {
+  return function(files, types) {
+    if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
+
+    return files.filter((file) => {
+      return types.indexOf(file.context_type) == -1;
+    });
   }
 });
 
