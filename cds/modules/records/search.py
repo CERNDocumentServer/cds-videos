@@ -27,7 +27,7 @@
 from __future__ import absolute_import, print_function
 
 from elasticsearch_dsl.query import Q
-from flask import g
+from flask import current_app, g
 from flask_login import current_user
 from invenio_access.permissions import DynamicPermission, superuser_access
 from invenio_search import RecordsSearch
@@ -72,6 +72,15 @@ class RecordVideosSearch(RecordsSearch):
         doc_types = None
         fields = ('*',)
         default_filter = DefaultFilter(cern_filter)
+
+    def __init__(self, **kwargs):
+        """Use Meta to set kwargs defaults."""
+        kwargs.setdefault('extra', {})
+        min_score = current_app.config.get('SEARCH_RESULTS_MIN_SCORE')
+        if min_score:
+            kwargs['extra'].update(min_score=min_score)
+
+        super(RecordVideosSearch, self).__init__(**kwargs)
 
 
 class KeywordSearch(RecordsSearch):

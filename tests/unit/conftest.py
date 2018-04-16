@@ -118,6 +118,7 @@ def app():
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
         THEO_LICENCE_KEY='CHANGE_ME',
+        SEARCH_RESULTS_MIN_SCORE=None,
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
@@ -162,6 +163,7 @@ def celery_not_fail_on_eager_app(app):
         ),
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
+        SEARCH_RESULTS_MIN_SCORE=None,
     )
     app.register_blueprint(files_rest_blueprint)
 

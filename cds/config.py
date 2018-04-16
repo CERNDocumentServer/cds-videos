@@ -479,6 +479,8 @@ RECORDS_REST_ELASTICSEARCH_ERROR_HANDLERS = {
     ),
 }
 
+SEARCH_RESULTS_MIN_SCORE = 0.4
+
 RECORD_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
 # Facets for the specific index
