@@ -107,6 +107,7 @@ install_requires = [
     #  'invenio-files-rest>=1.0.0a18',
     'invenio-formatter[badges]>=1.0.0',
     'invenio-i18n>=1.0.0',
+    'invenio-iiif>=1.0.0a3',
     'invenio-indexer>=1.0.0',
     'invenio-jsonschemas>=1.0.0',
     'invenio-logging>=1.0.0',
@@ -196,7 +197,6 @@ setup(
         'invenio_base.api_apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_files_rest = cds.modules.files.ext:CDSFilesRestApp',
-            'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.api_blueprints': [
@@ -213,7 +213,6 @@ setup(
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
-            'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
