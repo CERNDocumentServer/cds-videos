@@ -594,6 +594,12 @@ i.sort-handle {
     >:not(:last-child) {
       margin-right: 10px;
     }
+
+    .download-list-header-warning {
+      color: #888;
+      outline: none;
+      cursor: pointer;
+    }
   }
 
   .download-list-group {
@@ -606,29 +612,36 @@ i.sort-handle {
 .download-list-item-container {
   display: flex;
   align-items: center;
-
-  .popover-content {
-    font-size: 12px;
-  }
 }
 
 .download-list-item {
+  font-size: 14px;
   display: flex;
-  padding: 10px 15px;
   margin-bottom: 5px;
   justify-content: space-between;
   align-items: center;
 
   .download-list-item-button {
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    background-color: #fff;
+    font-size: 14px;
   }
 
   .download-list-item-checksum {
-    font-size: 14px;
+    font-size: 13px;
     margin-right: 10px;
     color: #888;
+    outline: none;
+    cursor: pointer;
+  }
+}
+
+.cds-detail-video {
+  .popover-title {
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .popover-content {
+    font-size: 12px;
   }
 }
 

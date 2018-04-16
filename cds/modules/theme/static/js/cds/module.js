@@ -355,6 +355,15 @@ app.filter('groupDownloadable', function() {
   });
 });
 
+// Sort video subformats descending by height
+app.filter('sortVideosDescending', function() {
+  return function(videos) {
+    return _.orderBy(videos, function(video) {
+      return parseInt(video.tags.height);
+    }, ['desc']);
+  }
+});
+
 // Transform the URL into absolute an URL
 app.filter('absoluteURL', ['$sce', function($sce) {
   return function(url) {
