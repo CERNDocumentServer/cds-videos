@@ -87,6 +87,7 @@ invenio-config==1.0.0
 invenio-db[postgresql,versioning]==1.0.0
 invenio-formatter[badges]==1.0.0
 invenio-i18n==1.0.0
+invenio-iiif==1.0.0a3
 invenio-indexer==1.0.0
 invenio-jsonschemas==1.0.0
 invenio-logging==1.0.0

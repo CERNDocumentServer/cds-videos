@@ -66,10 +66,11 @@ app.directive('cdsSearchResults', ['$sce', '$window', function($sce, $window) {
       try {
         var file = showGif ? scope.findGif(record) : scope.findPoster(record);
         return _.template(
-          "/api/iiif/v2/<%=bucket%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
+          "/api/iiif/v2/<%=bucket%>:<%=version_id%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
         )({
           bucket: file.bucket_id,
           key: file.key,
+          version_id: file.version_id,
           size: size.join(','),
           ext: showGif ? 'gif' : 'png',
         });
@@ -281,13 +282,15 @@ app.filter('iiif', function($filter) {
   return function(record, showGif, size) {
     try {
       var masterFile = $filter('findMaster')(record);
+      console.log(masterFile);
       var filterFun = showGif ? 'findGif' : 'findPoster';
       var filterArg = showGif ? masterFile : record
       return _.template(
-        "/api/iiif/v2/<%=bucket%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
+        "/api/iiif/v2/<%=bucket%>:<%=version_id%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
       )({
         bucket: masterFile.bucket_id,
         key: $filter(filterFun)(filterArg).key,
+        version_id: masterFile.version_id,
         size: size.join(','),
         ext: showGif ? 'gif' : 'png',
       });
