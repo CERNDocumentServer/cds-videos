@@ -210,22 +210,41 @@ app.filter('findMaster', function($filter) {
 // Find closest video resolution
 app.filter('findResolution', function($filter) {
   return function(record) {
-    height = record['tags']['height'];
-    selectedResolution = height.concat('p');
-    configuredResolutions = {
+    var height = record['tags']['height'];
+    var width = record['tags']['width'];
+
+    var selectedResolution = height.concat('p');
+
+    var heightsToQualities = {
       '240': '240p',
       '360': '360p',
       '480': '480p',
-      '720': 'HD 720',
-      '1080': 'HD 1080',
-      '2160': '2K',
-      '4096': '4K'
-    }
-    Object.keys(configuredResolutions).forEach(function(resolution) {
+      '720': '720p',
+      '1024': '1024p',
+      '1080': 'TBD',
+      '2160': '4K',
+      '4320': '8K'
+    };
+
+    Object.keys(heightsToQualities).forEach(function(resolution) {
       if (height >= resolution) {
-        selectedResolution = configuredResolutions[resolution]
+        selectedResolution = heightsToQualities[resolution];
       }
     });
+
+    if (selectedResolution === 'TBD') {
+      var widthToQualities = {
+        '1920': '1080p',
+        '2048': '2K'
+      };
+
+      Object.keys(widthToQualities).forEach(function(resolution) {
+        if (width >= resolution) {
+          selectedResolution = widthToQualities[resolution];
+        }
+      });
+    }
+
     return selectedResolution;
   }
 });
@@ -239,7 +258,7 @@ app.filter('findPoster', function($filter) {
     } else {
       var masterFile = $filter('findMaster')(record);
       return _.find(masterFile['frame'], function (frame) {
-        return frame.key === 'frame-1.jpg'
+        return frame.key === 'frame-1.jpg';
       })
     }
   }
@@ -249,7 +268,7 @@ app.filter('findPoster', function($filter) {
 app.filter('findGif', function() {
   return function(masterFile) {
     return _.find(masterFile['frames-preview'], function (gif) {
-      return gif.key === 'frames.gif'
+      return gif.key === 'frames.gif';
     })
   }
 });
@@ -308,6 +327,53 @@ app.filter('groupDownloadable', function() {
       return _.get(e, 'tags.download')  === 'true' ?  'download' : 'additional';
     })
   });
+});
+
+// Sort video subformats descending by height
+app.filter('sortVideosDescending', function() {
+  return function(videos) {
+    return _.orderBy(videos, function(video) {
+      return parseInt(video.tags.height);
+    }, ['desc']);
+  }
+});
+
+/**
+ * Gett all files with types passed as argument
+ * @param {Array} files
+ * @param {Array} types the context type of a file
+ *
+ * ex:
+ * data.files | getFilesByType: ['subtitle']
+ * The function will filter all the files with the 'context_type' 'subtitle'
+ */
+app.filter('getFilesByType', function() {
+  return function(files, types) {
+    if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
+
+    return files.filter((file) => {
+      return types.indexOf(file.context_type) !== -1;
+    });
+  }
+});
+
+/**
+ * Gett all files except the the files with types passed as argument
+ * @param {Array} files
+ * @param {Array} types the context type of a file
+ *
+ * ex:
+ * data.files | getAllFilesExcept: ['subtitle']
+ * The function will filter all the files that have the 'context_type' not equal to 'subtitle'
+ */
+app.filter('getAllFilesExcept', function() {
+  return function(files, types) {
+    if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
+
+    return files.filter((file) => {
+      return types.indexOf(file.context_type) == -1;
+    });
+  }
 });
 
 // Transform the URL into absolute an URL
@@ -502,4 +568,11 @@ app.provider('isoLanguages', function () {
       };
     }
   }
+});
+
+// directive for bootstrap popover to work inside ng-repeat
+app.directive('popover', function() {
+  return function(scope, element, attrs) {
+      element.find('a[rel=popover]').popover();
+  };
 });
