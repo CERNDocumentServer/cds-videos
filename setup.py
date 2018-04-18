@@ -194,6 +194,7 @@ setup(
         ],
         'invenio_base.api_apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
+            'cds_files_rest = cds.modules.files.ext:CDSFilesRestApp',
             'cds_iiif = cds.modules.cds_iiif:CDSIIIF',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
