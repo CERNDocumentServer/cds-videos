@@ -592,3 +592,25 @@ app.filter('download', function () {
     return url + '?download';
   }
 });
+
+// filter for sharing on different social platforms
+// more details about how we build the URLs you can find on: https://github.com/bradvin/social-share-urls
+app.filter('assembleShareURL', ['$window', function($window) {
+  return function(record, platform) {
+    if (!record) { return; }
+
+    var title = encodeURIComponent(record.metadata.title.title);
+    var description = encodeURIComponent(record.metadata.description);
+    var currentPageAddress = encodeURIComponent($window.location.href);
+
+    var platformMapping = {
+      'facebook': 'https://www.facebook.com/sharer.php?u=' + currentPageAddress,
+      'twitter': 'https://twitter.com/intent/tweet?url=' + currentPageAddress + '&text=' + title + '&hashtags=cern',
+      'linkedin': 'https://www.linkedin.com/shareArticle?mini=true&url=' + currentPageAddress + '&title=' + title + '&summary=' + description + '&source=' + currentPageAddress,
+      'reddit': 'https://reddit.com/submit?url=' + currentPageAddress + '&title=' + title,
+      'email': 'mailto:?subject=' + title + '&body=' + description + '%0a' + currentPageAddress,
+    };
+
+    return platformMapping[platform];
+  };
+}]);
