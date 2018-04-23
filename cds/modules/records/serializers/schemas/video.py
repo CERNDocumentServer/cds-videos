@@ -21,7 +21,6 @@
 from __future__ import absolute_import
 
 from invenio_jsonschemas import current_jsonschemas
-
 from marshmallow import Schema, fields, post_load
 
 from ....deposit.api import Video
@@ -122,6 +121,7 @@ class VideoSchema(StrictKeysSchema):
     featured = fields.Boolean()
     internal_note = fields.Str()
     internal_categories = fields.Raw()
+    Press = fields.List(fields.Str, many=True)
     keywords = fields.Nested(KeywordsSchema, many=True)
     language = fields.Str()
     license = fields.Nested(LicenseSchema, many=True)
