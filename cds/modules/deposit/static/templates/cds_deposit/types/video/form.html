@@ -43,7 +43,7 @@
             <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
             <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
           </div>
-          <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+          <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" ng-src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
         </div>
         <!-- Video preview -->
       </div>
@@ -121,7 +121,7 @@
             <i ng-hide="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-spinner fa-spin fa-2x fa-fw"></i>
             <i ng-show="$ctrl.cdsDepositCtrl.depositStatusCurrent === $ctrl.cdsDepositCtrl.depositStatuses.FAILURE" class="fa fa-remove fa-2x"></i>
           </div>
-          <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
+          <iframe scrolling="no"  allowfullscreen="" ng-if="$ctrl.cdsDepositCtrl.previewer !== null" class="embed-responsive-item" ng-src="{{ $ctrl.cdsDepositCtrl.previewer }}"></iframe>
         </div>
         <!-- Video preview -->
         <!-- Extra information -->
