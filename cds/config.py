@@ -191,6 +191,7 @@ SEARCH_DOC_TYPE_DEFAULT = None
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # SEARCH UI JS TEMPLATES
 # SEARCH_UI_JSTEMPLATE_RESULTS = 'templates/cds_search_ui/results.html'
+SEARCH_UI_JSTEMPLATE_ERROR = 'templates/cds_search_ui/error.html'
 
 # Angular template for featured
 SEARCH_UI_VIDEO_FEATURED = 'templates/cds/video/featured.html'
