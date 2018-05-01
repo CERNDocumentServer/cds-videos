@@ -570,9 +570,25 @@ app.provider('isoLanguages', function () {
   }
 });
 
-// directive for bootstrap popover to work inside ng-repeat
+// Directive for bootstrap popover to work inside ng-repeat
 app.directive('popover', function() {
   return function(scope, element, attrs) {
-      element.find('a[rel=popover]').popover();
+    element.find('a[rel=popover]').popover();
   };
+});
+
+// Filter to format urls for download
+app.filter('download', function () {
+  return function(url) {
+    // Check if the url is invalid
+    if (!url) { return url; }
+
+    re = /([?&].*)=[^?&]+/;
+    // Check if the url has a querystring
+    if (url.match(re)) {
+      return url + '&download';
+    }
+
+    return url + '?download';
+  }
 });
