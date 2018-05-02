@@ -1,0 +1,10 @@
+<div class="btn-group">
+  <button type="button" class="btn cds-select-btn btn-default dropdown-toggle text-capitalize" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Sort: {{ (data.availableOptions.options | filter:data.selectedOption)[0].title || 'Select'}} <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li ng-repeat="option in data.availableOptions.options track by $index">
+      <a ng-click="data.selectedOption=option.value;handleFieldChange();">{{ option.title }}</a>
+    </li>
+  </ul>
+</div>

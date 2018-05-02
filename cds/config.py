@@ -178,6 +178,8 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 # Search API endpoint.
 SEARCH_UI_SEARCH_API = '/api/records/'
+# Name of the search index used.
+SEARCH_UI_SEARCH_INDEX = 'records-videos-video'
 # Default template for search UI.
 SEARCH_UI_SEARCH_TEMPLATE = 'cds_search_ui/search.html'
 # Default base template for search UI
@@ -447,16 +449,24 @@ RECORDS_REST_SORT_OPTIONS = {
             'order': 1,
         },
         'mostrecent': {
-            'title': 'Most recent',
+            'title': 'Newest',
             'fields': ['-_created'],
-            'default_order': 'asc',
-            'order': 2,
+            'default_order': 'asc', 'order': 2,
         },
-        'publication_date': {
-            'title': 'Publication date',
-            'fields': ['publication_date'],
-            'default_order': 'desc',
-            'order': 3,
+        'oldest': {
+            'title': 'Oldest',
+            'fields': ['_created'],
+            'default_order': 'asc', 'order': 3,
+        },
+        'title_asc': {
+            'title': 'Title [Asc]',
+            'fields': ['title.title'],
+            'default_order': 'asc', 'order': 4,
+        },
+        'title_desc': {
+            'title': 'Title [Desc]',
+            'fields': ['title.title'],
+            'default_order': 'desc', 'order': 5,
         }
     }
 }
