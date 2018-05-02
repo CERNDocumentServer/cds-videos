@@ -752,10 +752,10 @@ def test_default_order(api_app, es, cds_jsonresolver, users,
 
         # test order: older first
         res = client.get(
-            url_for('invenio_deposit_rest.project_list', sort='oldest'),
-            headers=json_headers)
-        res = client.get(
-            url_for('invenio_deposit_rest.project_list', sort='oldest'),
+            url_for(
+                'invenio_deposit_rest.project_list',
+                sort='oldest_created'
+            ),
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
