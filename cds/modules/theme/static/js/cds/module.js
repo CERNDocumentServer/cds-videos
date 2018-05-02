@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2016, 2017 CERN.
+ * Copyright (C) 2016, 2017, 2018 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -539,6 +539,7 @@ app.provider('isoLanguages', function () {
         'bg': 'Bulgarian',
         'ca': 'Catalan',
         'ch': 'Chamorro',
+        'cs': 'Czech',
         'da': 'Danish',
         'de': 'German',
         'el': 'Greek',
@@ -547,12 +548,13 @@ app.provider('isoLanguages', function () {
         'es': 'Spanish',
         'fi': 'Finnish',
         'fr': 'French',
-        'hu': 'Hungarian',
         'hr': 'Croatian',
+        'hu': 'Hungarian',
         'it': 'Italian',
         'ja': 'Japanese',
         'ka': 'Georgian',
         'ko': 'Korean',
+        'nl': 'Dutch',
         'no': 'Norwegian',
         'pl': 'Polish',
         'pt': 'Portuguese',
