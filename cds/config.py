@@ -450,12 +450,12 @@ RECORDS_REST_SORT_OPTIONS = {
         },
         'mostrecent': {
             'title': 'Newest',
-            'fields': ['-_created'],
+            'fields': ['-date'],
             'default_order': 'asc', 'order': 2,
         },
         'oldest': {
             'title': 'Oldest',
-            'fields': ['_created'],
+            'fields': ['date'],
             'default_order': 'asc', 'order': 3,
         },
         'title_asc': {
@@ -479,7 +479,7 @@ RECORDS_REST_DEFAULT_SORT = {
     },
     'deposits-records-videos-project': {
         'query': 'bestmatch',
-        'noquery': 'mostrecent',
+        'noquery': 'mostrecent_created',
     }
 }
 
@@ -568,30 +568,45 @@ DEPOSIT_REST_SORT_OPTIONS = {
         bestmatch=dict(
             fields=['-_score'],
             title='Best match',
-            default_order='asc',
-            order=1
+            default_order='asc', order=1
         ),
-        mostrecent=dict(
-            fields=['-_updated'],
-            title='Newest',
+        mostrecent_created=dict(
+            fields=['-_created'],
+            title='Newest Created',
             default_order='asc', order=2,
-
         ),
-        oldest=dict(
-            fields=['_updated'],
-            title='Oldest',
+        oldest_created=dict(
+            fields=['_created'],
+            title='Oldest Created',
             default_order='asc', order=3,
+        ),
+        mostrecent_updated=dict(
+            fields=['-_updated'],
+            title='Newest Updated',
+            default_order='asc', order=4,
+        ),
+        oldest_updated=dict(
+            fields=['_updated'],
+            title='Oldest Updated',
+            default_order='asc', order=5,
         ),
         title_asc=dict(
             fields=['title.title.raw'],
             title='Title [Asc]',
-            default_order='asc', order=4,
+            default_order='asc', order=6,
         ),
         title_desc=dict(
             fields=['title.title.raw'],
             title='Title [Desc]',
-            default_order='desc', order=5,
+            default_order='desc', order=7,
         )),
+}
+
+DEPOSIT_REST_DEFAULT_SORT = {
+    'deposits-records-videos-project': {
+        'query': 'bestmatch',
+        'noquery': 'mostrecent_created',
+    }
 }
 
 # Update facets and sort options with deposit options
