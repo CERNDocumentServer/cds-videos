@@ -53,10 +53,19 @@
             {%- block search_header %}
               <div class="row">
                 {%- block search_count %}
-                  <div class="col-md-12 text-center pb-20">
+                  <div class="col-md-12 text-center pb-20 cds-search-header">
                     <invenio-search-count
                         template="{{ url_for('static', filename='templates/cds_search_ui/count.html') }}">
                     </invenio-search-count>
+
+                    {%- set sort_options = config.get('RECORDS_REST_SORT_OPTIONS', {}).get(config.SEARCH_UI_SEARCH_INDEX) %}
+                    {%- if sort_options %}
+                      <invenio-search-select-box
+                        sort-key="sort"
+                        available-options='{{ sort_options|format_sortoptions|safe }}'
+                        template="{{ url_for('static', filename='templates/cds_search_ui/selectbox.html') }}">
+                      </invenio-search-select-box>
+                    {%- endif %}
                   </div>
                 {%- endblock search_count %}
                 {%- block search_pagination_top %}{%- endblock search_pagination_top %}
