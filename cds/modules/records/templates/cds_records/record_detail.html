@@ -16,6 +16,9 @@
                                                     pid_value=pid.pid_value,
                                                     filename='frame-1.jpg', _external=True) }}" />
     {% endif %}
+    {%- if type == 'project' %}
+      <meta name="robots" content="noindex" />
+    {% endif %}
 {%- endblock head_meta %}
 {%- block javascript %}
   {{ super() }}
