@@ -66,7 +66,7 @@ app.directive('cdsSearchResults', ['$sce', '$window', function($sce, $window) {
       try {
         var file = showGif ? scope.findGif(record) : scope.findPoster(record);
         return _.template(
-          "/api/iiif/v2/<%=bucket%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
+          "/api/iiif/v2/<%=bucket%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
         )({
           bucket: file.bucket_id,
           key: file.key,
@@ -281,7 +281,7 @@ app.filter('iiif', function($filter) {
       var filterFun = showGif ? 'findGif' : 'findPoster';
       var filterArg = showGif ? masterFile : record
       return _.template(
-        "/api/iiif/v2/<%=bucket%>:<%=key%>/full/<%=size%>/0/default.<%=ext%>"
+        "/api/iiif/v2/<%=bucket%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
       )({
         bucket: masterFile.bucket_id,
         key: $filter(filterFun)(filterArg).key,
