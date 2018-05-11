@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017, 2018 CERN.
 #
 # CDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ from __future__ import absolute_import, print_function
 
 from flask import has_request_context
 from flask_security import current_user
-
 from invenio_records_rest.serializers.json import JSONSerializer
 
 from ..api import CDSRecord
-from ..permissions import has_read_record_eos_path_permission
+from ..permissions import (has_read_record_eos_path_permission,
+                           has_read_record_permission)
 from ..utils import HTMLTagRemover, remove_html_tags
 
 
@@ -62,6 +62,11 @@ class CDSJSONSerializer(JSONSerializer):
                 # decode html entities
                 metadata['description'] = self.html_tag_remover.unescape(
                     metadata['description'])
+                if has_request_context():
+                    metadata['videos'] = [
+                        video for video in metadata['videos']
+                        if has_read_record_permission(current_user, video)
+                    ]
             except KeyError:
                 # ignore error if keys are missing in the metadata
                 pass
