@@ -291,12 +291,12 @@ def has_read_files_permission(user, record):
     # Same permissions as for record itself
 
     # Allow everyone for public records
-    if is_public(record, 'read-files'):
+    if is_public(record, 'read'):
         return True
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = record['_access']['read-files']
+    read_access_groups = record['_access']['read']
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
