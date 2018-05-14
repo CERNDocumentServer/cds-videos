@@ -26,7 +26,7 @@
             <div class="cds-navbar-form-wrapper">
               {%- block navbar_search %}
                 {%- if suggest_app %}
-                  <form name='cdsSearchFormSuggest'
+                  <form id='cdsSearchFormSuggest'
                         ng-app="cdsSuggest"
                         ng-submit="updateHistory()"
                         ng-controller="mainCtrl"
