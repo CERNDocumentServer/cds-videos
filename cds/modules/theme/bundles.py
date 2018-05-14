@@ -73,6 +73,7 @@ js = NpmBundle(
         'node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js',
         'node_modules/mousetrap/mousetrap.js',
         'js/cds/module.js',
+        'js/cds/suggestions.js',
         'js/main.js',
         filters='jsmin',
     ),

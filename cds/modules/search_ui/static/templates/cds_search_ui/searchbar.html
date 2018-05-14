@@ -1,16 +1,19 @@
 <form
+  id="cdsSearchFormSuggest"
   ng-init="focused=false"
   class="cds-navbar-form navbar-form"
   role="search"
   ng-class="{'cds-active-search': vm.userQuery || focused}"
 >
-  <div class="form-group">
+  <div mass-autocomplete class="form-group">
     <input
       id="cds-navbar-form-input"
       type="text"
+      name="q"
       class="form-control"
       placeholder="{{placeholder}}"
       autocomplete="off"
+      mass-autocomplete-item="autocomplete_options"
       ng-model="vm.userQuery"
       ng-focus="focused=true"
       ng-blur="focused=false"
