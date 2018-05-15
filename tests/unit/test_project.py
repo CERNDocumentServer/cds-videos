@@ -42,6 +42,7 @@ from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      record_video_resolver,
                                      deposit_project_resolver,
                                      deposit_video_resolver)
+from cds.modules.deposit.indexer import CDSRecordIndexer
 from invenio_accounts.models import User
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
@@ -561,6 +562,8 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
         {'$ref': keyword_2.ref},
     ]
     project.commit()
+    db.session.commit()
+    CDSRecordIndexer().index(project)
     sleep(2)
 
     # check elasticsearch
@@ -576,6 +579,8 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
         {'$ref': keyword_2.ref},
     ]
     project.commit()
+    db.session.commit()
+    CDSRecordIndexer().index(project)
     sleep(2)
 
     # check elasticsearch

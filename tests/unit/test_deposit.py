@@ -153,9 +153,10 @@ def test_publish_process_files(api_app, db, location):
                     assert obj.get_tags()['context_type'] == 'subformat'
 
 
+@mock.patch('cds.modules.deposit.tasks.RecordIndexer.bulk_index')
 @mock.patch('cds.modules.deposit.tasks._is_state_changed')
-def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
-                                      api_project):
+def test_preserve_celery_states_on_db(mock_is_state_changed, mock_indexer,
+                                      api_app, api_project):
     """Test preserve celery states on db."""
     #  mock_is_state_changed.return_value = True
     project, video_1, video_2 = api_project
@@ -165,18 +166,17 @@ def test_preserve_celery_states_on_db(mock_is_state_changed, api_app,
     def mymock_is_state_changed(x, y):
         return x['_deposit']['id'] == vid1
     mock_is_state_changed.side_effect = mymock_is_state_changed
-    with mock.patch('invenio_deposit.api.Deposit.indexer') \
-            as mock_indexer:
-        mock_indexer.index = mock.Mock()
-        preserve_celery_states_on_db.s().apply()
+    preserve_celery_states_on_db.s().apply()
 
-    assert mock_indexer.index.called is True
+    assert mock_indexer.called is True
     indexed = []
-    for call in mock_indexer.index.call_args_list:
+    for call in mock_indexer.call_args_list:
         ((arg, ), _) = call
-        indexed.append(arg)
+        # bulk_index is called with an iterator argument
+        for param in arg:
+            indexed.append(param)
     assert len(indexed) == 1
-    assert indexed[0]['_deposit']['id'] == vid1
+    assert indexed[0] == str(video_1.id)
 
 
 def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata,

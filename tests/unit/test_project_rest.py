@@ -43,6 +43,7 @@ from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
 from helpers import prepare_videos_for_publish, new_project
+from cds.modules.deposit.indexer import CDSRecordIndexer
 
 
 def test_simple_workflow(
@@ -439,15 +440,16 @@ def test_publish_project_check_indexed(
             # get video records
             video_records = Project(data=project_record).videos
             assert len(video_records) == 2
-            # check project + videos are indexed
+            # check project + videos are indexed. We also index the project
+            # deposit on publish, so we have one more id
             assert mock_indexer.called is True
             ids = list(list(mock_indexer.mock_calls[0])[1][0])
-            assert len(ids) == 3
+            assert len(ids) == 4
             # check video deposit are not indexed
             assert video_1_id not in ids
             assert video_2_id not in ids
-            # check project deposit is not indexed
-            assert project_id not in ids
+            # check project deposit is indexed
+            assert project_id in ids
             # check video records are indexed
             assert str(video_records[0].id) in ids
             assert str(video_records[1].id) in ids
@@ -635,6 +637,8 @@ def test_deleted(api_app, db, location, api_project, users, json_headers):
         res = client.delete(url, headers=json_headers)
         assert res.status_code == 204
 
+        CDSRecordIndexer().process_bulk_queue()
+
         # check project contains only video_2
         pid = project['_deposit']['id']
         url = url_for('invenio_deposit_rest.project_item', pid_value=pid)
@@ -673,11 +677,9 @@ def test_deleted(api_app, db, location, api_project, users, json_headers):
         assert res.status_code == 204
 
         # check elasticsearch is up-to-date
+        CDSRecordIndexer().process_bulk_queue()
         sleep(2)
-        res = client.get(
-            url_for('invenio_deposit_rest.project_list',
-                    q='_deposit.id:{0}'.format(pid)),
-            headers=json_headers)
+        res = client.get(url_for('invenio_deposit_rest.project_list', q='_deposit.id:{0}'.format(pid)), headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
         assert len(data['hits']['hits']) == 0
@@ -830,6 +832,7 @@ def test_search_excluded_fields(api_app, users, api_project,
 def test_aggregations(api_app, es, cds_jsonresolver, users,
                       location, db, deposit_metadata, json_headers):
     """Test default project order."""
+    indexer = RecordIndexer()
     # project 1
     (project_1, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
@@ -840,6 +843,8 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         }, wait=False)
     project_1.commit()
     db.session.commit()
+    indexer.index(project_1)
+
     # project 2
     (project_2, video_1, video_2) = new_project(
         api_app, es, cds_jsonresolver, users,
@@ -855,6 +860,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
     project_2 = project_2.publish()
     project_2.commit()
     db.session.commit()
+    indexer.index(project_2)
     # project 3
     (project_3, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
@@ -865,6 +871,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
     project_3['category'] = 'LHC'
     project_3.commit()
     db.session.commit()
+    indexer.index(project_3)
     # project 4
     (project_4, _, _) = new_project(
         api_app, es, cds_jsonresolver, users,
@@ -875,6 +882,7 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
     project_4['category'] = 'ATLAS'
     project_4.commit()
     db.session.commit()
+    indexer.index(project_4)
     sleep(2)
 
     def check_agg(agg, key, doc_count):

@@ -100,9 +100,20 @@ def required(fields):
     return check
 
 
+class DummyIndexer(object):
+    """Define a dummy indexer to disable Deposit indexer."""
+
+    def index(self, *args, **kwargs):
+        pass
+
+    def delete(self, *args, **kwargs):
+        pass
+
+
 class CDSDeposit(Deposit):
     """Define API for changing deposit state."""
 
+    indexer = DummyIndexer()
     sequence_name = None
     """Sequence identifier (`None` if not applicable)."""
 
@@ -156,7 +167,7 @@ class CDSDeposit(Deposit):
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
         bucket = Bucket.create(location=Location.get_by_name(
-            kwargs.get('bucket_location', 'default')))
+                kwargs.get('bucket_location', 'default')))
         data['_buckets'] = {'deposit': str(bucket.id)}
         data.setdefault('_cds', {})
         data['_cds'].setdefault('state', {})
