@@ -301,6 +301,7 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
         'date': '2017-09-25',
     }
     project_video_2.update(deposit_metadata)
+    indexer = RecordIndexer()
     with app.test_request_context():
         login_user(User.query.get(users[0]))
 
@@ -319,6 +320,9 @@ def new_project(app, es, cds_jsonresolver, users, location, db,
         video_2.commit()
 
     db.session.commit()
+    indexer.index(project)
+    indexer.index(video_1)
+    indexer.index(video_2)
     if wait is not False:
         sleep(2)
     return project, video_1, video_2

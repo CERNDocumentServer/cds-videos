@@ -34,27 +34,13 @@ from invenio_deposit.receivers import \
 from invenio_jsonschemas import current_jsonschemas
 
 from .api import Project
+from .indexer import CDSRecordIndexer
 from .tasks import datacite_register
 
 
-def index_deposit_after_publish(sender, action=None, pid=None, deposit=None):
+def index_deposit_after_action(sender, action=None, pid=None, deposit=None):
     """Index the record after publishing."""
-    project_schema = current_jsonschemas.path_to_url(Project._schema)
-    if deposit['$schema'] == project_schema:
-        if action == 'publish':
-            # index videos (records)
-            pid_values = Project(data=deposit).video_ids
-            ids = [str(p.object_uuid)
-                   for p in PersistentIdentifier.query.filter(
-                PersistentIdentifier.pid_value.in_(pid_values)).all()]
-            # index project (record)
-            _, record = deposit.fetch_published()
-            ids.append(str(record.id))
-            RecordIndexer().bulk_index(iter(ids))
-    else:
-        original_index_deposit_after_publish(sender=sender, action=action,
-                                             pid=pid, deposit=deposit)
-
+    CDSRecordIndexer().index(deposit, action)
 
 def datacite_register_after_publish(sender, action=None, pid=None,
                                     deposit=None):

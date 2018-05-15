@@ -55,6 +55,7 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
                                      record_video_resolver,
                                      deposit_video_resolver)
+from cds.modules.deposit.indexer import CDSRecordIndexer
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.webhooks.status import get_deposit_events, \
     get_tasks_status_by_task
@@ -618,6 +619,8 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
         {'$ref': keyword_2.ref},
     ]
     video_1.commit()
+    db.session.commit()
+    CDSRecordIndexer().index(video_1)
     sleep(2)
 
     # check elasticsearch
@@ -631,9 +634,13 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     # try to remove a key
     video_1.remove_keyword(keyword_1)
     assert video_1['keywords'] == [
-        {'$ref': keyword_2.ref},
+        {
+            '$ref': keyword_2.ref
+        },
     ]
     video_1.commit()
+    db.session.commit()
+    CDSRecordIndexer().index(video_1)
     sleep(2)
 
     # check elasticsearch
@@ -668,8 +675,13 @@ def test_deposit_vtt_tags(api_app, db, api_project, users):
     video_1 = video_1.publish()
 
     # check tags
-    check_object_tags(obj, video_1, content_type='vtt', media_type='subtitle',
-                      context_type='subtitle', language='fr')
+    check_object_tags(
+        obj,
+        video_1,
+        content_type='vtt',
+        media_type='subtitle',
+        context_type='subtitle',
+        language='fr')
 
     # edit the video
     video_1 = video_1.edit()

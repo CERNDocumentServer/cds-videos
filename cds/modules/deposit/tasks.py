@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 from invenio_db import db
 from flask import current_app
 from celery import shared_task
+from invenio_indexer.api import RecordIndexer
 from invenio_records_files.api import Record
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
@@ -108,11 +109,16 @@ def preserve_celery_states_on_db():
     """Preserve in db the celery tasks state."""
     (videos, projects, records) = _get_deposits_split_by_type(
         query=AllDraftDepositsSearch())
+    ids = []
     # commit only the ones who should be update
     for video in videos:
         if _is_state_changed(records[video.id], video):
             video.commit()
+            ids.append(str(video.id))
     for project in projects:
         if _is_state_changed(records[project.id], project):
             project.commit()
+            ids.append(str(project.id))
     db.session.commit()
+    if ids:
+        RecordIndexer().bulk_index(iter(ids))
