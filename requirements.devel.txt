@@ -63,7 +63,7 @@
 -e git+https://github.com/inveniosoftware/invenio-records-rest.git#egg=invenio-records-rest
 -e git+https://github.com/inveniosoftware/invenio-records-ui.git#egg=invenio-records-ui
 -e git+https://github.com/inveniosoftware/invenio-records.git#egg=invenio-records[postgresql]
--e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest[cors]
+-e git+https://github.com/inveniosoftware/invenio-rest.git#egg=invenio-rest
 -e git+https://github.com/inveniosoftware/invenio-search-ui.git#egg=invenio-search-ui
 -e git+https://github.com/inveniosoftware/invenio-search.git#egg=invenio-search
 -e git+https://github.com/inveniosoftware/invenio-sequencegenerator.git#egg=invenio-sequencegenerator
