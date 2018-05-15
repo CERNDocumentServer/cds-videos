@@ -5,15 +5,14 @@
     "access": {
       "public": true,
       "restricted": [
-        "audiovisual-support@cern.ch",
-        "it-dep-uds-avc@cern.ch",
-        "editorial-group@cern.ch",
-        "hr-video-group@cern.ch",
-        "visualmedia-office@cern.ch",
-        "vmo-restictedrights@cern.ch"
+        "PRESS-TEAM@cern.ch",
+        "vmo-restictedrights@cern.ch",
+        "writing-team@cern.ch"
       ],
       "responsible": [
-        "vmo-restictedrights@cern.ch"
+        "PRESS-TEAM@cern.ch",
+        "vmo-restictedrights@cern.ch",
+        "writing-team@cern.ch"
       ]
     },
     "_record_type": ["PROJECT"],

@@ -801,11 +801,6 @@ VIDEOS_XROOTD_PREFIX = '{endpoint}{location}'.format(
     endpoint=VIDEOS_XROOTD_ENDPOINT, location=VIDEOS_LOCATION)
 # EOS path for video library `e-groups`
 VIDEOS_EOS_PATH_EGROUPS = [
-    "audiovisual-support@cern.ch",
-    "it-dep-uds-avc@cern.ch",
-    "editorial-group@cern.ch",
-    "hr-video-group@cern.ch",
-    "visualmedia-office@cern.ch",
     "vmo-restictedrights@cern.ch"
 ]
 """

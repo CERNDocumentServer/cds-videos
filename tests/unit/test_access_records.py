@@ -75,7 +75,7 @@ def test_record_access(db, users, access, action, is_allowed):
         """Add additional group to the user."""
         roles = [RoleNeed('test-egroup@cern.ch')]
         if 'eos' in access:
-            roles.append(RoleNeed('audiovisual-support@cern.ch'))
+            roles.append(RoleNeed('vmo-restictedrights@cern.ch'))
         identity.provides |= set(roles)
 
     def login_and_test(user_id):
