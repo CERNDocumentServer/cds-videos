@@ -37,4 +37,6 @@ def on_download_rename_file(sender, obj):
     if master_version_id:
         master_obj = as_object_version(master_version_id)
         filename_no_ext = splitext(master_obj.key)[0]
-        obj.key = '{}-{}'.format(filename_no_ext, obj.key)
+        # master filename is the report number
+        if filename_no_ext not in obj.key:
+            obj.key = '{}-{}'.format(filename_no_ext, obj.key)
