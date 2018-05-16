@@ -1,9 +1,13 @@
 addons:
   postgresql: 9.4
   apt:
+    update: true
+    sources:
+    - sourceline: 'ppa:kirillshkrogalev/ffmpeg-next'
     packages:
     - nodejs
     - libfreetype6-dev
+    - ffmpeg
 notifications:
   email: false
 sudo: false
@@ -30,7 +34,6 @@ python:
   - '3.5'
 before_install:
   - ./.travis-extra-install.sh ${ES_VERSION}
-  - export PATH=$PATH:/tmp/ffmpeg
   - "./scripts/setup-npm.sh"
   - ./.travis-requirements-build.sh
 install:
