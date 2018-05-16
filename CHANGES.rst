@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.2 (2018-05-16)
+
+- Invenio v1.0.0 package releases update.
+
 Version 1.0.1 (2018-05-14)
 
 - deposit:
