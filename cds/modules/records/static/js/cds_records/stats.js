@@ -1,35 +1,32 @@
 function getStats(record) {
-  var record_id = record.recid;
-  var defaultConfig = {
+  const defaultConfig = {
     legend: {
       visible: false,
     },
     tooltip: {
-      enabled: false
-    }
+      enabled: false,
+    },
   };
-  // Fetch the pageviews of the specific record
+
+  fetchRecordData(record.recid, 'pageviews', defaultConfig); // fetch the pageviews for a record
+  fetchRecordData(record.recid, 'downloads', defaultConfig); // fetch the downloads for a record
+}
+
+function fetchRecordData(recordId, category, defaultConfig) {
   $.ajax({
     type: 'GET',
-    url: '/api/stats/' + record_id + '/pageviews',
+    url: `/api/stats/${recordId}/${category}`,
     headers: {
       'Content-Type': 'application/json'
     }
   })
-  .success(function(data) {
-    new inveniographs.LineGraph(data, 'pageviews', defaultConfig).render();
-  });
-
-  // Fetch the downloads of the specific record
-  $.ajax({
-    type: 'GET',
-    url: '/api/stats/' + record_id + '/downloads',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+  .success((data) => {
+    $(`#${category}-loading-spinner`).hide();
+    new inveniographs.LineGraph(data, category, defaultConfig).render();
   })
-  .success(function(data) {
-    new inveniographs.LineGraph(data, 'downloads', defaultConfig).render();
+  .error((error) => {
+    $(`#${category}-loading-spinner`).hide();
+    $(`#${category}-error-message`).show();
+    console.error(`GET: /api/stats/${recordId}/${category}: `, error);
   });
-
 }

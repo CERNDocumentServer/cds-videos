@@ -25,18 +25,11 @@ from flask_assets import Bundle
 from invenio_assets import NpmBundle
 
 stats_js = NpmBundle(
-    'node_modules/d3-tip/index.js',
-    'node_modules/d3-svg-legend/d3-legend.min.js',
-    'node_modules/lodash/lodash.js',
     'node_modules/invenio-charts-js/dist/lib.bundle.js',
     'js/cds_records/stats.js',
     output='gen/cds.records.stats.%(version)s.js',
     npm={
-        'invenio-charts-js': '^0.1.4',
-        'd3-extended': '^1.2.10',
-        'd3-svg-legend': '^2.24.1',
-        'd3-tip': '^0.7.1',
-        'lodash': '^4.17.4'
+        'invenio-charts-js': '^0.2.2',
     }
 )
 
