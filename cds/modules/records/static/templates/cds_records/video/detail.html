@@ -166,10 +166,10 @@
                    <li uib-tooltip-html="'Video Language'" ng-if="record.metadata.language">
                       <i class="fa fa-globe text-muted"></i> <a ng-href='/search?q=language:"{{ record.metadata.language }}"'>{{ record.metadata.language | isoToLanguage }}</a>
                    </li>
-                   <li ng-if="record.metadata.language">
+                   <li ng-if="record.metadata.language && (record.links.project_html || record.metadata._project_id)">
                      ·
                    </li>
-                   <li>
+                   <li ng-if="record.links.project_html || record.metadata._project_id">
                      <i class="fa fa-list-ul text-muted"></i>
                      <a ng-href="{{ record.links.project_html ? record.links.project_html : '/search?q=_project_id:' + record.metadata._project_id }}">
                        More videos in the project
