@@ -172,14 +172,14 @@
                          multiple
                          theme="bootstrap"
                          ng-disabled="(!$ctrl.cdsDepositCtrl.record.category && $ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.public === 'public') || $ctrl.cdsDepositCtrl.isPublished()"
-                         title="Search for names"
+                         title="Enter personal emails or e-group emails here"
                          on-select="$ctrl.onSelectValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
                          on-remove="$ctrl.onRemoveValue($item, $model, '_access.read');$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"
                          ng-model="$ctrl.selectedRestricted"
                         >
                          <ui-select-match
                           ui-lock-choice="($ctrl.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access.restricted || []).indexOf($item) > -1"
-                          placeholder="Search for names"
+                          placeholder="Enter personal emails or e-group emails here"
                         >
                           {{ $item.email || $item }}
                         </ui-select-match>
@@ -253,10 +253,10 @@
                    ng-model="$ctrl.selectedShare"
                    theme="bootstrap"
                    ng-disabled="$ctrl.cdsDepositCtrl.isPublished()"
-                   title="Search for names"
+                   title="Enter personal emails or e-group emails here"
                   >
                    <ui-select-match
-                    placeholder="Search for names"
+                    placeholder="Enter personal emails or e-group emails here"
                   >
                     {{ $item.email || $item }}
                   </ui-select-match>
