@@ -56,7 +56,7 @@ flask-celeryext==0.3.1    # via invenio-accounts, invenio-celery, invenio-files-
 flask-collect==1.2.2      # via invenio-assets
 flask-cors==3.0.4         # via invenio-rest
 flask-debugtoolbar==0.10.1
-flask-iiif==0.4.0
+flask-iiif==0.5.0
 flask-kvsession==0.6.2    # via invenio-accounts
 flask-login==0.4.1        # via flask-security, invenio-accounts, invenio-admin, invenio-files-rest, invenio-oauth2server
 flask-mail==0.9.1         # via flask-security, invenio-accounts, invenio-mail, invenio-userprofiles
