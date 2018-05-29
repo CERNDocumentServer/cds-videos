@@ -38,6 +38,17 @@ from .utils import get_user_provides
 from .api import Keyword
 
 
+def lowercase_filter(field_name):
+    """Create a term lowercase filter.
+
+    :param field_name: Field name.
+    :returns: Lowercase terms for given field.
+    """
+    def inner(values):
+        return Q('terms', **{field_name: [val.lower() for val in values]})
+    return inner
+
+
 def cern_filter():
     """Filter list of results."""
     # Send empty query for admins
