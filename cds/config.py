@@ -46,7 +46,8 @@ from .modules.records.permissions import (deposit_delete_permission_factory,
                                           record_create_permission_factory,
                                           record_read_permission_factory,
                                           record_update_permission_factory)
-from .modules.records.search import NotDeletedKeywordSearch, RecordVideosSearch
+from .modules.records.search import (NotDeletedKeywordSearch,
+                                     RecordVideosSearch, lowercase_filter)
 
 
 # Identity function for string extraction
@@ -533,7 +534,7 @@ RECORD_VIDEOS_FACETS = {
             }
         },
         'filters': {
-            'keyword': terms_filter('keywords.name'),
+            'keyword': lowercase_filter('keywords.name'),
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
             'language': terms_filter('language'),
