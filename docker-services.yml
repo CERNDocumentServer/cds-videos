@@ -1,0 +1,41 @@
+version: '2.3'
+services:
+  cache:
+    image: redis
+    restart: "always"
+    read_only: true
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres:9.6
+    restart: "always"
+    environment:
+      - "POSTGRES_USER=$USER"
+      - "POSTGRES_PASSWORD="
+    ports:
+      - "5432:5432"
+  mq:
+    image: rabbitmq:3-management
+    restart: "always"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+  es:
+    build: ./docker/es/
+    restart: "always"
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  flower:
+    image: mher/flower
+    command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
+    ports:
+      - "5555:5555"
