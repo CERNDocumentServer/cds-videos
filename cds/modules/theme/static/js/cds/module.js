@@ -210,20 +210,20 @@ app.filter('findMaster', function($filter) {
 // Find closest video resolution
 app.filter('findResolution', function($filter) {
   return function(record) {
-    var height = record['tags']['height'];
-    var width = record['tags']['width'];
+    var height = parseInt(record['tags']['height'], 10);
+    var width = parseInt(record['tags']['width'], 10);
 
-    var selectedResolution = height.concat('p');
+    var selectedResolution = toString(height).concat('p');
 
     var heightsToQualities = {
-      '240': '240p',
-      '360': '360p',
-      '480': '480p',
-      '720': '720p',
-      '1024': '1024p',
-      '1080': 'TBD',
-      '2160': '4K',
-      '4320': '8K'
+      240: '240p',
+      360: '360p',
+      480: '480p',
+      720: '720p',
+      1024: '1024p',
+      1080: 'TBD',
+      2160: '4K',
+      4320: '8K'
     };
 
     Object.keys(heightsToQualities).forEach(function(resolution) {
@@ -234,8 +234,8 @@ app.filter('findResolution', function($filter) {
 
     if (selectedResolution === 'TBD') {
       var widthToQualities = {
-        '1920': '1080p',
-        '2048': '2K'
+        1920: '1080p',
+        2048: '2K'
       };
 
       Object.keys(widthToQualities).forEach(function(resolution) {
@@ -573,8 +573,8 @@ app.provider('isoLanguages', function () {
 });
 
 // Directive for bootstrap popover to work inside ng-repeat
-app.directive('popover', function() {
-  return function(scope, element, attrs) {
+app.directive('popover', function () {
+  return function (scope, element, attrs) {
     element.find('a[rel=popover]').popover();
   };
 });
