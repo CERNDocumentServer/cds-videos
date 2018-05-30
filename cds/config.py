@@ -187,6 +187,13 @@ SEARCH_UI_SEARCH_EXTRA_PARAMS = {
 }
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
+
+# Legacy host Elasticsearch
+LEGACY_STATS_ELASTIC_HOST = '127.0.0.1'
+# Legacy port Elasticsearch
+LEGACY_STATS_ELASTIC_PORT = 9199
+# Default port Elasticsearch
+
 # Do not map any keywords.
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # SEARCH UI JS TEMPLATES

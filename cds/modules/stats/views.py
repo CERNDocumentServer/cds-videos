@@ -23,14 +23,13 @@ from __future__ import absolute_import, print_function
 
 from elasticsearch import Elasticsearch
 
-from flask import Blueprint, jsonify, make_response
+from flask import Blueprint, current_app, jsonify, make_response
 from flask.views import MethodView
 
 from cds.modules.records.permissions import record_read_permission_factory
 from invenio_records_rest.views import pass_record, need_record_permission
 
 # Legaciy code: once invenio-statistics is used, this code will be removed.
-CFG_ELASTICSEARCH_SEARCH_HOST = [{'host': '127.0.0.1', 'port': 9199}]
 ES_INDEX = 'cds-*'
 
 blueprint = Blueprint(
@@ -92,7 +91,10 @@ class StatsResource(MethodView):
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
 
-        es = Elasticsearch(CFG_ELASTICSEARCH_SEARCH_HOST)
+        es = Elasticsearch([{
+            'host': current_app.config['LEGACY_STATS_ELASTIC_HOST'],
+            'port': current_app.config['LEGACY_STATS_ELASTIC_PORT'],
+        }])
         query = {}
         results = {}
 
