@@ -57,7 +57,6 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
           });
         }
       } catch (error) {
-        console.error(error);
       }
     }
   }

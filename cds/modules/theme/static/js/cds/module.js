@@ -351,7 +351,7 @@ app.filter('getFilesByType', function() {
   return function(files, types) {
     if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
 
-    return files.filter((file) => {
+    return files.filter(function(file) {
       return types.indexOf(file.context_type) !== -1;
     });
   }
@@ -370,7 +370,7 @@ app.filter('getAllFilesExcept', function() {
   return function(files, types) {
     if (!_.isArray(files) || !_.isArray(types) || !types.length || !files.length) { return files; }
 
-    return files.filter((file) => {
+    return files.filter(function(file) {
       return types.indexOf(file.context_type) == -1;
     });
   }
