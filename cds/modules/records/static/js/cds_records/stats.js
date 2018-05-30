@@ -20,13 +20,12 @@ function fetchRecordData(recordId, category, defaultConfig) {
       'Content-Type': 'application/json'
     }
   })
-  .success((data) => {
+  .success(function(data) {
     $(`#${category}-loading-spinner`).hide();
     new inveniographs.LineGraph(data, category, defaultConfig).render();
   })
-  .error((error) => {
+  .error(function(error) {
     $(`#${category}-loading-spinner`).hide();
     $(`#${category}-error-message`).show();
-    console.error(`GET: /api/stats/${recordId}/${category}: `, error);
   });
 }
