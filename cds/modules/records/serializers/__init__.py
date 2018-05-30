@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 from invenio_records_rest.serializers.datacite import DataCite31Serializer
 from invenio_records_rest.serializers.response import record_responsify, \
     search_responsify
-from invenio_records_rest.serializers.schemas.json import RecordSchemaJSONV1
+from invenio_records_rest.schemas import RecordSchemaJSONV1
 
 from .drupal import DrupalSerializer
 from .json import CDSJSONSerializer as JSONSerializer
