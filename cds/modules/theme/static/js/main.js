@@ -46,6 +46,17 @@ function mainCtrl($scope, $sce, $q, $http, localStorageService, searchSuggestion
     on_select: searchSuggestions.onSelect,
     on_attach: function () { $scope.focused = true; },
   };
+
+  // Dismiss the popover by clicking outside
+  $(document).on('click', function(e) {
+    $('a[rel=popover]').each(function() {
+      var $this = $(this);
+
+      if (!$this.is(e.target) && $this.has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+        $this.popover('hide').data('bs.popover').inState.click = false;
+      }
+    });
+  });
 };
 
 angular.module('cdsSuggest', ['MassAutoComplete', 'cdsSharedServices'])
