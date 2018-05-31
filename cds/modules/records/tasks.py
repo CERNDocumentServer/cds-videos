@@ -169,9 +169,9 @@ def format_file_integrity_report(report):
                                 entry['record'].get('recid'))))
         if 'deposit' in entry:
             lines.append(u'Deposit: {}'.format(
-                format_pid_link(current_app.config['DEPOSIT_UI_ENDPOINT'],
-                                entry['deposit'].get('_deposit',
-                                                     {}).get('id'))))
+                format_pid_link(
+                    current_app.config['DEPOSIT_UI_ENDPOINT_DEFAULT'],
+                    entry['deposit'].get('_deposit', {}).get('id'))))
         lines.append(('-' * 80) + '\n')
     return '\n'.join(lines)
 
