@@ -48,7 +48,10 @@ from .search import KeywordSearch, query_to_objects
 
 def _get_keywords_from_api(url):
     """Get keywords list from API."""
-    request = requests.get(url, headers={'User-Agent': 'cdslabs'}).text
+    request = requests.get(
+        url, headers={
+            'User-Agent': current_app.config.get('RECORDS_ID_PROVIDER_AGENT')
+        }).text
 
     keywords = {}
     for tag in json.loads(request)['tags']:

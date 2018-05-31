@@ -61,7 +61,11 @@ class CDSRecordIdProvider(BaseProvider):
             kwargs['pid_value'] = str(RecordIdentifier.next())
         else:
             response = requests.get(
-                provider_url, headers={'User-Agent': 'cdslabs'})
+                provider_url,
+                headers={
+                    'User-Agent':
+                    current_app.config.get('RECORDS_ID_PROVIDER_AGENT')
+                })
 
             if not response.ok or response.text.strip().startswith('[ERROR]'):
                 raise PersistentIdentifierError(response.text)
