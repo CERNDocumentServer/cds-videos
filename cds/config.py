@@ -594,6 +594,9 @@ RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
 # Endpoint for the cds_recid provider
 RECORDS_ID_PROVIDER_ENDPOINT = None
 
+# User agent value to send in cds endpoints.
+RECORDS_ID_PROVIDER_AGENT = None
+
 ###############################################################################
 # Files
 ###############################################################################
