@@ -67,6 +67,7 @@ class ProjectSchema(StrictKeysSchema):
     description = fields.Str()
     category = fields.Str(required=True)
     type = fields.Str(required=True)
+    note = fields.Str()
 
     recid = fields.Number()
     _access = fields.Nested(AccessSchema)
