@@ -76,6 +76,12 @@ def _rec_minter(record_uuid, data):
 
 def _doi_minter(record_uuid, data):
     """Mint DOI."""
+    from .permissions import is_public
+
+    # If the record is restricted, exit the function
+    if not is_public(data, 'read'):
+        return
+
     doi = data.get('doi')
     assert 'recid' in data
 
