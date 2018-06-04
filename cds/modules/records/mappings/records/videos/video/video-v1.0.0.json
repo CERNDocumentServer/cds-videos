@@ -23,6 +23,12 @@
             }
           }
         },
+        "_created": {
+          "type": "date"
+        },
+        "_updated": {
+          "type": "date"
+        },
         "_project_id":{
           "type": "string"
         },

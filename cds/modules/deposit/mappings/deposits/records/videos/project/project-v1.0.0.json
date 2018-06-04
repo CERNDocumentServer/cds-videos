@@ -6,6 +6,9 @@
         "report_number": {
           "type": "string"
         },
+        "_created": {
+          "type": "date"
+        },
         "_updated": {
           "type": "date"
         },
