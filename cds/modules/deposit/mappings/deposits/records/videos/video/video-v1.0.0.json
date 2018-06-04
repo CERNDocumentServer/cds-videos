@@ -26,6 +26,12 @@
         "report_number": {
           "type": "string"
         },
+        "_created": {
+          "type": "date"
+        },
+        "_updated": {
+          "type": "date"
+        },
         "physical_medium": {
           "type": "object",
           "properties": {

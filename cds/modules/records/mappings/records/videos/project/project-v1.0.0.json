@@ -3,6 +3,12 @@
     "project-v1.0.0": {
       "date_detection": true,
       "properties": {
+        "_created": {
+          "type": "date"
+        },
+        "_updated": {
+          "type": "date"
+        },
         "keywords": {
           "properties": {
             "value": {
