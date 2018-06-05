@@ -142,7 +142,9 @@ install_requires = [
     'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
     'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
     'node-semver>=0.1.1,<0.2.0',        # FIXME: node-semver 0.2.0
-    'urllib3[secure]>=1.22'             # urllib3 doesn't install pyOpenSSl by default
+    'urllib3[secure]==1.22',            # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
+                                        # FIXME: pin urllib until is compatible with `requests` latest version
+    'SQLAlchemy-Continuum==1.3.4'       # FIXME: issue https://github.com/kvesteri/sqlalchemy-continuum/issues/188
 ]
 
 packages = find_packages()
