@@ -25,6 +25,15 @@
 Changes
 =======
 
+Version 1.0.3 (2018-06-06)
+
+- added search suggestions on search page
+- fixed video playback for uncommon video formats
+- fixed record statistics charts
+- fixed deposit indexing
+- fixed UI issues with IE11
+- fixed video preview image aspect ratio for some videos
+
 Version 1.0.2 (2018-05-16)
 
 - Invenio v1.0.0 package releases update.
