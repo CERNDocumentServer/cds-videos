@@ -15,17 +15,17 @@ function getStats(record) {
 function fetchRecordData(recordId, category, defaultConfig) {
   $.ajax({
     type: 'GET',
-    url: `/api/stats/${recordId}/${category}`,
+    url: '/api/stats/' + recordId + '/' + category,
     headers: {
       'Content-Type': 'application/json'
     }
   })
   .success(function(data) {
-    $(`#${category}-loading-spinner`).hide();
+    $('#' + category + '-loading-spinner').hide();
     new inveniographs.LineGraph(data, category, defaultConfig).render();
   })
   .error(function(error) {
-    $(`#${category}-loading-spinner`).hide();
-    $(`#${category}-error-message`).show();
+    $('#' + category + '-loading-spinner').hide();
+    $('#' + category + '-error-message').show();
   });
 }
