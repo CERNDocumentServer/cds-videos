@@ -238,6 +238,9 @@ app.filter('findResolution', function($filter) {
         2048: '2K'
       };
 
+      // default case with first value
+      selectedResolution = widthToQualities[1920];
+
       Object.keys(widthToQualities).forEach(function(resolution) {
         if (width >= resolution) {
           selectedResolution = widthToQualities[resolution];
