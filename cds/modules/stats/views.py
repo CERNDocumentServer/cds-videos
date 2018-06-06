@@ -46,7 +46,8 @@ class StatsResource(MethodView):
         """Init."""
         self.read_permission_factory = record_read_permission_factory
 
-    def build_subquery(report_number):
+    @staticmethod
+    def _build_subquery(report_number):
         """Elasticsearch subquery for download statistics.
         Because the report number was changed for consistency reasons,
         we had to build a workaround so that we can target old videos
@@ -128,7 +129,7 @@ class StatsResource(MethodView):
                 "query": {
                     "filtered": {
                         "query": {
-                            "bool": build_subquery(report_number)
+                            "bool": StatsResource._build_subquery(report_number)
                         },
                         "filter": {
                             "range": {
