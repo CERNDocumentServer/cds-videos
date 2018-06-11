@@ -262,7 +262,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       options = {
         url: '//cds.cern.ch/submit/get_authors',
         extraParams: {
-          'relative_curdir': 'cdslabs/videos'
+          'relative_curdir': 'cdslabs/videosegroups'
         }
       };
 
