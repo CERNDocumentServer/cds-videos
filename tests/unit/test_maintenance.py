@@ -72,7 +72,8 @@ def test_create_all_missing_subformats(resolve_deposit, get_master_video,
     sorenson_all_qualities.return_value = ['240p', '360p', '480p']
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    assert not create_all_missing_subformats('recid', 2)
+    result, _ = create_all_missing_subformats('recid', 2)
+    assert not result
 
     # test 480p missing, 720p not valid
     video_subformats.return_value = _fill_video_subformats(['240p', '360p'])
@@ -81,15 +82,16 @@ def test_create_all_missing_subformats(resolve_deposit, get_master_video,
     def all_but_highest(q, ar, w, h):
         return q != '720p'
     sorenson_can_transcode.side_effect = all_but_highest
-    assert create_all_missing_subformats('recid', 2) == ['480p']
+    result, _ = create_all_missing_subformats('recid', 2)
+    assert result == ['480p']
 
     # test all missing
     video_subformats.return_value = []
     sorenson_all_qualities.return_value = ['240p', '360p', '480p', '720p']
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    assert sorted(create_all_missing_subformats('recid', 2)) == sorted(
-        ['240p', '360p', '480p', '720p'])
+    result, _ = create_all_missing_subformats('recid', 2)
+    assert sorted(result) == sorted(['240p', '360p', '480p', '720p'])
 
 
 @patch('cds.modules.maintenance.subformats.MaintenanceTranscodeVideoTask')
@@ -110,13 +112,15 @@ def test_create_subformat(resolve_deposit, get_master_video,
     # test valid quality
     sorenson_can_transcode.return_value = dict(quality='360p')
     sorenson_can_transcode.side_effect = None
-    assert create_subformat('recid', 'value', '360p') == dict(quality='360p')
+    result, _ = create_subformat('recid', 'value', '360p')
+    assert result == dict(quality='360p')
 
     # test not valid quality
     def all_but_highest(q, ar, w, h):
         return q != '720p'
     sorenson_can_transcode.side_effect = all_but_highest
-    assert not create_subformat('recid', 'value', '720p')
+    result, _ = create_subformat('recid', 'value', '720p')
+    assert not result
 
 
 @patch('cds.modules.maintenance.subformats.chain')
@@ -137,17 +141,18 @@ def test_recreate_all_subformats(resolve_deposit, get_master_video,
 
     # test no subformats possible, should never happen
     sorenson_can_transcode.return_value = False
-    assert not create_all_subformats('recid', 2)
+    result, _ = create_all_subformats('recid', 2)
+    assert not result
 
     # test recreate subformat but highest
     def all_but_highest(q, ar, w, h):
         return q != '1080p'
     sorenson_can_transcode.side_effect = all_but_highest
-    assert sorted(create_all_subformats('recid', 2)) == sorted(
-        ['240p', '360p', '480p', '720p'])
+    result, _ = create_all_subformats('recid', 2)
+    assert sorted(result) == sorted(['240p', '360p', '480p', '720p'])
 
     # test recreate all subformats
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    assert sorted(create_all_subformats('recid', 2)) == sorted(
-        ['240p', '360p', '480p', '720p', '1080p'])
+    result, _ = create_all_subformats('recid', 2)
+    assert sorted(result) == sorted(['240p', '360p', '480p', '720p', '1080p'])
