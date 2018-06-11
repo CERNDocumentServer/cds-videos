@@ -174,6 +174,7 @@ setup(
         ],
         'flask.commands': [
             'subformats = cds.modules.maintenance.cli:subformats',
+            'videos = cds.modules.maintenance.cli:videos',
         ],
         'invenio_admin.views': [
             'cds_admin = '
