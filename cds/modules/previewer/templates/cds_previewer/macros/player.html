@@ -1,4 +1,4 @@
-{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None) -%}
+{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None) -%}
   {% if config.THEO_LICENCE_KEY %}
     <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
     <script type="text/javascript">
@@ -18,6 +18,9 @@
           {% endif %}
         },
         isEmbeddable: true,
+        {% if embed_config.autoplay %}
+        mutedAutoplay: 'all',
+        {% endif %}
         initialRendition: 'first'
       });
       // Preload
@@ -36,6 +39,7 @@
             {% endif %}
           },
         ],
+        {% if not embed_config.subtitlesOff %}
         textTracks: [
           {
             kind: 'metadata',
@@ -52,12 +56,15 @@
           },
           {% endfor %}
         ],
+        {% endif %}
         poster: '{{ obj.poster_uri }}',
         {% if obj.vr %}
         vr: {
-          360: true
+          360: true,
         },
         {% endif %}
+        startTime: {{ embed_config.start | int if embed_config.start else 0 }},
+        endTime: {{ embed_config.end | int if embed_config.end else "Infinity" }},
         preload: 'auto'
       };
       {% if theo_config.socialSharing %}
@@ -72,11 +79,17 @@
            }
        ];
       {% endif %}
+      player.autoplay = {{ embed_config.autoplay | default(False) | tojson }};
+      // not working currently
+      player.loop = {{ embed_config.loop | default(False) | tojson }};
+      player.controls = {{ (not embed_config.controlsOff) | default(True) | tojson }};
+      player.muted = {{ embed_config.muted | default(False) | tojson }};
+
       {% if theo_config.showTitle %}
         // Append the title div
         var title = document.createElement('div');
         title.id = 'cds-video-overlay-title';
-        title.innerHTML = '{{ record.get("title", {}).get("title", "") }}'
+        title.innerHTML = '{{ record.get("title", {}).get("title", "") }}';
         document.body.appendChild(title);
         // Show/Hide the title on play
         player.addEventListener('play', function() {

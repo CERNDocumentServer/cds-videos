@@ -98,7 +98,7 @@ def _try_previewers(pid, record, filename, preview_file_class=PreviewFile,
             previewers=[file_previewer] if file_previewer else None):
         if plugin.can_preview(fileobj):
             try:
-                return plugin.preview(fileobj)
+                return plugin.preview(fileobj, embed_config=request.args)
             except Exception:
                 current_app.logger.warning(
                     ('Preview failed for {key}, in {pid_type}:{pid_value}'
