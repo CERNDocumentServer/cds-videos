@@ -36,5 +36,5 @@
   {%- set url = config.LOG_USER_ACTIONS_ENDPOINTS.get('media_view', '').format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS.get('base_url', '') , recid=recid, report_number=report_number, format=file_extension) -%}
 
   {# Initialize theo player #}
-  {{ theo_player(file, theo_config, record=record, log_media_views_url=url) }}
+  {{ theo_player(file, theo_config, record=record, log_media_views_url=url, embed_config=embed_config) }}
 {%- endblock javascript %}

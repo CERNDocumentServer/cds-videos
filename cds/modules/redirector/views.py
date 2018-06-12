@@ -73,7 +73,8 @@ def video_embed_alias(report_number):
         abort(404)
 
     return redirect(url_for(
-        'invenio_records_ui.recid_embed_default', pid_value=recid), code=301)
+        'invenio_records_ui.recid_embed_default', pid_value=recid,
+        **request.args), code=301)
 
 
 # /record/<:id:>/export/drupal

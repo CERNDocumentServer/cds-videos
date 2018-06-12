@@ -44,7 +44,7 @@ class VideoExtension(object):
         """Determine if the given file can be previewed."""
         return file.is_local() and file.has_extensions(*self._file_exts)
 
-    def preview(self, file):
+    def preview(self, file, embed_config=None):
         """Render appropriate template with embed flag."""
         record = getattr(file, 'record')
         filename = getattr(file, 'filename', '')
@@ -62,6 +62,7 @@ class VideoExtension(object):
             recid=record.get('recid', ''),
             report_number=report_number,
             record=record,
+            embed_config=embed_config,
         )
 
 
