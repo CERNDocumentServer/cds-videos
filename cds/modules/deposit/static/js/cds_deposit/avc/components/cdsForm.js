@@ -257,7 +257,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     that.cdsDepositCtrl.setDirty();
   }
 
-  this.autocompleteAccess = function(query) {
+  this.autocompleteAccess = _.debounce(function(query) {
     var userInput = query.length ? [{ name: query, email: query, isUserInput: true }] : [],
       options = {
         url: '//cds.cern.ch/submit/get_authors',
@@ -279,7 +279,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
           });
       that.accessSuggestions = _.concat(userInput, mappedResults);
     });
-  };
+  }, 300);
 
   /**
    * Categories and Types
