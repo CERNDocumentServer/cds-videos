@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.4 (2018-06-13)
+
+- added sorting options when searching
+- added e-groups autocompletion for restricted videos
+- added embedding configuration options
+
 Version 1.0.3 (2018-06-06)
 
 - added search suggestions on search page
