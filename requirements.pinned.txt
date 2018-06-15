@@ -27,7 +27,7 @@ cairocffi==0.8.0          # via cairosvg
 cairosvg==1.0.22
 cchardet==2.1.1           # via invenio-previewer
 cds-dojson==0.9.0
-cds-sorenson==0.1.5
+cds-sorenson==0.1.6
 celery==3.1.26.post2
 certifi==2018.4.16        # via dulwich, requests, urllib3
 cffi==1.11.5              # via cairocffi, cryptography
