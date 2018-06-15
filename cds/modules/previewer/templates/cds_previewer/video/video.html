@@ -43,7 +43,7 @@
 
 {%- block page_body %}
   {% if not config.THEO_LICENCE_KEY %}
-    <video poster="{{ file.poser_uri }}" controls>
+    <video poster="{{ file.poster_uri }}" controls>
       <source src="{{ file.uri }}" type="video/mp4">
       {{ _('Your browser does not support the video tag.') }}
     </video>
