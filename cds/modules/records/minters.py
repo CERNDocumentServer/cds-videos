@@ -39,11 +39,14 @@ from .providers import CDSRecordIdProvider, CDSReportNumberProvider
 def cds_record_minter(record_uuid, data):
     """Mint record identifiers."""
     provider = _rec_minter(record_uuid, data)
+
+    from .permissions import is_public
     from cds.modules.deposit.api import Project
     project_schema = current_jsonschemas.path_to_url(Project._schema)
+
     # We shouldn't mint the DOI for the project (CDS#996)
-    if data.get('$schema') != project_schema:
-        _doi_minter(record_uuid, data)
+    if data.get('$schema') != project_schema and is_public(data, 'read'):
+        doi_minter(record_uuid, data)
 
     return provider.pid
 
@@ -74,14 +77,8 @@ def _rec_minter(record_uuid, data):
     return provider
 
 
-def _doi_minter(record_uuid, data):
+def doi_minter(record_uuid, data):
     """Mint DOI."""
-    from .permissions import is_public
-
-    # If the record is restricted, exit the function
-    if not is_public(data, 'read'):
-        return
-
     doi = data.get('doi')
     assert 'recid' in data
 
@@ -90,16 +87,16 @@ def _doi_minter(record_uuid, data):
         doi = cds_doi_generator(data['recid'])
         data['doi'] = doi
 
-    # Make sure it's a proper DOI
-    assert idutils.is_doi(doi)
-    return PersistentIdentifier.create(
-        'doi',
-        doi,
-        pid_provider='datacite',
-        object_type='rec',
-        object_uuid=record_uuid,
-        status=PIDStatus.RESERVED
-    )
+        # Make sure it's a proper DOI
+        assert idutils.is_doi(doi)
+        return PersistentIdentifier.create(
+            'doi',
+            doi,
+            pid_provider='datacite',
+            object_type='rec',
+            object_uuid=record_uuid,
+            status=PIDStatus.RESERVED
+        )
 
 
 def is_local_doi(doi):

@@ -60,7 +60,7 @@ from ..deposit.api import Project, Video, record_unbuild_url
 from ..deposit.tasks import datacite_register
 from ..records.api import CDSVideosFilesIterator, dump_generic_object
 from ..records.fetchers import report_number_fetcher
-from ..records.minters import _doi_minter
+from ..records.minters import doi_minter
 from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
@@ -186,7 +186,7 @@ class CDSRecordDumpLoader(RecordDumpLoader):
         if Video.get_record_schema() == record['$schema']['$ref']:
             cls._resolve_license_copyright(record=record)
             cls._resolve_description(record=record)
-            _doi_minter(record_uuid=record.id, data=record)
+            doi_minter(record_uuid=record.id, data=record)
             cls._resolve_project_id(video=record)
         cls._resolve_cds(record=record)
 
