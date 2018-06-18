@@ -516,25 +516,25 @@ RECORD_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 DEPOSIT_PROJECT_FACETS = {
     'deposits-records-videos-project': {
         'aggs': {
-            'status': {
+            'project_status': {
                 'terms': {'field': '_deposit.status'},
             },
             'category': {
                 'terms': {'field': 'category.untouched'},
             },
-            'transcode': {
+            'task_transcode': {
                 'terms': {'field': '_cds.state.file_transcode'},
             },
-            'frames': {
+            'task_extract_frames': {
                 'terms': {'field': '_cds.state.file_video_extract_frames'},
             },
             'created_by': created_by_me_aggs,
         },
         'filters': {
-            'status': terms_filter('_deposit.status'),
+            'project_status': terms_filter('_deposit.status'),
             'category': terms_filter('category.untouched'),
-            'transcode': terms_filter('_cds.state.file_transcode'),
-            'frames': terms_filter('_cds.state.file_video_extract_frames'),
+            'task_transcode': terms_filter('_cds.state.file_transcode'),
+            'task_extract_frames': terms_filter('_cds.state.file_video_extract_frames'),
             'created_by': terms_filter('_deposit.created_by'),
         },
     },

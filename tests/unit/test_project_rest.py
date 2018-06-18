@@ -903,9 +903,9 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         check_agg(agg['category'], 'LHC', 1)
         check_agg(agg['category'], 'ATLAS', 1)
         assert len(agg['category']['buckets']) == 3
-        check_agg(agg['status'], 'draft', 3)
-        check_agg(agg['status'], 'published', 1)
-        assert len(agg['status']['buckets']) == 2
+        check_agg(agg['project_status'], 'draft', 3)
+        check_agg(agg['project_status'], 'published', 1)
+        assert len(agg['project_status']['buckets']) == 2
 
         # test: category == 'CERN'
         res = client.get(
@@ -916,13 +916,14 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         agg = data['aggregations']
         check_agg(agg['category'], 'CERN', 2)
         assert len(agg['category']['buckets']) == 1
-        check_agg(agg['status'], 'draft', 1)
-        check_agg(agg['status'], 'published', 1)
-        assert len(agg['status']['buckets']) == 2
+        check_agg(agg['project_status'], 'draft', 1)
+        check_agg(agg['project_status'], 'published', 1)
+        assert len(agg['project_status']['buckets']) == 2
 
-        # test: category == 'CERN'
+        # test: project_status == 'draft'
         res = client.get(
-            url_for('invenio_deposit_rest.project_list', status='draft'),
+            url_for('invenio_deposit_rest.project_list',
+                    project_status='draft'),
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
@@ -931,8 +932,8 @@ def test_aggregations(api_app, es, cds_jsonresolver, users,
         check_agg(agg['category'], 'LHC', 1)
         check_agg(agg['category'], 'ATLAS', 1)
         assert len(agg['category']['buckets']) == 3
-        check_agg(agg['status'], 'draft', 3)
-        assert len(agg['status']['buckets']) == 1
+        check_agg(agg['project_status'], 'draft', 3)
+        assert len(agg['project_status']['buckets']) == 1
 
 
 def test_sync_access_rights(

@@ -536,6 +536,13 @@ app.filter('replace', function () {
   }
 });
 
+// replace '_' with ' '
+app.filter('titlecase', function () {
+  return function (text, replaceText, replaceWith) {
+    return text ? String(text).replace(/_/g, ' ') : '';
+  }
+});
+
 app.provider('isoLanguages', function () {
   return {
     $get: function () {
