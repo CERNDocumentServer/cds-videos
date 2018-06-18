@@ -42,10 +42,13 @@ def index_deposit_after_action(sender, action=None, pid=None, deposit=None):
     """Index the record after publishing."""
     CDSRecordIndexer().index(deposit, action)
 
+
 def datacite_register_after_publish(sender, action=None, pid=None,
                                     deposit=None):
     """Mind DOI with DataCite after the deposit has been published."""
     if action == "publish" and \
             current_app.config['DEPOSIT_DATACITE_MINTING_ENABLED']:
         recid_pid, record = deposit.fetch_published()
-        datacite_register.delay(recid_pid.pid_value, str(record.id))
+
+        if record.get('doi'):
+            datacite_register.delay(recid_pid.pid_value, str(record.id))

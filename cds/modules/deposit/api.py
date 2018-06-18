@@ -57,7 +57,7 @@ from jsonschema.exceptions import ValidationError
 
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
-from ..records.minters import is_local_doi, report_number_minter
+from ..records.minters import doi_minter, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
@@ -856,6 +856,12 @@ class Video(CDSDeposit):
         """Rename subtitles and publish."""
         self['_files'] = self.files.dumps()
         self._rename_subtitles()
+
+        from cds.modules.records.permissions import is_public
+        if is_public(self, 'read'):
+            # Mint the doi if necessary
+            doi_minter(record_uuid=self.id, data=self)
+
         return super(Video, self)._publish_edited()
 
     @mark_as_action
