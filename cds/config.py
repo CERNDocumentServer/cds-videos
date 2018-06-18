@@ -143,6 +143,11 @@ CELERYBEAT_SCHEDULE = {
         # Every 2 days at 04:00 UTC
         'schedule': crontab(minute=0, hour=4, day_of_week=[0, 2, 4, 6]),
     },
+    'missing-subformats-report': {
+        'task': 'cds.modules.records.tasks.missing_subformats_report',
+        # Every Monday morning at 05:30 UTC
+        'schedule': crontab(hour=5, minute=30, day_of_week=1),
+    },
 }
 
 ###############################################################################
