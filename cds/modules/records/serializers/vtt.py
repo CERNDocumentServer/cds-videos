@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function
 from datetime import datetime
 
 from flask import current_app, render_template, url_for
+from invenio_iiif.utils import ui_iiif_image_url
 from invenio_rest.errors import FieldError, RESTValidationError
 
 from ...deposit.api import Video
@@ -69,8 +70,9 @@ class VTT(object):
         master_file = CDSVideosFilesIterator.get_master_video_file(record)
         frames = [{
             'time': float(f['tags']['timestamp']),
-            'bid': f['bucket_id'],
-            'key': f['key']
+            'bucket': f['bucket_id'],
+            'key': f['key'],
+            'version_id': f['version_id'],
         } for f in CDSVideosFilesIterator.get_video_frames(master_file)]
 
         last_time = float(master_file['tags']['duration'])
@@ -84,11 +86,14 @@ class VTT(object):
 
     @staticmethod
     def resize_link(frame, size):
-        return url_for('iiifimageapi', version='v2',
-                       uuid='{0}:{1}'.format(frame['bid'], frame['key']),
-                       region='full', size='{0[0]},{0[1]}'.format(size),
-                       rotation='0', quality='default',
-                       image_format='png', _external=True)
+        return '{}{}'.format(
+            current_app.config.get('THEME_SITEURL'),
+            ui_iiif_image_url(
+                    frame,
+                    size='!{0[0]},{0[1]}'.format(size),
+                    image_format='png'
+                )
+            )
 
     @staticmethod
     def time_format(seconds):
