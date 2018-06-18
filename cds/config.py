@@ -138,6 +138,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'cds.modules.records.tasks.file_integrity_report',
         'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
     },
+    'subformats-integrity-report': {
+        'task': 'cds.modules.records.tasks.subformats_integrity_report',
+        # Every 2 days at 04:00 UTC
+        'schedule': crontab(minute=0, hour=4, day_of_week=[0, 2, 4, 6]),
+    },
 }
 
 ###############################################################################

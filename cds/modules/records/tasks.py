@@ -27,20 +27,25 @@ from __future__ import absolute_import, print_function
 
 import json
 from datetime import datetime
-
 import requests
 import sqlalchemy as sa
+from cds.modules.ffmpeg import ff_probe_all
+from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.utils import format_pid_link, is_deposit, is_record
 from celery import shared_task
 from flask import current_app
 from flask_mail import Message
+from invenio_cache import current_cache
 from invenio_db import db
-from invenio_files_rest.models import FileInstance
+from invenio_files_rest.models import Bucket, FileInstance, as_object_version
 from invenio_indexer.api import RecordIndexer
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
+from invenio_records.models import RecordMetadata
+from invenio_records_files.api import ObjectVersion
 from invenio_records_files.models import RecordsBuckets
 from requests.exceptions import RequestException
 
-from .api import Keyword
+from .api import CDSRecord, Keyword
 from .search import KeywordSearch, query_to_objects
 
 # from .symlinks import SymlinksCreator
@@ -116,6 +121,26 @@ def _delete_not_existing_keywords(indexer, keywords_api, keywords_db):
             to_soft_delete.append(str(keyword.id))
 
     indexer.bulk_index(iter(to_soft_delete))
+
+
+def _send_email(subject, body, sender, recipients):
+    current_app.extensions['mail'].send(
+        Message(subject, sender=sender, recipients=recipients, body=body))
+
+
+def _get_all_record_uuids():
+    record_uuids = (
+        RecordMetadata.query
+        .join(PersistentIdentifier,
+              PersistentIdentifier.object_uuid == RecordMetadata.id)
+        .join(RecordsBuckets)
+        .join(Bucket)
+        .join(ObjectVersion)
+        .filter(
+            PersistentIdentifier.status == PIDStatus.REGISTERED,
+            PersistentIdentifier.pid_type == 'recid'))
+
+    return record_uuids
 
 
 @shared_task(bind=True)
@@ -221,5 +246,111 @@ def file_integrity_report():
         body = format_file_integrity_report(report)
         sender = current_app.config['NOREPLY_EMAIL']
         recipients = [current_app.config['CDS_ADMIN_EMAIL']]
-        msg = Message(subject, sender=sender, recipients=recipients, body=body)
-        current_app.extensions['mail'].send(msg)
+        _send_email(subject, body, sender, recipients)
+
+
+def format_subformats_integrity_report(report):
+    """Format the email body for the file integrity report."""
+    lines = []
+    for entry in report:
+        lines.append('Message: {}'.format(entry.get('message')))
+        lines.append(u'Record: {}'.format(
+                format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
+                                entry.get('recid'))))
+        lines.append('Report number: {}'.format(entry.get('report_number')))
+        if entry.get('other'):
+            lines.append('File name: {}'.format(entry.get('other').key))
+            lines.append('File id: {}'.format(entry.get('other').file_id))
+            lines.append('Version id: {}'.format(entry.get('other').bucket_id))
+            lines.append('Bucket id: {}'.format(entry.get('other').version_id))
+        lines.append('Error message: {}'.format(entry.get('error')))
+        lines.append(('-' * 80) + '\n')
+
+    return '\n'.join(lines)
+
+
+@shared_task
+def subformats_integrity_report(start_date=None, end_date=None):
+    """Send a report of all corrupted subformats to CDS admins."""
+    report = []
+
+    def _probe_video_file(obj, record):
+        """Run ffmpeg on a video file"""
+        try:
+            # Expecting the storage to be mounted on the machine
+            probe = ff_probe_all(obj.file.uri.replace(
+                current_app.config['VIDEOS_XROOTD_ENDPOINT'], ''))
+
+            if not probe.get('streams'):
+                report.append({
+                    'message': 'No video streams',
+                    'recid': record['recid'],
+                    'report_number': record['report_number'][0],
+                    'other': obj})
+
+        except Exception as e:
+            report.append({
+                'message': 'Error while running ff_probe_all',
+                'recid': record['recid'],
+                'report_number': record['report_number'][0],
+                'other': obj,
+                'error': repr(e)})
+
+    cache = current_cache.get('subformats_integrity:task_details')
+    task_details = cache if cache else {}
+
+    if 'last_run' not in task_details:
+        # Save the current date
+        task_details['last_run'] = datetime.utcnow()
+
+    record_uuids = _get_all_record_uuids()
+
+    if start_date and end_date:
+        record_uuids = (
+            record_uuids
+            .filter(ObjectVersion.created >= start_date,
+                    ObjectVersion.created <= end_date)
+            .group_by(RecordMetadata.id)
+            .with_entities(RecordMetadata.id))
+    else:
+        record_uuids = (
+            record_uuids
+            .filter(ObjectVersion.created > task_details['last_run'])
+            .group_by(RecordMetadata.id)
+            .with_entities(RecordMetadata.id))
+
+    records = (CDSRecord.get_record(record.id) for record in record_uuids)
+    for record in records:
+        master = CDSVideosFilesIterator.get_master_video_file(record)
+
+        if not master:
+            report.append({
+                'message': 'No master video found for the given record',
+                'recid': record['recid'],
+                'report_number': record['report_number'][0]})
+            continue
+
+        master_obj = as_object_version(master['version_id'])
+        _probe_video_file(master_obj, record)
+
+        subformats = CDSVideosFilesIterator.get_video_subformats(master)
+        if not subformats:
+            report.append({
+                'message': 'No subformats found',
+                'recid': record['recid']})
+        for subformat in subformats:
+            subformat_obj = as_object_version(subformat['version_id'])
+            _probe_video_file(subformat_obj, record)
+
+    task_details['last_run'] = datetime.utcnow()
+    current_cache.set(
+        'subformats_integrity:task_details', task_details, timeout=-1)
+
+    if report:
+        # Format and send the email
+        subject = u'[CDS Videos] Subformats integrity report [{}]'.format(
+            datetime.now())
+        body = format_subformats_integrity_report(report)
+        sender = current_app.config['NOREPLY_EMAIL']
+        recipients = [current_app.config['CDS_ADMIN_EMAIL']]
+        _send_email(subject, body, sender, recipients)
