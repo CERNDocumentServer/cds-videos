@@ -572,7 +572,7 @@ function cdsUploaderCtrl(
       deposit: that.cdsDepositCtrl.record._buckets.deposit,
       key: frame.key,
       res: '150,100',
-      version: frame.version_id
+      version_id: frame.version_id
     });
   };
 

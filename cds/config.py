@@ -317,10 +317,6 @@ RECORDS_UI_ENDPOINTS = dict(
 # Endpoint for record ui.
 RECORDS_UI_ENDPOINT = '{scheme}://{host}/record/{pid_value}'
 
-# IIIF
-#: Improve quality of image resampling using better algorithm
-IIIF_RESIZE_RESAMPLE = 'PIL.Image:BICUBIC'
-
 # OAI Server.
 OAISERVER_ID_PREFIX = 'oai:cds.cern.ch:'
 # Relative URL to XSL Stylesheet, placed under `modules/records/static`.
