@@ -214,7 +214,7 @@ app.filter('findResolution', function($filter) {
     var height = parseInt(record['tags']['height'], 10);
     var width = parseInt(record['tags']['width'], 10);
 
-    var selectedResolution = toString(height).concat('p');
+    var selectedResolution = height.toString().concat('p');
 
     var heightsToQualities = {
       240: '240p',
