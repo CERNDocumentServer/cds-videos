@@ -281,16 +281,16 @@ app.filter('findGif', function() {
 app.filter('iiif', function($filter) {
   return function(record, showGif, size) {
     try {
-      var masterFile = $filter('findMaster')(record);
-      console.log(masterFile);
-      var filterFun = showGif ? 'findGif' : 'findPoster';
-      var filterArg = showGif ? masterFile : record
+      var masterFile = $filter('findMaster')(record),
+          filterFun = showGif ? 'findGif' : 'findPoster'
+          filterArg = showGif ? masterFile : record,
+          objectVersion = $filter(filterFun)(filterArg);
       return _.template(
         "/api/iiif/v2/<%=bucket%>:<%=version_id%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
       )({
-        bucket: masterFile.bucket_id,
-        key: $filter(filterFun)(filterArg).key,
-        version_id: masterFile.version_id,
+        bucket: objectVersion.bucket_id,
+        key: objectVersion.key,
+        version_id: objectVersion.version_id,
         size: size.join(','),
         ext: showGif ? 'gif' : 'png',
       });
