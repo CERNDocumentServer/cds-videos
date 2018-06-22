@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.5 (2018-06-22)
+
+- replaced cds-iiif module with latest invenio-iiif package
+- bumped cds-sorenson to enable small videos transcoding
+- improved search ui performance
+
 Version 1.0.4 (2018-06-13)
 
 - added sorting options when searching
