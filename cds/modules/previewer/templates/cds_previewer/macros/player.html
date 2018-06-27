@@ -1,10 +1,16 @@
 {% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None) -%}
+{%- if embed_config.responsive %}
+      {%- set video_classes = video_classes + " embed-responsive-background" %}
+  {% endif %}
   {% if config.THEO_LICENCE_KEY %}
     <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
     <script type="text/javascript">
 
       var element = document.createElement('div');
       element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
+      if (/(MSIE|Trident\/|Edge\/)/i.test(window.navigator.userAgent)){
+        element.className += ' ie-reponsive';
+      }
       {% if append_to_element %}
         document.getElementById("{{ append_to_element }}").appendChild(element);
       {% else %}
@@ -13,7 +19,7 @@
       var player = new THEOplayer.Player(element, {
         libraryLocation : '//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/',
         ui : {
-          {% if theo_config.fluid %}
+          {% if theo_config.fluid or embed_config.responsive %}
           fluid: true
           {% endif %}
         },
@@ -80,12 +86,11 @@
        ];
       {% endif %}
       player.autoplay = {{ embed_config.autoplay | default(False) | tojson }};
-      // not working currently
       player.loop = {{ embed_config.loop | default(False) | tojson }};
       player.controls = {{ (not embed_config.controlsOff) | default(True) | tojson }};
       player.muted = {{ embed_config.muted | default(False) | tojson }};
 
-      {% if theo_config.showTitle %}
+      {% if theo_config.showTitle and not embed_config.controlsOff %}
         // Append the title div
         var title = document.createElement('div');
         title.id = 'cds-video-overlay-title';
