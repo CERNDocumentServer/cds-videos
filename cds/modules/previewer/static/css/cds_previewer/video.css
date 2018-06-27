@@ -29,6 +29,34 @@ video {
   top: 0;
 }
 
+.video-js.embed-responsive-background.ie-responsive{
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 0;
+    height: 100% !important;
+    width: 100% !important;
+    -webkit-transform-style: preserve-3d;
+    overflow: hidden;
+}
+
+.video-js.embed-responsive-background video{
+    z-index: 0;
+    object-fit:cover;
+    object-position: center;
+}
+
+.video-js.embed-responsive-background.ie-responsive video{
+    position: absolute;
+    top:50% !important;
+    left:50% !important;
+    height:auto !important;
+    width:auto !important;
+    min-width:100% !important;
+    min-height:100% !important;
+    transform:translate(-50%, -50%);
+}
+
 /* Override default yellow color for player */
 .theo-primary-color, .vjs-selected {
   color: #ffffff !important;
