@@ -42,6 +42,21 @@ To simplify, this makes you appear as two different users on our side, when you 
 <p>The documents on the CERN Document Server are generally already the highest quality available.</p>
 <p><strong>What about low resolution multimedia files?</strong></p>
 <p>Low-res files are also protected by the CERN copyright, and subject to the same conditions of use as high resolutions files. Though you will not need to login to access them, you agree to the same conditions (including the CERN computing rules) by downloading this material.</p>
+<p><strong><a name="embed" class="cds-anchor">Are there special options for embedding a video?</a></strong></p>
+<p>Yes, there are several parameters that can be added to the embedding link in order to control the appearance of the embedded video. Below you can find the complete list:</p>
+<dl>
+ <dt>autoplay=1</dt><dd>this parameter triggers the auto playing of the video when the page is loaded. Please note that some web browsers turn off the sound for auto-playing videos.</dd>
+  <dt>controlsOff=1</dt><dd>this parameter hides the seeking bar, tool bar and title of the video.</dd>
+  <dt>muted=1</dt><dd>this parameter turns off the sound of the video.</dd>
+  <dt>start=5</dt><dd>this parameter starts playing the video at the 5th second.</dd>
+  <dt>end=30</dt><dd>this parameter stops playing the video at the 30th second.</dd>
+  <dt>subtitlesOff=1</dt><dd>this parameter turns off the subtitles of the video (if they are available).</dd>
+  <dt>loop=1</dt><dd>this parameter plays the video in a loop.</dd>
+  <dt>responsive=1</dt><dd>this parameter indicates that the video should fill the container and should be responsive.</dd>
+</dl>
+<p>Here is an the example of embedding a video that is muted and that will play in a loop:</p>
+<pre><code>&lt;iframe scrolling="no" src="http://videos.cern.ch/video/CERN-VIDEO-2018-002-001?muted=1&loop=1" width="560" height="315" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
+<p>Remember to add the "?" character before the parameter list and to separate the parameters with "&".</p>
 <p><strong>Who can I contact in case of question or problem?</strong></p>
 <p>You can contact the following services:</p>
 <ul>
@@ -49,3 +64,6 @@ To simplify, this makes you appear as two different users on our side, when you 
 <li><a href="http://copyright.cern.ch/contact">http://copyright.cern.ch/contact</a> for questions related to copyright, conditions of use, etc.</li>
 <li>audiovisual.productions.service@cern.ch for questions related to videos, photos and audios</li>
 <li>cds.support@cern.ch for technical help related directly to the Videos platform of CERN Document Server.</li>
+</ul>
+
+
