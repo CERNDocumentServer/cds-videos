@@ -1,4 +1,5 @@
 <div
+    ng-init="internalModelTags=$$value$$"
     ng-controller="invenioDynamicSelectController"
     ng-class="{
         'has-error': hasError(),
@@ -7,7 +8,6 @@
     class="form-group">
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
     <ui-select
-        ng-init="internalModelTags=$$value$$"
         ng-if="form.options.tagging == true"
         multiple
         tagging="form.formatTokenTags"
@@ -36,14 +36,6 @@
             <div ng-bind-html="item.name | highlight: $select.search"></div>
         </ui-select-choices>
     </ui-select>
-    <input
-        type="hidden"
-        name="{{form.key.slice(-1)[0]}}"
-        toggle-multiple-model
-        ng-model="internalModelTags"
-        form="form"
-        sf-changed="form"
-        schema-validate="form"/>
     <span
         ng-if="form.feedback !== false"
         ng-class="evalInScope(form.feedback) || {

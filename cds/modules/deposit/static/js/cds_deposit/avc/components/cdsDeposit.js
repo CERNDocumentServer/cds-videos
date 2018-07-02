@@ -160,12 +160,16 @@ function cdsDepositCtrl(
         var ownElement = accessElement(record, propPath);
         if ((inheritedVal && !ownElement) || (inheritedVal && forceInherit === true)) {
           accessElement(record, propPath, inheritedVal);
+          if (propPath === 'keywords') {
+            $scope.$broadcast('cds.deposit.form.keywords.inherit', record);
+          }
         } else if (ownElement instanceof Array &&
             ownElement.every(hasNoProperties)) {
           var inheritedArray = angular.copy(inheritedVal);
           accessElement(record, propPath, inheritedArray);
         }
       });
+
       // Set form dirty
       that.setDirty();
     };
