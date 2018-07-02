@@ -208,11 +208,19 @@ angular.module('schemaForm')
 
       // Use this only in multiple select
       if ($scope.form.type === 'uiselectmultiple') {
-        // store the $scope form as is not accesible inside the handler's scope below
-        var form = $scope.form;
-        $scope.$on('cds.deposit.form.keywords.inherit', function(event, record) {
-          form.internalModelTags = record.keywords;
-        });
+        $scope.$watchCollection('ngModel.$modelValue', function(newValue) {
+          if(newValue !== undefined && !_.isEqual($scope.form.$$selectedObjects, newValue)){
+            $scope.form.$$selectedObjects = newValue;
+          }
+        }, true);
+
+        $scope.$watchCollection('form.$$selectedObjects', function(newValue) {
+          if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)) {
+            $scope.ngModel.$setViewValue(_.uniq(newValue));
+            $scope.ngModel.$commitViewValue();
+            $scope.ngModel.$render();
+          }
+        }, true);
       }
 
       if ($scope.modelArray) {
