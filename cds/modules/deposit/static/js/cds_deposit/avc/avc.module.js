@@ -196,50 +196,31 @@ angular.module('schemaForm')
     function ($scope, $controller, $select, $http) {
       $controller('dynamicSelectController', {$scope: $scope});
 
-      // Formats tags tokens in ``uiselectmultiple``
-      $scope.form.formatTokenTags = function(item) {
+      // format return value for uiselectmultiple
+      function formatTokenTags(item) {
         return {
           name: item,
           value: {
             name: item
           }
         }
-      }
+      };
+
+      $scope.form.formatTokenTags = formatTokenTags;
 
       // Use this only in multiple select
       if ($scope.form.type === 'uiselectmultiple') {
-        $scope.$watchCollection('ngModel.$modelValue', function(newValue) {
-          if(newValue !== undefined && !_.isEqual($scope.form.$$selectedObjects, newValue)){
-            $scope.form.$$selectedObjects = newValue;
-          }
-        }, true);
-
-        $scope.$watchCollection('form.$$selectedObjects', function(newValue) {
-          if(newValue !== undefined && !_.isEqual($scope.ngModel.$modelValue, newValue)) {
-            $scope.ngModel.$setViewValue(_.uniq(newValue));
-            $scope.ngModel.$commitViewValue();
-            $scope.ngModel.$render();
-          }
-        }, true);
-      }
-
-      if ($scope.modelArray) {
-        $scope.$watchCollection('modelArray', function (newValue) {
-          // If this is not the initial setting of the element...
-          if (!angular.equals($scope.select_model, {})) {
-            // Get the element's correct value from the array model
-            var formKey = $scope.form.key.slice(-1)[0],
-                value = $scope.modelArray[$scope.arrayIndex][formKey];
-            // Set ui-select's model to the correct value if needed
-            if (value && $scope.insideModel !== value) {
-              $scope.insideModel = value;
-              var query = $scope.$eval($scope.form.options.processQuery || 'query', {query: value});
-              $scope.populateTitleMap($scope.form, query);
-              $scope.select_model.selected = $scope.find_in_titleMap(value);
-            }
-          }
+        // listen to keywords external change (inherit from project) and update the internal model
+        $scope.$on('cds.deposit.form.keywords.inherit', function(event, record) {
+          // format the keywords list for uiselectmultiple
+          var value = record.keywords.map(function(item) {
+            return formatTokenTags(item.name)
+          });
+          // assign it to the form internal model
+          event.currentScope.internalModelTags = value;
         });
       }
+
     }]);
 // Initialize the module
 angular
