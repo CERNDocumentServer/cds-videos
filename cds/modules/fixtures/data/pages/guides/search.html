@@ -1,0 +1,398 @@
+<h2 id="cds-videos">CDS Videos</h2>
+
+<h1>Search guide</h1>
+
+<p>This guide explains how to perform search queries on CDS Videos using easy to understand examples.</p>
+
+<h3>Simple search (one or multiple terms)</h3>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=dark%20matter"><code>dark matter</code></a></p>
+
+<p>Results will match records with the <em>terms</em> <code>dark</code> <em>or</em> <code>matter</code> in <em>any field</em>. 
+
+<!-- Note that stemming is applied so e.g. <code>science</code> will also match <code>sciences</code>. Search results are ranked according to an algorithm that takes your query terms into account.</p> -->
+
+<p>You can require <em>presence</em> of both terms using either the <code>+</code> or <code>AND</code> operator:</p>
+
+<p><strong>Examples:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=%2Bdark%20%2Bmatter"><code>+dark +matter</code></a> or <a href="https://videos.cern.ch/search?page=1&size=21&q=dark%20AND%20matter"><code>dark AND matter</code></a></p>
+
+<p>You can require <em>absence</em> of one or more terms using either the <code>-</code> or <code>NOT</code> operator:</p>
+
+<p><strong>Examples:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=-dark%20%2Bmatter"><code>-dark +matter</code></a> or <a href="https://videos.cern.ch/search?page=1&size=21&q=NOT%20dark%20AND%20matter"><code>NOT dark AND matter</code></a></p>
+
+
+<h3 id="phrasesearch">Phrase search</h3>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=%22dark%20matter%22"><code>"dark matter"</code></a></p>
+
+<p>Results will match records with the <em>phrase</em> <code>dark matter</code> in <em>any field</em>.</p>
+
+<h3 id="fieldsearch">Field search</h3>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=title.title:matter"><code>title.title:matter</code></a></p>
+
+<p>Results will match records with the <em>term</em> <code>matter</code> in the <em>field</em> <code>title</code>. If you want to search for multiple terms in the title you must <strong>group the terms</strong> using parenthesis:</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=title.title:(dark%20matter)"><code>title.title:(dark matter)</code></a></p>
+
+<p>See the field reference below for the full list of fields you can search.</p>
+
+<h3 id="combinedsimplephraseorfieldsearch">Combined simple, phrase or field search</h3>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=%2Btitle.title:%22dark%20matter%22%20-title.title:experiment"><code>+title.title:"dark matter" -title.title:experiment</code></a> or <a href="https://videos.cern.ch/search?page=1&size=21&q=title.title:(-dark%20%2Bmatter)"><code>title.title:(-dark +matter)</code></a></p>
+
+<p>You can combine simple, phrase and field search to construct advanced search queries.</p>
+
+<h3 id="rangesearch">Range search</h3>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=date:%5B2015-01-01%20TO%202015-03-31%5D"><code>date:[2015-01-01 TO 2015-03-31]</code></a> (note, you must capitalize <code>TO</code>).</p>
+
+<p>Results will match any record with a publication date between 2015-01-01 and 2015-03-31 (both dates inclusive).</p>
+
+<!-- <p>Note that, partial dates are expanded to full dates, e.g.:</p>
+
+<ul>
+<li>2017 is expanded to 2017-01-01</li>
+
+<li>2017-06 is expanded to 2017-06-01</li>
+</ul>
+
+-->
+
+<p>Use square brackets (<code>[]</code>) for <em>inclusive</em> ranges and  use curly brackets (<code>{}</code>) for <em>exclusive</em> ranges.</p>
+
+<!--
+<ul>
+<li><code>[2017 TO 2018}</code> is equivalent to <code>[2017-01-01 TO 2017-12-31]</code> because of date expansion and exclusive upper bound.</li>
+</ul>
+-->
+
+<p>Examples of other ranges:</p>
+
+<ul>
+<li><code>date:{* TO 2017-01-01}</code> - All days until 2017.</li>
+
+<li><code>date:[2017-01-01 TO *]</code> - All days from 2017.</li>
+
+<!--
+<li><code>size:[1000000 TO *]</code>: File size bigger than 1MB.</li>
+
+<li><code>size:&gt;1000000</code>: File size bigger than 1MB.</li>
+
+<li><code>size:&gt;=1000000</code>: File size bigger than or equal to 1MB.</li>
+-->
+</ul>
+
+<h3 id="phrasesearch">Examples of searches on video files characteristics</h3>
+
+<h4>File formats</h4>
+
+<ul>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:avi"><code>_files.content_type:avi</code></a> - AVI files</li>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:mpg"><code>_files.content_type:mpg</code></a> - MPEG files</li>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:avi"><code>_files.content_type:mp4</code></a> - MP4 files</li>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:avi"><code>_files.content_type:mov</code></a> - MOV files</li>
+</ul>
+
+<p>Results will match records with files in <em>AVI, MPEG, MP4 and MOV format</em>, respectively.</p>
+
+<ul>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:mpg%20AND%20_files.tags.size:%3C100000000"><code>_files.content_type:mpg AND _files.tags.size:<100000000</code></a></li>
+</ul>
+
+<p>Results will match records with files in <em>MPEG format</em> and size less than 100 MB (note that size is recorded in bytes).</p>
+
+<h4>Aspect ratio</h4>
+
+<ul>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:mpg%20AND%20_files.tags.display_aspect_ratio:%224:3%22"><code>_files.content_type:mpg AND _files.tags.display_aspect_ratio:"4:3"</code></a></li>
+<li><a href="https://videos.cern.ch/search?page=1&size=21&q=_files.content_type:mpg%20AND%20_files.tags.display_aspect_ratio:%2216:9%22"><code>_files.content_type:mpg AND _files.tags.display_aspect_ratio:"16:9"</code></a></li>
+</ul>
+
+<p>Results will match records with files in <em>MPEG format</em> and aspect ratio <em>4:3 and 16:9</em>, respectively.</p>
+
+
+<h3 id="rankingsorting">Ranking/Sorting</h3>
+
+<p>By default all searches are sorted according to an internal ranking algorithm that scores each match against your query. In both the user interface and REST API, it's possible to sort the results by:</p>
+
+<ul>
+<li>Most recent</li>
+
+<li>Least recent</li>
+
+<li>Title (in ascending order)</li>
+
+<li>Title (in descending order)</li>
+</ul>
+
+<!--
+<h3 id="regularexpressions">Regular expressions</h3>
+
+<p>Regular expressions are a powerful pattern matching language that allow to search for specific patterns in a field. For instance if we wanted to find all records with a DOI-prefix 10.5281 we could use a regular expression search:</p>
+
+<p><strong>Example:</strong> <a href="https://zenodo.org/search?page=1&amp;size=20&amp;q=doi:%2F10.5281%5C%2F.%2B%2F"><code>doi:/10.5281\/.+/</code></a></p>
+
+<p>Careful, the regular expression must match the <em>entire</em> field value. See the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#regexp-syntax">regular expression syntax</a> for further details.</p>
+
+-->
+
+<h3 id="missingvalues">Missing values</h3>
+
+<p>It is possible to search for records that either are missing a value or have a value in a specific field using the <code>_exists_</code> and <code>_missing_</code> field names.</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=_missing_:location%20%20AND%20title.title:%22Passport%20Big%20Bang%22"><code>_missing_:location AND title.title:"Passport Big Bang"</code></a> (records with Passport Big Bang in the title without location)</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&amp;size=20&amp;q=_exists_:related_links"><code>_exists_:related_links</code></a> (all records with related links)</p>
+
+<h3 id="advancedconcepts">Advanced concepts</h3>
+
+<h4 id="boosting">Boosting</h4>
+
+<p>You can use the boost operator <code>^</code> when one term is more relevant than another. For instance, you can search for all records with the phrase <em>Dark matter</em> in either <em>title</em> or <em>description</em> field, but rank records with the phrase in the <em>title</em> field higher:</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=title.title:%22dark%20matter%22%5E3%20description:%22dark%20matter%22"><code>title:"dark matter"^5 description:"dark matter"</code></a></p>
+
+<p>Note: <code>^</code> is followed by a positive floating point number specifying the boost value compared to the default 1.
+
+<h4 id="fuzziness">Fuzziness</h4>
+
+<p>You can search for terms similar to but not exactly like your search term using the fuzzy operator <code>~</code>.</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=drak~"><code>drak~</code></a></p>
+
+<p>Results will match records with terms similar to <code>drak</code> which would e.g. also match <code>dark</code>.</p>
+
+<h4 id="proximitysearches">Proximity searches</h4>
+
+<p>A phrase search like <code>"president visit"</code> by default expect all terms in exactly the same order, and thus for instance would not match a record containing the phrase <em>"Visit of his excellency the President of..."</em>. A proximity search allows that the terms are not in the exact order and may include other terms inbetween. The degree of flexiblity is specified by an integer afterwards:</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=%22president%20visit%22~10"><code>"president visit"~10</code></a></p>
+
+<h4 id="wildcards">Wildcards</h4>
+
+<p>You can use wildcards in search terms to replace a single character (using <code>?</code> operator) or zero or more characters (using <code>*</code> operator).</p>
+
+<p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=title.title:(crab%20cavit*)"><code>title.title:(crab cavit*)</code></a></p>
+
+The result will match videos with title referring to cavities also in languages other than english.
+
+<p>Wildcard searches can be slow and should normally be avoided if possible.</p>
+
+<hr />
+
+<h2 id="fieldsreference">Fields reference</h2>
+
+<p>The table below lists the data type of each field. Below is a quick description
+of what each data type means and what is possible.</p>
+
+<ul>
+<li><strong>string</strong>: Field does not require exact match (example field: <code>title.title</code>).</li>
+
+<!--
+
+<li><strong>string (exact)</strong>: Field requires exact match (example field: <code>doi</code>).</li>
+
+<li><strong>CV</strong>: Controlled vocabularies are similar to "string (exact)" but takes only a specific list of values.</li>
+
+<li><strong>integer</strong>: A number (range queries possible).</li>
+-->
+<li><strong>datetime</strong>: An ISO8601 date or datetime, e.g. <code>2017-12-31</code> (range queries possible).</li>
+
+<li><strong>boolean</strong>: <code>true</code> or <code>false</code>.</li>
+</ul>
+
+<p>
+<table><thead><tr>
+<th align="left">Field name</th>
+<th align="left">Type</th>
+<th align="left">Notes</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>category</code></td>
+  <td>string</td>
+  <td>Category of the project</td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>contributors.\*</code></td>
+  <td>string</td>
+  <td>Contributors name, affiliation, role</td>
+</tr>
+<tr>
+  <td><code>contributors.affiliations</code></td>
+  <td>string</td>
+  <td>Affiliation(s) for the purpose of this specific record</td>
+</tr>
+<tr>
+  <td><code>contributors.name</code></td>
+  <td>string</td>
+  <td>Full name of person. Personal name format: family, given</td>
+</tr>
+<tr>
+  <td><code>contributors.role</code></td>
+  <td>CV</td>
+  <td>See "Contributor roles (CV)" below.</td>
+</tr>
+<tr>
+  <td><code>copyright.\*</code></td>
+  <td>string</td>
+  <td>Copyright</td>
+</tr>
+<tr>
+  <td><code>copyright.holder</code></td>
+  <td>string</td>
+  <td>The party holding the legal copyright to the record</td>
+</tr>
+<tr>
+  <td><code>copyright.year</code></td>
+  <td>string</td>
+  <td>The year during which the claimed copyright for the CreativeWork was first asserted</td>
+</tr>
+<!--
+<tr>
+<td><code>copyright.orcid</code></td><td>string (exact)</td><td></td>
+</tr>
+-->
+<tr>
+  <td><code>date</code></td>
+  <td>datetime</td>
+  <td>Date of the video recording or other event in the lifecycle of the resource</td>
+</tr>
+<tr>
+  <td><code>description</code></td>
+  <td>string</td>
+  <td>An account of the resource. Description may include but is not limited to: an abstract, a table of contents, a graphical representation, or a free-text account of the resource</td>
+</tr>
+<!--<tr>
+<td><code>doi</code></td><td>string (exact)</td><td></td>
+</tr>
+-->
+<tr>
+  <td><code>duration</code></td>
+  <td>string</td>
+  <td>Duration</td>
+</tr>
+<tr>
+  <td><code>language</code></td>
+  <td>CV</td>
+  <td>A language of the resource, e.g. en for english, fr for french, es for spanish</td>
+</tr>
+<tr>
+  <td><code>license.\*</code></td>
+  <td>string</td>
+  <td>License</td>
+</tr>
+<tr>
+  <td><code>license.license</code></td>
+  <td>string</td>
+  <td>License name</td>
+</tr>
+<tr>
+  <td><code>license.credit</code></td>
+  <td>string</td>
+  <td>Credit</td>
+</tr>
+<tr>
+  <td><code>license.url</code></td>
+  <td>string</td>
+  <td>Credit</td>
+</tr>
+<tr>
+  <td><code>location</code></td>
+  <td>string</td>
+  <td>Place or location</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>publication_date</code></td>
+  <td>datetime</td>
+  <td>When the record is published</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>recid</code></td>
+  <td>number</td>
+  <td>Record identifier</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>related_links.\*</code></td>
+  <td>string</td>
+  <td>Related links</td>
+</tr>
+<tr>
+  <td><code>related_links.name</code></td>
+  <td>string</td>
+  <td>Related link name</td>
+</tr>
+<tr>
+  <td><code>related_links.url</code></td>
+  <td>string</td>
+  <td>Related URL</td>
+</tr>
+<tr>
+  <td><code>report_number</code></td>
+  <td>string</td>
+  <td>Report number</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>title.title</code></td>
+  <td>string</td>
+  <td>A name given to the resource. Typically, a Title will be a name by which the resource is formally known</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>type</code></td>
+  <td>string</td>
+  <td>Type of the project</td>
+  <td></td>
+  <td></td>
+</tr>
+
+</tbody>
+</table>
+
+
+<h4 id="contributorrolesscv">Contributor roles (CV)</h4>
+
+<ul>
+<li><code>Animations by</code></li>
+
+<li><code>Camera Operator</code></li>
+
+<li><code>Comments by</code></li>
+
+<li><code>Co-Producer</code></li>
+
+<li><code>Creator</code></li>
+
+<li><code>Credits</code></li>
+
+<li><code>Director</code></li>
+
+<li><code>Editor</code></li>
+
+<li><code>Music by</code></li>
+
+<li><code>Narrator</code></li>
+
+<li><code>Photography</code></li>
+
+<li><code>Producer</code></li>
+
+<li><code>Reporter</code></li>
+
+<li><code>Screenwriter</code></li>
+
+<li><code>Speaker</code></li>
+
+<li><code>Translator</code></li>
+
+</ul>
