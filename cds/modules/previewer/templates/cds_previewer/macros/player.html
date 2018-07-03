@@ -9,7 +9,7 @@
       var element = document.createElement('div');
       element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
       if (/(MSIE|Trident\/|Edge\/)/i.test(window.navigator.userAgent)){
-        element.className += ' ie-reponsive';
+        element.className += ' ie-responsive';
       }
       {% if append_to_element %}
         document.getElementById("{{ append_to_element }}").appendChild(element);
@@ -19,7 +19,7 @@
       var player = new THEOplayer.Player(element, {
         libraryLocation : '//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/',
         ui : {
-          {% if theo_config.fluid or embed_config.responsive %}
+          {% if theo_config.fluid %}
           fluid: true
           {% endif %}
         },
