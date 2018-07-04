@@ -249,7 +249,7 @@ def pages():
         Page(url='/guide/search',
              title='Search guide',
              description='Search guide',
-             content=page_data('search.html'),
+             content=page_data('guide/search.html'),
              template_name='invenio_pages/dynamic.html'),
         Page(url='/feedback',
              title='Feedback',
