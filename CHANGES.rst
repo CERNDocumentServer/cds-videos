@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 1.0.6 (2018-07-04)
+
+- implemented responsive player for embed videos
+- fixed keywords inheritance in the deposit
+
 Version 1.0.5 (2018-06-22)
 
 - replaced cds-iiif module with latest invenio-iiif package
