@@ -63,6 +63,9 @@
       "restricted": [],
       "responsible": ["service-winccoa@cern.ch"]
     },
+    "_access": {
+      "read" : ["service-winccoa@cern.ch"]
+    },
     "_record_type":  ["PROJECT"]
   }
 ]
