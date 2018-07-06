@@ -26,7 +26,9 @@
 from __future__ import absolute_import, print_function
 
 import json
+import os.path
 from datetime import datetime, timedelta
+
 import requests
 import sqlalchemy as sa
 from cds.modules.ffmpeg import ff_probe_all
@@ -142,18 +144,22 @@ def _get_all_records_with_bucket():
             PersistentIdentifier.pid_type == 'recid')
 
 
-def _filter_by_last_created(query, start_date, end_date=None):
+def _filter_by_last_created(query, start_date=None, end_date=None):
     """Return records UUIDs filtered by ObjectVersion creation interval."""
     if start_date and end_date:
         query = query \
             .filter(ObjectVersion.created >= start_date,
                     ObjectVersion.created <= end_date)
-    else:
+    elif start_date:
         query = query \
             .filter(ObjectVersion.created >= start_date)
+    elif end_date:
+        query = query \
+            .filter(ObjectVersion.created <= end_date)
 
     return query \
         .group_by(RecordMetadata.id) \
+        .order_by(sa.func.max(ObjectVersion.created).desc()) \
         .with_entities(RecordMetadata.id)
 
 
@@ -267,65 +273,85 @@ def file_integrity_report():
 def subformats_integrity_report(start_date=None, end_date=None):
     """Send a report of all corrupted subformats to CDS admins."""
     report = []
+    update_cache = True
 
     def _probe_video_file(obj, record):
-        """Run ffmpeg on a video file"""
+        """Run ffmpeg on a video file
+        Return a touple containing (report, accessible)
+        """
+        file_report = {}
+        path = obj.file.uri.replace(
+                current_app.config['VIDEOS_XROOTD_ENDPOINT'], '')
+
+        if not os.path.exists(path):
+            # Check if the file exists on disk
+            file_report = {
+                'file_name': obj.key,
+                'message': 'The file cannot be accessed',
+                'error': repr(e)}
+
+            # Return the file report and the file accessibility
+            return (file_report, False)
+
         try:
             # Expecting the storage to be mounted on the machine
-            probe = ff_probe_all(obj.file.uri.replace(
-                current_app.config['VIDEOS_XROOTD_ENDPOINT'], ''))
+            probe = ff_probe_all(path)
 
             if not probe.get('streams'):
-                report.append({
-                    'message': 'No video streams',
-                    'recid': record['recid'],
-                    'report_number': record['report_number'][0],
-                    'other': obj})
+                file_report = {
+                    'file_name': obj.key,
+                    'message': 'No video stream'}
 
         except Exception as e:
-            report.append({
+            file_report = {
+                'file_name': obj.key,
                 'message': 'Error while running ff_probe_all',
-                'recid': record['recid'],
-                'report_number': record['report_number'][0],
-                'other': obj,
-                'error': repr(e)})
+                'error': repr(e)}
+
+        # Return the file report and the file accessibility
+        return (file_report, True)
 
     def _format_report(report):
-        """Format the email body for the file integrity report."""
+        """Format the email body for the subformats integrity report."""
         lines = []
         for entry in report:
-            lines.append('Message: {}'.format(entry.get('message')))
             lines.append(u'Record: {}'.format(
                     format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
                                     entry.get('recid'))))
-            lines.append('Report number: {}'.format(
-                entry.get('report_number')))
+            lines.append('Message: {}'.format(entry.get('message')))
 
-            if entry.get('other'):
-                lines.append('File name: {}'.format(entry.get('other').key))
-                lines.append('File id: {}'.format(entry.get('other').file_id))
-                lines.append('Version id: {}'.format(
-                    entry.get('other').bucket_id))
-                lines.append('Bucket id: {}'.format(
-                    entry.get('other').version_id))
-            lines.append('Error message: {}'.format(entry.get('error')))
+            if entry.get('report_number'):
+                lines.append('Report number: {}'.format(
+                    entry.get('report_number')))
+
+            subreports = entry.get('subreports')
+            if subreports:
+                lines.append(('-' * 10) + '\n')
+
+                for subreport in subreports:
+                    lines.append('  File name: {}'.format(
+                        subreport.get('file_name')))
+                    lines.append('  Message: {}'.format(
+                        subreport.get('message')))
+
+                    if subreport.get('error'):
+                        lines.append('  Error: {}'.format(
+                            subreport.get('error')))
+
             lines.append(('-' * 80) + '\n')
 
         return '\n'.join(lines)
 
     cache = current_cache.get('task_subformats_integrity:details') or {}
-    if 'last_run' not in cache:
-        # Save the last week date to have a default value the first time
-        cache['last_run'] = datetime.utcnow() - timedelta(days=7)
+    two_days_ago = datetime.utcnow() - timedelta(days=2)
+    if 'start_date' not in cache:
+        # Set the start date to 4 days ago
+        cache['start_date'] = datetime.utcnow() - timedelta(days=4)
 
-    query = _filter_by_last_created(
+    record_uuids = _filter_by_last_created(
         _get_all_records_with_bucket(),
-        start_date or cache['last_run'],
-        end_date)
-
-    record_uuids = query \
-        .group_by(RecordMetadata.id) \
-        .with_entities(RecordMetadata.id)
+        start_date or cache['start_date'],
+        end_date or two_days_ago)
 
     for record_uuid in record_uuids:
         record = CDSRecord.get_record(record_uuid.id)
@@ -333,25 +359,55 @@ def subformats_integrity_report(start_date=None, end_date=None):
 
         if not master:
             report.append({
-                'message': 'No master video found for the given record',
                 'recid': record['recid'],
+                'message': 'No master video found for the given record',
                 'report_number': record['report_number'][0]})
             continue
 
         master_obj = as_object_version(master['version_id'])
-        _probe_video_file(master_obj, record)
+        subreport_master, accessible = _probe_video_file(master_obj, record)
+
+        if not accessible:
+            update_cache = False
+
+        if subreport_master:
+            report.append({
+                'recid': record['recid'],
+                'message': 'Master file issue report',
+                'report_number': record['report_number'][0],
+                'subreports': subreport_master})
 
         subformats = CDSVideosFilesIterator.get_video_subformats(master)
         if not subformats:
             report.append({
-                'message': 'No subformats found',
-                'recid': record['recid']})
+                'recid': record['recid'],
+                'message': 'No subformats found'})
+            continue
+
+        subformats_subreport = []
         for subformat in subformats:
             subformat_obj = as_object_version(subformat['version_id'])
-            _probe_video_file(subformat_obj, record)
+            subformat_subreport, accessible = _probe_video_file(
+                subformat_obj, record)
 
-    cache['last_run'] = datetime.utcnow()
-    current_cache.set('task_subformats_integrity:details', cache, timeout=-1)
+            if not accessible:
+                update_cache = False
+
+            if subformat_subreport:
+                subformats_subreport.append(subformat_subreport)
+
+        if subformats_subreport:
+            report.append({
+                'recid': record['recid'],
+                'message': 'Subformats issues found',
+                'report_number': record['report_number'][0],
+                'subreports': subformats_subreport})
+
+    if update_cache:
+        # Set the start date for next time when the task will run
+        cache['start_date'] = two_days_ago
+        current_cache.set(
+            'task_subformats_integrity:details', cache, timeout=-1)
 
     if report:
         # Format and send the email
@@ -403,18 +459,14 @@ def missing_subformats_report(start_date=None, end_date=None):
         return '\n'.join(lines)
 
     cache = current_cache.get('task_missing_subformats:details') or {}
-    if 'last_run' not in cache:
-        # Save the last week date to have a default value the first time
-        cache['last_run'] = datetime.utcnow() - timedelta(days=7)
+    if 'end_date' not in cache:
+        # Set the end date to 7 days ago
+        cache['end_date'] = datetime.utcnow() - timedelta(days=7)
 
-    query = _filter_by_last_created(
+    record_uuids = _filter_by_last_created(
                 _get_all_records_with_bucket(),
-                start_date or cache['last_run'],
-                end_date)
-
-    record_uuids = query \
-        .group_by(RecordMetadata.id) \
-        .with_entities(RecordMetadata.id)
+                start_date,
+                end_date or cache['end_date'])
 
     for record_uuid in record_uuids:
         record = CDSRecord.get_record(record_uuid.id)
@@ -439,9 +491,10 @@ def missing_subformats_report(start_date=None, end_date=None):
 
         # check bucket ids consistency
         bucket_id = master['bucket_id']
-        for f in subformats + \
-                    CDSVideosFilesIterator.get_video_frames(master) + \
-                    CDSVideosFilesIterator.get_video_subtitles(record):
+        for f in \
+            subformats + CDSVideosFilesIterator.get_video_frames(master) + \
+                CDSVideosFilesIterator.get_video_subtitles(record):
+
             if f['bucket_id'] != bucket_id:
                 report.append({
                     'message': 'Different buckets in the same record',
@@ -452,7 +505,7 @@ def missing_subformats_report(start_date=None, end_date=None):
                                                                f['bucket_id'])
                 })
 
-    cache['last_run'] = datetime.utcnow()
+    cache['end_date'] = datetime.utcnow()
     current_cache.set('task_missing_subformats:details', cache, timeout=-1)
 
     if report:
