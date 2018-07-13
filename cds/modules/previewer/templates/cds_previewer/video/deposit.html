@@ -33,7 +33,8 @@
   {%- set theo_config = {} -%}
 
   {# Strip eos path for the ``uri`` #}
-  {%- set path = file.file.obj.file.uri | replace(config.VIDEOS_XROOTD_PREFIX, '') %}
+  {%- set path = file.file.obj.file.uri | replace(config.VIDEOS_XROOTD_ENDPOINT, '') |
+                 replace(config.VIDEOS_LOCATION, '') %}
   {%- set source = config.WOWZA_VIDEO_URL | format(path) -%}
 
   {# Initialize theo player #}
