@@ -567,6 +567,7 @@ class TranscodeVideoTask(AVCTask):
         with db.session.begin_nested():
             # Create FileInstance
             file_instance = FileInstance.create()
+            logging.debug('FileInstance created')
 
             # Create ObjectVersion
             obj_key = self._build_subformat_key(preset_quality=preset_quality)
