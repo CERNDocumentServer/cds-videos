@@ -287,8 +287,7 @@ def subformats_integrity_report(start_date=None, end_date=None):
             # Check if the file exists on disk
             file_report = {
                 'file_name': obj.key,
-                'message': 'The file cannot be accessed',
-                'error': repr(e)}
+                'message': 'The file cannot be accessed'}
 
             # Return the file report and the file accessibility
             return (file_report, False)
