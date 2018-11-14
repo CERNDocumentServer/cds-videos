@@ -148,6 +148,11 @@ CELERYBEAT_SCHEDULE = {
         # Every Monday morning at 05:30 UTC
         'schedule': crontab(hour=5, minute=30, day_of_week=1),
     },
+    'index-deposit-projects': {
+        'task': 'cds.modules.deposit.tasks.index_deposit_projects',
+        # Every 10 minutes
+        'schedule': crontab(minute=10, hour=0),
+    },
 }
 
 ###############################################################################
