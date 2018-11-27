@@ -5,11 +5,13 @@
     "access": {
       "public": true,
       "restricted": [
+        "dvs-team-video@cern.ch",
         "PRESS-TEAM@cern.ch",
         "vmo-restictedrights@cern.ch",
         "writing-team@cern.ch"
       ],
       "responsible": [
+        "dvs-team-video@cern.ch",
         "PRESS-TEAM@cern.ch",
         "vmo-restictedrights@cern.ch",
         "writing-team@cern.ch"
@@ -17,7 +19,7 @@
     },
     "_record_type": ["PROJECT"],
     "_access": {
-      "read": ["vmo-restictedrights@cern.ch"]
+      "read": ["dvs-team-video@cern.ch", "vmo-restictedrights@cern.ch"]
     }
   },
   {
@@ -28,7 +30,7 @@
       "restricted": ["atlas-readaccess-active-members@cern.ch"],
       "responsible": ["atlas-outreach-cds-video@cern.ch"]
     },
-    "_record_type":  ["PROJECT"],
+    "_record_type": ["PROJECT"],
     "_access": {
       "read": ["atlas-outreach-cds-access@cern.ch"]
     }
@@ -41,7 +43,7 @@
       "restricted": [],
       "responsible": ["cms-virtual-visits@cern.ch"]
     },
-    "_record_type":  ["PROJECT"],
+    "_record_type": ["PROJECT"],
     "_access": {
       "read": ["cms-outreach-cds-access@cern.ch"]
     }
@@ -53,7 +55,7 @@
       "public": true,
       "restricted": []
     },
-    "_record_type":  ["PROJECT"]
+    "_record_type": ["PROJECT"]
   },
   {
     "name": "SCADA",
@@ -64,8 +66,8 @@
       "responsible": ["service-winccoa@cern.ch"]
     },
     "_access": {
-      "read" : ["service-winccoa@cern.ch"]
+      "read": ["service-winccoa@cern.ch"]
     },
-    "_record_type":  ["PROJECT"]
+    "_record_type": ["PROJECT"]
   }
 ]
