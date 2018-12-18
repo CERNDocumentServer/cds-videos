@@ -38,8 +38,8 @@ from invenio_db import db
 from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
                                        ObjectVersionTag)
 from invenio_indexer.api import RecordIndexer
-from invenio_opendefinition.tasks import (harvest_licenses,
-                                          import_licenses_from_json)
+from invenio_opendefinition.cli import loadlicenses
+from invenio_opendefinition.tasks import (harvest_licenses)
 from invenio_pages import Page
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_files.models import RecordsBuckets
@@ -283,13 +283,17 @@ def keywords(url):
 
 
 @fixtures.command()
+@click.option('--path', '-p', type=click.Path(exists=True, dir_okay=False),
+              default='cds/modules/fixtures/data/licenses.json')
 @with_appcontext
-def licenses():
+@click.pass_context
+def licenses(ctx, path):
     """Load Licenses."""
-    # harvest licenses
-    harvest_licenses()
     # load cds licenses
-    import_licenses_from_json(_load_json_source('licenses.json'))
+    # import_licenses_from_json(_load_json_source('licenses.json'))
+    # loadlicenses('opendefinition', path='./licenses.json')
+    ctx.invoke(loadlicenses)
+    ctx.invoke(loadlicenses, path=path)
     db.session.commit()
     # index all licenses
     query = (str(x[0]) for x in PersistentIdentifier.query.filter_by(

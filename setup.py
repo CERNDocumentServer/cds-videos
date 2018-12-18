@@ -48,7 +48,7 @@ tests_require = [
     'pytest-flask>=0.10.0',
     'pytest-pep8>=1.0.6',
     'pytest-runner>=2.7.0',
-    'pytest>=3.3.2',
+    'pytest>=4.0.0',
     'selenium>=2.53.6',
     'simplejson>=3.10',
     'six>=1.10.0',
@@ -139,11 +139,13 @@ install_requires = [
     'raven>=6.6.0',
     'requests>=2.11.1',
     'Wand>=0.4.2',
+    'pluggy>=0.8.0',
+    'redis<3.0.0,>=2.10.0',
     'celery<4.0,>=3.1',                 # FIXME: invenio-indexer
     'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
     'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
     'node-semver>=0.1.1,<0.2.0',        # FIXME: node-semver 0.2.0
-    'urllib3[secure]>=1.22',            # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
+    'urllib3[secure]>=1.23',            # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
     'SQLAlchemy-Continuum==1.3.4'       # FIXME: issue https://github.com/kvesteri/sqlalchemy-continuum/issues/188
 ]
 

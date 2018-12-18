@@ -36,7 +36,7 @@ click==6.7                # via cookiecutter, dojson, flask, invenio-opendefinit
 configparser==3.5.0       # via entrypoints
 contextlib2==0.5.5        # via raven
 cookiecutter==1.6.0       # via invenio-base
-cryptography==2.2.2       # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
+cryptography==2.4.2       # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
 datacite==1.0.1
 dcxml==0.1.1
 decorator==4.3.0          # via ipython, traitlets, validators
@@ -95,7 +95,7 @@ invenio-mail==1.0.1
 invenio-oaiserver==1.0.0
 invenio-oauth2server==1.0.0
 invenio-oauthclient==1.0.0
-invenio-opendefinition==1.0.0a7
+invenio-opendefinition==1.0.0a8
 invenio-pages==1.0.0a4
 invenio-pidstore==1.0.0
 invenio-previewer==1.0.0a11
@@ -146,7 +146,7 @@ pathlib2==2.3.2           # via ipython, pickleshare
 pexpect==4.5.0            # via ipython
 pickleshare==0.7.4        # via ipython
 pillow==5.1.0             # via flask-iiif, invenio-formatter
-pluggy==0.6.0             # via jsonresolver
+pluggy==0.8.0             # via jsonresolver
 poyo==0.4.1               # via cookiecutter
 prompt-toolkit==1.0.15    # via ipython
 psycopg2==2.7.4           # via invenio-db
@@ -165,7 +165,7 @@ pyzmq==17.0.0             # via jupyter-client
 raven==6.8.0
 redis==2.10.6             # via invenio-accounts, invenio-celery
 requests-oauthlib==0.8.0  # via flask-oauthlib
-requests[socks]==2.18.4
+requests[socks]==2.21
 scandir==1.7              # via pathlib2
 simplegeneric==0.8.1      # via ipython
 simplejson==3.15.0        # via dojson
@@ -181,7 +181,7 @@ tornado==5.0.2            # via jupyter-client
 traitlets==4.3.2          # via ipython, jupyter-client, jupyter-core, nbconvert, nbformat
 ua-parser==0.8.0          # via invenio-accounts
 uritools==2.1.1           # via invenio-oauthclient
-urllib3[secure]==1.22
+urllib3[secure]==1.24
 validators==0.12.1        # via wtforms-components
 wand==0.4.4
 wcwidth==0.1.7            # via prompt-toolkit

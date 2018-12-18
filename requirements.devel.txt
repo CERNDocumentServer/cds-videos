@@ -71,4 +71,4 @@
 -e git+https://github.com/inveniosoftware/invenio-sse.git#egg=invenio-sse
 -e git+https://github.com/inveniosoftware/invenio-theme.git#egg=invenio-theme
 -e git+https://github.com/inveniosoftware/invenio-userprofiles.git#egg=invenio-userprofiles
--e git+https://github.com/inveniosoftware/jsonresolver.git@#egg=jsonresolver
+-e git+https://github.com/inveniosoftware/jsonresolver.git#egg=jsonresolver
