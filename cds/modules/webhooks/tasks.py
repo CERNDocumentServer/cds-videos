@@ -567,6 +567,7 @@ class TranscodeVideoTask(AVCTask):
         with db.session.begin_nested():
             # Create FileInstance
             file_instance = FileInstance.create()
+            logging.debug('FileInstance created')
 
             # Create ObjectVersion
             obj_key = self._build_subformat_key(preset_quality=preset_quality)
@@ -769,3 +770,15 @@ def dispose_object_version(object_version):
         # remove the object version
         ObjectVersion.delete(
             bucket=object_version.bucket, key=object_version.key)
+        clean_file_instances(object_version)
+
+
+def clean_file_instances(object_version):
+    """Clean up empty FileInstance objects attached to an ObjectVersion."""
+    if object_version:
+        file_instance = object_version.file
+        if (file_instance and file_instance.size == 0 and
+                not file_instance.uri and not file_instance.checksum):
+            # The FileInstance is empty, delete it, otherwise we will get
+            # notified about it in the "file integrity" report
+            file_instance.delete()
