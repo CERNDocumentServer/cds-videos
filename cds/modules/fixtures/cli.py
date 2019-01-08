@@ -39,7 +39,6 @@ from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
                                        ObjectVersionTag)
 from invenio_indexer.api import RecordIndexer
 from invenio_opendefinition.cli import loadlicenses
-from invenio_opendefinition.tasks import (harvest_licenses)
 from invenio_pages import Page
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_files.models import RecordsBuckets
@@ -290,8 +289,6 @@ def keywords(url):
 def licenses(ctx, path):
     """Load Licenses."""
     # load cds licenses
-    # import_licenses_from_json(_load_json_source('licenses.json'))
-    # loadlicenses('opendefinition', path='./licenses.json')
     ctx.invoke(loadlicenses)
     ctx.invoke(loadlicenses, path=path)
     db.session.commit()
