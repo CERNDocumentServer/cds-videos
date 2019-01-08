@@ -134,25 +134,25 @@ CELERYBEAT_SCHEDULE = {
             'checksum_kwargs': {'use_default_impl': True},
         },
     },
-    'file-integrity-report': {
-        'task': 'cds.modules.records.tasks.file_integrity_report',
-        'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
-    },
-    'subformats-integrity-report': {
-        'task': 'cds.modules.records.tasks.subformats_integrity_report',
-        # Every 2 days at 04:00 UTC
-        'schedule': crontab(minute=0, hour=4, day_of_week=[0, 2, 4, 6]),
-    },
-    'missing-subformats-report': {
-        'task': 'cds.modules.records.tasks.missing_subformats_report',
-        # Every Monday morning at 05:30 UTC
-        'schedule': crontab(hour=5, minute=30, day_of_week=1),
-    },
     'index-deposit-projects': {
         'task': 'cds.modules.deposit.tasks.index_deposit_projects',
         # Every 10 minutes
         'schedule': crontab(minute=10, hour=0),
     },
+    # 'file-integrity-report': {
+    #     'task': 'cds.modules.records.tasks.file_integrity_report',
+    #     'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
+    # },
+    # 'subformats-integrity-report': {
+    #     'task': 'cds.modules.records.tasks.subformats_integrity_report',
+    #     # Every 2 days at 04:00 UTC
+    #     'schedule': crontab(minute=0, hour=4, day_of_week=[0, 2, 4, 6]),
+    # },
+    # 'missing-subformats-report': {
+    #     'task': 'cds.modules.records.tasks.missing_subformats_report',
+    #     # Every Monday morning at 05:30 UTC
+    #     'schedule': crontab(hour=5, minute=30, day_of_week=1),
+    # },
 }
 
 ###############################################################################
