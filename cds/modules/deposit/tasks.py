@@ -26,10 +26,14 @@
 
 from __future__ import absolute_import, print_function
 
+from datetime import datetime, timedelta
+
 from invenio_db import db
 from flask import current_app
 from celery import shared_task
+from invenio_cache import current_cache
 from invenio_indexer.api import RecordIndexer
+from invenio_records.models import RecordMetadata
 from invenio_records_files.api import Record
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
@@ -41,10 +45,15 @@ from ...modules.records.serializers import datacite_v31
 from ...modules.records.minters import is_local_doi
 
 
-@shared_task(bind=True, ignore_result=True, rate_limit='100/m',
-             default_retry_delay=10 * 60)
+@shared_task(
+    bind=True,
+    ignore_result=True,
+    rate_limit="100/m",
+    default_retry_delay=10 * 60,
+)
 def datacite_register(
-        self, pid_value, record_uuid, max_retries=5, countdown=5):
+    self, pid_value, record_uuid, max_retries=5, countdown=5
+):
     """Mint the DOI with DataCite.
 
     :param pid_value: Value of record PID, with pid_type='recid'.
@@ -52,18 +61,21 @@ def datacite_register(
     """
     try:
         record = Record.get_record(record_uuid)
-        if not record.get('doi'):
+        if not record.get("doi"):
             # If it's a project, there is no reserved DOI
             return
         # Bail out if not a CDS DOI.
-        if not is_local_doi(record['doi']) or \
-                not current_app.config['DEPOSIT_DATACITE_MINTING_ENABLED']:
+        if (
+            not is_local_doi(record["doi"])
+            or not current_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"]
+        ):
             return
 
-        dcp = DataCiteProvider.get(record['doi'])
+        dcp = DataCiteProvider.get(record["doi"])
 
-        url = current_app.config['CDS_RECORDS_UI_LINKS_FORMAT'].format(
-            recid=pid_value)
+        url = current_app.config["CDS_RECORDS_UI_LINKS_FORMAT"].format(
+            recid=pid_value
+        )
         doc = datacite_v31.serialize(dcp.pid, record)
 
         if dcp.pid.status == PIDStatus.REGISTERED:
@@ -78,8 +90,8 @@ def datacite_register(
 
 def _is_state_changed(record, deposit):
     """Return True if the celery tasks state changed."""
-    state_r = record['_cds'].get('state', {})
-    state_d = deposit['_cds'].get('state', {})
+    state_r = record["_cds"].get("state", {})
+    state_d = deposit["_cds"].get("state", {})
     return state_r != state_d
 
 
@@ -92,9 +104,9 @@ def _get_deposits_split_by_type(query):
     project_ids = []
     record_ids = []
     for data in query.scan():
-        if data['$schema'] == project_schema:
+        if data["$schema"] == project_schema:
             project_ids.append(data.meta.id)
-        if data['$schema'] == video_schema:
+        if data["$schema"] == video_schema:
             video_ids.append(data.meta.id)
         record_ids.append(data.meta.id)
     records = {r.id: r for r in Record.get_records(record_ids)}
@@ -103,12 +115,14 @@ def _get_deposits_split_by_type(query):
     return (videos, projects, records)
 
 
-@shared_task(ignore_result=True, rate_limit='100/m',
-             default_retry_delay=10 * 60)
+@shared_task(
+    ignore_result=True, rate_limit="100/m", default_retry_delay=10 * 60
+)
 def preserve_celery_states_on_db():
     """Preserve in db the celery tasks state."""
     (videos, projects, records) = _get_deposits_split_by_type(
-        query=AllDraftDepositsSearch())
+        query=AllDraftDepositsSearch()
+    )
     ids = []
     # commit only the ones who should be update
     for video in videos:
@@ -122,3 +136,27 @@ def preserve_celery_states_on_db():
     db.session.commit()
     if ids:
         RecordIndexer().bulk_index(iter(ids))
+
+
+@shared_task(ignore_result=True, rate_limit="100/m")
+def index_deposit_projects(check_time=None):
+    cache = current_cache.get("task_index_deposit_projects:details") or {}
+    if "update_date" not in cache:
+        # Set the update date by default to 10 minutes ago
+        cache["update_date"] = datetime.utcnow() - timedelta(minutes=10)
+    records = RecordMetadata.query.filter(
+        RecordMetadata.updated > check_time or cache["update_date"]
+    ).with_entities(RecordMetadata.id, RecordMetadata.json)
+
+    projects_ids = []
+    for _id, json in records:
+        if json and json.get("$schema") == current_jsonschemas.path_to_url(
+            Project._schema
+        ):
+            projects_ids.append(str(_id))
+
+    if projects_ids:
+        RecordIndexer().bulk_index(iter(projects_ids))
+
+    cache["update_date"] = datetime.utcnow()
+    current_cache.set("task_index_deposit_projects:details", cache, timeout=-1)
