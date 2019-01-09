@@ -125,7 +125,7 @@ def test_fixture_pages(app, script_info, db, client):
     res = runner.invoke(cli_pages, [], obj=script_info)
     assert res.exit_code == 0
     pages = Page.query.all()
-    assert len(pages) == 6
+    assert len(pages) == 7
     about_response = client.get('/about')
     assert about_response.status_code == 200
 
