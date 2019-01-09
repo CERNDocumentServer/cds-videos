@@ -30,3 +30,4 @@ npm install
 cd ${CWD}
 cds collect -v
 cds assets build
+cds webpack buildall
