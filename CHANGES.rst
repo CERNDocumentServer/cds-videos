@@ -25,6 +25,14 @@
 Changes
 =======
 
+Version 1.0.7 (2019-01-10)
+
+- updated dependencies, vulnerabilities removed
+- search guide added
+- files integrity checks disabled
+- fixing deposit statuses added
+- fixed invenio-opendefinition usage
+
 Version 1.0.6 (2018-07-04)
 
 - implemented responsive player for embed videos
