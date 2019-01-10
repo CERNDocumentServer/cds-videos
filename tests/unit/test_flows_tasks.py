@@ -274,8 +274,8 @@ def test_transcode_too_high_resolutions(db, cds_depid, mock_sorenson):
     obj = ObjectVersion.create(bucket, key=filename,
                                stream=BytesIO(b'\x00' * filesize))
     ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
-    ObjectVersionTag.create(obj, 'height', 360)
-    ObjectVersionTag.create(obj, 'width', 640)
+    ObjectVersionTag.create(obj, 'height', '360')
+    ObjectVersionTag.create(obj, 'width', '640')
     obj_id = str(obj.version_id)
     db.session.commit()
 
