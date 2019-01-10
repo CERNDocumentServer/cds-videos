@@ -90,7 +90,7 @@ invenio-celery==1.0.1
 invenio-communities==1.0.0a19
 invenio-config==1.0.1
 invenio-db[postgresql,versioning]==1.0.2
-# invenio-files-rest==1.0.0a23  # via invenio-communities, invenio-iiif, invenio-records-files
+invenio-files-rest==1.0.0a23  # via invenio-communities, invenio-iiif, invenio-records-files
 invenio-formatter[badges]==1.0.1
 invenio-i18n==1.1.1
 invenio-iiif==1.0.0a4

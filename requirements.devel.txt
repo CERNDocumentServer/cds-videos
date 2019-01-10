@@ -26,7 +26,6 @@
 
 # FIXME topical branches
 # -e git+https://github.com/inveniosoftware/invenio-deposit.git#egg=invenio-deposit
-# -e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
 # -e git+https://github.com/inveniosoftware/invenio-webhooks.git#egg=invenio-webhooks
 
 # FIXME removed until proper integration
@@ -45,6 +44,7 @@
 -e git+https://github.com/inveniosoftware/invenio-communities.git#egg=invenio-communities
 -e git+https://github.com/inveniosoftware/invenio-config.git#egg=invenio-config
 -e git+https://github.com/inveniosoftware/invenio-db.git#egg=invenio-db[postgresql,versioning]
+-e git+https://github.com/inveniosoftware/invenio-files-rest.git#egg=invenio-files-rest
 -e git+https://github.com/inveniosoftware/invenio-formatter.git#egg=invenio-formatter[badges]
 -e git+https://github.com/inveniosoftware/invenio-iiif.git#egg=invenio-iiif
 -e git+https://github.com/inveniosoftware/invenio-indexer.git#egg=invenio-indexer
