@@ -126,14 +126,9 @@ class CDSDeposit(Deposit):
         self._update_tasks_status()
         self['_files'] = self._get_files_dump()
 
-    @property
-    def _bucket(self):
-        """Get the bucket object."""
-        return as_bucket(self['_buckets']['deposit'])
-
     def _get_files_dump(self):
         """Get files without create the record_bucket."""
-        bucket = self._bucket
+        bucket = self.bucket
         if bucket:
             return self.files_iter_cls(
                 self, bucket=bucket,
@@ -155,6 +150,18 @@ class CDSDeposit(Deposit):
         return deposits
 
     @classmethod
+    def dump_bucket(cls, data, bucket):
+        """Dump the bucket id into the record metadata."""
+        _buckets = data.setdefault("_buckets", {})
+        _buckets["deposit"] = str(bucket.id)
+        data["_buckets"] = _buckets
+
+    @classmethod
+    def load_bucket(cls, record):
+        """Load the bucket id from the record metadata."""
+        return record.get("_buckets", {}).get("deposit", "")
+
+    @classmethod
     def create(cls, data, id_=None, **kwargs):
         """Create a CDS deposit.
 
@@ -163,13 +170,6 @@ class CDSDeposit(Deposit):
         if '_deposit' not in data:
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
-        bucket = Bucket.create(location=Location.get_by_name(
-            kwargs.get('bucket_location', 'default')),
-            storage_class=current_app.config[
-                'DEPOSIT_DEFAULT_STORAGE_CLASS'
-            ]
-        )
-        data['_buckets'] = {'deposit': str(bucket.id)}
         data.setdefault('_cds', {})
         data['_cds'].setdefault('state', {})
         data.setdefault('keywords', [])
@@ -182,7 +182,6 @@ class CDSDeposit(Deposit):
             data.setdefault('_access', {})
         deposit = super(CDSDeposit, cls).create(
             data, id_=id_, validator=PartialDraft4Validator)
-        RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
 
     @property
@@ -281,12 +280,28 @@ class CDSDeposit(Deposit):
         """Snapshot bucket and add files in record during first publishing."""
         if self.files:
             assert not self.files.bucket.locked
-            # FIXME deposit bucket is never locked down
+            self.files.bucket.locked = True
+
+            # create a copy of the deposit bucket for the record
             snapshot = self.files.bucket.snapshot()
-            for data in self._merge_related_objects(
-                record_id=record_id, snapshot=snapshot, data=data
-            ):
-                yield data
+            self._fix_tags_refs_to_master(bucket=snapshot)
+            # dump after fixing references
+            data['_files'] = self.files.dumps(bucket=snapshot.id)
+            snapshot.locked = False
+
+            data = self._generate_smil_file(record_id, data, snapshot)
+            # dump after smil generation
+            data['_files'] = self.files.dumps(bucket=snapshot.id)
+            # dump the snapshot id to the record bucket
+            # we need this to avoid creatng a new bucket on `Record.create(...)`
+            data["_buckets"]["record"] = str(snapshot.id)
+            snapshot.locked = True
+
+            yield data
+
+            db.session.add(RecordsBuckets(
+                record_id=record_id, bucket_id=snapshot.id
+            ))
         else:
             yield
 
@@ -339,31 +354,36 @@ class CDSDeposit(Deposit):
     def _prepare_edit(self, record):
         """Unlock bucket after edit."""
         data = super(CDSDeposit, self)._prepare_edit(record=record)
-        # TODO when you edit we are starting always from the deposit
+        # unlock bucket to eventually modify files
+        self.files.bucket.locked = False
         return data
 
     def _publish_edited(self):
         """Sync deposit bucket with the record bucket."""
         record = super(CDSDeposit, self)._publish_edited()
-        return self._sync_record_files(record=record)
 
-    def _sync_record_files(self, record):
-        """Synchronize deposit files with deposit files."""
-        if self.files:
-            record.files.bucket.locked = False
-            snapshot = self.files.bucket.merge(bucket=record.files.bucket)
-            next(self._merge_related_objects(
-                record_id=record.id, snapshot=snapshot, data=record
-            ))
-            record.files.bucket.locked = True
+        if record.files:
+            self.files.bucket.locked = True
+
+            bucket = record.files.bucket
+            bucket.locked = False
+            self.files.bucket.sync(bucket=bucket, delete_extras=False)
+            self._fix_tags_refs_to_master(bucket=bucket)
+            # dump after fixing references
+            record['_files'] = self.files.dumps(bucket=bucket.id)
+
+            record = self._generate_smil_file(record.id, record, bucket)
+            # dump after smil generation
+            record['_files'] = self.files.dumps(bucket=bucket.id)
+            bucket.locked = True
 
         return record
 
-    def _merge_related_objects(self, record_id, snapshot, data):
-        """."""
+    def _fix_tags_refs_to_master(self, bucket):
+        """Change references from old master to new master OV version_id."""
         # dict of version_ids in original bucket to version_ids in
         # snapshot bucket for the each file
-        snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=snapshot)
+        snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=bucket)
         old_to_new_version = {
             str(self.files[obj.key]['version_id']): str(obj.version_id)
             for obj in snapshot_obj_list
@@ -380,28 +400,14 @@ class CDSDeposit(Deposit):
                 tag.value = new_master_id
         db.session.add_all(slave_tags)
 
-        # FIXME bug when dump a different bucket
-        backup = deepcopy(self['_files'])
-
-        # Generate SMIL file
-        data['_files'] = self.files.dumps(bucket=snapshot.id)
-        master_video = get_master_object(snapshot)
+    def _generate_smil_file(self, record_id, data, bucket):
+        """Add SMIL file to record's bucket and dump it in the record."""
+        master_video = get_master_object(bucket)
         if master_video:
+            assert not bucket.locked
             from cds.modules.records.serializers.smil import generate_smil_file
-            generate_smil_file(record_id, data, snapshot, master_video)
-
-        # Update metadata with SMIL file information
-        data['_files'] = self.files.dumps(bucket=snapshot.id)
-
-        # FIXME bug when dump a different bucket
-        self['_files'] = backup
-
-        snapshot.locked = True
-
-        yield data
-        db.session.add(RecordsBuckets(
-            record_id=record_id, bucket_id=snapshot.id
-        ))
+            generate_smil_file(record_id, data, bucket, master_video)
+        return data
 
 
 # TODO move inside Video class
@@ -823,9 +829,13 @@ class Video(CDSDeposit):
             subtitle_obj = as_object_version(subtitle_file['version_id'])
             match = pattern.match(subtitle_file['key'])
             if match:
-                subtitle_obj.key = '{}_{}.vtt'.format(self['report_number'][0],
+                subtitle_obj_key = '{}_{}.vtt'.format(self['report_number'][0],
                                                       match.group('iso_lang'))
-                db.session.add(subtitle_obj)
+                ObjectVersion.create(
+                    bucket=subtitle_obj.bucket,
+                    key=subtitle_obj_key,
+                    _file_id=subtitle_obj.file_id)
+                subtitle_obj.remove()
 
     def _rename_master_file(self, master_file):
         """Rename master file."""
@@ -854,6 +864,8 @@ class Video(CDSDeposit):
         """Rename subtitles and publish."""
         self['_files'] = self.files.dumps()
         self._rename_subtitles()
+        # dump again renamed subtitles
+        self['_files'] = self.files.dumps()
 
         from cds.modules.records.permissions import is_public
         if is_public(self, 'read'):

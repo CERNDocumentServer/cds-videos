@@ -77,7 +77,16 @@ def _build_file_links(obj):
                 bucket=obj.bucket_id,
                 key=obj.key,
                 version_id=obj.version_id,
-            )))
+            )),
+        deleteFile=u'{scheme}://{host}/{api}/{bucket}/{key}'
+            .format(
+                # TODO: JSONSchema host is not the best solution here.
+                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
+                host=current_app.config['JSONSCHEMAS_HOST'],
+                api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
+                bucket=obj.bucket_id,
+                key=obj.key,
+            ))
 
 
 def dump_generic_object(obj, data):
@@ -85,9 +94,8 @@ def dump_generic_object(obj, data):
     obj_dump = dump_object(obj)
     # if it's a master, get all the depending object and add them inside
     # <context_type> as a list order by key.
-    for slave in ObjectVersion.query_heads_by_bucket(bucket=obj.bucket).join(
+    for slave in ObjectVersion.get_by_bucket(bucket=obj.bucket).join(
             ObjectVersion.tags).filter(
-                ObjectVersion.file_id.isnot(None),
                 ObjectVersionTag.key == 'master',
                 ObjectVersionTag.value == str(obj.version_id)).order_by(
                     func.length(ObjectVersion.key), ObjectVersion.key):
@@ -203,11 +211,30 @@ class CDSRecord(Record):
         return PersistentIdentifier.get(
             pid_type='depid', pid_value=self.get('_deposit', {}).get('id'))
 
-    def _create_bucket(self):
-        """Override bucket creation."""
-        return Bucket.create(storage_class=current_app.config[
-            'DEPOSIT_DEFAULT_STORAGE_CLASS'
-        ])
+
+    @classmethod
+    def create_bucket(cls, data):
+        """Create a bucket for this record.
+
+        Check in record's metadata if there is already a bucket created.
+        This happens before we publish, while creating a snapshot of the
+        deposit's bucket.
+        """
+        if data.get("_buckets", {}).get("record"):
+            return None
+        return Bucket.create()
+
+    @classmethod
+    def dump_bucket(cls, data, bucket):
+        """Dump the bucket id into the record metadata."""
+        _buckets = data.setdefault("_buckets", {})
+        _buckets["record"] = str(bucket.id)
+        data["_buckets"] = _buckets
+
+    @classmethod
+    def load_bucket(cls, record):
+        """Load the deposit bucket id from the record metadata."""
+        return record.get("_buckets", {}).get("record", "")
 
 
 class Keyword(Record):

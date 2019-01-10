@@ -74,6 +74,10 @@ class AVCTask(Task):
 
     abstract = True
 
+    @property
+    def name(self):
+        return '.'.join([self.__module__, self.__name__])
+
     def _extract_call_arguments(self, arg_list, **kwargs):
         for name in arg_list:
             setattr(self, name, kwargs.pop(name, None))
@@ -285,7 +289,7 @@ class ExtractMetadataTask(AVCTask):
 
         extracted_dict = cls.get_metadata_tags(object_=object_, uri=uri)
         # Add technical information to the ObjectVersion as Tags
-        [ObjectVersionTag.create_or_update(object_, k, v)
+        [ObjectVersionTag.create_or_update(object_, k, to_string(v))
          for k, v in extracted_dict.items()
          if k in keys]
         db.session.refresh(object_)
@@ -507,7 +511,7 @@ class ExtractFramesTask(AVCTask):
         ObjectVersionTag.create(obj, 'master', str(master_id))
         ObjectVersionTag.create(obj, 'media_type', media_type)
         ObjectVersionTag.create(obj, 'context_type', context_type)
-        [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
+        [ObjectVersionTag.create(obj, k, to_string(tags[k])) for k in tags]
 
 
 class TranscodeVideoTask(AVCTask):
