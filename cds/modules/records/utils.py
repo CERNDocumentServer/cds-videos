@@ -26,6 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+import six
+
 from elasticsearch.exceptions import NotFoundError
 from flask import current_app, g, request
 from flask_security import current_user
@@ -510,3 +513,11 @@ def delete_record(record_uuid, reason):
     db.session.commit()
 
     return report
+
+
+def to_string(value):
+    """."""
+    if isinstance(value, six.string_types):
+        return value
+    else:
+        return json.dumps(value)

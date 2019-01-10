@@ -40,7 +40,7 @@ services:
     extends:
       file: docker-services.yml
       service: es
-  flower:
-    extends:
-      file: docker-services.yml
-      service: flower
+  # flower:
+  #   extends:
+  #     file: docker-services.yml
+  #     service: flower

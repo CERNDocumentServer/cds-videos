@@ -50,6 +50,7 @@ from flask_security import login_user
 from invenio_access.models import ActionRoles
 from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
+from invenio_app.factory import create_app
 from invenio_db import db as db_
 from invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, Location, ObjectVersion
@@ -68,7 +69,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
 from werkzeug.routing import Rule
 
-from cds.factory import create_app
 from cds.modules.deposit.api import Project, Video
 from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
@@ -95,7 +95,7 @@ def app():
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-        CELERY_TRACK_STARTED=True,
+        CELERY_TASK_TRACK_STARTED=True,
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
@@ -296,29 +296,6 @@ def video_with_small(request, datadir):
 def online_video():
     """Get online test video file."""
     return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
-
-
-@pytest.fixture()
-def cds_jsonresolver(app):
-    """Configure a jsonresolver for cds-dojson."""
-    @jsonresolver.hookimpl
-    def jsonresolver_loader(url_map):
-        url_map.add(Rule(
-            '/schemas/<path:path>', endpoint=endpoint_get_schema,
-            host='cdslabs.cern.ch'
-        ))
-
-
-@pytest.fixture()
-def api_cds_jsonresolver(api_app):
-    """Configure a jsonresolver for cds-dojson."""
-    @jsonresolver.hookimpl
-    def jsonresolver_loader(url_map):
-        url_map.add(Rule(
-            '/schemas/<path:path>',
-            endpoint=endpoint_get_schema,
-            host='cdslabs.cern.ch'
-        ))
 
 
 @pytest.fixture()

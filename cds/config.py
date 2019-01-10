@@ -37,6 +37,7 @@ from invenio_oauthclient.contrib import cern
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 
+from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
@@ -82,8 +83,6 @@ MAIL_SUPPRESS_SEND = True
 BABEL_DEFAULT_LANGUAGE = 'en'
 # Default timezone.
 BABEL_DEFAULT_TIMEZONE = 'Europe/Zurich'
-# Supported languages.
-I18N_LANGUAGES = []
 
 ###############################################################################
 # Celery
@@ -95,11 +94,13 @@ CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 #: URL of backend for result storage (default is Redis).
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
 # Celery monitoring.
-CELERY_TRACK_STARTED = True
+CELERY_TASK_TRACK_STARTED = True
 # Celery accepted content types.
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml', 'pickle']
+"""A whitelist of content-types/serializers."""
+
 # Celery Beat schedule
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'indexer': {
         'task': 'invenio_indexer.tasks.process_bulk_queue',
         'schedule': timedelta(minutes=5),
@@ -828,6 +829,14 @@ SECURITY_LOGIN_USER_TEMPLATE = 'cds_theme/login_user.html'
 # Security login salt.
 SECURITY_LOGIN_SALT = 'CHANGE_ME'
 
+# Flask configuration
+# ===================
+# See details on
+# http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
+
+APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
+
 ###############################################################################
 # User Profiles
 ###############################################################################
@@ -942,16 +951,6 @@ the users that are part of the e-groups in VIDEOS_EOS_PATH_EGROUPS and admins.
 JSONSCHEMAS_ENDPOINT = '/schemas'
 JSONSCHEMAS_HOST = os.environ.get('JSONSCHEMAS_HOST', 'localhost:5000')
 JSONSCHEMAS_URL_SCHEME = 'https'
-
-###############################################################################
-# Migration
-###############################################################################
-
-MIGRATOR_RECORDS_DUMPLOADER_CLS = 'cds.modules.migrator.records:' \
-                                  'CDSRecordDumpLoader'
-MIGRATOR_RECORDS_DUMP_CLS = 'cds.modules.migrator.records:CDSRecordDump'
-
-CDS_MIGRATION_RECORDS_BASEPATH = '/dfs/Services'
 
 ###############################################################################
 # Indexer

@@ -1,3 +1,2 @@
 # QuantifiedCode ignore folder content
-tests/e2e/*
 tests/unit/*
