@@ -252,7 +252,7 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
     master_obj = ObjectVersion.create(bucket=bucket_id,
                                       key='{}.mp4'.format(basename),
                                       stream=open(video, 'rb'))
-    ObjectVersionTag.create(master_obj, 'preview', True)
+    ObjectVersionTag.create(master_obj, 'preview', 'true')
     create_video_tags(master_obj, context_type='master')
     for i in range(4):
         slave = create_slave(key='{0}_{1}.mp4'.format(basename, i))

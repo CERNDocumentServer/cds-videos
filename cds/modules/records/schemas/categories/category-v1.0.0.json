@@ -1,0 +1,39 @@
+{
+  "title": "CDS Deposit Category Schema.",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "name": {
+      "description": "TODO",
+      "type": "string"
+    },
+    "types": {
+      "description": "TODO",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "access": {
+      "type": "object",
+      "properties": {
+        "public": {
+          "type": "boolean"
+        },
+        "restricted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "_record_type": {
+      "description": "TODO",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

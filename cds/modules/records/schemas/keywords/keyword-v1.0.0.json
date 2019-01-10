@@ -1,0 +1,19 @@
+{
+  "title": "CDS Deposit Keywords Schema.",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "key_id": {
+      "description": "TODO",
+      "type": "string"
+    },
+    "name": {
+      "description": "TODO",
+      "type": "string"
+    },
+    "provenance": {
+      "description": "Specifies the provenance of a keyword",
+      "type": "string"
+    }
+  }
+}
