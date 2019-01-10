@@ -43,7 +43,6 @@ tests_require = [
     'isort>=4.2.2',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
-    'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-flask>=0.10.0',
     'pytest-pep8>=1.0.6',
@@ -73,75 +72,41 @@ extras_require['xrootd'] = [
 ]
 
 setup_requires = [
-    'Babel>=1.3',
+    'Babel>=2.4.0',
+    'Flask-BabelEx>=0.9.3',
     'setuptools>=20.6.7',
     'pytest-runner>=2.7.0',
 ]
 
 install_requires = [
-    'arrow>=0.7.0',
+    'invenio[base,auth,metadata,files,postgresql,elasticsearch2]==3.2.1',  # 3.2.2 removes support for Python 2.7
+    # pin some invenio 3.2.x packages because of versions conflicts
+    'invenio-db[postgresql,versioning]==1.0.4',  # 1.0.5 dropped Python 2
+    'invenio-base==1.2.3',
+    'invenio-oauth2server==1.0.4',
+    # extras
+    'arrow>=0.7.0,<1.0.0',
     'CairoSVG>=1.0.20,<2.0.0',
-    'Flask-Admin>=1.4.2',
-    'Flask-BabelEx>=0.9.3',
-    'Flask-Debugtoolbar>=0.10.0',
-    'Flask-IIIF>=0.5.0',
-    'Flask-WTF>=0.13.1',
-    'Flask>=0.11.1',
-    'cds-dojson==0.11.0',
-    'datacite>=1.0.1',
-    'dcxml>=0.1.1',
-    'idutils>=0.2.3',
-    'invenio-access>=1.0.0',
-    'invenio-accounts>=1.0.0',
-    'invenio-admin>=1.0.0',
-    'invenio-assets>=1.0.0',
-    'invenio-base>=1.0.1',
-    'invenio-cache>=1.0.0',
-    'invenio-celery>=1.0.0',
-    'invenio-communities==1.0.0a19',
-    'invenio-config>=1.0.0',
-    'invenio-db[postgresql,versioning]>=1.0.0',
-    # FIXME topical branch
-    #  'invenio-deposit>=1.0.0a8',
-    # FIXME topical branch
-    #  'invenio-files-rest>=1.0.0a18',
-    'invenio-formatter[badges]>=1.0.0',
-    'invenio-i18n>=1.0.0',
-    'invenio-iiif>=1.0.0a3',
-    'invenio-indexer>=1.0.0',
-    'invenio-jsonschemas>=1.0.0,<1.1.2',
-    'invenio-logging>=1.0.0',
-    'invenio-mail>=1.0.0',
-    'invenio-migrator>=1.0.0a10',
-    'invenio-oaiserver>=1.0.0',
-    'invenio-oauth2server>=1.0.3',
-    'invenio-oauthclient>=1.1.2',
-    'invenio-opendefinition>=1.0.0a7',
-    'invenio-pages>=1.0.0a4',
-    'invenio-pidstore>=1.0.0',
-    'invenio-previewer==1.0.0a11',
-    'invenio-records-files==1.0.0a11',
-    'invenio-records-rest>=1.1.0',
-    'invenio-records-ui>=1.0.0',
-    'invenio-records[postgresql]>=1.3.2',
-    'invenio-rest>=1.0.0',
-    'invenio-search-ui>=1.0.1',
-    'invenio-search[elasticsearch2]>=1.0.0',
-    'invenio-sequencegenerator>=1.0.0a2',
-    'invenio-theme>=1.0.0',
-    'invenio-userprofiles>=1.0.0',
-    'jsonref>=0.1',
-    'jsonresolver>=0.2.1',
-    'marshmallow>=2.15.0',
+    'datacite==1.0.1',
+    'dcxml==0.1.1',
+    'dictdiffer<0.9.0',
+    'Flask>=1.0.4,<2.0',
+    'Flask-Breadcrumbs<0.5.0',
+    'flask-caching<1.8.0',
+    'flask-debugtoolbar>0.10.1',
+    'Flask-Login>=0.3.0,<0.5.0',
+    'flask-sqlalchemy<2.5.0',
+    'idutils==0.2.3',
+    'invenio-formatter[badges]>=1.0.2,<1.1.0',
+    'invenio-opendefinition==1.0.0a8',
+    'invenio-pages==1.0.0a4',
+    'invenio-sequencegenerator==1.0.0a2',
+    'jsonresolver>=0.2.1,<0.3.0',
     'raven>=6.6.0',
-    'requests>=2.11.1',
-    'Wand>=0.4.2',
-    'redis<3.0.0,>=2.10.0',
-    'celery<4.0,>=3.1',                 # FIXME: invenio-indexer
-    'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
-    'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
-    'node-semver>=0.1.1,<0.2.0',        # FIXME: node-semver 0.2.0
-    'urllib3[secure]>=1.24.2,<1.25',    # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
+    'redis>=2.10.0,<3.0.0',
+    'SQLAlchemy>=1.0,<1.4.0',
+    'urllib3[secure]>=1.24.2,<2.0.0',    # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
+    'WTForms-Alchemy<0.17.0',
 ]
 
 packages = find_packages()
@@ -167,7 +132,7 @@ setup(
     platforms='any',
     entry_points={
         'console_scripts': [
-            'cds = cds.cli:cli',
+            'cds = invenio_app.cli:cli',
         ],
         'flask.commands': [
             'subformats = cds.modules.maintenance.cli:subformats',
@@ -209,7 +174,6 @@ setup(
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
-            'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
         ],
         'invenio_base.blueprints': [
@@ -223,9 +187,16 @@ setup(
             'cds_redirector = cds.modules.redirector.views:blueprint',
             'cern_oauth = invenio_oauthclient.contrib.cern:cern_oauth_blueprint',
         ],
+        'invenio_config.module': [
+            'cds = cds.config',
+        ],
         'invenio_db.alembic': [
             'cds_announcements = cds.modules.announcements:alembic',
             'invenio_flows = cds.modules.flows:alembic',
+        ],
+        'invenio_jsonschemas.schemas': [
+            'deposit = cds.modules.deposit.schemas',
+            'record = cds.modules.records.schemas',
         ],
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',
@@ -239,10 +210,6 @@ setup(
             'cds.modules.records.minters:report_number_minter',
             'cds_recid = cds.modules.records.minters:cds_record_minter',
         ],
-        # FIXME removed until proper integration
-        # 'invenio_i18n.translations': [
-        #    'messages = cds',
-        # ],
         'invenio_search.mappings': [
             'records = cds.modules.records.mappings',
             'deposits = cds.modules.deposit.mappings',
@@ -251,9 +218,10 @@ setup(
         ],
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.flows.tasks',
-            'cds_migration_tasks = cds.modules.migrator.tasks',
+            'cds_deposit_tasks = cds.modules.deposit',
             'cds_maintenance_tasks = cds.modules.maintenance.tasks',
             'cds_opencast_tasks = cds.modules.opencast.tasks',
+            'cds_records_tasks = cds.modules.records',
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',
@@ -266,7 +234,6 @@ setup(
         'invenio_records.jsonresolver': [
             'keywords = cds.modules.records.jsonresolver.keywords',
             'records = cds.modules.records.jsonresolver.records',
-            'schemas = cds.modules.records.jsonresolver.schemas',
             'deposits = cds.modules.deposit.jsonresolver',
         ],
     },

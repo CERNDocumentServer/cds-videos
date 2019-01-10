@@ -110,7 +110,6 @@ class Smil(object):
 
 def generate_smil_file(record_id, record, bucket, master_object, **kwargs):
     """Generate SMIL file for Video record (on publish)."""
-    #  output_folder = tempfile.mkdtemp()
     master_object = as_object_version(master_object)
 
     # Generate SMIL file
