@@ -51,6 +51,7 @@ from ..records.serializers.smil import generate_smil_file
 
 from ..records.api import CDSRecord as Record
 from ..records.tasks import keywords_harvesting
+from ..records.utils import to_string
 
 
 def _load_json_source(filename):
@@ -81,9 +82,7 @@ def _process_files(record, files_metadata):
     """
     if not files_metadata:
         return
-    bucket = Bucket.create(storage_class=current_app.config[
-            'DEPOSIT_DEFAULT_STORAGE_CLASS'
-        ])
+    bucket = Bucket.create()
     RecordsBuckets.create(record=record.model, bucket=bucket)
     response = requests.get(
         files_metadata['source'], stream=True, verify=False)
@@ -107,7 +106,7 @@ def _process_files(record, files_metadata):
         for k, v in f['tags'].items():
             if k == 'master':
                 v = ObjectVersion.get(bucket, v).version_id
-            ObjectVersionTag.create(obj, k, v)
+            ObjectVersionTag.create(obj, k, to_string(v))
     shutil.rmtree(files_base_dir)
 
     record['_files'] = record.files.dumps()

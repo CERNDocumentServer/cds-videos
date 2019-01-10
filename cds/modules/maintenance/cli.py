@@ -151,8 +151,6 @@ def fix_bucket_conflict(recid):
     def _force_sync_deposit_bucket(record):
         """Replace deposit bucket with a copy of the record bucket."""
         deposit = Video.get_record(record.depid.object_uuid)
-        # if deposit['_deposit']['status'] == 'draft':
-        #     raise RuntimeError('Deposit in edit mode: {0}'.format(deposit.id))
         deposit_old_bucket = deposit.files.bucket
         # create a copy of record bucket
         new_bucket = record.files.bucket.snapshot()
@@ -231,4 +229,3 @@ def extract_frames(recid, depid):
         if 'ExtractFramesTask' in t.name:
             flow.restart_task(t)
     db.session.commit()
-

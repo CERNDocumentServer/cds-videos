@@ -34,7 +34,7 @@ from celery.schedules import crontab
 def test_celery_beat(app):
     """Test celery beat."""
     beats = [task['schedule']
-             for task in app.config['CELERYBEAT_SCHEDULE'].values()
+             for task in app.config['CELERY_BEAT_SCHEDULE'].values()
              if isinstance(task['schedule'], crontab)]
     assert len(beats) == 3
     for beat in beats:

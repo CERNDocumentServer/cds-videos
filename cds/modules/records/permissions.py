@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function
 
 from flask import current_app
 from flask_security import current_user
-from invenio_access import DynamicPermission
+from invenio_access import Permission
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
@@ -66,7 +66,7 @@ def files_permission_factory(obj, action=None):
             elif is_deposit(record):
                 return DepositFilesPermission.create(record, action)
 
-    return DynamicPermission(action_admin_access).can()
+    return Permission(action_admin_access).can()
 
 
 def record_permission_factory(record=None, action=None):
@@ -358,4 +358,4 @@ def has_admin_permission(user=None, record=None):
     to allow for dynamic dispatch.
     """
     # Allow administrators
-    return DynamicPermission(action_admin_access).can()
+    return Permission(action_admin_access).can()
