@@ -136,8 +136,6 @@ def fix_bucket_conflict(recid):
     def _force_sync_deposit_bucket(record):
         """Replace deposit bucket with a copy of the record bucket."""
         deposit = Video.get_record(record.depid.object_uuid)
-        # if deposit['_deposit']['status'] == 'draft':
-        #     raise RuntimeError('Deposit in edit mode: {0}'.format(deposit.id))
         deposit_old_bucket = deposit.files.bucket
         # create a copy of record bucket
         new_bucket = record.files.bucket.snapshot()
@@ -155,9 +153,8 @@ def fix_bucket_conflict(recid):
             master_deposit_obj = ObjectVersion.get(new_bucket,
                                                    master_file['key'])
 
-            for slave in ObjectVersion.query_heads_by_bucket(
+            for slave in ObjectVersion.get_by_bucket(
                     bucket=new_bucket).join(ObjectVersion.tags).filter(
-                        ObjectVersion.file_id.isnot(None),
                         ObjectVersionTag.key == 'master'):
                 ObjectVersionTag.create_or_update(
                     slave, 'master', str(master_deposit_obj.version_id))

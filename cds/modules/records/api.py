@@ -85,9 +85,8 @@ def dump_generic_object(obj, data):
     obj_dump = dump_object(obj)
     # if it's a master, get all the depending object and add them inside
     # <context_type> as a list order by key.
-    for slave in ObjectVersion.query_heads_by_bucket(bucket=obj.bucket).join(
+    for slave in ObjectVersion.get_by_bucket(bucket=obj.bucket).join(
             ObjectVersion.tags).filter(
-                ObjectVersion.file_id.isnot(None),
                 ObjectVersionTag.key == 'master',
                 ObjectVersionTag.value == str(obj.version_id)).order_by(
                     func.length(ObjectVersion.key), ObjectVersion.key):

@@ -28,8 +28,5 @@
 # FIXME wait for PR#166
 -e git+https://github.com/inveniosoftware/invenio-deposit.git@cds-create-validator#egg=invenio-deposit
 
-# FIXME wait for PR#147
--e git+https://github.com/inveniosoftware/invenio-files-rest.git@cds-object-version-tags#egg=invenio-files-rest
-
 # FIXME wait for PR#54
 -e git+https://github.com/hachreak/invenio-webhooks.git@51_receivers_permissions#egg=invenio-webhooks
