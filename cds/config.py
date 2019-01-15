@@ -136,8 +136,8 @@ CELERYBEAT_SCHEDULE = {
     },
     'index-deposit-projects': {
         'task': 'cds.modules.deposit.tasks.index_deposit_projects',
-        # Every 10 minutes
-        'schedule': crontab(minute=10, hour=0),
+        # Every 12 minutes, not to be at the same time as the others
+        'schedule': timedelta(minutes=12),
     },
     # 'file-integrity-report': {
     #     'task': 'cds.modules.records.tasks.file_integrity_report',
