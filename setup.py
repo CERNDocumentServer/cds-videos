@@ -112,8 +112,7 @@ install_requires = [
     'invenio-jsonschemas>=1.0.0',
     'invenio-logging>=1.0.0',
     'invenio-mail>=1.0.0',
-    # FIXME topical branch
-    #  'invenio-migrator>=1.0.0a10',
+    'invenio-migrator>=1.0.0a10',
     'invenio-oaiserver>=1.0.0',
     'invenio-oauth2server>=1.0.3',
     'invenio-oauthclient>=1.0.0',

@@ -33,7 +33,3 @@
 
 # FIXME wait for PR#54
 -e git+https://github.com/hachreak/invenio-webhooks.git@51_receivers_permissions#egg=invenio-webhooks
-
-# FIXME wait for PR#75
-# -e git+https://github.com/inveniosoftware/invenio-migrator.git#egg=invenio-migrator
--e git+https://github.com/egabancho/invenio-migrator.git@fix-users-invenio-1#egg=invenio-migrator
