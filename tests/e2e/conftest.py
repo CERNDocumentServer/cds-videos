@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2019 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -38,17 +38,17 @@ import uuid
 import pkg_resources
 import pytest
 from cds_dojson.marc21 import marc21
-from elasticsearch.exceptions import RequestError
-from selenium import webdriver
-from sqlalchemy_utils.functions import create_database, database_exists
-
-from cds.factory import create_app
 from dojson.contrib.marc21.utils import create_record, split_blob
+from elasticsearch.exceptions import RequestError
 from invenio_db import db as _db
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_records.api import Record
 from invenio_search import current_search, current_search_client
+from selenium import webdriver
+from sqlalchemy_utils.functions import create_database, database_exists
+
+from cds.factory import create_app
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -68,8 +68,6 @@ def base_app(request):
         SECRET_KEY="CHANGE_ME",
         SECURITY_PASSWORD_SALT="CHANGE_ME",
         MAIL_SUPPRESS_SEND=True,
-        SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
         TESTING=True,
     )
 

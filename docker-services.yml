@@ -1,0 +1,106 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of CERN Document Server.
+# Copyright (C) 2015-2019 CERN.
+#
+# CERN Document Server is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# CERN Document Server is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CERN Document Server; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
+#
+version: '2.3'
+services:
+  app:
+    build:
+      context: ./
+      args:
+        - ENVIRONMENT=DEV
+    image: cds-videos
+    environment:
+      - "INVENIO_ACCOUNTS_SESSION_REDIS_URL=redis://cache:6379/1"
+      - "INVENIO_BROKER_URL=amqp://guest:guest@mq:5672/"
+      - "INVENIO_CACHE_REDIS_URL=redis://cache:6379/0"
+      - "INVENIO_CACHE_TYPE=redis"
+      - "INVENIO_CELERY_BROKER_URL=amqp://guest:guest@mq:5672/"
+      - "INVENIO_CELERY_RESULT_BACKEND=redis://cache:6379/2"
+      - "INVENIO_SEARCH_ELASTIC_HOSTS=['es:9200']"
+      - "INVENIO_SECRET_KEY=CHANGE_ME"
+      - "INVENIO_SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://cds-videos:cds-videos@db/cds-videos"
+      - "INVENIO_WSGI_PROXIES=2"
+      - "INVENIO_RATELIMIT_STORAGE_URL=redis://cache:6379/3"
+  lb:
+    build: ./docker/haproxy/
+    image: cds-videos-lb
+    restart: "always"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+  frontend:
+    build: ./docker/nginx/
+    image: cds-videos-frontend
+    restart: "always"
+    ports:
+      - "80"
+      - "443"
+  cache:
+    image: redis
+    restart: "always"
+    read_only: true
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres:9.6
+    restart: "always"
+    environment:
+      - "POSTGRES_USER=cds-videos"
+      - "POSTGRES_PASSWORD=cds-videos"
+      - "POSTGRES_DB=cds-videos"
+    ports:
+      - "5432:5432"
+  mq:
+    image: rabbitmq:3-management
+    restart: "always"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+  es:
+    build: ./docker/es/
+    restart: "always"
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  # TODO: decide if Kibana is needed
+  # kibana:
+  #   image: docker.elastic.co/elasticsearch/kibana-oss:6.2.2
+  #   environment:
+  #     - "ELASTICSEARCH_URL=http://es:9200"
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ports: ['5601:5601']
+  flower:
+    image: mher/flower
+    command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
+    ports:
+      - "5555:5555"

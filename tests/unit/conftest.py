@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017 CERN.
+# Copyright (C) 2015, 2016, 2017, 2019 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -31,62 +31,54 @@ import json
 import os
 import shutil
 import tempfile
-import requests
+from datetime import datetime
+from os.path import dirname, join
+from time import sleep
+from uuid import uuid4
+
+import jsonresolver
 import mock
 import pytest
-import jsonresolver
-from datetime import datetime
-
-from os.path import dirname, join
-
+import requests
 from cds_sorenson.api import _get_quality_preset
-
-from cds.factory import create_app
-from cds.modules.deposit.api import Project
-from cds.modules.redirector.views import api_blueprint \
-    as cds_api_blueprint
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds_sorenson.error import InvalidResolutionError
-from celery import chain
-from celery import group
-from celery import shared_task
+from celery import chain, group, shared_task
 from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
-from invenio_sequencegenerator.api import Template
 from flask_security import login_user
 from invenio_access.models import ActionRoles
 from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
 from invenio_db import db as db_
-from invenio_files_rest.models import Location, Bucket
+from invenio_deposit.permissions import action_admin_access
+from invenio_files_rest.models import Bucket, Location, ObjectVersion
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
 from invenio_indexer.api import RecordIndexer
 from invenio_oauth2server.models import Token
 from invenio_pidstore import InvenioPIDStore
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_previewer import InvenioPreviewer
 from invenio_search import InvenioSearch, current_search, current_search_client
-from invenio_webhooks import InvenioWebhooks
-from invenio_webhooks import current_webhooks
+from invenio_sequencegenerator.api import Template
+from invenio_webhooks import InvenioWebhooks, current_webhooks
 from invenio_webhooks.models import CeleryReceiver
-from invenio_deposit.permissions import action_admin_access
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
-from invenio_files_rest.models import ObjectVersion
-from invenio_pidstore.models import PersistentIdentifier
-from time import sleep
-from uuid import uuid4
 from werkzeug.routing import Rule
-from cds.modules.records.resolver import record_resolver
-from cds.modules.deposit.api import Video
 
-from helpers import (create_category, create_record, sse_simple_add,
-                     sse_failing_task, sse_success_task, new_project,
+from cds.factory import create_app
+from cds.modules.deposit.api import Project, Video
+from cds.modules.records.resolver import record_resolver
+from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from helpers import (create_category, create_keyword, create_record,
+                     endpoint_get_schema, new_project,
                      prepare_videos_for_publish, rand_md5, rand_version_id,
-                     create_keyword, endpoint_get_schema)
+                     sse_failing_task, sse_simple_add, sse_success_task)
 
 
 @pytest.yield_fixture(scope='session', autouse=True)
@@ -101,17 +93,12 @@ def app():
 
     app = create_app(
         DEBUG_TB_ENABLED=False,
-        SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI',
-            'postgresql+psycopg2://localhost/cds_testing'),
-        #  SQLALCHEMY_ECHO=True,
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_TRACK_STARTED=True,
-        BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
@@ -140,16 +127,12 @@ def celery_not_fail_on_eager_app(app):
 
     app = create_app(
         DEBUG_TB_ENABLED=False,
-        SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI',
-            'postgresql+psycopg2://localhost/cds_testing'),
         TESTING=True,
         CELERY_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
         CELERY_TRACK_STARTED=True,
-        BROKER_TRANSPORT='redis',
         JSONSCHEMAS_HOST='cdslabs.cern.ch',
         PREVIEWER_PREFERENCE=['cds_video', ],
         RECORDS_UI_ENDPOINTS=dict(

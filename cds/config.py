@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017, 2018 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018, 2019 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -67,6 +67,11 @@ CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
 NOREPLY_EMAIL = "no-reply@cern.ch"
 MAIL_SUPPRESS_SEND = True
 
+# TODO: Rate limiting
+# =============
+#: Storage for ratelimiter.
+# RATELIMIT_STORAGE_URL = 'redis://localhost:6379/3'
+
 ###############################################################################
 # Translations & Time
 ###############################################################################
@@ -82,14 +87,11 @@ I18N_LANGUAGES = []
 # Celery
 ###############################################################################
 
-# Celery broker.
-BROKER_URL = os.environ.get(
-    'APP_BROKER_URL',
-    'redis://localhost:6379/0')
-# Celery results.
-CELERY_RESULT_BACKEND = os.environ.get(
-    'APP_CACHE_REDIS_URL',
-    'redis://localhost:6379/1')
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+#: URL of message broker for Celery (default is RabbitMQ).
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+#: URL of backend for result storage (default is Redis).
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
 # Celery monitoring.
 CELERY_TRACK_STARTED = True
 # Celery accepted content types.
@@ -160,9 +162,7 @@ CELERYBEAT_SCHEDULE = {
 ###############################################################################
 
 CACHE_KEY_PREFIX = 'cache::'
-CACHE_REDIS_URL = os.environ.get(
-    'APP_CACHE_REDIS_URL',
-    'redis://localhost:6379/0')
+CACHE_REDIS_URL = 'redis://localhost:6379/0'
 CACHE_TYPE = 'redis'
 # We use `invenio_cache.cached_unless_authenticated` decorator
 # for cahcing the home page. As a result we use the below config
@@ -175,9 +175,8 @@ CACHE_IS_AUTHENTICATED_CALLBACK = lambda: '_flashes' in session or \
 # Database
 ###############################################################################
 
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'SQLALCHEMY_DATABASE_URI',
-    'postgresql+psycopg2://localhost/cds', )
+SQLALCHEMY_DATABASE_URI = \
+    'postgresql+psycopg2://cds-videos:cds-videos@localhost/cds-videos'
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
