@@ -1,7 +1,8 @@
+#!/usr/bin/env bash
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,11 +23,18 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-FROM cds-videos-base:latest
+set -e
 
-COPY ./ .
-COPY ./docker/uwsgi/ ${INVENIO_INSTANCE_PATH}
+script_path=$(dirname "$0")
 
-RUN ./scripts/bootstrap
+FLASK_ENV=development
+# Start Worker and Server
+celery worker -A cds.celery -l INFO & pid_celery=$!
 
-USER ${INVENIO_USER_ID}
+cds run --reload --with-threads \
+    --cert "$script_path"/../docker/nginx/test.crt \
+    --key "$script_path"/../docker/nginx/test.key & pid_server=$!
+
+trap 'kill $pid_celery $pid_server &>/dev/null' EXIT
+
+wait $pid_celery $pid_server
