@@ -1,7 +1,8 @@
+#!/usr/bin/env bash
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,11 +23,29 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-FROM cds-videos-base:latest
+set -e
 
-COPY ./ .
-COPY ./docker/uwsgi/ ${INVENIO_INSTANCE_PATH}
+# Clean redis
+# cds shell --no-term-title -c "import redis; redis.StrictRedis.from_url(app.config['CACHE_REDIS_URL']).flushall(); print('Cache cleared')"
+cds db destroy --yes-i-know
+cds db init create
+cds index destroy --force --yes-i-know
+cds index init --force
+cds index queue init purge
 
-RUN ./scripts/bootstrap
+cds fixtures sequence-generator
 
-USER ${INVENIO_USER_ID}
+# Create a test user
+cds users create test@test.ch -a --password=123456
+# Create an admin user
+cds users create admin@test.ch -a --password=123456
+cds roles create admin
+cds roles add admin@test.ch admin
+cds access allow deposit-admin-access role admin
+cds access allow superuser-access role admin
+
+# Create a default files location
+cds files location videos /tmp/files
+
+# Load demo records
+# cds fixtures records
