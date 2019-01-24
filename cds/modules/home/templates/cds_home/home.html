@@ -69,9 +69,10 @@
         <!-- List group -->
         <div class="row">
           {% for channel in config.FRONTPAGE_CHANNELS %}
+          {% set img_url = url_for('static', filename='img/{0}'.format(channel.img_filename)) %}
           <div class="col-md-4">
-            <a class="cds-video-title l-b" href="/search?keyword={{ channel.keyword }}">
-              <img class="img-responsive" src='{{ channel.img_url }}' />
+            <a class="cds-video-title l-b" href="/search?{{ channel.qs }}">
+              <img class="img-responsive" src="{{ img_url }}" />
               <p>
                 {{ channel.label }}
               </p>
