@@ -29,7 +29,7 @@ cds db init create
 cds index init
 cds index queue init
 
-cds fixtures sequence_generator
+cds fixtures sequence-generator
 
 # Create a test user
 cds users create test@test.ch -a --password=123456
