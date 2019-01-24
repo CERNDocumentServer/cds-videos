@@ -566,6 +566,7 @@ RECORD_VIDEOS_FACETS = {
             }
         },
         'filters': {
+            'press': lowercase_filter('Press'),
             'keyword': lowercase_filter('keywords.name'),
             'category': terms_filter('category.untouched'),
             'type': terms_filter('type.untouched'),
@@ -688,52 +689,48 @@ FRONTPAGE_SLOGAN = 'Search for over than 1.000.000 records'
 # Keywords to use when searching in ES keywords.name
 FRONTPAGE_CHANNELS = [
     {
-        'label': 'Experiments',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Movies/CERN/2016/CERN-MOVIE-2016-031/CERN-MOVIE-2016-031'
-                   '-003/CERN-MOVIE-2016-031-003-posterframe-640x360-at-5'
-                   '-percent.jpg',
-        'keyword': 'experiment'
-    },
-    {
-        'label': 'Computing',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077'
-                   '-005/CERN-MOVIE-2016-077-005-posterframe-640x360-at-75'
-                   '-percent.jpg',
-        'keyword': 'computing'
-    },
-    {
-        'label': 'Data',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Movies/CERN/2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077'
-                   '-004/CERN-MOVIE-2016-077-004-posterframe-640x360-at-5'
-                   '-percent.jpg',
-        'keyword': 'data'
-    },
-    {
-        'label': 'Physics',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Movies/CERN/2015/CERN-MOVIE-2015-025/CERN-MOVIE-2015-025'
-                   '-011/CERN-MOVIE-2015-025-011-posterframe-640x360-at-5'
-                   '-percent.jpg',
-        'keyword': 'physics'
+        'label': 'Press',
+        # https://github.com/CERNDocumentServer/cds-videos/issues/1759
+        'img_filename': 'channel_press.jpg',
+        'qs': 'press="Press Videos"'
     },
     {
         'label': 'Accelerators',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Footage/CERN/2008/CERN-FOOTAGE-2008-022/CERN-FOOTAGE'
-                   '-2008-022-001/CERN-FOOTAGE-2008-022-001-posterframe'
-                   '-640x360-at-25-percent.jpg',
-        'keyword': 'accelerator'
+        # https://mediaarchive.cern.ch/MediaArchive/Video/Public/Footage/CERN/
+        # 2008/CERN-FOOTAGE-2008-022/CERN-FOOTAGE-2008-022-001/
+        # CERN-FOOTAGE-2008-022-001-posterframe-640x360-at-25-percent.jpg
+        'img_filename': 'channel_accelerators.jpg',
+        'qs': 'keyword=accelerator'
     },
     {
-        'label': 'Events',
-        'img_url': 'https://mediaarchive.cern.ch/MediaArchive/Video/Public'
-                   '/Movies/OPEN/2016/OPEN-MOVIE-2016-002/OPEN-MOVIE-2016-002'
-                   '-001/OPEN-MOVIE-2016-002-001-posterframe-640x360-at-5'
-                   '-percent.jpg',
-        'keyword': 'event'
+        'label': 'Physics',
+        # https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/
+        # 2015/CERN-MOVIE-2015-025/CERN-MOVIE-2015-025-011/
+        # CERN-MOVIE-2015-025-011-posterframe-640x360-at-5-percent.jpg
+        'img_filename': 'channel_physics.jpg',
+        'qs': 'keyword=physics'
+    },
+    {
+        'label': 'Experiments',
+        # https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/
+        # 2016/CERN-MOVIE-2016-031/CERN-MOVIE-2016-031-003/
+        # CERN-MOVIE-2016-031-003-posterframe-640x360-at-5-percent.jpg
+        'img_filename': 'channel_experiments.jpg',
+        'qs': 'keyword=experiment'
+    },
+    {
+        'label': 'Data',
+        # https://mediaarchive.cern.ch/MediaArchive/Video/Public/Movies/CERN/
+        # 2016/CERN-MOVIE-2016-077/CERN-MOVIE-2016-077-004/
+        # CERN-MOVIE-2016-077-004-posterframe-640x360-at-5-percent.jpg
+        'img_filename': 'channel_data.jpg',
+        'qs': 'keyword=data'
+    },
+    {
+        'label': 'Animations',
+        # https://github.com/CERNDocumentServer/cds-videos/issues/1759
+        'img_filename': 'channel_animations.jpg',
+        'qs': 'keyword=animations'
     }
 ]
 
