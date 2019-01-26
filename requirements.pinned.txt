@@ -101,7 +101,7 @@ invenio-mail==1.0.2
 invenio-migrator==1.0.0a10
 invenio-oaiserver==1.0.2
 invenio-oauth2server==1.0.3
-invenio-oauthclient==1.1.0
+invenio-oauthclient==1.1.1
 invenio-opendefinition==1.0.0a8
 invenio-pages==1.0.0a4
 invenio-pidstore==1.0.0
@@ -153,7 +153,6 @@ pathlib2==2.3.3           # via ipython, pickleshare
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==5.4.1             # via flask-iiif, invenio-formatter
-pluggy==0.8.1
 poyo==0.4.2               # via cookiecutter
 prompt-toolkit==1.0.15    # via ipython
 psycopg2-binary==2.7.6.1  # via invenio-db
