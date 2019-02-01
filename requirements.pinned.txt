@@ -101,7 +101,7 @@ invenio-mail==1.0.2
 invenio-migrator==1.0.0a10
 invenio-oaiserver==1.0.2
 invenio-oauth2server==1.0.3
-invenio-oauthclient==1.1.1
+invenio-oauthclient==1.1.2
 invenio-opendefinition==1.0.0a8
 invenio-pages==1.0.0a4
 invenio-pidstore==1.0.0

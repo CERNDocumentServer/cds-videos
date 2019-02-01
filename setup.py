@@ -116,7 +116,7 @@ install_requires = [
     'invenio-migrator>=1.0.0a10',
     'invenio-oaiserver>=1.0.0',
     'invenio-oauth2server>=1.0.3',
-    'invenio-oauthclient>=1.1.1',
+    'invenio-oauthclient>=1.1.2',
     'invenio-opendefinition>=1.0.0a7',
     'invenio-pages>=1.0.0a4',
     'invenio-pidstore>=1.0.0',
@@ -224,6 +224,7 @@ setup(
             'cds_theme = cds.modules.theme.views:blueprint',
             'cds_webhooks = cds.modules.webhooks.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
+            'cern_oauth = invenio_oauthclient.contrib.cern:cern_oauth_blueprint',
         ],
         'invenio_db.alembic': [
             'cds_announcements = cds.modules.announcements:alembic',

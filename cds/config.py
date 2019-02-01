@@ -691,7 +691,7 @@ FRONTPAGE_CHANNELS = [
         'label': 'Press',
         # https://github.com/CERNDocumentServer/cds-videos/issues/1759
         'img_filename': 'channel_press.jpg',
-        'qs': 'press="Press Videos"'
+        'qs': 'press=videos'
     },
     {
         'label': 'Accelerators',
