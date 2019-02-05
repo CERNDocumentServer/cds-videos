@@ -25,6 +25,13 @@
 Changes
 =======
 
+Version 1.0.8 (2019-02-05)
+
+- fixed cron task for indexing projects deposits
+- new homepage channels and Press collection
+- fixed CERN OAuth login for lightweight accounts
+- fixed CERN OAuth logout redirection
+
 Version 1.0.7 (2019-01-10)
 
 - updated dependencies, vulnerabilities removed
