@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -96,8 +96,9 @@ class CDSReportNumberProvider(BaseProvider):
     def create(cls, object_type=None, object_uuid=None, data=None, **kwargs):
         """Create a new report number."""
         # assert isinstance(data, CDSDeposit)
-        sequence, kwargs = data.get_report_number_sequence(**kwargs)
-        kwargs['pid_value'] = sequence.next()
+        if 'pid_value' not in kwargs:
+            sequence, kwargs = data.get_report_number_sequence(**kwargs)
+            kwargs['pid_value'] = sequence.next()
 
         kwargs.setdefault('status', cls.default_status)
         if object_type and object_uuid:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,7 +27,12 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app, request, url_for
+from invenio_deposit.utils import extract_actions_from_class
 from invenio_records_files.links import default_bucket_link_factory
+
+from ..records.permissions import has_custom_deposit_action_permission
+from ..records.resolver import get_pid
+from .api import Project, Video
 
 
 def deposit_links_factory(pid, deposit_type=None):
@@ -56,7 +61,15 @@ def deposit_links_factory(pid, deposit_type=None):
             type=deposit_type,
             pid_value=pid.pid_value,
         )
-    for action in ('publish', 'edit', 'discard'):
+    deposit_cls = Video if deposit_type == 'video' else Project
+    deposit  = deposit_cls.get_record(
+        get_pid('depid', pid.pid_value).object_uuid)
+    for action in extract_actions_from_class(deposit_cls):
+        if action not in ('publish', 'edit', 'discard') and \
+                not has_custom_deposit_action_permission(
+                    action, record=deposit):
+            #The user can't perform this action
+            continue
         links[action] = _url('actions', action=action)
     return links
 

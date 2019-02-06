@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,9 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import idutils
-
 from flask import current_app
-
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
@@ -53,7 +51,6 @@ def cds_record_minter(record_uuid, data):
 
 def report_number_minter(record_uuid, data, **kwargs):
     """Mint report number."""
-    assert 'report_number' not in data
     provider = CDSReportNumberProvider.create(
         object_type='rec', object_uuid=record_uuid, data=data, **kwargs)
     data['report_number'] = [provider.pid.pid_value]
