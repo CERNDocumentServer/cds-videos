@@ -226,6 +226,13 @@ SEARCH_UI_VIDEO_MEDIUM = 'templates/cds/video/featured-medium.html'
 SEARCH_UI_VIDEO_SMALL = 'templates/cds/video/small.html'
 
 ###############################################################################
+# Accounts
+###############################################################################
+
+#: Redis session storage URL.
+ACCOUNTS_SESSION_REDIS_URL = 'redis://localhost:6379/1'
+
+###############################################################################
 # REST API
 ###############################################################################
 
