@@ -24,6 +24,16 @@
       <button class="btn btn-primary" ng-click="$ctrl.showCannotEditVideoDialog=false">Close</button>
     </p>
   </modal-dialog>
+  <modal-dialog show="form.infoRNShow" dialog-title="Reserve Report Number" >
+    This action can't be undone.<br>
+    Are you sure you want to reserve a report number?<br>
+    <hr class="mt-30 mb-10" />
+    <p class="pull-right">
+      <button class="btn btn-default" ng-click="$parent.hideModal()">No</button>
+      <button class="btn btn-success" ng-click="$ctrl.actionHandler('RESERVE_REPORT_NUMBER'); $ctrl.cdsDepositCtrl.changeShowAll(true); $parent.hideModal()">Yes</button>
+    </p>
+  </modal-dialog>
+
   <div class="text-right">
     <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
       <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
@@ -33,6 +43,13 @@
       ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-default btn-sm" ng-click="form.infoShown = true">
       <i class="fa fa-trash-o"></i>
+    </button>
+    <button
+        ng-hide="$ctrl.cdsDepositCtrl.record.report_number || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAvcRestrictedFields || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type"
+        class="btn btn-sm btn-default"
+        ng-click="form.infoRNShow = true"
+        ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
+      Reserve report number
     </button>
     <button
       ng-hide='$ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isPristine()'

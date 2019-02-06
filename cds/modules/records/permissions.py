@@ -1,5 +1,5 @@
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,13 +27,13 @@ from __future__ import absolute_import, print_function
 from flask import current_app
 from flask_security import current_user
 from invenio_access import DynamicPermission
+from invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
-from invenio_deposit.permissions import action_admin_access
 
-from .utils import is_deposit, is_record, get_user_provides
 from .api import CDSRecord as Record
+from .utils import get_user_provides, is_deposit, is_record
 
 
 def files_permission_factory(obj, action=None):
@@ -358,3 +358,25 @@ def has_admin_permission(user=None, record=None):
     """
     # Allow administrators
     return DynamicPermission(action_admin_access).can()
+
+
+def has_custom_deposit_action_permission(action, record, user=None):
+    """Check permissions on extra actions.
+
+    Deposit allows custom action using `@mark_action`, but this actions don't
+    have a permission factory inside the default record rest configuration.
+    """
+    user = user if user else current_user
+
+    if action == 'reserve_report_number':
+        return has_reserve_report_number_permission(user, record)
+
+    return False
+
+
+def has_reserve_report_number_permission(user, record):
+    """Check if the user has reserve report number rights."""
+    # If a user can select CERN category, also can reserve report number.
+    if record.project.get('category') == 'CERN':
+        return True
+    return has_admin_permission(user, record)

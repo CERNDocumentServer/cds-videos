@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2019 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -26,12 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+from copy import deepcopy
+from time import sleep
+
 import mock
 import pytest
-import json
-
 from celery import states
-from copy import deepcopy
 from elasticsearch_dsl.query import Q
 from flask import url_for
 from flask_security import login_user
@@ -49,21 +50,18 @@ from invenio_webhooks.models import Event
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
 from six import BytesIO
-from time import sleep
 
-from cds.modules.deposit.api import (record_build_url, video_build_url,
-                                     video_resolver, Video,
-                                     record_video_resolver,
-                                     deposit_video_resolver)
+from cds.modules.deposit.api import (Video, deposit_video_resolver,
+                                     record_build_url, record_video_resolver,
+                                     video_build_url, video_resolver)
 from cds.modules.deposit.indexer import CDSRecordIndexer
-from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.webhooks.status import get_deposit_events, \
-    get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
-
-from helpers import workflow_receiver_video_failing, mock_current_user, \
-    get_indexed_records_from_mock, prepare_videos_for_publish, \
-    reset_oauth2
+from cds.modules.records.api import CDSVideosFilesIterator
+from cds.modules.webhooks.status import (get_deposit_events,
+                                         get_tasks_status_by_task)
+from helpers import (get_indexed_records_from_mock, mock_current_user,
+                     prepare_videos_for_publish, reset_oauth2,
+                     workflow_receiver_video_failing)
 
 
 def test_video_resolver(api_project):
@@ -543,7 +541,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert status['add'] == states.SUCCESS
         assert status['failing'] == states.FAILURE
         # check elasticsearch project state
-        resp = client.get(url_for('invenio_deposit_rest.video_list',
+        resp = client.get(url_for('invenio_deposit_rest.project_list',
                                   q='_deposit.id:{0}'.format(project_depid),
                                   access_token=access_token),
                           headers=json_headers)

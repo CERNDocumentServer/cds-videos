@@ -32,6 +32,10 @@ function depositActions() {
             method: 'POST',
             link: 'edit'
           },
+          RESERVE_REPORT_NUMBER: {
+            method: 'POST',
+            link: 'reserve_report_number'
+          },
           PUBLISH: {
             method: 'POST',
             link: 'publish',

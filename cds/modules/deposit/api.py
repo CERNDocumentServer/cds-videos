@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017, 2018 CERN.
+# Copyright (C) 2016, 2017, 2018, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -37,7 +37,7 @@ from os.path import splitext
 
 import arrow
 from celery import states
-from flask import current_app
+from flask import abort, current_app
 from flask_security import current_user
 from invenio_db import db
 from invenio_deposit.api import Deposit, has_status, preserve
@@ -58,6 +58,7 @@ from jsonschema.exceptions import ValidationError
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
+from ..records.permissions import has_reserve_report_number_permission
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
@@ -962,6 +963,26 @@ class Video(CDSDeposit):
         )
         return video_discarded
 
+    @mark_as_action
+    def reserve_report_number(self, *args, **kwargs):
+        """Reserve videos's report number until first publishing."""
+        if not has_reserve_report_number_permission(current_user, self):
+            abort(401)
+
+        if self.report_number:
+            raise ValidationError(
+                message='Report number already reserved.')
+
+        if self.project.report_number is None:
+            self.project.reserve_report_number()
+        report_number_minter(
+            None, self, parent_report_number=self.project.report_number)
+
+        self.project.commit()
+        self.commit()
+
+        return self
+
     def mint_report_number(self, id_, **kwargs):
         """Mint video's report number.
 
@@ -970,10 +991,15 @@ class Video(CDSDeposit):
         """
         if self.project.report_number is None:
             self.project.reserve_report_number()
-        super(Video, self).mint_report_number(
-            id_, parent_report_number=self.project.report_number)
 
-    @has_status(status='published')
+        if self.report_number is None:
+            self.reserve_report_number()
+
+        # Register reserved report number
+        pid = PersistentIdentifier.get('rn', self.report_number)
+        pid.assign('rec', id_, overwrite=True)
+        assert pid.register()
+
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Videos."""
         assert 'parent_report_number' in kwargs

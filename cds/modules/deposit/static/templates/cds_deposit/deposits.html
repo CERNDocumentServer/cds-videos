@@ -128,7 +128,7 @@
               <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
                 <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted px-20 py-10">
                   <span class="text-muted">
-                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
+                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} <span ng-show="child.report_number" class="label ml-10 label-primary"> {{child.report_number[0]}} </span> <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
                   </span>
                   <span class="pull-right">
                     <cds-actions template="/static/templates/cds_deposit/types/video/actions.html">

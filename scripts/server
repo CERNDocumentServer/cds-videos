@@ -27,11 +27,11 @@ set -e
 
 script_path=$(dirname "$0")
 
-FLASK_ENV=development
+export FLASK_ENV=development
 # Start Worker and Server
 celery worker -A cds.celery -l INFO & pid_celery=$!
 
-cds run --reload --with-threads \
+cds run --reload \
     --cert "$script_path"/../docker/nginx/test.crt \
     --key "$script_path"/../docker/nginx/test.key & pid_server=$!
 
