@@ -393,7 +393,8 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     return videos
       .filter(function (video) {
         // if it has recid, it means it has been published at least one time
-        return video.recid;
+        // if it has report number, it's almost like published too ;-)
+        return video.recid || video.report_number;
       }).length > 0;
   }
 
