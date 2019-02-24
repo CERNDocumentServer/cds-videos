@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -31,7 +31,7 @@ from invenio_indexer.tasks import index_record
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
 
-from .api import Video, Project
+from .api import Project, Video
 
 
 def cdsdeposit_indexer_receiver(
@@ -74,7 +74,7 @@ class CDSRecordIndexer(RecordIndexer):
             elif deposit['$schema'] == video_schema:
                 _, record = deposit.fetch_published()
                 super(CDSRecordIndexer, self).index(record)
-        elif action in ('edit', 'discard', 'commit'):
+        elif action in ('edit', 'discard', 'commit', 'reserve_report_number'):
             super(CDSRecordIndexer, self).index(deposit)
         elif action == 'delete':
             self.delete(deposit)
