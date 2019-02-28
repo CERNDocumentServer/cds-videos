@@ -69,5 +69,18 @@
       "read": ["service-winccoa@cern.ch"]
     },
     "_record_type": ["PROJECT"]
-  }
+  },
+  {
+    "name": "IPPOG",
+    "types": ["VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": [],
+      "responsible": ["ippog-cds-contributors@cern.ch"]
+    },
+    "_record_type": ["PROJECT"],
+    "_access": {
+      "read": ["ippog-cds-contributors@cern.ch"]
+    }
+  },
 ]
