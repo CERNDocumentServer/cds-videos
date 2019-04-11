@@ -740,6 +740,53 @@ FRONTPAGE_CHANNELS = [
     }
 ]
 
+FRONTPAGE_TREND_TOPICS = [
+    {
+        'label': 'Antimatter',
+        'qs': 'keyword=antimatter',
+    },
+    {
+        'label': 'Dark Matter',
+        'qs': 'q=keywords.name:"dark matter"',
+    },
+    {
+        'label': 'Higgs',
+        'qs': 'keyword=higgs',
+    },
+    {
+        'label': 'HL-LHC',
+        'qs': 'q=keywords.name:"HL-LHC"',
+    },
+    {
+        'label': 'LHC',
+        'qs': 'keyword=LHC',
+    },
+    {
+        'label': 'CLOUD',
+        'qs': 'keyword=CLOUD',
+    },
+    {
+        'label': 'FCC',
+        'qs': 'keyword=FCC',
+    },
+    {
+        'label': 'AWAKE',
+        'qs': 'keyword=AWAKE',
+    },
+    {
+        'label': 'Collisions',
+        'qs': 'keyword=collisions',
+    },
+    {
+        'label': 'History',
+        'qs': 'keyword=history',
+    },
+    {
+        'label': 'Video News Releases',
+        'qs': 'keywords.name:"VNR" OR keywords.name:"video news release"',
+    },
+]
+
 ###############################################################################
 # Security
 ###############################################################################
