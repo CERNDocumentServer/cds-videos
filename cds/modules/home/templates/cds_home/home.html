@@ -1,29 +1,30 @@
 {%- extends "cds_home/default.html" %}
 
 {%- block page_body %}
-  <div class="flex-item">
-    {% block home_featured_video %}
-    <div id="cds-featured-video" class="cds-home-video-featured bg-b">
-      <!-- List group -->
-      <invenio-search
+<div class="flex-item">
+  {% block home_featured_video %}
+  <div id="cds-featured-video" class="cds-home-video-featured bg-b">
+    <!-- List group -->
+    <invenio-search
         disable-url-handler="true"
         search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
-      >
-        <div class="text-center">
-          <invenio-search-loading
-              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-              message="">
-          </invenio-search-loading>
-        </div>
-        <invenio-search-results
+    >
+      <div class="text-center">
+        <invenio-search-loading
+            template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+            message="">
+        </invenio-search-loading>
+      </div>
+      <invenio-search-results
           template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
-        </invenio-search-results>
-      </invenio-search>
-    </div>
-    {% endblock home_featured_video %}
-    <!-- Recent videos -->
-    <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
-      <div class="{{container_class}}">
+      </invenio-search-results>
+    </invenio-search>
+  </div>
+  {% endblock home_featured_video %}
+  <!-- Recent videos and trends-->
+  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
+    <div class="{{container_class}}">
+      <div class="col-md-8">
         <div class="row">
           <div class="col-md-12">
             <!-- Title -->
@@ -36,8 +37,8 @@
         </div>
         <!-- List group -->
         <invenio-search
-          disable-url-handler="true"
-          search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
+            disable-url-handler="true"
+            search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
         >
           <div class="text-center">
             <invenio-search-loading
@@ -46,42 +47,66 @@
             </invenio-search-loading>
           </div>
           <invenio-search-results
-            template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
+              template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
           </invenio-search-results>
         </invenio-search>
       </div>
-    </div>
-    <!-- Recent videos -->
-
-    <!-- Channels -->
-    <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pt-20 pb-20">
-      <div class="{{container_class}}">
+      <div class="col-md-4">
         <div class="row">
           <div class="col-md-12">
             <!-- Title -->
-            <div class="cds-title-section pt-10 mb-20">
-              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
-              <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
+            <div class="cds-title-section pt-10 mb-20 l-w">
+              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('TRENDS') }}</h2>
+              <p>{{ _('MOST POPULAR TOPICS') }}</p>
             </div>
             <!-- Title -->
           </div>
         </div>
-        <!-- List group -->
         <div class="row">
-          {% for channel in config.FRONTPAGE_CHANNELS %}
-          {% set img_url = url_for('static', filename='img/{0}'.format(channel.img_filename)) %}
-          <div class="col-md-4">
-            <a class="cds-video-title l-b" href="/search?{{ channel.qs }}">
-              <img class="img-responsive" src="{{ img_url }}" />
-              <p>
-                {{ channel.label }}
-              </p>
-            </a>
+          <div class="col-md-12">
+            <div class="cds-tags cds-home-tags">
+              <ul>
+              {% for topic in config.FRONTPAGE_TREND_TOPICS %}
+                <li><a href="/search?{{ topic.qs }}">{{ topic.label }}</a></li>
+              {% endfor %}
+              </ul>
+            </div>
           </div>
-          {% endfor %}
         </div>
       </div>
     </div>
-    <!-- Channels -->
   </div>
+  <!-- Recent videos and trends -->
+
+  <!-- Channels -->
+  <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pt-20 pb-20">
+    <div class="{{container_class}}">
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Title -->
+          <div class="cds-title-section pt-10 mb-20">
+            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
+            <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
+          </div>
+          <!-- Title -->
+        </div>
+      </div>
+      <!-- List group -->
+      <div class="row">
+        {% for channel in config.FRONTPAGE_CHANNELS %}
+        {% set img_url = url_for('static', filename='img/{0}'.format(channel.img_filename)) %}
+        <div class="col-md-4">
+          <a class="cds-video-title l-b" href="/search?{{ channel.qs }}">
+            <img class="img-responsive" src="{{ img_url }}" />
+            <p>
+              {{ channel.label }}
+            </p>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- Channels -->
+</div>
 {%- endblock page_body %}

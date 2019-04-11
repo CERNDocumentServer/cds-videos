@@ -1,6 +1,6 @@
 /*
  * This file is part of Invenio.
- * Copyright (C) 2015, 2016, 2017, 2018 CERN.
+ * Copyright (C) 2015, 2016, 2017, 2018, 2019 CERN.
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -275,12 +275,26 @@ a.cds-anchor:hover{
   transition: .2s;
 }
 
+.cds-home-tags ul li a {
+    padding: 0 0.6em;
+    background-color: #111;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    color: #eee;
+    text-transform: uppercase;
+}
+
 .cds-tags ul li a:hover {
   background-color: $primary-color;
   border: 1px solid $primary-color;
   color: #fff;
 }
 
+.cds-home-tags ul li a:hover {
+    color: #ddd;
+    border: 1px solid #ddd;
+    background-color: transparent;
+}
 .cds-search-header {
   display: flex;
   justify-content: space-between;
