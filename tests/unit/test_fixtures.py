@@ -27,14 +27,9 @@
 from __future__ import absolute_import, print_function
 
 import json
-import pytest
 
 import mock
-from click.testing import CliRunner
-from invenio_pages import InvenioPages, Page
-from invenio_records.models import RecordMetadata
-from invenio_sequencegenerator.models import TemplateDefinition
-
+import pytest
 from cds.modules.fixtures.cli import categories as cli_categories
 from cds.modules.fixtures.cli import keywords as cli_keywords
 from cds.modules.fixtures.cli import licenses as cli_licenses
@@ -42,6 +37,10 @@ from cds.modules.fixtures.cli import pages as cli_pages
 from cds.modules.fixtures.cli import records as cli_records
 from cds.modules.fixtures.cli import \
     sequence_generator as cli_sequence_generator
+from click.testing import CliRunner
+from invenio_pages import InvenioPages, Page
+from invenio_records.models import RecordMetadata
+from invenio_sequencegenerator.models import TemplateDefinition
 
 
 def test_fixture_licenses(app, script_info, db, es, cds_jsonresolver,
@@ -98,7 +97,7 @@ def test_fixture_categories(app, script_info, db, es, cds_jsonresolver):
     res = runner.invoke(cli_categories, [], obj=script_info)
     assert res.exit_code == 0
     categories = RecordMetadata.query.all()
-    assert len(categories) == 5
+    assert len(categories) == 6
     for category in categories:
         assert 'VIDEO' in category.json['types']
 
