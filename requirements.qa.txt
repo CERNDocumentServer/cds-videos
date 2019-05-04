@@ -26,8 +26,4 @@
 -r requirements.topical.branches.txt
 
 # Install the latest released version of packages
-# -e .
-
-# Pinned base requirements
--r requirements.pinned.txt
-
+-e .
