@@ -32,10 +32,8 @@ from flask_login import current_user
 from invenio_access.permissions import DynamicPermission, superuser_access
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
-from invenio_search.utils import schema_to_index
 
 from .utils import get_user_provides
-from .api import Keyword
 
 
 def lowercase_filter(field_name):
@@ -94,7 +92,7 @@ class KeywordSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = schema_to_index(Keyword._schema)[0]
+        index = 'keywords-keyword-v1.0.0'
         doc_types = None
         fields = ('*',)
 
@@ -108,7 +106,7 @@ class NotDeletedKeywordSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = schema_to_index(Keyword._schema)[0]
+        index = 'keywords-keyword-v1.0.0'
         doc_types = None
         fields = ('*',)
         default_filter = DefaultFilter(
