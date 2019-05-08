@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.9 (2019-05-08)
+
+- add Popular Videos links on homepage
+
 Version 1.0.8 (2019-02-05)
 
 - fixed cron task for indexing projects deposits
