@@ -783,7 +783,7 @@ FRONTPAGE_TREND_TOPICS = [
     },
     {
         'label': 'Video News Releases',
-        'qs': 'keywords.name:"VNR" OR keywords.name:"video news release"',
+        'qs': 'q=keywords.name:"VNR" OR keywords.name:"video news release"',
     },
 ]
 
