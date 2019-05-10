@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.10 (2019-05-10)
+
+- bug fix for Popular Videos search query
+
 Version 1.0.9 (2019-05-08)
 
 - add Popular Videos links on homepage
