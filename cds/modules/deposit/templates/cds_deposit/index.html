@@ -62,7 +62,7 @@
               message="{{ _('Loading...') }}">
             </invenio-search-loading>
           </div>
-          <div class="col-md-5 text-right">
+          <div class="col-md-7 text-right">
              {%- set sort_options = config.get('DEPOSIT_REST_SORT_OPTIONS', {}).get(config.DEPOSIT_UI_SEARCH_INDEX) %}
              <invenio-search-select-box
                sort-key="sort"
@@ -70,6 +70,11 @@
                template="{{ url_for('static', filename='templates/cds_deposit/selectbox.html') }}"
                >
              </invenio-search-select-box>
+             {%- if has_avc_permission() %}
+             <a class="btn btn-warning" href="{{ url_for('cds_deposit.reserve_report_number') }}">
+               <i class="glyphicon glyphicon-magnet"></i> {{ _('Reserve Report Number') }}
+             </a>
+             {%- endif %}
             <a class="btn btn-success" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
               <i class="glyphicon glyphicon-upload"></i> {{ _('New Upload') }}
             </a>

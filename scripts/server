@@ -27,7 +27,7 @@ set -e
 
 script_path=$(dirname "$0")
 
-FLASK_ENV=development
+export FLASK_ENV=development
 # Start Worker and Server
 celery worker -A cds.celery -l INFO & pid_celery=$!
 
