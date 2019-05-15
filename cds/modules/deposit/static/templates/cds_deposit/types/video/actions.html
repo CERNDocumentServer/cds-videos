@@ -56,11 +56,18 @@
     {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
     </button>
     <button
-      ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
-      ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
-      class="btn btn-sm btn-default"
-      ng-click="$ctrl.editPublished()">
-    {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Editing ...' : 'Edit' }}
+        ng-hide='$ctrl.cdsDepositCtrl.isDraft()'
+        ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+        class="btn btn-sm btn-default"
+        ng-click="$ctrl.editPublished()">
+      {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Editing ...' : 'Edit' }}
     </button>
+    <a
+        ng-hide="$ctrl.cdsDepositCtrl.record.report_number || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAvcRestrictedFields || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category || !$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type"
+        class="btn btn-sm btn-warning"
+        ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+        ng-href="/deposit/reportnumbers/assign/{{$ctrl.cdsDepositCtrl.record._deposit.id}}">
+      Assign Report Number
+    </a>
   </div>
 </div>
