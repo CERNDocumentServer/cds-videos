@@ -18,6 +18,13 @@ function cdsUploaderCtrl(
   // The ongoing uploads
   this.uploading = [];
 
+  function preventBrowserClose(e) {
+    // Cancel the event
+    e.preventDefault();
+    // Chrome requires returnValue to be set
+    e.returnValue = "";
+  }
+
   function updateMasterFileUpload(state, percentage) {
     var masterFile = that.cdsDepositCtrl.findMasterFile();
     if (!masterFile) {
@@ -417,6 +424,8 @@ function cdsUploaderCtrl(
 
     this.upload = function() {
       if (that.queue.length > 0) {
+        // prevent user closes the browser by showing a warning
+        window.addEventListener("beforeunload", preventBrowserClose);
         // Loading
         that.loading = true;
         return that.uploader()
@@ -447,6 +456,7 @@ function cdsUploaderCtrl(
               that.cdsDepositCtrl.waitingUpload = false;
               that.cdsDepositCtrl.loading = false;
               that.loading = false;
+              window.removeEventListener("beforeunload", preventBrowserClose);
             }
           );
       } else {

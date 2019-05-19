@@ -4,7 +4,21 @@
     <div class="row">
       <div class="col-md-offset-3 col-md-6">
         <div class="cds-deposit-box cds-deposit-box-upload-intro">
-          <!-- Drag&Drop upload -->
+          <div class="text-muted">
+            <div class="text-muted">
+              <h5 class="text-muted"><strong>Supported videos</strong></h5>
+              <ul>
+                <li>Supported video formats are <mark>{{ $ctrl.videoExtensions }}</mark></li>
+                <li>For best results, we recommend uploading <mark>landscape</mark> videos encoded with <mark>H.264</mark> video codec and <mark>24</mark> FPS (Frames Per Second)</li>
+                <li>Ultra High Definition 8K videos are <strong>NOT</strong> supported</li>
+              </ul>
+            </div>
+            <hr class="my-30" />
+            <div class="text-muted"></div>
+              <p class="text-center">Do <strong>NOT</strong> close the browser window/tab or<br />your laptop until the video upload is completed.</p>
+            </div>
+            <hr class="my-30" />
+            <!-- Drag&Drop upload -->
             <div
                ngf-drag-over-class="{accept: 'cds-deposit-dragover',  delay:100}"
                ngf-drop=""
@@ -21,9 +35,9 @@
                 </p>
                 <div class="cds-deposit-box-upload-content">
                   <div class="cds-deposit-box-upload-title">
-                    <h3>Select videos to upload</h3>
+                    <h3>Click here to select videos to upload</h3>
                   </div>
-                  <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
+                  <p class="cds-deposit-box-upload-description">You can also <strong>Drag & Drop</strong> video files here</p>
                 </div>
               </div>
             </div>
@@ -51,13 +65,6 @@
             </div>
             <!-- Remote uploader -->
           <!-- Drag&Drop upload -->
-          <hr class="my-30" />
-          <div class="text-muted">
-            <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
-            <ul>
-              <li>Supported videos are <mark>{{ $ctrl.videoExtensions }}</mark></li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
