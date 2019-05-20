@@ -25,6 +25,10 @@ function cdsDepositsCtrl(
   // The last video upload promise
   this.lastVideoUpload = $q.resolve();
 
+  // read from the dom the max number of videos per project or set default
+  var maxNumberOfVideosValue = document.getElementById('max-n-videos-per-project');
+  this.maxNumberOfVideos = maxNumberOfVideosValue && maxNumberOfVideosValue.value ? parseInt(maxNumberOfVideosValue.value) : 10;
+
   // Schemas and forms
   that.masterSchemaResolved = {};
   that.childrenSchemaResolved = {};

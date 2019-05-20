@@ -1196,6 +1196,10 @@ DEPOSIT_AVC_COPYRIGHT = {
     'url': 'http://copyright.web.cern.ch',
 }
 
+# The number of max videos per project. It blocks the upload of new videos in a
+# project only client side
+DEPOSIT_PROJECT_MAX_N_VIDEOS = 10
+
 ###############################################################################
 # Keywords
 ###############################################################################
