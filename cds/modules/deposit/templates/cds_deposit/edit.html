@@ -62,5 +62,6 @@
   >
   </cds-deposits>
   {{ jwt() }}
+  <input type="hidden" id="max-n-videos-per-project" value="{{ config.DEPOSIT_PROJECT_MAX_N_VIDEOS }}" />
 </div>
 {%- endblock %}

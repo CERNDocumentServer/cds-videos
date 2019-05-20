@@ -135,7 +135,7 @@
               <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
                 <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted px-20 py-10">
                   <span class="text-muted">
-                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
+                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} (of {{$ctrl.maxNumberOfVideos}}) <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
                   </span>
                   <span class="pull-right">
                     <cds-actions template="/static/templates/cds_deposit/types/video/actions.html">
@@ -178,7 +178,7 @@
             </p>
             <p class="f8 text-center text-muted">Click <strong>Edit Project</strong> to add more videos</p>
           </div>
-          <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published'">
+          <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status !== 'published' && $ctrl.master.metadata.videos.length < $ctrl.maxNumberOfVideos">
             <!-- Drag&Drop upload -->
             <div
                  ngf-drag-over-class="'cds-deposit-dragover'"
@@ -197,9 +197,9 @@
                   </p>
                   <div class="cds-deposit-box-upload-content">
                     <div class="cds-deposit-box-upload-title">
-                      <h3>Select more videos to upload</h3>
+                        <h3>Click here to select more videos to upload</h3>
                     </div>
-                    <p class="cds-deposit-box-upload-description"> Or Drag & Drop video files</p>
+                    <p class="cds-deposit-box-upload-description">You can also <strong>Drag & Drop</strong> video files here</p>
                     <p class="text-muted mt-20">supported files <mark>{{ $ctrl.videoExtensions }}</mark></p>
                   </div>
                 </div>
@@ -229,6 +229,18 @@
               <!-- Remote uploader -->
             <!-- Drag&Drop upload -->
           </div>
+          <!-- Max Number of Videos per Project -->
+          <div class="mt-20 cds-deposit-panel panel panel-default" ng-if="$ctrl.master.metadata.videos.length >= $ctrl.maxNumberOfVideos">
+              <div class="panel-heading text-muted px-20 py-10">
+                <span class="text-muted">
+                    <i class="fa fa-square"></i> Max number of videos
+                </span>
+              </div>
+              <div class="panel-body text-center">
+                  <p>This project has reached the <strong>maximum number</strong> of videos ({{$ctrl.maxNumberOfVideos}}).<br/>Please start a new upload and create a new project to add more videos.</p>
+              </div>
+          </div>
+          <!-- //Max Number of Videos per Project -->
           <div ng-if="$ctrl.duplicateVideos.length" class="alert alert-danger">
             <p>
               Multiple deposits with the same filename are not allowed:
