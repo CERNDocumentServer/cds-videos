@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.11 (2019-05-22)
+
+- resize home page video player to be smaller
+- prevent browser window to be closed while uploading a file
+- limit the number of videos per project via a configuration variable
+
 Version 1.0.10 (2019-05-10)
 
 - bug fix for Popular Videos search query
