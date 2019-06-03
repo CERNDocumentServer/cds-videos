@@ -33,8 +33,6 @@ cds index destroy --force --yes-i-know
 cds index init --force
 cds index queue init purge
 
-cds fixtures sequence-generator
-
 # Create a test user
 cds users create test@test.ch -a --password=123456
 # Create an admin user
@@ -47,5 +45,10 @@ cds access allow superuser-access role admin
 # Create a default files location
 cds files location videos /tmp/files
 
-# Load demo records
+# Load demo data
+cds fixtures sequence-generator
+cds fixtures categories
+cds fixtures pages
+cds fixtures keywords
+cds fixtures licenses
 # cds fixtures records

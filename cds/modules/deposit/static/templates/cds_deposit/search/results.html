@@ -18,7 +18,10 @@
        <p class="f8 mt-5 text-muted">
          <div class="row">
            <div class="col-md-8">
-              <div ng-repeat="video in record.metadata.videos | limitTo:3 track by $index" class="pl-20">#{{ $index + 1 }}: {{ video.title.title || "No video title" | wordsSplit:8 | trustHtml }} </div>
+             <div ng-repeat="video in record.metadata.videos | limitTo:3 track by $index" class="pl-20">
+               #{{ $index + 1 }}: {{ video.title.title || "No video title" | wordsSplit:8 | trustHtml }}
+               <span ng-show="video.report_number" class="label ml-10 label-primary"> {{video.report_number[0]}} </span>
+             </div>
            </div>
            <div class="col-md-4">
              <ul ng-if="record.metadata._deposit.status != 'published'" class="list-unstyled">

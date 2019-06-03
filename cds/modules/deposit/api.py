@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017, 2018 CERN.
+# Copyright (C) 2016, 2017, 2018, 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -40,11 +40,6 @@ from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
-from invenio_deposit.api import Deposit, has_status, preserve
-from invenio_deposit.utils import mark_as_action
-from invenio_files_rest.models import (Bucket, Location, MultipartObject,
-                                       ObjectVersion, ObjectVersionTag,
-                                       as_bucket, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import (PIDDoesNotExistError, PIDInvalidAction,
                                      ResolverError)
@@ -54,6 +49,12 @@ from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
+
+from invenio_deposit.api import Deposit, has_status, preserve
+from invenio_deposit.utils import mark_as_action
+from invenio_files_rest.models import (Bucket, Location, MultipartObject,
+                                       ObjectVersion, ObjectVersionTag,
+                                       as_bucket, as_object_version)
 
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
@@ -962,6 +963,21 @@ class Video(CDSDeposit):
         )
         return video_discarded
 
+    def assign_report_number(self, report_number):
+        """Assign a report number to the video and parent."""
+        project = self.project
+        project_rn = report_number.rsplit('-', 1)[0]
+        if project.report_number is None:
+            project['report_number'] = [project_rn]
+            project.commit()
+        elif project_rn != project['report_number'][0]:
+            raise ValueError(
+                '{0} does not match the project report number {1}'.format(
+                    report_number, project['report_number'][0]))
+
+        self['report_number'] = [report_number]
+        self.commit()
+
     def mint_report_number(self, id_, **kwargs):
         """Mint video's report number.
 
@@ -970,8 +986,15 @@ class Video(CDSDeposit):
         """
         if self.project.report_number is None:
             self.project.reserve_report_number()
-        super(Video, self).mint_report_number(
-            id_, parent_report_number=self.project.report_number)
+
+        if self.report_number is not None:
+            # Register reserved report number
+            pid = PersistentIdentifier.get('rn', self.report_number)
+            pid.assign('rec', id_, overwrite=True)
+            assert pid.register()
+        else:
+            super(Video, self).mint_report_number(
+                id_, parent_report_number=self.project.report_number)
 
     @has_status(status='published')
     def get_report_number_sequence(self, **kwargs):

@@ -141,7 +141,9 @@
             <hr class="my-10" />
           </div>
           <div ng-if="!$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category" class="text-muted mt-10">
-            <i class="fa fa-info-circle"></i> For publishing the video please select category from the
+            <i class="fa fa-info-circle"></i> For publishing the video
+            <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAvcRestrictedFields">, or assigning a report number, </span>
+            please select category and type from the
             <a du-smooth-scroll ng-href="#{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata._deposit.id}}">Project</a>.
             <hr class="my-10" />
           </div>
