@@ -24,6 +24,10 @@
 
 Changes
 =======
+Version 1.0.12 (2019-06-05)
+
+- reserve report number before uploading a video
+
 
 Version 1.0.11 (2019-05-22)
 
