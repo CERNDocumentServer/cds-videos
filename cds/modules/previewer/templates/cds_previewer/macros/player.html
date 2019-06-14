@@ -59,6 +59,9 @@
             src: '{{ uri }}',
             label: '{{ lang }}',
             srclang: '{{ lang }}',
+            {% if embed_config.subtitles and embed_config.subtitles == lang %}
+            default: true,
+            {% endif %}
           },
           {% endfor %}
         ],
