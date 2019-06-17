@@ -83,7 +83,7 @@ install_requires = [
     'CairoSVG>=1.0.20,<2.0.0',
     'Flask-Admin>=1.4.2',
     'Flask-BabelEx>=0.9.2',
-    'Flask-Debugtoolbar>=0.10.0',
+    'Flask-Debugtoolbar>=0.10.1',
     'Flask-IIIF>=0.5.0',
     'Flask-WTF>=0.13.1',
     'Flask>=0.11.1',
@@ -95,6 +95,7 @@ install_requires = [
     'invenio-access>=1.0.0',
     'invenio-accounts>=1.0.0',
     'invenio-admin>=1.0.0',
+    'invenio-app>=1.1.0,<1.2.0',
     'invenio-assets>=1.0.0',
     'invenio-base>=1.0.1',
     'invenio-cache>=1.0.0',
@@ -171,11 +172,14 @@ setup(
     platforms='any',
     entry_points={
         'console_scripts': [
-            'cds = cds.cli:cli',
+            'cds = invenio_app.cli:cli',
         ],
         'flask.commands': [
             'subformats = cds.modules.maintenance.cli:subformats',
             'videos = cds.modules.maintenance.cli:videos',
+        ],
+        'invenio_config.module': [
+            'cds = cds.config',
         ],
         'invenio_admin.views': [
             'cds_admin = '
@@ -210,7 +214,6 @@ setup(
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
-            'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
             'invenio_webhooks = invenio_webhooks:InvenioWebhooks',

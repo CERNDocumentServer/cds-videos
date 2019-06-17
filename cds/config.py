@@ -32,6 +32,7 @@ from datetime import timedelta
 from celery.schedules import crontab
 from flask import current_app, session
 from flask_login import current_user
+from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
@@ -237,6 +238,7 @@ ACCOUNTS_SESSION_REDIS_URL = 'redis://localhost:6379/1'
 ###############################################################################
 
 # FIXME: Enable CORS for now.
+# ====
 REST_ENABLE_CORS = True
 
 ###############################################################################
@@ -803,6 +805,14 @@ SECURITY_LOGIN_USER_TEMPLATE = 'cds_theme/login_user.html'
 
 # Security login salt.
 SECURITY_LOGIN_SALT = 'CHANGE_ME'
+
+# Flask configuration
+# ===================
+# See details on
+# http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
+
+APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
 
 ###############################################################################
 # User Profiles
