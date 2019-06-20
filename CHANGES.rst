@@ -24,10 +24,14 @@
 
 Changes
 =======
+
+Version 1.0.13 (2019-06-20)
+
+- activate video subtitles via URL query parameter
+
 Version 1.0.12 (2019-06-05)
 
 - reserve report number before uploading a video
-
 
 Version 1.0.11 (2019-05-22)
 
