@@ -264,6 +264,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
             record_bucket.bucket.locked = False
             # Make files writable
             for obj in bucket.objects:
+                # skip if file is None (due to a previous soft deletion)
+                if not obj.file:
+                    continue
                 files.append(obj.file.id)
                 obj.file.writable = True
                 db.session.add(obj.file)
