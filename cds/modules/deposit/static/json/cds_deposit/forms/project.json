@@ -30,7 +30,8 @@
               "removePlugins": "elementspath",
               "removeButtons": ""
             },
-            "description": ""
+            "description": "",
+            "required": true
           }
         ]
       },
