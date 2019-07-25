@@ -25,7 +25,6 @@
 
 from __future__ import absolute_import
 
-import hashlib
 import logging
 import os
 import shutil
@@ -45,6 +44,7 @@ from celery.states import FAILURE, REVOKED, STARTED, SUCCESS
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
+from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_bucket,
                                        as_object_version)
@@ -663,9 +663,8 @@ class TranscodeVideoTask(AVCTask):
         with db.session.begin_nested():
             uri = output_file
             with file_opener_xrootd(uri, 'rb') as transcoded_file:
-                digest = hashlib.md5(transcoded_file.read()).hexdigest()
+                checksum = compute_md5_checksum(transcoded_file)
             size = file_size_xrootd(uri)
-            checksum = '{0}:{1}'.format('md5', digest)
             file_instance.set_uri(uri, size, checksum)
             as_object_version(
                 job_info['version_id']).set_file(file_instance)
