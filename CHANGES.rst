@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.14 (2019-07-26)
+
+- fix md5 checksum calculation for transcoded video subformats
+- add missing `*` mark for the required field `description` when creating a
+  project in the  upload form
+
 Version 1.0.13 (2019-06-20)
 
 - activate video subtitles via URL query parameter
