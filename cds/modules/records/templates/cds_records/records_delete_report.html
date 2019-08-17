@@ -1,0 +1,26 @@
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{% set report_class = dict(INFO='alert-success', ERROR='alert-danger', WARN='alert-warning') %}
+
+{%- block page_body %}
+<div class="container record-admin">
+  <div class="row">
+    <div class="col-xs-12">
+      <h1>Deletion report</h1>
+      <div class="alert alert-warning">
+        <p>Pay special attention to this report, it's for your own good!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    {%- for line in report %}
+    <div class="alert {{ report_class[line[0]] }}">
+      <p>
+        {{ line[1] }}
+      </p>
+    </div>
+    {%- endfor %}
+  </div>
+</div>
+{%- endblock page_body %}

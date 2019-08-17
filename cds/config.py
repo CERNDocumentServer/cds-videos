@@ -333,6 +333,15 @@ RECORDS_UI_ENDPOINTS = dict(
         view_imp='cds.modules.records.views.records_ui_export',
         record_class='cds.modules.records.api:CDSRecord',
     ),
+    record_delete=dict(
+        pid_type='recid',
+        route='/record/<pid_value>/admin/delete',
+        view_imp='cds.modules.records.views.records_ui_delete',
+        record_class='cds.modules.records.api:CDSRecord',
+        permission_factory_imp=
+        'cds.modules.records.permissions:record_delete_permission_factory',
+        methods=['GET', 'POST'],
+    ),
 )
 
 # Endpoint for record ui.
@@ -651,6 +660,15 @@ RECORDS_ID_PROVIDER_ENDPOINT = None
 
 # User agent value to send in cds endpoints.
 RECORDS_ID_PROVIDER_AGENT = None
+
+
+#: Standard record removal reasons.
+CDS_REMOVAL_REASONS = [
+    ('', ''),
+    ('spam', 'Spam record, removed by CDS staff.'),
+    ('uploader', 'Record removed on request by uploader.'),
+    ('takedown', 'Record removed on request by third-party.'),
+]
 
 ###############################################################################
 # Files

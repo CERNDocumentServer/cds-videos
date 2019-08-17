@@ -1,0 +1,150 @@
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{% from "invenio_userprofiles/settings/_macros.html" import render_field %}
+
+
+{%- block page_body %}
+<div class="container record-admin">
+  <div class="row">
+    <div class="col-xs-12" align="center">
+      <div class="progress">
+        <div class="progress-bar progress-bar-danger progress-bar-striped" role="progressbar" style="width: 100%">
+          <strong>Danger Zone</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      {%- if is_project %}
+      <h1>Delete Project</h1>
+      {% else %}
+      <h1>Delete Video</h1>
+      {% endif %}
+      <div class="alert alert-warning">
+        <p>Are you <strong>ABSOLUTELY</strong> sure? This action <strong>CANNOT</strong> be undone easily if at all!</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Record and associated objects</div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <h5>Record</h5>
+            <ul>
+              <li>Record UUID: {{record.id}}</li>
+              <li>Revision number {{record.revision_id}}</li>
+              <li>Created: {{record.created}}</li>
+              <li>Last updated: {{record.updated}})</li>
+            </ul>
+          </li>
+          <li class="list-group-item">
+            <h5>Deposit</h5>
+            <ul>
+              <li>Deposit UUID: {{deposit.id}}</li>
+              <li>Revision number {{deposit.revision_id}}</li>
+              <li>Created: {{deposit.created}}</li>
+              <li>Last updated: {{deposit.updated}})</li>
+            </ul>
+          </li>
+          <li class="list-group-item">
+            <h5>Persistent identifiers</h5>
+            <table class="table table-bordered">
+              <tr>
+                <th>PID Type</th>
+                <th>PID Value</th>
+                <th>Status</th>
+              </tr>
+              {%- for p in pids %}
+              <tr>
+                <td>{{p.pid_type}}</td>
+                <td>{{p.pid_value}}</td>
+                <td>{{p|pidstatus}}</td>
+              </tr>
+              {%- endfor %}
+            </table>
+          </li>
+          <li class="list-group-item">
+            <h5>Metadata</h5>
+            <pre>{{record|pprint}}</pre>
+          </li>
+          <li class="list-group-item">
+            <h5>Buckets</h5>
+            <table class="table table-bordered">
+              {%- if record.files %}
+              <tr>
+                <td colspan="4" class="info">
+                  <strong>Record bucket ({{record.files.bucket}})</strong>
+                </td>
+              </tr>
+              <tr>
+                <th>Object</th>
+                <th>URI</th>
+                <th>Size</th>
+                <th>Checksum</th>
+              </tr>
+              {%- for f in record.files %}
+              <tr>
+                <td>{{f.key}}</td>
+                <td>{{f.file.uri}}</td>
+                <td>{{f.file.size}}</td>
+                <td>{{f.file.checksum}}</td>
+              </tr>
+              {%- endfor %}
+              {%- endif %}
+              {%- if deposit.files %}
+              <tr>
+                <td colspan="4" class="info">
+                  <strong>Deposit bucket ({{deposit.files.bucket}})</strong>
+                </td>
+              </tr>
+              <tr>
+                <th>Object</th>
+                <th>URI</th>
+                <th>Size</th>
+                <th>Checksum</th>
+              </tr>
+              {%- for f in deposit.files %}
+              <tr>
+                <td>{{f.key}}</td>
+                <td>{{f.file.uri}}</td>
+                <td>{{f.file.size}}</td>
+                <td>{{f.file.checksum}}</td>
+              </tr>
+              {%- endfor %}
+              {%- endif %}
+            </table>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel panel-danger">
+        <div class="panel-heading">Delete options</div>
+        <div class="panel-body">
+          <form action="" method="POST">
+            {{form.csrf_token}}
+            {{ render_field(form.standard_reason) }}
+            {{ render_field(form.reason) }}
+            <div class="row">
+              {%- if is_project %}
+              <div class="col-md-6">{{ render_field(form.delete_videos) }}</div>
+              {%- endif %}
+              <div class="col-md-6">{{ render_field(form.hard_delete) }}</div>
+            </div>
+            {{ render_field(form.confirm) }}
+            <button class="btn btn-block btn-danger" type="submit">
+              <i class="fa fa-trash"></i>
+              Permanently delete record
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{%- endblock page_body %}
