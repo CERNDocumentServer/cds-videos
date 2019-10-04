@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.15 (2019-10-04)
+
+- add record deletion interface
+
 Version 1.0.14 (2019-07-26)
 
 - fix md5 checksum calculation for transcoded video subformats
