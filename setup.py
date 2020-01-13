@@ -88,7 +88,7 @@ install_requires = [
     'Flask-WTF>=0.13.1',
     'Flask>=0.11.1',
     'cds-dojson==0.9.0',
-    'cds-sorenson>=0.1.6',
+    'cds-sorenson>=0.1.7',
     'datacite>=1.0.1',
     'dcxml>=0.1.1',
     'idutils>=0.2.3',
