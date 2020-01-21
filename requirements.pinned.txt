@@ -190,7 +190,7 @@ traitlets==4.3.2          # via ipython, jupyter-client, jupyter-core, nbconvert
 ua-parser==0.8.0          # via invenio-accounts
 uritools==2.2.0           # via invenio-oauthclient
 urllib3[secure]==1.24.1
-validators==0.12.4        # via wtforms-components
+validators==0.12.6        # via wtforms-components
 wand==0.5.0
 wcwidth==0.1.7            # via ftfy, prompt-toolkit
 webargs==5.1.0            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
