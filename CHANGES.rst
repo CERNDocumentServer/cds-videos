@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.16 (2020-01-24)
+
+- bump cds-sorenson version (updated infrastructure)
+
 Version 1.0.15 (2019-10-04)
 
 - add record deletion interface
