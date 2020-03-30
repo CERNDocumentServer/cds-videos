@@ -21,7 +21,7 @@ backports.functools-lru-cache==1.5  # via arrow
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 billiard==3.3.0.23        # via celery
 binaryornot==0.4.4        # via cookiecutter
-bleach==3.1.0             # via invenio-records-rest, nbconvert
+bleach==3.1.4             # via invenio-records-rest, nbconvert
 blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flask-principal, invenio-base, invenio-oauthclient, invenio-records
 cairocffi==0.9.0          # via cairosvg
 cairosvg==1.0.22
