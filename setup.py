@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017, 2018, 2019 CERN.
+# Copyright (C) 2015, 2016, 2017, 2018, 2019, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -180,6 +180,8 @@ setup(
         'invenio_admin.views': [
             'cds_admin = '
             'cds.modules.announcements.admin:announcements_adminview',
+            'invenio_flows_flow = cds.modules.flows.admin:flow_model_view',
+            'invenio_flows_task = cds.modules.flows.admin:task_model_view',
         ],
         'invenio_assets.bundles': [
             'cds_deposit_jquery_js = cds.modules.deposit.bundles:js_jquery',
@@ -228,6 +230,7 @@ setup(
         ],
         'invenio_db.alembic': [
             'cds_announcements = cds.modules.announcements:alembic',
+            'invenio_flows = cds.modules.flows:alembic',
         ],
         'invenio_pidstore.fetchers': [
             'cds_recid = cds.modules.records.fetchers:recid_fetcher',
