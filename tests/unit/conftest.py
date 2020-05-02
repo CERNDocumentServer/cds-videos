@@ -115,45 +115,6 @@ def app():
     shutil.rmtree(instance_path)
 
 
-@pytest.yield_fixture(scope='session')
-def celery_not_fail_on_eager_app(app):
-    """Celery configuration that does not raise errors inside test."""
-    instance_path = tempfile.mkdtemp()
-
-    os.environ.update(
-        APP_INSTANCE_PATH=os.environ.get(
-            'INSTANCE_PATH', instance_path),
-    )
-
-    app = create_app(
-        DEBUG_TB_ENABLED=False,
-        TESTING=True,
-        CELERY_ALWAYS_EAGER=True,
-        CELERY_RESULT_BACKEND='cache',
-        CELERY_CACHE_BACKEND='memory',
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
-        CELERY_TRACK_STARTED=True,
-        JSONSCHEMAS_HOST='cdslabs.cern.ch',
-        PREVIEWER_PREFERENCE=['cds_video', ],
-        RECORDS_UI_ENDPOINTS=dict(
-            video_preview=dict(
-                pid_type='depid',
-                route='/deposit/<pid_value>/preview/video/<filename>',
-                view_imp='cds.modules.previewer.views.preview_depid',
-                record_class='cds.modules.deposit.api:Video',
-            ),
-        ),
-        # FIXME
-        ACCOUNTS_JWT_ENABLE=False,
-    )
-    app.register_blueprint(files_rest_blueprint)
-
-    with app.app_context():
-        yield app
-
-    shutil.rmtree(instance_path)
-
-
 @pytest.fixture()
 def previewer_deposit(app):
     """."""
