@@ -36,7 +36,7 @@ click==7.0                # via cookiecutter, dojson, flask, invenio-migrator, i
 configparser==3.5.0       # via entrypoints
 contextlib2==0.5.5        # via raven
 cookiecutter==1.6.0       # via invenio-base
-cryptography==2.4.2       # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
+cryptography==2.9.2       # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
 datacite==1.0.1
 dcxml==0.1.1
 decorator==4.3.0          # via ipython, traitlets, validators
