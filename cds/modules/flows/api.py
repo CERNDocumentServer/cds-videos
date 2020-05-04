@@ -33,6 +33,7 @@ from celery import Task as CeleryTask
 from celery import chain as celery_chain
 from celery import current_app as celery_app
 from celery import group as celery_group
+from celery.result import AsyncResult
 from celery.task.control import revoke
 from invenio_db import db
 
@@ -225,15 +226,8 @@ class Flow(object):
 
     def stop(self):
         """Stop the flow."""
-        revoke(
-            [
-                str(task.id)
-                for task in self.model.tasks
-                if task.status == Status.PENDING
-            ],
-            terminate=True,
-            signal='SIGKILL',  # TODO: do we need this?
-        )
+        for task in self.model.tasks:
+            self.stop_task(task)
 
     def get_task_status(self, task_id):
         """Get singular task status."""
@@ -253,6 +247,8 @@ class Flow(object):
 
         if task.status == Status.PENDING:
             revoke(str(task.id), terminate=True, signal='SIGKILL')
+            result = AsyncResult(str(task.id))
+            result.forget()
 
     def restart_task(self, task_id):
         """Restart singular task."""
@@ -261,7 +257,9 @@ class Flow(object):
         except Exception:
             raise KeyError('Task ID %s not in flow %s', task_id, self.id)
 
-        self.stop_task(task)
+        # self.stop_task(task)
+        # If a task gets send to the queue with the same id, it gets
+        # automagically restarted, no need to stop it.
 
         task.status = Status.PENDING
         db.session.add(task)
@@ -272,7 +270,7 @@ class Flow(object):
         return (
             celery_app.tasks.get(task.name)
             .subtask(
-                task_id=str(task.id),
+                task_id=str(task.id), 
                 kwargs=kwargs,
                 immutable=True,  # TODO, ad this as an option/parameter?
             )
@@ -288,14 +286,12 @@ class Task(CeleryTask):
 
     def commit_status(self, task_id, state=Status.PENDING, message=''):
         """Commit task status to the database."""
-        # FIXME: this should be uncommented for newer releases
-        # of Invenio and Celery
-        # with celery_app.flask_app.app_context(), db.session.begin_nested():
-        task = TaskModel.get(task_id)
-        task.status = state
-        task.message = message
-        db.session.merge(task)
-        db.session.commit()
+        with celery_app.flask_app.app_context():
+            task = TaskModel.get(task_id)
+            task.status = state
+            task.message = message
+            db.session.merge(task)
+            db.session.commit()
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Update task status on database."""
@@ -309,6 +305,6 @@ class Task(CeleryTask):
         self.commit_status(
             task_id,
             Status.SUCCESS,
-            'Task finished with return value: {}'.format(retval),
+            '{}'.format(retval),
         )
         super(Task, self).on_success(retval, task_id, args, kwargs)

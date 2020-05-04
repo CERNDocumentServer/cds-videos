@@ -218,7 +218,7 @@ function cdsDepositCtrl(
           }
         });
       that.processSubformats();
-      that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
+      that.getTaskFeedback(eventId, 'file_transcode')
         .then(function(data) {
           var restartEvents = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
@@ -365,10 +365,12 @@ function cdsDepositCtrl(
                 return task.info;
               }).map(function(task) {
                 var payload = task.info.payload;
-                if (payload.percentage === 100 && task.status === 'SUCCESS') {
+                if (payload.percentage === 100 || task.status === 'SUCCESS') {
                   payload.completed = true;
                 } else if (task.status === 'FAILURE') {
                   payload.errored = true;
+                } else if (task.status == 'REVOKED'){
+                  payload.revoked = true;
                 }
                 return payload;
               });
