@@ -76,6 +76,7 @@ def test_basic_flow_api_usage(db):
             self.retry(args=(times,), kwargs=kwargs)
 
     flow = Flow.create('test', payload=dict(common='common-arg'))
+    flow_id = flow.id
     assert flow.status['status'] == 'PENDING'
 
     # build the workflow
@@ -94,7 +95,7 @@ def test_basic_flow_api_usage(db):
 
     flow.start()
 
-    flow = Flow.get_flow(flow.id)
+    flow = Flow.get_flow(flow_id)
     assert flow.status['status'] == 'SUCCESS'
 
     task_status = flow.status['tasks'][0]
@@ -103,10 +104,11 @@ def test_basic_flow_api_usage(db):
     assert flow_task_status['status'] == 'SUCCESS'
 
     # Create a new instance of the same flow (restart)
-    old_flow_id = flow.id
+    old_flow_id = flow_id
     flow = flow.__class__.create(
         flow.name, payload={'common': 'test 2'}, previous_id=old_flow_id
     )
+    flow_id = flow.id
     assert flow.status['status'] == 'PENDING'
     flow.assemble(build)
 
@@ -117,10 +119,10 @@ def test_basic_flow_api_usage(db):
 
     flow.start()
 
-    assert flow.id != old_flow_id
+    assert flow_id != old_flow_id
 
-    flow = Flow.get_flow(flow.id)
-    assert flow.previous_id == old_flow_id
+    flow = Flow.get_flow(flow_id)
+    assert str(flow.previous_id) == old_flow_id
 
     # Restart task
     flow.restart_task(task_status['id'])

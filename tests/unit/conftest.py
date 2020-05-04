@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2015, 2016, 2017, 2019 CERN.
+# Copyright (C) 2015, 2016, 2017, 2019, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -702,11 +702,11 @@ def mock_sorenson():
         return '1234', ar, preset_config
 
     mock.patch(
-        'cds.modules.webhooks.tasks.start_encoding'
+        'cds.modules.webhooks.tasks.sorenson.start_encoding'
     ).start().side_effect = mocked_encoding
 
     mock.patch(
-        'cds.modules.webhooks.tasks.get_encoding_status'
+        'cds.modules.webhooks.tasks.sorenson.get_encoding_status'
     ).start().side_effect = [
         ('Waiting', 0),
         ('Transcoding', 45),
@@ -715,7 +715,7 @@ def mock_sorenson():
     ] * 50  # repeat for multiple usages of the mocked method
 
     mock.patch(
-        'cds.modules.webhooks.tasks.stop_encoding'
+        'cds.modules.webhooks.tasks.sorenson.stop_encoding'
     ).start().return_value = None
 
 

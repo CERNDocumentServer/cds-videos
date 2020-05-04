@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -30,135 +30,24 @@ import json
 
 import mock
 from cds_sorenson.api import get_all_distinct_qualities
+from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
 from flask_security import current_user
-
-from invenio_files_rest.models import ObjectVersion, \
-    Bucket, ObjectVersionTag
+from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-import pytest
 from invenio_records.models import RecordMetadata
-from invenio_accounts.testutils import login_user_via_session
-from invenio_accounts.models import User
-from cds.modules.deposit.api import deposit_project_resolver
 
-from celery import states, chain, group
-from celery.result import AsyncResult
-from invenio_webhooks import current_webhooks
-from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.webhooks.status import collect_info, \
-    get_tasks_status_by_task, get_deposit_events, iterate_events_results
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.webhooks.status import CollectInfoTasks
+from cds.modules.deposit.api import (deposit_project_resolver,
+                                     deposit_video_resolver)
+from cds.modules.webhooks.status import (get_deposit_events,
+                                         get_tasks_status_by_task)
+from helpers import (get_indexed_records_from_mock, get_object_count,
+                     get_presets_applied, get_tag_count, mock_current_user)
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_webhooks.models import Event
-from six import BytesIO
-
-from helpers import failing_task, get_object_count, get_tag_count, \
-    simple_add, mock_current_user, success_task, \
-    get_indexed_records_from_mock, get_presets_applied
-
-
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_download_receiver(api_app, db, api_project, access_token, webhooks,
-                           json_headers):
-    """Test downloader receiver."""
-    project, video_1, video_2 = api_project
-    video_1_depid = video_1['_deposit']['id']
-    video_1_id = str(video_1.id)
-    project_id = str(project.id)
-
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token)
-
-    with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
-            api_app.test_client() as client:
-
-        file_size = 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            deposit_id=video_1_depid,
-            key='test.pdf'
-        )
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
-
-        assert '_tasks' in data
-        assert data['tags']['uri_origin'] == 'http://example.com/test.pdf'
-        assert data['key'] == 'test.pdf'
-        assert 'version_id' in data
-        assert 'links' in data  # TODO decide with links are needed
-        assert all([link in data['links']
-                    for link in ['self', 'version', 'cancel']])
-
-        assert ObjectVersion.query.count() == 1
-        obj = ObjectVersion.query.first()
-        tags = obj.get_tags()
-        assert tags['_event_id'] == data['tags']['_event_id']
-        assert obj.key == data['key']
-        assert str(obj.version_id) == data['version_id']
-        assert obj.file
-        assert obj.file.size == file_size
-
-        def set_data(state, message, size, total, percentage, type_):
-            return {
-                'state': state,
-                'meta': {
-                    'message': message,
-                    'payload': {
-                        'event_id': str(tags['_event_id']),
-                        'key': u'test.pdf',
-                        'tags': {
-                            u'uri_origin': u'http://example.com/test.pdf',
-                            u'_event_id': str(tags['_event_id']),
-                            u'context_type': u'master',
-                        },
-                        'deposit_id': video_1_depid,
-                        'percentage': percentage,
-                        'version_id': str(obj.version_id),
-                        'size': size,
-                        'total': total,
-                        'type': type_
-                    }
-                }
-            }
-        deposit = deposit_video_resolver(video_1_depid)
-
-        # check ElasticSearch is called
-        ids = set(get_indexed_records_from_mock(mock_indexer))
-        assert video_1_id in ids
-        assert project_id in ids
-        assert deposit['_cds']['state'] == {
-            u'file_download': states.SUCCESS}
-
-    # Test cleaning!
-    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
-
-    with mock.patch('requests.get'), \
-            mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
-            api_app.test_client() as client:
-        resp = client.delete(url, headers=json_headers)
-
-        assert resp.status_code == 201
-
-        assert ObjectVersion.query.count() == 2
-        bucket = Bucket.query.first()
-        assert bucket.size == 0
-
-        assert mock_indexer.called is False
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -251,22 +140,6 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert 'file_transcode' in tasks_status
         assert 'file_video_extract_frames' in tasks_status
         assert 'file_video_metadata_extraction' in tasks_status
-
-        # check single status
-        collector = CollectInfoTasks()
-        iterate_events_results(events=events, fun=collector)
-        info = list(collector)
-        presets = get_presets_applied().keys()
-        assert info[0][0] == 'file_download'
-        assert info[0][1].status == states.SUCCESS
-        assert info[1][0] == 'file_video_metadata_extraction'
-        assert info[1][1].status == states.SUCCESS
-        assert info[2][0] == 'file_video_extract_frames'
-        assert info[2][1].status == states.SUCCESS
-        for i in info[3:]:
-            assert i[0] == 'file_transcode'
-            if i[1].status == states.SUCCESS:
-                assert i[1].result['payload']['preset_quality'] in presets
 
         # check tags
         assert ObjectVersionTag.query.count() == get_tag_count()
@@ -459,22 +332,6 @@ def test_avc_workflow_receiver_local_file_pass(
         assert 'file_video_extract_frames' in tasks_status
         assert 'file_video_metadata_extraction' in tasks_status
 
-        # check single status
-        collector = CollectInfoTasks()
-        iterate_events_results(events=events, fun=collector)
-        info = list(collector)
-        assert len(info) == 11
-        assert info[0][0] == 'file_video_metadata_extraction'
-        assert info[0][1].status == states.SUCCESS
-        assert info[1][0] == 'file_video_extract_frames'
-        assert info[1][1].status == states.SUCCESS
-        transocode_tasks = info[2:]
-        statuses = [task[1].status for task in info[2:]]
-        assert len(transocode_tasks) == len(statuses)
-        assert [states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
-                states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
-                states.REVOKED] == statuses
-
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
 
@@ -562,15 +419,21 @@ def test_avc_workflow_receiver_clean_download(
     assert ObjectVersion.query.count() == get_object_count() + 1
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    # RUN again first step
-    event.receiver._init_object_version(event=event)
-    event.receiver._first_step(event=event).apply()
+    # RUN again
+    with api_app.test_client() as client:
+        payload = dict(
+            uri=online_video,
+            deposit_id=cds_depid,
+            key=master_key,
+            sleep_time=0,
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 201
 
     # Create + Clean 1 Download File + Run First Step
-    assert ObjectVersion.query.count() == get_object_count() + 2
-    assert ObjectVersionTag.query.count() == (
-        get_tag_count() + get_tag_count(frames=False, transcode=False)
-    )
+    assert ObjectVersion.query.count() == (get_object_count() * 2) + 1
+    assert ObjectVersionTag.query.count() == get_tag_count() * 2
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -615,20 +478,6 @@ def test_avc_workflow_receiver_clean_video_frames(
         get_object_count() + get_object_count(download=False, transcode=False)
     )
     assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # RUN again frame extraction
-    event.receiver.run_task(
-        event=event, task_name='file_video_extract_frames').apply()
-
-    # Create + Clean Frames + Restart Frames
-    assert ObjectVersion.query.count() == (
-        get_object_count() +
-        2 * get_object_count(download=False, transcode=False)
-    )
-    assert ObjectVersionTag.query.count() == (
-        get_tag_count() +
-        get_tag_count(download=False, metadata=False, transcode=False)
-    )
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -681,21 +530,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
     assert ObjectVersion.query.count() == get_object_count() + len(presets)
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    #
-    # RUN again
-    #
-    for i, preset_quality in enumerate(presets, 1):
-        event = Event.query.first()
-        event.receiver.run_task(event=event, task_name='file_transcode',
-                                preset_quality=preset_quality).apply()
-
-        # Create + Delete transcoded files + Restart i-th transcode
-        assert ObjectVersion.query.count() == (
-            get_object_count() + len(presets) + i
-        )
-        # if changed, copy magic number 14 from helpers::get_tag_count
-        assert ObjectVersionTag.query.count() == get_tag_count() + (i * 14)
-
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_extract_metadata(
@@ -737,151 +571,3 @@ def test_avc_workflow_receiver_clean_extract_metadata(
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # [[ RUN again metadata extraction ]]
-    event.receiver.run_task(
-        event=event, task_name='file_video_metadata_extraction').apply()
-
-    # Metadata Extraction doesn't create new objects
-    assert ObjectVersion.query.count() == get_object_count()
-    # neither new tags, but update the current
-    assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_cds']
-
-
-@pytest.mark.parametrize(
-    'receiver_id, workflow, status, http_status, payload, result', [
-        ('failing-task', failing_task, states.FAILURE, 500, {}, None),
-        ('success-task', success_task, states.SUCCESS, 201, {}, None),
-        ('add-task', simple_add, states.SUCCESS, 202, {'x': 40, 'y': 2}, 42)
-    ]
-)
-def test_async_receiver_status_fail(api_app, access_token, u_email,
-                                    json_headers, receiver_id, workflow,
-                                    status, http_status, payload, result):
-    """Test AVC workflow test-case."""
-    ctx = dict()
-
-    class TestReceiver(CeleryAsyncReceiver):
-
-        def run(self, event):
-            assert payload == event.payload
-            ctx['myresult'] = workflow.s(**event.payload).apply_async()
-            self._serialize_result(event=event, result=ctx['myresult'])
-            super(TestReceiver, self).persist(
-                event=event, result=ctx['myresult'])
-
-        def _raw_info(self, event):
-            result = self._deserialize_result(event)
-            return {receiver_id: result}
-
-    current_webhooks.register(receiver_id, TestReceiver)
-
-    with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_list',
-                      receiver_id=receiver_id,
-                      access_token=access_token)
-    with api_app.test_client() as client:
-        # run the task
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == http_status
-        data = json.loads(resp.headers['X-Hub-Info'])
-        assert data['name'] == receiver_id
-        extra_info = json.loads(resp.headers['X-Hub-Info'])
-        assert extra_info['id'] == ctx['myresult'].id
-        assert ctx['myresult'].result == result
-
-    with api_app.test_request_context():
-        event_id = resp.headers['X-Hub-Delivery']
-        url = url_for('invenio_webhooks.event_item',
-                      receiver_id=receiver_id, event_id=event_id,
-                      access_token=access_token)
-    with api_app.test_client() as client:
-        # check status
-        resp = client.get(url, headers=json_headers)
-        assert resp.status_code == http_status
-        data = json.loads(resp.headers['X-Hub-Info'])
-        #  assert data['status'] == status
-        assert data['name'] == receiver_id
-        extra_info = json.loads(resp.headers['X-Hub-Info'])
-        assert extra_info['id'] == ctx['myresult'].id
-
-
-def test_collect_info():
-    """Test info extractor."""
-    result = simple_add.s(1, 2).apply_async()
-
-    info = collect_info('mytask', result)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-
-    result = chain(simple_add.s(1, 2), simple_add.s(3)).apply_async()
-
-    # check first task
-    info = collect_info('mytask', result.parent)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-    # check second task
-    info = collect_info('mytask2', result)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 6
-    assert 'id' in info
-    assert info['name'] == 'mytask2'
-
-    result = chain(
-        simple_add.s(1, 2),
-        group(simple_add.s(3), simple_add.s(4), failing_task.s())
-    ).apply_async()
-
-    info = collect_info('mytask', result.parent)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-
-    info = collect_info('mytask2', result.children[0])
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 6
-    assert 'id' in info
-    assert info['name'] == 'mytask2'
-
-    info = collect_info('mytask3', result.children[1])
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 7
-    assert 'id' in info
-    assert info['name'] == 'mytask3'
-
-    fail = AsyncResult(result.children[2].id)
-    info = collect_info('mytask4', fail)
-    assert info['status'] == states.FAILURE
-    assert 'id' in info
-    assert info['name'] == 'mytask4'
-
-
-def test_serializer():
-    """Test result serializer on event."""
-    event = Event()
-    event.response = {}
-    event.response_headers = {}
-
-    result = chain(
-        simple_add.s(1, 2),
-        group(simple_add.s(3), simple_add.s(4), failing_task.s())
-    ).apply_async()
-
-    CeleryAsyncReceiver._serialize_result(event=event, result=result)
-    deserialized_result = CeleryAsyncReceiver._deserialize_result(event=event)
-
-    assert deserialized_result.id == result.id
-    assert deserialized_result.parent.id == result.parent.id
-    assert deserialized_result.children[0].id == result.children[0].id
-    assert deserialized_result.children[1].id == result.children[1].id
-    assert deserialized_result.children[2].id == result.children[2].id
