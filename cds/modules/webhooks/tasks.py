@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016, 2017, 2018 CERN.
+# Copyright (C) 2016, 2017, 2018, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import
 
+import json
 import logging
 import os
 import shutil
@@ -35,12 +36,13 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
+from cds_sorenson import api as sorenson
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
-from celery import Task, shared_task
+from celery import shared_task
+from ..flows.api import Task
 from celery.exceptions import Ignore
-from celery.states import FAILURE, REVOKED, STARTED, SUCCESS
+from celery.states import FAILURE, STARTED, SUCCESS
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
@@ -65,6 +67,90 @@ from .utils import move_file_into_local
 
 logger = get_task_logger(__name__)
 
+# Mock sorenson server for local development
+# Copy this code to cds/modules/webhooks/tasks.py
+import random
+import uuid
+from shutil import copyfile
+
+
+from flask import current_app
+from cds_sorenson.api import _get_quality_preset
+from cds_sorenson.error import SorensonError
+
+
+class MockSorenson(object):
+    """Mock class to use for local testing."""
+
+    def __init__(self):
+        self.jobs = {}
+
+    def start_encoding(
+        self,
+        input_file,
+        output_file,
+        desired_quality,
+        display_aspect_ratio,
+        max_height=None,
+        max_width=None,
+        **kwargs
+    ):
+        job_id = str(uuid.uuid4())
+        self.jobs[job_id] = {
+            'step': 0,
+            'input_file': input_file,
+            'output_file': output_file,
+            'quality': desired_quality,
+            'aspect_ratio': display_aspect_ratio,
+        }
+        aspect_ratio, preset_config = _get_quality_preset(
+            desired_quality,
+            display_aspect_ratio,
+            video_height=max_height,
+            video_width=max_width
+        )
+        return job_id, aspect_ratio, preset_config
+
+    def stop_encoding(self, job_id):
+        try:
+            del self.jobs[job_id]
+        except KeyError:
+            raise SorensonError('No status found for job: {0}'.format(job_id))
+
+    def get_encoding_status(self, job_id):
+        try:
+            job = self.jobs[job_id]
+        except KeyError:
+            return 'Canceled', 100
+
+        if job['step'] < 5:
+            fail_value = random.random()
+            # Simulate random failures 5% of the times
+            if fail_value >= 0.99:  # Change value to higher probability
+                job_status = 6
+                job_progress = 100
+            else:
+                job_status = job['step']
+                # 5 means finished, before that it's all running
+                job_progress = (job_status / 5.0) * 100
+        else:
+            job_status = job['step']
+            job_progress = 100
+
+        status = current_app.config['CDS_SORENSON_STATUSES'].get(job_status)
+        # Increase step for next call
+        if job_status == 5:
+            # This means finished, copy input file to destination
+            copyfile(job['input_file'], '{}.mp4'.format(job['output_file']))
+        elif job_status < 5:
+            job_status = job_status + 1
+
+        job['step'] = job_status
+
+        return status, job_progress
+
+# Uncomment this line to use
+# sorenson = MockSorenson()
 
 class AVCTask(Task):
     """Base class for tasks."""
@@ -117,14 +203,18 @@ class AVCTask(Task):
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
             self._update_record()
             logging.debug('Failure: {0}'.format(exception))
+        super(AVCTask, self).on_failure(
+            exc=exc, task_id=task_id, args=args, kwargs=kwargs, einfo=einfo)
 
-    def on_success(self, exc, task_id, *args, **kwargs):
+    def on_success(self, exc, task_id, args, kwargs):
         """When end correctly, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
             self.update_state(task_id=task_id, state=SUCCESS, meta=meta)
             self._update_record()
             logging.debug('Success: {0}'.format(meta))
+        super(AVCTask, self).on_success(
+            retval=exc, task_id=task_id, args=args, kwargs=kwargs)
 
     def _update_record(self):
         # update record state
@@ -250,8 +340,8 @@ class ExtractMetadataTask(AVCTask):
             patch_record(recid=recid, patch=patch, validator=validator)
         except jsonpatch.JsonPatchConflict as c:
             logger.warning(
-                'Failed to apply JSON Patch to deposit {0}: {1}'.format(
-                    recid, c))
+                'Failed to apply JSON Patch to deposit %s: %s', recid, c
+            )
 
         # Delete tmp file if any
         obj = as_object_version(version_id)
@@ -327,6 +417,8 @@ class ExtractMetadataTask(AVCTask):
                     extracted_metadata=extracted_dict,),
                 message='Attached video metadata'))
 
+        return json.dumps(extracted_dict)
+
 
 class ExtractFramesTask(AVCTask):
     """Extract frames task."""
@@ -393,6 +485,7 @@ class ExtractFramesTask(AVCTask):
                 message='Extracting frames [{0} out of {1}]'.format(
                     current_frame, options['number_of_frames']),
             )
+            logging.debug(meta['message'])
             self.update_state(state=STARTED, meta=meta)
 
         try:
@@ -587,19 +680,21 @@ class TranscodeVideoTask(AVCTask):
 
             try:
                 # Start Sorenson
-                job_id, ar, preset_config = start_encoding(input_file,
-                                                           output_file,
-                                                           preset_quality,
-                                                           aspect_ratio,
-                                                           max_height=height,
-                                                           max_width=width)
-            except (InvalidResolutionError, TooHighResolutionError) as e:
-                exception = self._meta_exception_envelope(exc=e)
-                self.update_state(state=REVOKED, meta=exception)
-                raise Ignore()
+                job_id, ar, preset_config = sorenson.start_encoding(
+                    input_file,
+                    output_file,
+                    preset_quality,
+                    aspect_ratio,
+                    max_height=height,
+                    max_width=width
+                )
+            except (InvalidResolutionError, TooHighResolutionError):
+                # exception = self._meta_exception_envelope(exc=e)
+                # self.update_state(state=REVOKED, meta=exception)
+                return 'Not transcoding for {}'.format(preset_quality)
 
             # Set revoke handler, in case of an abrupt execution halt.
-            self.set_revoke_handler(partial(stop_encoding, job_id))
+            self.set_revoke_handler(partial(sorenson.stop_encoding, job_id))
 
             # Create ObjectVersionTags
             ObjectVersionTag.create(obj, 'master', self.obj_id)
@@ -636,7 +731,7 @@ class TranscodeVideoTask(AVCTask):
         # Monitor job and report accordingly
         while status != 'Finished':
             # Get job status
-            status, percentage = get_encoding_status(job_id)
+            status, percentage = sorenson.get_encoding_status(job_id)
             if status == 'Error':
                 raise RuntimeError('Error transcoding: {0}'.format(status))
             elif status == 'Canceled':
@@ -669,6 +764,8 @@ class TranscodeVideoTask(AVCTask):
             as_object_version(
                 job_info['version_id']).set_file(file_instance)
         db.session.commit()
+
+        return job_info['version_id']
 
 
 def patch_record(recid, patch, validator=None):

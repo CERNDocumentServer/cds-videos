@@ -26,15 +26,20 @@
 
 from __future__ import absolute_import
 
-from invenio_db import db
-from flask.views import MethodView
-from invenio_webhooks.views import blueprint, error_handler
-from invenio_oauth2server import require_api_auth, require_oauth_scopes
-from invenio_webhooks.decorators import pass_event, pass_user_id, \
-    need_receiver_permission
+import json
 
-from .receivers import build_task_payload
-from .status import iterate_result, collect_info, ResultEncoder
+from flask.views import MethodView
+from invenio_db import db
+from invenio_oauth2server import require_api_auth, require_oauth_scopes
+
+from invenio_webhooks.decorators import (
+    need_receiver_permission,
+    pass_event,
+    pass_user_id,
+)
+from invenio_webhooks.views import blueprint, error_handler
+
+from .receivers import CeleryAsyncReceiver
 
 
 class TaskResource(MethodView):
@@ -48,12 +53,13 @@ class TaskResource(MethodView):
     @need_receiver_permission('update')
     def put(self, user_id, receiver_id, event, task_id):
         """Handle PUT request: restart a task."""
-        payload = build_task_payload(event, task_id)
-        if payload:
-            event.receiver.rerun_task(**payload)
+        flow = CeleryAsyncReceiver.get_flow(event)
+        try:
+            flow.restart_task(task_id)
             db.session.commit()
-            return '', 204
-        return '', 400
+        except KeyError:
+            return '', 400
+        return '', 204
 
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
@@ -63,11 +69,7 @@ class TaskResource(MethodView):
     @need_receiver_permission('delete')
     def delete(self, user_id, receiver_id, event, task_id):
         """Handle DELETE request: stop and clean a task."""
-        payload = build_task_payload(event, task_id)
-        if payload:
-            event.receiver.clean_task(**payload)
-            db.session.commit()
-            return '', 204
+        # TODO
         return '', 400
 
 
@@ -82,23 +84,9 @@ class EventFeedbackResource(MethodView):
     @need_receiver_permission('read')
     def get(self, user_id, receiver_id, event):
         """Handle GET request: get more informations."""
-        raw_info = event.receiver._raw_info(event=event)
+        code, status = event.receiver.status(event=event)
 
-        def collect(task_name, result):
-            if isinstance(result.info, Exception):
-                (args,) = result.info.args
-                return {
-                    'id': result.id,
-                    'status': result.status,
-                    'info': args,
-                    'name': task_name
-                }
-            else:
-                return collect_info(task_name, result)
-
-        result = iterate_result(
-            raw_info=raw_info, fun=collect)
-        return ResultEncoder().encode(result), 200
+        return json.dumps(status), 200
 
 
 task_item = TaskResource.as_view('task_item')

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -95,7 +95,7 @@ def test_publish_all_videos(api_app, api_project, users):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # publish project
-    prepare_videos_for_publish([video_1, video_2])
+    prepare_videos_for_publish([video_1, video_2], with_files=True)
     login_user(User.query.get(users[0]))
     new_project = project.publish()
     # check project and all video are published
@@ -115,7 +115,7 @@ def test_publish_one_video(api_app, api_project, users):
     assert video_2['_deposit']['status'] == 'draft'
     assert project['_deposit']['status'] == 'draft'
     # [publish project]
-    prepare_videos_for_publish([video_1, video_2])
+    prepare_videos_for_publish([video_1, video_2], with_files=True)
     # publish one video
     login_user(User.query.get(users[0]))
     video_1 = video_1.publish()
@@ -329,7 +329,7 @@ def test_project_delete_one_video_published(api_app, api_project, force,
     (project, video_1, video_2) = api_project
 
     # prepare videos for publishing
-    prepare_videos_for_publish([video_1, video_2])
+    prepare_videos_for_publish([video_1, video_2], with_files=True)
 
     # publish video_2
     login_user(User.query.get(users[0]))
@@ -392,7 +392,7 @@ def test_inheritance(api_app, api_project, users):
 
     # Publish the video
     login_user(User.query.get(users[0]))
-    prepare_videos_for_publish([video])
+    prepare_videos_for_publish([video], with_files=True)
     video = video.publish()
     assert 'category' in video
     assert 'type' in video
@@ -403,7 +403,7 @@ def test_inheritance(api_app, api_project, users):
 def test_project_publish_with_workflow(api_app, users, api_project, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = api_project
-    prepare_videos_for_publish([video_1, video_2])
+    prepare_videos_for_publish([video_1, video_2], with_files=True)
     project_depid = project['_deposit']['id']
     project_id = str(project.id)
     video_1_depid = video_1['_deposit']['id']
@@ -432,7 +432,10 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
 
     # check tasks status is propagated to video and project
     video_1 = deposit_video_resolver(video_1_depid)
-    expected = {u'add': u'SUCCESS', u'failing': u'FAILURE'}
+    expected = {
+        u'sse_simple_add': 'SUCCESS',
+        u'sse_failing_task': 'FAILURE'
+    }
     assert video_1['_cds']['state'] == expected
     assert video_1.project['_cds']['state'] == expected
 
@@ -500,7 +503,7 @@ def test_project_partial_validation(
         project = Project.create(deposit_metadata)
         video_1['_project_id'] = project['_deposit']['id']
         video_1 = Video.create(video_1)
-        prepare_videos_for_publish([video_1])
+        prepare_videos_for_publish([video_1], with_files=True)
         video_1.commit()
         id_ = project.id
         db.session.expire_all()
