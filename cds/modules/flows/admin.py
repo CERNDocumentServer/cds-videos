@@ -26,32 +26,42 @@
 
 import uuid
 
+from flask import url_for
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.contrib.sqla.filters import FilterEqual
+from flask_wtf import FlaskForm
+from invenio_admin.filters import FilterConverter
+from markupsafe import Markup
 
 from .models import Flow, Task
 
 
-class FilterUUID(FilterEqual):
-    """UUID aware filter."""
+def link(text, link_func):
+    """Generate a object formatter for links.."""
+    def object_formatter(v, c, m, p):
+        """Format object view link."""
+        return Markup('<a href="{0}">{1}</a>'.format(link_func(m), text))
 
-    def apply(self, query, value, alias):
-        """Convert UUID."""
-        return query.filter(self.column == uuid.UUID(value))
+    return object_formatter
 
 
 class FlowModelView(ModelView):
     """Flow Model view."""
 
+    filter_converter = FilterConverter()
     can_create = False
     can_edit = False
     can_delete = False
     can_view_details = True
-    column_display_all_relations = True
+    column_formatters = dict(
+        tasks=link('Tasks', lambda o: url_for('task.index_view', search=o.id))
+    )
 
-    column_list = ('id', 'name', 'payload', 'previous_id', 'created')
+    column_list = ('id', 'name', 'payload', 'created', 'tasks')
+    column_labels = {
+        'id': 'UUID',
+    }
 
-    column_filters = ('created', 'updated')
+    column_searchable_list = ('id', 'payload')
     column_default_sort = ('updated', True)
     page_size = 25
 
@@ -59,15 +69,20 @@ class FlowModelView(ModelView):
 class TaskModelView(ModelView):
     """Flow Model view."""
 
+    filter_converter = FilterConverter()
     can_create = False
     can_edit = False
     can_delete = False
     can_view_details = True
-    column_display_all_relations = True
+    form_base_class = FlaskForm
 
-    column_list = ('id', 'name', 'flow_id', 'status', 'message', 'payload')
+    column_list = ('id', 'name', 'flow.id', 'status', 'message', 'payload')
+    column_labels = {
+        'id': 'UUID',
+        'flow.id': 'Flow UUID',
+    }
+    column_searchable_list = ('flow.id', 'name')
 
-    column_filters = ('name', FilterUUID(Task.flow_id, 'Flow'))
     column_default_sort = ('flow_id', True)
     page_size = 25
 

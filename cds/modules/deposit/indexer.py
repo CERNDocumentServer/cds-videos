@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2020 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -97,4 +97,4 @@ class CDSRecordIndexer(RecordIndexer):
     def bulk_delete(self, record_iterator, **kwargs):
         """Overrides to `RecordIndexer.buld_delete` to pass the index of the
         records. Can be used to delete only records of the same index."""
-        self._bulk_op(record_id_iterator, 'delete', **kwargs)
+        self._bulk_op(record_iterator, 'delete', **kwargs)
