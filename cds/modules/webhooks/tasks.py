@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016, 2017, 2018 CERN.
+# Copyright (C) 2016, 2017, 2018, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -38,9 +38,10 @@ import requests
 from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
-from celery import Task, shared_task
+from celery import shared_task
+from ..flows.api import Task
 from celery.exceptions import Ignore
-from celery.states import FAILURE, REVOKED, STARTED, SUCCESS
+from celery.states import FAILURE, STARTED, SUCCESS
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
@@ -117,14 +118,18 @@ class AVCTask(Task):
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
             self._update_record()
             logging.debug('Failure: {0}'.format(exception))
+        super(AVCTask, self).on_failure(
+            exc=exc, task_id=task_id, args=args, kwargs=kwargs, einfo=einfo)
 
-    def on_success(self, exc, task_id, *args, **kwargs):
+    def on_success(self, exc, task_id, args, kwargs):
         """When end correctly, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
             self.update_state(task_id=task_id, state=SUCCESS, meta=meta)
             self._update_record()
             logging.debug('Success: {0}'.format(meta))
+        super(AVCTask, self).on_success(
+            retval=exc, task_id=task_id, args=args, kwargs=kwargs)
 
     def _update_record(self):
         # update record state
@@ -393,6 +398,7 @@ class ExtractFramesTask(AVCTask):
                 message='Extracting frames [{0} out of {1}]'.format(
                     current_frame, options['number_of_frames']),
             )
+            logging.debug(meta['message'])
             self.update_state(state=STARTED, meta=meta)
 
         try:
@@ -593,10 +599,10 @@ class TranscodeVideoTask(AVCTask):
                                                            aspect_ratio,
                                                            max_height=height,
                                                            max_width=width)
-            except (InvalidResolutionError, TooHighResolutionError) as e:
-                exception = self._meta_exception_envelope(exc=e)
-                self.update_state(state=REVOKED, meta=exception)
-                raise Ignore()
+            except (InvalidResolutionError, TooHighResolutionError):
+                # exception = self._meta_exception_envelope(exc=e)
+                # self.update_state(state=REVOKED, meta=exception)
+                return 'Not transcoding for {}'.format(preset_quality)
 
             # Set revoke handler, in case of an abrupt execution halt.
             self.set_revoke_handler(partial(stop_encoding, job_id))

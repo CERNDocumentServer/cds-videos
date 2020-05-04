@@ -288,14 +288,12 @@ class Task(CeleryTask):
 
     def commit_status(self, task_id, state=Status.PENDING, message=''):
         """Commit task status to the database."""
-        # FIXME: this should be uncommented for newer releases
-        # of Invenio and Celery
-        # with celery_app.flask_app.app_context(), db.session.begin_nested():
-        task = TaskModel.get(task_id)
-        task.status = state
-        task.message = message
-        db.session.merge(task)
-        db.session.commit()
+        with celery_app.flask_app.app_context():
+            task = TaskModel.get(task_id)
+            task.status = state
+            task.message = message
+            db.session.merge(task)
+            db.session.commit()
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Update task status on database."""
