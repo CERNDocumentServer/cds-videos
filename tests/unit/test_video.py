@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -276,203 +276,6 @@ def test_video_record_schema(app, db, api_project):
     assert video_1.record_schema == Video.get_record_schema()
 
 
-#  @mock.patch('flask_login.current_user', mock_current_user)
-def test_video_events_on_download_check_index(api_app, webhooks, db,
-                                              api_project, access_token,
-                                              json_headers, users):
-    """Test deposit events."""
-    (project, video_1, video_2) = api_project
-    prepare_videos_for_publish([video_1, video_2])
-    project_depid = project['_deposit']['id']
-    video_1_depid = video_1['_deposit']['id']
-    bucket_id = video_1._bucket.id
-
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token)
-
-    with mock.patch('requests.get') as mock_request, \
-            api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[0]).email)
-
-        file_size = 1024 * 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            bucket_id=str(bucket_id),
-            deposit_id=video_1_depid,
-            key='test.pdf')
-
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 201
-
-        # run indexer
-        RecordIndexer().process_bulk_queue()
-        sleep(2)
-
-        deposit = deposit_video_resolver(video_1_depid)
-        file_dumps = deposit._get_files_dump()
-        assert len(file_dumps) == 1
-
-        def search_record(url):
-            res = client.get(url, headers=json_headers)
-            assert res.status_code == 200
-            data = json.loads(
-                res.data.decode('utf-8')
-            )['hits']['hits'][0]['metadata']
-            return data
-
-        # check if the tasks states and files are inside elasticsearch
-        # -> check video
-        url_video_deposit = url_for('invenio_deposit_rest.video_list',
-                                    q='_deposit.id:{0}'.format(video_1_depid),
-                                    access_token=access_token)
-        data = search_record(url_video_deposit)
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-        assert file_dumps == data['_files']
-        # -> check project
-        url_project_deposit = url_for(
-            'invenio_deposit_rest.project_list',
-            q='_deposit.id:{0}'.format(project_depid),
-            access_token=access_token)
-        search_record(url_project_deposit)
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-
-        # [[ EDIT VIDEO ]]
-        deposit = deposit_video_resolver(video_1_depid)
-        video_edited = deepcopy(deposit)
-        del video_edited['_files']
-        del video_edited['_cds']['state']
-        reset_oauth2()
-        res = client.put(
-            url_for('invenio_deposit_rest.video_item',
-                    pid_value=video_1_depid),
-            data=json.dumps(video_edited),
-            headers=json_headers
-        )
-        assert res.status_code == 200
-
-        # check if the tasks states and files are inside elasticsearch
-        # -> check video
-        data = search_record(url_video_deposit)
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-        assert file_dumps == data['_files']
-        # -> check project
-        url_project_deposit = url_for(
-            'invenio_deposit_rest.project_list',
-            q='_deposit.id:{0}'.format(project_depid),
-            access_token=access_token)
-        search_record(url_project_deposit)
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-
-        # [[ PUBLISH THE PROJECT ]]
-        reset_oauth2()
-        res = client.post(
-            url_for('invenio_deposit_rest.project_actions',
-                    pid_value=project['_deposit']['id'], action='publish',
-                    ), headers=json_headers)
-        assert res.status_code == 202
-
-        # run indexer
-        RecordIndexer().process_bulk_queue()
-        sleep(2)
-
-        deposit = deposit_video_resolver(video_1_depid)
-
-        # check if the files are inside elasticsearch
-        # -> check video deposit
-        data = search_record(url_video_deposit)
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-        assert file_dumps == data['_files']
-        # check video record
-        pid, record = deposit.fetch_published()
-        url = url_for('invenio_records_rest.recid_list',
-                      q='_deposit.pid.value:{0}'.format(pid.pid_value))
-        data = search_record(url)
-        assert record['_files'] == data['_files']
-
-
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_video_events_on_download_create(api_app, webhooks, db, api_project,
-                                         access_token, json_headers):
-    """Test deposit events."""
-    (project, video_1, video_2) = api_project
-    video_1_depid = video_1['_deposit']['id']
-    project_id = str(project.id)
-    video_1_id = str(video_1.id)
-    bucket_id = video_1._bucket.id
-
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token)
-
-    with mock.patch('requests.get') as mock_request, \
-            mock.patch('invenio_indexer.tasks.index_record.delay') \
-            as mock_indexer, \
-            api_app.test_client() as client:
-        file_size = 1024 * 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            bucket_id=str(bucket_id),
-            deposit_id=video_1_depid,
-            key='test.pdf')
-
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 201
-
-        file_size = 1024 * 1024 * 6
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 201
-
-        deposit = deposit_video_resolver(video_1_depid)
-
-        events = get_deposit_events(deposit['_deposit']['id'])
-
-        assert len(events) == 2
-        assert events[0].payload['deposit_id'] == video_1_depid
-        assert events[1].payload['deposit_id'] == video_1_depid
-
-        status = get_tasks_status_by_task(events)
-        assert status == {'file_download': states.SUCCESS}
-
-        # check if the states are inside the deposit
-        res = client.get(
-            url_for('invenio_deposit_rest.video_item', pid_value=video_1_depid,
-                    access_token=access_token),
-            headers=json_headers)
-        assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_cds']['state']['file_download'] == states.SUCCESS
-        assert deposit._get_files_dump() == data['_files']
-
-        # check the record is inside the indexer queue
-        ids = set(get_indexed_records_from_mock(mock_indexer))
-        assert len(ids) == 2
-        assert video_1_id in ids
-        assert project_id in ids
-
-
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
                                   access_token, json_headers):
@@ -509,15 +312,8 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert events[1].payload['deposit_id'] == video_1_depid
         # check computed status
         status = get_tasks_status_by_task(events)
-        assert status['add'] == states.SUCCESS
-        assert status['failing'] == states.FAILURE
-
-        # check every task for every event
-        for event in events:
-            result = event.receiver._deserialize_result(event)
-            assert result.parent.status == states.SUCCESS
-            assert result.children[0].status == states.FAILURE
-            assert result.children[1].status == states.SUCCESS
+        assert status['sse_simple_add'] == states.SUCCESS
+        assert status['sse_failing_task'] == states.FAILURE
 
         # check if the states are inside the deposit
         res = client.get(
@@ -526,8 +322,8 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
-        assert data['_cds']['state']['add'] == states.SUCCESS
-        assert data['_cds']['state']['failing'] == states.FAILURE
+        assert data['_cds']['state']['sse_simple_add'] == states.SUCCESS
+        assert data['_cds']['state']['sse_failing_task'] == states.FAILURE
 
         # run indexer
         RecordIndexer().process_bulk_queue()
@@ -540,8 +336,8 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
         status = data['hits']['hits'][0]['metadata']['_cds']['state']
-        assert status['add'] == states.SUCCESS
-        assert status['failing'] == states.FAILURE
+        assert status['sse_simple_add'] == states.SUCCESS
+        assert status['sse_failing_task'] == states.FAILURE
         # check elasticsearch project state
         resp = client.get(url_for('invenio_deposit_rest.video_list',
                                   q='_deposit.id:{0}'.format(project_depid),
@@ -550,8 +346,8 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
         status = data['hits']['hits'][0]['metadata']['_cds']['state']
-        assert status['add'] == states.SUCCESS
-        assert status['failing'] == states.FAILURE
+        assert status['sse_simple_add'] == states.SUCCESS
+        assert status['sse_failing_task'] == states.FAILURE
 
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2018 CERN.
+# Copyright (C) 2018, 2020 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -22,19 +22,20 @@
 from __future__ import absolute_import, print_function
 
 import click
-from cds.modules.deposit.api import Video, deposit_video_resolver
-from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.records.resolver import record_resolver
-from cds.modules.webhooks.tasks import ExtractFramesTask
 from cds_sorenson.api import get_all_distinct_qualities
 from click import ClickException
 from flask.cli import with_appcontext
-
-from cds.modules.maintenance.subformats import create_all_missing_subformats, \
-    create_all_subformats, create_subformat
 from invenio_db import db
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_records_files.models import RecordsBuckets
+
+from cds.modules.deposit.api import Video, deposit_video_resolver
+from cds.modules.maintenance.subformats import (create_all_missing_subformats,
+                                                create_all_subformats,
+                                                create_subformat)
+from cds.modules.records.api import CDSVideosFilesIterator
+from cds.modules.records.resolver import record_resolver
+from cds.modules.webhooks.status import get_deposit_events, get_event_last_flow
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 
 def abort_if_false(ctx, param, value):
@@ -57,13 +58,16 @@ def missing(recid, depid):
         raise ClickException('Missing option "--recid" or "--depid"')
 
     value = recid or depid
-    type = 'recid' if recid else 'depid'
-    output, task_id = create_all_missing_subformats(id_type=type,
-                                                    id_value=value)
+    type_ = 'recid' if recid else 'depid'
+    output, task_id = create_all_missing_subformats(
+        id_type=type_, id_value=value
+    )
     if output:
         click.echo(
             "Creating the following subformats: {0}. Task id: {1}".format(
-                output, task_id))
+                output, task_id
+            )
+        )
     else:
         click.echo("No missing subformats to create.")
 
@@ -84,19 +88,23 @@ def quality(recid, depid, quality):
         raise ClickException('Missing option "--recid" or "--depid"')
 
     value = recid or depid
-    type = 'recid' if recid else 'depid'
+    type_ = 'recid' if recid else 'depid'
 
     qualities = get_all_distinct_qualities()
     if quality not in qualities:
         raise ClickException(
-            "Input quality must be one of {0}".format(qualities))
+            "Input quality must be one of {0}".format(qualities)
+        )
 
-    output, task_id = create_subformat(id_type=type, id_value=value,
-                                       quality=quality)
+    output, task_id = create_subformat(
+        id_type=type_, id_value=value, quality=quality
+    )
     if output:
         click.echo(
             "Creating the following subformat: {0}. Task id: {1}".format(
-                output, task_id))
+                output, task_id
+            )
+        )
     else:
         click.echo("This subformat cannot be transcoded.")
 
@@ -104,9 +112,13 @@ def quality(recid, depid, quality):
 @recreate.command()
 @click.option('--recid', 'recid', default=None)
 @click.option('--depid', 'depid', default=None)
-@click.option('--yes', is_flag=True, callback=abort_if_false,
-              expose_value=False,
-              prompt='Do you really want to recreate all subformats?')
+@click.option(
+    '--yes',
+    is_flag=True,
+    callback=abort_if_false,
+    expose_value=False,
+    prompt='Do you really want to recreate all subformats?',
+)
 @with_appcontext
 def all(recid, depid):
     """Recreate all subformats."""
@@ -114,12 +126,14 @@ def all(recid, depid):
         raise ClickException('Missing option "--recid" or "--depid"')
 
     value = recid or depid
-    type = 'recid' if recid else 'depid'
+    type_ = 'recid' if recid else 'depid'
 
-    output, task_id = create_all_subformats(id_type=type, id_value=value)
+    output, task_id = create_all_subformats(id_type=type_, id_value=value)
     click.echo(
-        "Creating the following subformats: {0}. Task id: {1}".format(output,
-                                                                      task_id))
+        "Creating the following subformats: {0}. Task id: {1}".format(
+            output, task_id
+        )
+    )
 
 
 @click.group()
@@ -144,7 +158,8 @@ def fix_bucket_conflict(recid):
         new_bucket.locked = False
         db.session.commit()
         rb = RecordsBuckets.query.filter(
-            RecordsBuckets.bucket_id == deposit_old_bucket.id).one()
+            RecordsBuckets.bucket_id == deposit_old_bucket.id
+        ).one()
         rb.bucket = new_bucket
         db.session.add(rb)
         db.session.commit()
@@ -152,15 +167,21 @@ def fix_bucket_conflict(recid):
         # Put tags correctly pointing to the right object
         master_file = CDSVideosFilesIterator.get_master_video_file(record)
         if master_file:
-            master_deposit_obj = ObjectVersion.get(new_bucket,
-                                                   master_file['key'])
+            master_deposit_obj = ObjectVersion.get(
+                new_bucket, master_file['key']
+            )
 
-            for slave in ObjectVersion.query_heads_by_bucket(
-                    bucket=new_bucket).join(ObjectVersion.tags).filter(
-                        ObjectVersion.file_id.isnot(None),
-                        ObjectVersionTag.key == 'master'):
+            for slave in (
+                ObjectVersion.query_heads_by_bucket(bucket=new_bucket)
+                .join(ObjectVersion.tags)
+                .filter(
+                    ObjectVersion.file_id.isnot(None),
+                    ObjectVersionTag.key == 'master',
+                )
+            ):
                 ObjectVersionTag.create_or_update(
-                    slave, 'master', str(master_deposit_obj.version_id))
+                    slave, 'master', str(master_deposit_obj.version_id)
+                )
                 db.session.add(slave)
                 db.session.commit()
 
@@ -186,7 +207,8 @@ def fix_bucket_conflict(recid):
 
     click.echo(
         "Deposit bucket re-created from record bucket. Old bucket id: {0} - "
-        "New bucket id: {1}".format(old_bucket_id, new_bucket_id))
+        "New bucket id: {1}".format(old_bucket_id, new_bucket_id)
+    )
 
 
 @videos.command()
@@ -202,8 +224,11 @@ def extract_frames(recid, depid):
         _, record = record_resolver.resolve(recid)
         depid = record['_deposit']['id']
 
-    video_deposit = deposit_video_resolver(depid)
-    master = CDSVideosFilesIterator.get_master_video_file(video_deposit)
+    events = get_deposit_events(depid)
+    flow = get_event_last_flow(events[0])
 
-    ExtractFramesTask().si(version_id=master['version_id'],
-                           deposit_id=depid).apply_async()
+    for t in flow.model.tasks:
+        if 'ExtractFramesTask' in t.name:
+            flow.restart_task(t)
+    db.session.commit()
+

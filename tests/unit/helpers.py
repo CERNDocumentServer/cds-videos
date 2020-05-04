@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -57,6 +57,7 @@ from cds.modules.records.minters import catid_minter
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
                                         ExtractMetadataTask, update_record)
+from cds.modules.flows import Flow
 
 
 @shared_task(bind=True)
@@ -85,9 +86,7 @@ class sse_failing_task(AVCTask):
 
     def on_success(self, exc, task_id, *args, **kwargs):
         """Set Fail."""
-        self.update_state(
-            state=states.FAILURE,
-            meta={'exc_type': 'Exception', 'exc_message': {'hello': 'world'}})
+        self.on_failure(exc, task_id, args, kwargs, '')
 
 
 class sse_success_task(AVCTask):
@@ -98,7 +97,7 @@ class sse_success_task(AVCTask):
 
     def run(self, *args, **kwargs):
         """A failing shared task."""
-        self.update_state(state=states.SUCCESS, meta={})
+        pass
 
 
 @shared_task
@@ -236,33 +235,51 @@ def workflow_receiver_video_failing(api_app, db, video, receiver_id):
     """Workflow receiver for video."""
     video_depid = video['_deposit']['id']
 
-    class TestReceiver(CeleryAsyncReceiver):
-        def run(self, event):
-            workflow = chain(
-                sse_simple_add().s(x=1, y=2, deposit_id=video_depid),
-                group(sse_failing_task().s(), sse_success_task().s())
+    def build_flow(flow):
+        flow.chain(sse_simple_add(), {'x': 1, 'y': 2})
+        flow.group([sse_failing_task(), sse_failing_task()])
 
-            )
-            event.payload['deposit_id'] = video_depid
+    class TestReceiver(CeleryAsyncReceiver):
+        def _workflow(self, event):
             with db.session.begin_nested():
+                workflow = Flow.create(
+                    'TestFlow',
+                    payload={
+                        'event_id': str(event.id),
+                        'deposit_id': event.payload['deposit_id'],
+                    },
+                )
+                workflow.assemble(build_flow)
+            db.session.commit()
+            return workflow
+
+        def run(self, event):
+            with db.session.begin_nested():
+                event.payload['deposit_id'] = video_depid
                 event.response_headers = {}
+                event.response = {}
                 flag_modified(event, 'response_headers')
+                flag_modified(event, 'response')
                 flag_modified(event, 'payload')
                 db.session.expunge(event)
             db.session.commit()
-            result = workflow.apply_async()
-            self._serialize_result(event=event, result=result)
-            self.persist(event=event, result=result)
-
-        def _raw_info(self, event):
-            result = self._deserialize_result(event)
-            return (
-                [{'add': result.parent}],
-                [
-                    {'failing': result.children[0]},
-                    {'failing': result.children[1]}
-                ]
+            workflow = self._workflow(event)
+            flow_id = workflow.id
+            workflow.start()
+            workflow = Flow.get_flow(flow_id)
+            self._serialize_result(
+                event=event, result=self.build_status(workflow.status)
             )
+            self.persist(event=event, result=workflow.status)
+
+        def build_status(self, raw_info):
+            return ([{'add': 3}], [{'failing': ''}, {'failing': ''}])
+
+        def status(self, event):
+            code, status = super(TestReceiver, self).status(event)
+            if 'tasks' in status:
+                status = self.build_status(status)
+            return code, status
 
     current_webhooks.register(receiver_id, TestReceiver)
     return receiver_id
@@ -342,7 +359,7 @@ def get_indexed_records_from_mock(mock_indexer):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def prepare_videos_for_publish(videos):
+def prepare_videos_for_publish(videos, with_files=False):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(
         bit_rate='679886',
@@ -362,6 +379,9 @@ def prepare_videos_for_publish(videos):
         if '_cds' not in video:
             video['_cds'] = {}
         video['_cds']['extracted_metadata'] = metadata_dict
+        if with_files:
+            video['_files'] = get_files_metadata(video.files.bucket.id)
+
         # DB update
         update_record(
             recid=video.id,
@@ -376,6 +396,7 @@ def prepare_videos_for_publish(videos):
 
 def get_files_metadata(bucket_id):
     """Return _files data filled with a valid version id."""
+    bucket_id = str(bucket_id)
     object_version = ObjectVersion.create(bucket_id, 'test_object_version',
                                           stream=BytesIO(b'\x00' * 200))
     object_version_id = str(object_version.version_id)
