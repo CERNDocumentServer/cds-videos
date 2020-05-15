@@ -33,6 +33,8 @@ from copy import deepcopy
 from celery import states
 
 from invenio_webhooks.models import Event
+from ..flows.models import Flow as FlowModel
+from ..flows.api import Flow
 
 
 def get_deposit_events(deposit_id, _deleted=False):
@@ -47,13 +49,21 @@ def get_deposit_events(deposit_id, _deleted=False):
         filters.append(Event.response_code == 202)
     # build base query
     query = Event.query.filter(
-        sqlalchemy.cast(
-            Event.payload['deposit_id'],
-            sqlalchemy.String) == sqlalchemy.type_coerce(
-                deposit_id, sqlalchemy.JSON)
+        sqlalchemy.cast(Event.payload['deposit_id'], sqlalchemy.String)
+        == sqlalchemy.type_coerce(deposit_id, sqlalchemy.JSON)
     )
     # execute with more filters
     return query.filter(*filters).all()
+
+
+def get_event_last_flow(event):
+    """Get the last flow associated with a deposit."""
+    event_id = str(event.id)
+    model = FlowModel.query.filter(
+        sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
+        == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
+    ).one()
+    return Flow(model=model)
 
 
 def iterate_events_results(events, fun):
@@ -67,10 +77,12 @@ def iterate_events_results(events, fun):
 
 def get_tasks_status_by_task(events, statuses=None):
     """Get tasks status grouped by task name."""
-    statuses = statuses or {}
-    status_extractor = CollectStatusesByTask(statuses=statuses)
-    iterate_events_results(events=events, fun=status_extractor)
-    return status_extractor.statuses
+    # statuses = statuses or {}
+    # status_extractor = CollectStatusesByTask(statuses=statuses)
+    # iterate_events_results(events=events, fun=status_extractor)
+    # return status_extractor.statuses
+    results = [get_event_last_flow(e).status for e in events]
+    return {'results': results}
 
 
 def iterate_result(raw_info, fun):
@@ -95,15 +107,21 @@ def iterate_result(raw_info, fun):
 
 def _compute_status(statuses):
     """Compute minimum state."""
-    if len(statuses) > 0 and all(status_to_check is None
-                                 for status_to_check in statuses):
+    if len(statuses) > 0 and all(
+        status_to_check is None for status_to_check in statuses
+    ):
         return None
-    for status_to_check in [states.FAILURE, states.STARTED,
-                            states.RETRY, states.PENDING]:
+    for status_to_check in [
+        states.FAILURE,
+        states.STARTED,
+        states.RETRY,
+        states.PENDING,
+    ]:
         if any(status == status_to_check for status in statuses):
             return status_to_check
-    if len(statuses) > 0 and all(status_to_check == states.REVOKED
-                                 for status_to_check in statuses):
+    if len(statuses) > 0 and all(
+        status_to_check == states.REVOKED for status_to_check in statuses
+    ):
         return states.REVOKED
     return states.SUCCESS
 
@@ -113,7 +131,8 @@ def merge_tasks_status(task_statuses_1, task_statuses_2):
     statuses = {}
     for key in set(task_statuses_1.keys()) | set(task_statuses_2.keys()):
         statuses[key] = _compute_status(
-            [task_statuses_1.get(key), task_statuses_2.get(key)])
+            [task_statuses_1.get(key), task_statuses_2.get(key)]
+        )
     return statuses
 
 
@@ -150,7 +169,7 @@ def collect_info(task_name, result):
         'id': result.id,
         'status': result.status,
         'info': result.info,
-        'name': task_name
+        'name': task_name,
     }
 
 
@@ -166,16 +185,18 @@ class CollectStatusesByTask(object):
         """Update status collection."""
         old_status = self._statuses.get(task_name, None)
         # get new status from celery only if still exists on celery cache
-        new_status = result.status \
-            if result.result is not None else None
+        new_status = result.status if result.result is not None else None
         self._statuses[task_name] = _compute_status([old_status, new_status])
 
     @property
     def statuses(self):
         """Get new status or original."""
         # take the calculated
-        statuses = {key: value for key, value in self._statuses.items()
-                    if value is not None}
+        statuses = {
+            key: value
+            for key, value in self._statuses.items()
+            if value is not None
+        }
         # and add orignal value if there is no new value
         keys = set(self._original) - set(statuses)
         for key in keys:
@@ -222,12 +243,15 @@ def replace_task_id(result, old_task_id, new_task_id):
         if head == old_task_id:
             return new_task_id, replace_task_id(tail, old_task_id, new_task_id)
         else:
-            return [replace_task_id(head, old_task_id, new_task_id),
-                    replace_task_id(tail, old_task_id, new_task_id)]
+            return [
+                replace_task_id(head, old_task_id, new_task_id),
+                replace_task_id(tail, old_task_id, new_task_id),
+            ]
     except ValueError:
         if isinstance(result, list) or isinstance(result, tuple):
-            return [replace_task_id(r, old_task_id, new_task_id)
-                    for r in result]
+            return [
+                replace_task_id(r, old_task_id, new_task_id) for r in result
+            ]
         return result
     except TypeError:
         return result

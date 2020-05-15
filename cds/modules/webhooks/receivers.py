@@ -24,13 +24,12 @@
 
 """Webhook Receivers."""
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 
 from flask_security import current_user
 from cds_sorenson.api import get_all_distinct_qualities
-from celery import chain, group
 from celery.result import AsyncResult
 from invenio_db import db
 from celery import states
@@ -54,6 +53,7 @@ from .status import (
     GetInfoByID,
     replace_task_id,
     ResultEncoder,
+    get_event_last_flow,
 )
 from .tasks import (
     DownloadTask,
@@ -140,9 +140,10 @@ class CeleryAsyncReceiver(Receiver):
             #     event.response['_tasks']['parent'] = fun(
             #         result.parent.as_tuple()
             #     )
-            event.response.update(_tasks=result['tasks'])
+            event.response.update(_tasks=result)
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
+        print('serialize_result', event.response)
 
     def delete(self, event):
         """Delete."""
@@ -168,30 +169,31 @@ class CeleryAsyncReceiver(Receiver):
             # in case the event has been removed
             return (201, event.response)
         # get raw info from the celery receiver
-        raw_info = self._raw_info(event)
-        # extract global status
-        global_status = ComputeGlobalStatus()
-        iterate_result(raw_info=raw_info, fun=global_status)
-        # extract information
-        info = iterate_result(raw_info=raw_info, fun=collect_info)
-        # build response
-        return (
-            CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(
-                global_status.status
-            ),
-            ResultEncoder().encode(info),
-        )
+        print('status', self._raw_info(event))
+        return ('PENDING', self._raw_info(event))
+        # # extract global status
+        # global_status = ComputeGlobalStatus()
+        # iterate_result(raw_info=raw_info, fun=global_status)
+        # # extract information
+        # info = iterate_result(raw_info=raw_info, fun=collect_info)
+        # # build response
+        # return (
+        #     CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(
+        #         global_status.status
+        #     ),
+        #     ResultEncoder().encode(info),
+        # )
 
     def persist(self, event, result):
         """Persist event and result after execution."""
         with db.session.begin_nested():
-            status = iterate_result(
-                raw_info=self._raw_info(event),
-                fun=lambda task_name, result: {
-                    task_name: {'id': result.id, 'status': result.status}
-                },
-            )
-            event.response.update(global_status=status)
+            # status = iterate_result(
+            #     raw_info=self._raw_info(event),
+            #     fun=lambda task_name, result: {
+            #         task_name: {'id': result.id, 'status': result.status}
+            #     },
+            # )
+            event.response.update(global_status=result)
 
             db.session.add(event)
         db.session.commit()
@@ -357,7 +359,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
         }
 
     def create_task(self, event, task_name, **kwargs):
-        """Run a task."""
+        """Create a task with parameters from event."""
         kwargs['event_id'] = str(event.id)
         kwargs['version_id'] = event.response['version_id']
         payload = deepcopy(event.payload)
@@ -435,38 +437,6 @@ class AVCWorkflow(CeleryAsyncReceiver):
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
 
-    # def _first_step(self, event):
-    #     """Define first step."""
-    #     with db.session.begin_nested():
-    #         if 'version_id' in event.payload:
-    #             first_step = self.run_task(
-    #                 event=event, task_name='file_video_metadata_extraction'
-    #             )
-    #         else:
-    #             first_step = group(
-    #                 self.run_task(event=event, task_name='file_download'),
-    #                 self.run_task(
-    #                     event=event, task_name='file_video_metadata_extraction'
-    #                 ),
-    #             )
-    #     return first_step
-
-    # def _second_step(self, event):
-    #     """Define second step."""
-    #     all_distinct_qualities = get_all_distinct_qualities()
-    #     event.response['presets'] = all_distinct_qualities
-    #     return group(
-    #         self.run_task(event=event, task_name='file_video_extract_frames'),
-    #         *[
-    #             self.run_task(
-    #                 event=event,
-    #                 task_name='file_transcode',
-    #                 preset_quality=preset_quality,
-    #             )
-    #             for preset_quality in all_distinct_qualities
-    #         ]
-    #     )
-
     def _build_flow(self, event):
         """Build flow."""
 
@@ -518,11 +488,11 @@ class AVCWorkflow(CeleryAsyncReceiver):
         return build_flow
 
     def _workflow(self, event):
-        # first_step = self._first_step(event=event)
-        # second_step = self._second_step(event=event)
-        # return chain(first_step, second_step)
         with db.session.begin_nested():
-            flow = Flow.create('AVCWorkflow')
+            # Add the event ID to the payload for querying later
+            flow = Flow.create(
+                'AVCWorkflow', payload={'event_id': str(event.id)}
+            )
             flow.assemble(self._build_flow(event))
         db.session.commit()
         return flow
@@ -597,18 +567,21 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def _raw_info(self, event):
         """Get info from the event."""
-        result = self._deserialize_result(event)
-        if 'version_id' in event.payload:
-            first_step = [{'file_video_metadata_extraction': result.parent}]
-        else:
-            first_step = [
-                {'file_download': result.parent.children[0]},
-                {'file_video_metadata_extraction': result.parent.children[1]},
-            ]
-        second_step = [{'file_video_extract_frames': result.children[0]}]
-        for res in result.children[1:]:
-            second_step.append({'file_transcode': res})
-        return first_step, second_step
+        # result = self._deserialize_result(event)
+        # if 'version_id' in event.payload:
+        #     first_step = [{'file_video_metadata_extraction': result.parent}]
+        # else:
+        #     first_step = [
+        #         {'file_download': result.parent.children[0]},
+        #         {'file_video_metadata_extraction': result.parent.children[1]},
+        #     ]
+        # second_step = [{'file_video_extract_frames': result.children[0]}]
+        # for res in result.children[1:]:
+        #     second_step.append({'file_transcode': res})
+        # return first_step, second_step
+        res = get_event_last_flow(event).status
+        print(res)
+        return res
 
     @classmethod
     def can(cls, user_id, event, action, **kwargs):
