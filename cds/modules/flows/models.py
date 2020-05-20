@@ -52,6 +52,7 @@ class Status(Enum):
     """Constants for possible task status."""
 
     PENDING = 'PENDING'
+    STARTED = 'STARTED'
     SUCCESS = 'SUCCESS'
     FAILURE = 'FAILURE'
     CANCELED = 'CANCELED'
@@ -59,6 +60,8 @@ class Status(Enum):
     @classmethod
     def compute_status(cls, statuses):
         """Compute the general status from a list."""
+        # Make statuses always emun in case they are strings, it doesn't hurt much
+        statuses = [Status(s) for s in statuses]
         if not statuses:
             return cls.PENDING
 
@@ -70,6 +73,19 @@ class Status(Enum):
                 return status
 
         return cls.PENDING
+
+    @classmethod
+    def status_to_http(cls, status):
+        """Convert Flow status into HTTP code"""
+        STATES_TO_HTTP = {
+            cls.PENDING: 202,
+            cls.STARTED: 202,
+            cls.FAILURE: 500,
+            cls.SUCCESS: 201,
+            cls.CANCELED: 409,
+        }
+
+        return STATES_TO_HTTP.get(status)
 
     def __str__(self):
         """Return its value."""
@@ -113,7 +129,7 @@ class Flow(db.Model, Timestamp):
 
     def __repr__(self):
         """Flow representation."""
-        return '<Workflow {name} {status}: {payload}>'.format(self)
+        return '<Workflow {name} {status}: {payload}>'.format(**self.to_dict())
 
     @classmethod
     def get(cls, id_):

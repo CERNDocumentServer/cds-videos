@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,17 +24,26 @@
 
 """Task status manipulation."""
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import json
 import sqlalchemy
 
 from copy import deepcopy
 from celery import states
+from collections import defaultdict
 
 from invenio_webhooks.models import Event
-from ..flows.models import Flow as FlowModel
+from ..flows.models import Flow as FlowModel, Status as FlowStatus
 from ..flows.api import Flow
+
+
+TASK_NAMES = {
+    'cds.modules.webhooks.tasks.TranscodeVideoTask': 'file_transcode',
+    'cds.modules.webhooks.tasks.ExtractFramesTask': 'file_video_extract_frames',
+    'cds.modules.webhooks.tasks.ExtractMetadataTask': 'file_video_metadata_extraction',
+    'cds.modules.webhooks.tasks.DownloadTask': 'file_download',
+}
 
 
 def get_deposit_events(deposit_id, _deleted=False):
@@ -77,12 +86,12 @@ def iterate_events_results(events, fun):
 
 def get_tasks_status_by_task(events, statuses=None):
     """Get tasks status grouped by task name."""
-    # statuses = statuses or {}
-    # status_extractor = CollectStatusesByTask(statuses=statuses)
-    # iterate_events_results(events=events, fun=status_extractor)
-    # return status_extractor.statuses
-    results = [get_event_last_flow(e).status for e in events]
-    return {'results': results}
+    results = defaultdict(list)
+    for e in events:
+        for task in get_event_last_flow(e).status['tasks']:
+            results[TASK_NAMES.get(task['name'])].append(task['status'])
+
+    return {k: str(FlowStatus.compute_status(v)) for k, v in results.items() if v}
 
 
 def iterate_result(raw_info, fun):

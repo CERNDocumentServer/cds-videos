@@ -332,6 +332,8 @@ class ExtractMetadataTask(AVCTask):
                     extracted_metadata=extracted_dict,),
                 message='Attached video metadata'))
 
+        return extracted_dict
+
 
 class ExtractFramesTask(AVCTask):
     """Extract frames task."""
@@ -676,6 +678,8 @@ class TranscodeVideoTask(AVCTask):
                 job_info['version_id']).set_file(file_instance)
         db.session.commit()
 
+        return job_info['version_id']
+
 
 def patch_record(recid, patch, validator=None):
     """Patch a record."""
@@ -693,7 +697,7 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
                                     countdown=5):
     """Low level files synchronize."""
     deposit_video = deposit_video_resolver(deposit_id)
-    db.session.refresh(deposit_video.model)
+    db.sessiorefresh(deposit_video.model)
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files

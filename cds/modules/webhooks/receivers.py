@@ -28,32 +28,37 @@ from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 
-from flask_security import current_user
-from cds_sorenson.api import get_all_distinct_qualities
-from celery.result import AsyncResult
-from invenio_db import db
+import sqlalchemy
 from celery import states
+from celery.result import AsyncResult, result_from_tuple
 from flask import url_for
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_records import Record
-from invenio_webhooks.models import Receiver
-from sqlalchemy.orm.attributes import flag_modified
-from celery.result import result_from_tuple
-
+from invenio_db import db
 from invenio_files_rest.models import (
     ObjectVersion,
     ObjectVersionTag,
     as_object_version,
 )
+from invenio_records import Record
+from sqlalchemy.orm.attributes import flag_modified
 
+from cds_sorenson.api import get_all_distinct_qualities
+from flask_security import current_user
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_webhooks.models import Receiver
+
+from ..deposit.api import deposit_video_resolver
+from ..flows.api import Flow
+from ..flows.models import Flow as FlowModel, Status as FlowStatus
+from ..records.permissions import DepositPermission
 from .status import (
     ComputeGlobalStatus,
-    iterate_result,
-    collect_info,
     GetInfoByID,
-    replace_task_id,
     ResultEncoder,
+    collect_info,
     get_event_last_flow,
+    iterate_result,
+    replace_task_id,
+    TASK_NAMES,
 )
 from .tasks import (
     DownloadTask,
@@ -62,9 +67,6 @@ from .tasks import (
     TranscodeVideoTask,
     update_avc_deposit_state,
 )
-from ..records.permissions import DepositPermission
-from ..deposit.api import deposit_video_resolver
-from ..flows import Flow
 
 
 def _update_event_bucket(event):
@@ -101,45 +103,31 @@ def build_task_payload(event, task_id):
 class CeleryAsyncReceiver(Receiver):
     """Celery Async Receiver abstract class."""
 
-    CELERY_STATES_TO_HTTP = {
-        states.PENDING: 202,
-        states.STARTED: 202,
-        states.RETRY: 202,
-        states.FAILURE: 500,
-        states.SUCCESS: 201,
-        states.REVOKED: 409,
-    }
-    """Mapping of Celery result states to HTTP codes."""
-
     @staticmethod
     def has_result(event):
         """Return true if some result are in the event."""
         return '_tasks' in event.response
 
+    @staticmethod
+    def get_flow(event):
+        """Find the latest flow associated with the event."""
+        event_id = str(event.id)
+        model = FlowModel.query.filter(
+            sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
+            == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
+        ).one()
+        return Flow(model=model)
+
     @classmethod
     def _deserialize_result(cls, event):
         """Deserialize celery result stored in event."""
-        result = result_from_tuple(event.response['_tasks']['result'])
-        parent = (
-            result_from_tuple(event.response['_tasks']['parent'])
-            if 'parent' in event.response['_tasks']
-            else None
-        )
-        result.parent = parent
-        return result
+        return CeleryAsyncReceiver.get_flow(event).status
 
     @classmethod
     def _serialize_result(cls, event, result, fun=None):
         """Run the task and save the task ids."""
         fun = fun or (lambda x: x)
         with db.session.begin_nested():
-            # event.response.update(
-            #     _tasks={'result': fun(result.as_tuple()),}
-            # )
-            # if result.parent:
-            #     event.response['_tasks']['parent'] = fun(
-            #         result.parent.as_tuple()
-            #     )
             event.response.update(_tasks=result)
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
@@ -152,10 +140,8 @@ class CeleryAsyncReceiver(Receiver):
 
     def clean(self, event):
         """Clean environment."""
-        iterate_result(
-            raw_info=self._raw_info(event),
-            fun=lambda task_name, result: result.revoke(terminate=True),
-        )
+        flow = CeleryAsyncReceiver.get_flow(event)
+        flow.stop()
         super(CeleryAsyncReceiver, self).clean(event=event)
 
     @staticmethod
@@ -168,32 +154,14 @@ class CeleryAsyncReceiver(Receiver):
         if event.response_code == 410:
             # in case the event has been removed
             return (201, event.response)
-        # get raw info from the celery receiver
-        print('status', self._raw_info(event))
-        return ('PENDING', self._raw_info(event))
-        # # extract global status
-        # global_status = ComputeGlobalStatus()
-        # iterate_result(raw_info=raw_info, fun=global_status)
-        # # extract information
-        # info = iterate_result(raw_info=raw_info, fun=collect_info)
-        # # build response
-        # return (
-        #     CeleryAsyncReceiver.CELERY_STATES_TO_HTTP.get(
-        #         global_status.status
-        #     ),
-        #     ResultEncoder().encode(info),
-        # )
+        status = CeleryAsyncReceiver.get_flow(event).status
+        return (FlowStatus.status_to_http(status['status']), status)
 
     def persist(self, event, result):
         """Persist event and result after execution."""
         with db.session.begin_nested():
-            # status = iterate_result(
-            #     raw_info=self._raw_info(event),
-            #     fun=lambda task_name, result: {
-            #         task_name: {'id': result.id, 'status': result.status}
-            #     },
-            # )
-            event.response.update(global_status=result)
+            status = CeleryAsyncReceiver.get_flow(event).status
+            event.response.update(global_status=status['status'])
 
             db.session.add(event)
         db.session.commit()
@@ -201,6 +169,7 @@ class CeleryAsyncReceiver(Receiver):
 
     def rerun_task(self, **payload):
         """Re-run a task."""
+        # TODO
         db.session.expunge(payload['event'])
         # rerun task (with cleaning)
         result = self.run_task(_clean=True, **payload).apply_async()
@@ -217,6 +186,7 @@ class CeleryAsyncReceiver(Receiver):
 
     def _update_serialized_result(self, event, old_task_id, task_result):
         """Update task id in global result."""
+        # TODO
         result_deserialized = self._deserialize_result(event)
         self._serialize_result(
             event=event,
@@ -545,7 +515,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
         # 3. update event response
         self._update_event_response(event=event, version_id=version_id)
         # 4. serialize event and result
-        self._serialize_result(event=event, result=flow.status)
+        self._serialize_result(
+            event=event, result=self.build_status(flow.status)
+        )
         # 5. persist everything
         super(AVCWorkflow, self).persist(event, flow.status)
 
@@ -565,23 +537,38 @@ class AVCWorkflow(CeleryAsyncReceiver):
             self.clean_task(event=event, task_name='file_download')
         super(AVCWorkflow, self).clean(event)
 
-    def _raw_info(self, event):
-        """Get info from the event."""
-        # result = self._deserialize_result(event)
-        # if 'version_id' in event.payload:
-        #     first_step = [{'file_video_metadata_extraction': result.parent}]
-        # else:
-        #     first_step = [
-        #         {'file_download': result.parent.children[0]},
-        #         {'file_video_metadata_extraction': result.parent.children[1]},
-        #     ]
-        # second_step = [{'file_video_extract_frames': result.children[0]}]
-        # for res in result.children[1:]:
-        #     second_step.append({'file_transcode': res})
-        # return first_step, second_step
-        res = get_event_last_flow(event).status
-        print(res)
-        return res
+    def status(self, event):
+        """AVCWorkflow particular status."""
+        code, raw_info = super(AVCWorkflow, self).status(event)
+        status = self.build_status(raw_info)
+        return code, status
+
+    def build_status(self, raw_info):
+        status = ([], [])
+        for task in raw_info['tasks']:
+            # Get the UI name of the task
+            task_name = TASK_NAMES.get(task['name'])
+            # Calculate the right position inside the tuple
+            step = (
+                0
+                if task_name
+                in ('file_download', 'file_video_metadata_extraction')
+                else 1
+            )
+            # Add the information the UI needs on the right position
+            status[step].append(
+                {
+                    'name': task_name,
+                    'id': task['id'],
+                    'status': task['status'],
+                    'info': {
+                        'payload': task['payload'],
+                        'message': task['message'],
+                    },
+                }
+            )
+
+        return status
 
     @classmethod
     def can(cls, user_id, event, action, **kwargs):
