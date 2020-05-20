@@ -307,6 +307,6 @@ class Task(CeleryTask):
         self.commit_status(
             task_id,
             Status.SUCCESS,
-            'Task finished with return value: {}'.format(retval),
+            '{}'.format(retval),
         )
         super(Task, self).on_success(retval, task_id, args, kwargs)
