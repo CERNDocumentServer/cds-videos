@@ -697,7 +697,7 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
                                     countdown=5):
     """Low level files synchronize."""
     deposit_video = deposit_video_resolver(deposit_id)
-    db.sessiorefresh(deposit_video.model)
+    db.session.refresh(deposit_video.model)
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files

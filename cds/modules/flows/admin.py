@@ -81,7 +81,6 @@ class TaskModelView(ModelView):
         'id': 'UUID',
         'flow.id': 'Flow UUID',
     }
-    column_filters = ('flow.id', 'id', 'name', 'status')
     column_searchable_list = ('flow.id', 'name')
 
     column_default_sort = ('flow_id', True)
