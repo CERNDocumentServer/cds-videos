@@ -131,7 +131,6 @@ class CeleryAsyncReceiver(Receiver):
             event.response.update(_tasks=result)
             flag_modified(event, 'response')
             flag_modified(event, 'response_headers')
-        print('serialize_result', event.response)
 
     def delete(self, event):
         """Delete."""
