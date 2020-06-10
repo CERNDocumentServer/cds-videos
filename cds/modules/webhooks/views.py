@@ -30,8 +30,8 @@ import json
 
 from flask.views import MethodView
 from invenio_db import db
-
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
+
 from invenio_webhooks.decorators import (
     need_receiver_permission,
     pass_event,
@@ -39,7 +39,7 @@ from invenio_webhooks.decorators import (
 )
 from invenio_webhooks.views import blueprint, error_handler
 
-from .receivers import build_task_payload
+from .receivers import CeleryAsyncReceiver
 
 
 class TaskResource(MethodView):
@@ -53,12 +53,13 @@ class TaskResource(MethodView):
     @need_receiver_permission('update')
     def put(self, user_id, receiver_id, event, task_id):
         """Handle PUT request: restart a task."""
-        payload = build_task_payload(event, task_id)
-        if payload:
-            event.receiver.rerun_task(**payload)
+        flow = CeleryAsyncReceiver.get_flow(event)
+        try:
+            flow.restart_task(task_id)
             db.session.commit()
-            return '', 204
-        return '', 400
+        except KeyError:
+            return '', 400
+        return '', 204
 
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
@@ -68,11 +69,7 @@ class TaskResource(MethodView):
     @need_receiver_permission('delete')
     def delete(self, user_id, receiver_id, event, task_id):
         """Handle DELETE request: stop and clean a task."""
-        payload = build_task_payload(event, task_id)
-        if payload:
-            event.receiver.clean_task(**payload)
-            db.session.commit()
-            return '', 204
+        # TODO
         return '', 400
 
 

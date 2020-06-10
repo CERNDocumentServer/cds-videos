@@ -559,7 +559,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 {
                     'name': task_name,
                     'id': task['id'],
-                    'status': task['status'],
+                    'status': 'REVOKED'
+                    if 'Not transcoding' in task['message']
+                    else task['status'],
                     'info': {
                         'payload': task['payload'],
                         'message': task['message'],
