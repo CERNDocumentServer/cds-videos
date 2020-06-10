@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import
 
+import json
 import logging
 import os
 import shutil
@@ -332,7 +333,7 @@ class ExtractMetadataTask(AVCTask):
                     extracted_metadata=extracted_dict,),
                 message='Attached video metadata'))
 
-        return extracted_dict
+        return json.dumps(extracted_dict)
 
 
 class ExtractFramesTask(AVCTask):

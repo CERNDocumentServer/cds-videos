@@ -64,10 +64,11 @@
       <td>
       </td>
       <td class="text-center">
-        <span ng-show="f.percentage > 0 && !f.completed && !f.errored">{{ f.percentage | toInt }} %</span>
-        <span ng-show="!f.percentage && !f.completed && !f.errored"><i class="fa fa-spinner fa-spin"></i></span>
+        <span ng-show="f.percentage > 0 && !f.completed && !f.errored && !f.revoked">{{ f.percentage | toInt }} %</span>
+        <span ng-show="!f.percentage && !f.completed && !f.errored && !f.revoked"><i class="fa fa-spinner fa-spin"></i></span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.completed && !f.errored" class="text-success">✓</span>
+        <span ng-show="f.completed && !f.errored" class="text-success">Done</span>
+        <span ng-show="f.revoked && !f.errored" class="text-warning">Not needed</span>
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
@@ -199,7 +200,7 @@
         <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">✓</span>
+        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
@@ -248,7 +249,7 @@
         <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
         <span ng-show="f.processing && !f.errored">Processing...</span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">✓</span>
+        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">

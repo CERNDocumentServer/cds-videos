@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 from copy import deepcopy
 
 import sqlalchemy
@@ -555,6 +556,16 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 else 1
             )
             # Add the information the UI needs on the right position
+            payload = task['payload']
+            payload['type'] = task_name
+            payload['key'] = payload.get('preset_quality', payload['key'])
+            if task_name == 'file_video_metadata_extraction':
+                # Load message as JSON, we only need this for this particular task
+                try:
+                    payload['extracted_metadata'] = json.loads(task['message'])
+                except:
+                    payload['extracted_metadata'] = task['message']
+                task['message'] = 'Attached video metadata'
             status[step].append(
                 {
                     'name': task_name,
@@ -563,7 +574,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
                     if 'Not transcoding' in task['message']
                     else task['status'],
                     'info': {
-                        'payload': task['payload'],
+                        'payload': payload,
                         'message': task['message'],
                     },
                 }
