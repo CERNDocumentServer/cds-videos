@@ -68,11 +68,17 @@ def get_deposit_events(deposit_id, _deleted=False):
 def get_event_last_flow(event):
     """Get the last flow associated with a deposit."""
     event_id = str(event.id)
-    model = FlowModel.query.filter(
-        sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
-        == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
-    ).one()
-    return Flow(model=model)
+    try:
+        model = FlowModel.query.filter(
+            sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
+            == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
+        ).one()
+        return Flow(model=model)
+    except sqlalchemy.orm.exc.NoResultFound:
+        # There is no Flow,
+        # Most likely we are working with an old record: Migrate!
+        from ..flows.migration import migrate_event
+        return migrate_event(event)
 
 
 def iterate_events_results(events, fun):

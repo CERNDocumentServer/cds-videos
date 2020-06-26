@@ -79,28 +79,6 @@ def _update_event_bucket(event):
     flag_modified(event, 'payload')
 
 
-def build_task_payload(event, task_id):
-    """Build payload for a task."""
-    raw_info = event.receiver._raw_info(event=event)
-    search = GetInfoByID(task_id=task_id)
-    iterate_result(raw_info=raw_info, fun=search)
-    if search.task_name:
-        if isinstance(search.result.info, Exception):
-            if hasattr(search.result.info, 'message'):
-                payload = search.result.info.message['payload']
-            else:
-                payload = search.result.info.args[0]['payload']
-        else:
-            payload = search.result.info['payload']
-        base = {
-            'event': event,
-            'task_name': search.task_name,
-            'task_id': task_id,
-        }
-        base.update(**payload)
-        return base
-
-
 class CeleryAsyncReceiver(Receiver):
     """Celery Async Receiver abstract class."""
 
@@ -112,12 +90,7 @@ class CeleryAsyncReceiver(Receiver):
     @staticmethod
     def get_flow(event):
         """Find the latest flow associated with the event."""
-        event_id = str(event.id)
-        model = FlowModel.query.filter(
-            sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
-            == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
-        ).one()
-        return Flow(model=model)
+        return get_event_last_flow(event)
 
     @classmethod
     def _deserialize_result(cls, event):
