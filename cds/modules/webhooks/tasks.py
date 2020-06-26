@@ -256,8 +256,8 @@ class ExtractMetadataTask(AVCTask):
             patch_record(recid=recid, patch=patch, validator=validator)
         except jsonpatch.JsonPatchConflict as c:
             logger.warning(
-                'Failed to apply JSON Patch to deposit {0}: {1}'.format(
-                    recid, c))
+                'Failed to apply JSON Patch to deposit %s: %s', recid, c
+            )
 
         # Delete tmp file if any
         obj = as_object_version(version_id)

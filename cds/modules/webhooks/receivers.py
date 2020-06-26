@@ -539,8 +539,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     def status(self, event):
         """AVCWorkflow particular status."""
-        code, raw_info = super(AVCWorkflow, self).status(event)
-        status = self.build_status(raw_info)
+        code, status = super(AVCWorkflow, self).status(event)
+        if 'tasks' in status:
+            # Extract info and build correct status dict
+            status = self.build_status(status)
         return code, status
 
     def build_status(self, raw_info):
