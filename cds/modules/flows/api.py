@@ -225,15 +225,8 @@ class Flow(object):
 
     def stop(self):
         """Stop the flow."""
-        revoke(
-            [
-                str(task.id)
-                for task in self.model.tasks
-                if task.status == Status.PENDING
-            ],
-            terminate=True,
-            signal='SIGKILL',  # TODO: do we need this?
-        )
+        for task in self.model.tasks:
+            self.stop_task(task)
 
     def get_task_status(self, task_id):
         """Get singular task status."""
@@ -272,7 +265,7 @@ class Flow(object):
         return (
             celery_app.tasks.get(task.name)
             .subtask(
-                task_id=str(task.id),
+                # task_id=str(task.id), can't set the same tasks id, revoked
                 kwargs=kwargs,
                 immutable=True,  # TODO, ad this as an option/parameter?
             )
