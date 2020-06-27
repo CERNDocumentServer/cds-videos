@@ -33,6 +33,7 @@ from celery import Task as CeleryTask
 from celery import chain as celery_chain
 from celery import current_app as celery_app
 from celery import group as celery_group
+from celery.result import AsyncResult
 from celery.task.control import revoke
 from invenio_db import db
 
@@ -246,6 +247,8 @@ class Flow(object):
 
         if task.status == Status.PENDING:
             revoke(str(task.id), terminate=True, signal='SIGKILL')
+            result = AsyncResult(str(task.id))
+            result.forget()
 
     def restart_task(self, task_id):
         """Restart singular task."""
@@ -254,7 +257,9 @@ class Flow(object):
         except Exception:
             raise KeyError('Task ID %s not in flow %s', task_id, self.id)
 
-        self.stop_task(task)
+        # self.stop_task(task)
+        # If a task gets send to the queue with the same id, it gets
+        # automagically restarted, no need to stop it.
 
         task.status = Status.PENDING
         db.session.add(task)
@@ -265,7 +270,7 @@ class Flow(object):
         return (
             celery_app.tasks.get(task.name)
             .subtask(
-                # task_id=str(task.id), can't set the same tasks id, revoked
+                task_id=str(task.id), 
                 kwargs=kwargs,
                 immutable=True,  # TODO, ad this as an option/parameter?
             )
