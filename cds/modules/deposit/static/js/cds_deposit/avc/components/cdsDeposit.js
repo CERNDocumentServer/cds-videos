@@ -218,7 +218,7 @@ function cdsDepositCtrl(
           }
         });
       that.processSubformats();
-      that.getTaskFeedback(eventId, 'file_transcode', 'FAILURE')
+      that.getTaskFeedback(eventId, 'file_transcode')
         .then(function(data) {
           var restartEvents = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
