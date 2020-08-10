@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016, 2017, 2018, 2019 CERN.
+# Copyright (C) 2016, 2017, 2018, 2019, 2020 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -62,9 +62,8 @@ from ..records.minters import doi_minter, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
-                               get_tasks_status_by_task,
-                               iterate_events_results, merge_tasks_status)
+from ..webhooks.status import (get_deposit_events, get_tasks_status_by_task,
+                               merge_tasks_status)
 from .errors import DiscardConflict
 from .resolver import get_video_pid
 
@@ -809,13 +808,6 @@ class Video(CDSDeposit):
         """Set a project."""
         self['_project_id'] = project['_deposit']['id']
         project._add_video(self)
-
-    def _tasks_global_status(self):
-        """Check if all tasks are successfully."""
-        global_status = ComputeGlobalStatus()
-        events = get_deposit_events(deposit_id=self['_deposit']['id'])
-        iterate_events_results(events=events, fun=global_status)
-        return global_status.status
 
     def _rename_subtitles(self):
         """Rename subtitles."""

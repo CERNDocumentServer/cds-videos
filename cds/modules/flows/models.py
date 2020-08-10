@@ -61,7 +61,7 @@ class Status(Enum):
     def compute_status(cls, statuses):
         """Compute the general status from a list."""
         # Make statuses always emun in case they are strings, it doesn't hurt much
-        statuses = [Status(s) for s in statuses]
+        statuses = [Status(s) for s in statuses if s is not None]
         if not statuses:
             return cls.PENDING
 

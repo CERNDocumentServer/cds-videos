@@ -29,9 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 from copy import deepcopy
 
-import sqlalchemy
-from celery import states
-from celery.result import AsyncResult, result_from_tuple
+from celery.result import AsyncResult
 from flask import url_for
 from invenio_db import db
 from invenio_files_rest.models import (
@@ -49,15 +47,10 @@ from invenio_webhooks.models import Receiver
 
 from ..deposit.api import deposit_video_resolver
 from ..flows.api import Flow
-from ..flows.models import Flow as FlowModel, Status as FlowStatus
+from ..flows.models import Status as FlowStatus
 from ..records.permissions import DepositPermission
 from .status import (
-    ComputeGlobalStatus,
-    GetInfoByID,
-    ResultEncoder,
-    collect_info,
     get_event_last_flow,
-    iterate_result,
     replace_task_id,
     TASK_NAMES,
 )
