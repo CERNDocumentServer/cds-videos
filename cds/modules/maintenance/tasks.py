@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2018 CERN.
+# Copyright (C) 2018, 2020 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -22,6 +22,8 @@
 from celery.utils.log import get_task_logger
 
 from invenio_db import db
+
+from cds.modules.flows.models import Status
 
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.resolver import record_resolver
@@ -50,8 +52,9 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
         rec_video.commit()
         db.session.commit()
 
-    def on_success(self, *args, **kwargs):
-        pass
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        task_id = kwargs.get('task_id', task_id)
+        self.commit_status(task_id, Status.FAILURE, str(einfo))
 
     def _update_record(self, *args, **kwargs):
         pass
