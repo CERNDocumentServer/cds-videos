@@ -36,7 +36,7 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson.api import get_encoding_status, start_encoding, stop_encoding
+from cds_sorenson import api as sorenson
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import shared_task
@@ -596,19 +596,21 @@ class TranscodeVideoTask(AVCTask):
 
             try:
                 # Start Sorenson
-                job_id, ar, preset_config = start_encoding(input_file,
-                                                           output_file,
-                                                           preset_quality,
-                                                           aspect_ratio,
-                                                           max_height=height,
-                                                           max_width=width)
+                job_id, ar, preset_config = sorenson.start_encoding(
+                    input_file,
+                    output_file,
+                    preset_quality,
+                    aspect_ratio,
+                    max_height=height,
+                    max_width=width
+                )
             except (InvalidResolutionError, TooHighResolutionError):
                 # exception = self._meta_exception_envelope(exc=e)
                 # self.update_state(state=REVOKED, meta=exception)
                 return 'Not transcoding for {}'.format(preset_quality)
 
             # Set revoke handler, in case of an abrupt execution halt.
-            self.set_revoke_handler(partial(stop_encoding, job_id))
+            self.set_revoke_handler(partial(sorenson.stop_encoding, job_id))
 
             # Create ObjectVersionTags
             ObjectVersionTag.create(obj, 'master', self.obj_id)
@@ -645,7 +647,7 @@ class TranscodeVideoTask(AVCTask):
         # Monitor job and report accordingly
         while status != 'Finished':
             # Get job status
-            status, percentage = get_encoding_status(job_id)
+            status, percentage = sorenson.get_encoding_status(job_id)
             if status == 'Error':
                 raise RuntimeError('Error transcoding: {0}'.format(status))
             elif status == 'Canceled':
