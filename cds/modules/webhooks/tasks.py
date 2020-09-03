@@ -67,6 +67,90 @@ from .utils import move_file_into_local
 
 logger = get_task_logger(__name__)
 
+# Mock sorenson server for local development
+# Copy this code to cds/modules/webhooks/tasks.py
+import random
+import uuid
+from shutil import copyfile
+
+
+from flask import current_app
+from cds_sorenson.api import _get_quality_preset
+from cds_sorenson.error import SorensonError
+
+
+class MockSorenson(object):
+    """Mock class to use for local testing."""
+
+    def __init__(self):
+        self.jobs = {}
+
+    def start_encoding(
+        self,
+        input_file,
+        output_file,
+        desired_quality,
+        display_aspect_ratio,
+        max_height=None,
+        max_width=None,
+        **kwargs
+    ):
+        job_id = str(uuid.uuid4())
+        self.jobs[job_id] = {
+            'step': 0,
+            'input_file': input_file,
+            'output_file': output_file,
+            'quality': desired_quality,
+            'aspect_ratio': display_aspect_ratio,
+        }
+        aspect_ratio, preset_config = _get_quality_preset(
+            desired_quality,
+            display_aspect_ratio,
+            video_height=max_height,
+            video_width=max_width
+        )
+        return job_id, aspect_ratio, preset_config
+
+    def stop_encoding(self, job_id):
+        try:
+            del self.jobs[job_id]
+        except KeyError:
+            raise SorensonError('No status found for job: {0}'.format(job_id))
+
+    def get_encoding_status(self, job_id):
+        try:
+            job = self.jobs[job_id]
+        except KeyError:
+            return 'Canceled', 100
+
+        if job['step'] < 5:
+            fail_value = random.random()
+            # Simulate random failures 5% of the times
+            if fail_value >= 0.99:  # Change value to higher probability
+                job_status = 6
+                job_progress = 100
+            else:
+                job_status = job['step']
+                # 5 means finished, before that it's all running
+                job_progress = (job_status / 5.0) * 100
+        else:
+            job_status = job['step']
+            job_progress = 100
+
+        status = current_app.config['CDS_SORENSON_STATUSES'].get(job_status)
+        # Increase step for next call
+        if job_status == 5:
+            # This means finished, copy input file to destination
+            copyfile(job['input_file'], '{}.mp4'.format(job['output_file']))
+        elif job_status < 5:
+            job_status = job_status + 1
+
+        job['step'] = job_status
+
+        return status, job_progress
+
+# Uncomment this line to use
+sorenson = MockSorenson()
 
 class AVCTask(Task):
     """Base class for tasks."""
