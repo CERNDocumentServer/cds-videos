@@ -40,16 +40,19 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
             preset_quality=preset_quality,
             sleep_time=sleep_time,
             *args,
-            **kwargs)
+            **kwargs
+        )
 
         logger.debug("Updating deposit and record")
         # get deposit and record
         dep_video = deposit_video_resolver(self.deposit_id)
-        rec_video = record_resolver.resolve(dep_video['recid'])[1]
-        # sync deposit --> record
-        dep_video._sync_record_files(record=rec_video)
+        if 'recid' in dep_video:
+            rec_video = record_resolver.resolve(dep_video['recid'])[1]
+            # sync deposit --> record
+            dep_video._sync_record_files(record=rec_video)
+            rec_video.commit()
+
         dep_video.commit()
-        rec_video.commit()
         db.session.commit()
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -57,4 +60,5 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
         self.commit_status(task_id, Status.FAILURE, str(einfo))
 
     def _update_record(self, *args, **kwargs):
+        # TODO: why?
         pass
