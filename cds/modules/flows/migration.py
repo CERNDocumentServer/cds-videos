@@ -47,7 +47,7 @@ def migrate_event(event):
     has_frames = bool(CDSVideosFilesIterator.get_video_frames(original_file))
     subformats = CDSVideosFilesIterator.get_video_subformats(original_file)
     subformat_done = [
-        f.get('tags, {}').get('preset_quality', '') for f in subformats
+        f.get('tags', {}).get('preset_quality', '') for f in subformats
     ]
     missing_subformats = [
         s
