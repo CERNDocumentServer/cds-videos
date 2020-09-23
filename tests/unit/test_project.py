@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -448,7 +448,10 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
 
     # check tasks status is propagated to video and project
     video_1 = deposit_video_resolver(video_1_depid)
-    expected = {u'add': u'SUCCESS', u'failing': u'FAILURE'}
+    expected = {
+        u'helpers.sse_simple_add': 'SUCCESS',
+        u'helpers.sse_failing_task': 'FAILURE'
+    }
     assert video_1['_cds']['state'] == expected
     assert video_1.project['_cds']['state'] == expected
 
