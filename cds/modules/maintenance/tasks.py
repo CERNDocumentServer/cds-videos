@@ -58,7 +58,3 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         task_id = kwargs.get('task_id', task_id)
         self.commit_status(task_id, Status.FAILURE, str(einfo))
-
-    def _update_record(self, *args, **kwargs):
-        # TODO: why?
-        pass
