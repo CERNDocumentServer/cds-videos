@@ -427,7 +427,11 @@ class AVCWorkflow(CeleryAsyncReceiver):
         with db.session.begin_nested():
             # Add the event ID to the payload for querying later
             flow = Flow.create(
-                'AVCWorkflow', payload={'event_id': str(event.id)}
+                'AVCWorkflow',
+                payload={
+                    'event_id': str(event.id),
+                    'deposit_id': event.payload['deposit_id'],
+                },
             )
             flow.assemble(self._build_flow(event))
         db.session.commit()
