@@ -87,9 +87,9 @@ def get_tasks_status_by_task(events, statuses=None):
     results = defaultdict(list)
     for e in events:
         for task in get_event_last_flow(e).status['tasks']:
-            results[TASK_NAMES.get(task['name'], task['name'])].append(
-                task['status']
-            )
+            results[
+                TASK_NAMES.get(task['name'], task['name'].split('.')[-1])
+            ].append(task['status'])
 
     return {
         k: str(FlowStatus.compute_status(v)) for k, v in results.items() if v

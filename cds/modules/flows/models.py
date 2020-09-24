@@ -85,7 +85,12 @@ class Status(Enum):
             cls.CANCELED: 409,
         }
 
-        return STATES_TO_HTTP.get(status)
+        try:
+            status = Status(status)
+        except ValueError:
+            pass
+
+        return STATES_TO_HTTP.get(status, 404)
 
     def __str__(self):
         """Return its value."""

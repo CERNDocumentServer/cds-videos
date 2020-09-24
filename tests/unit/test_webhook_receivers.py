@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CDS.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CDS is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -29,40 +29,49 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
+import pytest
 from cds_sorenson.api import get_all_distinct_qualities
+from celery import chain, group, states
+from celery.result import AsyncResult
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
 from flask_security import current_user
-
-from invenio_files_rest.models import ObjectVersion, \
-    Bucket, ObjectVersionTag
+from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-import pytest
 from invenio_records.models import RecordMetadata
-from invenio_accounts.testutils import login_user_via_session
-from invenio_accounts.models import User
-from cds.modules.deposit.api import deposit_project_resolver
-
-from celery import states, chain, group
-from celery.result import AsyncResult
-from invenio_webhooks import current_webhooks
-from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.webhooks.status import collect_info, \
-    get_tasks_status_by_task, get_deposit_events, iterate_events_results
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.webhooks.status import CollectInfoTasks
-from invenio_webhooks.models import Event
 from six import BytesIO
 
-from helpers import failing_task, get_object_count, get_tag_count, \
-    simple_add, mock_current_user, success_task, \
-    get_indexed_records_from_mock, get_presets_applied
+from cds.modules.deposit.api import (
+    deposit_project_resolver,
+    deposit_video_resolver,
+)
+from cds.modules.webhooks.receivers import CeleryAsyncReceiver
+from cds.modules.webhooks.status import (
+    get_deposit_events,
+    get_tasks_status_by_task,
+)
+from helpers import (
+    failing_task,
+    get_indexed_records_from_mock,
+    get_object_count,
+    get_presets_applied,
+    get_tag_count,
+    mock_current_user,
+    simple_add,
+    success_task,
+)
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
+from invenio_webhooks import current_webhooks
+from invenio_webhooks.models import Event
 
 
+@pytest.mark.skip()
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_download_receiver(api_app, db, api_project, access_token, webhooks,
-                           json_headers):
+def test_download_receiver(
+    api_app, db, api_project, access_token, webhooks, json_headers
+):
     """Test downloader receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -251,22 +260,6 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert 'file_transcode' in tasks_status
         assert 'file_video_extract_frames' in tasks_status
         assert 'file_video_metadata_extraction' in tasks_status
-
-        # check single status
-        collector = CollectInfoTasks()
-        iterate_events_results(events=events, fun=collector)
-        info = list(collector)
-        presets = get_presets_applied().keys()
-        assert info[0][0] == 'file_download'
-        assert info[0][1].status == states.SUCCESS
-        assert info[1][0] == 'file_video_metadata_extraction'
-        assert info[1][1].status == states.SUCCESS
-        assert info[2][0] == 'file_video_extract_frames'
-        assert info[2][1].status == states.SUCCESS
-        for i in info[3:]:
-            assert i[0] == 'file_transcode'
-            if i[1].status == states.SUCCESS:
-                assert i[1].result['payload']['preset_quality'] in presets
 
         # check tags
         assert ObjectVersionTag.query.count() == get_tag_count()
@@ -458,22 +451,6 @@ def test_avc_workflow_receiver_local_file_pass(
         assert 'file_transcode' in tasks_status
         assert 'file_video_extract_frames' in tasks_status
         assert 'file_video_metadata_extraction' in tasks_status
-
-        # check single status
-        collector = CollectInfoTasks()
-        iterate_events_results(events=events, fun=collector)
-        info = list(collector)
-        assert len(info) == 11
-        assert info[0][0] == 'file_video_metadata_extraction'
-        assert info[0][1].status == states.SUCCESS
-        assert info[1][0] == 'file_video_extract_frames'
-        assert info[1][1].status == states.SUCCESS
-        transocode_tasks = info[2:]
-        statuses = [task[1].status for task in info[2:]]
-        assert len(transocode_tasks) == len(statuses)
-        assert [states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
-                states.SUCCESS, states.REVOKED, states.REVOKED, states.REVOKED,
-                states.REVOKED] == statuses
 
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
@@ -809,79 +786,3 @@ def test_async_receiver_status_fail(api_app, access_token, u_email,
         assert data['name'] == receiver_id
         extra_info = json.loads(resp.headers['X-Hub-Info'])
         assert extra_info['id'] == ctx['myresult'].id
-
-
-def test_collect_info():
-    """Test info extractor."""
-    result = simple_add.s(1, 2).apply_async()
-
-    info = collect_info('mytask', result)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-
-    result = chain(simple_add.s(1, 2), simple_add.s(3)).apply_async()
-
-    # check first task
-    info = collect_info('mytask', result.parent)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-    # check second task
-    info = collect_info('mytask2', result)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 6
-    assert 'id' in info
-    assert info['name'] == 'mytask2'
-
-    result = chain(
-        simple_add.s(1, 2),
-        group(simple_add.s(3), simple_add.s(4), failing_task.s())
-    ).apply_async()
-
-    info = collect_info('mytask', result.parent)
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 3
-    assert 'id' in info
-    assert info['name'] == 'mytask'
-
-    info = collect_info('mytask2', result.children[0])
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 6
-    assert 'id' in info
-    assert info['name'] == 'mytask2'
-
-    info = collect_info('mytask3', result.children[1])
-    assert info['status'] == states.SUCCESS
-    assert info['info'] == 7
-    assert 'id' in info
-    assert info['name'] == 'mytask3'
-
-    fail = AsyncResult(result.children[2].id)
-    info = collect_info('mytask4', fail)
-    assert info['status'] == states.FAILURE
-    assert 'id' in info
-    assert info['name'] == 'mytask4'
-
-
-def test_serializer():
-    """Test result serializer on event."""
-    event = Event()
-    event.response = {}
-    event.response_headers = {}
-
-    result = chain(
-        simple_add.s(1, 2),
-        group(simple_add.s(3), simple_add.s(4), failing_task.s())
-    ).apply_async()
-
-    CeleryAsyncReceiver._serialize_result(event=event, result=result)
-    deserialized_result = CeleryAsyncReceiver._deserialize_result(event=event)
-
-    assert deserialized_result.id == result.id
-    assert deserialized_result.parent.id == result.parent.id
-    assert deserialized_result.children[0].id == result.children[0].id
-    assert deserialized_result.children[1].id == result.children[1].id
-    assert deserialized_result.children[2].id == result.children[2].id

@@ -273,7 +273,6 @@ def workflow_receiver_video_failing(api_app, db, video, receiver_id):
             self.persist(event=event, result=workflow.status)
 
         def build_status(self, raw_info):
-            print(raw_info)
             return ([{'add': 3}], [{'failing': ''}, {'failing': ''}])
 
         def status(self, event):
@@ -360,7 +359,7 @@ def get_indexed_records_from_mock(mock_indexer):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def prepare_videos_for_publish(videos):
+def prepare_videos_for_publish(videos, with_files=False):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(
         bit_rate='679886',
@@ -380,8 +379,10 @@ def prepare_videos_for_publish(videos):
         if '_cds' not in video:
             video['_cds'] = {}
         video['_cds']['extracted_metadata'] = metadata_dict
+        if with_files:
+            video['_files'] = get_files_metadata(video.files.bucket.id)
+
         # DB update
-        video['_files'] = get_files_metadata(video.files.bucket.id)
         update_record(
             recid=video.id,
             patch=[{
@@ -395,6 +396,7 @@ def prepare_videos_for_publish(videos):
 
 def get_files_metadata(bucket_id):
     """Return _files data filled with a valid version id."""
+    bucket_id = str(bucket_id)
     object_version = ObjectVersion.create(bucket_id, 'test_object_version',
                                           stream=BytesIO(b'\x00' * 200))
     object_version_id = str(object_version.version_id)
