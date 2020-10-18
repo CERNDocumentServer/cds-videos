@@ -261,7 +261,6 @@ setup(
         ],
         'invenio_webhooks.receivers': [
             'avc = cds.modules.webhooks.receivers:AVCWorkflow',
-            'downloader = cds.modules.webhooks.receivers:Downloader',
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',

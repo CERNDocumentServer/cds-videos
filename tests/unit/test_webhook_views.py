@@ -378,127 +378,6 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
             video_1_id, video_1_depid, users)
 
 
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_download_workflow_delete(api_app, db, cds_depid, access_token,
-                                  json_headers, mock_sorenson, online_video,
-                                  webhooks):
-    """Test Download receiver REST API."""
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token
-        )
-
-    with mock.patch('requests.get') as mock_request, \
-            api_app.test_client() as client, \
-            mock.patch('invenio_indexer.tasks.index_record.delay'):
-        file_size = 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        # [[ RUN ]]
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            deposit_id=cds_depid,
-            key='test.pdf',
-        )
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
-
-        assert ObjectVersion.query.count() == 1
-        [obj] = ObjectVersion.query.all()
-        tags = obj.get_tags()
-        assert tags['_event_id'] == data['tags']['_event_id']
-        assert obj.key == data['key']
-        assert str(obj.version_id) == data['version_id']
-        assert obj.file
-        assert obj.file.size == file_size
-
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_item',
-            receiver_id='downloader',
-            event_id=data['tags']['_event_id'],
-            access_token=access_token
-        )
-
-    with mock.patch('requests.get') as mock_request, \
-            api_app.test_client() as client, \
-            mock.patch('invenio_indexer.tasks.index_record.delay'):
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        # [[ RESTART ]]
-        resp = client.put(url, headers=json_headers)
-
-        assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
-
-        # Create + Delete/Create (Restart)
-        assert ObjectVersion.query.count() == 3
-        obj = ObjectVersion.query.first()
-        obj = ObjectVersion.query.get(data['version_id'])
-        tags = obj.get_tags()
-        assert tags['_event_id'] == data['tags']['_event_id']
-        assert obj.key == data['key']
-        assert str(obj.version_id) == data['version_id']
-        assert obj.file
-        assert obj.file.size == file_size
-
-
-def test_webhooks_feedback(api_app, cds_depid, access_token, json_headers):
-    """Test webhooks feedback."""
-    with api_app.test_request_context():
-        url = url_for(
-            'invenio_webhooks.event_list',
-            receiver_id='downloader',
-            access_token=access_token
-        )
-
-    with mock.patch('requests.get') as mock_request, \
-            api_app.test_client() as client, \
-            mock.patch('invenio_indexer.tasks.index_record.delay'):
-        file_size = 1024
-        mock_request.return_value = type(
-            'Response', (object, ), {
-                'raw': BytesIO(b'\x00' * file_size),
-                'headers': {'Content-Length': file_size}
-            })
-
-        payload = dict(
-            uri='http://example.com/test.pdf',
-            deposit_id=cds_depid,
-            key='test.pdf',
-        )
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
-        data = json.loads(resp.data.decode('utf-8'))
-
-        # check feedback url
-        event_id = data['tags']['_event_id']
-        with api_app.test_request_context():
-            url = url_for('invenio_webhooks.event_feedback_item',
-                          event_id=event_id, access_token=access_token,
-                          receiver_id='downloader')
-        resp = client.get(url, headers=json_headers)
-        assert resp.status_code == 200
-        data = json.loads(resp.data.decode('utf-8'))
-        assert 'id' in data
-        assert data['name'] == 'file_download'
-        assert data['status'] == states.SUCCESS
-        assert data['info']['payload']['deposit_id'] == cds_depid
-
-
 def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
                                    json_headers, api_project):
     """Test webhooks feedback with a failing task."""
@@ -538,6 +417,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
         assert data[1][0]['status'] == states.FAILURE
 
 
+@pytest.mark.skip(reason='Functionality not used')
 @pytest.mark.parametrize('receiver_id', ['avc', 'downloader'])
 def test_webhooks_delete(api_app, access_token, json_headers,
                          online_video, api_project, users, receiver_id,

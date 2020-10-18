@@ -150,7 +150,7 @@ class MockSorenson(object):
         return status, job_progress
 
 # Uncomment this line to use
-sorenson = MockSorenson()
+# sorenson = MockSorenson()
 
 class AVCTask(Task):
     """Base class for tasks."""

@@ -41,29 +41,6 @@
                 </div>
               </div>
             </div>
-            <div ng-show="active_uploader!='remote'">
-              <p class="text-center pb-40 mb-0 f5 text-muted">
-                <strong>— OR —</strong>
-              </p>
-              <p class="text-center">
-                <button class="btn btn-info" ng-click="active_uploader='remote'">Upload by URL</button>
-              </p>
-            </div>
-            <!-- Remote uploader -->
-            <div ng-if="active_uploader=='remote'">
-              <hr class="mt-0 mb-40" />
-              <cds-remote-uploader
-                  template="/static/templates/cds_deposit/remote_upload.html"
-                  dropbox-enabled="true"
-                  dropbox-selector=".dropbox-upload"
-                  dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
-                  remote-master-receiver="/api/hooks/receivers/avc/events/"
-                  remote-children-receiver="/api/hooks/receivers/downloader/events/"
-              >
-                <div class="dropbox-upload"></div>
-              </cds-remote-uploader>
-            </div>
-            <!-- Remote uploader -->
           <!-- Drag&Drop upload -->
         </div>
       </div>
@@ -204,29 +181,6 @@
                   </div>
                 </div>
               </div>
-              <div ng-show="active_uploader!='remote'">
-                <p class="text-center pb-40 mb-0 f5 text-muted">
-                  <strong>— OR —</strong>
-                </p>
-                <p class="text-center">
-                  <a class="btn btn-info" ng-click="active_uploader='remote'">Upload by URL</a>
-                </p>
-              </div>
-              <!-- Remote uploader -->
-              <div ng-if="active_uploader=='remote'">
-                <hr class="mt-0 mb-40" />
-                <cds-remote-uploader
-                    template="/static/templates/cds_deposit/remote_upload.html"
-                    dropbox-enabled="true"
-                    dropbox-selector=".dropbox-upload"
-                    dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
-                    remote-master-receiver="/api/hooks/receivers/avc/events/"
-                    remote-children-receiver="/api/hooks/receivers/downloader/events/"
-                >
-                  <div class="dropbox-upload"></div>
-                </cds-remote-uploader>
-              </div>
-              <!-- Remote uploader -->
             <!-- Drag&Drop upload -->
           </div>
           <!-- Max Number of Videos per Project -->
