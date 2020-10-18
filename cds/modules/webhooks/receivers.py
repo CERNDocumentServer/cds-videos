@@ -363,7 +363,10 @@ class AVCWorkflow(CeleryAsyncReceiver):
         db.session.commit()
         # 2. define the workflow and run
         flow = self._workflow(event=event)
+        flow_id = flow.id # Get it for later because the DB object is modified
         flow.start()
+        # 2.1 Refresh flow object
+        flow = Flow.get_flow(flow_id)
         # 3. update event response
         self._update_event_response(event=event, version_id=version_id)
         # 4. serialize event and result

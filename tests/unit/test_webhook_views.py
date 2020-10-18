@@ -201,10 +201,10 @@ def check_video_transcode_restart(api_app, event_id, access_token,
                                   json_headers, data, video_1_id,
                                   video_1_depid, users):
     """Try to delete transcoded file via REST API."""
-    task_ids = [d['file_transcode']['id']
-                for d in data['global_status'][1]
-                if 'file_transcode' in d and
-                d['file_transcode']['status'] == 'SUCCESS']
+    task_ids = [d['id']
+                for d in data['_tasks'][1]
+                if d['name'] == 'file_transcode' and
+                d['status'] == 'SUCCESS']
     # RESTART FIRST TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
@@ -243,7 +243,7 @@ def check_video_transcode_restart(api_app, event_id, access_token,
 def check_video_frames(api_app, event_id, access_token,
                        json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete video frames via REST API."""
-    task_id = data['global_status'][1][0]['file_video_extract_frames']['id']
+    task_id = data['_tasks'][1][0]['id']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.task_item',
@@ -272,7 +272,7 @@ def check_video_frames(api_app, event_id, access_token,
 def check_video_download(api_app, event_id, access_token,
                          json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete downloaded files via REST API."""
-    task_id = data['global_status'][0][0]['file_download']['id']
+    task_id = data['_tasks'][0][0]['id']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.task_item',
@@ -302,8 +302,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
                                     json_headers, data, video_1_id,
                                     video_1_depid, users):
     """Try to delete metadata extraction via REST API."""
-    task_id = data['global_status'][0][1][
-        'file_video_metadata_extraction']['id']
+    task_id = data['_tasks'][0][1]['id']
     with api_app.test_request_context():
         url = url_for(
             'invenio_webhooks.task_item',
@@ -326,6 +325,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     assert 'extracted_metadata' not in record.json['_cds']
 
 
+@pytest.mark.skip(reason='Functionality not used')
 @pytest.mark.parametrize('checker', [
     check_restart_avc_workflow,
     check_video_metadata_extraction,
@@ -409,12 +409,8 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
-        assert 'id' in data[0][0]
-        assert data[0][0]['name'] == 'add'
-        assert data[0][0]['status'] == states.SUCCESS
-        assert 'id' in data[1][0]
-        assert data[1][0]['name'] == 'failing'
-        assert data[1][0]['status'] == states.FAILURE
+        assert data[0][0] == {'add': 3}
+        assert data[1][0] == {'failing': ''}
 
 
 @pytest.mark.skip(reason='Functionality not used')

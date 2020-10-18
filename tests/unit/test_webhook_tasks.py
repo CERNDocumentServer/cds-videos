@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2020 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,34 +27,37 @@ from __future__ import absolute_import
 
 import threading
 import time
+import uuid
+
 import mock
 import pytest
-
-from jsonschema.exceptions import ValidationError
-from flask_security import login_user
+from cds_sorenson.error import InvalidResolutionError
 from celery import states
-from werkzeug.utils import import_string
+from celery.exceptions import Ignore, Retry
+from flask_security import login_user
 from invenio_accounts.models import User
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
-    Bucket, FileInstance
+from invenio_db import db
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
+from jsonschema.exceptions import ValidationError
 from six import BytesIO, next
-from celery.exceptions import Retry, Ignore
 from sqlalchemy.orm.exc import ConcurrentModificationError
-from cds_sorenson.error import InvalidResolutionError
+from werkzeug.utils import import_string
 
-from cds.modules.webhooks.tasks import (DownloadTask,
-                                        update_record, ExtractFramesTask,
+from cds.modules.deposit.api import (Project, Video, deposit_project_resolver,
+                                     deposit_video_resolver)
+from cds.modules.flows.models import Flow, Task
+from cds.modules.webhooks.tasks import (DownloadTask, ExtractFramesTask,
                                         ExtractMetadataTask,
                                         TranscodeVideoTask,
-                                        sync_records_with_deposit_files)
-from cds.modules.deposit.api import deposit_video_resolver, Video, Project, \
-    deposit_project_resolver
-
-from helpers import add_video_tags, get_object_count, transcode_task, \
-    check_deposit_record_files, prepare_videos_for_publish
+                                        sync_records_with_deposit_files,
+                                        update_record)
+from helpers import (add_video_tags, check_deposit_record_files,
+                     get_object_count, prepare_videos_for_publish,
+                     transcode_task)
+from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
+                                       ObjectVersionTag)
 
 
 def test_download_to_object_version(db, bucket):
@@ -73,8 +76,16 @@ def test_download_to_object_version(db, bucket):
             })
         assert obj.file is None
 
+        flow = Flow(id=uuid.uuid4(), name='Test')
+        db.session.add(flow)
+        task_model = Task.create(
+            id_=uuid.uuid4(),
+            flow_id=flow.id,
+            name=DownloadTask.name,
+        )
         task_s = DownloadTask().s('http://example.com/test.pdf',
-                                  version_id=obj.version_id)
+                                  version_id=obj.version_id,
+                                  task_id=str(task_model.id))
         # Download
         task = task_s.delay()
         assert ObjectVersion.query.count() == 1
@@ -171,10 +182,11 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
     dep_id = str(cds_depid)
-    task_s = ExtractMetadataTask().s(uri=video,
-                                     version_id=obj_id,
-                                     deposit_id=dep_id)
-    task_s.delay()
+    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+        task_s = ExtractMetadataTask().s(uri=video,
+                                         version_id=obj_id,
+                                         deposit_id=dep_id)
+        task_s.delay()
 
     # Check that deposit's metadata got updated
     record = Record.get_record(recid)
@@ -227,10 +239,11 @@ def test_video_extract_frames(app, db, bucket, video):
     db.session.commit()
     assert ObjectVersion.query.count() == 1
 
-    task_s = ExtractFramesTask().s(version_id=version_id)
+    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+        task_s = ExtractFramesTask().s(version_id=version_id)
+        # Extract frames
+        task_s.delay()
 
-    # Extract frames
-    task_s.delay()
     assert ObjectVersion.query.count() == get_object_count(transcode=False)
 
     frames_and_gif = ObjectVersion.query.join(ObjectVersion.tags).filter(
@@ -251,8 +264,9 @@ def test_video_extract_frames(app, db, bucket, video):
     assert len(frames_and_gif) == 11
 
 
-def test_transcode_too_high_resolutions(db, bucket):
+def test_transcode_too_high_resolutions(db, cds_depid, mock_sorenson):
     """Test trascoding task when it should discard some high resolutions."""
+    bucket = deposit_project_resolver(cds_depid).files.bucket
     filesize = 1024
     filename = 'test.mp4'
     preset_quality = '480p'
@@ -264,13 +278,14 @@ def test_transcode_too_high_resolutions(db, bucket):
     obj_id = str(obj.version_id)
     db.session.commit()
 
-    task_s = TranscodeVideoTask().s(version_id=obj_id,
-                                    preset_quality=preset_quality,
-                                    sleep_time=0)
-
-    # Transcode
-    result = task_s.delay()
-    assert result.status == states.IGNORED
+    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+        task_s = TranscodeVideoTask().s(version_id=obj_id,
+                                        preset_quality=preset_quality,
+                                        sleep_time=0)
+        # Transcode
+        result = task_s.delay(deposit_id=cds_depid)
+        assert result.status == states.SUCCESS
+        assert result.result == 'Not transcoding for 480p'
 
 
 def test_transcode_and_undo(db, cds_depid, mock_sorenson):
@@ -291,12 +306,12 @@ def test_transcode_and_undo(db, cds_depid, mock_sorenson):
     assert get_bucket_keys() == [filename]
     assert bucket.size == filesize
 
-    task_s = TranscodeVideoTask().s(version_id=obj_id,
-                                    preset_quality=preset_quality,
-                                    sleep_time=0)
-
-    # Transcode
-    task_s.delay(deposit_id=cds_depid)
+    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+        task_s = TranscodeVideoTask().s(version_id=obj_id,
+                                        preset_quality=preset_quality,
+                                        sleep_time=0)
+        # Transcode
+        task_s.delay(deposit_id=cds_depid)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
@@ -337,8 +352,9 @@ def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
     assert bucket.size == filesize
 
     # Transcode
-    task_s1.delay(deposit_id=cds_depid)
-    task_s2.delay(deposit_id=cds_depid)
+    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+        task_s1.delay(deposit_id=cds_depid)
+        task_s2.delay(deposit_id=cds_depid)
 
     db.session.add(bucket)
     keys = get_bucket_keys()
@@ -360,11 +376,12 @@ def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
     assert bucket.size == (3 * filesize)
 
 
-def test_transcode_ignore_exception_if_invalid(db, bucket):
+def test_transcode_ignore_exception_if_invalid(db, cds_depid):
     """Test ignore exception if sorenson raise InvalidResolutionError."""
     def get_bucket_keys():
         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
 
+    bucket = deposit_project_resolver(cds_depid).files.bucket
     filesize = 1024
     filename = 'test.mp4'
     preset_qualities = ['480p', '720p']
@@ -376,18 +393,22 @@ def test_transcode_ignore_exception_if_invalid(db, bucket):
     assert get_bucket_keys() == [filename]
     assert bucket.size == filesize
 
-    with mock.patch('cds.modules.webhooks.tasks.start_encoding',
-                    side_effect=InvalidResolutionError('fuu', 'test')):
+    with mock.patch(
+        'cds.modules.webhooks.tasks.sorenson.start_encoding',
+        side_effect=InvalidResolutionError('fuu', 'test'),
+    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
         # Transcode
-        task = task_s1.delay()
+        task = task_s1.delay(deposit_id=cds_depid)
         isinstance(task.result, Ignore)
 
 
 @pytest.mark.parametrize('preset, is_inside', [
     ('1080ph265', None), ('240p', 'true')
 ])
-def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
+def test_smil_tag(app, db, cds_depid, mock_sorenson, preset, is_inside):
     """Test that smil tags are generated correctly."""
+    bucket = deposit_project_resolver(cds_depid).files.bucket
+
     def create_file(filename, preset_quality, aspect_ratio):
         obj = ObjectVersion.create(bucket, key=filename,
                                    stream=BytesIO(b'\x00' * 1024))
@@ -399,10 +420,11 @@ def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     db.session.commit()
 
     with mock.patch(
-            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'):
+            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'
+    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
         TranscodeVideoTask().s(
             version_id=obj_id, preset_quality=preset, sleep_time=0
-        ).apply()
+        ).apply(deposit_id=cds_depid)
 
     # Get the tags from the newly created slave
     tags = ObjectVersion.query.filter(
@@ -414,8 +436,10 @@ def test_smil_tag(app, db, bucket, mock_sorenson, preset, is_inside):
 @pytest.mark.parametrize('preset, is_inside', [
     ('1080ph265', 'true'), ('240p', None)
 ])
-def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
+def test_download_tag(app, db, cds_depid, mock_sorenson, preset, is_inside):
     """Test that download tags are generated correctly."""
+    bucket = deposit_project_resolver(cds_depid).files.bucket
+
     def create_file(filename, preset_quality, aspect_ratio):
         obj = ObjectVersion.create(bucket, key=filename,
                                    stream=BytesIO(b'\x00' * 1024))
@@ -427,10 +451,11 @@ def test_download_tag(app, db, bucket, mock_sorenson, preset, is_inside):
     db.session.commit()
 
     with mock.patch(
-            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'):
+            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'
+    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
         TranscodeVideoTask().s(
             version_id=obj_id, preset_quality=preset, sleep_time=0
-        ).apply()
+        ).apply(deposit_id=cds_depid)
 
     # Get the tags from the newly created slave
     tags = ObjectVersion.query.filter(

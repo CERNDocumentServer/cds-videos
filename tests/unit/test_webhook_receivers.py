@@ -29,10 +29,8 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
-import pytest
 from cds_sorenson.api import get_all_distinct_qualities
-from celery import chain, group, states
-from celery.result import AsyncResult
+from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
 from flask_security import current_user
@@ -41,29 +39,14 @@ from invenio_accounts.testutils import login_user_via_session
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
-from six import BytesIO
 
-from cds.modules.deposit.api import (
-    deposit_project_resolver,
-    deposit_video_resolver,
-)
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.webhooks.status import (
-    get_deposit_events,
-    get_tasks_status_by_task,
-)
-from helpers import (
-    failing_task,
-    get_indexed_records_from_mock,
-    get_object_count,
-    get_presets_applied,
-    get_tag_count,
-    mock_current_user,
-    simple_add,
-    success_task,
-)
+from cds.modules.deposit.api import (deposit_project_resolver,
+                                     deposit_video_resolver)
+from cds.modules.webhooks.status import (get_deposit_events,
+                                         get_tasks_status_by_task)
+from helpers import (get_indexed_records_from_mock, get_object_count,
+                     get_presets_applied, get_tag_count, mock_current_user)
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
-from invenio_webhooks import current_webhooks
 from invenio_webhooks.models import Event
 
 
@@ -436,15 +419,21 @@ def test_avc_workflow_receiver_clean_download(
     assert ObjectVersion.query.count() == get_object_count() + 1
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    # RUN again first step
-    event.receiver._init_object_version(event=event)
-    event.receiver._first_step(event=event).apply()
+    # RUN again
+    with api_app.test_client() as client:
+        payload = dict(
+            uri=online_video,
+            deposit_id=cds_depid,
+            key=master_key,
+            sleep_time=0,
+        )
+        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
+
+        assert resp.status_code == 201
 
     # Create + Clean 1 Download File + Run First Step
-    assert ObjectVersion.query.count() == get_object_count() + 2
-    assert ObjectVersionTag.query.count() == (
-        get_tag_count() + get_tag_count(frames=False, transcode=False)
-    )
+    assert ObjectVersion.query.count() == (get_object_count() * 2) + 1
+    assert ObjectVersionTag.query.count() == get_tag_count() * 2
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -489,20 +478,6 @@ def test_avc_workflow_receiver_clean_video_frames(
         get_object_count() + get_object_count(download=False, transcode=False)
     )
     assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # RUN again frame extraction
-    event.receiver.run_task(
-        event=event, task_name='file_video_extract_frames').apply()
-
-    # Create + Clean Frames + Restart Frames
-    assert ObjectVersion.query.count() == (
-        get_object_count() +
-        2 * get_object_count(download=False, transcode=False)
-    )
-    assert ObjectVersionTag.query.count() == (
-        get_tag_count() +
-        get_tag_count(download=False, metadata=False, transcode=False)
-    )
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
@@ -555,21 +530,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
     assert ObjectVersion.query.count() == get_object_count() + len(presets)
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    #
-    # RUN again
-    #
-    for i, preset_quality in enumerate(presets, 1):
-        event = Event.query.first()
-        event.receiver.run_task(event=event, task_name='file_transcode',
-                                preset_quality=preset_quality).apply()
-
-        # Create + Delete transcoded files + Restart i-th transcode
-        assert ObjectVersion.query.count() == (
-            get_object_count() + len(presets) + i
-        )
-        # if changed, copy magic number 14 from helpers::get_tag_count
-        assert ObjectVersionTag.query.count() == get_tag_count() + (i * 14)
-
 
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_extract_metadata(
@@ -611,75 +571,3 @@ def test_avc_workflow_receiver_clean_extract_metadata(
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # [[ RUN again metadata extraction ]]
-    event.receiver.run_task(
-        event=event, task_name='file_video_metadata_extraction').apply()
-
-    # Metadata Extraction doesn't create new objects
-    assert ObjectVersion.query.count() == get_object_count()
-    # neither new tags, but update the current
-    assert ObjectVersionTag.query.count() == get_tag_count()
-
-    # check extracted metadata is there
-    records = RecordMetadata.query.all()
-    assert len(records) == 1
-    assert 'extracted_metadata' in records[0].json['_cds']
-
-
-@pytest.mark.parametrize(
-    'receiver_id, workflow, status, http_status, payload, result', [
-        ('failing-task', failing_task, states.FAILURE, 500, {}, None),
-        ('success-task', success_task, states.SUCCESS, 201, {}, None),
-        ('add-task', simple_add, states.SUCCESS, 202, {'x': 40, 'y': 2}, 42)
-    ]
-)
-def test_async_receiver_status_fail(api_app, access_token, u_email,
-                                    json_headers, receiver_id, workflow,
-                                    status, http_status, payload, result):
-    """Test AVC workflow test-case."""
-    ctx = dict()
-
-    class TestReceiver(CeleryAsyncReceiver):
-
-        def run(self, event):
-            assert payload == event.payload
-            ctx['myresult'] = workflow.s(**event.payload).apply_async()
-            self._serialize_result(event=event, result=ctx['myresult'])
-            super(TestReceiver, self).persist(
-                event=event, result=ctx['myresult'])
-
-        def _raw_info(self, event):
-            result = self._deserialize_result(event)
-            return {receiver_id: result}
-
-    current_webhooks.register(receiver_id, TestReceiver)
-
-    with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_list',
-                      receiver_id=receiver_id,
-                      access_token=access_token)
-    with api_app.test_client() as client:
-        # run the task
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == http_status
-        data = json.loads(resp.headers['X-Hub-Info'])
-        assert data['name'] == receiver_id
-        extra_info = json.loads(resp.headers['X-Hub-Info'])
-        assert extra_info['id'] == ctx['myresult'].id
-        assert ctx['myresult'].result == result
-
-    with api_app.test_request_context():
-        event_id = resp.headers['X-Hub-Delivery']
-        url = url_for('invenio_webhooks.event_item',
-                      receiver_id=receiver_id, event_id=event_id,
-                      access_token=access_token)
-    with api_app.test_client() as client:
-        # check status
-        resp = client.get(url, headers=json_headers)
-        assert resp.status_code == http_status
-        data = json.loads(resp.headers['X-Hub-Info'])
-        #  assert data['status'] == status
-        assert data['name'] == receiver_id
-        extra_info = json.loads(resp.headers['X-Hub-Info'])
-        assert extra_info['id'] == ctx['myresult'].id
