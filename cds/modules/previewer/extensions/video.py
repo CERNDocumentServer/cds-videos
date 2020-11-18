@@ -32,8 +32,9 @@ from flask import render_template
 class VideoExtension(object):
     """Previewer extension for videos."""
 
-    previewable_extensions = ['mp4', 'm4v', 'webm', 'mov', 'avi', 'mpg', 'flv',
-                              'ts']
+    previewable_extensions = [
+        'avi', 'flv', 'm4v', 'mkv', 'mov', 'mp4', 'mpg', 'ts', 'webm'
+    ]
     _file_exts = ['.{0}'.format(ext) for ext in previewable_extensions]
 
     def __init__(self, template=None):
