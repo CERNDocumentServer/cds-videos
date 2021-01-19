@@ -11,7 +11,7 @@ Install `ffmpeg` and ensure that `ffprobe` is in your PATH:
     $ ffprobe
     ... ffprobe version 3.3.3 ...
 
-Prepare the environment
+Prepare the environment. You will need NodeJS v8:
 
 .. code-block:: console
 
@@ -82,7 +82,7 @@ Run example development server:
 
 .. code-block:: console
 
-    (cds3)$ cds run --debugger --with-threads
+    (cds3)$ ./script/server
 
 Now you can visit http://localhost:5000/ :)
 
