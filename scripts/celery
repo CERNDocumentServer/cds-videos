@@ -29,6 +29,4 @@ script_path=$(dirname "$0")
 
 export FLASK_ENV=development
 
-cds run --reload --with-threads \
-    --cert "$script_path"/../docker/nginx/test.crt \
-    --key "$script_path"/../docker/nginx/test.key
+celery worker -A cds.celery -l INFO
