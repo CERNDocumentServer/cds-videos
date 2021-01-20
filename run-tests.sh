@@ -3,7 +3,7 @@
 #
 # This file is part of CDS.
 #
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015-2020 CERN.
 #
 # CDS is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,5 +21,5 @@
 
 pydocstyle --match-dir='[^\.|(cds\/modules\/record_split)].*' cds && \
 isort -rc -c -df **/*.py && \
-check-manifest --ignore ".travis-*" && \
+check-manifest --ignore ".ci-*" && \
 py.test tests/unit/
