@@ -21,7 +21,7 @@ backports.functools-lru-cache==1.5  # via arrow
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 billiard==3.3.0.23        # via celery
 binaryornot==0.4.4        # via cookiecutter
-bleach==3.1.0             # via invenio-records-rest, nbconvert
+bleach==3.1.4             # via invenio-records-rest, nbconvert
 blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flask-principal, invenio-base, invenio-oauthclient, invenio-records
 cairocffi==0.9.0          # via cairosvg
 cairosvg==1.0.22
@@ -36,7 +36,7 @@ click==7.0                # via cookiecutter, dojson, flask, invenio-migrator, i
 configparser==3.5.0       # via entrypoints
 contextlib2==0.5.5        # via raven
 cookiecutter==1.6.0       # via invenio-base
-cryptography==2.4.2       # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
+cryptography==3.2         # via invenio-accounts, pyopenssl, sqlalchemy-utils, urllib3
 datacite==1.0.1
 dcxml==0.1.1
 decorator==4.3.0          # via ipython, traitlets, validators
@@ -134,7 +134,7 @@ jsonschema==2.6.0         # via datacite, invenio-opendefinition, invenio-record
 jupyter-client==5.2.4     # via nbconvert
 jupyter-core==4.4.0       # via jupyter-client, nbconvert, nbformat
 kombu==3.0.37             # via celery
-lxml==4.3.0               # via datacite, dcxml, dojson, invenio-oaiserver
+lxml==4.6.2               # via datacite, dcxml, dojson, invenio-oaiserver
 mako==1.0.7               # via alembic
 markupsafe==1.1.0         # via jinja2, mako
 marshmallow==2.18.0
@@ -152,7 +152,7 @@ passlib==1.7.1            # via flask-security, invenio-accounts
 pathlib2==2.3.3           # via ipython, pickleshare
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pillow==5.4.1             # via flask-iiif, invenio-formatter
+pillow==6.2.2             # via flask-iiif, invenio-formatter
 poyo==0.4.2               # via cookiecutter
 prompt-toolkit==1.0.15    # via ipython
 psycopg2-binary==2.7.6.1  # via invenio-db
@@ -190,13 +190,13 @@ traitlets==4.3.2          # via ipython, jupyter-client, jupyter-core, nbconvert
 ua-parser==0.8.0          # via invenio-accounts
 uritools==2.2.0           # via invenio-oauthclient
 urllib3[secure]==1.24.1
-validators==0.12.4        # via wtforms-components
+validators==0.12.6        # via wtforms-components
 wand==0.5.0
 wcwidth==0.1.7            # via ftfy, prompt-toolkit
-webargs==5.1.0            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
+webargs==5.1.3            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
 webassets==0.12.1         # via flask-assets, invenio-assets
 webencodings==0.5.1       # via bleach, html5lib
-werkzeug==0.14.1          # via flask, flask-debugtoolbar, flask-kvsession, invenio-migrator, jsonresolver
+werkzeug==0.15.3          # via flask, flask-debugtoolbar, flask-kvsession, invenio-migrator, jsonresolver
 whichcraft==0.5.2         # via cookiecutter
 wtforms-alchemy==0.16.8   # via invenio-oauth2server
 wtforms-components==0.10.3  # via wtforms-alchemy
