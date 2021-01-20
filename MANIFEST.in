@@ -38,6 +38,7 @@ include Dockerfile.base
 include babel.cfg
 include pytest.ini
 include scripts/bootstrap
+include scripts/celery
 include scripts/console
 include scripts/server
 include scripts/setup

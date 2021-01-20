@@ -27,30 +27,16 @@ set -e
 
 CWD=`pwd`
 
-requirements_file=${1:-'requirements.qa.txt'}
+requirements_file=${1:-'requirements.pinned.txt'}
 
 pip install -r $requirements_file
 pip install -e .[all]
 
-npm update --prefix $VIRTUAL_ENV
-npm install --prefix $VIRTUAL_ENV \
+npm update
+npm install \
     node-sass@3.8.0 \
     clean-css@3.4.24 \
     uglify-js requirejs
-
-# Add npm local bin to the activate script so we can use the installed packages
-cd $VIRTUAL_ENV
-npm_path=$(npm bin)
-if ! grep -q npm_path ./bin/activate; then
-    cat <<EOF >> ./bin/activate
-
-# Add local node modules bin to the path
-PATH="$npm_path:\$PATH"
-export PATH
-EOF
-    source ./bin/activate
-fi
-cd ${CWD}
 
 # Setup and build assets
 cds npm

@@ -92,13 +92,6 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-  # TODO: decide if Kibana is needed
-  # kibana:
-  #   image: docker.elastic.co/elasticsearch/kibana-oss:6.2.2
-  #   environment:
-  #     - "ELASTICSEARCH_URL=http://es:9200"
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #   ports: ['5601:5601']
   flower:
     image: mher/flower
     command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/

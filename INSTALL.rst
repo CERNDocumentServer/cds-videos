@@ -32,17 +32,8 @@ Install production like setup
 
     $ workon cds3
     (cds3)$ cd cds
-    (cds3)$ pip install -r requirements.txt
+    (cds3)$ pip install -r requirements.pinned.txt
     (cds3)$ pip install -e .
-
-If you want to install a developer setup and use the latest versions of the
-Invenio packages
-
-.. code-block:: console
-
-    $ workon cds3
-    (cds3)$ cd cds
-    (cds3)$ pip install -r requirements.developer.txt
 
 Or to install the latest released versions of all the dependencies
 
@@ -83,6 +74,12 @@ Run example development server:
 .. code-block:: console
 
     (cds3)$ ./script/server
+
+Run celery:
+
+.. code-block:: console
+
+    (cds3)$ ./script/celery
 
 Now you can visit http://localhost:5000/ :)
 

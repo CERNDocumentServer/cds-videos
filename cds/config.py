@@ -32,12 +32,13 @@ from datetime import timedelta
 from celery.schedules import crontab
 from flask import current_app, session
 from flask_login import current_user
-from invenio_deposit.config import DEPOSIT_REST_FACETS
-from invenio_deposit.scopes import write_scope
-from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
+
+from invenio_deposit.config import DEPOSIT_REST_FACETS
+from invenio_deposit.scopes import write_scope
+from invenio_deposit.utils import check_oauth2_scope
 
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.deposit.indexer import CDSRecordIndexer
