@@ -183,7 +183,7 @@ six==1.12.0               # via bleach, cryptography, elasticsearch-dsl, flask-b
 speaklater==1.3           # via flask-babelex, invenio-assets
 sqlalchemy-continuum==1.3.4
 sqlalchemy-utils[encrypted]==0.33.11  # via invenio-accounts, invenio-db, invenio-files-rest, invenio-oauth2server, invenio-oauthclient, invenio-sequencegenerator, sqlalchemy-continuum, wtforms-alchemy
-sqlalchemy==1.2.16        # via alembic, flask-alembic, flask-sqlalchemy, invenio-db, sqlalchemy-continuum, sqlalchemy-utils, wtforms-alchemy
+sqlalchemy==1.3.0        # via alembic, flask-alembic, flask-sqlalchemy, invenio-db, sqlalchemy-continuum, sqlalchemy-utils, wtforms-alchemy
 testpath==0.4.2           # via nbconvert
 tornado==5.1.1            # via jupyter-client
 traitlets==4.3.2          # via ipython, jupyter-client, jupyter-core, nbconvert, nbformat
