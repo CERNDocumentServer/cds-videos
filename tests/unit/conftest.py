@@ -104,7 +104,7 @@ def app():
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
-        THEO_LICENCE_KEY='CHANGE_ME',
+        THEOPLAYER_LICENCE_KEY='CHANGE_ME',
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)

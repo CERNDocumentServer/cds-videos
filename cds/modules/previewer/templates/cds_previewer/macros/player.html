@@ -2,8 +2,8 @@
 {%- if embed_config.responsive %}
       {%- set video_classes = video_classes + " embed-responsive-background" %}
   {% endif %}
-  {% if config.THEO_LICENCE_KEY %}
-    <script type='text/javascript' src='//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/THEOplayer.js'></script>
+  {% if config.THEOPLAYER_LICENCE_KEY %}
+    <script type='text/javascript' src='{{ config.THEOPLAYER_BASE_URL}}{{ config.THEOPLAYER_LICENCE_KEY }}/THEOplayer.js'></script>
     <script type="text/javascript">
 
       var element = document.createElement('div');
@@ -17,7 +17,7 @@
         document.body.appendChild(element);
       {% endif %}
       var player = new THEOplayer.Player(element, {
-        libraryLocation : '//cdn.theoplayer.com/dash/{{ config.THEO_LICENCE_KEY }}/',
+        libraryLocation : '{{ config.THEOPLAYER_BASE_URL}}{{ config.THEOPLAYER_LICENCE_KEY }}',
         ui : {
           {% if theo_config.fluid %}
           fluid: true

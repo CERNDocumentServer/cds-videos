@@ -142,7 +142,7 @@ def test_preview_video_html5(previewer_app, es, db, cds_jsonresolver, users,
                              publish, endpoint_template, ui_blueprint):
     """Test record video previewing."""
     # Enable HTML5 player
-    previewer_app.config['THEO_LICENCE_KEY'] = None
+    previewer_app.config['THEOPLAYER_LICENCE_KEY'] = None
     project = new_project(previewer_app, es, cds_jsonresolver, users,
                           location, db, deposit_metadata)
 
