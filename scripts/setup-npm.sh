@@ -24,4 +24,4 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 # FIXME clean-css version pinned!. See issue #390
-npm update && npm install --silent -g node-sass@3.8.0 clean-css@3.4.24 uglify-js requirejs
+npm update && npm install -g node-sass@3.8.0 clean-css@3.4.24 uglify-js requirejs

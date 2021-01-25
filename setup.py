@@ -82,7 +82,7 @@ install_requires = [
     'arrow>=0.7.0',
     'CairoSVG>=1.0.20,<2.0.0',
     'Flask-Admin>=1.4.2',
-    'Flask-BabelEx>=0.9.2',
+    'Flask-BabelEx>=0.9.3',
     'Flask-Debugtoolbar>=0.10.0',
     'Flask-IIIF>=0.5.0',
     'Flask-WTF>=0.13.1',
@@ -124,7 +124,7 @@ install_requires = [
     'invenio-records-files==1.0.0a11',
     'invenio-records-rest>=1.1.0',
     'invenio-records-ui>=1.0.0',
-    'invenio-records[postgresql]>=1.0.0',
+    'invenio-records[postgresql]>=1.3.2',
     'invenio-rest>=1.0.0',
     'invenio-search-ui>=1.0.1',
     'invenio-search[elasticsearch2]>=1.0.0',
@@ -144,8 +144,7 @@ install_requires = [
     'elasticsearch<3.0.0,>=2.0.0',      # FIXME: invenio-search
     'elasticsearch-dsl<3.0.0,>=2.0.0',  # FIXME: invenio-search
     'node-semver>=0.1.1,<0.2.0',        # FIXME: node-semver 0.2.0
-    'urllib3[secure]<1.25,>=1.23',      # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
-    'SQLAlchemy-Continuum==1.3.4'       # FIXME: issue https://github.com/kvesteri/sqlalchemy-continuum/issues/188
+    'urllib3[secure]>=1.24.2,<1.25',    # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
 ]
 
 packages = find_packages()
