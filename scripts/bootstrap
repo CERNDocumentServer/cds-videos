@@ -40,8 +40,6 @@ npm install \
 
 # Setup and build assets
 cds npm
-# static_folder=$(cds shell --no-term-title -c "print(app.static_folder)")
-# cd $static_folder
 cd ${VIRTUAL_ENV}/var/instance/static
 npm install
 cd ${CWD}

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-          python-version: [2.7, 3.5]
+        python-version: [2.7, 3.5]
 
     steps:
       - name: Install FFmpeg
@@ -40,28 +40,33 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Use Node v6
-        shell: bash -l -eo pipefail {0}
+      - name: Use Node.js 8.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 8.x
+
+      - name: Install global Node packages
         run: |
-          nvm install 6
-          nvm use 6
+          ./scripts/setup-npm.sh
+          rm -f package-lock.json
 
       - name: Generate dependencies
         run: |
           python -m pip install "pip>=20,<21" setuptools py
           python -m pip install wheel coveralls requirements-builder configparser
           pip freeze
+          cp requirements.pinned.txt .ci-${{ matrix.python-version }}-requirements.txt
 
       - name: Cache pip
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('${{ matrix.python-version }}-requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('.ci-${{ matrix.python-version }}-requirements.txt') }}
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.pinned.txt
-          pip install -e .[all]
+          export VIRTUAL_ENV=${pythonLocation}
+          ./scripts/bootstrap .ci-${{ matrix.python-version }}-requirements.txt
           pip freeze
           docker --version
           docker-compose --version
