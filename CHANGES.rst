@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.17 (2021-01-27)
+
+- bump Python packages
+- improve help text for users
+- adapt THEOPlayer code to new versions
+
 Version 1.0.16 (2020-01-24)
 
 - bump cds-sorenson version (updated infrastructure)
