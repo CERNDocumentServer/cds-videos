@@ -166,7 +166,10 @@
             <p>The video is <strong>not</strong> published.</p>
             <ul class="list-unstyled text-left my">
               <li ng-repeat="(task, status) in ($ctrl.cdsDepositCtrl.record._cds.state | orderTasks)">
-                <small><i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}</small>
+                <small>
+                  <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
+                  <a ng-click="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="task === 'file_transcode'"></i></a>
+                </small>
               </li>
             </ul>
           </div>

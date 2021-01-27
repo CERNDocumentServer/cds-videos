@@ -6,8 +6,9 @@
         <div class="cds-deposit-box cds-deposit-box-upload-intro">
           <div class="text-muted">
             <div class="text-muted">
-              <h5 class="text-muted"><strong>Supported videos</strong></h5>
+              <h5 class="text-muted"><strong>Tips</strong></h5>
               <ul>
+                <li>If you are uploading a <mark>Zoom recording</mark>, please make sure that you have enabled the option <a href="https://videoconference.web.cern.ch/t/can-i-record-a-zoom-meeting/126" target="_blank">Optimize for 3rd party video editor</a>. If not, the transcoding process to create different video subformats might take long.</li>
                 <li>Supported video formats are <mark>{{ $ctrl.videoExtensions }}</mark></li>
                 <li>For best results, we recommend uploading <mark>landscape</mark> videos encoded with <mark>H.264</mark> video codec and <mark>24</mark> FPS (Frames Per Second)</li>
                 <li>Ultra High Definition 8K videos are <strong>NOT</strong> supported</li>
@@ -86,6 +87,7 @@
             <ul class="list-inline text-left">
               <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks)">
                 <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
+                <a ng-click="$ctrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="task === 'file_transcode'"></i></a>
               </li>
             </ul>
           </div>
@@ -95,6 +97,13 @@
         </div>
       </div>
     </div>
+    <modal-dialog show="$ctrl.videoTranscodingHelpDialogShown" dialog-title="Video transcoding" >
+      <p class="text-left">The video transcoding step creates several different video formats (qualities) to enable adaptive streaming and optimize how the video is watched on multiple devices with different screen resolutions or Internet connection latencies. It is a heavy and lengthy process.</p>
+      <p class="text-left">The transcoding software will create such video formats automatically in the background after your upload. You can publish your video at any time, even if transcoding <strong>is still running or failed</strong>, given that it might take long to complete. We are constantly monitoring the transcoding process and we will intervene when needed.</p>
+      <p class="text-left"><strong>Our recommendation</strong> is to publish the video as soon as at least one video format is ready. You can follow the status of the transcoding process by clicking on the <strong>Files</strong> tab of each video and then on the <strong>Show</strong> text in the section <strong>Extracted subformats</strong>.</p>
+      <br />
+      <p class="text-left">Please notice that the transcoding platform at CERN is provided by the Webcast service and it is not managed by the CDS service.</p>
+    </modal-dialog>
     <!-- Top status bar -->
     <div class="container-fluid">
       <div class="row">

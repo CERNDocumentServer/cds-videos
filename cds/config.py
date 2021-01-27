@@ -906,7 +906,7 @@ PREVIEWER_PREFERENCE = [
 PREVIEWER_BASE_TEMPLATE = 'cds_previewer/base.html'
 # Licence key and base URL for THEO player
 THEOPLAYER_LICENCE_KEY = None
-THEOPLAYER_BASE_URL = '//cdn.myth.theoplayer.com/'
+THEOPLAYER_BASE_URL = 'https://cdn.myth.theoplayer.com/'
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = ('https://wowza.cern.ch/cds/_definist_/smil:'
                       '{filepath}/playlist.m3u8')
