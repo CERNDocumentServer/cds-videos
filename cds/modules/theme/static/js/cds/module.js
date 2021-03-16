@@ -574,6 +574,7 @@ app.provider('isoLanguages', function () {
         'ru': 'Russian',
         'silent': 'Silent',
         'sk': 'Slovak',
+        'sl': 'Slovene',
         'sr': 'Serbian',
         'sv': 'Swedish',
         'tr': 'Turkish',

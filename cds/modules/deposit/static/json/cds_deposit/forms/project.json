@@ -24,7 +24,8 @@
                 ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
                 ["NumberedList", "BulletedList", "Blockquote"],
                 ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-                ["Source"], ["Maximize"]
+                ["Source"],
+                ["Maximize"]
               ],
               "disableNativeSpellChecker": false,
               "removePlugins": "elementspath",
@@ -79,7 +80,7 @@
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "filterTriggers": ["model.category"],
-          "filter" : "item.category == model.category",
+          "filter": "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
         }
       },
@@ -125,64 +126,64 @@
             "required": true,
             "titleMap": [
               {
-                "value":  "Animations by",
-                "name":  "Animations by"
+                "value": "Animations by",
+                "name": "Animations by"
               },
               {
-                "value":  "Camera Operator",
-                "name":  "Camera Operator"
+                "value": "Camera Operator",
+                "name": "Camera Operator"
               },
               {
-                "value":  "Co-Producer",
-                "name":  "Co-Producer"
+                "value": "Co-Producer",
+                "name": "Co-Producer"
               },
               {
-                "value":  "Creator",
-                "name":  "Creator"
+                "value": "Creator",
+                "name": "Creator"
               },
               {
-                "value":  "Credits",
-                "name":  "Credits"
+                "value": "Credits",
+                "name": "Credits"
               },
               {
-                "value":  "Director",
-                "name":  "Director"
+                "value": "Director",
+                "name": "Director"
               },
               {
-                "value":  "Editor",
-                "name":  "Editor"
+                "value": "Editor",
+                "name": "Editor"
               },
               {
-                "value":  "Music by",
-                "name":  "Music by"
+                "value": "Music by",
+                "name": "Music by"
               },
               {
-                "value":  "Narrator",
-                "name":  "Narrator"
+                "value": "Narrator",
+                "name": "Narrator"
               },
               {
-                "value":  "Photography",
-                "name":  "Photography"
+                "value": "Photography",
+                "name": "Photography"
               },
               {
-                "value":  "Producer",
-                "name":  "Producer"
+                "value": "Producer",
+                "name": "Producer"
               },
               {
-                "value":  "Reporter",
-                "name":  "Reporter"
+                "value": "Reporter",
+                "name": "Reporter"
               },
               {
-                "value":  "Screenwriter",
-                "name":  "Screenwriter"
+                "value": "Screenwriter",
+                "name": "Screenwriter"
               },
               {
-                "value":  "Speaker",
-                "name":  "Speaker"
+                "value": "Speaker",
+                "name": "Speaker"
               },
               {
-                "value":  "Translator",
-                "name":  "Translator"
+                "value": "Translator",
+                "name": "Translator"
               }
             ]
           }
@@ -219,7 +220,7 @@
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
           "filterTriggers": ["model.category"],
-          "filter" : "item.category == model.category",
+          "filter": "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
         },
         "description": ""
@@ -290,112 +291,112 @@
           "required": false,
           "titleMap": [
             {
-              "value":  "bg",
-              "name":  "Bulgarian"
+              "value": "bg",
+              "name": "Bulgarian"
             },
             {
-              "value":  "ca",
-              "name":  "Catalan"
+              "value": "ca",
+              "name": "Catalan"
             },
             {
-              "value":  "da",
-              "name":  "Danish"
+              "value": "da",
+              "name": "Danish"
             },
             {
-              "value":  "de",
-              "name":  "German"
+              "value": "de",
+              "name": "German"
             },
             {
-              "value":  "el",
-              "name":  "Greek"
+              "value": "el",
+              "name": "Greek"
             },
             {
-              "value":  "en",
-              "name":  "English"
+              "value": "en",
+              "name": "English"
             },
             {
-              "value":  "es",
-              "name":  "Spanish"
+              "value": "es",
+              "name": "Spanish"
             },
             {
-              "value":  "fi",
-              "name":  "Finnish"
+              "value": "fi",
+              "name": "Finnish"
             },
             {
-              "value":  "fr",
+              "value": "fr",
               "name": "French"
             },
             {
-              "value":  "hr",
-              "name":  "Croatian"
+              "value": "hr",
+              "name": "Croatian"
             },
             {
-              "value":  "hu",
-              "name":  "Hungarian"
+              "value": "hu",
+              "name": "Hungarian"
             },
             {
-              "value":  "it",
-              "name":  "Italian"
+              "value": "it",
+              "name": "Italian"
             },
             {
-              "value":  "ja",
-              "name":  "Japanese"
+              "value": "ja",
+              "name": "Japanese"
             },
             {
-              "value":  "ka",
-              "name":  "Georgian"
+              "value": "ka",
+              "name": "Georgian"
             },
             {
-              "value":  "ko",
-              "name":  "Korean"
+              "value": "ko",
+              "name": "Korean"
             },
             {
-              "value":  "no",
-              "name":  "Norwegian"
+              "value": "no",
+              "name": "Norwegian"
             },
             {
-              "value":  "pl",
-              "name":  "Polish"
+              "value": "pl",
+              "name": "Polish"
             },
             {
-              "value":  "pt",
-              "name":  "Portuguese"
+              "value": "pt",
+              "name": "Portuguese"
             },
             {
-              "value":  "ru",
-              "name":  "Russian"
+              "value": "ru",
+              "name": "Russian"
             },
             {
-              "value":  "sk",
-              "name":  "Slovak"
+              "value": "sk",
+              "name": "Slovak"
             },
             {
-              "value":  "sr",
-              "name":  "Serbian"
+              "value": "sl",
+              "name": "Slovene"
             },
             {
-              "value":  "sv",
-              "name":  "Swedish"
+              "value": "sr",
+              "name": "Serbian"
             },
             {
-              "value":  "sv",
-              "name":  "Swedish"
+              "value": "sv",
+              "name": "Swedish"
             },
             {
-              "value":  "tr",
-              "name":  "Turkish"
+              "value": "tr",
+              "name": "Turkish"
             },
             {
-              "value":  "uk",
-              "name":  "Ukrainian"
+              "value": "uk",
+              "name": "Ukrainian"
             },
             {
-              "value":  "zh_CN",
-              "name":  "Chinese"
+              "value": "zh_CN",
+              "name": "Chinese"
             },
             {
-              "value":  "zh_TW",
-              "name":  "Chinese (Taiwan)"
+              "value": "zh_TW",
+              "name": "Chinese (Taiwan)"
             }
           ]
         }
