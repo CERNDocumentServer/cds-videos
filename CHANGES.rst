@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 1.0.18 (2021-03-22)
+
+- add Slovenian language
+- update FAQ text
+
 Version 1.0.17 (2021-01-27)
 
 - bump Python packages
