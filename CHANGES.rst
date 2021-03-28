@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.19 (2021-03-28)
+
+- bump cds-dojson to add Slovenian language validation
+
 Version 1.0.18 (2021-03-22)
 
 - add Slovenian language
