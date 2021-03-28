@@ -25,7 +25,7 @@ blinker==1.4              # via flask-debugtoolbar, flask-iiif, flask-mail, flas
 cairocffi==0.9.0          # via cairosvg
 cairosvg==1.0.22
 cchardet==2.1.4           # via invenio-previewer
-cds-dojson==0.9.0
+cds-dojson==0.10.0
 cds-sorenson==0.1.8
 celery==3.1.26.post2
 certifi==2019.3.9         # via dulwich, requests, urllib3
