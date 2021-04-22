@@ -291,6 +291,10 @@
           "required": false,
           "titleMap": [
             {
+              "value": "ar",
+              "name": "Arabic"
+            },
+            {
               "value": "bg",
               "name": "Bulgarian"
             },
@@ -299,24 +303,36 @@
               "name": "Catalan"
             },
             {
+              "value": "zh_CN",
+              "name": "Chinese"
+            },
+            {
+              "value": "zh_TW",
+              "name": "Chinese (Taiwan)"
+            },
+            {
+              "value": "hr",
+              "name": "Croatian"
+            },
+            {
+              "value": "cs",
+              "name": "Czech"
+            },
+            {
               "value": "da",
               "name": "Danish"
             },
             {
-              "value": "de",
-              "name": "German"
-            },
-            {
-              "value": "el",
-              "name": "Greek"
+              "value": "nl",
+              "name": "Dutch"
             },
             {
               "value": "en",
               "name": "English"
             },
             {
-              "value": "es",
-              "name": "Spanish"
+              "value": "et",
+              "name": "Estonian"
             },
             {
               "value": "fi",
@@ -327,8 +343,24 @@
               "name": "French"
             },
             {
-              "value": "hr",
-              "name": "Croatian"
+              "value": "ka",
+              "name": "Georgian"
+            },
+            {
+              "value": "de",
+              "name": "German"
+            },
+            {
+              "value": "el",
+              "name": "Greek"
+            },
+            {
+              "value": "he",
+              "name": "Hebrew"
+            },
+            {
+              "value": "hi",
+              "name": "Hindi"
             },
             {
               "value": "hu",
@@ -343,12 +375,12 @@
               "name": "Japanese"
             },
             {
-              "value": "ka",
-              "name": "Georgian"
-            },
-            {
               "value": "ko",
               "name": "Korean"
+            },
+            {
+              "value": "lt",
+              "name": "Lithuanian"
             },
             {
               "value": "no",
@@ -363,8 +395,20 @@
               "name": "Portuguese"
             },
             {
+              "value": "ro",
+              "name": "Romanian"
+            },
+            {
               "value": "ru",
               "name": "Russian"
+            },
+            {
+              "value": "sr",
+              "name": "Serbian"
+            },
+            {
+              "value": "silent",
+              "name": "Silent"
             },
             {
               "value": "sk",
@@ -375,8 +419,8 @@
               "name": "Slovene"
             },
             {
-              "value": "sr",
-              "name": "Serbian"
+              "value": "es",
+              "name": "Spanish"
             },
             {
               "value": "sv",
@@ -391,12 +435,8 @@
               "name": "Ukrainian"
             },
             {
-              "value": "zh_CN",
-              "name": "Chinese"
-            },
-            {
-              "value": "zh_TW",
-              "name": "Chinese (Taiwan)"
+              "value": "ur",
+              "name": "Urdu"
             }
           ]
         }
