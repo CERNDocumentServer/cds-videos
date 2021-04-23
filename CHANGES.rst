@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.20 (2021-04-23)
+
+- bump cds-dojson to add CERN member states languages
+
 Version 1.0.19 (2021-03-28)
 
 - bump cds-dojson to add Slovenian language validation
