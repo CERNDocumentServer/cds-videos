@@ -120,7 +120,7 @@ install_requires = [
     'invenio-opendefinition>=1.0.0a7',
     'invenio-pages>=1.0.0a4',
     'invenio-pidstore>=1.0.0',
-    'invenio-previewer==1.0.0a11',
+    'invenio-previewer==1.0.0a12',
     'invenio-records-files==1.0.0a11',
     'invenio-records-rest>=1.1.0',
     'invenio-records-ui>=1.0.0',
