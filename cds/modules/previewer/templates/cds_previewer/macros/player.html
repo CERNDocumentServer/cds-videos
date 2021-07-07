@@ -72,8 +72,6 @@
           360: true,
         },
         {% endif %}
-        startTime: {{ embed_config.start | int if embed_config.start else 0 }},
-        endTime: {{ embed_config.end | int if embed_config.end else "Infinity" }},
         preload: 'auto'
       };
       {% if theo_config.socialSharing %}
@@ -88,6 +86,14 @@
            }
        ];
       {% endif %}
+      player.addEventListener("durationchange", function() {
+        {% if embed_config.start %}
+        player.clip.startTime = {{ embed_config.start | int }};
+        {% endif %}
+        {% if embed_config.end %}
+        player.clip.endTime = {{ embed_config.end | int }};
+        {% endif %}
+      });
       player.autoplay = {{ embed_config.autoplay | default(False) | tojson }};
       player.loop = {{ embed_config.loop | default(False) | tojson }};
       player.controls = {{ (not embed_config.controlsOff) | default(True) | tojson }};
