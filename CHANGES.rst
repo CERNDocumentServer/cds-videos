@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 1.0.21 (2021-07-09)
+
+- fix start/end time when embedding videos
+- remove link to detailed video stats
+
 Version 1.0.20 (2021-04-23)
 
 - bump cds-dojson to add CERN member states languages
