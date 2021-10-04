@@ -69,3 +69,5 @@ dump.rdb
 .idea
 package-lock.json
 
+# node-modules
+node_modules

@@ -31,6 +31,7 @@ from invenio_indexer.tasks import index_record
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
 
+from ..records.utils import lowercase_value
 from .api import Video, Project
 
 
@@ -46,6 +47,15 @@ def cdsdeposit_indexer_receiver(
     if record['$schema'] in [project_schema, video_schema]:
         json['_cds']['state'] = deposit['_cds']['state']
         json['_files'] = deposit['_files']
+        if json.get('_access'):
+            if json['_access'].get('read'):
+                json['_access']['read'] = [
+                    lowercase_value(value) for value in json['_access'][
+                        'read']]
+            if json['_access'].get('update'):
+                json['_access']['update'] = [
+                    lowercase_value(value) for value in json['_access'][
+                        'update']]
 
 
 class CDSRecordIndexer(RecordIndexer):

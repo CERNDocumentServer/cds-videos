@@ -42,7 +42,7 @@ from invenio_records.api import Record
     ({'_access': {'read': [1, 'no-access@cern.ch',
                   'no-access-either@cern.ch']}}, 'read', True),
     ({'_access': {'read': [2, 'no-access@cern.ch']}}, 'read', False),
-    ({'_access': {'read': ['test-egroup@cern.ch']}}, 'read', True),
+    ({'_access': {'read': ['Test-egroup@cern.ch']}}, 'read', True),
     ({'_access': {'read': []}}, 'read', True),
     ({'foo': 'bar'}, 'create', True),
     ({'_access': {'create': [1, 'no-access@cern.ch',
@@ -61,7 +61,7 @@ from invenio_records.api import Record
     ({'_access': {'update': [1, 'no-access@cern.ch',
                   'no-access-either@cern.ch']}}, 'update', True),
     ({'_access': {'update': [2, 'no-access@cern.ch']}}, 'update', False),
-    ({'_access': {'update': ['test-egroup@cern.ch']}}, 'update', True),
+    ({'_access': {'update': ['Test-egroup@cern.ch']}}, 'update', True),
     ({'_access': {'update': []}}, 'update', False),
     # Only admin can delete records
     ({'foo': 'bar'}, 'delete', False),

@@ -87,9 +87,11 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
         data = json.loads(res.data.decode('utf-8'))
         assert len(data['hits']['hits']) == 0
 
-        # Add user2 as editor for this deposit
+        # Add user1 as editor for this deposit
+        # Check that user1 email is case insensitive
         proj = api_project[0]
-        proj['_access'] = {'update': [User.query.get(users[1]).email]}
+        proj['_access'] = {'update': [
+            User.query.get(users[1]).email.capitalize()]}
         proj.commit()
         RecordIndexer().index(proj)
         sleep(2)
