@@ -81,6 +81,9 @@ Run celery:
 
     (cds3)$ ./script/celery
 
+If you are running MacOS Big Sur and you have an error with dynamic linker, check this link:
+https://stackoverflow.com/questions/65130080/attributeerror-running-django-site-on-mac-11-0-1
+
 Now you can visit http://localhost:5000/ :)
 
 In order to test the video previewer:
@@ -92,54 +95,3 @@ In order to test the video previewer:
         $ 127.0.0.1  localhost.cern.ch
 
 Now you can visit http://localhost.cern.ch:5000/ :)
-
-
-Docker
-------
-
-First clone the repository, if you haven't done it already, build all docker
-images and boot them up using Docker Compose:
-
-.. code-block:: console
-
-    $ git clone https://github.com/CERNDocumentServer/cds-videos.git
-    $ git checkout master
-    $ docker-compose build
-    $ docker-compose up
-
-Next, create the database, indexes, fixtures and an admin user:
-
-.. code-block:: console
-
-    $ docker-compose run --rm web cds db create
-    $ docker-compose run --rm web cds index init
-    $ docker-compose run --rm web cds users create cds@cern.ch -a
-    $ docker-compose run --rm web cds access allow admin-access user cds@cern.ch
-    $ docker-compose run --rm web cds fixtures records
-
-Now visit the following URL in your browser:
-
-.. code-block:: console
-
-    https://<docker ip>
-
-You can use the following web interface to inspect Elasticsearch and RabbitMQ:
-
-- Elasticsearch: http://<docker ip>:9200/_plugin/hq/
-- RabbitMQ: http://<docker ip>:15672/ (guest/guest)
-
-Also the following ports are exposed on the Docker host:
-
-- ``80``: Nginx
-- ``443``: Nginx
-- ``5000``: CDS
-- ``5432``: PostgreSQL
-- ``5672``: RabbitMQ
-- ``6379``: Redis
-- ``9200``: Elasticsearch
-- ``9300``: Elasticsearch
-- ``15672``: RabbitMQ management console
-
-**Dependencies**
-
-CDS depends on PostgreSQL, Elasticsearch, Redis and RabbitMQ.
