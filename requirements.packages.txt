@@ -40,6 +40,7 @@ datacite==1.0.1
 dcxml==0.1.1
 decorator==4.4.0          # via ipython, traitlets, validators
 defusedxml==0.6.0         # via nbconvert
+dictdiffer==0.8.1
 dojson==1.4.0             # via cds-dojson, invenio-oaiserver
 dulwich==0.19.11          # via autosemver
 elasticsearch-dsl==2.2.0
