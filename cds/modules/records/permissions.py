@@ -32,7 +32,7 @@ from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 from invenio_deposit.permissions import action_admin_access
 
-from .utils import is_deposit, is_record, get_user_provides
+from .utils import is_deposit, is_record, get_user_provides, lowercase_value
 from .api import CDSRecord as Record
 
 
@@ -296,7 +296,7 @@ def has_read_files_permission(user, record):
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = record['_access']['read']
+    read_access_groups = [lowercase_value(value) for value in record['_access']['read']]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -312,7 +312,7 @@ def has_read_record_permission(user, record):
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = record['_access']['read']
+    read_access_groups = [lowercase_value(value) for value in record['_access']['read']]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -343,7 +343,8 @@ def has_update_permission(user, record):
     # Allow based in the '_access' key
     user_provides = get_user_provides()
     # set.isdisjoint() is faster than set.intersection()
-    allowed_users = record.get('_access', {}).get('update', [])
+    allowed_users = [lowercase_value(value) for value in \
+        record.get('_access', {}).get('update', [])]
     if allowed_users and not set(user_provides).isdisjoint(set(allowed_users)):
         return True
 

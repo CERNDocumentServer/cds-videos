@@ -76,16 +76,26 @@ def is_project_record(record):
     return 'records/videos/project/project-v' in project_schema
 
 
+
+def lowercase_value(value):
+    """Lowercase value if not an integer.
+
+    This function is used when we compare user's identity groups and record's
+    stored `_access` values. If the value is not a string, it is considered the
+    user ID (integer) and thus we return it unchanged.
+    """
+    lowercase_value = ""
+    try:
+        lowercase_value = value.lower()
+    except AttributeError:
+        # Add the user ID (integer) to the list
+        lowercase_value = value
+    return lowercase_value
+
+
 def get_user_provides():
     """Extract the user's provides from g."""
-    provides = []
-    for need in g.identity.provides:
-        try:
-            provides.append(need.value.lower())
-        except AttributeError:
-            # Add the user ID (integer) to the list
-            provides.append(need.value)
-    return provides
+    return [lowercase_value(need.value) for need in g.identity.provides]
 
 
 def remove_html_tags(html_tag_remover, value):

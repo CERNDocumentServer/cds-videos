@@ -61,6 +61,7 @@ from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
+from ..records.utils import lowercase_value
 from ..records.validators import PartialDraft4Validator
 from ..webhooks.status import (ComputeGlobalStatus, get_deposit_events,
                                get_tasks_status_by_task,
@@ -193,12 +194,12 @@ class CDSDeposit(Deposit):
     @preserve(result=False, fields=PRESERVE_FIELDS)
     def update(self, *args, **kwargs):
         """Update only drafts."""
-        def lower(l):
-            return [s.lower() for s in l]
         # use always lower case in the access rights to prevent problems
         if '_access' in self:
-            self['_access']['read'] = lower(self['_access'].get('read', []))
-            self['_access']['update'] = lower(self['_access'].get('update', []))
+            self['_access']['read'] = lowercase_value(
+                self['_access'].get('read', []))
+            self['_access']['update'] = lowercase_value(
+                self['_access'].get('update', []))
         super(CDSDeposit, self).update(*args, **kwargs)
 
     @preserve(result=False, fields=PRESERVE_FIELDS)
