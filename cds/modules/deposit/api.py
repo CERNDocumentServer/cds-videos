@@ -163,7 +163,11 @@ class CDSDeposit(Deposit):
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
         bucket = Bucket.create(location=Location.get_by_name(
-                kwargs.get('bucket_location', 'default')))
+            kwargs.get('bucket_location', 'default')),
+            storage_class=current_app.config[
+                'DEPOSIT_DEFAULT_STORAGE_CLASS'
+            ]
+        )
         data['_buckets'] = {'deposit': str(bucket.id)}
         data.setdefault('_cds', {})
         data['_cds'].setdefault('state', {})

@@ -30,7 +30,7 @@ import uuid
 from os.path import splitext
 
 from flask import current_app
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import FileObject, FilesIterator, Record
@@ -202,6 +202,12 @@ class CDSRecord(Record):
         """Return depid of the record."""
         return PersistentIdentifier.get(
             pid_type='depid', pid_value=self.get('_deposit', {}).get('id'))
+
+    def _create_bucket(self):
+        """Override bucket creation."""
+        return Bucket.create(storage_class=current_app.config[
+            'DEPOSIT_DEFAULT_STORAGE_CLASS'
+        ])
 
 
 class Keyword(Record):
