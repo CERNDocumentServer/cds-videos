@@ -28,7 +28,11 @@
 import arrow
 from flask_babelex import gettext as _
 from flask_wtf import Form
-from wtforms import IntegerField, SelectField, StringField, validators
+from invenio_pidstore.errors import PIDDoesNotExistError
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_sequencegenerator.api import Template
+from wtforms import (IntegerField, SelectField, StringField, ValidationError,
+                     validators)
 
 
 class ReserveReportNumberForm(Form):
@@ -70,6 +74,18 @@ class ReserveReportNumberForm(Form):
         ),
         validators=[validators.optional()],
     )
+
+    def validate_project_number(self, field):
+        if not isinstance(field.data, int):
+            return
+        template = Template('project-v1_0_0')
+        counter = template.model.counter(**self.data)
+        project_rn = counter.template_instance.format(
+            counter=field.data)
+        try:
+            PersistentIdentifier.get('rn', project_rn)
+        except PIDDoesNotExistError:
+            raise ValidationError("Not existent project number")
 
 
 class MintReportNumber(Form):

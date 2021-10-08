@@ -453,7 +453,9 @@ class CDSRecordDumpLoader(RecordDumpLoader):
     def _resolve_bucket(cls, deposit, record):
         """Build bucket."""
         logging.debug('Creating new buckets, record and deposit.')
-        bucket = Bucket.create(location=Location.get_by_name('videos'))
+        bucket = Bucket.create(storage_class=current_app.config[
+            'DEPOSIT_DEFAULT_STORAGE_CLASS'
+        ])
         deposit['_buckets'] = {'deposit': str(bucket.id)}
         RecordsBuckets.create(record=deposit.model, bucket=bucket)
         record['_buckets'] = deepcopy(deposit['_buckets'])

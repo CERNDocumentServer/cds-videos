@@ -81,7 +81,9 @@ def _process_files(record, files_metadata):
     """
     if not files_metadata:
         return
-    bucket = Bucket.create(location=Location.get_by_name('videos'))
+    bucket = Bucket.create(storage_class=current_app.config[
+            'DEPOSIT_DEFAULT_STORAGE_CLASS'
+        ])
     RecordsBuckets.create(record=record.model, bucket=bucket)
     response = requests.get(
         files_metadata['source'], stream=True, verify=False)

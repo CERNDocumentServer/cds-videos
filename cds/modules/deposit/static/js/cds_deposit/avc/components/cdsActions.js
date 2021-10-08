@@ -15,9 +15,9 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
                 var _check = hasMultipleActions ? userActions : [userActions],
                     message;
                 if (_check.indexOf('DELETE') > -1) {
-                  message = 'Succefully deleted.'
+                  message = 'Successfully deleted.'
                 } else if (_check.indexOf('PUBLISH') > -1) {
-                  message = 'Succefully published.'
+                  message = 'Successfully published.'
                 }
                 that.cdsDepositCtrl.onSuccessAction(response, message);
               },
