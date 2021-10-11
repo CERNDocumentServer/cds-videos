@@ -26,11 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-import json
 from copy import deepcopy
 
 from celery.result import AsyncResult
-from flask import url_for
 from invenio_db import db
 from invenio_files_rest.models import (
     ObjectVersion,
@@ -39,21 +37,19 @@ from invenio_files_rest.models import (
 )
 from invenio_records import Record
 from sqlalchemy.orm.attributes import flag_modified
+from flask import current_app, request, url_for
 
 from cds_sorenson.api import get_all_distinct_qualities
 from flask_security import current_user
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_webhooks.models import Receiver
 
+from ._compat import delete_cached_json_for
+from .errors import InvalidPayload
 from ..deposit.api import deposit_video_resolver
-from ..flows.api import Flow
+from ..flows.api import Flow, Task
 from ..flows.models import Status as FlowStatus
 from ..records.permissions import DepositPermission
-from .status import (
-    get_event_last_flow,
-    replace_task_id,
-    TASK_NAMES,
-)
+
 from .tasks import (
     DownloadTask,
     ExtractFramesTask,
@@ -63,108 +59,79 @@ from .tasks import (
 )
 
 
-def _update_event_bucket(event):
+def _update_event_bucket(flow):
     """Update event's payload with correct bucket of deposit."""
-    depid = event.payload['deposit_id']
+    depid = flow.payload['deposit_id']
     dep_uuid = str(PersistentIdentifier.get('depid', depid).object_uuid)
     deposit_bucket = Record.get_record(dep_uuid)['_buckets']['deposit']
-    event.payload['bucket_id'] = deposit_bucket
-    flag_modified(event, 'payload')
+    flow.payload['bucket_id'] = deposit_bucket
+    flag_modified(flow, 'payload')
 
 
-class CeleryAsyncReceiver(Receiver):
+class CeleryAsyncReceiver(object):
     """Celery Async Receiver abstract class."""
 
-    @staticmethod
-    def has_result(event):
-        """Return true if some result are in the event."""
-        return '_tasks' in event.response
+    def __call__(self):
+        """Proxy to ``self.run`` method."""
+        return self.run()
+
+    def run(self, *args, **kwargs):
+        """Implement method accepting the ``Event`` instance."""
+        raise NotImplementedError()
 
     @staticmethod
-    def get_flow(event):
+    def get_flow(flow_id):
         """Find the latest flow associated with the event."""
-        return get_event_last_flow(event)
+        return Flow.get_flow(flow_id)
 
-    @classmethod
-    def _deserialize_result(cls, event):
-        """Deserialize celery result stored in event."""
-        return CeleryAsyncReceiver.get_flow(event).status
-
-    @classmethod
-    def _serialize_result(cls, event, result, fun=None):
-        """Run the task and save the task ids."""
-        fun = fun or (lambda x: x)
-        with db.session.begin_nested():
-            event.response.update(_tasks=result)
-            flag_modified(event, 'response')
-            flag_modified(event, 'response_headers')
-
-    def delete(self, event):
+    def delete(self, flow):
         """Delete."""
-        self.clean(event=event)
-        super(CeleryAsyncReceiver, self).delete(event=event)
+        self.clean(flow=flow)
 
-    def clean(self, event):
+    def clean(self, flow):
         """Clean environment."""
-        flow = CeleryAsyncReceiver.get_flow(event)
+        flow = CeleryAsyncReceiver.get_flow(flow.id)
         flow.stop()
-        super(CeleryAsyncReceiver, self).clean(event=event)
 
     @staticmethod
     def delete_task(event, task_id):
         """Revoke a specific task."""
         AsyncResult(task_id).revoke(terminate=True)
 
-    def status(self, event):
+    def serialize_result(self, flow):
         """Get the status."""
-        if event.response_code == 410:
-            # in case the event has been removed
-            return (201, event.response)
-        status = CeleryAsyncReceiver.get_flow(event).status
-        return (FlowStatus.status_to_http(status['status']), status)
+        flow = CeleryAsyncReceiver.get_flow(flow.id)
+        if flow.response_code == 410:
+            # in case the flow has been removed
+            # return what was already in the response
+            return 201, flow.response
+        return FlowStatus.status_to_http(flow.status), flow.json
 
-    def persist(self, event, result):
+    def persist(self, flow):
         """Persist event and result after execution."""
         with db.session.begin_nested():
-            status = CeleryAsyncReceiver.get_flow(event).status
-            event.response.update(global_status=status['status'])
 
-            db.session.add(event)
+            status = CeleryAsyncReceiver.get_flow(flow.id).status
+            flow.response.update(global_status=status)
+
         db.session.commit()
-        update_avc_deposit_state(deposit_id=event.payload.get('deposit_id'))
+        update_avc_deposit_state(deposit_id=flow.payload.get('deposit_id'))
 
-    def rerun_task(self, **payload):
-        """Re-run a task."""
-        # TODO
-        db.session.expunge(payload['event'])
-        # rerun task (with cleaning)
-        result = self.run_task(_clean=True, **payload).apply_async()
-        # update event information
-        self._update_serialized_result(
-            event=payload['event'],
-            old_task_id=payload['task_id'],
-            task_result=result,
-        )
-        self.persist(
-            event=payload['event'],
-            result=self._deserialize_result(payload['event']),
-        )
-
-    def _update_serialized_result(self, event, old_task_id, task_result):
-        """Update task id in global result."""
-        # TODO
-        result_deserialized = self._deserialize_result(event)
-        self._serialize_result(
-            event=event,
-            result=result_deserialized,
-            fun=lambda x: replace_task_id(
-                result=x, old_task_id=old_task_id, new_task_id=task_result.id
-            ),
-        )
+    def extract_payload(self):
+        """Extract payload from request."""
+        if request.is_json:
+            # Request.get_json() could be first called with silent=True.
+            delete_cached_json_for(request)
+            return request.get_json(silent=False, cache=False)
+        elif request.content_type == 'application/x-www-form-urlencoded':
+            return dict(request.form)
+        raise InvalidPayload(request.content_type)
 
 
 class AVCWorkflow(CeleryAsyncReceiver):
     """AVC workflow receiver."""
+
+    receiver_id = 'avc'
 
     def __init__(self, *args, **kwargs):
         """Init."""
@@ -176,41 +143,38 @@ class AVCWorkflow(CeleryAsyncReceiver):
             'file_video_extract_frames': ExtractFramesTask,
         }
 
-    def create_task(self, event, task_name, **kwargs):
-        """Create a task with parameters from event."""
-        kwargs['event_id'] = str(event.id)
-        kwargs['version_id'] = event.response['version_id']
-        payload = deepcopy(event.payload)
+    def create_task(self, flow, task_name, **kwargs):
+        """Create a task with parameters from flow."""
+        payload = deepcopy(flow.payload)
         payload.update(**kwargs)
-        return (self._tasks[task_name](), payload)
+        return self._tasks[task_name](), payload
 
-    def clean_task(self, event, task_name, *args, **kwargs):
+    def clean_task(self, flow, task_name, *args, **kwargs):
         """Clean a task."""
-        kwargs['event_id'] = str(event.id)
-        kwargs['version_id'] = event.response['version_id']
-        kwargs['deposit_id'] = event.payload['deposit_id']
+        kwargs['version_id'] = flow.payload['version_id']
+        kwargs['deposit_id'] = flow.payload['deposit_id']
         return self._tasks[task_name]().clean(*args, **kwargs)
 
     @staticmethod
-    def _init_object_version(event):
+    def _init_object_version(flow):
         """Create, if doesn't exists, the version object."""
-        event_id = str(event.id)
+        flow_id = str(flow.id)
         with db.session.begin_nested():
             # create a object version if doesn't exists
-            if 'version_id' in event.payload:
-                version_id = event.payload['version_id']
+            if 'version_id' in flow.payload:
+                version_id = flow.payload['version_id']
                 object_version = as_object_version(version_id)
             else:
                 object_version = ObjectVersion.create(
-                    bucket=event.payload['bucket_id'], key=event.payload['key']
+                    bucket=flow.payload['bucket_id'], key=flow.payload['key']
                 )
                 ObjectVersionTag.create(
-                    object_version, 'uri_origin', event.payload['uri']
+                    object_version, 'uri_origin', flow.payload['uri']
                 )
                 version_id = str(object_version.version_id)
             # add tag with corresponding event
             ObjectVersionTag.create_or_update(
-                object_version, '_event_id', event_id
+                object_version, '_flow_id', flow_id
             )
             # add tag for preview
             ObjectVersionTag.create_or_update(object_version, 'preview', True)
@@ -221,19 +185,19 @@ class AVCWorkflow(CeleryAsyncReceiver):
             ObjectVersionTag.create_or_update(
                 object_version, 'context_type', 'master'
             )
-            event.response['version_id'] = version_id
+            flow.response['version_id'] = version_id
         return object_version
 
     @staticmethod
-    def _update_event_response(event, version_id):
+    def _update_flow_response(flow, version_id):
         """Update event response."""
-        event_id = str(event.id)
+        flow_id = str(flow.id)
         object_version = as_object_version(version_id)
         obj_tags = object_version.get_tags()
         obj_key = object_version.key
         obj_bucket_id = str(object_version.bucket_id)
         with db.session.begin_nested():
-            event.response.update(
+            flow.response.update(
                 links={
                     'self': url_for(
                         'invenio_files_rest.object_api',
@@ -242,9 +206,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
                         _external=True,
                     ),
                     'cancel': url_for(
-                        'invenio_webhooks.event_item',
-                        receiver_id='avc',
-                        event_id=event_id,
+                        'cds_webhooks.flow_item',
+                        receiver_id=AVCWorkflow.receiver_id,
+                        flow_id=flow_id,
                         _external=True,
                     ),
                 },
@@ -252,74 +216,78 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 version_id=version_id,
                 tags=obj_tags,
             )
-            flag_modified(event, 'response')
-            flag_modified(event, 'response_headers')
+            flag_modified(flow.model, 'response')
 
-    def _build_flow(self, event):
+    def _build_flow(self, flow):
         """Build flow."""
 
-        def build_flow(flow):
-            # First step
-            if 'version_id' in event.payload:
-                flow.chain(
-                    *self.create_task(
-                        event=event, task_name='file_video_metadata_extraction'
-                    )
+        # First step
+        if 'version_id' in flow.payload:
+            flow.chain(
+                *self.create_task(
+                    flow=flow, task_name='file_video_metadata_extraction'
                 )
-            else:
-                # FIXME: better handle this on the API
-                tasks_info = [
-                    list(t)
-                    for t in zip(
-                        self.create_task(
-                            event=event, task_name='file_download'
-                        ),
-                        self.create_task(
-                            event=event,
-                            task_name='file_video_metadata_extraction',
-                        ),
-                    )
-                ]
-                flow.group(*tasks_info)
-            # Second step
-            all_distinct_qualities = get_all_distinct_qualities()
-            event.response['presets'] = all_distinct_qualities
-
+            )
+        else:
+            # FIXME: better handle this on the API
             tasks_info = [
                 list(t)
                 for t in zip(
                     self.create_task(
-                        event=event, task_name='file_video_extract_frames'
+                        flow=flow, task_name='file_download'
                     ),
-                    *[
-                        self.create_task(
-                            event=event,
-                            task_name='file_transcode',
-                            preset_quality=preset_quality,
-                        )
-                        for preset_quality in all_distinct_qualities
-                    ]
+                    self.create_task(
+                        flow=flow,
+                        task_name='file_video_metadata_extraction',
+                    ),
                 )
             ]
             flow.group(*tasks_info)
+        # Second step
+        all_distinct_qualities = get_all_distinct_qualities()
+        flow.response['presets'] = all_distinct_qualities
 
-        return build_flow
+        tasks_info = [
+            list(t)
+            for t in zip(
+                self.create_task(
+                    flow=flow, task_name='file_video_extract_frames'
+                ),
+                *[
+                    self.create_task(
+                        flow=flow,
+                        task_name='file_transcode',
+                        preset_quality=preset_quality,
+                    )
+                    for preset_quality in all_distinct_qualities
+                ]
+            )
+        ]
+        flow.group(*tasks_info)
 
-    def _workflow(self, event):
+        return flow
+
+    def _workflow(self, deposit_id, user_id, bucket_id, version_id, key):
         with db.session.begin_nested():
             # Add the event ID to the payload for querying later
             flow = Flow.create(
                 'AVCWorkflow',
                 payload={
-                    'event_id': str(event.id),
-                    'deposit_id': event.payload['deposit_id'],
+                    'deposit_id': deposit_id,
+                    'bucket_id': bucket_id,
+                    'version_id': version_id,
+                    'key': key,
+
                 },
+                user_id=user_id,
+                deposit_id=deposit_id,
+                receiver_id=self.receiver_id,
             )
-            flow.assemble(self._build_flow(event))
+            flow.assemble(self._build_flow)
         db.session.commit()
         return flow
 
-    def run(self, event):
+    def run(self, deposit_id, user_id, version_id, bucket_id, key):
         """Run AVC workflow for video transcoding.
 
         Steps:
@@ -347,64 +315,75 @@ class AVCWorkflow(CeleryAsyncReceiver):
           * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
           * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
         """
-        assert 'deposit_id' in event.payload
-        assert ('uri' in event.payload and 'key' in event.payload) or (
-            'version_id' in event.payload
+
+        flow = self._workflow(deposit_id=deposit_id,
+                              user_id=user_id,
+                              bucket_id=bucket_id,
+                              version_id=version_id,
+                              key=key)
+        flow_id = flow.id  # Get it for later because the DB object is modified
+        assert 'deposit_id' in flow.payload
+        assert ('uri' in flow.payload and 'key' in flow.payload) or (
+                'version_id' in flow.payload
         )
 
-        # TODO remove field completely when we make sure nothing breaks
-        if 'version_id' not in event.payload:
-            _update_event_bucket(event)
+        if 'version_id' not in flow.payload:
+            _update_event_bucket(flow)
 
         # 1. create the object version if doesn't exist
-        object_version = self._init_object_version(event=event)
+        object_version = self._init_object_version(flow)
         version_id = str(object_version.version_id)
-        db.session.expunge(event)
+
+        # expunge in case of any mutations to the object
+        db.session.expunge(flow.model)
         db.session.commit()
+
         # 2. define the workflow and run
-        flow = self._workflow(event=event)
-        flow_id = flow.id # Get it for later because the DB object is modified
         flow.start()
         # 2.1 Refresh flow object
         flow = Flow.get_flow(flow_id)
         # 3. update event response
-        self._update_event_response(event=event, version_id=version_id)
-        # 4. serialize event and result
-        self._serialize_result(
-            event=event, result=self.build_status(flow.status)
-        )
-        # 5. persist everything
-        super(AVCWorkflow, self).persist(event, flow.status)
+        self._update_flow_response(flow=flow, version_id=version_id)
 
-    def clean(self, event):
+        # 4. persist everything
+        super(AVCWorkflow, self).persist(flow)
+
+        return flow
+
+    def clean(self, flow):
         """Delete tasks and everything created by them."""
-        self.clean_task(event=event, task_name='file_video_extract_frames')
+        self.clean_task(flow=flow, task_name='file_video_extract_frames')
         for preset_quality in get_all_distinct_qualities():
             self.clean_task(
-                event=event,
+                flow=flow,
                 task_name='file_transcode',
                 preset_quality=preset_quality,
             )
         self.clean_task(
-            event=event, task_name='file_video_metadata_extraction'
+            flow=flow, task_name='file_video_metadata_extraction'
         )
-        if 'version_id' not in event.payload:
-            self.clean_task(event=event, task_name='file_download')
-        super(AVCWorkflow, self).clean(event)
+        if 'version_id' not in flow.payload:
+            self.clean_task(flow=flow, task_name='file_download')
+        super(AVCWorkflow, self).clean(flow)
 
-    def status(self, event):
+    def serialize_result(self, flow):
         """AVCWorkflow particular status."""
-        code, status = super(AVCWorkflow, self).status(event)
-        if 'tasks' in status:
+        code, full_flow_json = super(AVCWorkflow, self).serialize_result(flow)
+        if 'tasks' in full_flow_json:
             # Extract info and build correct status dict
-            status = self.build_status(status)
-        return code, status
+            full_flow_json = self.build_flow_json(full_flow_json)
+        return code, full_flow_json
 
-    def build_status(self, raw_info):
+    def build_flow_json(self, flow_json):
+        """Build json serializer object."""
         status = ([], [])
-        for task in raw_info['tasks']:
+
+        for task in flow_json['tasks']:
+            task_status = Task.build_task_json_status(task)
+
             # Get the UI name of the task
-            task_name = TASK_NAMES.get(task['name'])
+            task_name = task_status["name"]
+
             # Calculate the right position inside the tuple
             step = (
                 0
@@ -412,39 +391,17 @@ class AVCWorkflow(CeleryAsyncReceiver):
                 in ('file_download', 'file_video_metadata_extraction')
                 else 1
             )
-            # Add the information the UI needs on the right position
-            payload = task['payload']
-            payload['type'] = task_name
-            payload['key'] = payload.get('preset_quality', payload['key'])
-            if task_name == 'file_video_metadata_extraction':
-                # Load message as JSON, we only need this for this particular task
-                try:
-                    payload['extracted_metadata'] = json.loads(task['message'])
-                except:
-                    payload['extracted_metadata'] = task['message']
-                task['message'] = 'Attached video metadata'
-            status[step].append(
-                {
-                    'name': task_name,
-                    'id': task['id'],
-                    'status': 'REVOKED'
-                    if 'Not transcoding' in task['message']
-                    else task['status'],
-                    'info': {
-                        'payload': payload,
-                        'message': task['message'],
-                    },
-                }
-            )
+
+            status[step].append(task_status)
 
         return status
 
     @classmethod
-    def can(cls, user_id, event, action, **kwargs):
-        """Check permission."""
+    def can(cls, user_id, flow, action, **kwargs):
+        """Check receiver permission."""
         record = None
-        if event:
-            deposit_id = event.payload['deposit_id']
+        if flow:
+            deposit_id = flow.payload['deposit_id']
             record = deposit_video_resolver(deposit_id).project
         return DepositPermission.create(
             record=record, action=action, user=current_user

@@ -24,7 +24,7 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Invenio-Flow python API."""
-
+import json
 import logging
 from functools import wraps
 from itertools import repeat
@@ -94,16 +94,35 @@ class Flow(object):
         """Get flow payload."""
         return self.model.payload if self.model else None
 
-    @property
-    def previous_id(self):
-        """Get the previous run of the flow."""
-        return self.model.previous_id if self.model else None
-
     @payload.setter
     def payload(self, value):
         """Update payload."""
         if self.model:
             self.model.payload = value
+            db.session.merge(self.model)
+
+    @property
+    def response(self):
+        """Get flow payload."""
+        return self.model.response if self.model else None
+
+    @response.setter
+    def response(self, value):
+        """Update payload."""
+        if self.model:
+            self.model.response = value
+            db.session.merge(self.model)
+
+    @property
+    def response_code(self):
+        """Get flow payload."""
+        return self.model.response_code if self.model else None
+
+    @response_code.setter
+    def response_code(self, value):
+        """Update payload."""
+        if self.model:
+            self.model.response_code = value
             db.session.merge(self.model)
 
     @property
@@ -117,14 +136,20 @@ class Flow(object):
         return self.model.updated if self.model else None
 
     @property
-    def status(self):
+    def json(self):
         """Get flow status."""
         if self.model is None:
             return None
 
         res = self.model.to_dict()
-        res.update({'tasks': [t.to_dict() for t in self.model.tasks]})
+        res.update(
+            {'tasks': [t.to_dict() for t in self.model.tasks]}
+        )
         return res
+
+    @property
+    def status(self):
+        return self.model.status if self.model else None
 
     @classmethod
     def get_flow(cls, id_):
@@ -133,14 +158,18 @@ class Flow(object):
         return cls(obj)
 
     @classmethod
-    def create(cls, name, payload=None, id_=None, previous_id=None):
+    def create(cls, name, payload=None,
+               id_=None, user_id=None,
+               deposit_id=None, receiver_id=None):
         """Create a new flow instance and store it in the database.."""
         with db.session.begin_nested():
             obj = FlowModel(
                 name=name,
                 id=id_ or uuid(),
                 payload=payload or dict(),
-                previous_id=previous_id,
+                user_id=user_id,
+                deposit_id=deposit_id,
+                receiver_id=receiver_id
             )
             db.session.add(obj)
         logger.info('Created new Flow %s', obj)
@@ -163,11 +192,11 @@ class Flow(object):
         task_id = uuid()
         kwargs = kwargs if kwargs else {}
         kwargs.update({'flow_id': str(self.id), 'task_id': task_id})
-        kwargs.update(self.payload,)  # TODO: Do we need to move this to a key?
+        kwargs.update(self.payload, )
         signature = task.subtask(
             task_id=task_id,
             kwargs=kwargs,
-            immutable=True,  # TODO, ad this as an option/parameter?
+            immutable=True,
         )
 
         _ = TaskModel.create(
@@ -181,7 +210,7 @@ class Flow(object):
         return signature
 
     def build(self):
-        """."""
+        """Build flow."""
         raise NotImplementedError()
 
     def assemble(self, build_func):
@@ -221,7 +250,7 @@ class Flow(object):
     def start(self):
         """Start the flow asynchronously."""
         if not self._canvas:
-            self.assemble()
+            self.assemble(self.build)
         return self._canvas.apply_async()
 
     def stop(self):
@@ -266,15 +295,13 @@ class Flow(object):
 
         kwargs = {'flow_id': str(self.id), 'task_id': str(task.id)}
         kwargs.update(task.payload)
-        kwargs.update(self.payload)  # TODO: Do we need to move this to a key?
+        kwargs.update(self.payload)
         return (
-            celery_app.tasks.get(task.name)
-            .subtask(
-                task_id=str(task.id), 
+            celery_app.tasks.get(task.name).subtask(
+                task_id=str(task.id),
                 kwargs=kwargs,
-                immutable=True,  # TODO, ad this as an option/parameter?
-            )
-            .apply_async()
+                immutable=True,
+            ).apply_async()
         )
 
 
@@ -308,3 +335,42 @@ class Task(CeleryTask):
             '{}'.format(retval),
         )
         super(Task, self).on_success(retval, task_id, args, kwargs)
+
+    @staticmethod
+    def build_task_json_status(task_json):
+        """."""
+        from ..webhooks.status import TASK_NAMES
+        # Get the UI name of the task
+        task_name = TASK_NAMES.get(task_json['name'])
+
+        # Add the information the UI needs on the right position
+        payload = task_json['payload']
+        payload['type'] = task_name
+
+        payload['key'] = payload.get('preset_quality', payload['key'])
+
+        if task_name == 'file_video_metadata_extraction':
+            # try to load message as JSON,
+            # we only need this for this particular task
+            try:
+                payload['extracted_metadata'] = \
+                    json.loads(task_json['message'])
+            except ValueError:
+                payload['extracted_metadata'] = task_json['message']
+
+            task_json['message'] = 'Attached video metadata'
+
+        celery_task_status = 'REVOKED' if 'Not transcoding' in task_json[
+            'message'] else task_json['status']
+
+        task_status = {
+            'name': task_name,
+            'id': task_json['id'],
+            'status': celery_task_status,
+            'info': {
+                'payload': payload,
+                'message': task_json['message'],
+            },
+        }
+
+        return task_status
