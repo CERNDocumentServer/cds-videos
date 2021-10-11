@@ -29,7 +29,7 @@ from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.flows.models import Status
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.webhooks.status import get_deposit_events, get_event_last_flow
+from cds.modules.webhooks.status import get_deposit_flows, get_deposit_last_flow
 
 from .tasks import MaintenanceTranscodeVideoTask
 
@@ -127,8 +127,7 @@ def _schedule(deposit_id, transcodables):
     if not transcodables:
         return None
 
-    events = get_deposit_events(deposit_id)
-    flow = get_event_last_flow(events[0])
+    flow = get_deposit_last_flow(deposit_id)
 
     # Reset all tasks which quality is within transcodables
     tasks = []

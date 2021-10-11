@@ -347,7 +347,7 @@ function cdsUploaderCtrl(
             that.files.push(newMasterFile);
             that.queue.push(newMasterFile);
             // Upload the video file
-            var old_event_id = old_master[0]['tags']['_event_id']
+            var old_event_id = old_master[0]['tags']['_flow_id']
             that.deleteEvent(old_event_id).then(
               function success(response) {
                 that.cdsDepositCtrl.previewer = null;

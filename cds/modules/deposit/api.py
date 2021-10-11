@@ -63,7 +63,7 @@ from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.utils import lowercase_value
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.status import (get_deposit_events, get_tasks_status_by_task,
+from ..webhooks.status import (get_deposit_flows, get_tasks_status_by_task,
                                merge_tasks_status)
 from .errors import DiscardConflict
 from .resolver import get_video_pid
@@ -931,7 +931,7 @@ class Video(CDSDeposit):
 
     def _clean_tasks(self):
         """Clean all tasks."""
-        events = get_deposit_events(deposit_id=self['_deposit']['id'])
+        events = get_deposit_flows(deposit_id=self['_deposit']['id'])
         for event in events:
             event.receiver.delete(event=event)
 
@@ -1004,7 +1004,7 @@ class Video(CDSDeposit):
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
         return get_tasks_status_by_task(
-            get_deposit_events(self['_deposit']['id']),
+            get_deposit_flows(self['_deposit']['id']),
             statuses=deepcopy(self['_cds'].get('state', {})))
 
     def generate_duration(self):
