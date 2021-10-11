@@ -34,7 +34,8 @@ from cds.modules.maintenance.subformats import (create_all_missing_subformats,
                                                 create_subformat)
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.webhooks.status import get_deposit_events, get_event_last_flow
+from cds.modules.webhooks.status import get_deposit_flows, \
+    get_deposit_last_flow
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 
@@ -224,8 +225,7 @@ def extract_frames(recid, depid):
         _, record = record_resolver.resolve(recid)
         depid = record['_deposit']['id']
 
-    events = get_deposit_events(depid)
-    flow = get_event_last_flow(events[0])
+    flow = get_deposit_last_flow(depid)
 
     for t in flow.model.tasks:
         if 'ExtractFramesTask' in t.name:
