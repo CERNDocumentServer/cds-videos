@@ -197,7 +197,7 @@ urllib3[secure]==1.24.3
 validators==0.13.0        # via wtforms-components
 wand==0.5.4
 wcwidth==0.1.7            # via ftfy, prompt-toolkit
-webargs==5.3.1            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
+webargs==5.5.3            # via invenio-files-rest, invenio-oaiserver, invenio-records-rest
 webassets==0.12.1         # via flask-assets, invenio-assets
 webencodings==0.5.1       # via bleach, html5lib
 werkzeug==0.15.4          # via flask, flask-debugtoolbar, flask-kvsession, invenio-migrator, invenio-records, jsonresolver
