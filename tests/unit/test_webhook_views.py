@@ -56,7 +56,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     """Try to restart AVC workflow via REST API."""
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_item',
+            'cds_webhooks.flow_item',
             receiver_id='avc',
             event_id=event_id,
             access_token=access_token
@@ -86,7 +86,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     # check restart from anonymous user
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_item',
+            'cds_webhooks.flow_item',
             receiver_id='avc',
             event_id=event_id,
         )
@@ -99,7 +99,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     user_2_email = user_2.email
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_item',
+            'cds_webhooks.flow_item',
             receiver_id='avc',
             event_id=event_id,
         )
@@ -117,7 +117,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     project.commit()
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_item',
+            'cds_webhooks.flow_item',
             receiver_id='avc',
             event_id=event_id,
         )
@@ -346,7 +346,7 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -388,7 +388,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
 
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id=receiver_id,
             access_token=access_token
         )
@@ -403,7 +403,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
         event_id = resp.headers['X-Hub-Delivery']
         #  event_id = data['tags']['_event_id']
         with api_app.test_request_context():
-            url = url_for('invenio_webhooks.event_feedback_item',
+            url = url_for('invenio_webhooks.flow_feedback_item',
                           event_id=event_id, access_token=access_token,
                           receiver_id=receiver_id)
         resp = client.get(url, headers=json_headers)
@@ -426,7 +426,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
     # run workflow!
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id=receiver_id,
             access_token=access_token
         )
@@ -458,7 +458,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
 
         # delete event
         url_to_delete = url_for(
-            'invenio_webhooks.event_item',
+            'cds_webhooks.flow_item',
             receiver_id=receiver_id,
             event_id=str(event_id),
             access_token=access_token
@@ -486,7 +486,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
 
     with api_app.test_request_context():
         url_run_workflow = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id=receiver_id,
             access_token=access_token
         )
@@ -529,7 +529,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         video_1 = deposit_video_resolver(video_1_depid)
 
         # delete old worflow
-        url_delete = url_for('invenio_webhooks.event_item',
+        url_delete = url_for('cds_webhooks.flow_item',
                              receiver_id=receiver_id,
                              event_id=str(event_id),
                              access_token=access_token)
