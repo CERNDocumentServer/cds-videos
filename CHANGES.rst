@@ -25,6 +25,15 @@
 Changes
 =======
 
+Version 1.0.22 (2021-10-11)
+
+- add validation when reserving non-existing report number
+- fix bucket creation issue
+- normalize access check values
+- update version to use sdk
+- pin dictdiffer to 0.8.1
+- update installation docs
+
 Version 1.0.21 (2021-07-09)
 
 - fix start/end time when embedding videos
