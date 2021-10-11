@@ -207,6 +207,7 @@ setup(
             'cds_redirector = cds.modules.redirector.views:api_blueprint',
             'cds_announcements = '
             'cds.modules.announcements.views:api_blueprint',
+            'cds_webhooks = cds.modules.webhooks.views:blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
@@ -214,7 +215,7 @@ setup(
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
             # FIXME should be move to invenio-webhooks
-            'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
+            # 'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
@@ -258,9 +259,9 @@ setup(
             'cds_migration_tasks = cds.modules.migrator.tasks',
             'cds_maintenance_tasks = cds.modules.maintenance.tasks',
         ],
-        'invenio_webhooks.receivers': [
-            'avc = cds.modules.webhooks.receivers:AVCWorkflow',
-        ],
+        # 'invenio_webhooks.receivers': [
+        #     'avc = cds.modules.webhooks.receivers:AVCWorkflow',
+        # ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',
             'cds_embed_video = '

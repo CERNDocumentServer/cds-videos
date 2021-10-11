@@ -209,7 +209,7 @@ function cdsDepositCtrl(
 
     this.restartFailedSubformats = function(subformatKeys) {
       var master = that.findMasterFile();
-      var eventId = master.tags._event_id;
+      var eventId = master.tags._flow_id;
       master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
@@ -223,7 +223,7 @@ function cdsDepositCtrl(
           var restartEvents = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
           }).map(function(taskInfo) {
-            var eventId = taskInfo.info.payload.event_id;
+            var eventId = taskInfo.info.payload.flow_id;
             var taskId = taskInfo.id;
             return that.restartEvent(eventId, taskId);
           });
@@ -275,7 +275,7 @@ function cdsDepositCtrl(
 
         var fetchPresetsPromise = $q.resolve();
         if (that.presets && that.presets.length == 0) {
-          var eventId = masterFile.tags._event_id;
+          var eventId = masterFile.tags._flow_id;
           if (eventId) {
             var eventUrl = urlBuilder.eventInfo({eventId: eventId});
             var updatePresets = function (resp) {
@@ -344,7 +344,7 @@ function cdsDepositCtrl(
       // Update only if it is ``draft``
       if (that.isDraft()){
         var masterFile = that.findMasterFile();
-        var eventId = _.get(masterFile, 'tags._event_id', undefined);
+        var eventId = _.get(masterFile, 'tags._flow_id', undefined);
         that.webhookEventId = eventId;
         if (eventId) {
           that.getTaskFeedback(eventId)
