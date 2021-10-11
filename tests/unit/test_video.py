@@ -284,7 +284,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
 
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id=receiver_id,
             access_token=access_token)
 

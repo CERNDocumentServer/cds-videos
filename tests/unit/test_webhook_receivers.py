@@ -68,7 +68,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -160,7 +160,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     # check feedback from anoymous user
     event_id = data['tags']['_event_id']
     with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_feedback_item',
+        url = url_for('invenio_webhooks.flow_feedback_item',
                       event_id=event_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -168,7 +168,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert resp.status_code == 401
     # check feedback from owner
     with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_feedback_item',
+        url = url_for('invenio_webhooks.flow_feedback_item',
                       event_id=event_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -177,7 +177,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         assert resp.status_code == 200
     # check feedback from another user without access
     with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_feedback_item',
+        url = url_for('invenio_webhooks.flow_feedback_item',
                       event_id=event_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -192,7 +192,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     project['_access'] = {'update': [user_2_email]}
     project = project.commit()
     with api_app.test_request_context():
-        url = url_for('invenio_webhooks.event_feedback_item',
+        url = url_for('invenio_webhooks.flow_feedback_item',
                       event_id=event_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -257,7 +257,7 @@ def test_avc_workflow_receiver_local_file_pass(
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -389,7 +389,7 @@ def test_avc_workflow_receiver_clean_download(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -444,7 +444,7 @@ def test_avc_workflow_receiver_clean_video_frames(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -488,7 +488,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )
@@ -539,7 +539,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.event_list',
+            'cds_webhooks.flow_list',
             receiver_id='avc',
             access_token=access_token
         )

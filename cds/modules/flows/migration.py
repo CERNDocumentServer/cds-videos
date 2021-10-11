@@ -31,15 +31,18 @@ from invenio_db import db
 from ..deposit.api import deposit_video_resolver
 from ..records.api import CDSVideosFilesIterator
 from .models import Status
+from ..webhooks.receivers import AVCWorkflow
 
 
-def migrate_event(event):
+def migrate_event(deposit_id):
     """Migrate an old event into Flows."""
-    receiver = event.receiver
-    flow = receiver._workflow(event=event)
+    receiver = AVCWorkflow()
+    deposit = deposit_video_resolver(deposit_id)
+    import ipdb;ipdb.set_trace()
+
+    flow = receiver._workflow(deposit_id)
 
     # Update flow task status depending on the content of th record
-    deposit_id = event.payload['deposit_id']
     deposit = deposit_video_resolver(deposit_id)
 
     original_file = CDSVideosFilesIterator.get_master_video_file(deposit)
