@@ -273,7 +273,7 @@ def workflow_receiver_video_failing(api_app, db, video, receiver_id):
             self.persist(event=event, result=workflow.status)
 
         def build_status(self, raw_info):
-            return ([{'add': 3}], [{'failing': ''}, {'failing': ''}])
+            return [{'add': 3}], [{'failing': ''}, {'failing': ''}]
 
         def status(self, event):
             code, status = super(TestReceiver, self).status(event)

@@ -27,6 +27,7 @@
 import logging
 import uuid
 from enum import Enum, unique
+from invenio_accounts.models import User
 
 from invenio_db import db
 from sqlalchemy.dialects import postgresql
@@ -60,7 +61,8 @@ class Status(Enum):
     @classmethod
     def compute_status(cls, statuses):
         """Compute the general status from a list."""
-        # Make statuses always emun in case they are strings, it doesn't hurt much
+        # Make statuses always enum in case they are strings,
+        # it doesn't hurt much
         statuses = [Status(s) for s in statuses if s is not None]
         if not statuses:
             return cls.PENDING
@@ -76,7 +78,7 @@ class Status(Enum):
 
     @classmethod
     def status_to_http(cls, status):
-        """Convert Flow status into HTTP code"""
+        """Convert Flow state into HTTP code."""
         STATES_TO_HTTP = {
             cls.PENDING: 202,
             cls.STARTED: 202,
@@ -118,14 +120,28 @@ class Flow(db.Model, Timestamp):
         default=lambda: dict(),
         nullable=True,
     )
-    """Flow payload in JSON format, typically args and kwagrs."""
 
-    previous_id = db.Column(
-        UUIDType,
-        db.ForeignKey('flows_flow.id', onupdate="CASCADE", ondelete="CASCADE"),
+    response = db.Column(
+        db.JSON()
+        .with_variant(postgresql.JSONB(none_as_null=True), 'postgresql',)
+        .with_variant(JSONType(), 'sqlite',)
+        .with_variant(JSONType(), 'mysql',),
+        default=lambda: dict(),
         nullable=True,
     )
-    """Task flow instance."""
+    """Flow payload in JSON format, typically args and kwargs."""
+
+    response_code = db.Column(db.Integer, default=202)
+    """Response code returned on flow trigger."""
+
+    user_id = db.Column(db.Integer(), db.ForeignKey(User.id), nullable=False)
+    """User who triggered the flow."""
+
+    deposit_id = db.Column(db.String, nullable=False)
+    """Deposit for which the flow was triggered."""
+
+    receiver_id = db.Column(db.String, nullable=False)
+    """Receiver which managed the flow."""
 
     @hybrid_property
     def status(self):
@@ -150,7 +166,7 @@ class Flow(db.Model, Timestamp):
             'name': self.name,
             'payload': self.payload,
             'status': str(self.status),
-            'previous': str(self.previous_id),
+            'user': str(self.user_id),
         }
 
 

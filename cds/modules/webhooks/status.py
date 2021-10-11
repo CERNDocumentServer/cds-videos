@@ -33,20 +33,22 @@ from copy import deepcopy
 from celery import states
 from collections import defaultdict
 
-from invenio_webhooks.models import Event
+# from invenio_webhooks.models import Event
 from ..flows.models import Flow as FlowModel, Status as FlowStatus
 from ..flows.api import Flow
 
 
 TASK_NAMES = {
     'cds.modules.webhooks.tasks.TranscodeVideoTask': 'file_transcode',
-    'cds.modules.webhooks.tasks.ExtractFramesTask': 'file_video_extract_frames',
-    'cds.modules.webhooks.tasks.ExtractMetadataTask': 'file_video_metadata_extraction',
+    'cds.modules.webhooks.tasks.ExtractFramesTask':
+        'file_video_extract_frames',
+    'cds.modules.webhooks.tasks.ExtractMetadataTask':
+        'file_video_metadata_extraction',
     'cds.modules.webhooks.tasks.DownloadTask': 'file_download',
 }
 
 
-def get_deposit_events(deposit_id, _deleted=False):
+def get_deposit_flows(deposit_id, _deleted=False):
     """Get a list of events associated with a deposit."""
     #  return Event.query.filter(
     #      Event.payload.op('->>')(
@@ -55,39 +57,32 @@ def get_deposit_events(deposit_id, _deleted=False):
     # do you want to involve deleted events?
     filters = []
     if not _deleted:
-        filters.append(Event.response_code == 202)
+        filters.append(FlowModel.response_code == 202)
     # build base query
-    query = Event.query.filter(
-        sqlalchemy.cast(Event.payload['deposit_id'], sqlalchemy.String)
-        == sqlalchemy.type_coerce(deposit_id, sqlalchemy.JSON)
-    )
+    query = FlowModel.query.filter(FlowModel.deposit_id==deposit_id)
     # execute with more filters
     return query.filter(*filters).all()
 
 
-def get_event_last_flow(event):
+def get_deposit_last_flow(deposit_id):
     """Get the last flow associated with a deposit."""
-    event_id = str(event.id)
     try:
         # In case of many flows, return the last one
-        model = FlowModel.query.filter(
-            sqlalchemy.cast(FlowModel.payload['event_id'], sqlalchemy.String)
-            == sqlalchemy.type_coerce(event_id, sqlalchemy.JSON)
-        ).all()[-1]
+        model = FlowModel.query.filter(FlowModel.deposit_id==deposit_id).all()[-1]
         return Flow(model=model)
     except IndexError:
         # There is no Flow,
         # Most likely we are working with an old record: Migrate!
         from ..flows.migration import migrate_event
 
-        return migrate_event(event)
+        return migrate_event(deposit_id)
 
 
-def get_tasks_status_by_task(events, statuses=None):
+def get_tasks_status_by_task(flows, statuses=None):
     """Get tasks status grouped by task name."""
     results = defaultdict(list)
-    for e in events:
-        for task in get_event_last_flow(e).status['tasks']:
+    for flow in flows:
+        for task in get_deposit_last_flow(flow.deposit_id).json['tasks']:
             results[
                 TASK_NAMES.get(task['name'], task['name'].split('.')[-1])
             ].append(task['status'])
