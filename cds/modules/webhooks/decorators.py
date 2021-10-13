@@ -6,9 +6,10 @@ from cds.modules.flows.models import Flow as FlowModel
 from cds.modules.flows.api import Flow
 from cds.modules.webhooks.errors import ReceiverDoesNotExist, InvalidPayload, \
     WebhooksError
+from cds.modules.webhooks.proxies import current_flows
 from cds.modules.webhooks.receivers import AVCWorkflow
 from flask_login import current_user
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 
 
 def pass_user_id(f):
@@ -27,7 +28,7 @@ def pass_user_id(f):
 
 
 def pass_flow(f):
-    """Decorator to retrieve event."""
+    """Decorator to retrieve flow."""
     @wraps(f)
     def inner(self, receiver_id=None, flow_id=None, *args, **kwargs):
         flow = FlowModel.query.filter_by(
@@ -35,6 +36,16 @@ def pass_flow(f):
         ).first_or_404()
         flow = Flow(model=flow)
         kwargs.update(receiver_id=receiver_id, flow=flow)
+        return f(self, *args, **kwargs)
+    return inner
+
+
+def pass_receiver(f):
+    """Decorator to retrieve flow controler."""
+    @wraps(f)
+    def inner(self, receiver_id=None, *args, **kwargs):
+        receiver = current_flows.receivers[receiver_id]
+        kwargs.update(receiver=receiver)
         return f(self, *args, **kwargs)
     return inner
 

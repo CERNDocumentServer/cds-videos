@@ -60,7 +60,7 @@ from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
                                        ObjectVersionTag)
 
 
-def test_download_to_object_version(db, bucket):
+def test_download_to_object_version(db, bucket, users):
     """Test download to object version task."""
     with mock.patch('requests.get') as mock_request:
         obj = ObjectVersion.create(bucket=bucket, key='test.pdf')
@@ -76,7 +76,8 @@ def test_download_to_object_version(db, bucket):
             })
         assert obj.file is None
 
-        flow = Flow(id=uuid.uuid4(), name='Test')
+        flow = Flow(id=uuid.uuid4(), name='Test', user_id="1",
+                    deposit_id="test", receiver_id="avc")
         db.session.add(flow)
         task_model = Task.create(
             id_=uuid.uuid4(),
