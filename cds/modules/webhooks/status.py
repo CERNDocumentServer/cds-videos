@@ -33,7 +33,6 @@ from copy import deepcopy
 from celery import states
 from collections import defaultdict
 
-# from invenio_webhooks.models import Event
 from ..flows.models import Flow as FlowModel, Status as FlowStatus
 from ..flows.api import Flow
 

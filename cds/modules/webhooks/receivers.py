@@ -71,6 +71,10 @@ def _update_event_bucket(flow):
 class CeleryAsyncReceiver(object):
     """Celery Async Receiver abstract class."""
 
+    def __init__(self, receiver_id):
+        assert self.receiver_id == receiver_id
+        super(CeleryAsyncReceiver, self).__init__()
+
     def __call__(self):
         """Proxy to ``self.run`` method."""
         return self.run()
@@ -133,9 +137,9 @@ class AVCWorkflow(CeleryAsyncReceiver):
 
     receiver_id = 'avc'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, receiver_id,  *args, **kwargs):
         """Init."""
-        super(AVCWorkflow, self).__init__(*args, **kwargs)
+        super(AVCWorkflow, self).__init__(receiver_id, *args, **kwargs)
         self._tasks = {
             'file_video_metadata_extraction': ExtractMetadataTask,
             'file_download': DownloadTask,
@@ -344,6 +348,11 @@ class AVCWorkflow(CeleryAsyncReceiver):
         flow = Flow.get_flow(flow_id)
         # 3. update event response
         self._update_flow_response(flow=flow, version_id=version_id)
+
+        with db.session.begin_nested():
+            flow.response.update(_tasks=self.build_flow_json())
+            flag_modified(event, 'response')
+            flag_modified(event, 'response_headers')
 
         # 4. persist everything
         super(AVCWorkflow, self).persist(flow)

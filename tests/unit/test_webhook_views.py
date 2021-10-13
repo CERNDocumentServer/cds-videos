@@ -42,10 +42,9 @@ from invenio_files_rest.models import ObjectVersion, \
 from invenio_records.models import RecordMetadata
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
-from six import BytesIO
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.webhooks.status import get_deposit_events
-from invenio_webhooks.models import Event
+from cds.modules.webhooks.status import get_deposit_flows
+from cds.modules.flows.models import Flow as FlowModel
 
 from helpers import get_indexed_records_from_mock, get_local_file
 
@@ -145,7 +144,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     # DELETE FIRST TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_ids[0],
@@ -176,7 +175,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     # DELETE SECOND TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_ids[1],
@@ -208,7 +207,7 @@ def check_video_transcode_restart(api_app, event_id, access_token,
     # RESTART FIRST TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_ids[0],
@@ -230,12 +229,12 @@ def check_video_transcode_restart(api_app, event_id, access_token,
     assert 'extracted_metadata' in record.json['_cds']
 
     # check task id is changed
-    event = Event.query.first()
-    new_task_id = event.response['global_status'][1][1]['file_transcode']['id']
+    flow = FlowModel.query.first()
+    new_task_id = flow.response['global_status'][1][1]['file_transcode']['id']
     assert task_ids[0] != new_task_id
     old_result = AsyncResult(task_ids[0])
     new_result = AsyncResult(new_task_id)
-    for key in ['tags', 'key', 'deposit_id', 'event_id', 'preset_quality']:
+    for key in ['tags', 'key', 'deposit_id', 'flow_id', 'preset_quality']:
         assert old_result.result[
             'payload'][key] == new_result.result['payload'][key]
 
@@ -246,7 +245,7 @@ def check_video_frames(api_app, event_id, access_token,
     task_id = data['_tasks'][1][0]['id']
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_id,
@@ -275,7 +274,7 @@ def check_video_download(api_app, event_id, access_token,
     task_id = data['_tasks'][0][0]['id']
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_id,
@@ -305,7 +304,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     task_id = data['_tasks'][0][1]['id']
     with api_app.test_request_context():
         url = url_for(
-            'invenio_webhooks.task_item',
+            'cds_webhooks.task_item',
             receiver_id='avc',
             event_id=event_id,
             task_id=task_id,
@@ -379,12 +378,17 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 
 
 def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
-                                   json_headers, api_project):
+                                   json_headers, api_project, local_file):
     """Test webhooks feedback with a failing task."""
     (project, video_1, video_2) = api_project
     receiver_id = 'test_feedback_with_workflow'
-    workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id)
+    video_depid = video_1['_deposit']['id']
+    bucket_id = str(video_1.files.bucket.id)
+    version_id = str(local_file)
+    key = 'TEST.mp4'
+    workflow_receiver_video_failing(api_app, db, video_1,
+                                    receiver_id, version_id,
+                                    )
 
     with api_app.test_request_context():
         url = url_for(
@@ -395,16 +399,22 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
 
     with api_app.test_client() as client:
         # run workflow
-        resp = client.post(url, headers=json_headers, data=json.dumps({}))
+        resp = client.post(url, headers=json_headers,
+                           data=json.dumps(
+                               dict(deposit_id=video_depid,
+                                    bucket_id=bucket_id,
+                                    version_id=version_id,
+                                    key=key)
+                           ))
         assert resp.status_code == 500
         #  data = json.loads(resp.data.decode('utf-8'))
 
         # check feedback url
-        event_id = resp.headers['X-Hub-Delivery']
+        flow_id = resp.headers['X-Hub-Delivery']
         #  event_id = data['tags']['_event_id']
         with api_app.test_request_context():
-            url = url_for('invenio_webhooks.flow_feedback_item',
-                          event_id=event_id, access_token=access_token,
+            url = url_for('cds_webhooks.flow_feedback_item',
+                          flow_id=flow_id, access_token=access_token,
                           receiver_id=receiver_id)
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
@@ -432,7 +442,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
         )
 
     # check no events are there
-    assert get_deposit_events(video_1_depid) == []
+    assert get_deposit_flows(video_1_depid) == []
 
     with api_app.test_client() as client, \
             mock.patch('invenio_indexer.tasks.index_record.delay'):
@@ -452,25 +462,25 @@ def test_webhooks_delete(api_app, access_token, json_headers,
 
         # check event is created
         assert resp.status_code == 201
-        event_id = resp.headers['X-Hub-Delivery']
-        [event] = get_deposit_events(video_1_depid)
-        assert str(event.id) == event_id
+        flow_id = resp.headers['X-Hub-Delivery']
+        [flow] = get_deposit_flows(video_1_depid)
+        assert str(flow.id) == flow_id
 
         # delete event
         url_to_delete = url_for(
             'cds_webhooks.flow_item',
             receiver_id=receiver_id,
-            event_id=str(event_id),
+            event_id=str(flow_id),
             access_token=access_token
         )
         res = client.delete(url_to_delete, headers=json_headers)
         assert res.status_code == 201
         # check no events are there
-        assert get_deposit_events(video_1_depid) == []
+        assert get_deposit_flows(video_1_depid) == []
         # check event is marked as deleted
-        [event_deleted] = Event.query.all()
-        assert event_deleted.id == event.id
-        assert event_deleted.response_code == 410
+        [flow_deleted] = FlowModel.query.all()
+        assert flow_deleted.id == flow.id
+        assert flow_deleted.response_code == 410
 
 
 def test_webhooks_reload_master(api_app, users, access_token, json_headers,
@@ -504,6 +514,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
             key=master_key,
             sleep_time=0,
             version_id=str(local_file),
+            bucket_id=str(video_1.files.bucket.id)
         )
 
         # run the workflow!
@@ -512,7 +523,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                            data=json.dumps(payload))
         assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
-        event_id = data['tags']['_event_id']
+        flow_id = data['tags']['_flow_id']
 
         # publish video
         publish_url = url_for('invenio_deposit_rest.video_actions',
@@ -531,7 +542,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         # delete old worflow
         url_delete = url_for('cds_webhooks.flow_item',
                              receiver_id=receiver_id,
-                             event_id=str(event_id),
+                             flow_id=str(flow_id),
                              access_token=access_token)
         resp = client.delete(url_delete, headers=json_headers)
 
@@ -540,7 +551,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                            data=json.dumps(payload))
         assert resp.status_code == 201
         data = json.loads(resp.data.decode('utf-8'))
-        event_id = data['tags']['_event_id']
+        flow_id = data['tags']['_flow_id']
 
         # publish again
         resp = client.post(publish_url, headers=json_headers)
