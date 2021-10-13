@@ -47,13 +47,13 @@ from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records import Record
-from invenio_webhooks import current_webhooks
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 
 from cds.modules.deposit.api import Project, Video
 from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
+from cds.modules.webhooks.proxies import current_flows
 from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
                                         ExtractMetadataTask, update_record)
@@ -208,7 +208,7 @@ def get_object_count(download=True, frames=True, transcode=True):
 def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
                   is_local=False):
     """Get number of ObjectVersionTags, based on executed tasks."""
-    # download: _event_id, uri_origin, context_type, media_type, preview
+    # download: _flow_id, uri_origin, context_type, media_type, preview
     tags_download = 5
     if is_local:
         # uri_origin doesn't exists if not downloaded
@@ -231,57 +231,69 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
     ])
 
 
-def workflow_receiver_video_failing(api_app, db, video, receiver_id):
+def workflow_receiver_video_failing(api_app, db, video, receiver_id,
+                                    version_id):
     """Workflow receiver for video."""
     video_depid = video['_deposit']['id']
+    bucket_id = str(video.files.bucket.id)
+    key = 'TEST.mp4'
 
     def build_flow(flow):
         flow.chain(sse_simple_add(), {'x': 1, 'y': 2})
         flow.group([sse_failing_task(), sse_failing_task()])
 
     class TestReceiver(CeleryAsyncReceiver):
-        def _workflow(self, event):
+        receiver_id = 'test_feedback_with_workflow'
+        def _workflow(self, deposit_id, bucket_id, version_id, key):
             with db.session.begin_nested():
                 workflow = Flow.create(
                     'TestFlow',
                     payload={
-                        'event_id': str(event.id),
-                        'deposit_id': event.payload['deposit_id'],
+                        'deposit_id': deposit_id,
+                        'bucket_id': bucket_id,
+                        'version_id': version_id,
+                        'key': key,
                     },
+                    user_id="1",
+                    deposit_id=deposit_id,
+                    receiver_id=self.receiver_id,
                 )
                 workflow.assemble(build_flow)
             db.session.commit()
             return workflow
 
-        def run(self, event):
+        def run(self, deposit_id, user_id, version_id, bucket_id, key):
+            flow = self._workflow(deposit_id=video_depid,
+                                  bucket_id=bucket_id,
+                                  version_id=version_id,
+                                  key=key
+                                )
+            flow_id = flow.id
+
             with db.session.begin_nested():
-                event.payload['deposit_id'] = video_depid
-                event.response_headers = {}
-                event.response = {}
-                flag_modified(event, 'response_headers')
-                flag_modified(event, 'response')
-                flag_modified(event, 'payload')
-                db.session.expunge(event)
+                flow.payload['deposit_id'] = video_depid
+                flow.response = {}
+                flag_modified(flow.model, 'response')
+                flag_modified(flow.model, 'payload')
+                db.session.expunge(flow.model)
             db.session.commit()
-            workflow = self._workflow(event)
-            flow_id = workflow.id
-            workflow.start()
-            workflow = Flow.get_flow(flow_id)
-            self._serialize_result(
-                event=event, result=self.build_status(workflow.status)
-            )
-            self.persist(event=event, result=workflow.status)
+
+            flow.start()
+            flow = Flow.get_flow(flow_id)
+            self.serialize_result(flow=flow)
+            self.persist(flow=flow)
+            return flow
 
         def build_status(self, raw_info):
             return [{'add': 3}], [{'failing': ''}, {'failing': ''}]
 
-        def status(self, event):
-            code, status = super(TestReceiver, self).status(event)
+        def serialize_result(self, flow):
+            code, status = super(TestReceiver, self).serialize_result(flow)
             if 'tasks' in status:
                 status = self.build_status(status)
             return code, status
 
-    current_webhooks.register(receiver_id, TestReceiver)
+    current_flows.register(receiver_id, TestReceiver)
     return receiver_id
 
 

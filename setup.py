@@ -131,8 +131,6 @@ install_requires = [
     'invenio-sequencegenerator>=1.0.0a2',
     'invenio-theme>=1.0.0',
     'invenio-userprofiles>=1.0.0',
-    # FIXME topical branch
-    #  'invenio-webhooks>=1.0.0a4',
     'jsonref>=0.1',
     'jsonresolver>=0.2.1',
     'marshmallow>=2.15.0',
@@ -200,6 +198,7 @@ setup(
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_files_rest = cds.modules.files.ext:CDSFilesRestApp',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
+            'cds_flows = cds.modules.webhooks:CDSFlows',
         ],
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
@@ -214,8 +213,7 @@ setup(
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
-            # FIXME should be move to invenio-webhooks
-            # 'invenio_webhooks = invenio_webhooks:InvenioWebhooks',
+            'cds_flows = cds.modules.webhooks:CDSFlows',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
@@ -259,9 +257,6 @@ setup(
             'cds_migration_tasks = cds.modules.migrator.tasks',
             'cds_maintenance_tasks = cds.modules.maintenance.tasks',
         ],
-        # 'invenio_webhooks.receivers': [
-        #     'avc = cds.modules.webhooks.receivers:AVCWorkflow',
-        # ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',
             'cds_embed_video = '
@@ -275,6 +270,9 @@ setup(
             'records = cds.modules.records.jsonresolver.records',
             'schemas = cds.modules.records.jsonresolver.schemas',
             'deposits = cds.modules.deposit.jsonresolver',
+        ],
+        'cds_flows.receivers': [
+            'avc = cds.modules.webhooks.receivers:AVCWorkflow',
         ]
     },
     extras_require=extras_require,
