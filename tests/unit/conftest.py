@@ -63,8 +63,6 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_previewer import InvenioPreviewer
 from invenio_search import InvenioSearch, current_search, current_search_client
 from invenio_sequencegenerator.api import Template
-from invenio_webhooks import InvenioWebhooks, current_webhooks
-from invenio_webhooks.models import CeleryReceiver
 from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
@@ -260,14 +258,6 @@ def pidstore(app):
 def indexer(app):
     """Initialize invenio-indexer app."""
     return InvenioIndexer(app)
-
-
-@pytest.fixture()
-def webhooks(app):
-    """Init webhooks API."""
-    if 'invenio-webhooks' not in app.extensions:
-        InvenioWebhooks(app)
-    return app
 
 
 @pytest.fixture()
