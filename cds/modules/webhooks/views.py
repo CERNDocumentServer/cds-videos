@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2016, 2017 CERN.
+# Copyright (C) 2016, 2017, 2021 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ from invenio_oauth2server import require_api_auth, require_oauth_scopes
 from invenio_oauth2server.models import Scope
 
 from .decorators import pass_flow, pass_user_id, need_receiver_permission, \
-    error_handler
+    error_handler, pass_receiver
 
 from .receivers import AVCWorkflow
 
@@ -65,15 +65,13 @@ def add_link_header(response, links):
         })
 
 
-def make_response(flow):
+def make_response(flow, receiver):
     """Make a response from flow object."""
-    receiver = AVCWorkflow()
     code, message = receiver.serialize_result(flow)
-    response = jsonify(**flow.response)
-    response.headers['X-Hub-Event'] = receiver.receiver_id
+    response = jsonify(message)
+    flow.response = message
+    db.session.commit()
     response.headers['X-Hub-Delivery'] = flow.id
-    if message:
-        response.headers['X-Hub-Info'] = message
     add_link_header(response, {'self': url_for(
         '.flow_item', receiver_id=receiver.receiver_id, flow_id=flow.id,
         _external=True
@@ -104,8 +102,9 @@ class TaskResource(MethodView):
     @error_handler
     @pass_user_id
     @pass_flow
+    @pass_receiver
     @need_receiver_permission('delete')
-    def delete(self, user_id, receiver_id, event, task_id):
+    def delete(self, user_id, receiver, receiver_id, event, task_id):
         """Handle DELETE request: stop and clean a task."""
         # TODO not used?
         return '', 400
@@ -119,10 +118,11 @@ class FlowFeedbackResource(MethodView):
     @error_handler
     @pass_user_id
     @pass_flow
+    @pass_receiver
     @need_receiver_permission('read')
-    def get(self, user_id, receiver_id, flow):
+    def get(self, user_id, receiver, receiver_id, flow):
         """Handle GET request: get more flow information."""
-        code, status = AVCWorkflow().serialize_result(flow)
+        code, status = receiver.serialize_result(flow)
         return json.dumps(status), 200
 
 
@@ -133,10 +133,10 @@ class FlowListResource(MethodView):
     @require_oauth_scopes('webhooks:event')
     @error_handler
     @pass_user_id
+    @pass_receiver
     @need_receiver_permission('create')
-    def post(self, receiver_id, user_id):
+    def post(self, receiver_id, receiver, user_id):
         """Handle POST request."""
-        receiver = AVCWorkflow()
         data = receiver.extract_payload()
         assert data["deposit_id"]
         assert data["version_id"]
@@ -149,9 +149,9 @@ class FlowListResource(MethodView):
                                 bucket_id=data["bucket_id"]
                                 )
         db.session.commit()
-        return make_response(new_flow)
+        return make_response(new_flow, receiver)
 
-    def options(self, receiver_id):
+    def options(self, receiver_id, receiver):
         """Handle OPTIONS request."""
         abort(405)
 
@@ -164,34 +164,37 @@ class FlowResource(MethodView):
     @error_handler
     @pass_user_id
     @pass_flow
+    @pass_receiver
     @need_receiver_permission('read')
-    def get(self, receiver_id, user_id, flow):
+    def get(self, receiver_id, receiver, user_id, flow):
         """Handle GET request - get flow status."""
-        return make_response(flow)
+        return make_response(flow, receiver)
 
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
     @error_handler
     @pass_user_id
     @pass_flow
+    @pass_receiver
     @need_receiver_permission('update')
-    def put(self, receiver_id, user_id, flow):
+    def put(self, receiver_id, receiver, user_id, flow):
         """Handle PUT request - restart flow."""
         flow.start()
         db.session.commit()
-        return make_response(flow)
+        return make_response(flow, receiver)
 
     @require_api_auth()
     @require_oauth_scopes('webhooks:event')
     @error_handler
     @pass_user_id
     @pass_flow
+    @pass_receiver
     @need_receiver_permission('delete')
-    def delete(self, receiver_id, user_id, flow):
+    def delete(self, receiver_id, receiver, user_id, flow):
         """Handle DELETE request."""
         flow.delete()
         db.session.commit()
-        return make_response(flow)
+        return make_response(flow, receiver)
 
 
 task_item = TaskResource.as_view('task_item')

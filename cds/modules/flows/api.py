@@ -140,7 +140,6 @@ class Flow(object):
         """Get flow status."""
         if self.model is None:
             return None
-
         res = self.model.to_dict()
         res.update(
             {'tasks': [t.to_dict() for t in self.model.tasks]}
@@ -252,6 +251,12 @@ class Flow(object):
         if not self._canvas:
             self.assemble(self.build)
         return self._canvas.apply_async()
+
+    def delete(self):
+        """Mark the flow as deleted."""
+        self.response = {'status': 410, 'message': 'Gone.'}
+        self.response_code = 410
+        db.session.commit()
 
     def stop(self):
         """Stop the flow."""

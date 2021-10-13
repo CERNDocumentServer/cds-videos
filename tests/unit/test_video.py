@@ -44,8 +44,6 @@ from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records.models import RecordMetadata
-from invenio_webhooks import current_webhooks
-from invenio_webhooks.models import Event
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
 from six import BytesIO
@@ -57,7 +55,7 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      deposit_video_resolver)
 from cds.modules.deposit.indexer import CDSRecordIndexer
 from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.webhooks.status import get_deposit_events, \
+from cds.modules.webhooks.status import get_deposit_flows, \
     get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
 
@@ -305,7 +303,7 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert resp.status_code == 500
         # resolve deposit and events
         deposit = deposit_video_resolver(video_1_depid)
-        events = get_deposit_events(deposit['_deposit']['id'])
+        events = get_deposit_flows(deposit['_deposit']['id'])
         # check events
         assert len(events) == 2
         assert events[0].payload['deposit_id'] == video_1_depid
