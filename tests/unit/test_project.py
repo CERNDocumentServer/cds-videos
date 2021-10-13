@@ -48,9 +48,8 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from jsonschema.exceptions import ValidationError
 from cds.modules.deposit.errors import DiscardConflict
-from cds.modules.webhooks.status import get_deposit_events
+from cds.modules.webhooks.status import get_deposit_flows
 from invenio_records.models import RecordMetadata
-from invenio_webhooks.models import Event
 from time import sleep
 from invenio_deposit.search import DepositSearch
 from elasticsearch_dsl.query import Q
@@ -439,7 +438,7 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
     assert video_1['_cds']['state'] == expected
     assert video_1.project['_cds']['state'] == expected
 
-    events = get_deposit_events(deposit_id=video_1_depid)
+    events = get_deposit_flows(deposit_id=video_1_depid)
     assert len(events) == 1
 
     def check(project_status, video_1_status, video_2_status):
