@@ -27,7 +27,7 @@ from cds.modules.flows.models import Status
 
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.resolver import record_resolver
-from cds.modules.webhooks.tasks import TranscodeVideoTask
+from cds.modules.flows.tasks import TranscodeVideoTask
 
 logger = get_task_logger(__name__)
 

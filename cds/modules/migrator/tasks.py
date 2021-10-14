@@ -32,7 +32,7 @@ from invenio_migrator.proxies import current_migrator
 
 from ..deposit.api import deposit_video_resolver
 from ..records.resolver import record_resolver
-from ..webhooks.tasks import TranscodeVideoTask
+from ..flows.tasks import TranscodeVideoTask
 
 warnings.warn(
     "The migrator module is now deprecated. Use it at your own risk!",

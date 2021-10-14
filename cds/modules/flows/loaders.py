@@ -22,11 +22,15 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Helper proxy to the state object."""
+from flask import request
+from cds.modules.flows.errors import InvalidPayload
 
-from flask import current_app
-from werkzeug.local import LocalProxy
 
-current_flows = LocalProxy(
-    lambda: current_app.extensions['cds-flows']
-)
+def extract_payload():
+    """Extract payload from request."""
+    if request.is_json:
+        # Request.get_json() could be first called with silent=True.
+        return request.get_json(silent=False, cache=False)
+    elif request.content_type == 'application/x-www-form-urlencoded':
+        return dict(request.form)
+    raise InvalidPayload(request.content_type)

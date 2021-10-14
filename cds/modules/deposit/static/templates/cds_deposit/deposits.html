@@ -100,8 +100,8 @@
                   dropbox-enabled="true"
                   dropbox-selector=".dropbox-upload"
                   dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
-                  remote-master-receiver="/api/hooks/receivers/avc/flows/"
-                  remote-children-receiver="/api/hooks/receivers/downloader/flows/"
+                  remote-master-receiver="/api/flows/"
+                  remote-children-receiver="/api/flows/"
               >
                 <div class="dropbox-upload"></div>
               </cds-remote-uploader>
@@ -138,15 +138,15 @@
                     auto-start-upload="true"
                     files="child._files"
                     template="/static/templates/cds_deposit/types/video/uploader.html"
-                    remote-master-receiver="/api/hooks/receivers/avc/flows/"
+                    remote-master-receiver="/api/flows/"
                   >
                     <cds-remote-uploader
                         template="/static/templates/cds_deposit/remote_upload.html"
                         dropbox-enabled="true"
                         dropbox-selector=".dropbox-upload"
                         dropbox-app-key="{{ $ctrl.dropboxAppKey }}"
-                        remote-master-receiver="/api/hooks/receivers/avc/flows/"
-                        remote-children-receiver="/api/hooks/receivers/downloader/flows/"
+                        remote-master-receiver="/api/flows/"
+                        remote-children-receiver="/api/flows/"
                     >
                       <div class="dropbox-upload"></div>
                     </cds-remote-uploader>
