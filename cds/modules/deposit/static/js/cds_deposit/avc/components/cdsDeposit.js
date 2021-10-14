@@ -365,7 +365,7 @@ function cdsDepositCtrl(
                 return task.info;
               }).map(function(task) {
                 var payload = task.info.payload;
-                if (payload.percentage === 100 || task.status === 'SUCCESS') {
+                if (task.status === 'SUCCESS') {
                   payload.completed = true;
                 } else if (task.status === 'FAILURE') {
                   payload.errored = true;

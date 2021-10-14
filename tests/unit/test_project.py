@@ -48,14 +48,14 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_pidstore.errors import PIDInvalidAction
 from jsonschema.exceptions import ValidationError
 from cds.modules.deposit.errors import DiscardConflict
-from cds.modules.webhooks.status import get_deposit_flows
+from cds.modules.flows.status import get_deposit_flows
 from invenio_records.models import RecordMetadata
 from time import sleep
 from invenio_deposit.search import DepositSearch
 from elasticsearch_dsl.query import Q
 
-from helpers import workflow_receiver_video_failing, \
-    get_indexed_records_from_mock, prepare_videos_for_publish
+from helpers import TestFlow, \
+    get_indexed_records_from_mock, prepare_videos_for_publish, MOCK_TASK_NAMES
 
 
 def test_is_deposit():
@@ -322,6 +322,7 @@ def test_project_delete_not_published(api_app, api_project, force):
 def test_project_delete_one_video_published(api_app, api_project, force,
                                             users):
     """Test project delete when one video is published."""
+
     def check_project(number_of_videos, video_2_status, video_1_ref,
                       video_2_ref, project_id):
         video_1_meta = RecordMetadata.query.filter_by(id=video_1_id).first()
@@ -415,7 +416,11 @@ def test_inheritance(api_app, api_project, users):
 
 @mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
             RecordIdProvider.create)
-def test_project_publish_with_workflow(api_app, users, api_project, es):
+@mock.patch("cds.modules.flows.api.Flow", TestFlow)
+@mock.patch("cds.modules.flows.views.Flow", TestFlow)
+@mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
+def test_project_publish_with_workflow(api_app, users, api_project, es,
+                                       local_file):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = api_project
     prepare_videos_for_publish([video_1, video_2], with_files=True)
@@ -425,19 +430,26 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
     video_1_id = str(video_1.id)
     video_2_depid = video_2['_deposit']['id']
 
-    receiver_id = 'test_project_publish_with_workflow'
-    workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id)
+    bucket_id = str(video_1.files.bucket.id)
+    version_id = str(local_file)
+    key = 'TEST.mp4'
+    user_id = "1"
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
     with mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer, \
             api_app.test_request_context(headers=headers, data=payload):
-        event = Event.create(receiver_id=receiver_id)
-        db.session.add(event)
-        event.process()
-
+        flow = TestFlow.create("TESTworkflow",
+                               payload=dict(deposit_id=video_1_depid,
+                                            bucket_id=bucket_id,
+                                            version_id=version_id,
+                                            key=key),
+                               user_id=user_id,
+                               deposit_id=video_1_depid,
+                               )
+        db.session.add(flow.model)
+        flow.run(video_1_depid, user_id, version_id, bucket_id, key)
         # check video and project are indexed
         assert mock_indexer.called is True
         ids = get_indexed_records_from_mock(mock_indexer)
@@ -454,8 +466,8 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
     assert video_1['_cds']['state'] == expected
     assert video_1.project['_cds']['state'] == expected
 
-    events = get_deposit_flows(deposit_id=video_1_depid)
-    assert len(events) == 1
+    flows = get_deposit_flows(deposit_id=video_1_depid)
+    assert len(flows) == 2
 
     def check(project_status, video_1_status, video_2_status):
         project = deposit_project_resolver(project_depid)

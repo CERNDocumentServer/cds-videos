@@ -68,7 +68,7 @@
         <span ng-show="!f.percentage && !f.completed && !f.errored && !f.revoked"><i class="fa fa-spinner fa-spin"></i></span>
         <span ng-show="f.errored" class="text-danger">Error</span>
         <span ng-show="f.completed && !f.errored" class="text-success">Done</span>
-        <span ng-show="f.revoked && !f.errored" class="text-warning">Not needed</span>
+        <span ng-show="f.revoked && !f.errored" class="text-warning">Not applicable</span>
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">

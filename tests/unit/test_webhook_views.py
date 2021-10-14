@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import json
+
 import pytest
 
 import mock
@@ -36,20 +37,20 @@ from flask import url_for
 from flask_security import current_user
 from flask_principal import UserNeed, identity_loaded
 from helpers import get_object_count, get_tag_count, mock_current_user, \
-    workflow_receiver_video_failing
+    TestFlow, MOCK_TASK_NAMES, mock_build_flow_status_json
 from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.webhooks.status import get_deposit_flows
+from cds.modules.flows.status import get_deposit_flows
 from cds.modules.flows.models import Flow as FlowModel
 
 from helpers import get_indexed_records_from_mock, get_local_file
 
 
-def check_restart_avc_workflow(api_app, event_id, access_token,
+def check_restart_avc_workflow(api_app, flow_id, access_token,
                                json_headers, data, video_1_id, video_1_depid,
                                users):
     """Try to restart AVC workflow via REST API."""
@@ -57,7 +58,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
         url = url_for(
             'cds_webhooks.flow_item',
             receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             access_token=access_token
         )
     with api_app.test_client() as client, \
@@ -86,8 +87,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
         )
     with api_app.test_client() as client:
         resp = client.put(url, headers=json_headers)
@@ -99,8 +99,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
         )
     with api_app.test_client() as client:
         login_user_via_session(client, email=user_2_email)
@@ -117,8 +116,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
         )
     with api_app.test_client() as client:
 
@@ -132,7 +130,7 @@ def check_restart_avc_workflow(api_app, event_id, access_token,
         assert resp.status_code == 201
 
 
-def check_video_transcode_delete(api_app, event_id, access_token,
+def check_video_transcode_delete(api_app, flow_id, access_token,
                                  json_headers, data, video_1_id, video_1_depid,
                                  users):
     """Try to delete transcoded file via REST API."""
@@ -145,8 +143,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             task_id=task_ids[0],
             access_token=access_token
         )
@@ -176,8 +173,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            event_id=flow_id,
             task_id=task_ids[1],
             access_token=access_token
         )
@@ -196,7 +192,7 @@ def check_video_transcode_delete(api_app, event_id, access_token,
     assert 'extracted_metadata' in record.json['_cds']
 
 
-def check_video_transcode_restart(api_app, event_id, access_token,
+def check_video_transcode_restart(api_app, flow_id, access_token,
                                   json_headers, data, video_1_id,
                                   video_1_depid, users):
     """Try to delete transcoded file via REST API."""
@@ -208,8 +204,7 @@ def check_video_transcode_restart(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             task_id=task_ids[0],
             access_token=access_token
         )
@@ -239,15 +234,14 @@ def check_video_transcode_restart(api_app, event_id, access_token,
             'payload'][key] == new_result.result['payload'][key]
 
 
-def check_video_frames(api_app, event_id, access_token,
+def check_video_frames(api_app, flow_id, access_token,
                        json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete video frames via REST API."""
     task_id = data['_tasks'][1][0]['id']
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
         )
@@ -268,15 +262,14 @@ def check_video_frames(api_app, event_id, access_token,
     assert 'extracted_metadata' in record.json['_cds']
 
 
-def check_video_download(api_app, event_id, access_token,
+def check_video_download(api_app, flow_id, access_token,
                          json_headers, data, video_1_id, video_1_depid, users):
     """Try to delete downloaded files via REST API."""
     task_id = data['_tasks'][0][0]['id']
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
         )
@@ -297,7 +290,7 @@ def check_video_download(api_app, event_id, access_token,
     assert 'extracted_metadata' in record.json['_cds']
 
 
-def check_video_metadata_extraction(api_app, event_id, access_token,
+def check_video_metadata_extraction(api_app, flow_id, access_token,
                                     json_headers, data, video_1_id,
                                     video_1_depid, users):
     """Try to delete metadata extraction via REST API."""
@@ -305,8 +298,7 @@ def check_video_metadata_extraction(api_app, event_id, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.task_item',
-            receiver_id='avc',
-            event_id=event_id,
+            flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
         )
@@ -346,7 +338,6 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -377,23 +368,23 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
             video_1_id, video_1_depid, users)
 
 
+@mock.patch("cds.modules.flows.api.Flow", TestFlow)
+@mock.patch("cds.modules.flows.views.Flow", TestFlow)
+@mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
+@mock.patch("cds.modules.flows.serializers.build_flow_status_json",  # noqa
+            mock_build_flow_status_json)
 def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
                                    json_headers, api_project, local_file):
     """Test webhooks feedback with a failing task."""
     (project, video_1, video_2) = api_project
-    receiver_id = 'test_feedback_with_workflow'
     video_depid = video_1['_deposit']['id']
     bucket_id = str(video_1.files.bucket.id)
     version_id = str(local_file)
     key = 'TEST.mp4'
-    workflow_receiver_video_failing(api_app, db, video_1,
-                                    receiver_id, version_id,
-                                    )
 
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id=receiver_id,
             access_token=access_token
         )
 
@@ -407,20 +398,21 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
                                     key=key)
                            ))
         assert resp.status_code == 500
-        #  data = json.loads(resp.data.decode('utf-8'))
 
         # check feedback url
         flow_id = resp.headers['X-Hub-Delivery']
-        #  event_id = data['tags']['_event_id']
+
         with api_app.test_request_context():
             url = url_for('cds_webhooks.flow_feedback_item',
                           flow_id=flow_id, access_token=access_token,
-                          receiver_id=receiver_id)
+                          )
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
-        assert data[0][0] == {'add': 3}
-        assert data[1][0] == {'failing': ''}
+        assert data[0][0]["info"]["message"] == "3"
+        assert data[0][0]["name"] == "sse_simple_add"
+        assert data[1][0]["info"]["message"] == ""
+        assert data[1][0]["name"] == "sse_failing_task"
 
 
 @pytest.mark.skip(reason='Functionality not used')
@@ -437,7 +429,6 @@ def test_webhooks_delete(api_app, access_token, json_headers,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id=receiver_id,
             access_token=access_token
         )
 
@@ -469,8 +460,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
         # delete event
         url_to_delete = url_for(
             'cds_webhooks.flow_item',
-            receiver_id=receiver_id,
-            event_id=str(flow_id),
+            flow_id=str(flow_id),
             access_token=access_token
         )
         res = client.delete(url_to_delete, headers=json_headers)
@@ -483,6 +473,9 @@ def test_webhooks_delete(api_app, access_token, json_headers,
         assert flow_deleted.response_code == 410
 
 
+# @mock.patch("cds.modules.flows.api.Flow", TestFlow)
+# @mock.patch("cds.modules.flows.views.Flow", TestFlow)
+# @mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
 def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                                 online_video, api_project, datadir,
                                 mock_sorenson):
@@ -497,7 +490,6 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
     with api_app.test_request_context():
         url_run_workflow = url_for(
             'cds_webhooks.flow_list',
-            receiver_id=receiver_id,
             access_token=access_token
         )
 
@@ -521,7 +513,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         login_user_via_session(client, email=User.query.get(users[0]).email)
         resp = client.post(url_run_workflow, headers=json_headers,
                            data=json.dumps(payload))
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
         flow_id = data['tags']['_flow_id']
 
@@ -541,7 +533,6 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
 
         # delete old worflow
         url_delete = url_for('cds_webhooks.flow_item',
-                             receiver_id=receiver_id,
                              flow_id=str(flow_id),
                              access_token=access_token)
         resp = client.delete(url_delete, headers=json_headers)
@@ -549,7 +540,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         # run the workflow!
         resp = client.post(url_run_workflow, headers=json_headers,
                            data=json.dumps(payload))
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
         flow_id = data['tags']['_flow_id']
 
