@@ -48,11 +48,11 @@ from werkzeug.utils import import_string
 from cds.modules.deposit.api import (Project, Video, deposit_project_resolver,
                                      deposit_video_resolver)
 from cds.modules.flows.models import Flow, Task
-from cds.modules.webhooks.tasks import (DownloadTask, ExtractFramesTask,
-                                        ExtractMetadataTask,
-                                        TranscodeVideoTask,
-                                        sync_records_with_deposit_files,
-                                        update_record)
+from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
+                                     ExtractMetadataTask,
+                                     TranscodeVideoTask,
+                                     sync_records_with_deposit_files,
+                                     update_record)
 from helpers import (add_video_tags, check_deposit_record_files,
                      get_object_count, prepare_videos_for_publish,
                      transcode_task)
@@ -77,7 +77,7 @@ def test_download_to_object_version(db, bucket, users):
         assert obj.file is None
 
         flow = Flow(id=uuid.uuid4(), name='Test', user_id="1",
-                    deposit_id="test", receiver_id="avc")
+                    deposit_id="test")
         db.session.add(flow)
         task_model = Task.create(
             id_=uuid.uuid4(),
@@ -183,7 +183,7 @@ def test_metadata_extraction_video(app, db, cds_depid, bucket, video):
     obj = ObjectVersion.create(bucket=bucket, key='video.mp4')
     obj_id = str(obj.version_id)
     dep_id = str(cds_depid)
-    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    with mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         task_s = ExtractMetadataTask().s(uri=video,
                                          version_id=obj_id,
                                          deposit_id=dep_id)
@@ -240,7 +240,7 @@ def test_video_extract_frames(app, db, bucket, video):
     db.session.commit()
     assert ObjectVersion.query.count() == 1
 
-    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    with mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         task_s = ExtractFramesTask().s(version_id=version_id)
         # Extract frames
         task_s.delay()
@@ -279,7 +279,7 @@ def test_transcode_too_high_resolutions(db, cds_depid, mock_sorenson):
     obj_id = str(obj.version_id)
     db.session.commit()
 
-    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    with mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         task_s = TranscodeVideoTask().s(version_id=obj_id,
                                         preset_quality=preset_quality,
                                         sleep_time=0)
@@ -307,7 +307,7 @@ def test_transcode_and_undo(db, cds_depid, mock_sorenson):
     assert get_bucket_keys() == [filename]
     assert bucket.size == filesize
 
-    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    with mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         task_s = TranscodeVideoTask().s(version_id=obj_id,
                                         preset_quality=preset_quality,
                                         sleep_time=0)
@@ -353,7 +353,7 @@ def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
     assert bucket.size == filesize
 
     # Transcode
-    with mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    with mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         task_s1.delay(deposit_id=cds_depid)
         task_s2.delay(deposit_id=cds_depid)
 
@@ -395,9 +395,9 @@ def test_transcode_ignore_exception_if_invalid(db, cds_depid):
     assert bucket.size == filesize
 
     with mock.patch(
-        'cds.modules.webhooks.tasks.sorenson.start_encoding',
+        'cds.modules.flows.tasks.sorenson.start_encoding',
         side_effect=InvalidResolutionError('fuu', 'test'),
-    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+    ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         # Transcode
         task = task_s1.delay(deposit_id=cds_depid)
         isinstance(task.result, Ignore)
@@ -421,8 +421,8 @@ def test_smil_tag(app, db, cds_depid, mock_sorenson, preset, is_inside):
     db.session.commit()
 
     with mock.patch(
-            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'
-    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+            'cds.modules.flows.tasks.TranscodeVideoTask.on_success'
+    ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         TranscodeVideoTask().s(
             version_id=obj_id, preset_quality=preset, sleep_time=0
         ).apply(deposit_id=cds_depid)
@@ -452,8 +452,8 @@ def test_download_tag(app, db, cds_depid, mock_sorenson, preset, is_inside):
     db.session.commit()
 
     with mock.patch(
-            'cds.modules.webhooks.tasks.TranscodeVideoTask.on_success'
-    ), mock.patch('cds.modules.webhooks.tasks.Task.commit_status'):
+            'cds.modules.flows.tasks.TranscodeVideoTask.on_success'
+    ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
         TranscodeVideoTask().s(
             version_id=obj_id, preset_quality=preset, sleep_time=0
         ).apply(deposit_id=cds_depid)

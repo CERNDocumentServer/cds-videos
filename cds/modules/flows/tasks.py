@@ -40,9 +40,11 @@ from cds_sorenson import api as sorenson
 from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import shared_task
-from ..flows.api import Task
+
+from .deposit import update_deposit_state
+from .task_api import Task
 from celery.exceptions import Ignore
-from celery.states import FAILURE, STARTED, SUCCESS
+from celery.states import FAILURE, STARTED, SUCCESS, IGNORED
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
@@ -59,98 +61,14 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from ..deposit.api import deposit_video_resolver
+
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..xrootd.utils import (file_move_xrootd, file_opener_xrootd,
                             file_size_xrootd)
-from .utils import move_file_into_local
+from .files import move_file_into_local, dispose_object_version
 
 logger = get_task_logger(__name__)
 
-# Mock sorenson server for local development
-# Copy this code to cds/modules/webhooks/tasks.py
-import random
-import uuid
-from shutil import copyfile
-
-
-from flask import current_app
-from cds_sorenson.api import _get_quality_preset
-from cds_sorenson.error import SorensonError
-
-
-class MockSorenson(object):
-    """Mock class to use for local testing."""
-
-    def __init__(self):
-        self.jobs = {}
-
-    def start_encoding(
-        self,
-        input_file,
-        output_file,
-        desired_quality,
-        display_aspect_ratio,
-        max_height=None,
-        max_width=None,
-        **kwargs
-    ):
-        job_id = str(uuid.uuid4())
-        self.jobs[job_id] = {
-            'step': 0,
-            'input_file': input_file,
-            'output_file': output_file,
-            'quality': desired_quality,
-            'aspect_ratio': display_aspect_ratio,
-        }
-        aspect_ratio, preset_config = _get_quality_preset(
-            desired_quality,
-            display_aspect_ratio,
-            video_height=max_height,
-            video_width=max_width
-        )
-        return job_id, aspect_ratio, preset_config
-
-    def stop_encoding(self, job_id):
-        try:
-            del self.jobs[job_id]
-        except KeyError:
-            raise SorensonError('No status found for job: {0}'.format(job_id))
-
-    def get_encoding_status(self, job_id):
-        try:
-            job = self.jobs[job_id]
-        except KeyError:
-            return 'Canceled', 100
-
-        if job['step'] < 5:
-            fail_value = random.random()
-            # Simulate random failures 5% of the times
-            if fail_value >= 0.99:  # Change value to higher probability
-                job_status = 6
-                job_progress = 100
-            else:
-                job_status = job['step']
-                # 5 means finished, before that it's all running
-                job_progress = (job_status / 5.0) * 100
-        else:
-            job_status = job['step']
-            job_progress = 100
-
-        status = current_app.config['CDS_SORENSON_STATUSES'].get(job_status)
-        # Increase step for next call
-        if job_status == 5:
-            # This means finished, copy input file to destination
-            copyfile(job['input_file'], '{}.mp4'.format(job['output_file']))
-        elif job_status < 5:
-            job_status = job_status + 1
-
-        job['step'] = job_status
-
-        return status, job_progress
-
-# Uncomment this line to use
-# sorenson = MockSorenson()
 
 class AVCTask(Task):
     """Base class for tasks."""
@@ -164,9 +82,8 @@ class AVCTask(Task):
 
     def __call__(self, *args, **kwargs):
         """Extract keyword arguments."""
-        arg_list = ['event_id', 'deposit_id', 'key']
+        arg_list = ['flow_id', 'deposit_id', 'key']
         kwargs = self._extract_call_arguments(arg_list, **kwargs)
-
         with self.app.flask_app.app_context():
             if kwargs.get('_clean', False):
                 self.clean(*args, **kwargs)
@@ -221,7 +138,7 @@ class AVCTask(Task):
         with celery_app.flask_app.app_context():
             if 'deposit_id' in self._base_payload \
                     and self._base_payload['deposit_id']:
-                update_avc_deposit_state(
+                update_deposit_state(
                     deposit_id=self._base_payload.get('deposit_id'))
 
     @staticmethod
@@ -236,7 +153,7 @@ class AVCTask(Task):
         """Set default base payload."""
         self._base_payload = {
             'deposit_id': self.deposit_id,
-            'event_id': self.event_id,
+            'flow_id': self.flow_id,
             'type': self._type,
         }
         if self.object:
@@ -365,6 +282,7 @@ class ExtractMetadataTask(AVCTask):
     @classmethod
     def create_metadata_tags(cls, object_, keys, uri=None):
         """Extract metadata from the video and create corresponding tags."""
+
         extracted_dict = cls.get_metadata_tags(object_=object_, uri=uri)
         # Add technical information to the ObjectVersion as Tags
         [ObjectVersionTag.create_or_update(object_, k, v)
@@ -545,6 +463,7 @@ class ExtractFramesTask(AVCTask):
     @classmethod
     def _create_frames(cls, frames, object_, start_time, time_step, **kwargs):
         """Create frames."""
+
         [cls._create_object(
             bucket=object_.bucket, key=os.path.basename(filename),
             stream=file_opener_xrootd(filename, 'rb'),
@@ -688,9 +607,9 @@ class TranscodeVideoTask(AVCTask):
                     max_height=height,
                     max_width=width
                 )
-            except (InvalidResolutionError, TooHighResolutionError):
+            except (InvalidResolutionError, TooHighResolutionError) as e:
                 # exception = self._meta_exception_envelope(exc=e)
-                # self.update_state(state=REVOKED, meta=exception)
+                # self.update_state(state=IGNORED, meta=exception)
                 return 'Not transcoding for {}'.format(preset_quality)
 
             # Set revoke handler, in case of an abrupt execution halt.
@@ -734,9 +653,9 @@ class TranscodeVideoTask(AVCTask):
             status, percentage = sorenson.get_encoding_status(job_id)
             if status == 'Error':
                 raise RuntimeError('Error transcoding: {0}'.format(status))
-            elif status == 'Canceled':
+            elif status == 'Cancelled':
                 self.update_state(
-                    state='CANCELED',
+                    state='CANCELLED',
                     meta=dict(
                         payload=dict(**job_info),
                         message='Job Canceled.'))
@@ -783,6 +702,7 @@ def patch_record(recid, patch, validator=None):
 def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
                                     countdown=5):
     """Low level files synchronize."""
+    from cds.modules.deposit.api import deposit_video_resolver
     deposit_video = deposit_video_resolver(deposit_id)
     db.session.refresh(deposit_video.model)
     if deposit_video.is_published():
@@ -841,27 +761,3 @@ def get_patch_tasks_status(deposit):
     for patch in patches:
         patch['path'] = '/_cds/state{0}'.format(patch['path'])
     return patches
-
-
-def _index_deposit(deposit):
-    """Index deposit if set."""
-    if deposit:
-        index_record.delay(str(deposit.id))
-
-
-def update_avc_deposit_state(deposit_id=None):
-    """Update deposit state on ElasticSearch."""
-    if deposit_id:
-        video = deposit_video_resolver(deposit_id)
-
-        _index_deposit(video)
-        _index_deposit(video.project)
-
-
-def dispose_object_version(object_version):
-    """Clean up resources related to an ObjectVersion."""
-    if object_version:
-        object_version = as_object_version(object_version)
-        # remove the object version
-        ObjectVersion.delete(
-            bucket=object_version.bucket, key=object_version.key)

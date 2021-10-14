@@ -53,7 +53,7 @@ from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
 from cds.modules.records.resolver import record_resolver
 from cds.modules.records.api import dump_object, CDSVideosFilesIterator, \
     CDSRecord
-from cds.modules.webhooks.tasks import ExtractMetadataTask, \
+from cds.modules.flows.tasks import ExtractMetadataTask, \
     ExtractFramesTask, TranscodeVideoTask
 from cds.modules.migrator.cli import \
     sequence_generator as cli_sequence_generator
