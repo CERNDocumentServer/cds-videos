@@ -23,66 +23,45 @@
 
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Invenio-Flow python API."""
-import json
+"""CDS-Flow python API."""
 import logging
-from functools import wraps
-from itertools import repeat
+from copy import deepcopy
 
-from celery import Task as CeleryTask
+from cds_sorenson.api import get_all_distinct_qualities
 from celery import chain as celery_chain
-from celery import current_app as celery_app
 from celery import group as celery_group
 from celery.result import AsyncResult
-from celery.task.control import revoke
 from invenio_db import db
+from sqlalchemy.orm.attributes import flag_modified
 
+from .deposit import update_deposit_state
+from .files import _update_flow_bucket, init_object_version
 from .models import Flow as FlowModel
-from .models import Status
 from .models import Task as TaskModel
-from .models import as_task
+from .task_api import Task
 from .utils import uuid
+from .tasks import ExtractMetadataTask, DownloadTask, \
+    TranscodeVideoTask, ExtractFramesTask
 
-logger = logging.getLogger('invenio-flow')
-
-
-def align_arguments(f):
-    """Align tasks and tasks arguments decorator."""
-
-    @wraps(f)
-    def inner(self, task, task_kwargs=None):
-        if isinstance(task, list) and not isinstance(task_kwargs, list):
-            task_kwargs = list(repeat(task_kwargs, len(task)))
-        elif not isinstance(task, list) and isinstance(task_kwargs, list):
-            task = list(repeat(task, len(task_kwargs)))
-        elif not isinstance(task, list) and not isinstance(task_kwargs, list):
-            task = [
-                task,
-            ]
-            task_kwargs = [
-                task_kwargs,
-            ]
-
-        task_kwargs.extend([None] * (len(task) - len(task_kwargs)))
-
-        return f(self, task, task_kwargs)
-
-    return inner
+logger = logging.getLogger('cds-flow')
 
 
-class Flow(object):
-    """Flow class."""
+class FlowWrapper(object):
+    """Flow Model wrapper class."""
 
     def __init__(self, model=None):
         """Initialize the flow object."""
         self.model = model
-        self._tasks = []
-        self._canvas = []
 
     @property
     def id(self):
         """Get flow identifier."""
         return self.model.id if self.model else None
+
+    @property
+    def deposit_id(self):
+        """Get flow identifier."""
+        return self.model.deposit_id if self.model else None
 
     @property
     def name(self):
@@ -99,30 +78,6 @@ class Flow(object):
         """Update payload."""
         if self.model:
             self.model.payload = value
-            db.session.merge(self.model)
-
-    @property
-    def response(self):
-        """Get flow payload."""
-        return self.model.response if self.model else None
-
-    @response.setter
-    def response(self, value):
-        """Update payload."""
-        if self.model:
-            self.model.response = value
-            db.session.merge(self.model)
-
-    @property
-    def response_code(self):
-        """Get flow payload."""
-        return self.model.response_code if self.model else None
-
-    @response_code.setter
-    def response_code(self, value):
-        """Update payload."""
-        if self.model:
-            self.model.response_code = value
             db.session.merge(self.model)
 
     @property
@@ -156,42 +111,81 @@ class Flow(object):
         obj = FlowModel.get(id_)
         return cls(obj)
 
+    @property
+    def deleted(self):
+        """Get flow payload."""
+        return self.model.deleted if self.model else None
+
+    @deleted.setter
+    def deleted(self, value):
+        """Update payload."""
+        if self.model:
+            self.model.deleted = value
+            db.session.merge(self.model)
+
     @classmethod
-    def create(cls, name, payload=None,
-               id_=None, user_id=None,
-               deposit_id=None, receiver_id=None):
-        """Create a new flow instance and store it in the database.."""
+    def get(cls, flow_id):
+        obj = FlowModel.query.filter(FlowModel.id == flow_id).one()
+        return cls(model=obj)
+
+    @classmethod
+    def get_for_deposit(cls, deposit_id):
+        obj = FlowModel.query.filter(FlowModel.deposit_id == deposit_id) \
+            .one()
+        return cls(model=obj)
+
+    @classmethod
+    def create(cls, name, deposit_id, payload=None, user_id=None):
+        """Create a new flow instance and store it in the database."""
         with db.session.begin_nested():
             obj = FlowModel(
                 name=name,
-                id=id_ or uuid(),
+                id=uuid(),
                 payload=payload or dict(),
                 user_id=user_id,
                 deposit_id=deposit_id,
-                receiver_id=receiver_id
             )
             db.session.add(obj)
         logger.info('Created new Flow %s', obj)
-        return cls(model=obj)
+        return obj
 
-    @align_arguments
-    def chain(self, task, task_kwargs=None):
-        """Appends new tasks to the canvas to be run in series."""
-        self._tasks.extend(zip(task, task_kwargs))
-        return self
 
-    @align_arguments
-    def group(self, task, task_kwargs=None):
-        """Appends new group of tasks to the canvas to run in parallel."""
-        self._tasks.append(list(zip(task, task_kwargs)))
-        return self
+class Flow(FlowWrapper):
+    """Flow controller class."""
+
+    def __init__(self, deposit_id=None, name='AVCWorkflow',
+                 payload=None, user_id=None, model=None):
+        """Initialize the flow object."""
+
+        if model:
+            self.model = model
+        else:
+            assert all((deposit_id, payload, user_id))
+            self.model = Flow.create(name, deposit_id, payload, user_id)
+
+        self._tasks_map = {
+            'file_video_metadata_extraction': ExtractMetadataTask,
+            'file_download': DownloadTask,
+            'file_transcode': TranscodeVideoTask,
+            'file_video_extract_frames': ExtractFramesTask,
+        }
+        self._tasks = []
+        # celery tasks "canvas", holds celery task with passed params,
+        # ready to be started
+        self._canvas = []
 
     def _new_task(self, task, kwargs, previous):
         """Create a new task associate with the flow."""
         task_id = uuid()
         kwargs = kwargs if kwargs else {}
-        kwargs.update({'flow_id': str(self.id), 'task_id': task_id})
-        kwargs.update(self.payload, )
+        kwargs.update(dict(flow_id=str(self.id), task_id=task_id))
+        kwargs.update(self.payload)
+        kwargs.pop("flow", None)
+
+        # signature wraps the arguments, keyword arguments, and execution
+        # options of a single task invocation
+        # Task is a function definition wrapped with decorator,
+        # subtask is a task with parameters passed, but not yet started
         signature = task.subtask(
             task_id=task_id,
             kwargs=kwargs,
@@ -200,7 +194,7 @@ class Flow(object):
 
         _ = TaskModel.create(
             id_=task_id,
-            flow_id=self.id,
+            flow_id=str(self.id),
             name=task.name,
             previous=previous,
             payload=kwargs,
@@ -208,11 +202,63 @@ class Flow(object):
 
         return signature
 
-    def build(self):
-        """Build flow."""
-        raise NotImplementedError()
+    def create_task(self, task_name, **kwargs):
+        """Create a task with parameters from flow."""
+        payload = deepcopy(self.payload)
+        payload.update(**kwargs)
+        return self._tasks_map[task_name](), payload
 
-    def assemble(self, build_func):
+    def clean_task(self, task_name, *args, **kwargs):
+        """Clean a task."""
+        kwargs['version_id'] = self.payload['version_id']
+        kwargs['deposit_id'] = self.payload['deposit_id']
+        return self._tasks_map[task_name]().clean(*args, **kwargs)
+
+    def build_steps(self):
+        """Build flow's tasks.
+
+        self._tasks = [(metadata_extraction, task_kwargs), <-- Step 1
+                        [                                  <-- Step 2 runs next
+        (frame_extraction, task_kwargs), (transcoding1, task_kwargs)<--parallel
+                        ]
+        ]
+        """
+
+        # First step
+        has_remote_file_to_download = self.payload.get('uri')
+        has_user_uploaded_file = self.payload.get('version_id')
+
+        metadata_extraction_task = self.create_task(
+            task_name='file_video_metadata_extraction')
+
+        if has_user_uploaded_file and not has_remote_file_to_download:
+
+            self._tasks.append(metadata_extraction_task)
+        else:
+            file_download_task = self.create_task(task_name='file_download')
+
+            parallel_tasks = [metadata_extraction_task, file_download_task]
+
+            self._tasks.append(parallel_tasks)
+
+        # Second step
+        all_distinct_qualities = get_all_distinct_qualities()
+
+        # create tasks in parallel
+        parallel_tasks_group = []
+        video_extract_task = self.create_task(
+            task_name='file_video_extract_frames'
+        )
+        parallel_tasks_group.append(video_extract_task)
+        for preset_quality in all_distinct_qualities:
+            transcode_task = self.create_task(task_name='file_transcode',
+                                              preset_quality=preset_quality,
+                                              )
+            parallel_tasks_group.append(transcode_task)
+
+        self._tasks.append(parallel_tasks_group)
+
+    def assemble(self):
         """Build the canvas out of the task list."""
         if self.model is None:
             raise RuntimeError('No database flow object found.')
@@ -221,19 +267,23 @@ class Flow(object):
                 'This flow instance was already assembled, use create'
                 'to create a new instance and restart the flow.'
             )
-
-        build_func(self)
+        self.build_steps()
 
         previous = []
-        for task in self._tasks:
-            if isinstance(task, tuple):
-                signature = self._new_task(*task, previous=previous)
+        for obj in self._tasks:
+
+            is_single_task = isinstance(obj, tuple)
+            is_group_of_tasks = isinstance(obj, list)
+
+            if is_single_task:
+                task, kwargs = obj
+                signature = self._new_task(task, kwargs, previous=previous)
                 self._canvas.append(signature)
                 previous = [signature.id]
-            elif isinstance(task, list):
+            elif is_group_of_tasks:
                 sub_canvas = [
-                    self._new_task(*t, previous=previous)
-                    for t in task
+                    self._new_task(t, t_kwargs, previous=previous)
+                    for t, t_kwargs in obj
                 ]
                 previous = [t.id for t in sub_canvas]
                 self._canvas.append(celery_group(sub_canvas, task_id=uuid()))
@@ -242,140 +292,104 @@ class Flow(object):
                     'Error while parsing the task list %s', self._tasks
                 )
 
-        self._canvas = celery_chain(*self._canvas, task_id=self.id)
+        self._canvas = celery_chain(*self._canvas, flow_id=str(self.id))
 
         return self
 
     def start(self):
         """Start the flow asynchronously."""
         if not self._canvas:
-            self.assemble(self.build)
+            self.assemble()
         return self._canvas.apply_async()
+
+    def run(self):
+        """Run workflow for video transcoding.
+
+        Steps:
+          * Download the video file (if not done yet).
+          * Extract metadata from the video.
+          * Run video transcoding.
+          * Extract frames from the video.
+
+        Mandatory fields in the payload:
+          * uri, if the video needs to be downloaded.
+          * bucket_id, only if URI is provided.
+          * key, only if URI is provided.
+          * version_id, if the video has been downloaded via HTTP (the previous
+            fields are not needed in this case).
+          * deposit_id
+
+        Optional:
+          * frames_start, if not set the default value will be used.
+          * frames_end, if not set the default value will be used.
+          * frames_gap, if not set the default value will be used.
+
+        For more info see the tasks used in the workflow:
+          * :func: `~cds.modules.webhooks.tasks.DownloadTask`
+          * :func: `~cds.modules.webhooks.tasks.ExtractMetadataTask`
+          * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
+          * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
+        """
+
+        deposit_id = self.deposit_id
+
+        has_remote_file_to_download = self.payload.get('uri')
+        has_user_uploaded_file = self.payload.get('version_id')
+        has_file = has_remote_file_to_download or has_user_uploaded_file
+        has_deposit = deposit_id
+        has_filename = self.payload.get('key')
+
+        assert has_deposit
+        assert has_file
+        assert has_filename
+
+        if not self.payload.get('version_id'):
+            _update_flow_bucket(self)
+
+        # 1. create the object version if doesn't exist
+        object_version = init_object_version(self)
+        version_id = str(object_version.version_id)
+        self.payload['version_id'] = version_id
+        flag_modified(self.model, "payload")
+        db.session.commit()
+
+        # 2. define the workflow and run
+        self.start()
+        db.session.commit()
+        # 3. update deposit state
+        update_deposit_state(deposit_id=deposit_id)
+        return self
 
     def delete(self):
         """Mark the flow as deleted."""
-        self.response = {'status': 410, 'message': 'Gone.'}
-        self.response_code = 410
+        self.clean()
+        self.deleted = True
         db.session.commit()
+
+    @staticmethod
+    def delete_task(task_id):
+        """Revoke a specific task."""
+        AsyncResult(task_id).revoke(terminate=True)
+
+    def restart_task(self, task_id):
+        Task.restart_task(task_id, str(self.id), flow_payload=self.payload)
 
     def stop(self):
         """Stop the flow."""
         for task in self.model.tasks:
-            self.stop_task(task)
+            Task().stop_task(task)
 
-    def get_task_status(self, task_id):
-        """Get singular task status."""
-        try:
-            task = as_task(task_id)
-        except Exception:
-            raise KeyError('Task ID %s not in flow %s', task_id, self.id)
+    def clean(self):
+        """Delete tasks and everything created by them."""
+        self.clean_task(task_name='file_video_extract_frames')
+        for preset_quality in get_all_distinct_qualities():
+            self.clean_task(
+                task_name='file_transcode',
+                preset_quality=preset_quality,
+            )
+        self.clean_task(task_name='file_video_metadata_extraction')
+        if 'version_id' not in self.payload:
+            self.clean_task(task_name='file_download')
 
-        return {'status': str(task.status), 'message': task.message}
-
-    def stop_task(self, task_id):
-        """Stop singular task."""
-        try:
-            task = as_task(task_id)
-        except Exception:
-            raise KeyError('Task ID %s not in flow %s', task_id, self.id)
-
-        if task.status == Status.PENDING:
-            revoke(str(task.id), terminate=True, signal='SIGKILL')
-            result = AsyncResult(str(task.id))
-            result.forget()
-
-    def restart_task(self, task_id):
-        """Restart singular task."""
-        try:
-            task = as_task(task_id)
-        except Exception:
-            raise KeyError('Task ID %s not in flow %s', task_id, self.id)
-
-        # self.stop_task(task)
-        # If a task gets send to the queue with the same id, it gets
-        # automagically restarted, no need to stop it.
-
-        task.status = Status.PENDING
-        db.session.add(task)
-
-        kwargs = {'flow_id': str(self.id), 'task_id': str(task.id)}
-        kwargs.update(task.payload)
-        kwargs.update(self.payload)
-        return (
-            celery_app.tasks.get(task.name).subtask(
-                task_id=str(task.id),
-                kwargs=kwargs,
-                immutable=True,
-            ).apply_async()
-        )
-
-
-class Task(CeleryTask):
-    """The task class which is used as the minimal unit of work.
-
-    This class is a wrapper around ``celery.Task``
-    """
-
-    def commit_status(self, task_id, state=Status.PENDING, message=''):
-        """Commit task status to the database."""
-        with celery_app.flask_app.app_context():
-            task = TaskModel.get(task_id)
-            task.status = state
-            task.message = message
-            db.session.merge(task)
-            db.session.commit()
-
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        """Update task status on database."""
-        task_id = kwargs.get('task_id', task_id)
-        self.commit_status(task_id, Status.FAILURE, str(einfo))
-        super(Task, self).on_failure(exc, task_id, args, kwargs, einfo)
-
-    def on_success(self, retval, task_id, args, kwargs):
-        """Update tasks status on database."""
-        task_id = kwargs.get('task_id', task_id)
-        self.commit_status(
-            task_id,
-            Status.SUCCESS,
-            '{}'.format(retval),
-        )
-        super(Task, self).on_success(retval, task_id, args, kwargs)
-
-    @staticmethod
-    def build_task_json_status(task_json):
-        """."""
-        from ..webhooks.status import TASK_NAMES
-        # Get the UI name of the task
-        task_name = TASK_NAMES.get(task_json['name'])
-
-        # Add the information the UI needs on the right position
-        payload = task_json['payload']
-        payload['type'] = task_name
-
-        payload['key'] = payload.get('preset_quality', payload['key'])
-
-        if task_name == 'file_video_metadata_extraction':
-            # try to load message as JSON,
-            # we only need this for this particular task
-            try:
-                payload['extracted_metadata'] = \
-                    json.loads(task_json['message'])
-            except ValueError:
-                payload['extracted_metadata'] = task_json['message']
-
-            task_json['message'] = 'Attached video metadata'
-
-        celery_task_status = 'REVOKED' if 'Not transcoding' in task_json[
-            'message'] else task_json['status']
-
-        task_status = {
-            'name': task_name,
-            'id': task_json['id'],
-            'status': celery_task_status,
-            'info': {
-                'payload': payload,
-                'message': task_json['message'],
-            },
-        }
-
-        return task_status
+        # stop the workflow
+        self.stop()

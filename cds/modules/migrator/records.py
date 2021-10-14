@@ -64,7 +64,7 @@ from ..records.minters import doi_minter
 from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import create_symlinks
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.tasks import ExtractFramesTask, ExtractMetadataTask
+from ..flows.tasks import ExtractFramesTask, ExtractMetadataTask
 from .tasks import TranscodeVideoTaskQuiet
 from .utils import (cern_movie_to_video_pid_fetcher, process_fireroles,
                     update_access)
