@@ -198,7 +198,6 @@ setup(
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_files_rest = cds.modules.files.ext:CDSFilesRestApp',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
-            'cds_flows = cds.modules.webhooks:CDSFlows',
         ],
         'invenio_base.api_blueprints': [
             'cds_records = cds.modules.records.views:blueprint',
@@ -206,14 +205,13 @@ setup(
             'cds_redirector = cds.modules.redirector.views:api_blueprint',
             'cds_announcements = '
             'cds.modules.announcements.views:api_blueprint',
-            'cds_webhooks = cds.modules.webhooks.views:blueprint',
+            'cds_flows = cds.modules.flows.views:blueprint',
         ],
         'invenio_base.apps': [
             'cds_deposit = cds.modules.deposit.ext:CDSDepositApp',
             'cds_main_fixtures = cds.modules.fixtures:CDSFixtures',
             'flask_debugtoolbar = flask_debugtoolbar:DebugToolbarExtension',
             'cds_xrootd = cds.modules.xrootd:CDSXRootD',
-            'cds_flows = cds.modules.webhooks:CDSFlows',
         ],
         'invenio_base.blueprints': [
             'cds_deposit = cds.modules.deposit.views:blueprint',
@@ -222,7 +220,7 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
-            'cds_webhooks = cds.modules.webhooks.views:blueprint',
+            'cds_flows = cds.modules.flows.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
             'cern_oauth = invenio_oauthclient.contrib.cern:cern_oauth_blueprint',
         ],
@@ -253,7 +251,7 @@ setup(
             'keywords = cds.modules.records.mappings',
         ],
         'invenio_celery.tasks': [
-            'cds_celery_tasks = cds.modules.webhooks.tasks',
+            'cds_celery_tasks = cds.modules.flows.tasks',
             'cds_migration_tasks = cds.modules.migrator.tasks',
             'cds_maintenance_tasks = cds.modules.maintenance.tasks',
         ],
@@ -271,9 +269,9 @@ setup(
             'schemas = cds.modules.records.jsonresolver.schemas',
             'deposits = cds.modules.deposit.jsonresolver',
         ],
-        'cds_flows.receivers': [
-            'avc = cds.modules.webhooks.receivers:AVCWorkflow',
-        ]
+        # 'cds_flows.receivers': [
+        #     'avc = cds.modules.webhooks.receivers:AVCWorkflow',
+        # ]
     },
     extras_require=extras_require,
     install_requires=install_requires,
