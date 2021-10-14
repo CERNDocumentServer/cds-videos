@@ -29,16 +29,13 @@ from __future__ import absolute_import, print_function
 import copy
 import json
 import os
-import random
-import uuid
 from time import sleep
 from os.path import join
 
 import mock
 import pkg_resources
 import six
-from flask import current_app
-from celery import chain, group, shared_task, states
+from celery import shared_task, states
 from flask_security import login_user, current_user
 from invenio_accounts.models import User
 from invenio_db import db
@@ -51,13 +48,23 @@ from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 
 from cds.modules.deposit.api import Project, Video
+from cds.modules.flows.serializers import FlowResponseSerializer
+from cds.modules.flows.task_api import Task
 from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
-from cds.modules.webhooks.proxies import current_flows
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
-from cds.modules.webhooks.tasks import (AVCTask, TranscodeVideoTask,
-                                        ExtractMetadataTask, update_record)
-from cds.modules.flows import Flow
+from cds.modules.flows.tasks import (
+    AVCTask, TranscodeVideoTask, ExtractMetadataTask, update_record
+)
+from cds.modules.flows.api import Flow
+from cds.modules.flows.models import Status
+
+import random
+import uuid
+from shutil import copyfile
+
+from flask import current_app
+from cds_sorenson.api import _get_quality_preset
+from cds_sorenson.error import SorensonError
 
 
 @shared_task(bind=True)
@@ -115,6 +122,13 @@ class sse_simple_add(AVCTask):
         """Simple shared task."""
         self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
         return x + y
+
+
+MOCK_TASK_NAMES = {
+    'helpers.sse_simple_add': 'sse_simple_add',
+    'helpers.sse_success_task': 'sse_success_task',
+    'helpers.sse_failing_task': 'sse_failing_task',
+}
 
 
 def create_category(api_app, db, data):
@@ -216,7 +230,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
 
     # metadata
     tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
-        len(ExtractMetadataTask.stream_keys)
+                            len(ExtractMetadataTask.stream_keys)
 
     # transcode
     # number of keys inside object `tags` (basically, the number of tags)
@@ -229,72 +243,6 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
         # count the presets with width x height < 640x320 (video resolution)
         (len(get_presets_applied())) * tags_keys if transcode else 0,
     ])
-
-
-def workflow_receiver_video_failing(api_app, db, video, receiver_id,
-                                    version_id):
-    """Workflow receiver for video."""
-    video_depid = video['_deposit']['id']
-    bucket_id = str(video.files.bucket.id)
-    key = 'TEST.mp4'
-
-    def build_flow(flow):
-        flow.chain(sse_simple_add(), {'x': 1, 'y': 2})
-        flow.group([sse_failing_task(), sse_failing_task()])
-
-    class TestReceiver(CeleryAsyncReceiver):
-        receiver_id = 'test_feedback_with_workflow'
-        def _workflow(self, deposit_id, bucket_id, version_id, key):
-            with db.session.begin_nested():
-                workflow = Flow.create(
-                    'TestFlow',
-                    payload={
-                        'deposit_id': deposit_id,
-                        'bucket_id': bucket_id,
-                        'version_id': version_id,
-                        'key': key,
-                    },
-                    user_id="1",
-                    deposit_id=deposit_id,
-                    receiver_id=self.receiver_id,
-                )
-                workflow.assemble(build_flow)
-            db.session.commit()
-            return workflow
-
-        def run(self, deposit_id, user_id, version_id, bucket_id, key):
-            flow = self._workflow(deposit_id=video_depid,
-                                  bucket_id=bucket_id,
-                                  version_id=version_id,
-                                  key=key
-                                )
-            flow_id = flow.id
-
-            with db.session.begin_nested():
-                flow.payload['deposit_id'] = video_depid
-                flow.response = {}
-                flag_modified(flow.model, 'response')
-                flag_modified(flow.model, 'payload')
-                db.session.expunge(flow.model)
-            db.session.commit()
-
-            flow.start()
-            flow = Flow.get_flow(flow_id)
-            self.serialize_result(flow=flow)
-            self.persist(flow=flow)
-            return flow
-
-        def build_status(self, raw_info):
-            return [{'add': 3}], [{'failing': ''}, {'failing': ''}]
-
-        def serialize_result(self, flow):
-            code, status = super(TestReceiver, self).serialize_result(flow)
-            if 'tasks' in status:
-                status = self.build_status(status)
-            return code, status
-
-    current_flows.register(receiver_id, TestReceiver)
-    return receiver_id
 
 
 def new_project(app, es, cds_jsonresolver, users, location, db,
@@ -562,6 +510,7 @@ def get_frames(*args, **kwargs):
 
 def get_migration_streams(datadir):
     """Get migration files streams."""
+
     def migration_streams(*args, **kwargs):
         if kwargs['file_']['tags']['media_type'] == 'video':
             path = join(datadir, 'test.mp4')
@@ -571,4 +520,165 @@ def get_migration_streams(datadir):
             else:
                 path = join(datadir, 'frame-1.jpg')
         return open(path, 'rb'), os.path.getsize(path)
+
     return migration_streams
+
+
+class MockSorenson(object):
+    """Mock class to use for local testing."""
+
+    def __init__(self):
+        self.jobs = {}
+
+    def start_encoding(
+            self,
+            input_file,
+            output_file,
+            desired_quality,
+            display_aspect_ratio,
+            max_height=None,
+            max_width=None,
+            **kwargs
+    ):
+        job_id = str(uuid.uuid4())
+        self.jobs[job_id] = {
+            'step': 0,
+            'input_file': input_file,
+            'output_file': output_file,
+            'quality': desired_quality,
+            'aspect_ratio': display_aspect_ratio,
+        }
+        aspect_ratio, preset_config = _get_quality_preset(
+            desired_quality,
+            display_aspect_ratio,
+            video_height=max_height,
+            video_width=max_width
+        )
+        return job_id, aspect_ratio, preset_config
+
+    def stop_encoding(self, job_id):
+        try:
+            del self.jobs[job_id]
+        except KeyError:
+            raise SorensonError('No status found for job: {0}'.format(job_id))
+
+    def get_encoding_status(self, job_id):
+        try:
+            job = self.jobs[job_id]
+        except KeyError:
+            return 'Cancelled', 100
+
+        if job['step'] < 5:
+            fail_value = random.random()
+            # Simulate random failures 5% of the times
+            if fail_value >= 0.99:  # Change value to higher probability
+                job_status = 6
+                job_progress = 100
+            else:
+                job_status = job['step']
+                # 5 means finished, before that it's all running
+                job_progress = (job_status / 5.0) * 100
+        else:
+            job_status = job['step']
+            job_progress = 100
+
+        status = current_app.config['CDS_SORENSON_STATUSES'].get(job_status)
+        # Increase step for next call
+        if job_status == 5:
+            # This means finished, copy input file to destination
+            copyfile(job['input_file'], '{}.mp4'.format(job['output_file']))
+        elif job_status < 5:
+            job_status = job_status + 1
+
+        job['step'] = job_status
+
+        return status, job_progress
+
+
+class MockSorensonHappy(MockSorenson):
+
+    def get_encoding_status(self, job_id):
+        status = current_app.config['CDS_SORENSON_STATUSES'].get(5)
+        job_progress = 100
+        return status, job_progress
+
+
+class MockSorensonFailed(MockSorenson):
+    def get_encoding_status(self, job_id):
+        status = current_app.config['CDS_SORENSON_STATUSES'].get(6)
+        job_progress = 100
+        return status, job_progress
+
+
+def mock_compute_status(cls, statuses):
+    return Status.FAILURE
+
+
+def mock_build_flow_status_json(flow_json):
+    """Build serialized status object."""
+    status = ([], [])
+    for task in flow_json['tasks']:
+        task_status = Task.build_task_json_status(task)
+
+        # Get the UI name of the task
+        task_name = task_status["name"]
+        assert task_name
+        # Calculate the right position inside the tuple
+        step = (
+            0
+            if task_name in ('sse_simple_add',)
+            else 1
+        )
+
+        status[step].append(task_status)
+
+    return status
+
+
+class TestFlow(Flow):
+
+    def _workflow(self, deposit_id, user_id, bucket_id,
+                  version_id, key, uri=None):
+        with db.session.begin_nested():
+            workflow = TestFlow.create(
+                'TestFlow',
+                payload={
+                    'deposit_id': deposit_id,
+                    'bucket_id': bucket_id,
+                    'version_id': version_id,
+                    'key': key,
+                    'uri': uri,
+                },
+                user_id="1",
+                deposit_id=deposit_id,
+            )
+
+        db.session.commit()
+
+        return workflow
+
+    def build_steps(self):
+        self._tasks.append((sse_simple_add(), {'x': 1, 'y': 2}))
+        self._tasks.append([
+            (sse_failing_task(), {}), (sse_failing_task(), {})])
+
+    def run(self, deposit_id, user_id, version_id, bucket_id, key,
+            uri=None):
+        flow = self._workflow(
+            deposit_id=deposit_id,
+            user_id=user_id,
+            bucket_id=bucket_id,
+            version_id=version_id,
+            key=key, uri=uri,
+        )
+        flow_id = flow.id
+        flow.assemble()
+        with db.session.begin_nested():
+            flow.payload['deposit_id'] = deposit_id
+            flag_modified(flow.model, 'payload')
+        db.session.commit()
+
+        flow.start()
+        flow = TestFlow.get_flow(flow_id)
+
+        return flow

@@ -43,12 +43,18 @@ from invenio_records.models import RecordMetadata
 
 from cds.modules.deposit.api import (deposit_project_resolver,
                                      deposit_video_resolver)
-from cds.modules.webhooks.proxies import current_flows
-from cds.modules.webhooks.status import (get_deposit_flows,
-                                         get_tasks_status_by_task)
+from cds.modules.flows.api import Flow
+from cds.modules.flows.status import (get_deposit_flows,
+                                      get_tasks_status_by_task)
 from cds.modules.flows.models import Flow as FlowModel
 from helpers import (get_indexed_records_from_mock, get_object_count,
-                     get_presets_applied, get_tag_count, mock_current_user)
+                     get_presets_applied, get_tag_count, mock_current_user,
+                     MockSorenson, MockSorensonHappy, MockSorensonFailed,
+                     TestFlow, MOCK_TASK_NAMES, mock_compute_status,
+                        mock_build_flow_status_json
+                     )
+
+
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 
 
@@ -88,11 +94,11 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
 
         assert '_tasks' in data
-        assert data['tags']['uri_origin'] == online_video
+        assert data['tags']['uri'] == online_video
         assert data['key'] == master_key
         assert 'version_id' in data
         assert data.get('presets') == get_all_distinct_qualities()
@@ -103,7 +109,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         # Master file
         master = ObjectVersion.get(bucket_id, master_key)
         tags = master.get_tags()
-        assert tags['_event_id'] == data['tags']['_event_id']
+        assert tags['_flow_id'] == data['tags']['_flow_id']
         assert master.key == master_key
         assert str(master.version_id) == data['version_id']
         assert master.file
@@ -135,10 +141,10 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             assert master.file.size == video_size
 
         video = deposit_video_resolver(video_1_depid)
-        events = get_deposit_flows(video['_deposit']['id'])
+        flows = get_deposit_flows(video['_deposit']['id'])
 
         # check deposit tasks status
-        tasks_status = get_tasks_status_by_task(events)
+        tasks_status = get_tasks_status_by_task(flows)
         assert len(tasks_status) == 4
         assert 'file_download' in tasks_status
         assert 'file_transcode' in tasks_status
@@ -279,10 +285,8 @@ def test_avc_workflow_receiver_local_file_pass(
         )
         # [[ RUN WORKFLOW ]]
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
-        import ipdb;ipdb.set_trace()
         assert '_tasks' in data
         assert data['key'] == master_key
         assert 'version_id' in data
@@ -294,7 +298,7 @@ def test_avc_workflow_receiver_local_file_pass(
         # Master file
         master = ObjectVersion.get(bucket_id, master_key)
         tags = master.get_tags()
-        assert tags['_event_id'] == data['tags']['_event_id']
+        assert tags['_flow_id'] == data['tags']['_flow_id']
         assert master.key == master_key
         assert str(master.version_id) == data['version_id']
         assert master.file
@@ -328,10 +332,10 @@ def test_avc_workflow_receiver_local_file_pass(
             assert master.file.size == video_size
 
         video = deposit_video_resolver(video_1_depid)
-        events = get_deposit_flows(video['_deposit']['id'])
+        flows = get_deposit_flows(video['_deposit']['id'])
 
         # check deposit tasks status
-        tasks_status = get_tasks_status_by_task(events)
+        tasks_status = get_tasks_status_by_task(flows)
         assert len(tasks_status) == 3
         assert 'file_transcode' in tasks_status
         assert 'file_video_extract_frames' in tasks_status
@@ -360,11 +364,14 @@ def test_avc_workflow_receiver_local_file_pass(
         # [[ DELETE WORKFLOW ]]
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 201
+        assert resp.status_code == 410
 
         # check that object versions and tags are deleted
         # (Create + Delete) * Num Objs - 1 (because the file is local and will
         # be not touched)
+        # calculated based on emptying ObjectVersion when deleting
+        # so we get two ObjectVersion per file
+        # TODO name the value of 2 and -1
         assert ObjectVersion.query.count() == 2 * get_object_count() - 1
         # Tags associated with the old version
         assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
@@ -376,7 +383,6 @@ def test_avc_workflow_receiver_local_file_pass(
 
         # check metadata patch are deleted
         assert 'extracted_metadata' not in record.json['_cds']
-
         # check the corresponding Event persisted after cleaning
         assert len(get_deposit_flows(record.json['_deposit']['id'])) == 0
         assert len(get_deposit_flows(record.json['_deposit']['id'],
@@ -386,17 +392,16 @@ def test_avc_workflow_receiver_local_file_pass(
         assert mock_indexer.called is False
 
 
-@pytest.mark.skip(reason='TO BE FIXED with remote DOWNLOAD flow')
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_download(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
     master_key = 'test.mp4'
+
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -412,9 +417,10 @@ def test_avc_workflow_receiver_clean_download(
         assert resp.status_code == 201
 
     assert ObjectVersionTag.query.count() == get_tag_count()
-    event = FlowModel.query.first()
+    flow = FlowModel.query.first()
+    flow = Flow(model=flow)
     # [[ CLEAN DOWNLOAD ]]
-    event.receiver.clean_task(event=event, task_name='file_download')
+    flow.clean_task(task_name='file_download')
 
     # check extracted metadata is there
     records = RecordMetadata.query.all()
@@ -442,18 +448,15 @@ def test_avc_workflow_receiver_clean_download(
     assert ObjectVersionTag.query.count() == get_tag_count() * 2
 
 
-@pytest.mark.skip(reason='TO BE FIXED with remote DOWNLOAD flow')
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_video_frames(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video, local_file, bucket):
     """Test AVCWorkflow receiver."""
     master_key = 'test.mp4'
-    receiver_id = 'avc'
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -468,7 +471,7 @@ def test_avc_workflow_receiver_clean_video_frames(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
@@ -476,9 +479,8 @@ def test_avc_workflow_receiver_clean_video_frames(
     flow = FlowModel.query.first()
 
     # [[ CLEAN VIDEO EXTRACT FRAMES ]]
-    receiver = current_flows.receivers[receiver_id]
-    receiver.clean_task(
-        flow=flow, task_name='file_video_extract_frames')
+    flow = Flow(model=flow)
+    flow.clean_task(task_name='file_video_extract_frames')
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()
@@ -492,18 +494,15 @@ def test_avc_workflow_receiver_clean_video_frames(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
 
-@pytest.mark.skip(reason='TO BE FIXED with remote DOWNLOAD flow')
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_video_transcode(
         api_app, db, cds_depid, access_token, json_headers,
-        mock_sorenson, online_video, webhooks):
+        mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
     master_key = 'test.mp4'
-    receiver_id = 'avc'
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -521,7 +520,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    receiver = current_flows.receivers[receiver_id]
     #
     # CLEAN
     #
@@ -529,9 +527,9 @@ def test_avc_workflow_receiver_clean_video_transcode(
     for i, preset_quality in enumerate(presets, 1):
         # Clean transcode task for each preset
 
-        flow = FlowModel.query.first()
-        receiver.clean_task(event=flow, task_name='file_transcode',
-                            preset_quality=preset_quality)
+        flow = Flow(model=FlowModel.query.first())
+        flow.clean_task(flow=flow, task_name='file_transcode',
+                        preset_quality=preset_quality)
 
         # check extracted metadata is there
         records = RecordMetadata.query.all()
@@ -547,18 +545,23 @@ def test_avc_workflow_receiver_clean_video_transcode(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
 
-@pytest.mark.skip(reason='TO BE FIXED with remote DOWNLOAD flow')
 @mock.patch('flask_login.current_user', mock_current_user)
+@mock.patch('cds.modules.flows.tasks.sorenson', MockSorensonHappy())
+# @mock.patch("cds.modules.flows.api.Flow", TestFlow)
+# @mock.patch("cds.modules.flows.views.Flow", TestFlow)
+# @mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
+@mock.patch("cds.modules.flows.serializers.build_flow_status_json",
+            mock_build_flow_status_json)
+@mock.patch("cds.modules.flows.models.Status.compute_status",
+            classmethod(mock_compute_status))
 def test_avc_workflow_receiver_clean_extract_metadata(
         api_app, db, cds_depid, access_token, json_headers,
-        mock_sorenson, online_video, webhooks):
+        mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
     master_key = 'test.mp4'
-    receiver_id = 'avc'
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -576,10 +579,10 @@ def test_avc_workflow_receiver_clean_extract_metadata(
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
-    receiver = current_flows.receivers[receiver_id]
     # [[ CLEAN VIDEO METADATA EXTRACTION ]]
     flow = FlowModel.query.first()
-    receiver.clean_task(flow=flow, task_name='file_video_metadata_extraction')
+    flow = Flow(model=flow)
+    flow.clean_task(task_name='file_video_metadata_extraction')
 
     # check extracted metadata is not there
     records = RecordMetadata.query.all()

@@ -36,7 +36,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import JSONType, UUIDType
 
-logger = logging.getLogger('invenio-flow')
+logger = logging.getLogger('cds-flow')
 
 
 def as_task(value):
@@ -56,7 +56,7 @@ class Status(Enum):
     STARTED = 'STARTED'
     SUCCESS = 'SUCCESS'
     FAILURE = 'FAILURE'
-    CANCELED = 'CANCELED'
+    CANCELLED = 'CANCELLED'
 
     @classmethod
     def compute_status(cls, statuses):
@@ -70,7 +70,9 @@ class Status(Enum):
         if all(s == cls.SUCCESS for s in statuses):
             return cls.SUCCESS
 
-        for status in (cls.PENDING, cls.FAILURE, cls.CANCELED):
+        for status in (cls.PENDING, cls.FAILURE, cls.CANCELLED):
+            # returns first status it finds, for the provided list
+            # checks if PENDING, then FAILURE and CANCELLED
             if any(s == status for s in statuses):
                 return status
 
@@ -80,11 +82,11 @@ class Status(Enum):
     def status_to_http(cls, status):
         """Convert Flow state into HTTP code."""
         STATES_TO_HTTP = {
-            cls.PENDING: 202,
-            cls.STARTED: 202,
+            cls.PENDING: 201,
+            cls.STARTED: 201,
             cls.FAILURE: 500,
-            cls.SUCCESS: 201,
-            cls.CANCELED: 409,
+            cls.SUCCESS: 200,
+            cls.CANCELLED: 409,
         }
 
         try:
@@ -121,17 +123,7 @@ class Flow(db.Model, Timestamp):
         nullable=True,
     )
 
-    response = db.Column(
-        db.JSON()
-        .with_variant(postgresql.JSONB(none_as_null=True), 'postgresql',)
-        .with_variant(JSONType(), 'sqlite',)
-        .with_variant(JSONType(), 'mysql',),
-        default=lambda: dict(),
-        nullable=True,
-    )
-    """Flow payload in JSON format, typically args and kwargs."""
-
-    response_code = db.Column(db.Integer, default=202)
+    deleted = db.Column(db.Boolean, default=False)
     """Response code returned on flow trigger."""
 
     user_id = db.Column(db.Integer(), db.ForeignKey(User.id), nullable=False)
@@ -139,9 +131,6 @@ class Flow(db.Model, Timestamp):
 
     deposit_id = db.Column(db.String, nullable=False)
     """Deposit for which the flow was triggered."""
-
-    receiver_id = db.Column(db.String, nullable=False)
-    """Receiver which managed the flow."""
 
     @hybrid_property
     def status(self):

@@ -72,7 +72,6 @@ from cds.factory import create_app
 from cds.modules.deposit.api import Project, Video
 from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
-from cds.modules.webhooks.receivers import CeleryAsyncReceiver
 from helpers import (create_category, create_keyword, create_record,
                      endpoint_get_schema, new_project,
                      prepare_videos_for_publish, rand_md5, rand_version_id,
@@ -103,6 +102,7 @@ def app():
         # FIXME
         ACCOUNTS_JWT_ENABLE=False,
         THEOPLAYER_LICENCE_KEY='CHANGE_ME',
+        PRESERVE_CONTEXT_ON_EXCEPTION=False
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
@@ -692,11 +692,11 @@ def mock_sorenson():
         return '1234', ar, preset_config
 
     mock.patch(
-        'cds.modules.webhooks.tasks.sorenson.start_encoding'
+        'cds.modules.flows.tasks.sorenson.start_encoding'
     ).start().side_effect = mocked_encoding
 
     mock.patch(
-        'cds.modules.webhooks.tasks.sorenson.get_encoding_status'
+        'cds.modules.flows.tasks.sorenson.get_encoding_status'
     ).start().side_effect = [
         ('Waiting', 0),
         ('Transcoding', 45),
@@ -705,7 +705,7 @@ def mock_sorenson():
     ] * 50  # repeat for multiple usages of the mocked method
 
     mock.patch(
-        'cds.modules.webhooks.tasks.sorenson.stop_encoding'
+        'cds.modules.flows.tasks.sorenson.stop_encoding'
     ).start().return_value = None
 
 
@@ -728,56 +728,6 @@ def access_token(api_app, db, users):
 def add(x, y):
     """Simple shared task."""
     return x + y
-
-
-@pytest.fixture
-def receiver(api_app):
-    """Register test celery receiver."""
-    class TestReceiver(CeleryReceiver):
-
-        def run(self, event):
-            ret = add.apply(kwargs=event.payload).get()
-            event.response['message'] = ret
-
-    current_webhooks.register('test-receiver', TestReceiver)
-    return 'test-receiver'
-
-
-@pytest.fixture
-def workflow_receiver(api_app, db, webhooks, es, cds_depid):
-    """Workflow receiver."""
-    class TestReceiver(CeleryAsyncReceiver):
-        def run(self, event):
-            workflow = chain(
-                sse_simple_add().s(x=1, y=2, deposit_id=cds_depid),
-                group(sse_failing_task().s(), sse_success_task().s())
-
-            )
-            event.payload['deposit_id'] = cds_depid
-            with db.session.begin_nested():
-                flag_modified(event, 'payload')
-                db.session.expunge(event)
-            db.session.commit()
-            result = workflow.apply_async()
-            self._serialize_result(event=event, result=result)
-            self.persist(event=event, result=result)
-
-        def _raw_info(self, event):
-            result = self._deserialize_result(event)
-            return (
-                [{'add': result.parent}],
-                [
-                    {'failing': result.children[0]},
-                    {'failing': result.children[1]}
-                ]
-            )
-
-    receiver_id = 'add-receiver'
-    from cds.celery import celery
-    celery.flask_app.extensions['invenio-webhooks'].register(
-        receiver_id, TestReceiver)
-    current_webhooks.register(receiver_id, TestReceiver)
-    return receiver_id
 
 
 @pytest.fixture()
