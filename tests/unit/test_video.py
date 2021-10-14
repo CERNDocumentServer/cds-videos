@@ -26,22 +26,23 @@
 
 from __future__ import absolute_import, print_function
 
+from shutil import copyfile
+
 import mock
 import pytest
 import json
 
 from celery import states
-from copy import deepcopy
 from elasticsearch_dsl.query import Q
-from flask import url_for
+from flask import url_for, current_app
 from flask_security import login_user
 from invenio_accounts.models import User
-from invenio_accounts.testutils import login_user_via_session
 from invenio_db import db
 from invenio_deposit.search import DepositSearch
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records.models import RecordMetadata
 from jsonschema.exceptions import ValidationError
@@ -49,19 +50,26 @@ from mock import MagicMock
 from six import BytesIO
 from time import sleep
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
+import cds.modules.flows.tasks
+from cds.modules.flows.models import Flow as FlowModel
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
                                      record_video_resolver,
                                      deposit_video_resolver)
 from cds.modules.deposit.indexer import CDSRecordIndexer
+from cds.modules.flows.api import Flow
+from cds.modules.flows.serializers import FlowResponseSerializer
 from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.webhooks.status import get_deposit_flows, \
+from cds.modules.flows.status import get_deposit_flows, \
     get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
 
-from helpers import workflow_receiver_video_failing, mock_current_user, \
+from helpers import mock_current_user, \
     get_indexed_records_from_mock, prepare_videos_for_publish, \
-    reset_oauth2
+    reset_oauth2, MockSorenson, MockSorensonHappy, MockSorensonFailed, \
+    TestFlow, MOCK_TASK_NAMES
 
 
 def test_video_resolver(api_project):
@@ -239,20 +247,31 @@ def test_video_delete_with_workflow(api_app, users, api_project, webhooks, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
+    bucket_id = str(video_1.files.bucket.id)
 
-    receiver_id = 'test_video_delete_with_workflow'
-    workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id)
+    user_id = "1"
+    key = "abc.mp4"
+    version_id = str(local_file)
 
     mock_delete = MagicMock(return_value=None)
-    current_webhooks.receivers[receiver_id].delete = mock_delete
+    Flow.delete = mock_delete
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
     with api_app.test_request_context(headers=headers, data=payload):
-        event = Event.create(receiver_id=receiver_id)
-        db.session.add(event)
-        event.process()
+        flow = TestFlow.create(
+            'TestFlow',
+            payload={
+                'deposit_id': video_1_depid,
+                'bucket_id': bucket_id,
+                'version_id': version_id,
+                'key': key,
+            },
+            user_id=user_id,
+            deposit_id=video_1_depid,
+        )
+        db.session.add(flow.model)
+        flow.run(video_1_depid, user_id, version_id, bucket_id, key, uri)
     db.session.commit()
 
     video_1 = deposit_video_resolver(video_1_depid)
@@ -267,48 +286,64 @@ def test_video_record_schema(app, db, api_project):
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
-                                  access_token, json_headers):
-    """Test deposit events."""
+@mock.patch('cds.modules.flows.tasks.sorenson', MockSorensonHappy())
+@mock.patch("cds.modules.flows.api.Flow", TestFlow)
+@mock.patch("cds.modules.flows.views.Flow", TestFlow)
+@mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
+def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
+                                 json_headers, local_file, access_token):
+    """Test deposit flows."""
     (project, video_1, video_2) = api_project
     project_depid = project['_deposit']['id']
     video_1_depid = video_1['_deposit']['id']
+    bucket_id = str(bucket.id)
+    version_id = str(local_file)
+    key = 'TEST.mp4'
     db.session.add(bucket)
 
-    # registering receiver
-    receiver_id = 'test_video_events_on_workflow'
-    workflow_receiver_video_failing(
-        api_app, db, video_1, receiver_id=receiver_id)
-
     with api_app.test_request_context():
-        url = url_for(
-            'cds_webhooks.flow_list',
-            receiver_id=receiver_id,
-            access_token=access_token)
+        url = url_for('cds_webhooks.flow_list', access_token=access_token)
 
     with api_app.test_client() as client:
         # run workflow
-        resp = client.post(url, headers=json_headers, data=json.dumps({}))
+        resp = client.post(url, headers=json_headers,
+                           data=json.dumps(
+                               {"deposit_id": video_1_depid,
+                                "version_id": version_id,
+                                "bucket_id": bucket_id,
+                                "key": key
+                                }
+                           ),
+                           )
         assert resp.status_code == 500
         # run again workflow
-        resp = client.post(url, headers=json_headers, data=json.dumps({}))
+        resp = client.post(url, headers=json_headers,
+                           data=json.dumps({"deposit_id": video_1_depid,
+                                            "version_id": version_id,
+                                            "bucket_id": bucket_id,
+                                            "key": key
+                                            }))
         assert resp.status_code == 500
-        # resolve deposit and events
+        # resolve deposit and flows
         deposit = deposit_video_resolver(video_1_depid)
-        events = get_deposit_flows(deposit['_deposit']['id'])
-        # check events
-        assert len(events) == 2
-        assert events[0].payload['deposit_id'] == video_1_depid
-        assert events[1].payload['deposit_id'] == video_1_depid
+
+        flows = get_deposit_flows(deposit['_deposit']['id'])
+        # check flows
+        assert len(flows) == 2
+
+        assert flows[0].payload['deposit_id'] == video_1_depid
+        assert flows[1].payload['deposit_id'] == video_1_depid
         # check computed status
-        status = get_tasks_status_by_task(events)
+
+        status = get_tasks_status_by_task(flows)
+
         assert status['sse_simple_add'] == states.SUCCESS
         assert status['sse_failing_task'] == states.FAILURE
 
         # check if the states are inside the deposit
         res = client.get(
-            url_for('invenio_deposit_rest.video_item', pid_value=video_1_depid,
-                    access_token=access_token),
+            url_for('invenio_deposit_rest.video_item',
+                    pid_value=video_1_depid),
             headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))['metadata']
@@ -316,12 +351,20 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert data['_cds']['state']['sse_failing_task'] == states.FAILURE
 
         # run indexer
+        ids = PersistentIdentifier.query.filter(
+            PersistentIdentifier.status == PIDStatus.REGISTERED,
+        )
+        obj_ids = [
+            str(p.object_uuid) for p in ids
+        ]
+        RecordIndexer().bulk_index(iter(obj_ids))
         RecordIndexer().process_bulk_queue()
         sleep(2)
         # check elasticsearch video_1 state
         resp = client.get(url_for('invenio_deposit_rest.video_list',
                                   q='_deposit.id:{0}'.format(video_1_depid),
-                                  access_token=access_token),
+                                  access_token=access_token
+                                  ),
                           headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
@@ -330,8 +373,10 @@ def test_video_events_on_workflow(webhooks, api_app, db, api_project, bucket,
         assert status['sse_failing_task'] == states.FAILURE
         # check elasticsearch project state
         resp = client.get(url_for('invenio_deposit_rest.video_list',
-                                  q='_deposit.id:{0}'.format(project_depid),
-                                  access_token=access_token),
+                                  q='_deposit.id:{0}'.format(
+                                      project_depid),
+                                  access_token=access_token
+                                  ),
                           headers=json_headers)
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
@@ -547,12 +592,13 @@ def test_deposit_poster_tags(api_app, db, api_project, users):
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_deposit_smil_tag_generation(api_app, db, api_project, users):
     """Test AVCWorkflow receiver."""
+
     def check_smil(video):
         _, record = video.fetch_published()
         master = CDSVideosFilesIterator.get_master_video_file(record)
         playlist = master['playlist']
         assert playlist[0]['key'] == '{}.smil'. \
-                                     format(record['report_number'][0])
+            format(record['report_number'][0])
         assert playlist[0]['content_type'] == 'smil'
         assert playlist[0]['context_type'] == 'playlist'
         assert playlist[0]['media_type'] == 'text'

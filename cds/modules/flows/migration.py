@@ -28,19 +28,17 @@
 from cds_sorenson.api import can_be_transcoded, get_all_distinct_qualities
 from invenio_db import db
 
+from .api import Flow
+from .status import get_deposit_last_flow
 from ..deposit.api import deposit_video_resolver
 from ..records.api import CDSVideosFilesIterator
 from .models import Status
-from ..webhooks.receivers import AVCWorkflow
 
 
 def migrate_event(deposit_id):
     """Migrate an old event into Flows."""
-    receiver = AVCWorkflow()
-    deposit = deposit_video_resolver(deposit_id)
-    import ipdb;ipdb.set_trace()
-
-    flow = receiver._workflow(deposit_id)
+    flow_model = get_deposit_last_flow(deposit_id)
+    flow = Flow(model=flow_model)
 
     # Update flow task status depending on the content of th record
     deposit = deposit_video_resolver(deposit_id)

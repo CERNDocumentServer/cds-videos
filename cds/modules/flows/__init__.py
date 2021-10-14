@@ -23,12 +23,12 @@
 
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Invenio-Flow is a module for managing sinple backend workflows."""
+"""Module for managing simple backend workflows."""
 
-from __future__ import absolute_import, print_function
+# from __future__ import absolute_import, print_function
 
-from .api import Flow
-from .decorators import task
+# from .api import Flow
+# from .decorators import task
+#
 
-
-__all__ = ('Flow', 'task')
+# __all__ = ('Flow', 'task')

@@ -27,11 +27,15 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.flows import Flow, task
-from cds.modules.flows.models import Task
+import mock
+
+from cds.modules.flows.api import Flow
+from cds.modules.flows.models import Task as TaskModel
+from cds.modules.flows.task_api import Task
+from cds.modules.flows.decorators import task
 
 
-def test_basic_flow_api_usage(db):
+def test_basic_flow_api_usage(db, users):
     """Test basic flow creation."""
 
     @task
@@ -65,66 +69,71 @@ def test_basic_flow_api_usage(db):
                 kwargs['task_id'], message='Running for {}'.format(times)
             )
             # Testing message updates
-            t = Task.get(kwargs['task_id'])
+            t = TaskModel.get(kwargs['task_id'])
             assert t.status.value == 'PENDING'
             assert t.message == 'Running for {}'.format(times)
             f = Flow.get_flow(kwargs['flow_id'])
-            assert f.status['status'] == 'PENDING'
+            assert str(f.status) == 'PENDING'
 
             # Reschedule the task to mimic breaking long standing tasks
             times = times - 1
             self.retry(args=(times,), kwargs=kwargs)
 
-    flow = Flow.create('test', payload=dict(common='common-arg'))
+    flow = Flow.create('test',
+                       payload=dict(common='common-arg', common2='common2'),
+                       user_id="1", deposit_id="test",
+                       )
     flow_id = flow.id
-    assert flow.status['status'] == 'PENDING'
+    assert str(flow.status) == 'PENDING'
 
     # build the workflow
-    def build(flow):
+    def build():
         flow.chain(t1)
         flow.group(t2, [{'p': 't2_1'}, {'p': 't2_2'}])
         flow.chain(t3, {'p': 't3'})
         flow.chain(t4, {'times': 10})
 
-    flow.assemble(build)
+    # patch the flow build
+    with mock.patch.object(Flow, "build_steps", return_value=build()):
 
-    # Save tasks and flow before running
-    db.session.commit()
+        flow.assemble()
+        # Save tasks and flow before running
+        db.session.commit()
 
-    assert flow.status['status'] == 'PENDING'
+        assert str(flow.status) == 'PENDING'
 
-    flow.start()
+        flow.start()
 
-    flow = Flow.get_flow(flow_id)
-    assert flow.status['status'] == 'SUCCESS'
+        flow = Flow.get_flow(flow_id)
+        assert str(flow.status) == 'SUCCESS'
 
-    task_status = flow.status['tasks'][0]
-    assert task_status['status'] == 'SUCCESS'
-    flow_task_status = flow.get_task_status(task_status['id'])
-    assert flow_task_status['status'] == 'SUCCESS'
+        task_status = flow.json['tasks'][0]
+        assert task_status['status'] == 'SUCCESS'
+        flow_task_status = Task().get_task_status(task_status['id'])
+        assert flow_task_status['status'] == 'SUCCESS'
 
-    # Create a new instance of the same flow (restart)
-    old_flow_id = flow_id
-    flow = flow.__class__.create(
-        flow.name, payload={'common': 'test 2'}, previous_id=old_flow_id
-    )
-    flow_id = flow.id
-    assert flow.status['status'] == 'PENDING'
-    flow.assemble(build)
+        # Create a new instance of the same flow (restart)
+        # old_flow_id = flow_id
+        flow = flow.create(
+            flow.name, payload={'common': 'test 2'}, user_id="1",
+            deposit_id="test",
+        )
+        flow_id = flow.id
+        assert str(flow.status) == 'PENDING'
+        flow.assemble()
 
-    # Save tasks and flow before running
-    db.session.commit()
+        # Save tasks and flow before running
+        db.session.commit()
 
-    assert flow.status['status'] == 'PENDING'
+        assert str(flow.status) == 'PENDING'
 
-    flow.start()
+        flow.start()
 
-    assert flow_id != old_flow_id
+        # assert flow_id != old_flow_id
 
-    flow = Flow.get_flow(flow_id)
-    assert str(flow.previous_id) == old_flow_id
+        flow = Flow.get_flow(flow_id)
 
-    # Restart task
-    flow.restart_task(task_status['id'])
-    flow_task_status = flow.get_task_status(task_status['id'])
-    assert flow_task_status['status'] == 'SUCCESS'
+        # Restart task
+        flow.restart_task(task_status['id'])
+        flow_task_status = Task().get_task_status(task_status['id'])
+        assert flow_task_status['status'] == 'SUCCESS'

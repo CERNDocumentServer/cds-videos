@@ -56,6 +56,7 @@ from invenio_files_rest.models import (Bucket, Location, MultipartObject,
                                        ObjectVersion, ObjectVersionTag,
                                        as_bucket, as_object_version)
 
+from ..flows.api import Flow
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
@@ -63,7 +64,7 @@ from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.utils import lowercase_value
 from ..records.validators import PartialDraft4Validator
-from ..webhooks.status import (get_deposit_flows, get_tasks_status_by_task,
+from ..flows.status import (get_deposit_flows, get_tasks_status_by_task,
                                merge_tasks_status)
 from .errors import DiscardConflict
 from .resolver import get_video_pid
@@ -931,9 +932,9 @@ class Video(CDSDeposit):
 
     def _clean_tasks(self):
         """Clean all tasks."""
-        events = get_deposit_flows(deposit_id=self['_deposit']['id'])
-        for event in events:
-            event.receiver.delete(event=event)
+        flows = get_deposit_flows(deposit_id=self['_deposit']['id'])
+        for flow in flows:
+            Flow(model=flow).delete()
 
     @mark_as_action
     def delete(self, force=True, pid=None):
