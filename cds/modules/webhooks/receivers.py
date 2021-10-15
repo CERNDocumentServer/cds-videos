@@ -360,7 +360,7 @@ class AVCWorkflow(CeleryAsyncReceiver):
             ObjectVersionTag.create_or_update(
                 object_version, '_event_id', event_id)
             # add tag for preview
-            ObjectVersionTag.create_or_update(object_version, 'preview', True)
+            ObjectVersionTag.create_or_update(object_version, 'preview', "true")
             # add tags for file type
             ObjectVersionTag.create_or_update(
                 object_version, 'media_type', 'video')

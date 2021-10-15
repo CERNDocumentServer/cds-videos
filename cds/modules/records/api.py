@@ -202,12 +202,6 @@ class CDSRecord(Record):
         return PersistentIdentifier.get(
             pid_type='depid', pid_value=self.get('_deposit', {}).get('id'))
 
-    def _create_bucket(self):
-        """Override bucket creation."""
-        return Bucket.create(storage_class=current_app.config[
-            'DEPOSIT_DEFAULT_STORAGE_CLASS'
-        ])
-
 
 class Keyword(Record):
     """Define API for a keywords."""

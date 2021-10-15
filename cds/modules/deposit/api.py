@@ -126,11 +126,6 @@ class CDSDeposit(Deposit):
         self._update_tasks_status()
         self['_files'] = self._get_files_dump()
 
-    @property
-    def _bucket(self):
-        """Get the bucket object."""
-        return as_bucket(self['_buckets']['deposit'])
-
     def _get_files_dump(self):
         """Get files without create the record_bucket."""
         bucket = self._bucket
@@ -155,6 +150,16 @@ class CDSDeposit(Deposit):
         return deposits
 
     @classmethod
+    def dump_bucket(cls, data, bucket):
+        """Dump the bucket id into the record metadata."""
+        data["_buckets"] = {'deposit': str(bucket.id)}
+
+    @classmethod
+    def load_bucket(cls, record):
+        """Load the bucket id from the record metadata."""
+        return record.get("_buckets", "").get("deposit", "")
+
+    @classmethod
     def create(cls, data, id_=None, **kwargs):
         """Create a CDS deposit.
 
@@ -163,13 +168,6 @@ class CDSDeposit(Deposit):
         if '_deposit' not in data:
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
-        bucket = Bucket.create(location=Location.get_by_name(
-            kwargs.get('bucket_location', 'default')),
-            storage_class=current_app.config[
-                'DEPOSIT_DEFAULT_STORAGE_CLASS'
-            ]
-        )
-        data['_buckets'] = {'deposit': str(bucket.id)}
         data.setdefault('_cds', {})
         data['_cds'].setdefault('state', {})
         data.setdefault('keywords', [])
@@ -182,7 +180,6 @@ class CDSDeposit(Deposit):
             data.setdefault('_access', {})
         deposit = super(CDSDeposit, cls).create(
             data, id_=id_, validator=PartialDraft4Validator)
-        RecordsBuckets.create(record=deposit.model, bucket=bucket)
         return deposit
 
     @property

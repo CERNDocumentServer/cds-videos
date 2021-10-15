@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import
 
+import json
 import logging
 import os
 import shutil
@@ -495,7 +496,7 @@ class ExtractFramesTask(AVCTask):
         ObjectVersionTag.create(obj, 'master', str(master_id))
         ObjectVersionTag.create(obj, 'media_type', media_type)
         ObjectVersionTag.create(obj, 'context_type', context_type)
-        [ObjectVersionTag.create(obj, k, tags[k]) for k in tags]
+        [ObjectVersionTag.create(obj, k, json.dumps(tags[k])) for k in tags]
 
 
 class TranscodeVideoTask(AVCTask):
@@ -607,9 +608,9 @@ class TranscodeVideoTask(AVCTask):
             ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
             ObjectVersionTag.create(obj, 'media_type', 'video')
             ObjectVersionTag.create(obj, 'context_type', 'subformat')
-            ObjectVersionTag.create(obj, 'display_aspect_ratio', ar)
+            ObjectVersionTag.create(obj, 'display_aspect_ratio', json.dumps(ar))
             for key, value in preset_config.items():
-                ObjectVersionTag.create(obj, key, value)
+                ObjectVersionTag.create(obj, key, json.dumps(value))
 
             # Information necessary for monitoring
             job_info = dict(
@@ -768,3 +769,4 @@ def dispose_object_version(object_version):
         # remove the object version
         ObjectVersion.delete(
             bucket=object_version.bucket, key=object_version.key)
+

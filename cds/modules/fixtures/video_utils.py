@@ -21,12 +21,14 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, Bucket
 
 
 def _create_tags(video_obj, **tags):
     """Create multiple tags for a single object version."""
-    [ObjectVersionTag.create(video_obj, tag, tags[tag]) for tag in tags]
+    [ObjectVersionTag.create(video_obj, tag, json.dumps(tags[tag])) for tag in tags]
 
 
 def add_master_to_video(video_deposit, filename, stream, video_duration):
