@@ -14,7 +14,7 @@ arrow==0.14.0
 asn1crypto==0.24.0        # via cryptography
 attrs==19.1.0             # via invenio-records-rest, jsonschema
 autosemver==0.5.3         # via isbnid-fork
-babel==2.7.0              # via angular-gettext-babel, flask-babelex, invenio-assets
+babel==2.9.1              # via angular-gettext-babel, flask-babelex, invenio-assets
 backports-abc==0.5        # via tornado
 backports.functools-lru-cache==1.5  # via arrow
 backports.shutil-get-terminal-size==1.0.0  # via ipython
