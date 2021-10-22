@@ -87,15 +87,15 @@ def test_basic_flow_api_usage(db, users):
     assert str(flow.status) == 'PENDING'
 
     # build the workflow
-    def build():
-        flow.chain(t1)
-        flow.group(t2, [{'p': 't2_1'}, {'p': 't2_2'}])
-        flow.chain(t3, {'p': 't3'})
-        flow.chain(t4, {'times': 10})
+    def build(self):
+        self._tasks.append((t1, {}))
+        self._tasks.append((t2, {'p': 't2_1'}))
+        self._tasks.append((t3, {'p': 't3'}))
+        self._tasks.append((t4, {'times': 10}))
 
     # patch the flow build
-    with mock.patch.object(Flow, "build_steps", return_value=build()):
-
+    with mock.patch("cds.modules.flows.api.Flow.build_steps", build):
+        flow = Flow.get(flow_id)
         flow.assemble()
         # Save tasks and flow before running
         db.session.commit()
@@ -120,6 +120,7 @@ def test_basic_flow_api_usage(db, users):
         )
         flow_id = flow.id
         assert str(flow.status) == 'PENDING'
+        flow = Flow.get(flow_id)
         flow.assemble()
 
         # Save tasks and flow before running

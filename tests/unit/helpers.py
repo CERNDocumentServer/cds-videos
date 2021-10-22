@@ -48,7 +48,6 @@ from six import BytesIO
 from sqlalchemy.orm.attributes import flag_modified
 
 from cds.modules.deposit.api import Project, Video
-from cds.modules.flows.serializers import FlowResponseSerializer
 from cds.modules.flows.task_api import Task
 from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
@@ -230,7 +229,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
 
     # metadata
     tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
-                            len(ExtractMetadataTask.stream_keys)
+        len(ExtractMetadataTask.stream_keys)
 
     # transcode
     # number of keys inside object `tags` (basically, the number of tags)
@@ -613,6 +612,8 @@ class MockSorensonFailed(MockSorenson):
 def mock_compute_status(cls, statuses):
     return Status.FAILURE
 
+def mock_compute_status(cls, statuses):
+    return Status.FAILURE
 
 def mock_build_flow_status_json(flow_json):
     """Build serialized status object."""
@@ -637,48 +638,7 @@ def mock_build_flow_status_json(flow_json):
 
 class TestFlow(Flow):
 
-    def _workflow(self, deposit_id, user_id, bucket_id,
-                  version_id, key, uri=None):
-        with db.session.begin_nested():
-            workflow = TestFlow.create(
-                'TestFlow',
-                payload={
-                    'deposit_id': deposit_id,
-                    'bucket_id': bucket_id,
-                    'version_id': version_id,
-                    'key': key,
-                    'uri': uri,
-                },
-                user_id="1",
-                deposit_id=deposit_id,
-            )
-
-        db.session.commit()
-
-        return workflow
-
     def build_steps(self):
         self._tasks.append((sse_simple_add(), {'x': 1, 'y': 2}))
         self._tasks.append([
             (sse_failing_task(), {}), (sse_failing_task(), {})])
-
-    def run(self, deposit_id, user_id, version_id, bucket_id, key,
-            uri=None):
-        flow = self._workflow(
-            deposit_id=deposit_id,
-            user_id=user_id,
-            bucket_id=bucket_id,
-            version_id=version_id,
-            key=key, uri=uri,
-        )
-        flow_id = flow.id
-        flow.assemble()
-        with db.session.begin_nested():
-            flow.payload['deposit_id'] = deposit_id
-            flag_modified(flow.model, 'payload')
-        db.session.commit()
-
-        flow.start()
-        flow = TestFlow.get_flow(flow_id)
-
-        return flow
