@@ -219,7 +219,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 410
+        assert resp.status_code == 200
 
         # check that object versions and tags are deleted
         # (Create + Delete) * Num Objs
@@ -358,7 +358,7 @@ def test_avc_workflow_receiver_local_file_pass(
         # [[ DELETE WORKFLOW ]]
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 410
+        assert resp.status_code == 200
 
         # check that object versions and tags are deleted
         # (Create + Delete) * Num Objs - 1 (because the file is local and will
