@@ -60,7 +60,6 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      deposit_video_resolver)
 from cds.modules.deposit.indexer import CDSRecordIndexer
 from cds.modules.flows.api import Flow
-from cds.modules.flows.serializers import FlowResponseSerializer
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.flows.status import get_deposit_flows, \
     get_tasks_status_by_task
@@ -272,8 +271,9 @@ def test_video_delete_with_workflow(api_app, users, api_project,
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
     with api_app.test_request_context(headers=headers, data=payload):
-        flow = TestFlow.create(
-            'TestFlow',
+        flow = TestFlow(
+            deposit_id=video_1_depid,
+            name='TestFlow',
             payload={
                 'deposit_id': video_1_depid,
                 'bucket_id': bucket_id,
@@ -281,10 +281,9 @@ def test_video_delete_with_workflow(api_app, users, api_project,
                 'key': key,
             },
             user_id=user_id,
-            deposit_id=video_1_depid,
         )
-        db.session.add(flow.model)
-        flow.run(video_1_depid, user_id, version_id, bucket_id, key, uri)
+        # db.session.add(flow.model)
+        flow.run()
     db.session.commit()
 
     video_1 = deposit_video_resolver(video_1_depid)
