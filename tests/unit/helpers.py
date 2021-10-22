@@ -612,8 +612,10 @@ class MockSorensonFailed(MockSorenson):
 def mock_compute_status(cls, statuses):
     return Status.FAILURE
 
+
 def mock_compute_status(cls, statuses):
     return Status.FAILURE
+
 
 def mock_build_flow_status_json(flow_json):
     """Build serialized status object."""

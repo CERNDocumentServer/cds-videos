@@ -528,7 +528,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                              flow_id=str(flow_id),
                              access_token=access_token)
         resp = client.delete(url_delete, headers=json_headers)
-
+        payload["key"] = resp.get_json()["key"]
         # run the workflow!
         resp = client.post(url_run_workflow, headers=json_headers,
                            data=json.dumps(payload))

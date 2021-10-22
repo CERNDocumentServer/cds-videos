@@ -95,7 +95,6 @@ class FlowListResource(MethodView):
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
-        #import ipdb;ipdb.set_trace()
         new_flow = Flow(deposit_id=data["deposit_id"],
                         user_id=user_id,
                         payload=dict(
