@@ -440,16 +440,17 @@ def test_project_publish_with_workflow(api_app, users, api_project, es,
     with mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer, \
             api_app.test_request_context(headers=headers, data=payload):
-        flow = TestFlow.create("TESTworkflow",
+        flow = TestFlow.create(deposit_id=video_1_depid,
+                               name="TESTworkflow",
                                payload=dict(deposit_id=video_1_depid,
                                             bucket_id=bucket_id,
                                             version_id=version_id,
                                             key=key),
                                user_id=user_id,
-                               deposit_id=video_1_depid,
                                )
-        db.session.add(flow.model)
-        flow.run(video_1_depid, user_id, version_id, bucket_id, key)
+        flow_id = flow.id
+        flow = TestFlow.get(flow_id)
+        flow.run()
         # check video and project are indexed
         assert mock_indexer.called is True
         ids = get_indexed_records_from_mock(mock_indexer)
@@ -467,7 +468,7 @@ def test_project_publish_with_workflow(api_app, users, api_project, es,
     assert video_1.project['_cds']['state'] == expected
 
     flows = get_deposit_flows(deposit_id=video_1_depid)
-    assert len(flows) == 2
+    assert len(flows) == 1
 
     def check(project_status, video_1_status, video_2_status):
         project = deposit_project_resolver(project_depid)

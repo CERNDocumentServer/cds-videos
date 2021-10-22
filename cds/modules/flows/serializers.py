@@ -26,17 +26,19 @@ def add_link_header(response, links):
 
 def make_response(flow):
     """Make a response from flow object."""
-    code = FlowStatus.status_to_http(flow.status)
+    if flow.deleted:
+        code = 410
+    else:
+        code = FlowStatus.status_to_http(flow.status)
 
     response = {}
     response.update(flow_response_links(flow))
     response.update(serialize_flow_tasks(flow))
     response.update({
         "global_status": str(flow.status),
-        "presets": get_all_distinct_qualities()
+        "presets": get_all_distinct_qualities(),
+        "deposit_id": flow.deposit_id
                      })
-    response.update("")
-
     response = jsonify(response)
     response.headers['X-Hub-Delivery'] = flow.id
     add_link_header(response, {'self': url_for(

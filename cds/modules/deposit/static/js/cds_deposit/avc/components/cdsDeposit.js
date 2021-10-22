@@ -61,10 +61,10 @@ function cdsDepositCtrl(
   };
 
   // Webhooks available tasks
-  this.webhookAvailableEventTasks = {};
+  this.availableFlowsTasks = {};
 
-  // Webhooks event_id
-  this.webhookEventId = null;
+  // Webhooks flow_id
+  this.flowId = null;
 
   this.isProjectPublished = function() {
     var isPublished;
@@ -174,8 +174,8 @@ function cdsDepositCtrl(
       that.setDirty();
     };
 
-    this.getTaskFeedback = function(eventId, taskName, taskStatus) {
-      var url = urlBuilder.taskFeedback({ eventId: eventId });
+    this.getTaskFeedback = function(flowId, taskName, taskStatus) {
+      var url = urlBuilder.taskFeedback({ flowId: flowId });
       return cdsAPI.action(url, 'GET', {}, jwt).then(function(data) {
         data = _.flatten(data.data, true);
         if (taskName || taskStatus) {
@@ -194,22 +194,22 @@ function cdsDepositCtrl(
       $scope.$broadcast('cds.deposit.workflow.restart');
     }
 
-    this.triggerRestartEvent = function(eventId, taskId) {
-      that.restartEvent(eventId, taskId)
+    this.triggerRestartFlow = function(flowId, taskId) {
+      that.restartFlow(flowId, taskId)
         .then(function() {
           // Fetch feedback to update the Interface
           that.fetchCurrentStatuses();
         })
     }
 
-    this.restartEvent = function(eventId, taskId) {
-      var url = urlBuilder.restartEvent({ taskId: taskId, eventId: eventId });
+    this.restartFlow = function(flowId, taskId) {
+      var url = urlBuilder.restartFlow({ taskId: taskId, flowId: flowId });
       return cdsAPI.action(url, 'PUT');
     };
 
     this.restartFailedSubformats = function(subformatKeys) {
       var master = that.findMasterFile();
-      var eventId = master.tags._flow_id;
+      var flowId = master.tags._flow_id;
       master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
@@ -218,16 +218,16 @@ function cdsDepositCtrl(
           }
         });
       that.processSubformats();
-      that.getTaskFeedback(eventId, 'file_transcode')
+      that.getTaskFeedback(flowId, 'file_transcode')
         .then(function(data) {
-          var restartEvents = data.filter(function(taskInfo) {
+          var restartFlows = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
           }).map(function(taskInfo) {
-            var eventId = taskInfo.info.payload.flow_id;
+            var flowId = taskInfo.info.payload.flow_id;
             var taskId = taskInfo.id;
-            return that.restartEvent(eventId, taskId);
+            return that.restartFlow(flowId, taskId);
           });
-          $q.all(restartEvents).then(function() {
+          $q.all(restartFlows).then(function() {
             that.fetchCurrentStatuses();
           });
       });
@@ -275,13 +275,13 @@ function cdsDepositCtrl(
 
         var fetchPresetsPromise = $q.resolve();
         if (that.presets && that.presets.length == 0) {
-          var eventId = masterFile.tags._flow_id;
-          if (eventId) {
-            var eventUrl = urlBuilder.eventInfo({eventId: eventId});
+          var flowId = masterFile.tags._flow_id;
+          if (flowId) {
+            var flowUrl = urlBuilder.eventInfo({flowId: flowId});
             var updatePresets = function (resp) {
               that.presets = angular.copy(resp.data.presets);
             };
-            fetchPresetsPromise = cdsAPI.action(eventUrl, 'GET', {}, jwt)
+            fetchPresetsPromise = cdsAPI.action(flowUrl, 'GET', {}, jwt)
               .then(updatePresets, updatePresets);
           }
         }
@@ -344,14 +344,14 @@ function cdsDepositCtrl(
       // Update only if it is ``draft``
       if (that.isDraft()){
         var masterFile = that.findMasterFile();
-        var eventId = _.get(masterFile, 'tags._flow_id', undefined);
-        that.webhookEventId = eventId;
-        if (eventId) {
-          that.getTaskFeedback(eventId)
+        var flowId = _.get(masterFile, 'tags._flow_id', undefined);
+        that.flowId = flowId;
+        if (flowId) {
+          that.getTaskFeedback(flowId)
             .then(function(data) {
               var groupedTasks = _.groupBy(data, 'name');
-              // Update the available task events
-              that.webhookAvailableEventTasks = groupedTasks;
+              // Update the available task flows
+              that.availableFlowsTasks = groupedTasks;
               var transcodeTasks = groupedTasks.file_transcode;
               // Update the state reporter with all the new info
               data.forEach(function(task) {
@@ -501,7 +501,7 @@ function cdsDepositCtrl(
       this.cleanLocalStorage();
     }
 
-    // cdsDeposit events
+    // cdsDeposit flows
 
     // Success message
     // Loading message

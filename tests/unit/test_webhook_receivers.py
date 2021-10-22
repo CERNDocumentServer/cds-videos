@@ -51,7 +51,7 @@ from helpers import (get_indexed_records_from_mock, get_object_count,
                      get_presets_applied, get_tag_count, mock_current_user,
                      MockSorenson, MockSorensonHappy, MockSorensonFailed,
                      TestFlow, MOCK_TASK_NAMES, mock_compute_status,
-                        mock_build_flow_status_json
+                     mock_build_flow_status_json
                      )
 
 
@@ -61,7 +61,7 @@ from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
                                     json_headers, mock_sorenson, online_video,
-                                    users, local_file):
+                                    users):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -77,7 +77,6 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -89,16 +88,13 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             deposit_id=video_1_depid,
             key=master_key,
             sleep_time=0,
-            version_id=str(local_file),
-            bucket_id=str(bucket_id)
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
 
         assert '_tasks' in data
-        assert data['tags']['uri'] == online_video
+        assert data['tags']['uri_origin'] == online_video
         assert data['key'] == master_key
         assert 'version_id' in data
         assert data.get('presets') == get_all_distinct_qualities()
@@ -223,11 +219,11 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
 
-        assert resp.status_code == 201
+        assert resp.status_code == 410
 
         # check that object versions and tags are deleted
         # (Create + Delete) * Num Objs
-        assert ObjectVersion.query.count() == 2 * get_object_count()
+        assert ObjectVersion.query.count() == 2 * get_object_count() - 1
         # Tags connected with the old version
         assert ObjectVersionTag.query.count() == get_tag_count()
         bucket = Bucket.query.first()
@@ -239,7 +235,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
         # check metadata patch are deleted
         assert 'extracted_metadata' not in record.json['_cds']
 
-        # check the corresponding Event persisted after cleaning
+        # check the corresponding flow persisted after cleaning
         assert len(get_deposit_flows(record.json['_deposit']['id'])) == 0
         assert len(get_deposit_flows(record.json['_deposit']['id'],
                                      _deleted=True)) == 1
@@ -251,7 +247,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_local_file_pass(
         api_app, db, api_project, access_token, json_headers,
-        mock_sorenson, online_video, local_file):
+        mock_sorenson, local_file):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -268,7 +264,6 @@ def test_avc_workflow_receiver_local_file_pass(
     with api_app.test_request_context():
         url = url_for(
             'cds_webhooks.flow_list',
-            receiver_id='avc',
             access_token=access_token
         )
 
@@ -276,7 +271,6 @@ def test_avc_workflow_receiver_local_file_pass(
             mock.patch('invenio_indexer.tasks.index_record.delay') \
             as mock_indexer:
         payload = dict(
-            uri=online_video,
             deposit_id=video_1_depid,
             key=master_key,
             sleep_time=0,
@@ -414,7 +408,7 @@ def test_avc_workflow_receiver_clean_download(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
 
     assert ObjectVersionTag.query.count() == get_tag_count()
     flow = FlowModel.query.first()
@@ -441,7 +435,7 @@ def test_avc_workflow_receiver_clean_download(
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
 
     # Create + Clean 1 Download File + Run First Step
     assert ObjectVersion.query.count() == (get_object_count() * 2) + 1
@@ -451,7 +445,7 @@ def test_avc_workflow_receiver_clean_download(
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_receiver_clean_video_frames(
         api_app, db, cds_depid, access_token, json_headers,
-        mock_sorenson, online_video, local_file, bucket):
+        mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
     master_key = 'test.mp4'
     with api_app.test_request_context():
@@ -466,8 +460,6 @@ def test_avc_workflow_receiver_clean_video_frames(
             deposit_id=cds_depid,
             key=master_key,
             sleep_time=0,
-            version_id=str(local_file),
-            bucket_id=str(bucket.id)
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
@@ -514,8 +506,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
             sleep_time=0,
         )
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
+        assert resp.status_code == 200
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
@@ -546,14 +537,6 @@ def test_avc_workflow_receiver_clean_video_transcode(
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-@mock.patch('cds.modules.flows.tasks.sorenson', MockSorensonHappy())
-# @mock.patch("cds.modules.flows.api.Flow", TestFlow)
-# @mock.patch("cds.modules.flows.views.Flow", TestFlow)
-# @mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
-@mock.patch("cds.modules.flows.serializers.build_flow_status_json",
-            mock_build_flow_status_json)
-@mock.patch("cds.modules.flows.models.Status.compute_status",
-            classmethod(mock_compute_status))
 def test_avc_workflow_receiver_clean_extract_metadata(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
@@ -574,8 +557,7 @@ def test_avc_workflow_receiver_clean_extract_metadata(
         )
         # [[ RUN ]]
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-
-        assert resp.status_code == 201
+        assert resp.status_code == 200
 
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
