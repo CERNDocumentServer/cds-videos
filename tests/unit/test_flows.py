@@ -59,10 +59,10 @@ from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
-                                    json_headers, mock_sorenson, online_video,
-                                    users):
-    """Test AVCWorkflow receiver."""
+def test_avc_workflow_pass(api_app, db, api_project, access_token,
+                           json_headers, mock_sorenson, online_video,
+                           users):
+    """Test AVCWorkflow."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     video_1_id = str(video_1.id)
@@ -245,149 +245,7 @@ def test_avc_workflow_receiver_pass(api_app, db, api_project, access_token,
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_local_file_pass(
-        api_app, db, api_project, access_token, json_headers,
-        mock_sorenson, local_file):
-    """Test AVCWorkflow receiver."""
-    project, video_1, video_2 = api_project
-    video_1_depid = video_1['_deposit']['id']
-    video_1_id = str(video_1.id)
-    project_id = str(project.id)
-
-    bucket_id = ObjectVersion.query.filter_by(
-        version_id=local_file).one().bucket_id
-    video_size = 5510872
-    master_key = 'test.mp4'
-    slave_keys = ['{0}.mp4'.format(quality)
-                  for quality in get_presets_applied().keys()
-                  if quality != '1024p']
-    with api_app.test_request_context():
-        url = url_for(
-            'cds_webhooks.flow_list',
-            access_token=access_token
-        )
-
-    with api_app.test_client() as client, \
-            mock.patch('invenio_indexer.tasks.index_record.delay') \
-            as mock_indexer:
-        payload = dict(
-            deposit_id=video_1_depid,
-            key=master_key,
-            sleep_time=0,
-            version_id=str(local_file),
-            bucket_id=str(bucket_id),
-        )
-        # [[ RUN WORKFLOW ]]
-        resp = client.post(url, headers=json_headers, data=json.dumps(payload))
-        assert resp.status_code == 200
-        data = json.loads(resp.data.decode('utf-8'))
-        assert '_tasks' in data
-        assert data['key'] == master_key
-        assert 'version_id' in data
-        assert data.get('presets') == get_all_distinct_qualities()
-        assert 'links' in data  # TODO decide with links are needed
-
-        assert ObjectVersion.query.count() == get_object_count()
-
-        # Master file
-        master = ObjectVersion.get(bucket_id, master_key)
-        tags = master.get_tags()
-        assert tags['_flow_id'] == data['tags']['_flow_id']
-        assert master.key == master_key
-        assert str(master.version_id) == data['version_id']
-        assert master.file
-        assert master.file.size == video_size
-
-        # Check metadata tags
-        metadata_keys = ['duration', 'bit_rate', 'size', 'avg_frame_rate',
-                         'codec_name', 'codec_long_name', 'width', 'height',
-                         'nb_frames', 'display_aspect_ratio', 'color_range']
-        assert all([key in tags for key in metadata_keys])
-        assert ObjectVersion.query.count() == get_object_count()
-        assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
-
-        # Check metadata patch
-        recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
-        record = Record.get_record(recid)
-        assert 'extracted_metadata' in record['_cds']
-        assert all([key in str(record['_cds']['extracted_metadata'])
-                    for key in metadata_keys])
-
-        # Check slaves
-        for slave_key in slave_keys:
-            slave = ObjectVersion.get(bucket_id, slave_key)
-            tags = slave.get_tags()
-            assert slave.key == slave_key
-            assert '_sorenson_job_id' in tags
-            assert tags['_sorenson_job_id'] == '1234'
-            assert 'master' in tags
-            assert tags['master'] == str(master.version_id)
-            assert master.file
-            assert master.file.size == video_size
-
-        video = deposit_video_resolver(video_1_depid)
-        flows = get_deposit_flows(video['_deposit']['id'])
-
-        # check deposit tasks status
-        tasks_status = get_tasks_status_by_task(flows)
-        assert len(tasks_status) == 3
-        assert 'file_transcode' in tasks_status
-        assert 'file_video_extract_frames' in tasks_status
-        assert 'file_video_metadata_extraction' in tasks_status
-
-        # check tags (exclude 'uri-origin')
-        assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
-
-        deposit = deposit_video_resolver(video_1_depid)
-
-        # check ElasticSearch is called
-        ids = set(get_indexed_records_from_mock(mock_indexer))
-        assert video_1_id in ids
-        assert project_id in ids
-        assert deposit['_cds']['state'] == {
-            'file_video_metadata_extraction': states.SUCCESS,
-            'file_video_extract_frames': states.SUCCESS,
-            'file_transcode': states.SUCCESS,
-        }
-
-    # Test cleaning!
-    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
-
-    with mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
-            api_app.test_client() as client:
-        # [[ DELETE WORKFLOW ]]
-        resp = client.delete(url, headers=json_headers)
-
-        assert resp.status_code == 200
-
-        # check that object versions and tags are deleted
-        # (Create + Delete) * Num Objs - 1 (because the file is local and will
-        # be not touched)
-        # calculated based on emptying ObjectVersion when deleting
-        # so we get two ObjectVersion per file
-        # TODO name the value of 2 and -1
-        assert ObjectVersion.query.count() == 2 * get_object_count() - 1
-        # Tags associated with the old version
-        assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
-        bucket = Bucket.query.first()
-        # and bucket is empty
-        assert bucket.size == 0
-
-        record = RecordMetadata.query.filter_by(id=video_1_id).one()
-
-        # check metadata patch are deleted
-        assert 'extracted_metadata' not in record.json['_cds']
-        # check the corresponding Event persisted after cleaning
-        assert len(get_deposit_flows(record.json['_deposit']['id'])) == 0
-        assert len(get_deposit_flows(record.json['_deposit']['id'],
-                                     _deleted=True)) == 1
-
-        # check no reindexing is fired
-        assert mock_indexer.called is False
-
-
-@mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_clean_download(
+def test_avc_workflow_clean_download(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
@@ -443,7 +301,7 @@ def test_avc_workflow_receiver_clean_download(
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_clean_video_frames(
+def test_avc_workflow_clean_video_frames(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
@@ -487,7 +345,7 @@ def test_avc_workflow_receiver_clean_video_frames(
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_clean_video_transcode(
+def test_avc_workflow_clean_video_transcode(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
@@ -537,7 +395,7 @@ def test_avc_workflow_receiver_clean_video_transcode(
 
 
 @mock.patch('flask_login.current_user', mock_current_user)
-def test_avc_workflow_receiver_clean_extract_metadata(
+def test_avc_workflow_clean_extract_metadata(
         api_app, db, cds_depid, access_token, json_headers,
         mock_sorenson, online_video):
     """Test AVCWorkflow receiver."""
