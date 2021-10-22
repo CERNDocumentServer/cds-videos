@@ -93,7 +93,7 @@ services:
       - "9200:9200"
       - "9300:9300"
   flower:
-    image: mher/flower
+    image: mher/flower:0.9.7
     command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
     ports:
       - "5555:5555"
