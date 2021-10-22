@@ -364,7 +364,6 @@ class Flow(FlowWrapper):
         """Mark the flow as deleted."""
         self.clean()
         self.deleted = True
-        print("RUNNING DELETE")
         db.session.commit()
 
     @staticmethod
@@ -382,6 +381,7 @@ class Flow(FlowWrapper):
 
     def clean(self):
         """Delete tasks and everything created by them."""
+        print("RUN CLEAN TASKS")
         self.clean_task(task_name='file_video_extract_frames')
         for preset_quality in get_all_distinct_qualities():
             self.clean_task(
