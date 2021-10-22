@@ -109,7 +109,7 @@ class FlowWrapper(object):
     def get_flow(cls, id_):
         """Retrieve a Flow from the database by Id."""
         obj = FlowModel.get(id_)
-        return cls(obj)
+        return cls(model=obj)
 
     @property
     def deleted(self):
@@ -199,7 +199,6 @@ class Flow(FlowWrapper):
             previous=previous,
             payload=kwargs,
         )
-
         return signature
 
     def create_task(self, task_name, **kwargs):
@@ -291,8 +290,8 @@ class Flow(FlowWrapper):
                 raise RuntimeError(
                     'Error while parsing the task list %s', self._tasks
                 )
-
-        self._canvas = celery_chain(*self._canvas, flow_id=str(self.id))
+        db.session.commit()
+        self._canvas = celery_chain(*self._canvas, task_id=str(self.id))
 
         return self
 
@@ -330,9 +329,9 @@ class Flow(FlowWrapper):
           * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
           * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
         """
-
         deposit_id = self.deposit_id
-
+        flow_id = self.id
+        print("FLOW RUN")
         has_remote_file_to_download = self.payload.get('uri')
         has_user_uploaded_file = self.payload.get('version_id')
         has_file = has_remote_file_to_download or has_user_uploaded_file
@@ -356,14 +355,16 @@ class Flow(FlowWrapper):
         # 2. define the workflow and run
         self.start()
         db.session.commit()
+        flow = Flow.get_flow(flow_id)
         # 3. update deposit state
         update_deposit_state(deposit_id=deposit_id)
-        return self
+        return flow
 
     def delete(self):
         """Mark the flow as deleted."""
         self.clean()
         self.deleted = True
+        print("RUNNING DELETE")
         db.session.commit()
 
     @staticmethod
@@ -388,7 +389,7 @@ class Flow(FlowWrapper):
                 preset_quality=preset_quality,
             )
         self.clean_task(task_name='file_video_metadata_extraction')
-        if 'version_id' not in self.payload:
+        if not self.payload.get('version_id'):
             self.clean_task(task_name='file_download')
 
         # stop the workflow

@@ -407,7 +407,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
                           flow_id=flow_id, access_token=access_token,
                           )
         resp = client.get(url, headers=json_headers)
-        assert resp.status_code == 200
+        assert resp.status_code == 500
         data = json.loads(resp.data.decode('utf-8'))
         assert data[0][0]["info"]["message"] == "3"
         assert data[0][0]["name"] == "sse_simple_add"
@@ -416,9 +416,8 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
 
 
 @pytest.mark.skip(reason='Functionality not used')
-@pytest.mark.parametrize('receiver_id', ['avc', 'downloader'])
 def test_webhooks_delete(api_app, access_token, json_headers,
-                         online_video, api_project, users, receiver_id,
+                         online_video, api_project, users,
                          local_file, mock_sorenson):
     """Test webhooks delete."""
     project, video_1, video_2 = api_project
@@ -444,8 +443,8 @@ def test_webhooks_delete(api_app, access_token, json_headers,
             sleep_time=0,
         )
 
-        if receiver_id != 'downloader':
-            payload['version_id'] = str(local_file)
+        # if receiver_id != 'downloader':
+        #     payload['version_id'] = str(local_file)
 
         # run the workflow!
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -473,9 +472,6 @@ def test_webhooks_delete(api_app, access_token, json_headers,
         assert flow_deleted.response_code == 410
 
 
-# @mock.patch("cds.modules.flows.api.Flow", TestFlow)
-# @mock.patch("cds.modules.flows.views.Flow", TestFlow)
-# @mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
 def test_webhooks_reload_master(api_app, users, access_token, json_headers,
                                 online_video, api_project, datadir,
                                 mock_sorenson):
@@ -485,8 +481,6 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     master_key = 'test.mp4'
-    receiver_id = 'avc'
-
     with api_app.test_request_context():
         url_run_workflow = url_for(
             'cds_webhooks.flow_list',
@@ -505,8 +499,6 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
             deposit_id=video_1_depid,
             key=master_key,
             sleep_time=0,
-            version_id=str(local_file),
-            bucket_id=str(video_1.files.bucket.id)
         )
 
         # run the workflow!
@@ -531,7 +523,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
 
         video_1 = deposit_video_resolver(video_1_depid)
 
-        # delete old worflow
+        # delete old workflow
         url_delete = url_for('cds_webhooks.flow_item',
                              flow_id=str(flow_id),
                              access_token=access_token)
@@ -543,7 +535,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         assert resp.status_code == 200
         data = json.loads(resp.data.decode('utf-8'))
         flow_id = data['tags']['_flow_id']
-
+        print("PUBLISH")
         # publish again
         resp = client.post(publish_url, headers=json_headers)
         assert resp.status_code == 202

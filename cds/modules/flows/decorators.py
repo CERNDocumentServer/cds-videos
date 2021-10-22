@@ -33,7 +33,6 @@ from flask_restful import abort
 
 from .api import Flow
 from .errors import FlowDoesNotExist, InvalidPayload, FlowsError
-from .models import Flow as FlowModel
 from .permissions import can
 from .task_api import Task
 
@@ -55,7 +54,6 @@ def need_permission(action_name):
         def need_flow_permission_decorator(self, user_id=None, *args,
                                            **kwargs):
             flow = kwargs.get('flow')
-
             # Check if user can perform requested action
             if not can(user_id, flow=flow, action=action_name):
                 abort(403)

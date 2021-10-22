@@ -95,6 +95,7 @@ class FlowListResource(MethodView):
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
+        #import ipdb;ipdb.set_trace()
         new_flow = Flow(deposit_id=data["deposit_id"],
                         user_id=user_id,
                         payload=dict(
@@ -105,9 +106,11 @@ class FlowListResource(MethodView):
                             deposit_id=data.get("deposit_id")
                         )
                         )
+        new_flow_id = new_flow.id
         new_flow.run()
         db.session.commit()
-        return make_response(new_flow)
+        flow = Flow.get(new_flow_id)
+        return make_response(flow)
 
     def options(self, receiver_id, receiver):
         """Handle OPTIONS request."""
@@ -135,8 +138,10 @@ class FlowResource(MethodView):
     @need_permission('update')
     def put(self, user_id, flow):
         """Handle PUT request - restart flow."""
+        flow_id = flow.id
         flow.start()
         db.session.commit()
+        flow = Flow.get_flow(flow_id)
         return make_response(flow)
 
     @require_api_auth()
@@ -147,9 +152,12 @@ class FlowResource(MethodView):
     @need_permission('delete')
     def delete(self, user_id, flow):
         """Handle DELETE request."""
+        flow_id = flow.id
         flow.delete()
         db.session.commit()
-        return make_response(flow)
+        flow = Flow.get_flow(flow_id)
+        response, code = make_response(flow)
+        return response, 200
 
 
 task_item = TaskResource.as_view('task_item')

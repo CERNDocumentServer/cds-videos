@@ -26,10 +26,10 @@
 """Flow migration helper functions."""
 
 from cds_sorenson.api import can_be_transcoded, get_all_distinct_qualities
+from flask_login import current_user
 from invenio_db import db
 
 from .api import Flow
-from .status import get_deposit_last_flow
 from ..deposit.api import deposit_video_resolver
 from ..records.api import CDSVideosFilesIterator
 from .models import Status
@@ -37,9 +37,6 @@ from .models import Status
 
 def migrate_event(deposit_id):
     """Migrate an old event into Flows."""
-    flow_model = get_deposit_last_flow(deposit_id)
-    flow = Flow(model=flow_model)
-
     # Update flow task status depending on the content of th record
     deposit = deposit_video_resolver(deposit_id)
 
@@ -47,6 +44,16 @@ def migrate_event(deposit_id):
     has_metadata = 'extracted_metadata' in deposit.get('_cds', {})
     has_frames = bool(CDSVideosFilesIterator.get_video_frames(original_file))
     subformats = CDSVideosFilesIterator.get_video_subformats(original_file)
+
+    flow = Flow(deposit_id=deposit_id,
+                user_id=current_user,
+                payload=dict(
+                    version_id=original_file["version_id"],
+                    key=original_file["key"],
+                    bucket_id=deposit['_buckets']['deposit'],
+                    deposit_id=deposit_id
+                ))
+
     subformat_done = [
         f.get('tags', {}).get('preset_quality', '') for f in subformats
     ]
