@@ -35,6 +35,8 @@ def init_object_version(flow):
     flow_id = str(flow.id)
     with db.session.begin_nested():
         # create a object version if doesn't exists
+        # import ipdb;
+        # ipdb.set_trace()
         if flow.payload.get('version_id'):
             version_id = flow.payload['version_id']
             object_version = as_object_version(version_id)
@@ -46,7 +48,6 @@ def init_object_version(flow):
                 object_version, 'uri_origin', flow.payload['uri']
             )
             version_id = str(object_version.version_id)
-            flow.payload['version_id'] = version_id
         # add tag with corresponding event
         ObjectVersionTag.create_or_update(
             object_version, '_flow_id', flow_id
@@ -57,10 +58,10 @@ def init_object_version(flow):
         ObjectVersionTag.create_or_update(
             object_version, 'media_type', 'video'
         )
+        #import ipdb;ipdb.set_trace()
         ObjectVersionTag.create_or_update(
             object_version, 'context_type', 'master'
         )
-        flag_modified(flow.model, 'payload')
     return object_version
 
 

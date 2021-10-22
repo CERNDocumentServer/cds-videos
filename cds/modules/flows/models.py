@@ -187,7 +187,7 @@ class Task(db.Model, Timestamp):
     )
     """Task flow instance."""
 
-    flow = db.relationship(Flow, backref='tasks')
+    flow = db.relationship(Flow, backref='tasks', lazy='subquery')
     """Relationship to the Flow."""
 
     name = db.Column(db.String, nullable=False)
