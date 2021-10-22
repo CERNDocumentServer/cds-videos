@@ -363,6 +363,7 @@ class CDSDeposit(Deposit):
         """."""
         # dict of version_ids in original bucket to version_ids in
         # snapshot bucket for the each file
+        #import ipdb;ipdb.set_trace()
         snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=snapshot)
         old_to_new_version = {
             str(self.files[obj.key]['version_id']): str(obj.version_id)
@@ -385,7 +386,7 @@ class CDSDeposit(Deposit):
 
         # Generate SMIL file
         data['_files'] = self.files.dumps(bucket=snapshot.id)
-
+        #import ipdb;ipdb.set_trace()
         master_video = get_master_object(snapshot)
         if master_video:
             from cds.modules.records.serializers.smil import generate_smil_file
@@ -435,12 +436,8 @@ def is_deposit(url):
 def get_master_object(bucket):
     """Get master ObjectVersion from a bucket."""
     # TODO do as we do in `get_master_video_file()`?
-    return ObjectVersion.get_by_bucket(bucket).join(
-        ObjectVersionTag
-    ).filter(
-        ObjectVersionTag.key == 'context_type',
-        ObjectVersionTag.value == 'master'
-    ).one_or_none()
+    #import ipdb;ipdb.set_trace()
+    return ObjectVersion.get_by_bucket(bucket).join(ObjectVersionTag).filter(ObjectVersionTag.key == 'context_type',ObjectVersionTag.value == 'master').one_or_none()
 
 
 def is_project_record(record):
