@@ -46,46 +46,7 @@ class Task(CeleryTask):
         )
         super(Task, self).on_success(retval, task_id, args, kwargs)
 
-    @staticmethod
-    def build_task_json_status(task_json):
-        """."""
-        from .status import TASK_NAMES
-        # Get the UI name of the task
-        task_name = TASK_NAMES[task_json['name']]
-
-        # Add the information the UI needs on the right position
-        payload = task_json['payload']
-        payload['type'] = task_name
-
-        payload['key'] = payload.get('preset_quality', payload['key'])
-
-        if task_name == 'file_video_metadata_extraction':
-            # try to load message as JSON,
-            # we only need this for this particular task
-            try:
-                payload['extracted_metadata'] = \
-                    json.loads(task_json['message'])
-            except ValueError:
-                payload['extracted_metadata'] = task_json['message']
-
-            task_json['message'] = 'Attached video metadata'
-
-        celery_task_status = 'REVOKED' if 'Not transcoding' in task_json[
-            'message'] else task_json['status']
-
-        task_status = {
-            'name': task_name,
-            'id': task_json['id'],
-            'status': celery_task_status,
-            'info': {
-                'payload': payload,
-                'message': task_json['message'],
-            },
-        }
-
-        return task_status
-
-    def get_task_status(self, task_id):
+    def get_status(self, task_id):
         """Get singular task status."""
         try:
             task = as_task(task_id)

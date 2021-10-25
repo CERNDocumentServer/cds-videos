@@ -49,7 +49,7 @@ class FlowModelView(ModelView):
 
     filter_converter = FilterConverter()
     can_create = False
-    can_edit = False
+    can_edit = True
     can_delete = False
     can_view_details = True
     column_formatters = dict(
@@ -71,7 +71,7 @@ class TaskModelView(ModelView):
 
     filter_converter = FilterConverter()
     can_create = False
-    can_edit = False
+    can_edit = True
     can_delete = False
     can_view_details = True
     form_base_class = FlaskForm
