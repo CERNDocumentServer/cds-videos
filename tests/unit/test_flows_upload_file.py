@@ -69,7 +69,7 @@ def test_avc_workflow_receiver_local_file_pass(
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 

@@ -35,7 +35,7 @@ from invenio_db import db
 from sqlalchemy.orm.attributes import flag_modified
 
 from .deposit import update_deposit_state
-from .files import _update_flow_bucket, init_object_version
+from .files import init_object_version
 from .models import Flow as FlowModel
 from .models import Task as TaskModel
 from .task_api import Task
@@ -156,11 +156,15 @@ class Flow(FlowWrapper):
     def __init__(self, deposit_id=None, name='AVCWorkflow',
                  payload=None, user_id=None, model=None):
         """Initialize the flow object."""
-
         if model:
             self.model = model
         else:
             assert all((deposit_id, payload, user_id))
+            bucket_id = payload.get('bucket_id')
+            if not bucket_id:
+                from cds.modules.deposit.api import deposit_video_resolver
+                bucket_id = deposit_video_resolver(deposit_id).files.bucket
+                payload.update({"bucket_id": str(bucket_id)})
             self.model = Flow.create(name, deposit_id, payload, user_id)
 
         self._tasks_map = {
@@ -186,13 +190,16 @@ class Flow(FlowWrapper):
         # options of a single task invocation
         # Task is a function definition wrapped with decorator,
         # subtask is a task with parameters passed, but not yet started
+        #
+        # immutable sets the task to take no additional arguments
+        # which allows to block the arguments sharing alongside the task chain
         signature = task.subtask(
             task_id=task_id,
             kwargs=kwargs,
             immutable=True,
         )
 
-        _ = TaskModel.create(
+        TaskModel.create(
             id_=task_id,
             flow_id=str(self.id),
             name=task.name,
@@ -324,14 +331,13 @@ class Flow(FlowWrapper):
           * frames_gap, if not set the default value will be used.
 
         For more info see the tasks used in the workflow:
-          * :func: `~cds.modules.webhooks.tasks.DownloadTask`
-          * :func: `~cds.modules.webhooks.tasks.ExtractMetadataTask`
-          * :func: `~cds.modules.webhooks.tasks.ExtractFramesTask`
-          * :func: `~cds.modules.webhooks.tasks.TranscodeVideoTask`
+          * :func: `~cds.modules.flows.tasks.DownloadTask`
+          * :func: `~cds.modules.flows.tasks.ExtractMetadataTask`
+          * :func: `~cds.modules.flows.tasks.ExtractFramesTask`
+          * :func: `~cds.modules.flows.tasks.TranscodeVideoTask`
         """
         deposit_id = self.deposit_id
         flow_id = self.id
-        print("FLOW RUN")
         has_remote_file_to_download = self.payload.get('uri')
         has_user_uploaded_file = self.payload.get('version_id')
         has_file = has_remote_file_to_download or has_user_uploaded_file
@@ -341,9 +347,6 @@ class Flow(FlowWrapper):
         assert has_deposit
         assert has_file
         assert has_filename
-
-        if not self.payload.get('version_id'):
-            _update_flow_bucket(self)
 
         # 1. create the object version if doesn't exist
         object_version = init_object_version(self)
@@ -357,7 +360,8 @@ class Flow(FlowWrapper):
         db.session.commit()
         flow = Flow.get_flow(flow_id)
         # 3. update deposit state
-        update_deposit_state(deposit_id=deposit_id)
+        if deposit_id:
+            update_deposit_state(deposit_id=deposit_id)
         return flow
 
     def delete(self):
@@ -381,7 +385,6 @@ class Flow(FlowWrapper):
 
     def clean(self):
         """Delete tasks and everything created by them."""
-        print("RUN CLEAN TASKS")
         self.clean_task(task_name='file_video_extract_frames')
         for preset_quality in get_all_distinct_qualities():
             self.clean_task(
