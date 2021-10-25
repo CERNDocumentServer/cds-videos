@@ -76,7 +76,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
                   if quality != '1024p']
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -166,7 +166,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
     # check feedback from anoymous user
     flow_id = data['tags']['_flow_id']
     with api_app.test_request_context():
-        url = url_for('cds_webhooks.flow_feedback_item',
+        url = url_for('cds_flows.flow_feedback_item',
                       flow_id=flow_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -174,7 +174,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
         assert resp.status_code == 401
     # check feedback from owner
     with api_app.test_request_context():
-        url = url_for('cds_webhooks.flow_feedback_item',
+        url = url_for('cds_flows.flow_feedback_item',
                       flow_id=flow_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -183,7 +183,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
         assert resp.status_code == 200
     # check feedback from another user without access
     with api_app.test_request_context():
-        url = url_for('cds_webhooks.flow_feedback_item',
+        url = url_for('cds_flows.flow_feedback_item',
                       flow_id=flow_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
@@ -198,9 +198,9 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
     project['_access'] = {'update': [user_2_email]}
     project = project.commit()
     with api_app.test_request_context():
-        url = url_for('cds_webhooks.flow_feedback_item',
+        url = url_for('cds_flows.flow_feedback_item',
                       flow_id=flow_id,
-                      receiver_id='avc')
+                      )
     with api_app.test_client() as client:
 
         @identity_loaded.connect
@@ -218,7 +218,6 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
     with mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
             api_app.test_client() as client:
         resp = client.delete(url, headers=json_headers)
-
         assert resp.status_code == 200
 
         # check that object versions and tags are deleted
@@ -253,7 +252,7 @@ def test_avc_workflow_clean_download(
 
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -308,7 +307,7 @@ def test_avc_workflow_clean_video_frames(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -352,7 +351,7 @@ def test_avc_workflow_clean_video_transcode(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -402,7 +401,7 @@ def test_avc_workflow_clean_extract_metadata(
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 

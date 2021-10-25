@@ -723,7 +723,7 @@ def access_token(api_app, db, users):
         token = Token.create_personal(
             'test-personal-{0}'.format(tester_id),
             tester_id,
-            scopes=['webhooks:event'],
+            scopes=['flows:flow'],
             is_internal=True,
         ).access_token
     db.session.commit()

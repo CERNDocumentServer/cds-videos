@@ -269,9 +269,6 @@ setup(
             'schemas = cds.modules.records.jsonresolver.schemas',
             'deposits = cds.modules.deposit.jsonresolver',
         ],
-        # 'cds_flows.receivers': [
-        #     'avc = cds.modules.webhooks.receivers:AVCWorkflow',
-        # ]
     },
     extras_require=extras_require,
     install_requires=install_requires,

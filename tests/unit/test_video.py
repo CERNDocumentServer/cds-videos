@@ -314,7 +314,7 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
     db.session.add(bucket)
 
     with api_app.test_request_context():
-        url = url_for('cds_webhooks.flow_list', access_token=access_token)
+        url = url_for('cds_flows.flow_list', access_token=access_token)
 
     with api_app.test_client() as client:
         # run workflow

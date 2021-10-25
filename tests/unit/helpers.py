@@ -45,10 +45,9 @@ from invenio_pidstore import current_pidstore
 from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records import Record
 from six import BytesIO
-from sqlalchemy.orm.attributes import flag_modified
 
 from cds.modules.deposit.api import Project, Video
-from cds.modules.flows.task_api import Task
+from cds.modules.flows.serializers import build_task_json_status
 from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
 from cds.modules.flows.tasks import (
@@ -623,7 +622,7 @@ def mock_build_flow_status_json(flow_json):
     """Build serialized status object."""
     status = ([], [])
     for task in flow_json['tasks']:
-        task_status = Task.build_task_json_status(task)
+        task_status = build_task_json_status(task)
 
         # Get the UI name of the task
         task_name = task_status["name"]

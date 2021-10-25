@@ -109,7 +109,7 @@ def test_basic_flow_api_usage(db, users):
 
         task_status = flow.json['tasks'][0]
         assert task_status['status'] == 'SUCCESS'
-        flow_task_status = Task().get_task_status(task_status['id'])
+        flow_task_status = Task().get_status(task_status['id'])
         assert flow_task_status['status'] == 'SUCCESS'
 
         # Create a new instance of the same flow (restart)
@@ -136,5 +136,5 @@ def test_basic_flow_api_usage(db, users):
 
         # Restart task
         flow.restart_task(task_status['id'])
-        flow_task_status = Task().get_task_status(task_status['id'])
+        flow_task_status = Task().get_status(task_status['id'])
         assert flow_task_status['status'] == 'SUCCESS'
