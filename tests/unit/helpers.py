@@ -192,8 +192,7 @@ def transcode_task(bucket, filesize, filename, preset_qualities):
     db.session.commit()
 
     return (obj_id, [
-        TranscodeVideoTask().s(
-            version_id=obj_id, preset_quality=preset_quality, sleep_time=0)
+        TranscodeVideoTask().s(version_id=obj_id)
         for preset_quality in preset_qualities
     ])
 

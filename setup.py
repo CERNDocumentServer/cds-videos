@@ -88,7 +88,6 @@ install_requires = [
     'Flask-WTF>=0.13.1',
     'Flask>=0.11.1',
     'cds-dojson==0.11.0',
-    'cds-sorenson>=0.1.8',
     'datacite>=1.0.1',
     'dcxml>=0.1.1',
     'idutils>=0.2.3',
@@ -254,6 +253,7 @@ setup(
             'cds_celery_tasks = cds.modules.flows.tasks',
             'cds_migration_tasks = cds.modules.migrator.tasks',
             'cds_maintenance_tasks = cds.modules.maintenance.tasks',
+            'cds_opencast_tasks = cds.modules.opencast.tasks',
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',
