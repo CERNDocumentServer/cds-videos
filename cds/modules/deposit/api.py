@@ -434,10 +434,11 @@ def is_deposit(url):
 def get_master_object(bucket):
     """Get master ObjectVersion from a bucket."""
     # TODO do as we do in `get_master_video_file()`?
-    return ObjectVersion.get_by_bucket(bucket).join(ObjectVersionTag)\
+    return ObjectVersion.get_by_bucket(bucket)\
+        .join(ObjectVersionTag)\
         .filter(
-        ObjectVersionTag.key == 'context_type',
-        ObjectVersionTag.value == 'master')\
+            ObjectVersionTag.key == 'context_type',
+            ObjectVersionTag.value == 'master')\
         .one_or_none()
 
 

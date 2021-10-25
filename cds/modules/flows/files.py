@@ -19,28 +19,20 @@ from invenio_db import db
 from ..xrootd.utils import file_opener_xrootd
 
 
-def _update_flow_bucket(flow):
-    """Update event's payload with correct bucket of deposit."""
-    from cds.modules.deposit.api import deposit_video_resolver
-    deposit_bucket = deposit_video_resolver(
-        flow.payload['deposit_id']
-    ).files.bucket
-    flow.payload['bucket_id'] = str(deposit_bucket.id)
-    flag_modified(flow.model, 'payload')
-    db.session.commit()
-
-
 def init_object_version(flow):
     """Create, if doesn't exists, the version object for the flow."""
     flow_id = str(flow.id)
+    has_user_uploaded_file = flow.payload.get('version_id')
+    bucket_id = flow.payload.get("bucket_id")
+
     with db.session.begin_nested():
         # create a object version if doesn't exists
-        if flow.payload.get('version_id'):
+        if has_user_uploaded_file:
             version_id = flow.payload['version_id']
             object_version = as_object_version(version_id)
         else:
             object_version = ObjectVersion.create(
-                bucket=flow.payload['bucket_id'], key=flow.payload['key']
+                bucket=bucket_id, key=flow.payload['key']
             )
             ObjectVersionTag.create(
                 object_version, 'uri_origin', flow.payload['uri']
@@ -64,11 +56,10 @@ def init_object_version(flow):
 
 def dispose_object_version(object_version):
     """Clean up resources related to an ObjectVersion."""
-    if object_version:
-        object_version = as_object_version(object_version)
-        # remove the object version
-        ObjectVersion.delete(
-            bucket=object_version.bucket, key=object_version.key)
+    object_version = as_object_version(object_version)
+    # remove the object version
+    ObjectVersion.delete(
+        bucket=object_version.bucket, key=object_version.key)
 
 
 @contextmanager

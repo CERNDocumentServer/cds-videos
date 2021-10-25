@@ -136,8 +136,8 @@ class AVCTask(Task):
     def _update_record(self):
         # update record state
         with celery_app.flask_app.app_context():
-            if 'deposit_id' in self._base_payload \
-                    and self._base_payload['deposit_id']:
+            deposit_id = self._base_payload.get('deposit_id')
+            if deposit_id:
                 update_deposit_state(
                     deposit_id=self._base_payload.get('deposit_id'))
 
@@ -176,7 +176,8 @@ class DownloadTask(AVCTask):
     def clean(version_id, *args, **kwargs):
         """Undo download task."""
         # Delete the file and the object version
-        dispose_object_version(version_id)
+        if version_id:
+            dispose_object_version(version_id)
 
     def run(self, uri, **kwargs):
         """Download file from a URL.
@@ -550,7 +551,8 @@ class TranscodeVideoTask(AVCTask):
         obj_key = self._build_subformat_key(preset_quality=preset_quality)
         object_version = ObjectVersion.query.filter_by(
             bucket_id=object_version.bucket_id, key=obj_key).first()
-        dispose_object_version(object_version)
+        if object_version:
+            dispose_object_version(object_version)
 
     def run(self, preset_quality, sleep_time=5, *args, **kwargs):
         """Launch video transcoding.
