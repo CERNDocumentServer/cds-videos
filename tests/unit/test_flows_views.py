@@ -56,7 +56,7 @@ def check_restart_avc_workflow(api_app, flow_id, access_token,
     """Try to restart AVC workflow via REST API."""
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_item',
+            'cds_flows.flow_item',
             receiver_id='avc',
             flow_id=flow_id,
             access_token=access_token
@@ -86,7 +86,7 @@ def check_restart_avc_workflow(api_app, flow_id, access_token,
     # check restart from anonymous user
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_item',
+            'cds_flows.flow_item',
             flow_id=flow_id,
         )
     with api_app.test_client() as client:
@@ -98,7 +98,7 @@ def check_restart_avc_workflow(api_app, flow_id, access_token,
     user_2_email = user_2.email
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_item',
+            'cds_flows.flow_item',
             flow_id=flow_id,
         )
     with api_app.test_client() as client:
@@ -115,7 +115,7 @@ def check_restart_avc_workflow(api_app, flow_id, access_token,
     project.commit()
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_item',
+            'cds_flows.flow_item',
             flow_id=flow_id,
         )
     with api_app.test_client() as client:
@@ -136,13 +136,13 @@ def check_video_transcode_delete(api_app, flow_id, access_token,
     """Try to delete transcoded file via REST API."""
     # get the list of task id of successfully transcode tasks
     task_ids = [d['file_transcode']['id']
-                for d in data['global_status'][1]
+                for d in data['flow_status'][1]
                 if 'file_transcode' in d and
                 d['file_transcode']['status'] == 'SUCCESS']
     # DELETE FIRST TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             flow_id=flow_id,
             task_id=task_ids[0],
             access_token=access_token
@@ -172,7 +172,7 @@ def check_video_transcode_delete(api_app, flow_id, access_token,
     # DELETE SECOND TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             event_id=flow_id,
             task_id=task_ids[1],
             access_token=access_token
@@ -203,7 +203,7 @@ def check_video_transcode_restart(api_app, flow_id, access_token,
     # RESTART FIRST TRANSCODED FILE
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             flow_id=flow_id,
             task_id=task_ids[0],
             access_token=access_token
@@ -225,7 +225,7 @@ def check_video_transcode_restart(api_app, flow_id, access_token,
 
     # check task id is changed
     flow = FlowModel.query.first()
-    new_task_id = flow.response['global_status'][1][1]['file_transcode']['id']
+    new_task_id = flow.response['flow_status'][1][1]['file_transcode']['id']
     assert task_ids[0] != new_task_id
     old_result = AsyncResult(task_ids[0])
     new_result = AsyncResult(new_task_id)
@@ -240,7 +240,7 @@ def check_video_frames(api_app, flow_id, access_token,
     task_id = data['_tasks'][1][0]['id']
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
@@ -268,7 +268,7 @@ def check_video_download(api_app, flow_id, access_token,
     task_id = data['_tasks'][0][0]['id']
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
@@ -297,7 +297,7 @@ def check_video_metadata_extraction(api_app, flow_id, access_token,
     task_id = data['_tasks'][0][1]['id']
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.task_item',
+            'cds_flows.task_item',
             flow_id=flow_id,
             task_id=task_id,
             access_token=access_token
@@ -328,7 +328,7 @@ def check_video_metadata_extraction(api_app, flow_id, access_token,
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_delete(api_app, db, api_project, users,
                              access_token, json_headers, mock_sorenson,
-                             online_video, webhooks, checker):
+                             online_video, checker):
     """Test AVCWorkflow receiver REST API."""
     project, video_1, video_2 = api_project
     video_1_id = video_1.id
@@ -337,7 +337,7 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -373,9 +373,9 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 @mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
 @mock.patch("cds.modules.flows.serializers.build_flow_status_json",  # noqa
             mock_build_flow_status_json)
-def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
+def test_flow_failing_feedback(api_app, db, cds_depid, access_token,
                                    json_headers, api_project, local_file):
-    """Test webhooks feedback with a failing task."""
+    """Test flow feedback with a failing task."""
     (project, video_1, video_2) = api_project
     video_depid = video_1['_deposit']['id']
     bucket_id = str(video_1.files.bucket.id)
@@ -384,7 +384,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
 
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -403,7 +403,7 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
         flow_id = resp.headers['X-Hub-Delivery']
 
         with api_app.test_request_context():
-            url = url_for('cds_webhooks.flow_feedback_item',
+            url = url_for('cds_flows.flow_feedback_item',
                           flow_id=flow_id, access_token=access_token,
                           )
         resp = client.get(url, headers=json_headers)
@@ -416,10 +416,10 @@ def test_webhooks_failing_feedback(api_app, db, cds_depid, access_token,
 
 
 @pytest.mark.skip(reason='Functionality not used')
-def test_webhooks_delete(api_app, access_token, json_headers,
+def test_flows_delete(api_app, access_token, json_headers,
                          online_video, api_project, users,
                          local_file, mock_sorenson):
-    """Test webhooks delete."""
+    """Test flows delete."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
     master_key = 'test.mp4'
@@ -427,7 +427,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
     # run workflow!
     with api_app.test_request_context():
         url = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -458,7 +458,7 @@ def test_webhooks_delete(api_app, access_token, json_headers,
 
         # delete event
         url_to_delete = url_for(
-            'cds_webhooks.flow_item',
+            'cds_flows.flow_item',
             flow_id=str(flow_id),
             access_token=access_token
         )
@@ -472,10 +472,10 @@ def test_webhooks_delete(api_app, access_token, json_headers,
         assert flow_deleted.response_code == 410
 
 
-def test_webhooks_reload_master(api_app, users, access_token, json_headers,
+def test_flows_reload_master(api_app, users, access_token, json_headers,
                                 online_video, api_project, datadir,
                                 mock_sorenson):
-    """Test webhooks reload master after publish/edit/publish."""
+    """Test flows reload master after publish/edit/publish."""
     api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = False
 
     project, video_1, video_2 = api_project
@@ -483,7 +483,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
     master_key = 'test.mp4'
     with api_app.test_request_context():
         url_run_workflow = url_for(
-            'cds_webhooks.flow_list',
+            'cds_flows.flow_list',
             access_token=access_token
         )
 
@@ -524,7 +524,7 @@ def test_webhooks_reload_master(api_app, users, access_token, json_headers,
         video_1 = deposit_video_resolver(video_1_depid)
 
         # delete old workflow
-        url_delete = url_for('cds_webhooks.flow_item',
+        url_delete = url_for('cds_flows.flow_item',
                              flow_id=str(flow_id),
                              access_token=access_token)
         resp = client.delete(url_delete, headers=json_headers)
