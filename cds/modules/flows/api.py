@@ -178,7 +178,7 @@ class Flow(FlowWrapper):
         # ready to be started
         self._canvas = []
 
-    def _new_task(self, task, kwargs, previous):
+    def _new_task(self, task, create_task_table, kwargs, previous):
         """Create a new task associate with the flow."""
         task_id = uuid()
         kwargs = kwargs if kwargs else {}
@@ -199,20 +199,22 @@ class Flow(FlowWrapper):
             immutable=True,
         )
 
-        TaskModel.create(
-            id_=task_id,
-            flow_id=str(self.id),
-            name=task.name,
-            previous=previous,
-            payload=kwargs,
-        )
+        if create_task_table:
+            TaskModel.create(
+                id_=task_id,
+                flow_id=str(self.id),
+                name=task.name,
+                previous=previous,
+                payload=kwargs,
+            )
+
         return signature
 
-    def create_task(self, task_name, **kwargs):
+    def create_task(self, task_name, create_task_table=True, **kwargs):
         """Create a task with parameters from flow."""
         payload = deepcopy(self.payload)
         payload.update(**kwargs)
-        return self._tasks_map[task_name](), payload
+        return self._tasks_map[task_name](), payload, create_task_table
 
     def clean_task(self, task_name, *args, **kwargs):
         """Clean a task."""
@@ -256,11 +258,10 @@ class Flow(FlowWrapper):
             task_name='file_video_extract_frames'
         )
         parallel_tasks_group.append(video_extract_task)
-        for preset_quality in all_distinct_qualities:
-            transcode_task = self.create_task(task_name='file_transcode',
-                                              preset_quality=preset_quality,
-                                              )
-            parallel_tasks_group.append(transcode_task)
+        transcode_task = self.create_task(
+            flow=self, task_name='file_transcode', create_task_table=False
+        )
+        parallel_tasks_group.append(transcode_task)
 
         self._tasks.append(parallel_tasks_group)
 
@@ -282,14 +283,18 @@ class Flow(FlowWrapper):
             is_group_of_tasks = isinstance(obj, list)
 
             if is_single_task:
-                task, kwargs = obj
-                signature = self._new_task(task, kwargs, previous=previous)
+                task, kwargs, create_task_table = obj
+                signature = self._new_task(
+                    task, create_task_table, kwargs, previous=previous
+                )
                 self._canvas.append(signature)
                 previous = [signature.id]
             elif is_group_of_tasks:
                 sub_canvas = [
-                    self._new_task(t, t_kwargs, previous=previous)
-                    for t, t_kwargs in obj
+                    self._new_task(
+                        t, create_task_table, t_kwargs, previous=previous
+                    )
+                    for t, t_kwargs, create_task_table in obj
                 ]
                 previous = [t.id for t in sub_canvas]
                 self._canvas.append(celery_group(sub_canvas, task_id=uuid()))
