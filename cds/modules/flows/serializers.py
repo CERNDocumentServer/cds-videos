@@ -1,5 +1,7 @@
 from __future__ import absolute_import, print_function
 
+import json
+
 from cds_sorenson.api import get_all_distinct_qualities
 from invenio_files_rest.models import (
     as_object_version,
@@ -35,7 +37,7 @@ def make_response(flow):
     response.update(flow_response_links(flow))
     response.update(serialize_flow_tasks(flow))
     response.update({
-        "global_status": str(flow.status),
+        "flow_status": str(flow.status),
         "presets": get_all_distinct_qualities(),
         "deposit_id": flow.deposit_id
                      })
@@ -63,7 +65,7 @@ def flow_response_links(flow):
                 _external=True,
             ),
             'cancel': url_for(
-                'cds_webhooks.flow_item',
+                'cds_flows.flow_item',
                 flow_id=flow.id,
                 _external=True,
             ),
@@ -84,7 +86,7 @@ def build_flow_status_json(flow_json):
     """Build serialized status object."""
     status = ([], [])
     for task in flow_json['tasks']:
-        task_status = Task.build_task_json_status(task)
+        task_status = build_task_json_status(task)
 
         # Get the UI name of the task
         task_name = task_status["name"]
@@ -100,6 +102,45 @@ def build_flow_status_json(flow_json):
         status[step].append(task_status)
 
     return status
+
+
+def build_task_json_status(task_json):
+    """Serialize the task status."""
+    from .status import TASK_NAMES
+    # Get the UI name of the task
+    task_name = TASK_NAMES[task_json['name']]
+
+    # Add the information the UI needs on the right position
+    payload = task_json['payload']
+    payload['type'] = task_name
+
+    payload['key'] = payload.get('preset_quality', payload['key'])
+
+    if task_name == 'file_video_metadata_extraction':
+        # try to load message as JSON,
+        # we only need this for this particular task
+        try:
+            payload['extracted_metadata'] = \
+                json.loads(task_json['message'])
+        except ValueError:
+            payload['extracted_metadata'] = task_json['message']
+
+        task_json['message'] = 'Attached video metadata'
+
+    celery_task_status = 'REVOKED' if 'Not transcoding' in task_json[
+        'message'] else task_json['status']
+
+    task_status = {
+        'name': task_name,
+        'id': task_json['id'],
+        'status': celery_task_status,
+        'info': {
+            'payload': payload,
+            'message': task_json['message'],
+        },
+    }
+
+    return task_status
 
 
 def serialize_flow(flow):

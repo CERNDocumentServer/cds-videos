@@ -105,27 +105,3 @@ def merge_tasks_status(statuses_1, statuses_2):
         task_statuses_values = [statuses_1.get(task), statuses_2.get(task)]
         statuses[task] = str(FlowStatus.compute_status(task_statuses_values))
     return statuses
-
-
-# Old API
-
-# FIXME
-def replace_task_id(result, old_task_id, new_task_id):
-    """Replace task id in a serialized version of results."""
-    try:
-        (head, tail) = result
-        if head == old_task_id:
-            return new_task_id, replace_task_id(tail, old_task_id, new_task_id)
-        else:
-            return [
-                replace_task_id(head, old_task_id, new_task_id),
-                replace_task_id(tail, old_task_id, new_task_id),
-            ]
-    except ValueError:
-        if isinstance(result, list) or isinstance(result, tuple):
-            return [
-                replace_task_id(r, old_task_id, new_task_id) for r in result
-            ]
-        return result
-    except TypeError:
-        return result

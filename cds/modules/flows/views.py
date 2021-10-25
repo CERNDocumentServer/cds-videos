@@ -37,7 +37,7 @@ from cds.modules.flows.errors import InvalidPayload
 from cds.modules.flows.loaders import extract_payload
 from cds.modules.flows.serializers import make_response, serialize_flow
 
-blueprint = Blueprint('cds_webhooks', __name__)
+blueprint = Blueprint('cds_flows', __name__)
 
 
 class TaskResource(MethodView):
@@ -120,7 +120,7 @@ class FlowResource(MethodView):
     """Flow resource."""
 
     @require_api_auth()
-    @require_oauth_scopes('webhooks:event')
+    @require_oauth_scopes('flows:flow')
     @error_handler
     @pass_user_id
     @pass_flow
@@ -130,7 +130,7 @@ class FlowResource(MethodView):
         return make_response(flow)
 
     @require_api_auth()
-    @require_oauth_scopes('webhooks:event')
+    @require_oauth_scopes('flows:flow')
     @error_handler
     @pass_user_id
     @pass_flow
@@ -144,7 +144,7 @@ class FlowResource(MethodView):
         return make_response(flow)
 
     @require_api_auth()
-    @require_oauth_scopes('webhooks:event')
+    @require_oauth_scopes('flows:flow')
     @error_handler
     @pass_user_id
     @pass_flow
