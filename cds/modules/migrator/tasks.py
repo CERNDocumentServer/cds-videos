@@ -42,10 +42,8 @@ warnings.warn(
 class TranscodeVideoTaskQuiet(TranscodeVideoTask):
     """Transcode without index or send sse messages."""
 
-    def run(self, preset_quality, sleep_time=5, *args, **kwargs):
+    def run(self, *args, **kwargs):
         super(TranscodeVideoTaskQuiet, self).run(
-            preset_quality=preset_quality,
-            sleep_time=sleep_time,
             *args,
             **kwargs)
         # get deposit and record

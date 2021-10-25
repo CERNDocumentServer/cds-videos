@@ -31,29 +31,25 @@ import os
 import shutil
 import signal
 import tempfile
-import time
 from functools import partial
 
 import jsonpatch
 import requests
 from cds_sorenson import api as sorenson
-from cds_sorenson.error import InvalidResolutionError, TooHighResolutionError
 from celery import current_app as celery_app
 from celery import shared_task
+from flask import current_app
 
 from .deposit import update_deposit_state
 from .task_api import Task
-from celery.exceptions import Ignore
-from celery.states import FAILURE, STARTED, SUCCESS, IGNORED
+from celery.states import FAILURE, STARTED, SUCCESS
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
-from invenio_files_rest.helpers import compute_md5_checksum
-from invenio_files_rest.models import (FileInstance, ObjectVersion,
+from invenio_files_rest.models import (ObjectVersion,
                                        ObjectVersionTag, as_bucket,
                                        as_object_version)
 from invenio_indexer.api import RecordIndexer
-from invenio_indexer.tasks import index_record
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from PIL import Image
@@ -63,9 +59,12 @@ from werkzeug.utils import import_string
 
 
 from ..ffmpeg import ff_frames, ff_probe_all
-from ..xrootd.utils import (file_move_xrootd, file_opener_xrootd,
-                            file_size_xrootd)
+from ..opencast.api import start_workflow
+from ..opencast.utils import get_qualities
+from ..xrootd.utils import file_opener_xrootd
 from .files import move_file_into_local, dispose_object_version
+
+from cds.modules.flows.models import Task as TaskModel, Status
 
 logger = get_task_logger(__name__)
 
@@ -520,30 +519,17 @@ class TranscodeVideoTask(AVCTask):
         self._base_payload = {}  # {'type': self._type}
 
     def on_success(self, *args, **kwargs):
-        """On success update the record if exists."""
-        super(TranscodeVideoTask, self).on_success(*args, **kwargs)
-        # update record if already published
-        sync_records_with_deposit_files.s(
-            deposit_id=self._base_payload['deposit_id']).apply_async()
+        """Override on success."""
+        pass
+
+    def on_failure(self, *args, **kwargs):
+        """Override on failure."""
+        pass
 
     @staticmethod
     def _build_subformat_key(preset_quality):
         """Build the object version key connected with the transcoding."""
         return '{0}.mp4'.format(preset_quality)
-
-    # FIXME maybe we need to move this part to CDS-Sorenson
-    @staticmethod
-    def _clean_file_name(uri):
-        """Remove the .mp4 file extension from file name.
-
-        For some reason the Sorenson Server adds the extension to the output
-        file, creating ``data.mp4``. Our file storage does not use extensions
-        and this is causing troubles.
-        The best/dirtiest solution is to remove the file extension once the
-        transcoded file is created.
-        """
-        file_move_xrootd("{0}.mp4".format(uri),
-                         os.path.join(os.path.dirname(uri), 'data'))
 
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
@@ -554,22 +540,13 @@ class TranscodeVideoTask(AVCTask):
         if object_version:
             dispose_object_version(object_version)
 
-    def run(self, preset_quality, sleep_time=5, *args, **kwargs):
+    def run(self, *args, **kwargs):
         """Launch video transcoding.
 
-        For each of the presets generate a new ``ObjectVersion`` tagged as
-        slave with the preset name as key and a link to the master version.
+        Create one Task for every quality.
 
         :param self: reference to instance of task base class
-        :param preset_quality: preset quality to use for transcoding.
-        :param sleep_time: time interval between requests for the Sorenson
-            status.
         """
-        self._base_payload.update(preset_quality=preset_quality)
-
-        # Get master file's bucket_id
-        bucket_id = self.object.bucket_id
-        bucket_location = self.object.bucket.location.uri
 
         tags = self.object.get_tags()
         # Get master file's width x height
@@ -578,113 +555,46 @@ class TranscodeVideoTask(AVCTask):
         # Get master file's aspect ratio
         aspect_ratio = tags['display_aspect_ratio']
 
-        with db.session.begin_nested():
-            # Create FileInstance
-            file_instance = FileInstance.create()
+        qualities = get_qualities(video_height=height, video_width=width)
 
-            # Create ObjectVersion
-            obj_key = self._build_subformat_key(preset_quality=preset_quality)
-            obj = ObjectVersion.create(bucket=bucket_id, key=obj_key)
-
-            # Extract new location
-            storage = file_instance.storage(default_location=bucket_location)
-            directory, filename = storage._get_fs()
-
-            input_file = self.object.file.uri
-            # XRootDPyFS doesn't implement root_path
-            try:
-                # XRootD Safe
-                output_file = os.path.join(
-                    directory.root_url + directory.base_path, filename)
-            except AttributeError:
-                output_file = os.path.join(directory.root_path, filename)
-
-            try:
-                # Start Sorenson
-                job_id, ar, preset_config = sorenson.start_encoding(
-                    input_file,
-                    output_file,
-                    preset_quality,
-                    aspect_ratio,
-                    max_height=height,
-                    max_width=width
-                )
-            except (InvalidResolutionError, TooHighResolutionError) as e:
-                # exception = self._meta_exception_envelope(exc=e)
-                # self.update_state(state=IGNORED, meta=exception)
-                return 'Not transcoding for {}'.format(preset_quality)
-
-            # Set revoke handler, in case of an abrupt execution halt.
-            self.set_revoke_handler(partial(sorenson.stop_encoding, job_id))
-
-            # Create ObjectVersionTags
-            ObjectVersionTag.create(obj, 'master', self.obj_id)
-            ObjectVersionTag.create(obj, '_sorenson_job_id', job_id)
-            ObjectVersionTag.create(obj, 'preset_quality', preset_quality)
-            ObjectVersionTag.create(obj, 'media_type', 'video')
-            ObjectVersionTag.create(obj, 'context_type', 'subformat')
-            ObjectVersionTag.create(obj, 'display_aspect_ratio', ar)
-            for key, value in preset_config.items():
-                ObjectVersionTag.create(obj, key, value)
-
-            # Information necessary for monitoring
-            job_info = dict(
-                preset_quality=preset_quality,
-                job_id=job_id,
-                file_instance=str(file_instance.id),
-                uri=output_file,
-                version_id=str(obj.version_id),
-                key=obj_key,
-                tags=obj.get_tags(),
-                percentage=0,
-            )
-
-        db.session.commit()
-
-        self.update_state(
-            state=STARTED,
-            meta=dict(
-                payload=dict(**job_info),
-                message='Started transcoding.')
+        # Start Opencast transcoding
+        event_id = start_workflow(
+            self.object,
+            qualities,
         )
 
-        status = ''
-        # Monitor job and report accordingly
-        while status != 'Finished':
-            # Get job status
-            status, percentage = sorenson.get_encoding_status(job_id)
-            if status == 'Error':
-                raise RuntimeError('Error transcoding: {0}'.format(status))
-            elif status == 'Cancelled':
-                self.update_state(
-                    state='CANCELLED',
-                    meta=dict(
-                        payload=dict(**job_info),
-                        message='Job Canceled.'))
-                raise Ignore()
-            job_info['percentage'] = percentage
+        # Set revoke handler, in case of an abrupt execution halt.
+        # TODO: TO be updated to opencast
+        self.set_revoke_handler(partial(sorenson.stop_encoding, event_id))
+        ObjectVersionTag.create(self.object, '_opencast_event_id', event_id)
+        # for key, value in preset_config.items():
+        #     ObjectVersionTag.create(obj, key, value)
+        # Information necessary for monitoring
+        job_info = dict(
+            opencast_event_id=event_id,
+            version_id=str(self.object.version_id),
+            key=self.object.key,
+            tags=self.object.get_tags(),
+        )
 
-            # Update task's state for this preset
-            self.update_state(
-                state=STARTED,
-                meta=dict(
-                    payload=dict(**job_info),
-                    message='{1} {0}'.format(status, percentage)))
+        for quality in qualities:
+            task = TaskModel.create(
+                flow_id=self.object.get_tags()['_flow_id'],
+                name="file_transcode",
+                payload=kwargs,
+            )
+            task.status = Status.STARTED
+            task.message = "Started transcoding."
+            task_payload = task.payload.copy()
+            task_payload.update(quality=quality, **job_info)
+            task_payload.update(
+                opencast_publication_tag=
+                current_app.config['CDS_OPENCAST_QUALITIES'][quality][
+                    "opencast_publication_tag"]
+            )
+            task.payload = task_payload
+            db.session.commit()
 
-            time.sleep(sleep_time)
-
-        # Set file's location, if job has completed
-        self._clean_file_name(output_file)
-
-        with db.session.begin_nested():
-            uri = output_file
-            with file_opener_xrootd(uri, 'rb') as transcoded_file:
-                checksum = compute_md5_checksum(transcoded_file)
-            size = file_size_xrootd(uri)
-            file_instance.set_uri(uri, size, checksum)
-            as_object_version(
-                job_info['version_id']).set_file(file_instance)
-        db.session.commit()
 
         return job_info['version_id']
 
