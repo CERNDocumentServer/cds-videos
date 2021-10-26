@@ -43,3 +43,31 @@ def get_qualities(video_height=None, video_width=None):
             current_app.config['CDS_OPENCAST_QUALITIES'].items()[0][0]
         )
     return qualities
+
+
+def can_be_transcoded(subformat_desired_quality, video_width, video_height):
+    """Return the details of the subformat that will be generated.
+
+    :param subformat_desired_quality: the quality desired for the subformat
+    :param video_width: the original video width
+    :param video_height: the original video height
+    :returns a dict with width and height if the subformat can
+    be generated, or False otherwise
+    """
+    try:
+        qualitiy_config = current_app.config[
+            'CDS_OPENCAST_QUALITIES'
+        ][subformat_desired_quality]
+    except KeyError:
+        return None
+
+    if video_height < qualitiy_config[
+        'height'
+    ] or video_width < qualitiy_config['width']:
+        return None
+
+    return dict(
+        quality=subformat_desired_quality,
+        width=qualitiy_config['width'],
+        height=qualitiy_config['height']
+    )

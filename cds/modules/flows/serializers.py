@@ -2,11 +2,10 @@ from __future__ import absolute_import, print_function
 
 import json
 
-from cds_sorenson.api import get_all_distinct_qualities
 from invenio_files_rest.models import (
     as_object_version,
 )
-from flask import url_for, jsonify
+from flask import url_for, jsonify, current_app
 
 from ..flows.models import Status as FlowStatus
 
@@ -38,7 +37,7 @@ def make_response(flow):
     response.update(serialize_flow_tasks(flow))
     response.update({
         "flow_status": str(flow.status),
-        "presets": get_all_distinct_qualities(),
+        "presets": current_app.config['CDS_OPENCAST_QUALITIES'].keys(),
         "deposit_id": flow.deposit_id
                      })
     response = jsonify(response)

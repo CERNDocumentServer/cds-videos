@@ -25,12 +25,13 @@
 
 """Flow migration helper functions."""
 
-from cds_sorenson.api import can_be_transcoded, get_all_distinct_qualities
+from flask import current_app
 from flask_login import current_user
 from invenio_db import db
 
 from .api import Flow
 from ..deposit.api import deposit_video_resolver
+from ..opencast.utils import can_be_transcoded
 from ..records.api import CDSVideosFilesIterator
 from .models import Status
 
@@ -59,10 +60,9 @@ def migrate_event(deposit_id):
     ]
     missing_subformats = [
         s
-        for s in set(get_all_distinct_qualities()) - set(subformat_done)
+        for s in set(current_app.config['CDS_OPENCAST_QUALITIES'].keys()) - set(subformat_done)
         if can_be_transcoded(
             s,
-            original_file['tags']['display_aspect_ratio'],
             int(original_file['tags']['width']),
             int(original_file['tags']['height']),
         )

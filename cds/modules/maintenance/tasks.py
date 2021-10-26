@@ -18,7 +18,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Tasks for maintenance scripts."""
-
+from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from invenio_db import db
@@ -32,6 +32,7 @@ from cds.modules.flows.tasks import TranscodeVideoTask
 logger = get_task_logger(__name__)
 
 
+@shared_task
 class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
     """Transcode without indexing."""
 
