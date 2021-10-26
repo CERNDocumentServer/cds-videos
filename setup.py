@@ -87,6 +87,7 @@ install_requires = [
     # extras
     'arrow>=0.7.0,<1.0.0',
     'CairoSVG>=1.0.20,<2.0.0',
+    'cds-sorenson>=0.1.8',
     'datacite==1.0.1',
     'dcxml==0.1.1',
     'dictdiffer<0.9.0',
