@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 import os
+from collections import OrderedDict
 from datetime import timedelta
 
 from celery.schedules import crontab
@@ -114,6 +115,10 @@ CELERYBEAT_SCHEDULE = {
     'tasks_status': {
         'task': 'cds.modules.deposit.tasks.preserve_celery_states_on_db',
         'schedule': crontab(minute=5, hour=0),
+    },
+    'tasks_update': {
+        'task': 'cds.modules.opencast.tasks.update_task_status',
+        'schedule': timedelta(seconds=10),
     },
     'file-checks': {
         'task': 'invenio_files_rest.tasks.schedule_checksum_verification',
@@ -1262,3 +1267,53 @@ LOG_USER_ACTIONS_ENDPOINTS = {
                       'report_number}&format={format}&quality={quality}',
     'page_view': '{base_url}page_view?recid={recid}&userid={userid}'
 }
+
+###############################################################################
+# OPENCAST
+###############################################################################
+
+CDS_OPENCAST_QUALITIES = OrderedDict([
+    ('360p', {
+        'width': 640,
+        'height': 360,
+        'opencast_publication_tag': '360p-quality'}),
+    ('1080p', {
+        'width': 1920,
+        'height': 1080,
+        'opencast_publication_tag': '1080p-quality'}),
+    ('720p', {
+        'width': 1280,
+        'height': 720,
+        'opencast_publication_tag': '720p-quality'}),
+    ('480p', {
+        'width': 854,
+        'height': 480,
+        'opencast_publication_tag': '480p-quality'}),
+    ('2160p', {
+        'width': 3840,
+        'height': 2160,
+        'opencast_publication_tag': '2160p-quality'}),
+])
+"""List of qualities available on Opencast server."""
+
+CDS_OPENCAST_HOST = "https://ocweb01-test2.cern.ch"
+CDS_OPENCAST_API_ENDPOINT_INGEST = "{host}/ingest".format(host=CDS_OPENCAST_HOST)  # noqa
+CDS_OPENCAST_API_ENDPOINT_EVENTS = "{host}/api/events".format(host=CDS_OPENCAST_HOST)  # noqa
+
+CDS_OPENCAST_METADATA = """<?xml version="1.0" encoding="UTF-8" ?>
+    <dublincore
+        xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
+        xmlns:dcterms="http://purl.org/dc/terms/"
+        xmlns:oc="http://www.opencastproject.org/matterhorn/"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <dcterms:creator>CDS Videos</dcterms:creator>
+            <dcterms:contributor>No contributor</dcterms:contributor>
+            <dcterms:created>{start}</dcterms:created>
+            <dcterms:description>descr - CDS Videos test</dcterms:description>
+            <dcterms:subject>cds videos</dcterms:subject>
+            <dcterms:language>eng</dcterms:language>
+            <dcterms:spatial>Remote</dcterms:spatial>
+            <dcterms:title>ObjectVersion version_id: {version_id}</dcterms:title>
+            <dcterms:isPartOf>{series_id}</dcterms:isPartOf>
+    </dublincore>
+    """
