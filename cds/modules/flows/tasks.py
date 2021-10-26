@@ -58,6 +58,7 @@ from werkzeug.utils import import_string
 
 
 from ..ffmpeg import ff_frames, ff_probe_all
+from ..records.utils import to_string
 from ..opencast.api import start_workflow
 from ..opencast.utils import get_qualities
 from ..xrootd.utils import file_opener_xrootd
