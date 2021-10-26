@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function
 import click
 from cds_sorenson.api import get_all_distinct_qualities
 from click import ClickException
+from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
 from invenio_records_files.models import RecordsBuckets
@@ -91,7 +92,8 @@ def quality(recid, depid, quality):
     value = recid or depid
     type_ = 'recid' if recid else 'depid'
 
-    qualities = get_all_distinct_qualities()
+    qualities = current_app.config['CDS_OPENCAST_QUALITIES'].keys()
+
     if quality not in qualities:
         raise ClickException(
             "Input quality must be one of {0}".format(qualities)

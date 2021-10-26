@@ -56,6 +56,7 @@ def create_all_missing_subformats(id_type, id_value):
 
 def create_subformat(id_type, id_value, quality):
     """Recreate a given subformat."""
+    # TODO: change to opencast
     _validate(id_type=id_type, quality=quality)
 
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
