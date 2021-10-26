@@ -29,4 +29,4 @@
 -e git+https://github.com/inveniosoftware/invenio-deposit.git@cds-create-validator#egg=invenio-deposit
 
 # FIXME remove after release
--e git+https://github.com/inveniosoftware/invenio-files-rest.git@fix-sync-method#egg=invenio-files-rest
+-e git+https://github.com/inveniosoftware/invenio-files-rest.git@fix-sync-method-1.0.7#egg=invenio-files-rest
