@@ -22,7 +22,6 @@
 from __future__ import absolute_import, print_function
 
 import click
-from cds_sorenson.api import get_all_distinct_qualities
 from click import ClickException
 from flask import current_app
 from flask.cli import with_appcontext
@@ -49,6 +48,8 @@ def abort_if_false(ctx, param, value):
 def subformats():
     """Slaves command line utilities."""
 
+
+# TODO: Test all the commands
 
 @subformats.command()
 @click.option('--recid', 'recid', default=None)

@@ -30,7 +30,6 @@ import json
 
 import mock
 import pytest
-from cds_sorenson.api import get_all_distinct_qualities
 from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
@@ -97,7 +96,8 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
         assert data['tags']['uri_origin'] == online_video
         assert data['key'] == master_key
         assert 'version_id' in data
-        assert data.get('presets') == get_all_distinct_qualities()
+        assert data.get('presets') == api_app.config[
+            'CDS_OPENCAST_QUALITIES'].keys()
         assert 'links' in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()
