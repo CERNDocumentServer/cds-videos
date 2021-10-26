@@ -21,8 +21,8 @@
 
 from __future__ import absolute_import, print_function
 
-from cds_sorenson.api import can_be_transcoded, get_all_distinct_qualities
 from celery import chain
+from flask import current_app
 from invenio_db import db
 
 from cds.modules.deposit.api import deposit_video_resolver
@@ -32,6 +32,7 @@ from cds.modules.records.resolver import record_resolver
 from cds.modules.flows.status import get_deposit_flows, get_deposit_last_flow
 
 from .tasks import MaintenanceTranscodeVideoTask
+from ..opencast.utils import can_be_transcoded
 
 id_types = ['recid', 'depid']
 
@@ -41,28 +42,28 @@ def create_all_missing_subformats(id_type, id_value):
     _validate(id_type=id_type)
 
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
-    master, ar, w, h = _get_master_video(video_deposit)
+    master, w, h = _get_master_video(video_deposit)
     subformats = CDSVideosFilesIterator.get_video_subformats(master)
-
-    dones = [subformat['tags']['preset_quality'] for subformat in subformats]
-    missing = set(get_all_distinct_qualities()) - set(dones)
+    dones = [subformat['tags']['quality'] for subformat in subformats]
+    missing = set(
+        current_app.config['CDS_OPENCAST_QUALITIES'].keys()
+    ) - set(dones)
     transcodables = list(
-        filter(lambda q: can_be_transcoded(q, ar, w, h), missing)
+        filter(lambda q: can_be_transcoded(q, w, h), missing)
     )
 
     # sequential (and immutable) transcoding to avoid MergeConflicts on bucket
-    return transcodables, _schedule(dep_uuid, transcodables)
+    return transcodables, _schedule(dep_uuid, dones)
 
 
 def create_subformat(id_type, id_value, quality):
     """Recreate a given subformat."""
-    # TODO: change to opencast
     _validate(id_type=id_type, quality=quality)
 
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
-    master, ar, w, h = _get_master_video(video_deposit)
+    master, w, h = _get_master_video(video_deposit)
 
-    subformat = can_be_transcoded(quality, ar, w, h)
+    subformat = can_be_transcoded(quality, w, h)
     return (
         subformat,
         _schedule(dep_uuid, [subformat.get('quality')]) if subformat else None,
@@ -74,12 +75,12 @@ def create_all_subformats(id_type, id_value):
     _validate(id_type=id_type)
 
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
-    master, ar, w, h = _get_master_video(video_deposit)
+    master, w, h = _get_master_video(video_deposit)
 
     transcodables = list(
         filter(
-            lambda q: can_be_transcoded(q, ar, w, h),
-            get_all_distinct_qualities(),
+            lambda q: can_be_transcoded(q, w, h),
+            current_app.config['CDS_OPENCAST_QUALITIES'].keys(),
         )
     )
 
@@ -105,7 +106,6 @@ def _get_master_video(video_deposit):
 
     return (
         master,
-        master['tags']['display_aspect_ratio'],
         int(master['tags']['width']),
         int(master['tags']['height']),
     )
@@ -116,7 +116,9 @@ def _validate(id_type=None, quality=None):
     if id_type not in id_types:
         raise Exception('`id_type` param must be one of {0}'.format(id_types))
 
-    all_possible_qualities = get_all_distinct_qualities()
+    all_possible_qualities = current_app.config[
+        'CDS_OPENCAST_QUALITIES'
+    ].keys()
     if quality and quality not in all_possible_qualities:
         raise Exception(
             '`quality` param must be one of {0}'.format(all_possible_qualities)
@@ -133,7 +135,7 @@ def _schedule(deposit_id, transcodables):
     # Reset all tasks which quality is within transcodables
     tasks = []
     for t in flow.model.tasks:
-        if not t.payload.get('preset_quality') in transcodables:
+        if not t.payload.get('quality') in transcodables:
             continue
         t.status = Status.PENDING
         db.session.add(t)

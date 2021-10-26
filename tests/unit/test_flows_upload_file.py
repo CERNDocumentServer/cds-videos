@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
-from cds_sorenson.api import get_all_distinct_qualities
 from celery import states
 from flask import url_for
 from invenio_pidstore.models import PersistentIdentifier
@@ -90,7 +89,8 @@ def test_avc_workflow_receiver_local_file_pass(
         assert '_tasks' in data
         assert data['key'] == master_key
         assert 'version_id' in data
-        assert data.get('presets') == get_all_distinct_qualities()
+        assert data.get('presets') == api_app.config[
+            'CDS_OPENCAST_QUALITIES'].keys()
         assert 'links' in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()
