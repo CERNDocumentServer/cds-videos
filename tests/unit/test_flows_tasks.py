@@ -31,7 +31,6 @@ import uuid
 
 import mock
 import pytest
-from cds_sorenson.error import InvalidResolutionError
 from celery import states
 from celery.exceptions import Ignore, Retry
 from flask_security import login_user
@@ -377,30 +376,31 @@ def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
     assert bucket.size == (3 * filesize)
 
 
-def test_transcode_ignore_exception_if_invalid(db, cds_depid):
-    """Test ignore exception if sorenson raise InvalidResolutionError."""
-    def get_bucket_keys():
-        return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
-
-    bucket = deposit_project_resolver(cds_depid).files.bucket
-    filesize = 1024
-    filename = 'test.mp4'
-    preset_qualities = ['480p', '720p']
-
-    (version_id, [task_s1, task_s2]) = transcode_task(
-        bucket=bucket, filesize=filesize, filename=filename,
-        preset_qualities=preset_qualities)
-
-    assert get_bucket_keys() == [filename]
-    assert bucket.size == filesize
-
-    with mock.patch(
-        'cds.modules.flows.tasks.sorenson.start_encoding',
-        side_effect=InvalidResolutionError('fuu', 'test'),
-    ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
-        # Transcode
-        task = task_s1.delay(deposit_id=cds_depid)
-        isinstance(task.result, Ignore)
+# TODO: replace the tests to use opencast
+# def test_transcode_ignore_exception_if_invalid(db, cds_depid):
+#     """Test ignore exception if sorenson raise InvalidResolutionError."""
+#     def get_bucket_keys():
+#         return [o.key for o in list(ObjectVersion.get_by_bucket(bucket))]
+#
+#     bucket = deposit_project_resolver(cds_depid).files.bucket
+#     filesize = 1024
+#     filename = 'test.mp4'
+#     preset_qualities = ['480p', '720p']
+#
+#     (version_id, [task_s1, task_s2]) = transcode_task(
+#         bucket=bucket, filesize=filesize, filename=filename,
+#         preset_qualities=preset_qualities)
+#
+#     assert get_bucket_keys() == [filename]
+#     assert bucket.size == filesize
+#
+#     with mock.patch(
+#         'cds.modules.flows.tasks.sorenson.start_encoding',
+#         side_effect=InvalidResolutionError('fuu', 'test'),
+#     ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
+#         # Transcode
+#         task = task_s1.delay(deposit_id=cds_depid)
+#         isinstance(task.result, Ignore)
 
 
 @pytest.mark.parametrize('preset, is_inside', [
