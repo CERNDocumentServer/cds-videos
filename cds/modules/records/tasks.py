@@ -34,7 +34,6 @@ import sqlalchemy as sa
 from cds.modules.ffmpeg import ff_probe_all
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.utils import format_pid_link, is_deposit, is_record
-from cds_sorenson.api import can_be_transcoded, get_all_distinct_qualities
 from celery import shared_task
 from flask import current_app
 from flask_mail import Message
@@ -52,6 +51,7 @@ from .api import CDSRecord, Keyword
 from .search import KeywordSearch, query_to_objects
 
 # from .symlinks import SymlinksCreator
+from ..opencast.utils import can_be_transcoded
 
 
 def _get_keywords_from_api(url):
@@ -429,16 +429,18 @@ def missing_subformats_report(start_date=None, end_date=None):
         if not master:
             raise Exception("No master video found for the given record")
 
-        return master, master['tags']['display_aspect_ratio'], \
-            int(master['tags']['width']), int(master['tags']['height'])
+        return master, int(master['tags']['width']),\
+            int(master['tags']['height'])
 
     def _get_missing_subformats(subformats, ar, w, h):
         """Return missing and transcodable subformats."""
         dones = [subformat['tags']['preset_quality']
                  for subformat in subformats]
-        missing = set(get_all_distinct_qualities()) - set(dones)
+        missing = set(
+            current_app.config['CDS_OPENCAST_QUALITIES'].keys()
+        ) - set(dones)
         transcodables = list(
-            filter(lambda q: can_be_transcoded(q, ar, w, h), missing))
+            filter(lambda q: can_be_transcoded(q, w, h), missing))
         return transcodables
 
     def _format_report(report):
@@ -469,7 +471,7 @@ def missing_subformats_report(start_date=None, end_date=None):
 
     for record_uuid in record_uuids:
         record = CDSRecord.get_record(record_uuid.id)
-        master, ar, w, h = _get_master_video(record)
+        master, w, h = _get_master_video(record)
 
         if not master:
             report.append({
@@ -480,7 +482,7 @@ def missing_subformats_report(start_date=None, end_date=None):
 
         # check missing subformats
         subformats = CDSVideosFilesIterator.get_video_subformats(master)
-        missing = _get_missing_subformats(subformats, ar, w, h)
+        missing = _get_missing_subformats(subformats, w, h)
         if missing:
             report.append({
                 'message': 'Missing subformats for the given record',

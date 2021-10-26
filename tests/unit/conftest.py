@@ -40,8 +40,6 @@ import jsonresolver
 import mock
 import pytest
 import requests
-from cds_sorenson.api import _get_quality_preset
-from cds_sorenson.error import InvalidResolutionError
 from celery import chain, group, shared_task
 from celery.messaging import establish_connection
 from elasticsearch import RequestError
@@ -656,40 +654,6 @@ def api_project_published(api_app, api_project, users):
 def video_published(app, project_published):
     """New published project with videos."""
     return project_published[1]
-
-
-@pytest.fixture()
-def mock_sorenson():
-    """Mock requests to the Sorenson server."""
-    def mocked_encoding(input_file, output_file, preset_name, aspect_ratio,
-                        max_height=None, max_width=None):
-        # Check if options are valid
-        try:
-            ar, preset_config = _get_quality_preset(preset_name, aspect_ratio,
-                                                    max_height, max_width)
-        except InvalidResolutionError as e:
-            raise e
-
-        # just copy file
-        shutil.copyfile(input_file, '{0}.mp4'.format(output_file))
-        return '1234', ar, preset_config
-
-    mock.patch(
-        'cds.modules.flows.tasks.sorenson.start_encoding'
-    ).start().side_effect = mocked_encoding
-
-    mock.patch(
-        'cds.modules.flows.tasks.sorenson.get_encoding_status'
-    ).start().side_effect = [
-        ('Waiting', 0),
-        ('Transcoding', 45),
-        ('Transcoding', 95),
-        ('Finished', 100),
-    ] * 50  # repeat for multiple usages of the mocked method
-
-    mock.patch(
-        'cds.modules.flows.tasks.sorenson.stop_encoding'
-    ).start().return_value = None
 
 
 @pytest.fixture

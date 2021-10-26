@@ -131,12 +131,15 @@ def update_task_status():
                     update_task.delay(str(task.id),
                                       subformat["url"],
                                       str(master_object_version.version_id),
-                                      event_id
+                                      event_id,
+                                      task.payload["quality"],
                                       )
 
 
 @shared_task
-def update_task(task_id, url, master_object_version_version_id, event_id):
+def update_task(
+        task_id, url, master_object_version_version_id, event_id, quality
+):
     """Update Task status and files by streaming it to EOS."""
     # TODO: add ERROR HANDLING
     session = requests.Session()
@@ -158,6 +161,7 @@ def update_task(task_id, url, master_object_version_version_id, event_id):
     )
     ObjectVersionTag.create(obj, 'media_type', 'video')
     ObjectVersionTag.create(obj, 'context_type', 'subformat')
+    ObjectVersionTag.create(obj, 'quality', quality)
     # TODO: maybe enrich a bit more the tags of the ObjectVersion
     task.status = Status.SUCCESS
     task.message = "Transcoding succeeded"
