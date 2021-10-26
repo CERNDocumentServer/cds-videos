@@ -27,7 +27,6 @@
 import logging
 from copy import deepcopy
 
-from cds_sorenson.api import get_all_distinct_qualities
 from celery import chain as celery_chain
 from celery import group as celery_group
 from celery.result import AsyncResult
@@ -248,17 +247,14 @@ class Flow(FlowWrapper):
             self._tasks.append(file_download_task)
 
         # Second step
-        all_distinct_qualities = get_all_distinct_qualities()
-
         video_extract_task = self.create_task(
             task_name='file_video_extract_frames'
         )
         self._tasks.append(video_extract_task)
-        for preset_quality in all_distinct_qualities:
-            transcode_task = self.create_task(task_name='file_transcode',
-                                              preset_quality=preset_quality,
-                                              )
-            self._tasks.append(transcode_task)
+        transcode_task = self.create_task(
+            task_name='file_transcode', create_task_table=False
+        )
+        self._tasks.append(transcode_task)
 
     def assemble(self):
         """Build the canvas out of the task list."""
@@ -386,11 +382,7 @@ class Flow(FlowWrapper):
     def clean(self):
         """Delete tasks and everything created by them."""
         self.clean_task(task_name='file_video_extract_frames')
-        for preset_quality in get_all_distinct_qualities():
-            self.clean_task(
-                task_name='file_transcode',
-                preset_quality=preset_quality,
-            )
+        self.clean_task(task_name='file_transcode')
         self.clean_task(task_name='file_video_metadata_extraction')
         if not self.payload.get('version_id'):
             self.clean_task(task_name='file_download')

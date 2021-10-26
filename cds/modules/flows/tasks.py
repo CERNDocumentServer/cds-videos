@@ -35,7 +35,6 @@ from functools import partial
 
 import jsonpatch
 import requests
-from cds_sorenson import api as sorenson
 from celery import current_app as celery_app
 from celery import shared_task
 from flask import current_app
@@ -537,12 +536,14 @@ class TranscodeVideoTask(AVCTask):
 
     def clean(self, version_id, preset_quality, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
-        object_version = as_object_version(version_id)
-        obj_key = self._build_subformat_key(preset_quality=preset_quality)
-        object_version = ObjectVersion.query.filter_by(
-            bucket_id=object_version.bucket_id, key=obj_key).first()
-        if object_version:
-            dispose_object_version(object_version)
+        # TODO: check get_versions to get all the versions and dispose, to be tested in the UI
+        # object_version = as_object_version(version_id)
+        # obj_key = self._build_subformat_key(preset_quality=preset_quality)
+        # object_version = ObjectVersion.query.filter_by(
+        #     bucket_id=object_version.bucket_id, key=obj_key).first()
+        # if object_version:
+        #     dispose_object_version(object_version)
+        pass
 
     def run(self, *args, **kwargs):
         """Launch video transcoding.
@@ -569,7 +570,7 @@ class TranscodeVideoTask(AVCTask):
 
         # Set revoke handler, in case of an abrupt execution halt.
         # TODO: TO be updated to opencast
-        self.set_revoke_handler(partial(sorenson.stop_encoding, event_id))
+        # self.set_revoke_handler(partial(sorenson.stop_encoding, event_id))
         ObjectVersionTag.create(self.object, '_opencast_event_id', event_id)
         # for key, value in preset_config.items():
         #     ObjectVersionTag.create(obj, key, value)
@@ -598,7 +599,6 @@ class TranscodeVideoTask(AVCTask):
             )
             task.payload = task_payload
             db.session.commit()
-
 
         return job_info['version_id']
 
