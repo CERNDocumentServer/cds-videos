@@ -26,16 +26,11 @@
 
 from __future__ import absolute_import, print_function
 
-import json
-import sqlalchemy
-
-from copy import deepcopy
-from celery import states
 from collections import defaultdict
 
 from sqlalchemy import asc
 
-from ..flows.models import Flow as FlowModel, Status as FlowStatus
+from ..flows.models import FlowMetadata, Status as FlowStatus
 from ..flows.api import Flow
 
 
@@ -59,9 +54,9 @@ def get_deposit_flows(deposit_id, _deleted=False):
     filters = []
 
     if not _deleted:
-        filters.append(FlowModel.deleted != True)
+        filters.append(FlowMetadata.deleted != True)
     # build base query
-    query = FlowModel.query.filter(FlowModel.deposit_id == deposit_id)
+    query = FlowMetadata.query.filter(FlowMetadata.deposit_id == deposit_id)
     # execute with more filters
     return query.filter(*filters).all()
 
@@ -70,9 +65,9 @@ def get_deposit_last_flow(deposit_id):
     """Get the last flow associated with a deposit."""
     try:
         # In case of many flows, return the last one
-        model = FlowModel.query.filter(
-            FlowModel.deposit_id == deposit_id)\
-            .order_by(asc(FlowModel.updated))[-1]
+        model = FlowMetadata.query.filter(
+            FlowMetadata.deposit_id == deposit_id)\
+            .order_by(asc(FlowMetadata.updated))[-1]
         return Flow(model=model)
     except IndexError:
         # There is no Flow,

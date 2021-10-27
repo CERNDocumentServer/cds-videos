@@ -34,12 +34,12 @@ from flask_restful import abort
 from .api import Flow
 from .errors import FlowDoesNotExist, InvalidPayload, FlowsError
 from .permissions import can
-from .task_api import Task
+from .tasks import CeleryTask
 
 
 def task(*args, **kwargs):
     """Wrapper around shared task to set default base class."""
-    kwargs.setdefault('base', Task)
+    kwargs.setdefault('base', CeleryTask)
     return shared_task(*args, **kwargs)
 
 
@@ -88,7 +88,7 @@ def pass_flow(f):
     """Decorator to retrieve flow."""
     @wraps(f)
     def inner(self, flow_id=None, *args, **kwargs):
-        flow = Flow.get(flow_id)
+        flow = Flow.get_flow(flow_id)
         kwargs.update(flow=flow)
         return f(self, *args, **kwargs)
     return inner
