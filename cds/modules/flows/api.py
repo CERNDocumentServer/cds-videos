@@ -35,12 +35,10 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from .deposit import update_deposit_state
 from .files import init_object_version
-from .models import Flow as FlowModel
-from .models import Task as TaskModel
-from .task_api import Task
+from .models import FlowMetadata, TaskMetadata
 from .utils import uuid
-from .tasks import ExtractMetadataTask, DownloadTask, \
-    TranscodeVideoTask, ExtractFramesTask
+from .tasks import CeleryTask, ExtractMetadataTask, ExtractFramesTask, \
+    DownloadTask, TranscodeVideoTask
 
 logger = logging.getLogger('cds-flow')
 
@@ -107,7 +105,7 @@ class FlowWrapper(object):
     @classmethod
     def get_flow(cls, id_):
         """Retrieve a Flow from the database by Id."""
-        obj = FlowModel.get(id_)
+        obj = FlowMetadata.get(id_)
         return cls(model=obj)
 
     @property
@@ -123,13 +121,8 @@ class FlowWrapper(object):
             db.session.merge(self.model)
 
     @classmethod
-    def get(cls, flow_id):
-        obj = FlowModel.query.filter(FlowModel.id == flow_id).one()
-        return cls(model=obj)
-
-    @classmethod
     def get_for_deposit(cls, deposit_id):
-        obj = FlowModel.query.filter(FlowModel.deposit_id == deposit_id) \
+        obj = FlowMetadata.query.filter(FlowMetadata.deposit_id == deposit_id) \
             .one()
         return cls(model=obj)
 
@@ -137,7 +130,7 @@ class FlowWrapper(object):
     def create(cls, name, deposit_id, payload=None, user_id=None):
         """Create a new flow instance and store it in the database."""
         with db.session.begin_nested():
-            obj = FlowModel(
+            obj = FlowMetadata(
                 name=name,
                 id=uuid(),
                 payload=payload or dict(),
@@ -199,7 +192,7 @@ class Flow(FlowWrapper):
         )
 
         if create_task_table:
-            TaskModel.create(
+            TaskMetadata.create(
                 id_=task_id,
                 flow_id=str(self.id),
                 name=task.name,
@@ -344,11 +337,9 @@ class Flow(FlowWrapper):
         # 2. define the workflow and run
         self.start()
         db.session.commit()
-        flow = Flow.get_flow(flow_id)
         # 3. update deposit state
         if deposit_id:
             update_deposit_state(deposit_id=deposit_id)
-        return flow
 
     def delete(self):
         """Mark the flow as deleted."""
@@ -362,12 +353,12 @@ class Flow(FlowWrapper):
         AsyncResult(task_id).revoke(terminate=True)
 
     def restart_task(self, task_id):
-        Task.restart_task(task_id, str(self.id), flow_payload=self.payload)
+        CeleryTask.restart_task(task_id, str(self.id), flow_payload=self.payload)
 
     def stop(self):
         """Stop the flow."""
         for task in self.model.tasks:
-            Task().stop_task(task)
+            CeleryTask.stop_task(task.id)
 
     def clean(self):
         """Delete tasks and everything created by them."""
