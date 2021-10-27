@@ -535,16 +535,11 @@ class TranscodeVideoTask(AVCTask):
         """Build the object version key connected with the transcoding."""
         return '{0}.mp4'.format(preset_quality)
 
-    def clean(self, version_id, preset_quality, *args, **kwargs):
+    def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
-        # TODO: check get_versions to get all the versions and dispose, to be tested in the UI
-        # object_version = as_object_version(version_id)
-        # obj_key = self._build_subformat_key(preset_quality=preset_quality)
-        # object_version = ObjectVersion.query.filter_by(
-        #     bucket_id=object_version.bucket_id, key=obj_key).first()
-        # if object_version:
-        #     dispose_object_version(object_version)
-        pass
+        object_version = as_object_version(version_id)
+        if object_version:
+            dispose_object_version(object_version)
 
     def run(self, *args, **kwargs):
         """Launch video transcoding.
