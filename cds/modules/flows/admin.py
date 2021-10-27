@@ -32,7 +32,7 @@ from flask_wtf import FlaskForm
 from invenio_admin.filters import FilterConverter
 from markupsafe import Markup
 
-from .models import Flow, Task
+from .models import FlowMetadata, TaskMetadata
 
 
 def link(text, link_func):
@@ -53,7 +53,8 @@ class FlowModelView(ModelView):
     can_delete = False
     can_view_details = True
     column_formatters = dict(
-        tasks=link('Tasks', lambda o: url_for('task.index_view', search=o.id))
+        tasks=link('Tasks', lambda o: url_for(
+            'taskmetadata.index_view', search=o.id))
     )
 
     column_list = ('id', 'name', 'payload', 'created', 'tasks')
@@ -88,9 +89,9 @@ class TaskModelView(ModelView):
 
 
 flow_model_view = dict(
-    modelview=FlowModelView, model=Flow, name='Flows', category='Flows',
+    modelview=FlowModelView, model=FlowMetadata, name='Flows', category='Flows',
 )
 
 task_model_view = dict(
-    modelview=TaskModelView, model=Task, name='Tasks', category='Flows',
+    modelview=TaskModelView, model=TaskMetadata, name='Tasks', category='Flows',
 )

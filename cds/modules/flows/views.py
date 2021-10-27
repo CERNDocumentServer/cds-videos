@@ -108,7 +108,7 @@ class FlowListResource(MethodView):
         new_flow_id = new_flow.id
         new_flow.run()
         db.session.commit()
-        flow = Flow.get(new_flow_id)
+        flow = Flow.get_flow(new_flow_id)
         return make_response(flow)
 
     def options(self, receiver_id, receiver):

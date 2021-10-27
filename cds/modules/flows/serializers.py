@@ -9,8 +9,6 @@ from flask import url_for, jsonify, current_app
 
 from ..flows.models import Status as FlowStatus
 
-from .task_api import Task
-
 
 def add_link_header(response, links):
     """Add a Link HTTP header to a REST response.
