@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import json
 
 import mock
-import pytest
 from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
@@ -45,13 +44,11 @@ from cds.modules.deposit.api import (deposit_project_resolver,
 from cds.modules.flows.api import Flow
 from cds.modules.flows.status import (get_deposit_flows,
                                       get_tasks_status_by_task)
-from cds.modules.flows.models import Flow as FlowModel
-from helpers import (get_indexed_records_from_mock, get_object_count,
-                     get_presets_applied, get_tag_count, mock_current_user,
-                     MockSorenson, MockSorensonHappy, MockSorensonFailed,
-                     TestFlow, MOCK_TASK_NAMES, mock_compute_status,
-                     mock_build_flow_status_json
-                     )
+from cds.modules.flows.models import FlowMetadata
+from helpers import (
+    get_indexed_records_from_mock, get_object_count,
+    get_presets_applied, get_tag_count, mock_current_user,
+)
 
 
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
@@ -268,7 +265,7 @@ def test_avc_workflow_clean_download(
         assert resp.status_code == 200
 
     assert ObjectVersionTag.query.count() == get_tag_count()
-    flow = FlowModel.query.first()
+    flow = FlowMetadata.query.first()
     flow = Flow(model=flow)
     # [[ CLEAN DOWNLOAD ]]
     flow.clean_task(task_name='file_download')
@@ -325,7 +322,7 @@ def test_avc_workflow_clean_video_frames(
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
 
-    flow = FlowModel.query.first()
+    flow = FlowMetadata.query.first()
 
     # [[ CLEAN VIDEO EXTRACT FRAMES ]]
     flow = Flow(model=flow)
@@ -375,7 +372,7 @@ def test_avc_workflow_clean_video_transcode(
     for i, preset_quality in enumerate(presets, 1):
         # Clean transcode task for each preset
 
-        flow = Flow(model=FlowModel.query.first())
+        flow = Flow(model=FlowMetadata.query.first())
         flow.clean_task(flow=flow, task_name='file_transcode',
                         preset_quality=preset_quality)
 
@@ -419,7 +416,7 @@ def test_avc_workflow_clean_extract_metadata(
     assert ObjectVersion.query.count() == get_object_count()
     assert ObjectVersionTag.query.count() == get_tag_count()
     # [[ CLEAN VIDEO METADATA EXTRACTION ]]
-    flow = FlowModel.query.first()
+    flow = FlowMetadata.query.first()
     flow = Flow(model=flow)
     flow.clean_task(task_name='file_video_metadata_extraction')
 

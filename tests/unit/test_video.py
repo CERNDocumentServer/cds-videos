@@ -50,10 +50,6 @@ from mock import MagicMock
 from six import BytesIO
 from time import sleep
 
-from sqlalchemy.ext.hybrid import hybrid_property
-
-import cds.modules.flows.tasks
-from cds.modules.flows.models import Flow as FlowModel
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
                                      record_video_resolver,
@@ -65,10 +61,8 @@ from cds.modules.flows.status import get_deposit_flows, \
     get_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
 
-from helpers import mock_current_user, \
-    get_indexed_records_from_mock, prepare_videos_for_publish, \
-    reset_oauth2, MockSorenson, MockSorensonHappy, MockSorensonFailed, \
-    TestFlow, MOCK_TASK_NAMES
+from helpers import mock_current_user, prepare_videos_for_publish, \
+    MockSorensonHappy, MockSorensonFailed, TestFlow, MOCK_TASK_NAMES
 
 
 def test_video_resolver(api_project):

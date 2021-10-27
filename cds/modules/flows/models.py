@@ -33,6 +33,7 @@ from invenio_db import db
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import JSONType, UUIDType
 
@@ -42,10 +43,11 @@ logger = logging.getLogger('cds-flow')
 def as_task(value):
     """Get task object from task id or task object.
 
-    :param value: A :class:`invenio_flow.models.Task` or a Task Id.
-    :returns:  A :class:`invenio_flow.models.Task` instance.
+    :param value: A :class:`invenio_flow.models.TaskMetadata` or a Task Id.
+    :returns:  A :class:`invenio_flow.models.TaskMetadata` instance.
     """
-    return value if isinstance(value, Task) else Task.get(value)
+    return value if isinstance(value, TaskMetadata) else \
+        TaskMetadata.get(value)
 
 
 @unique
@@ -101,7 +103,7 @@ class Status(Enum):
         return self.value
 
 
-class Flow(db.Model, Timestamp):
+class FlowMetadata(db.Model, Timestamp):
     """Flow database model."""
 
     __tablename__ = 'flows_flow'
@@ -159,7 +161,7 @@ class Flow(db.Model, Timestamp):
         }
 
 
-class Task(db.Model, Timestamp):
+class TaskMetadata(db.Model, Timestamp):
     """Task database model."""
 
     __tablename__ = 'flows_task'
@@ -182,13 +184,13 @@ class Task(db.Model, Timestamp):
 
     flow_id = db.Column(
         UUIDType,
-        db.ForeignKey(Flow.id, onupdate="CASCADE", ondelete="CASCADE"),
+        db.ForeignKey(FlowMetadata.id, onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
     """Task flow instance."""
 
-    flow = db.relationship(Flow, backref='tasks', lazy='subquery')
-    """Relationship to the Flow."""
+    flow = db.relationship(FlowMetadata, backref='tasks', lazy='subquery')
+    """Relationship to the FlowMetadata."""
 
     name = db.Column(db.String, nullable=False)
     """Task name."""
