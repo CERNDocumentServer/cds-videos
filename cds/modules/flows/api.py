@@ -271,7 +271,6 @@ class Flow(FlowWrapper):
         for obj in self._tasks:
 
             is_single_task = isinstance(obj, tuple)
-            is_group_of_tasks = isinstance(obj, list)
 
             if is_single_task:
                 task, kwargs, create_task_table = obj
@@ -280,15 +279,6 @@ class Flow(FlowWrapper):
                 )
                 self._canvas.append(signature)
                 previous = [signature.id]
-            elif is_group_of_tasks:
-                sub_canvas = [
-                    self._new_task(
-                        t, create_task_table, t_kwargs, previous=previous
-                    )
-                    for t, t_kwargs, create_task_table in obj
-                ]
-                previous = [t.id for t in sub_canvas]
-                self._canvas.append(celery_group(sub_canvas, task_id=uuid()))
             else:
                 raise RuntimeError(
                     'Error while parsing the task list %s', self._tasks
