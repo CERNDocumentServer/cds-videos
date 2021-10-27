@@ -397,7 +397,7 @@ def test_transcode_2tasks_delete1(db, cds_depid, mock_sorenson):
 #     with mock.patch(
 #         'cds.modules.flows.tasks.sorenson.start_encoding',
 #         side_effect=InvalidResolutionError('fuu', 'test'),
-#     ), mock.patch('cds.modules.flows.tasks.Task.commit_status'):
+#     ), mock.patch('cds.modules.flows.tasks.CeleryTask.commit_status'):
 #         # Transcode
 #         task = task_s1.delay(deposit_id=cds_depid)
 #         isinstance(task.result, Ignore)

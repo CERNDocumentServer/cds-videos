@@ -35,13 +35,15 @@ from functools import partial
 
 import jsonpatch
 import requests
+from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
 from flask import current_app
 
 from .deposit import update_deposit_state
-from .task_api import Task
 from celery.states import FAILURE, STARTED, SUCCESS
+from celery.result import AsyncResult
+from celery.task.control import revoke
 from celery.utils.log import get_task_logger
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
@@ -63,13 +65,94 @@ from ..opencast.api import start_workflow
 from ..opencast.utils import get_qualities
 from ..xrootd.utils import file_opener_xrootd
 from .files import move_file_into_local, dispose_object_version
+from .models import as_task
 
-from cds.modules.flows.models import Task as TaskModel, Status
+from cds.modules.flows.models import TaskMetadata, Status
 
 logger = get_task_logger(__name__)
 
 
-class AVCTask(Task):
+class CeleryTask(_Task):
+    """The task class which is used as the minimal unit of work.
+
+    This class is a wrapper around ``celery.Task``
+    """
+
+    def commit_status(self, task_id, state=Status.PENDING, message=''):
+        """Commit task status to the database."""
+        with celery_app.flask_app.app_context():
+            task = self.get_task(task_id)
+            task.status = state
+            task.message = message
+            db.session.merge(task)
+            db.session.commit()
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        """Update task status on database."""
+        task_id = kwargs.get('task_id', task_id)
+        self.commit_status(task_id, Status.FAILURE, str(einfo))
+        super(CeleryTask, self).on_failure(exc, task_id, args, kwargs, einfo)
+
+    def on_success(self, retval, task_id, args, kwargs):
+        """Update tasks status on database."""
+        task_id = kwargs.get('task_id', task_id)
+        self.commit_status(
+            task_id,
+            Status.SUCCESS,
+            '{}'.format(retval),
+        )
+        super(CeleryTask, self).on_success(retval, task_id, args, kwargs)
+
+    @staticmethod
+    def get_status(task_id):
+        """Get singular task status."""
+        task = CeleryTask.get_task(task_id)
+        return {'status': str(task.status), 'message': task.message}
+
+    @staticmethod
+    def get_task(task_id):
+        """Get singular task from database."""
+        try:
+            task = as_task(task_id)
+            return task
+        except Exception:
+            raise KeyError('Task ID %s not found', task_id)
+
+    @staticmethod
+    def stop_task(task_id):
+        """Stop singular task."""
+        task = CeleryTask.get_task(task_id)
+
+        if task.status == Status.PENDING:
+            revoke(str(task.id), terminate=True, signal='SIGKILL')
+            result = AsyncResult(str(task.id))
+            result.forget()
+
+    @staticmethod
+    def restart_task(task_id, flow_id, flow_payload):
+        """Restart singular task."""
+        task = CeleryTask.get_task(task_id)
+
+        # self.stop_task(task)
+        # If a task gets send to the queue with the same id, it gets
+        # automagically restarted, no need to stop it.
+
+        task.status = Status.PENDING
+        db.session.add(task)
+
+        kwargs = {'flow_id': flow_id, 'task_id': str(task.id)}
+        kwargs.update(task.payload)
+        kwargs.update(flow_payload)
+        return (
+            celery_app.tasks.get(task.name).subtask(
+                task_id=str(task.id),
+                kwargs=kwargs,
+                immutable=True,
+            ).apply_async()
+        )
+
+
+class AVCTask(CeleryTask):
     """Base class for tasks."""
 
     abstract = True
@@ -579,7 +662,7 @@ class TranscodeVideoTask(AVCTask):
         )
 
         for quality in qualities:
-            task = TaskModel.create(
+            task = TaskMetadata.create(
                 flow_id=self.object.get_tags()['_flow_id'],
                 name="file_transcode",
                 payload=kwargs,

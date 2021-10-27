@@ -32,7 +32,7 @@ from invenio_files_rest.models import ObjectVersion, FileInstance,\
     ObjectVersionTag
 from collections import defaultdict
 
-from cds.modules.flows.models import Task, Status
+from cds.modules.flows.models import TaskMetadata, Status
 from celery import shared_task
 
 from cds.modules.opencast.error import MissingEventId
@@ -111,7 +111,7 @@ def update_task_status():
         current_app.config['CDS_OPENCAST_API_USERNAME'],
         current_app.config['CDS_OPENCAST_API_PASSWORD']
     )
-    pending_tasks = Task.query.filter_by(status=Status.STARTED).all()
+    pending_tasks = TaskMetadata.query.filter_by(status=Status.STARTED).all()
     grouped_tasks = _group_tasks_by_event_id(pending_tasks)
     print("--- Updating", len(pending_tasks))
     for tasks in grouped_tasks:
@@ -147,7 +147,7 @@ def update_task(
         current_app.config['CDS_OPENCAST_API_USERNAME'],
         current_app.config['CDS_OPENCAST_API_PASSWORD']
     )
-    task = Task.query.get(task_id)
+    task = TaskMetadata.query.get(task_id)
     obj = ObjectVersion.create(
         bucket=task.payload["bucket_id"],
         key=task.name
