@@ -429,7 +429,7 @@ def test_project_publish_with_workflow(api_app, users, api_project, es):
                                user_id=user_id,
                                )
         flow_id = flow.id
-        flow = TestFlow.get(flow_id)
+        flow = TestFlow.get_flow(flow_id)
         flow.run()
         # check video and project are indexed
         assert mock_indexer.called is True

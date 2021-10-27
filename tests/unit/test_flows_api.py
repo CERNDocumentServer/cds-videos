@@ -30,8 +30,8 @@ from __future__ import absolute_import, print_function
 import mock
 
 from cds.modules.flows.api import Flow
-from cds.modules.flows.models import Task as TaskModel
-from cds.modules.flows.task_api import Task
+from cds.modules.flows.models import TaskMetadata
+from cds.modules.flows.tasks import CeleryTask
 from cds.modules.flows.decorators import task
 
 
@@ -69,7 +69,7 @@ def test_basic_flow_api_usage(db, users):
                 kwargs['task_id'], message='Running for {}'.format(times)
             )
             # Testing message updates
-            t = TaskModel.get(kwargs['task_id'])
+            t = TaskMetadata.get(kwargs['task_id'])
             assert t.status.value == 'PENDING'
             assert t.message == 'Running for {}'.format(times)
             f = Flow.get_flow(kwargs['flow_id'])
@@ -95,7 +95,7 @@ def test_basic_flow_api_usage(db, users):
 
     # patch the flow build
     with mock.patch("cds.modules.flows.api.Flow.build_steps", build):
-        flow = Flow.get(flow_id)
+        flow = Flow.get_flow(flow_id)
         flow.assemble()
         # Save tasks and flow before running
         db.session.commit()
@@ -109,7 +109,7 @@ def test_basic_flow_api_usage(db, users):
 
         task_status = flow.json['tasks'][0]
         assert task_status['status'] == 'SUCCESS'
-        flow_task_status = Task().get_status(task_status['id'])
+        flow_task_status = CeleryTask.get_status(task_status['id'])
         assert flow_task_status['status'] == 'SUCCESS'
 
         # Create a new instance of the same flow (restart)
@@ -120,7 +120,7 @@ def test_basic_flow_api_usage(db, users):
         )
         flow_id = flow.id
         assert str(flow.status) == 'PENDING'
-        flow = Flow.get(flow_id)
+        flow = Flow.get_flow(flow_id)
         flow.assemble()
 
         # Save tasks and flow before running
@@ -136,5 +136,5 @@ def test_basic_flow_api_usage(db, users):
 
         # Restart task
         flow.restart_task(task_status['id'])
-        flow_task_status = Task().get_status(task_status['id'])
+        flow_task_status = CeleryTask.get_status(task_status['id'])
         assert flow_task_status['status'] == 'SUCCESS'
