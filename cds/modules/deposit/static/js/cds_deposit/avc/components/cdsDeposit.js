@@ -277,7 +277,7 @@ function cdsDepositCtrl(
         if (that.presets && that.presets.length == 0) {
           var flowId = masterFile.tags._flow_id;
           if (flowId) {
-            var flowUrl = urlBuilder.eventInfo({flowId: flowId});
+            var flowUrl = urlBuilder.flowInfo({flowId: flowId});
             var updatePresets = function (resp) {
               that.presets = angular.copy(resp.data.presets);
             };

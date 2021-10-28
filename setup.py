@@ -183,7 +183,6 @@ setup(
             'cds_records = cds.modules.records.views:blueprint',
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
-            'cds_flows = cds.modules.flows.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
             'cern_oauth = invenio_oauthclient.contrib.cern:cern_oauth_blueprint',
         ],
