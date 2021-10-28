@@ -35,6 +35,7 @@ from collections import defaultdict
 from cds.modules.flows.models import TaskMetadata, Status
 from celery import shared_task
 
+from cds.modules.flows.tasks import TranscodeVideoTask
 from cds.modules.opencast.error import MissingEventId
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
@@ -111,7 +112,10 @@ def update_task_status():
         current_app.config['CDS_OPENCAST_API_USERNAME'],
         current_app.config['CDS_OPENCAST_API_PASSWORD']
     )
-    pending_tasks = TaskMetadata.query.filter_by(status=Status.STARTED).all()
+    pending_tasks = TaskMetadata.query.filter_by(
+        status=Status.PENDING,
+        name=TranscodeVideoTask().name
+    ).all()
     grouped_tasks = _group_tasks_by_event_id(pending_tasks)
     print("--- Updating", len(pending_tasks))
     for tasks in grouped_tasks:
@@ -128,16 +132,19 @@ def update_task_status():
                 if task.payload[
                     "opencast_publication_tag"
                 ] in subformat["tags"]:
-                    update_task.delay(str(task.id),
-                                      subformat["url"],
-                                      str(master_object_version.version_id),
-                                      event_id,
-                                      task.payload["quality"],
-                                      )
+                    update_task_success.delay(
+                        str(task.id),
+                        subformat["url"],
+                        str(master_object_version.version_id),
+                        event_id,
+                        task.payload["quality"],
+                    )
+                elif status == "FAILED":
+                    update_task_failure.delay(str(task.id))
 
 
 @shared_task
-def update_task(
+def update_task_success(
         task_id, url, master_object_version_version_id, event_id, quality
 ):
     """Update Task status and files by streaming it to EOS."""
@@ -166,11 +173,18 @@ def update_task(
     task.status = Status.SUCCESS
     task.message = "Transcoding succeeded"
     task_payload = task.payload.copy()
-    # from celery.contrib import rdb
-    # rdb.set_trace()
     updated_payload = dict(
         key=obj.key, version_id=str(obj.version_id)
     )
     task_payload.update(**updated_payload)
     task.payload = task_payload
+    db.session.commit()
+
+
+@shared_task
+def update_task_failure(task_id):
+    """Update Task status to failed."""
+    task = TaskMetadata.query.get(task_id)
+    task.status = Status.FAILURE
+    task.message = "Transcoding failed"
     db.session.commit()
