@@ -59,8 +59,8 @@
         </a>
       </td>
     </tr>
-    <tr ng-if="f.key" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
-      <td title="{{ f.key }}">{{ f.key | limitTo:40 }} <span ng-show="f.key.length > 40">...</span></td>
+    <tr ng-if="f.quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
+      <td title="{{ f.quality }}">{{ f.quality }}
       <td>
       </td>
       <td class="text-center">
@@ -72,7 +72,7 @@
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
-          <a ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats([f.key])">
+          <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags._flow_id, f.db_task_id)">
             <i class="fa fa-undo"></i>
           </a>
         </span>
