@@ -140,9 +140,11 @@ class CeleryTask(_Task):
         task.status = Status.PENDING
         db.session.add(task)
 
-        kwargs = {'flow_id': flow_id, 'task_id': str(task.id)}
+        kwargs = {}
         kwargs.update(task.payload)
         kwargs.update(flow_payload)
+        kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
+
         return (
             celery_app.tasks.get(task.name).subtask(
                 task_id=str(task.id),
@@ -636,10 +638,13 @@ class TranscodeVideoTask(AVCTask):
         # Get master file's width x height
         width = int(tags['width']) if 'width' in tags else None
         height = int(tags['height']) if 'height' in tags else None
-        # Get master file's aspect ratio
-        aspect_ratio = tags['display_aspect_ratio']
 
-        qualities = get_qualities(video_height=height, video_width=width)
+        if 'quality' in kwargs:
+            qualities = [kwargs["quality"]]
+        else:
+            qualities = get_qualities(
+                video_height=height, video_width=width
+            )
 
         # Start Opencast transcoding
         event_id = start_workflow(
@@ -650,7 +655,9 @@ class TranscodeVideoTask(AVCTask):
         # Set revoke handler, in case of an abrupt execution halt.
         # TODO: TO be updated to opencast
         # self.set_revoke_handler(partial(sorenson.stop_encoding, event_id))
-        ObjectVersionTag.create(self.object, '_opencast_event_id', event_id)
+        ObjectVersionTag.create_or_update(  # TODO: Not sure this makes sense
+            self.object, '_opencast_event_id', event_id
+        )
         # for key, value in preset_config.items():
         #     ObjectVersionTag.create(obj, key, value)
         # Information necessary for monitoring
@@ -662,20 +669,22 @@ class TranscodeVideoTask(AVCTask):
         )
 
         for quality in qualities:
-            task = TaskMetadata.create(
+            task = TaskMetadata.create_or_update(
+                id_=kwargs["task_id"] if kwargs.get("quality") else None,  # TODO
                 flow_id=self.object.get_tags()['_flow_id'],
-                name="file_transcode",
+                name=TranscodeVideoTask().name,
                 payload=kwargs,
             )
-            task.status = Status.STARTED
+            task.status = Status.PENDING
             task.message = "Started transcoding."
             task_payload = task.payload.copy()
-            task_payload.update(quality=quality, **job_info)
             task_payload.update(
+                quality=quality,
                 opencast_publication_tag=
                 current_app.config['CDS_OPENCAST_QUALITIES'][quality][
-                    "opencast_publication_tag"]
-            )
+                    "opencast_publication_tag"],
+                db_task_id=str(task.id),
+                **job_info)
             task.payload = task_payload
             db.session.commit()
 
