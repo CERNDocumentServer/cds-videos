@@ -239,6 +239,18 @@ class TaskMetadata(db.Model, Timestamp):
         return obj
 
     @classmethod
+    def create_or_update(
+            cls, name, flow_id, id_=None, payload=None, previous=None
+    ):
+        """Create or update a new Task."""
+        task = cls.get(id_)
+        if task:
+            return task
+        else:
+            task = cls.create(name, flow_id, id_, payload, previous)
+        return task
+
+    @classmethod
     def get(cls, id_):
         """Get a task object from the DB."""
         return cls.query.get(id_)
