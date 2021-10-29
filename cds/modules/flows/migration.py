@@ -25,6 +25,8 @@
 
 """Flow migration helper functions."""
 
+import logging
+
 from flask import current_app
 from invenio_db import db
 from invenio_files_rest.models import (
@@ -147,8 +149,28 @@ def main():
             PersistentIdentifier.status == PIDStatus.REGISTERED).all()
         return pids
 
+    def get(name, filepath):
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+        fh = logging.FileHandler(filepath)
+        fh.setFormatter(formatter)
+        fh.setLevel(logging.DEBUG)
+        logger.addHandler(fh)
+
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        sh.setLevel(logging.DEBUG)
+        logger.addHandler(sh)
+
+        return logger
+
+    filepath = '/tmp/failed_migrated_videos_to_new_flows.log'
+    logger = get("failed_migrated_videos_to_new_flows", filepath)
     all_deps = get_all_pids_by("depid")
     video_deps = []
+    failed_deps = []
 
     for dep in all_deps:
         rec = CDSDeposit.get_record(dep.object_uuid)
@@ -156,10 +178,17 @@ def main():
             video_deps.append(rec)
 
     for video in video_deps:
-        migrate_event(video)
+        try:
+            migrate_event(video)
+        except Exception:
+            failed_deps.append(video)
         # we need to commit to re-dump files/tags to the record
         # and store `_flow_id`
         video._update_tasks_status()
         video['_files'] = video._get_files_dump()
         video.commit()
     db.session.commit()
+
+    if failed_deps:
+        logger.debug("Failed deposits ({0})".format(len(failed_deps)))
+        logger.debug(failed_deps)
