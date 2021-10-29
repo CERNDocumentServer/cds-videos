@@ -63,18 +63,11 @@ def get_deposit_flows(deposit_id, _deleted=False):
 
 def get_deposit_last_flow(deposit_id):
     """Get the last flow associated with a deposit."""
-    try:
-        # In case of many flows, return the last one
-        model = FlowMetadata.query.filter(
-            FlowMetadata.deposit_id == deposit_id)\
-            .order_by(asc(FlowMetadata.updated))[-1]
-        return Flow(model=model)
-    except IndexError:
-        # There is no Flow,
-        # Most likely we are working with an old record: Migrate!
-        from ..flows.migration import migrate_event
-
-        return migrate_event(deposit_id)
+    # In case of many flows, return the last one
+    model = FlowMetadata.query.filter(
+        FlowMetadata.deposit_id == deposit_id)\
+        .order_by(asc(FlowMetadata.updated))[-1]
+    return Flow(model=model)
 
 
 def get_tasks_status_by_task(flows, statuses=None):
