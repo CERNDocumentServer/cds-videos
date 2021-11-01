@@ -58,7 +58,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-
+from .errors import ExtractMetadataTaskError, ExtractFramesTaskError
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..records.utils import to_string
 from ..opencast.api import start_workflow
@@ -144,6 +144,9 @@ class CeleryTask(_Task):
         kwargs.update(task.payload)
         kwargs.update(flow_payload)
         kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
+        if kwargs.get("quality"):
+            kwargs["qualities"] = [kwargs["quality"]]
+            kwargs["task_id_"+kwargs["quality"]] = str(task.id)
 
         return (
             celery_app.tasks.get(task.name).subtask(
@@ -152,6 +155,86 @@ class CeleryTask(_Task):
                 immutable=True,
             ).apply_async()
         )
+
+    @staticmethod
+    def get_ordered_tasks(tasks, flow_id, flow_payload):
+        """."""
+        def get_signature(task):
+            """."""
+            task.status = Status.PENDING
+            db.session.add(task)
+
+            kwargs = {}
+            kwargs.update(task.payload)
+            kwargs.update(flow_payload)
+            kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
+
+            return (
+                celery_app.tasks.get(task.name).subtask(
+                    task_id=str(task.id),
+                    kwargs=kwargs,
+                    immutable=True,
+                )
+            )
+
+        signature_list = []
+        qualities = []
+        extract_metadata_task = filter(
+            lambda task: task.name == ExtractMetadataTask().name, tasks
+        )
+        extract_frames_task = filter(
+            lambda task: task.name == ExtractFramesTask().name, tasks
+        )
+        transcode_video_tasks = filter(
+            lambda task: task.name == TranscodeVideoTask().name, tasks
+        )
+
+        if len(extract_metadata_task) == 1:
+            signature_list.append(get_signature(extract_metadata_task[0]))
+        else:
+            raise ExtractMetadataTaskError(
+                'There should be only one extract_metadata_task in flow with '
+                'flow_id: {0}, but instead there are {1}.'.format(
+                    flow_id,
+                    len(extract_metadata_task)
+                )
+            )
+
+        if len(extract_frames_task) == 1:
+            signature_list.append(get_signature(extract_frames_task[0]))
+        else:
+            raise ExtractFramesTaskError(
+                'There should be only one extract_frames_task in flow with '
+                'flow_id: {0}, but instead there are {1}.'.format(
+                    flow_id,
+                    len(extract_frames_task)
+                )
+            )
+
+        transcode_kwargs = {}
+        for transcode_video_task in transcode_video_tasks:
+            quality = transcode_video_task.payload["quality"]
+            qualities.append(quality)
+            transcode_video_task.status = Status.PENDING
+            db.session.add(transcode_video_task)
+            transcode_kwargs.update(transcode_video_task.payload)
+            transcode_kwargs.update(flow_payload)
+            transcode_kwargs.update(
+                {'flow_id': flow_id, 'qualities': qualities}
+            )
+            task_key = "task_id_" + quality
+            transcode_kwargs[task_key] = str(transcode_video_task.id)
+
+        if transcode_video_tasks:
+            task = transcode_video_tasks[0]
+            signature = celery_app.tasks.get(task.name).subtask(
+                task_id=str(task.id),
+                kwargs=transcode_kwargs,
+                immutable=True,
+            )
+            signature_list.append(signature)
+
+        return signature_list
 
 
 class AVCTask(CeleryTask):
@@ -639,8 +722,8 @@ class TranscodeVideoTask(AVCTask):
         width = int(tags['width']) if 'width' in tags else None
         height = int(tags['height']) if 'height' in tags else None
 
-        if 'quality' in kwargs:
-            qualities = [kwargs["quality"]]
+        if 'qualities' in kwargs:
+            qualities = kwargs["qualities"]
         else:
             qualities = get_qualities(
                 video_height=height, video_width=width
@@ -669,8 +752,9 @@ class TranscodeVideoTask(AVCTask):
         )
 
         for quality in qualities:
+            task_id_key = "task_id_" + quality
             task = TaskMetadata.create_or_update(
-                id_=kwargs["task_id"] if kwargs.get("quality") else None,  # TODO
+                id_=kwargs[task_id_key] if kwargs.get("qualities") else None,
                 flow_id=self.object.get_tags()['_flow_id'],
                 name=TranscodeVideoTask().name,
                 payload=kwargs,

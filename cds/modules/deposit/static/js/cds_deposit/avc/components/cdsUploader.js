@@ -227,15 +227,26 @@ function cdsUploaderCtrl(
     };
   }
 
+    /*
+   * Prepare http request of Local File restart
+   */
+  function _prepareRestart(flow_id) {
+    return {
+      method: "PUT",
+      url: that.remoteMasterReceiver + flow_id,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+  }
+
   /*
    * Restart workflow for the existing master file
    */
 
   function restartWorkflow() {
-    var file = that.cdsDepositCtrl.findMasterFile() || {};
-    var args = _prepareLocalFileWebhooks(file, {
-      data: { version_id: file.version_id },
-    });
+    var master = that.cdsDepositCtrl.findMasterFile();
+    var args = _prepareRestart(master.tags._flow_id);
     $http(args).then(
       function success() {
         toaster.pop({
