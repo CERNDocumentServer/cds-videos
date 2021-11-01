@@ -319,6 +319,12 @@ function cdsDepositCtrl(
     };
 
     this.updateDeposit = function(deposit) {
+      that.record._files[0].subformat.sort(
+        (a,b) => a.key.localeCompare(b.key)
+      );
+      deposit._files[0].subformat.sort(
+        (a,b) => a.key.localeCompare(b.key)
+      );
       that.record._files = angular.merge(
         [],
         that.record._files,
