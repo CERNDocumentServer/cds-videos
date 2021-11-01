@@ -289,7 +289,6 @@ class Flow(FlowWrapper):
 
     def restart(self):
         """Restart the entire flow."""
-        print(self.id)
         if self.model is None:
             raise RuntimeError('No database flow object found.')
 
@@ -298,8 +297,6 @@ class Flow(FlowWrapper):
         )
 
         self._canvas = celery_chain(*self._canvas, task_id=str(self.id))
-        import pdb
-        pdb.set_trace()
         self.start()
         db.session.commit()
 
