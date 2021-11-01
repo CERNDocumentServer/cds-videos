@@ -59,7 +59,6 @@
         </a>
       </td>
     </tr>
-    <tr>{{$ctrl.cdsDepositCtrl.currentMasterFile.tags }}</tr>
     <tr ng-if="f.tags.quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
       <td title="{{f.tags.quality || f.tags.preset_quality }}">{{f.tags.quality || f.tags.preset_quality }}
       <td>
