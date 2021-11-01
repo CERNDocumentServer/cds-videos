@@ -287,6 +287,22 @@ class Flow(FlowWrapper):
             self.assemble()
         return self._canvas.apply_async()
 
+    def restart(self):
+        """Restart the entire flow."""
+        print(self.id)
+        if self.model is None:
+            raise RuntimeError('No database flow object found.')
+
+        self._canvas = CeleryTask.get_ordered_tasks(
+            self.model.tasks, str(self.id), flow_payload=self.payload
+        )
+
+        self._canvas = celery_chain(*self._canvas, task_id=str(self.id))
+        import pdb
+        pdb.set_trace()
+        self.start()
+        db.session.commit()
+
     def run(self):
         """Run workflow for video transcoding.
 
