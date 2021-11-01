@@ -157,7 +157,7 @@ def update_task_success(
     task = TaskMetadata.query.get(task_id)
     obj = ObjectVersion.create(
         bucket=task.payload["bucket_id"],
-        key=task.name
+        key=task.name + "_" + task.payload["quality"]
     )
     _write_file_to_eos(url, obj, session)
     ObjectVersionTag.create(
