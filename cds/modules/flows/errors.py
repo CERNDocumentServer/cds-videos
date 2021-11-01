@@ -37,3 +37,11 @@ class FlowDoesNotExist(FlowsError):
 
 class InvalidPayload(FlowsError):
     """Raised when the payload is invalid."""
+
+
+class ExtractMetadataTaskError(FlowsError):
+    """Raised when the extract metadata task ."""
+
+
+class ExtractFramesTaskError(FlowsError):
+    """Raised when the extract frames task ."""
