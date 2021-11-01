@@ -138,7 +138,7 @@ class FlowResource(MethodView):
     def put(self, user_id, flow):
         """Handle PUT request - restart flow."""
         flow_id = flow.id
-        flow.start()
+        flow.restart()
         db.session.commit()
         flow = Flow.get_flow(flow_id)
         return make_response(flow)
