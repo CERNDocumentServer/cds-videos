@@ -86,8 +86,6 @@ def test_video_build_url(api_app):
         video_build_url(uuid.UUID('95b0716a-c726-4481-96fe-2aa02c72cd41'))
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_publish_all_videos(api_app, api_project, users):
     """Test video publish."""
     (project, video_1, video_2) = api_project
@@ -108,8 +106,6 @@ def test_publish_all_videos(api_app, api_project, users):
         assert video['_deposit']['status'] == 'published'
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_publish_one_video(api_app, api_project, users):
     """Test video publish."""
     (project, video_1, video_2) = api_project
@@ -165,8 +161,6 @@ def test_delete_videos(api_project):
     assert project['videos'] == [{'$ref': video_1.ref}]
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_add_video(api_app, es, cds_jsonresolver, users,
                    location, project_deposit_metadata, video_deposit_metadata):
     """Test add video."""
@@ -220,8 +214,6 @@ def test_add_video(api_app, es, cds_jsonresolver, users,
     assert video_1.project.id == project.id
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_project_discard(app, project_published, video_deposit_metadata):
     """Test project discard."""
     (project, video_1, video_2) = project_published
@@ -243,8 +235,6 @@ def test_project_discard(app, project_published, video_deposit_metadata):
         project.discard()
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_project_edit(app, project_published, users):
     """Test project edit."""
     (project, video_1, video_2) = project_published
@@ -289,8 +279,6 @@ def test_project_edit(app, project_published, users):
     assert videos[0]['title']['title'] != videos[1]['title']['title']
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
 def test_project_delete_not_published(api_app, api_project, force):
     """Test project delete when all is not published."""
@@ -317,8 +305,6 @@ def test_project_delete_not_published(api_app, api_project, force):
             assert rec.json is None
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False])  # , True])
 def test_project_delete_one_video_published(api_app, api_project, force,
                                             users):
@@ -414,8 +400,6 @@ def test_inheritance(api_app, api_project, users):
     assert video['type'] == project['type']
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_project_publish_with_workflow(api_app, users, api_project, es):
     """Test publish a project with a workflow."""
     project, video_1, video_2 = api_project

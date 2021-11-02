@@ -340,8 +340,6 @@ def get_indexed_records_from_mock(mock_indexer):
     return indexed
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def prepare_videos_for_publish(videos):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(

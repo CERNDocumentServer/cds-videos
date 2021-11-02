@@ -42,8 +42,6 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 from helpers import assert_hits_len, get_files_metadata
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_records_ui_export(app, project_published, video_record_metadata):
     """Test view."""
     (project, video_1, video_2) = project_published
@@ -115,8 +113,6 @@ def test_records_ui_export(app, project_published, video_record_metadata):
             assert get_pre(data).startswith('&lt;?xml version=')
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
                       datacite_headers, json_headers, smil_headers,
                       drupal_headers, extra_metadata, _deposit_metadata, current_year):

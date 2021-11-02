@@ -58,8 +58,6 @@ from cds.modules.deposit.tasks import datacite_register
 from six import BytesIO
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite(
         datacite_mock, api_app, users, location, cds_jsonresolver,
@@ -109,8 +107,6 @@ def test_video_publish_registering_the_datacite(
             '10.0000/cds.1', 'https://cds.cern.ch/record/1')
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_if_fail(
         datacite_mock, api_app, users, location, cds_jsonresolver,
@@ -154,8 +150,6 @@ def test_video_publish_registering_the_datacite_if_fail(
         assert datacite_mock.call_count == 3
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_registering_the_datacite_not_local(
         datacite_mock, api_app, users, location, cds_jsonresolver,
@@ -327,8 +321,6 @@ def test_video_access_rights_based_admin(
         assert client.post(publish_url).status_code == 202
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
 def test_video_publish_edit_publish_again(
         datacite_mock, es, api_app, users, location, cds_jsonresolver,

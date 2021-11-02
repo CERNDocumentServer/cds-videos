@@ -685,8 +685,6 @@ def api_project(api_app, es, users, location, db, deposit_metadata):
                        location, db, deposit_metadata)
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.fixture()
 def project_published(api_app, api_project, users):
     """New published project with videos."""
@@ -704,8 +702,6 @@ def project_published(api_app, api_project, users):
             Video.get_record(new_videos[1].id))
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.fixture()
 def api_project_published(api_app, api_project, users):
     """New published project with videos."""
@@ -722,8 +718,6 @@ def api_project_published(api_app, api_project, users):
             Video.get_record(new_videos[1].id))
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.fixture()
 def video_published(app, project_published):
     """New published project with videos."""
