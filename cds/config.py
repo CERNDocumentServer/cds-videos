@@ -656,13 +656,6 @@ RECORDS_VALIDATION_TYPES = dict(
 RECORDS_UI_DEFAULT_PERMISSION_FACTORY = \
     'cds.modules.records.permissions:deposit_read_permission_factory'
 
-# Endpoint for the cds_recid provider
-RECORDS_ID_PROVIDER_ENDPOINT = None
-
-# User agent value to send in cds endpoints.
-RECORDS_ID_PROVIDER_AGENT = None
-
-
 #: Standard record removal reasons.
 CDS_REMOVAL_REASONS = [
     ('', ''),
