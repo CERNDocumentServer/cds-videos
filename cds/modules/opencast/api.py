@@ -28,6 +28,7 @@ import os
 import requests
 from xml.etree import ElementTree
 from flask import current_app
+from requests_toolbelt import MultipartEncoder
 
 from cds.modules.xrootd.utils import file_opener_xrootd
 from datetime import datetime, timedelta
@@ -96,23 +97,28 @@ def _add_metadata(media_package_xml, object_version, session):
 
 def _add_track(media_package_xml, video_filepath, video_filename, session):
     """Adds track to the media package."""
-    form_data = dict(
-        mediaPackage=media_package_xml,
-        flavor="presenter/source"
+
+    data = MultipartEncoder(
+        fields=dict(
+            mediaPackage=media_package_xml,
+            flavor="presenter/source",
+            file=(
+                video_filename,
+                file_opener_xrootd(video_filepath, 'rb')
+            )
+        )
     )
-    with file_opener_xrootd(video_filepath, 'rb') as f:
-        files = dict(
-            BODY=(video_filename, f)
-        )
-        r = session.post(
-            "{endpoint}/addTrack".format(
-                endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-            ),
-            files=files,
-            data=form_data,
-            verify=False
-        )
-        return r.content
+
+    r = session.post(
+        "{endpoint}/addTrack".format(
+            endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
+        ),
+        data=data,
+        headers={'Content-Type': data.content_type},
+        verify=False
+    )
+
+    return r.content
 
 
 def _ingest(media_package_xml, qualities, session):
@@ -131,7 +137,6 @@ def _ingest(media_package_xml, qualities, session):
         data=form_data,
         verify=False
     )
-
     return r.content
 
 
