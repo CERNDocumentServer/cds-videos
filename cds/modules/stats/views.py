@@ -92,116 +92,119 @@ class StatsResource(MethodView):
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
 
-        es = Elasticsearch([{
-            'host': current_app.config['LEGACY_STATS_ELASTIC_HOST'],
-            'port': current_app.config['LEGACY_STATS_ELASTIC_PORT'],
-        }])
-        query = {}
-        results = {}
+        try:
+            es = Elasticsearch([{
+                'host': current_app.config['LEGACY_STATS_ELASTIC_HOST'],
+                'port': current_app.config['LEGACY_STATS_ELASTIC_PORT'],
+            }])
+            query = {}
+            results = {}
 
-        # Get total number of pageviews for a specific CDS record
-        if stat == 'views':
-            query = {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {
-                                "match": {
-                                    "id_bibrec": pid.pid_value
+            # Get total number of pageviews for a specific CDS record
+            if stat == 'views':
+                query = {
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "match": {
+                                        "id_bibrec": pid.pid_value
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "_type": "events.pageviews"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+                results = es.count(index=ES_INDEX, body=query).get('count', 0)
+
+            # Get timestamp-aggregated downloads for specific CDS record
+            elif stat == 'downloads':
+                report_number = record.get('report_number')[0]
+                key_type = 'date'
+                query = {
+                    "query": {
+                        "filtered": {
+                            "query": {
+                                "bool": StatsResource._build_subquery(report_number)
+                            },
+                            "filter": {
+                                "range": {
+                                    "@timestamp": {
+                                        "from": 0,
+                                        "to": "now"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "aggregations": {
+                        "by_time": {
+                            "date_histogram": {
+                                "field": "@timestamp",
+                                "interval": "day"
+                            }
+                        }
+                    }
+                }
+                results = self.transform(
+                    es.search(index=ES_INDEX, body=query),
+                    stat,
+                    key_type)
+
+            # Get timestamp-aggregated pageviews for specific CDS record
+            elif stat == 'pageviews':
+                key_type = 'date'
+                query = {
+                    "query": {
+                        "filtered": {
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "match": {
+                                                "id_bibrec": pid.pid_value
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "_type": "events.pageviews"
+                                            }
+                                        }
+                                    ]
                                 }
                             },
-                            {
-                                "match": {
-                                    "_type": "events.pageviews"
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-            results = es.count(index=ES_INDEX, body=query).get('count', 0)
-
-        # Get timestamp-aggregated downloads for specific CDS record
-        elif stat == 'downloads':
-            report_number = record.get('report_number')[0]
-            key_type = 'date'
-            query = {
-                "query": {
-                    "filtered": {
-                        "query": {
-                            "bool": StatsResource._build_subquery(report_number)
-                        },
-                        "filter": {
-                            "range": {
-                                "@timestamp": {
-                                    "from": 0,
-                                    "to": "now"
-                                }
-                            }
-                        }
-                    }
-                },
-                "aggregations": {
-                    "by_time": {
-                        "date_histogram": {
-                            "field": "@timestamp",
-                            "interval": "day"
-                        }
-                    }
-                }
-            }
-            results = self.transform(
-                es.search(index=ES_INDEX, body=query),
-                stat,
-                key_type)
-
-        # Get timestamp-aggregated pageviews for specific CDS record
-        elif stat == 'pageviews':
-            key_type = 'date'
-            query = {
-                "query": {
-                    "filtered": {
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {
-                                        "match": {
-                                            "id_bibrec": pid.pid_value
-                                        }
-                                    },
-                                    {
-                                        "match": {
-                                            "_type": "events.pageviews"
-                                        }
+                            "filter": {
+                                "range": {
+                                    "@timestamp": {
+                                        "from": 0,
+                                        "to": "now"
                                     }
-                                ]
-                            }
-                        },
-                        "filter": {
-                            "range": {
-                                "@timestamp": {
-                                    "from": 0,
-                                    "to": "now"
                                 }
                             }
                         }
-                    }
-                },
-                "aggregations": {
-                    "by_time": {
-                        "date_histogram": {
-                            "field": "@timestamp",
-                            "interval": "day"
+                    },
+                    "aggregations": {
+                        "by_time": {
+                            "date_histogram": {
+                                "field": "@timestamp",
+                                "interval": "day"
+                            }
                         }
                     }
                 }
-            }
-            results = self.transform(
-                es.search(index=ES_INDEX, body=query),
-                stat,
-                key_type)
+                results = self.transform(
+                    es.search(index=ES_INDEX, body=query),
+                    stat,
+                    key_type)
 
-        return make_response(jsonify(results), 200)
+            return make_response(jsonify(results), 200)
+        except Exception:
+            return make_response("Couldn't connect to ES cluster.", 400)
 
     # Convert retrieved statistics into 'Invenio-Stats' format
     def transform(self, response, metric, key_type):

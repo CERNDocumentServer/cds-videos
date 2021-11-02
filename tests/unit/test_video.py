@@ -77,8 +77,6 @@ def test_video_resolver(api_project):
     assert original == resolved
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_video_publish_and_edit(api_project, users):
     """Test video publish and edit."""
     (project, video_1, video_2) = api_project
@@ -154,8 +152,6 @@ def test_video_publish_and_edit(api_project, users):
                for video_ref in project['videos']) is True
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
 def test_delete_video_not_published(api_project, force):
     """Test video delete when draft."""
@@ -180,8 +176,6 @@ def test_delete_video_not_published(api_project, force):
         assert video_2_meta.json is None
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @pytest.mark.parametrize('force', [False, True])
 def test_delete_video_published(api_project, force, users):
     """Test video delete after published."""
@@ -242,8 +236,6 @@ def test_video_dumps(db, api_project, video):
     assert len(files['subformat']) == 1
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 @mock.patch('cds.modules.flows.tasks.sorenson', MockSorensonFailed())
 @mock.patch("cds.modules.flows.api.Flow", TestFlow)
 @mock.patch("cds.modules.flows.views.Flow", TestFlow)
@@ -391,8 +383,6 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
         assert status['sse_failing_task'] == states.FAILURE
 
 
-@mock.patch('cds.modules.records.providers.CDSRecordIdProvider.create',
-            RecordIdProvider.create)
 def test_video_publish_with_no_category(api_project, users):
     """Test video publish if category is not set."""
     (project, video_1, video_2) = api_project

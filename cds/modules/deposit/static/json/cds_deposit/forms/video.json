@@ -243,7 +243,7 @@
             "mergeObjects": true,
             "required": true,
             "asyncCallback": "$ctrl.autocompleteAuthors",
-            "url": "//cds.cern.ch/submit/get_authors",
+            "url": "//cdss.cern.ch/submit/get_authors",
             "extraParams": {
               "relative_curdir": "cdslabs/videos"
             }
