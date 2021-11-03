@@ -67,7 +67,7 @@ def can_be_transcoded(subformat_desired_quality, video_width, video_height):
         return None
 
     return dict(
-        quality=subformat_desired_quality,
+        preset_quality=subformat_desired_quality,
         width=qualitiy_config['width'],
         height=qualitiy_config['height']
     )

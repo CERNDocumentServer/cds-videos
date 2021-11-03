@@ -144,9 +144,9 @@ class CeleryTask(_Task):
         kwargs.update(task.payload)
         kwargs.update(flow_payload)
         kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
-        if kwargs.get("quality"):
-            kwargs["qualities"] = [kwargs["quality"]]
-            kwargs["task_id_"+kwargs["quality"]] = str(task.id)
+        if kwargs.get("preset_quality"):
+            kwargs["qualities"] = [kwargs["preset_quality"]]
+            kwargs["task_id_"+kwargs["preset_quality"]] = str(task.id)
 
         return (
             celery_app.tasks.get(task.name).subtask(
@@ -213,7 +213,7 @@ class CeleryTask(_Task):
 
         transcode_kwargs = {}
         for transcode_video_task in transcode_video_tasks:
-            quality = transcode_video_task.payload["quality"]
+            quality = transcode_video_task.payload["preset_quality"]
             qualities.append(quality)
             transcode_video_task.status = Status.PENDING
             db.session.add(transcode_video_task)
@@ -763,7 +763,7 @@ class TranscodeVideoTask(AVCTask):
             task.message = "Started transcoding."
             task_payload = task.payload.copy()
             task_payload.update(
-                quality=quality,
+                preset_quality=quality,
                 opencast_publication_tag=
                 current_app.config['CDS_OPENCAST_QUALITIES'][quality][
                     "opencast_publication_tag"],
