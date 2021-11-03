@@ -137,7 +137,7 @@ def update_task_status():
                         subformat["url"],
                         str(master_object_version.version_id),
                         event_id,
-                        task.payload["quality"],
+                        task.payload["preset_quality"],
                     )
                 elif status == "FAILED":
                     update_task_failure.delay(str(task.id))
@@ -157,7 +157,7 @@ def update_task_success(
     task = TaskMetadata.query.get(task_id)
     obj = ObjectVersion.create(
         bucket=task.payload["bucket_id"],
-        key=task.name + "_" + task.payload["quality"]
+        key=task.name + "_" + task.payload["preset_quality"]
     )
     _write_file_to_eos(url, obj, session)
     ObjectVersionTag.create(
@@ -168,7 +168,7 @@ def update_task_success(
     )
     ObjectVersionTag.create(obj, 'media_type', 'video')
     ObjectVersionTag.create(obj, 'context_type', 'subformat')
-    ObjectVersionTag.create(obj, 'quality', quality)
+    ObjectVersionTag.create(obj, 'preset_quality', quality)
     # TODO: maybe enrich a bit more the tags of the ObjectVersion
     task.status = Status.SUCCESS
     task.message = "Transcoding succeeded"
