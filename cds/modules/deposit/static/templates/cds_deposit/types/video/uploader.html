@@ -59,8 +59,9 @@
         </a>
       </td>
     </tr>
-    <tr ng-if="f.tags.quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
-      <td title="{{f.tags.quality || f.tags.preset_quality }}">{{f.tags.quality || f.tags.preset_quality }}
+    <!-- We rely on f.preset_quality because it's dumped when creating the task and not when the task finishes i.e tags.preset_quality. For old videos, i.e old sorenson tasks, we rely on tags.preset_qaulity -->
+    <tr ng-if="f.preset_quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
+      <td title="{{f.preset_quality || f.tags.preset_quality }}">{{f.preset_quality || f.tags.preset_quality }}
       <td>
       </td>
       <td class="text-center">
