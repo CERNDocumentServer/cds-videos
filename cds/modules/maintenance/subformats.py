@@ -44,7 +44,7 @@ def create_all_missing_subformats(id_type, id_value):
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
     subformats = CDSVideosFilesIterator.get_video_subformats(master)
-    dones = [subformat['tags']['quality'] for subformat in subformats]
+    dones = [subformat['tags']['preset_quality'] for subformat in subformats]
     missing = set(
         current_app.config['CDS_OPENCAST_QUALITIES'].keys()
     ) - set(dones)
@@ -66,7 +66,7 @@ def create_subformat(id_type, id_value, quality):
     subformat = can_be_transcoded(quality, w, h)
     return (
         subformat,
-        _schedule(dep_uuid, [subformat.get('quality')]) if subformat else None,
+        _schedule(dep_uuid, [subformat.get('preset_quality')]) if subformat else None,
     )
 
 
@@ -135,7 +135,7 @@ def _schedule(deposit_id, transcodables):
     # Reset all tasks which quality is within transcodables
     tasks = []
     for t in flow.model.tasks:
-        if not t.payload.get('quality') in transcodables:
+        if not t.payload.get('preset_quality') in transcodables:
             continue
         t.status = Status.PENDING
         db.session.add(t)
