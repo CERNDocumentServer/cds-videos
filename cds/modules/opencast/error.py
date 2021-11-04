@@ -29,14 +29,7 @@ from __future__ import absolute_import, print_function
 
 class OpencastError(Exception):
     """Base class for exceptions in this module."""
-
-    def __init__(self, error_message=''):
-        """Initialize exception with error message."""
-        self.error_message = error_message
-
-    def __str__(self):
-        """Error message."""
-        return self.error_message
+    pass
 
 
 class MissingEventId(OpencastError):
@@ -82,3 +75,30 @@ class TooHighResolutionError(OpencastError):
         ).format(
             self._width, self._height, self._max_weight, self._max_height
         )
+
+
+class RequestError(OpencastError):
+    """Error while performing ingest request in Opencast."""
+
+    def __init__(self, url, message):
+        self.url = url
+        self.message = message
+
+    def __str__(self):
+        return 'Failed to perform {0}. Error message: {1}'.format(
+            self.url, self.message
+        )
+
+
+class WriteToEOSError(OpencastError):
+    """Error while writing transcoded file to EOS."""
+
+    def __init__(self, url, message):
+        self.url = url
+        self.message = message
+
+    def __str__(self):
+        return ('Failed to write transcoded file to EOS Request failed on: '
+                '{1}. Error message: {2}').format(
+                    self.url, self.message
+                )
