@@ -36,22 +36,27 @@ from cds.modules.flows.models import TaskMetadata, Status
 from celery import shared_task
 
 from cds.modules.flows.tasks import TranscodeVideoTask
-from cds.modules.opencast.error import MissingEventId
+from cds.modules.opencast.error import RequestError, WriteToEOSError
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
 
 def _get_status_and_subformats(event_id, session):
     """Retrieves the status and the subformats of an event_id."""
-    r = session.get(
-        "{endpoint}/{event_id}?withpublications=true".format(
-            endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_EVENTS'],
-            event_id=event_id
-        ),
-        verify=False
+    url = "{endpoint}/{event_id}?withpublications=true".format(
+        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_EVENTS'],
+        event_id=event_id
     )
-    json = r.json()
+    try:
+        response = session.get(
+            url,
+            verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT']
+        )
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        raise RequestError(url, e.message)
+    json = response.json()
     status = json["processing_state"]
-    publications = json["publications"]
+    publications = json.get("publications", [])
     for publication in publications:
         if publication["channel"] == "api":
             subformats = publication["media"]
@@ -89,7 +94,10 @@ def _write_file_to_eos(url_to_download, obj, session):
             directory.root_url + directory.base_path, filename)
     except AttributeError:
         output_file = os.path.join(directory.root_path, filename)
-    r = session.get(url_to_download, stream=True, verify=False)
+    r = session.get(
+        url_to_download,
+        stream=True,
+        verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT'])
     f = file_opener_xrootd(output_file, 'wb')
     for ch in r.iter_content(chunk_size=1000000):
         if ch:
@@ -104,7 +112,7 @@ def _write_file_to_eos(url_to_download, obj, session):
 
 
 @shared_task
-def update_task_status():
+def check_transcoding_status():
     """Update all finished transcoding tasks."""
     # TODO: add ERROR HANDLING
     session = requests.Session()
@@ -117,11 +125,26 @@ def update_task_status():
         name=TranscodeVideoTask().name
     ).all()
     grouped_tasks = _group_tasks_by_event_id(pending_tasks)
-    print("--- Updating", len(pending_tasks))
     for tasks in grouped_tasks:
-        print("Tasks: ", tasks)
         event_id = tasks[0].payload["opencast_event_id"]
-        status, subformats = _get_status_and_subformats(event_id, session)
+        try:
+            status, subformats = _get_status_and_subformats(event_id, session)
+        except RequestError as e:
+            error_message = e.message
+            for task in tasks:
+                on_transcoding_failed.delay(
+                    str(task.id),
+                    task_message=error_message
+                )
+            current_app.logger.error(
+                'Failed to fetch status and subformats from Opencast event id:'
+                ' {0}. Request failed on: {1}. Error message: {2} '.format(
+                    tasks[0].payload["opencast_event_id"],
+                    e.url,
+                    error_message
+                )
+            )
+            continue
         master_object_version = ObjectVersion.get(
             bucket=tasks[0].payload["bucket_id"],
             key=tasks[0].payload["key"],
@@ -132,7 +155,7 @@ def update_task_status():
                 if task.payload[
                     "opencast_publication_tag"
                 ] in subformat["tags"]:
-                    update_task_success.delay(
+                    on_transcoding_completed.delay(
                         str(task.id),
                         subformat["url"],
                         str(master_object_version.version_id),
@@ -140,15 +163,14 @@ def update_task_status():
                         task.payload["preset_quality"],
                     )
                 elif status == "FAILED":
-                    update_task_failure.delay(str(task.id))
+                    on_transcoding_failed.delay(str(task.id))
 
 
 @shared_task
-def update_task_success(
+def on_transcoding_completed(
         task_id, url, master_object_version_version_id, event_id, quality
 ):
     """Update Task status and files by streaming it to EOS."""
-    # TODO: add ERROR HANDLING
     session = requests.Session()
     session.auth = (
         current_app.config['CDS_OPENCAST_API_USERNAME'],
@@ -159,7 +181,19 @@ def update_task_success(
         bucket=task.payload["bucket_id"],
         key=task.name + "_" + task.payload["preset_quality"]
     )
-    _write_file_to_eos(url, obj, session)
+    try:
+        _write_file_to_eos(url, obj, session)
+    except Exception as e:
+        error_message = ('Failed to write transcoded file to EOS. Request '
+                         'failed on: {1}. Error message: {2}').format(
+            url,
+            e.message
+        )
+        current_app.logger.error(error_message)
+        task.status = Status.FAILURE
+        task.message = error_message
+        db.session.commit()
+        raise WriteToEOSError(url, e.message)
     ObjectVersionTag.create(
         obj, 'master', master_object_version_version_id
     )
@@ -182,9 +216,9 @@ def update_task_success(
 
 
 @shared_task
-def update_task_failure(task_id):
+def on_transcoding_failed(task_id, error_message="Transcoding failed"):
     """Update Task status to failed."""
     task = TaskMetadata.query.get(task_id)
     task.status = Status.FAILURE
-    task.message = "Transcoding failed"
+    task.message = error_message
     db.session.commit()
