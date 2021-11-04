@@ -359,7 +359,7 @@
                         <p><strong>{{name}}</strong></p>
                           <ul class="list-group" ng-repeat="task in data">
                             <li class="list-group-item">
-                              {{task.info.payload.quality}} <span class="label label-default">{{ task.status }}</span>
+                              {{task.info.payload.preset_quality}} <span class="label label-default">{{ task.status }}</span>
                               <a class="pull-right" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, task.id)">
                                 <i class="fa fa-refresh" aria-hidden="true"></i>
                               </a>
