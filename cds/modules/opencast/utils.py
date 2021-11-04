@@ -26,6 +26,20 @@
 from flask import current_app
 
 
+def find_lowest_quality():
+    """Return the lowest quality available."""
+    lowest_height = 100000
+    lowest_quality = None
+    for quality, preset_items in current_app.config[
+            'CDS_OPENCAST_QUALITIES'
+    ].items():
+        if preset_items["height"] < lowest_height:
+            lowest_height = preset_items["height"]
+            lowest_quality = quality
+
+    return lowest_quality
+
+
 def get_qualities(video_height=None, video_width=None):
     """Return the qualities given the video's height and width.
 
@@ -34,14 +48,15 @@ def get_qualities(video_height=None, video_width=None):
     :returns the qualities
     """
     qualities = []
-    for preset in current_app.config['CDS_OPENCAST_QUALITIES'].items():
-        if (video_height and video_height >= preset[1]['height']) or \
-                (video_width and video_width >= preset[1]['width']):
-            qualities.append(preset[0])
+    for quality, preset_items in current_app.config[
+        'CDS_OPENCAST_QUALITIES'
+    ].items():
+        if (video_height and video_height >= preset_items['height']) or \
+                (video_width and video_width >= preset_items['width']):
+            qualities.append(quality)
     if not qualities:
-        qualities.append(
-            current_app.config['CDS_OPENCAST_QUALITIES'].items()[0][0]
-        )
+        lowest_quality = find_lowest_quality()
+        qualities.append(lowest_quality)
     return qualities
 
 
