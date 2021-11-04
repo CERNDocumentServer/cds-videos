@@ -226,10 +226,10 @@ class TaskMetadata(db.Model, Timestamp):
                     previous=previous or [],
                 )
                 db.session.add(obj)
-            logger.info('Created new Flow %s', obj)
+            logger.info('Created new Task %s', obj)
         except SQLAlchemyError:
             logger.exception(
-                'Failed to create Flow with %s, %s, %s, %s',
+                'Failed to create Task with %s, %s, %s, %s',
                 id_,
                 flow_id,
                 name,
