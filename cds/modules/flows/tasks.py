@@ -60,6 +60,7 @@ from werkzeug.utils import import_string
 
 from .errors import ExtractMetadataTaskError, ExtractFramesTaskError
 from ..ffmpeg import ff_frames, ff_probe_all
+from ..opencast.error import RequestError
 from ..records.utils import to_string
 from ..opencast.api import start_workflow
 from ..opencast.utils import get_qualities
@@ -698,10 +699,35 @@ class TranscodeVideoTask(AVCTask):
         """Override on failure."""
         pass
 
-    @staticmethod
-    def _build_subformat_key(preset_quality):
-        """Build the object version key connected with the transcoding."""
-        return '{0}.mp4'.format(preset_quality)
+    def _create_or_update_tasks(
+            self,
+            tasks_qualities,
+            job_info,
+            task_status,
+            task_message,
+            *args,
+            **kwargs
+    ):
+        for quality in tasks_qualities:
+            task_id_key = "task_id_" + quality
+            task = TaskMetadata.create_or_update(
+                id_=kwargs[task_id_key] if kwargs.get("qualities") else None,
+                flow_id=self.object.get_tags()['_flow_id'],
+                name=TranscodeVideoTask().name,
+                payload=kwargs,
+            )
+            task.status = task_status
+            task.message = task_message
+            task_payload = task.payload.copy()
+            task_payload.update(
+                preset_quality=quality,
+                opencast_publication_tag=
+                current_app.config['CDS_OPENCAST_QUALITIES'][quality][
+                    "opencast_publication_tag"],
+                db_task_id=str(task.id),
+                **job_info)
+            task.payload = task_payload
+            db.session.commit()
 
     def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
@@ -716,7 +742,8 @@ class TranscodeVideoTask(AVCTask):
 
         :param self: reference to instance of task base class
         """
-
+        task_status = Status.PENDING
+        task_message = "Started transcoding."
         tags = self.object.get_tags()
         # Get master file's width x height
         width = int(tags['width']) if 'width' in tags else None
@@ -729,21 +756,38 @@ class TranscodeVideoTask(AVCTask):
                 video_height=height, video_width=width
             )
 
-        # Start Opencast transcoding
-        event_id = start_workflow(
-            self.object,
-            qualities,
+        self.set_revoke_handler(
+            lambda: self._create_or_update_tasks(
+                tasks_qualities=qualities,
+                job_info={},
+                task_status=Status.FAILURE,
+                task_message="Abrupt celery stop", **kwargs
+            )
         )
 
-        # Set revoke handler, in case of an abrupt execution halt.
-        # TODO: TO be updated to opencast
-        # self.set_revoke_handler(partial(sorenson.stop_encoding, event_id))
-        ObjectVersionTag.create_or_update(  # TODO: Not sure this makes sense
-            self.object, '_opencast_event_id', event_id
-        )
-        # for key, value in preset_config.items():
-        #     ObjectVersionTag.create(obj, key, value)
-        # Information necessary for monitoring
+        # Start Opencast transcoding
+        try:
+            event_id = start_workflow(
+                self.object,
+                qualities,
+            )
+        except RequestError as e:
+            event_id = None
+            task_status = Status.FAILURE
+            task_message = ('Failed to start Opencast transcoding workflow '
+                            'for flow with id: {0}. Request failed on: {1}.'
+                            ' Error message: {2}'). format(
+                    self.object.get_tags()['_flow_id'],
+                    e.url,
+                    e.message
+                )
+            current_app.logger.error(task_message)
+
+        if event_id:
+            ObjectVersionTag.create_or_update(
+                self.object, '_opencast_event_id', event_id
+            )
+
         job_info = dict(
             opencast_event_id=event_id,
             version_id=str(self.object.version_id),
@@ -751,26 +795,9 @@ class TranscodeVideoTask(AVCTask):
             tags=self.object.get_tags(),
         )
 
-        for quality in qualities:
-            task_id_key = "task_id_" + quality
-            task = TaskMetadata.create_or_update(
-                id_=kwargs[task_id_key] if kwargs.get("qualities") else None,
-                flow_id=self.object.get_tags()['_flow_id'],
-                name=TranscodeVideoTask().name,
-                payload=kwargs,
-            )
-            task.status = Status.PENDING
-            task.message = "Started transcoding."
-            task_payload = task.payload.copy()
-            task_payload.update(
-                preset_quality=quality,
-                opencast_publication_tag=
-                current_app.config['CDS_OPENCAST_QUALITIES'][quality][
-                    "opencast_publication_tag"],
-                db_task_id=str(task.id),
-                **job_info)
-            task.payload = task_payload
-            db.session.commit()
+        self._create_or_update_tasks(
+            qualities, job_info, task_status, task_message, **kwargs
+        )
 
         return job_info['version_id']
 
