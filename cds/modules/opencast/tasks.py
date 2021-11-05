@@ -27,9 +27,10 @@ import os
 import requests
 from flask import current_app
 from invenio_db import db
+from invenio_files_rest.errors import BucketLockedError
 from invenio_files_rest.helpers import compute_md5_checksum
-from invenio_files_rest.models import ObjectVersion, FileInstance,\
-    ObjectVersionTag
+from invenio_files_rest.models import ObjectVersion, FileInstance, \
+    ObjectVersionTag, as_object_version, as_bucket
 from collections import defaultdict
 
 from cds.modules.flows.models import TaskMetadata, Status
@@ -145,10 +146,9 @@ def check_transcoding_status():
                 )
             )
             continue
-        master_object_version = ObjectVersion.get(
-            bucket=tasks[0].payload["bucket_id"],
-            key=tasks[0].payload["key"],
-            version_id=tasks[0].payload["version_id"]
+
+        master_object_version = as_object_version(
+            tasks[0].payload.get("master_version_id")
         )
         for task in tasks:
             for subformat in subformats:
@@ -177,10 +177,19 @@ def on_transcoding_completed(
         current_app.config['CDS_OPENCAST_API_PASSWORD']
     )
     task = TaskMetadata.query.get(task_id)
-    obj = ObjectVersion.create(
-        bucket=task.payload["bucket_id"],
-        key=task.name + "_" + task.payload["preset_quality"]
-    )
+    try:
+        obj = ObjectVersion.create(
+            bucket=task.payload["bucket_id"],
+            key=task.name + "_" + task.payload["preset_quality"]
+        )
+    except BucketLockedError:
+        bucket = as_bucket(task.payload["bucket_id"])
+        bucket.locked = False
+        obj = ObjectVersion.create(
+            bucket=task.payload["bucket_id"],
+            key=task.name + "_" + task.payload["preset_quality"]
+        )
+        bucket.locked = True
     try:
         _write_file_to_eos(url, obj, session)
     except Exception as e:
