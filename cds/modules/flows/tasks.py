@@ -791,6 +791,7 @@ class TranscodeVideoTask(AVCTask):
         job_info = dict(
             opencast_event_id=event_id,
             version_id=str(self.object.version_id),
+            master_version_id=str(self.object.version_id),
             key=self.object.key,
             tags=self.object.get_tags(),
         )
