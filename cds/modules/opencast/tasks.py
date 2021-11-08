@@ -28,6 +28,7 @@ import requests
 from flask import current_app
 from invenio_db import db
 from invenio_files_rest.errors import BucketLockedError
+from cds.modules.flows.deposit import update_deposit_state
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import ObjectVersion, FileInstance, \
     ObjectVersionTag, as_object_version, as_bucket
@@ -36,7 +37,7 @@ from collections import defaultdict
 from cds.modules.flows.models import TaskMetadata, Status
 from celery import shared_task
 
-from cds.modules.flows.tasks import TranscodeVideoTask
+from cds.modules.flows.tasks import TranscodeVideoTask, sync_records_with_deposit_files
 from cds.modules.opencast.error import RequestError, WriteToEOSError
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
@@ -135,7 +136,7 @@ def check_transcoding_status():
             for task in tasks:
                 on_transcoding_failed.delay(
                     str(task.id),
-                    task_message=error_message
+                    error_message=error_message
                 )
             current_app.logger.error(
                 'Failed to fetch status and subformats from Opencast event id:'
@@ -177,19 +178,28 @@ def on_transcoding_completed(
         current_app.config['CDS_OPENCAST_API_PASSWORD']
     )
     task = TaskMetadata.query.get(task_id)
-    try:
-        obj = ObjectVersion.create(
-            bucket=task.payload["bucket_id"],
-            key=task.name + "_" + task.payload["preset_quality"]
-        )
-    except BucketLockedError:
-        bucket = as_bucket(task.payload["bucket_id"])
-        bucket.locked = False
-        obj = ObjectVersion.create(
-            bucket=task.payload["bucket_id"],
-            key=task.name + "_" + task.payload["preset_quality"]
-        )
-        bucket.locked = True
+    from cds.modules.deposit.api import deposit_video_resolver
+    deposit_id = task.flow.payload["deposit_id"]
+    deposit_video = deposit_video_resolver(deposit_id)
+    deposit_video_is_published = deposit_video.is_published()
+
+    if deposit_video_is_published:
+        assert deposit_video.files.bucket.locked
+        deposit_video.files.bucket.locked = False
+
+    obj = ObjectVersion.create(
+        bucket=task.payload["bucket_id"],
+        key=task.name + "_" + task.payload["preset_quality"]
+    )
+    ObjectVersionTag.create(
+        obj, 'master', master_object_version_version_id
+    )
+    ObjectVersionTag.create(
+        obj, '_opencast_event_id', event_id
+    )
+    ObjectVersionTag.create(obj, 'media_type', 'video')
+    ObjectVersionTag.create(obj, 'context_type', 'subformat')
+    ObjectVersionTag.create(obj, 'preset_quality', quality)
     try:
         _write_file_to_eos(url, obj, session)
     except Exception as e:
@@ -203,15 +213,7 @@ def on_transcoding_completed(
         task.message = error_message
         db.session.commit()
         raise WriteToEOSError(url, e.message)
-    ObjectVersionTag.create(
-        obj, 'master', master_object_version_version_id
-    )
-    ObjectVersionTag.create(
-        obj, '_opencast_event_id', event_id
-    )
-    ObjectVersionTag.create(obj, 'media_type', 'video')
-    ObjectVersionTag.create(obj, 'context_type', 'subformat')
-    ObjectVersionTag.create(obj, 'preset_quality', quality)
+
     # TODO: maybe enrich a bit more the tags of the ObjectVersion
     task.status = Status.SUCCESS
     task.message = "Transcoding succeeded"
@@ -221,7 +223,15 @@ def on_transcoding_completed(
     )
     task_payload.update(**updated_payload)
     task.payload = task_payload
+
+    if deposit_video_is_published:
+        sync_records_with_deposit_files(deposit_id)
+        deposit_video.files.bucket.locked = True
+
     db.session.commit()
+
+    update_deposit_state(deposit_id)
+
 
 
 @shared_task
@@ -230,4 +240,6 @@ def on_transcoding_failed(task_id, error_message="Transcoding failed"):
     task = TaskMetadata.query.get(task_id)
     task.status = Status.FAILURE
     task.message = error_message
+    update_deposit_state(task.flow.payload["deposit_id"])
+
     db.session.commit()
