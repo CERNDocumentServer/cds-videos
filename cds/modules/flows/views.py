@@ -95,7 +95,7 @@ class FlowListResource(MethodView):
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
-        new_flow = Flow(deposit_id=data["deposit_id"],
+        new_flow = Flow.create(deposit_id=data["deposit_id"],
                         user_id=user_id,
                         payload=dict(
                             version_id=data.get("version_id"),
@@ -150,10 +150,14 @@ class FlowResource(MethodView):
     @pass_flow
     @need_permission('delete')
     def delete(self, user_id, flow):
-        """Handle DELETE request."""
+        """Handle DELETE request.
+
+        Clears flow tasks and updates dependent entities e.g deposit.
+        """
         flow_id = flow.id
         flow.delete()
-        db.session.commit()
+
+        # TODO: do we really need that?
         flow = Flow.get_flow(flow_id)
         response, code = make_response(flow)
         return response, 200

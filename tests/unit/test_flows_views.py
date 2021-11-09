@@ -44,7 +44,7 @@ from invenio_records.models import RecordMetadata
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.flows.status import get_deposit_flows
+from cds.modules.flows.status import get_all_deposit_flows
 from cds.modules.flows.models import FlowMetadata
 
 from helpers import get_indexed_records_from_mock, get_local_file
@@ -432,7 +432,7 @@ def test_flows_delete(api_app, access_token, json_headers,
         )
 
     # check no events are there
-    assert get_deposit_flows(video_1_depid) == []
+    assert get_all_deposit_flows(video_1_depid) == []
 
     with api_app.test_client() as client, \
             mock.patch('invenio_indexer.tasks.index_record.delay'):
@@ -453,7 +453,7 @@ def test_flows_delete(api_app, access_token, json_headers,
         # check event is created
         assert resp.status_code == 201
         flow_id = resp.headers['X-Hub-Delivery']
-        [flow] = get_deposit_flows(video_1_depid)
+        [flow] = get_all_deposit_flows(video_1_depid)
         assert str(flow.id) == flow_id
 
         # delete event
@@ -465,7 +465,7 @@ def test_flows_delete(api_app, access_token, json_headers,
         res = client.delete(url_to_delete, headers=json_headers)
         assert res.status_code == 201
         # check no events are there
-        assert get_deposit_flows(video_1_depid) == []
+        assert get_all_deposit_flows(video_1_depid) == []
         # check event is marked as deleted
         [flow_deleted] = FlowMetadata.query.all()
         assert flow_deleted.id == flow.id
