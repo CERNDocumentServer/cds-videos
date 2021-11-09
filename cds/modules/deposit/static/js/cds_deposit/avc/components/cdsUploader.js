@@ -227,7 +227,7 @@ function cdsUploaderCtrl(
     };
   }
 
-    /*
+  /*
    * Prepare http request of Local File restart
    */
   function _prepareRestart(flow_id) {
@@ -357,8 +357,8 @@ function cdsUploaderCtrl(
             that.files.push(newMasterFile);
             that.queue.push(newMasterFile);
             // Upload the video file
-            var old_event_id = old_master[0]["tags"]["_flow_id"];
-            that.deleteEvent(old_event_id).then(
+            var old_flow_id = old_master[0]["tags"]["_flow_id"];
+            that.deleteFlow(old_flow_id).then(
               function success(response) {
                 that.cdsDepositCtrl.previewer = null;
                 that.upload();

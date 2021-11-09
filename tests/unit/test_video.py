@@ -57,8 +57,8 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
 from cds.modules.deposit.indexer import CDSRecordIndexer
 from cds.modules.flows.api import Flow
 from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.flows.status import get_deposit_flows, \
-    get_tasks_status_by_task
+from cds.modules.flows.status import get_all_deposit_flows, \
+    get_flow_tasks_status_by_task
 from cds.modules.fixtures.video_utils import add_master_to_video
 
 from helpers import mock_current_user, prepare_videos_for_publish, \
@@ -320,7 +320,7 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
         # resolve deposit and flows
         deposit = deposit_video_resolver(video_1_depid)
 
-        flows = get_deposit_flows(deposit['_deposit']['id'])
+        flows = get_all_deposit_flows(deposit['_deposit']['id'])
         # check flows
         assert len(flows) == 2
 
@@ -328,7 +328,7 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
         assert flows[1].payload['deposit_id'] == video_1_depid
         # check computed status
 
-        status = get_tasks_status_by_task(flows)
+        status = get_flow_tasks_status_by_task(flows)
 
         assert status['sse_simple_add'] == states.SUCCESS
         assert status['sse_failing_task'] == states.FAILURE
