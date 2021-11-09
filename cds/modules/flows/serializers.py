@@ -25,7 +25,7 @@ def add_link_header(response, links):
 
 def make_response(flow):
     """Make a response from flow object."""
-    if flow.deleted:
+    if not flow.is_last:
         code = 410
     else:
         code = FlowStatus.status_to_http(flow.status)
@@ -143,8 +143,8 @@ def build_task_json_status(task_json):
 def serialize_flow(flow):
     """Get the serialized flow status."""
     response_code = FlowStatus.status_to_http(flow.status)
-    if flow.deleted:
-        # in case the flow has been removed
+    if not flow.is_last:
+        # in case the flow has been replaced
         # return what was already in the response
         return 410
 
