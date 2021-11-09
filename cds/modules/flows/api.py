@@ -78,6 +78,11 @@ class FlowWrapper(object):
             db.session.merge(self.model)
 
     @property
+    def tasks(self):
+        """Get flow tasks."""
+        return self.model.tasks if self.model else []
+
+    @property
     def created(self):
         """Get creation timestamp."""
         return self.model.created if self.model else None
@@ -109,15 +114,15 @@ class FlowWrapper(object):
         return cls(model=obj)
 
     @property
-    def deleted(self):
-        """Get flow payload."""
-        return self.model.deleted if self.model else None
+    def is_last(self):
+        """Check if flow is the last one associated with the deposit_id."""
+        return self.model.is_last if self.model else None
 
-    @deleted.setter
-    def deleted(self, value):
+    @is_last.setter
+    def is_last(self, value):
         """Update payload."""
         if self.model:
-            self.model.deleted = value
+            self.model.is_last = value
             db.session.merge(self.model)
 
     @classmethod
@@ -145,20 +150,10 @@ class FlowWrapper(object):
 class Flow(FlowWrapper):
     """Flow controller class."""
 
-    def __init__(self, deposit_id=None, name='AVCWorkflow',
-                 payload=None, user_id=None, model=None):
+    def __init__(self,  model, deposit_id=None, name='AVCWorkflow',
+                 payload=None, user_id=None):
         """Initialize the flow object."""
-        if model:
-            self.model = model
-        else:
-            assert all((deposit_id, payload, user_id))
-            bucket_id = payload.get('bucket_id')
-            if not bucket_id:
-                from cds.modules.deposit.api import deposit_video_resolver
-                bucket_id = deposit_video_resolver(deposit_id).files.bucket
-                payload.update({"bucket_id": str(bucket_id)})
-            self.model = Flow.create(name, deposit_id, payload, user_id)
-
+        self.model = model
         self._tasks_map = {
             'file_video_metadata_extraction': ExtractMetadataTask,
             'file_download': DownloadTask,
@@ -201,6 +196,17 @@ class Flow(FlowWrapper):
             )
 
         return signature
+
+    @classmethod
+    def create(cls, deposit_id, payload, user_id, name='AVCWorkflow'):
+        """Creates a new flow in the db."""
+        bucket_id = payload.get('bucket_id')
+        if not bucket_id:
+            from cds.modules.deposit.api import deposit_video_resolver
+            bucket_id = deposit_video_resolver(deposit_id).files.bucket
+            payload.update({"bucket_id": str(bucket_id)})
+        _model = super(Flow, cls).create(name, deposit_id, payload, user_id)
+        return cls(model=_model)
 
     def create_task(self, task_name, create_task_table=True, **kwargs):
         """Create a task with parameters from flow."""
@@ -355,9 +361,13 @@ class Flow(FlowWrapper):
             update_deposit_state(deposit_id=deposit_id)
 
     def delete(self):
-        """Mark the flow as deleted."""
+        """Mark the flow as deleted.
+
+        In reality, we just unmark the flow as the last one associated with
+        a specific deposit_id.
+        """
         self.clean()
-        self.deleted = True
+        self.is_last = False
         db.session.commit()
 
     @staticmethod

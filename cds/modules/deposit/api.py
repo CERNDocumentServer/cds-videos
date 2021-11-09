@@ -64,8 +64,10 @@ from ..records.resolver import record_resolver
 from ..records.tasks import create_symlinks
 from ..records.utils import lowercase_value
 from ..records.validators import PartialDraft4Validator
-from ..flows.status import (get_deposit_flows, get_tasks_status_by_task,
-                               merge_tasks_status)
+from ..flows.status import (
+    get_all_deposit_flows, get_deposit_last_flow, get_flow_tasks_status_by_task,
+     merge_tasks_status
+)
 from .errors import DiscardConflict
 from .resolver import get_video_pid
 
@@ -947,7 +949,7 @@ class Video(CDSDeposit):
 
     def _clean_tasks(self):
         """Clean all tasks."""
-        flows = get_deposit_flows(deposit_id=self['_deposit']['id'])
+        flows = get_all_deposit_flows(deposit_id=self['_deposit']['id'])
         for flow in flows:
             Flow(model=flow).delete()
 
@@ -1019,9 +1021,11 @@ class Video(CDSDeposit):
 
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
-        return get_tasks_status_by_task(
-            get_deposit_flows(self['_deposit']['id']),
-            statuses=deepcopy(self['_cds'].get('state', {})))
+        flow_model = get_deposit_last_flow(self['_deposit']['id'])
+        if flow_model:
+            flow = Flow(model=flow_model)
+            return get_flow_tasks_status_by_task(flow)
+        return {}
 
     def generate_duration(self):
         """Generate human-readable duration field."""
