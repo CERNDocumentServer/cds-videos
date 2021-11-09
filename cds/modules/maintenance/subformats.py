@@ -29,7 +29,7 @@ from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.flows.models import Status
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.flows.status import get_deposit_flows, get_deposit_last_flow
+from cds.modules.flows.status import get_deposit_last_flow
 
 from .tasks import MaintenanceTranscodeVideoTask
 from ..opencast.utils import can_be_transcoded
@@ -134,7 +134,7 @@ def _schedule(deposit_id, transcodables):
 
     # Reset all tasks which quality is within transcodables
     tasks = []
-    for t in flow.model.tasks:
+    for t in flow.tasks:
         if not t.payload.get('preset_quality') in transcodables:
             continue
         t.status = Status.PENDING

@@ -125,8 +125,8 @@ class FlowMetadata(db.Model, Timestamp):
         nullable=True,
     )
 
-    deleted = db.Column(db.Boolean, default=False)
-    """Response code returned on flow trigger."""
+    is_last = db.Column(db.Boolean, default=True)
+    """Flag pointing to the last flow associated with a deposit."""
 
     user_id = db.Column(db.Integer(), db.ForeignKey(User.id), nullable=False)
     """User who triggered the flow."""
