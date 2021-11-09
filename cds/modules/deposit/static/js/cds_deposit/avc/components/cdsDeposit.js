@@ -174,23 +174,39 @@ function cdsDepositCtrl(
       that.setDirty();
     };
 
+    this.flattenFeedbackData = function(data, taskName, taskStatus) {
+      data = _.flatten(data.data, true);
+      if (taskName || taskStatus) {
+        return data.filter(function (taskInfo) {
+          return (!taskName || taskInfo.name === taskName) &&
+            (!taskStatus || taskInfo.status === taskStatus);
+        });
+      } else {
+        return data;
+      }
+    }
+
     this.getTaskFeedback = function(flowId, taskName, taskStatus) {
       var url = urlBuilder.taskFeedback({ flowId: flowId });
       return cdsAPI.action(url, 'GET', {}, jwt).then(function(data) {
-        data = _.flatten(data.data, true);
-        if (taskName || taskStatus) {
-          return data.filter(function (taskInfo) {
-            return (!taskName || taskInfo.name === taskName) &&
-              (!taskStatus || taskInfo.status === taskStatus);
-          });
-        } else {
-          return data;
-        }
+        return that.flattenFeedbackData(data, taskName, taskStatus)
+      }).catch(function(e) {
+        return that.flattenFeedbackData(e, taskName, taskStatus)
       });
     };
 
     this.triggerRestartAllEvents = function() {
       // Trigger restart workflow
+      // Update record state
+       that.record._cds.state["file_transcode"] = "PENDING";
+       that.record._cds.state["file_video_extract_frames"] = "PENDING";
+       that.record._cds.state["file_video_metadata_extraction"] = "PENDING";
+
+       // Update deposit state
+       that.cdsDepositsCtrl.master.metadata._cds.state["file_transcode"] = "PENDING";
+       that.cdsDepositsCtrl.master.metadata._cds.state["file_video_extract_frames"] = "PENDING";
+       that.cdsDepositsCtrl.master.metadata._cds.state["file_video_metadata_extraction"] = "PENDING";
+
       $scope.$broadcast('cds.deposit.workflow.restart');
     }
 
@@ -203,6 +219,15 @@ function cdsDepositCtrl(
     }
 
     this.restartFlow = function(flowId, taskId) {
+      //Update record and deposit state
+      for (const [key, value] of Object.entries(this.availableFlowsTasks)) {
+        value.forEach(function(item) {
+            if (taskId === item.id) {
+                that.record._cds.state[item.name] = "PENDING";
+                that.cdsDepositsCtrl.master.metadata._cds.state[item.name] = "PENDING";
+            }
+        });
+      }
       var url = urlBuilder.restartFlow({ taskId: taskId, flowId: flowId });
       return cdsAPI.action(url, 'PUT');
     };
@@ -223,7 +248,7 @@ function cdsDepositCtrl(
           var restartFlows = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
           }).map(function(taskInfo) {
-            var flowId = taskInfo.info.payload.flow_id;
+            var flowId = taskInfo.info.payload.tags._flow_id;
             var taskId = taskInfo.id;
             return that.restartFlow(flowId, taskId);
           });
@@ -345,10 +370,60 @@ function cdsDepositCtrl(
       that.lastUpdated = new Date();
     };
 
+
+    this.updateTaskStates = function () {
+      for (const key in that.availableFlowsTasks) {
+        if (that.record._cds.state[key] != "PENDING") {
+          continue;
+        }
+        updated_status = "SUCCESS";
+        for (const task of that.availableFlowsTasks[key]) {
+          if (["PENDING", "FAILURE", "CANCELLED"].includes(task.status)) {
+            updated_status = task.status;
+            break;
+          }
+        }
+        that.record._cds.state[key] = updated_status;
+        // Need to fetchRecord after task was processed
+        if (updated_status != "PENDING") {
+          that.cdsDepositsCtrl.fetchRecord();
+        }
+      }
+    };
+
+
+    this.updateMasterFileSubformats = function() {
+      // Updates master file subformats field, needed for files tab
+      var transcodeTasks = that.availableFlowsTasks.file_transcode;
+      var masterFile = that.findMasterFile();
+      var subformatsNew = transcodeTasks.filter(function(task) {
+        return task.info;
+      }).map(function(task) {
+        var payload = task.info.payload;
+        if (task.status === 'SUCCESS') {
+          payload.completed = true;
+        } else if (task.status === 'FAILURE') {
+          payload.errored = true;
+        }
+        return payload;
+      });
+      masterFile.subformat = subformatsNew;
+    }
+
+    this.statusIsPending = function() {
+    // Check if record has some pending task
+      for (const key of Object.keys(that.record._cds.state)) {
+        if (that.record._cds.state[key] === "PENDING") {
+            return true;
+        }
+      }
+      return false
+    }
+
     // Refresh tasks from feedback endpoint
-    this.fetchCurrentStatuses = function() {
+    this.fetchCurrentStatuses = function(force = false) {
       // Update only if it is ``draft``
-      if (that.isDraft()){
+      if (force === true || that.isDraft() || that.statusIsPending()){
         var masterFile = that.findMasterFile();
         var flowId = _.get(masterFile, 'tags._flow_id', undefined);
         that.flowId = flowId;
@@ -356,6 +431,7 @@ function cdsDepositCtrl(
           that.getTaskFeedback(flowId)
             .then(function(data) {
               var groupedTasks = _.groupBy(data, 'name');
+              var transcodeTasks = groupedTasks.file_transcode;
               // Update the available task flows
               that.availableFlowsTasks = groupedTasks;
               var transcodeTasks = groupedTasks.file_transcode;
@@ -363,26 +439,14 @@ function cdsDepositCtrl(
               data.forEach(function(task) {
                 that.updateStateReporter(task.name, task.info, task.status);
               });
+              // Update task states in record
+              that.updateTaskStates();
               // Update subformat info
               if (!transcodeTasks) {
                 return;
               }
-              var subformatsNew = transcodeTasks.filter(function(task) {
-                return task.info;
-              }).map(function(task) {
-                var payload = task.info.payload;
-                if (task.status === 'SUCCESS') {
-                  payload.completed = true;
-                } else if (task.status === 'FAILURE') {
-                  payload.errored = true;
-                } else if (task.status == 'REVOKED'){
-                  payload.revoked = true;
-                }
-                return payload;
-              });
-              masterFile.subformat = subformatsNew;
               that.processSubformats();
-              that.calculateCurrentState();
+              that.updateMasterFileSubformats();
             });
         }
       }
@@ -465,6 +529,7 @@ function cdsDepositCtrl(
           }
         } else {
           if (that.stateReporter[type].status !== data.status) {
+            // Get metadata
             $scope.$broadcast('cds.deposit.task', type, data.status, data);
           }
           that.stateReporter[type] = angular.copy(data);
@@ -561,8 +626,9 @@ function cdsDepositCtrl(
     // Check for previewer
     that.videoPreviewer();
     // Update subformat statuses
-    that.fetchCurrentStatuses();
-    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 15000);
+    force = true
+    that.fetchCurrentStatuses(force);
+    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 5000);
     // What the order of contributors and check make it dirty, throttle the
     // function for 1sec
     $scope.$watch(
@@ -779,10 +845,7 @@ function cdsDepositCtrl(
   }, true);
   // Listen for any updates
   $scope.$on('cds.deposit.metadata.update.' + that.id, function(evt, data) {
-    // Update only if it's draft
-    if (that.isDraft()) {
-      that.updateDeposit(data);
-    }
+    that.updateDeposit(data);
   });
 
   $window.onbeforeunload = function() {
