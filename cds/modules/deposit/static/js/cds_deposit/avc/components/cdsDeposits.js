@@ -15,7 +15,6 @@ function cdsDepositsCtrl(
 ) {
   var that = this;
   this.edit = false;
-
   // The master deposit
   this.master = {};
   // Global loading state
@@ -58,9 +57,7 @@ function cdsDepositsCtrl(
 
   // Fetch the latest record data (only if it's a project)
   this.fetchRecord = function() {
-    // Fetch only if it is in ``draft`` mode
-    if (that.master.metadata._deposit.status === 'draft') {
-      cdsAPI.action(that.master.links.self || that.masterLinks.self , 'GET', {}, jwt).then(function(data) {
+      cdsAPI.action(that.master.links.self || that.projectLinks.self , 'GET', {}, jwt).then(function(data) {
         // Metadata for the project
         $scope.$broadcast(
           'cds.deposit.metadata.update.' + data.data.metadata._deposit.id,
@@ -74,7 +71,6 @@ function cdsDepositsCtrl(
           );
         })
       });
-    }
   }
 
   this.$onInit = function() {
@@ -88,24 +84,28 @@ function cdsDepositsCtrl(
       });
     });
 
-    cdsAPI.resolveJSON(this.masterSchema).then(function(response) {
+    cdsAPI.resolveJSON(this.projectSchema).then(function(response) {
+      console.log("masterschema", response.data)
       that.masterSchemaResolved = response.data;
     });
-    cdsAPI.resolveJSON(this.childrenSchema).then(function(response) {
+    cdsAPI.resolveJSON(this.videoSchema).then(function(response) {
+      console.log("childrenSchema", response.data)
       that.childrenSchemaResolved = response.data;
     });
-    cdsAPI.resolveJSON(this.childrenForm).then(function(response) {
+    cdsAPI.resolveJSON(this.videoForm).then(function(response) {
+      console.log("childrenForm", response.data)
       that.childrenFormResolved = response.data;
     });
-    cdsAPI.resolveJSON(this.masterForm).then(function(response) {
+    cdsAPI.resolveJSON(this.projectForm).then(function(response) {
+      console.log("masterForm", response.data)
       that.masterFormResolved = response.data;
     });
 
-    if (this.masterLinks) {
+    if (this.projectLinks) {
       // Set mode to edit
       this.edit = true;
       // Fetch the project
-      cdsAPI.resolveJSON(this.masterLinks.self).then(function success(
+      cdsAPI.resolveJSON(this.projectLinks.self).then(function success(
         response
       ) {
         that.addMaster(response.data);
@@ -132,7 +132,7 @@ function cdsDepositsCtrl(
       // Initialized
       this.initialized = true;
       // Start sync metadata
-      that.autoUpdateInterval = $interval(that.fetchRecord, 15000);
+      that.fetchRecord()
       if (this.master.links.html) {
         this.handleRedirect(this.master.links.html, true);
       }
@@ -286,8 +286,8 @@ function cdsDepositsCtrl(
           this.push([
             function() {
               return that.createDeposit(
-                that.childrenInit,
-                that.childrenSchema,
+                that.videoInit,
+                that.videoSchema,
                 'video',
                 {
                   _project_id: master_id,
@@ -332,7 +332,7 @@ function cdsDepositsCtrl(
       return false;
     });
     return this
-      .createDeposit(this.masterInit, this.masterSchema, 'project')
+      .createDeposit(this.projectInit, this.projectSchema, 'project')
       .then(function(response) {
         // Create the master
         that.addMaster(response.data, files);
@@ -419,14 +419,14 @@ function cdsDeposits() {
     transclude: true,
     bindings: {
       // master related
-      masterInit: '@',
-      masterLinks: '<',
-      masterSchema: '@',
-      masterForm: '@',
+      projectInit: '@',
+      projectLinks: '<',
+      projectSchema: '@',
+      projectForm: '@',
       // children related
-      childrenInit: '@',
-      childrenForm: '@',
-      childrenSchema: '@',
+      videoInit: '@',
+      videoForm: '@',
+      videoSchema: '@',
       // general template base
       formTemplatesBase: '@?',
       formTemplates: '=?',

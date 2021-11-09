@@ -54,13 +54,13 @@
       <td class="text-center"></td>
       <td class="text-center">
         <a ng-click="showSubformats = !showSubformats">
-          <span ng-show="!showSubformats">Show</span>
-          <span ng-show="showSubformats">Hide</span>
+          <span ng-show="!showSubformats">Hide</span>
+          <span ng-show="showSubformats">Show</span>
         </a>
       </td>
     </tr>
     <!-- We rely on f.preset_quality because it's dumped when creating the task and not when the task finishes i.e tags.preset_quality. For old videos, i.e old sorenson tasks, we rely on tags.preset_qaulity -->
-    <tr ng-if="f.preset_quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="showSubformats">
+    <tr ng-if="f.preset_quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="!showSubformats">
       <td title="{{f.preset_quality || f.tags.preset_quality }}">{{f.preset_quality || f.tags.preset_quality }}
       <td>
       </td>
