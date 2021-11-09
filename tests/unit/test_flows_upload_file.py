@@ -36,8 +36,8 @@ from invenio_records import Record
 from invenio_records.models import RecordMetadata
 
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.flows.status import (get_deposit_flows,
-                                      get_tasks_status_by_task)
+from cds.modules.flows.status import (get_all_deposit_flows,
+                                      get_flow_tasks_status_by_task)
 from helpers import (get_indexed_records_from_mock, get_object_count,
                      get_presets_applied, get_tag_count, mock_current_user,
                      MockSorenson, MockSorensonHappy, MockSorensonFailed,
@@ -132,10 +132,10 @@ def test_avc_workflow_receiver_local_file_pass(
             assert master.file.size == video_size
 
         video = deposit_video_resolver(video_1_depid)
-        flows = get_deposit_flows(video['_deposit']['id'])
+        flows = get_all_deposit_flows(video['_deposit']['id'])
 
         # check deposit tasks status
-        tasks_status = get_tasks_status_by_task(flows)
+        tasks_status = get_flow_tasks_status_by_task(flows)
         assert len(tasks_status) == 3
         assert 'file_transcode' in tasks_status
         assert 'file_video_extract_frames' in tasks_status
@@ -184,8 +184,8 @@ def test_avc_workflow_receiver_local_file_pass(
         # check metadata patch are deleted
         assert 'extracted_metadata' not in record.json['_cds']
         # check the corresponding Event persisted after cleaning
-        assert len(get_deposit_flows(record.json['_deposit']['id'])) == 0
-        assert len(get_deposit_flows(record.json['_deposit']['id'],
+        assert len(get_all_deposit_flows(record.json['_deposit']['id'])) == 0
+        assert len(get_all_deposit_flows(record.json['_deposit']['id'],
                                      _deleted=True)) == 1
 
         # check no reindexing is fired

@@ -34,8 +34,7 @@ from cds.modules.maintenance.subformats import (create_all_missing_subformats,
                                                 create_subformat)
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.flows.status import get_deposit_flows, \
-    get_deposit_last_flow
+from cds.modules.flows.status import get_deposit_last_flow
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 
@@ -228,7 +227,7 @@ def extract_frames(recid, depid):
 
     flow = get_deposit_last_flow(depid)
 
-    for t in flow.model.tasks:
+    for t in flow.tasks:
         if 'ExtractFramesTask' in t.name:
             flow.restart_task(t)
     db.session.commit()

@@ -44,17 +44,11 @@ TASK_NAMES = {
 }
 
 
-def get_deposit_flows(deposit_id, _deleted=False):
-    """Get a list of events associated with a deposit."""
-    #  return Event.query.filter(
-    #      Event.payload.op('->>')(
-    #          'deposit_id').cast(String) == self['_deposit']['id']).all()
+def get_all_deposit_flows(deposit_id):
+    """Get a list of flows associated with a deposit."""
     deposit_id = str(deposit_id)
-    # do you want to involve deleted events?
     filters = []
-
-    if not _deleted:
-        filters.append(FlowMetadata.deleted != True)
+    filters.append(FlowMetadata.is_last != True)
     # build base query
     query = FlowMetadata.query.filter(FlowMetadata.deposit_id == deposit_id)
     # execute with more filters
@@ -63,21 +57,18 @@ def get_deposit_flows(deposit_id, _deleted=False):
 
 def get_deposit_last_flow(deposit_id):
     """Get the last flow associated with a deposit."""
-    # In case of many flows, return the last one
-    model = FlowMetadata.query.filter(
+    return FlowMetadata.query.filter(
         FlowMetadata.deposit_id == deposit_id)\
-        .order_by(asc(FlowMetadata.updated))[-1]
-    return Flow(model=model)
+            .filter(FlowMetadata.is_last == True).one_or_none()
 
 
-def get_tasks_status_by_task(flows, statuses=None):
-    """Get tasks status grouped by task name."""
+def get_flow_tasks_status_by_task(flow):
+    """Get tasks status grouped by task name for a specific flow."""
     results = defaultdict(list)
-    for flow in flows:
-        for task in get_deposit_last_flow(flow.deposit_id).json['tasks']:
-            results[
-                TASK_NAMES.get(task['name'], task['name'].split('.')[-1])
-            ].append(task['status'])
+    for task in flow.tasks:
+        results[
+            TASK_NAMES.get(task.name, task.name.split('.')[-1])
+        ].append(task.status)
 
     return {
         k: str(FlowStatus.compute_status(v)) for k, v in results.items() if v

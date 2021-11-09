@@ -71,3 +71,6 @@ package-lock.json
 
 # node-modules
 node_modules
+
+# celery beat
+celerybeat*
