@@ -45,3 +45,7 @@ class ExtractMetadataTaskError(FlowsError):
 
 class ExtractFramesTaskError(FlowsError):
     """Raised when the extract frames task ."""
+
+
+class TaskRunningError(FlowsError):
+    """Raised when a task is restarted while is running."""
