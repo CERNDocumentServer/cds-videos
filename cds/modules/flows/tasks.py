@@ -142,7 +142,7 @@ class CeleryTask(_Task):
         # If a task gets send to the queue with the same id, it gets
         # automagically restarted, no need to stop it.
 
-        task.status = Status.PENDING
+        task.status = Status.STARTED
         db.session.add(task)
 
         kwargs = {}
@@ -220,7 +220,7 @@ class CeleryTask(_Task):
         for transcode_video_task in transcode_video_tasks:
             quality = transcode_video_task.payload["preset_quality"]
             qualities.append(quality)
-            transcode_video_task.status = Status.PENDING
+            transcode_video_task.status = Status.STARTED
             db.session.add(transcode_video_task)
             transcode_kwargs.update(transcode_video_task.payload)
             transcode_kwargs.update(flow_payload)

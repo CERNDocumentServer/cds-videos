@@ -198,12 +198,12 @@ function cdsDepositCtrl(
     this.triggerRestartAllEvents = function() {
       // Trigger restart workflow
       // Update record state
-       that.record._cds.state["file_transcode"] = "PENDING";
+       that.record._cds.state["file_transcode"] = "STARTED";
        that.record._cds.state["file_video_extract_frames"] = "PENDING";
        that.record._cds.state["file_video_metadata_extraction"] = "PENDING";
 
        // Update deposit state
-       that.cdsDepositsCtrl.master.metadata._cds.state["file_transcode"] = "PENDING";
+       that.cdsDepositsCtrl.master.metadata._cds.state["file_transcode"] = "STARTED";
        that.cdsDepositsCtrl.master.metadata._cds.state["file_video_extract_frames"] = "PENDING";
        that.cdsDepositsCtrl.master.metadata._cds.state["file_video_metadata_extraction"] = "PENDING";
 
@@ -223,8 +223,8 @@ function cdsDepositCtrl(
       for (const [key, value] of Object.entries(this.availableFlowsTasks)) {
         value.forEach(function(item) {
             if (taskId === item.id) {
-                that.record._cds.state[item.name] = "PENDING";
-                that.cdsDepositsCtrl.master.metadata._cds.state[item.name] = "PENDING";
+                that.record._cds.state[item.name] = "STARTED";
+                that.cdsDepositsCtrl.master.metadata._cds.state[item.name] = "STARTED";
             }
         });
       }
@@ -373,20 +373,26 @@ function cdsDepositCtrl(
 
     this.updateTaskStates = function () {
       for (const key in that.availableFlowsTasks) {
-        if (that.record._cds.state[key] != "PENDING") {
+        if (
+        that.record._cds.state[key] != "PENDING" &&
+        that.record._cds.state[key] != "STARTED"
+        ) {
           continue;
         }
         updated_status = "SUCCESS";
         for (const task of that.availableFlowsTasks[key]) {
-          if (["PENDING", "FAILURE", "CANCELLED"].includes(task.status)) {
+          if (
+          ["PENDING", "FAILURE", "CANCELLED", "STARTED"].includes(task.status)
+          ) {
             updated_status = task.status;
             break;
           }
         }
         that.record._cds.state[key] = updated_status;
         // Need to fetchRecord after task was processed
-        if (updated_status != "PENDING") {
+        if (["FAILURE", "CANCELLED", "SUCCESS"].includes(updated_status)) {
           that.cdsDepositsCtrl.fetchRecord();
+          break;
         }
       }
     };
@@ -406,6 +412,8 @@ function cdsDepositCtrl(
           payload.errored = true;
         } else if (task.status === 'PENDING') {
           payload.pending = true;
+        } else if (task.status === 'STARTED') {
+          payload.started = true;
         }
         return payload;
       });
