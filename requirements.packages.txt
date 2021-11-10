@@ -176,6 +176,7 @@ requests-oauthlib==1.1.0
 requests[socks]==2.26.0
 requests-toolbelt==0.9.1
 scandir==1.10.0
+sentry-sdk==1.4.3
 simplegeneric==0.8.1
 simplejson==3.17.5
 simplekv==0.14.1
