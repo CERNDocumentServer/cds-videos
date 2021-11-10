@@ -28,6 +28,8 @@ import requests
 from flask import current_app
 from invenio_db import db
 from invenio_files_rest.errors import BucketLockedError
+from invenio_pidstore.errors import PIDDeletedError
+
 from cds.modules.flows.deposit import update_deposit_state
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import ObjectVersion, FileInstance, \
@@ -116,7 +118,6 @@ def _write_file_to_eos(url_to_download, obj, session):
 @shared_task
 def check_transcoding_status():
     """Update all finished transcoding tasks."""
-    # TODO: add ERROR HANDLING
     session = requests.Session()
     session.auth = (
         current_app.config['CDS_OPENCAST_API_USERNAME'],
@@ -180,7 +181,15 @@ def on_transcoding_completed(
     task = TaskMetadata.query.get(task_id)
     from cds.modules.deposit.api import deposit_video_resolver
     deposit_id = task.flow.payload["deposit_id"]
-    deposit_video = deposit_video_resolver(deposit_id)
+    try:
+        deposit_video = deposit_video_resolver(deposit_id)
+    except PIDDeletedError:
+        error_message = 'Video was deleted'
+        task = TaskMetadata.query.get(task_id)
+        task.status = Status.CANCELLED
+        task.message = error_message
+        db.session.commit()
+        return
     deposit_video_is_published = deposit_video.is_published()
 
     if deposit_video_is_published:
@@ -231,7 +240,6 @@ def on_transcoding_completed(
     db.session.commit()
 
     update_deposit_state(deposit_id)
-
 
 
 @shared_task

@@ -73,7 +73,7 @@
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
-          <a ng-show="!f.pending" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags._flow_id, f.db_task_id)">
+          <a ng-show="!f.pending && !f.started" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags._flow_id, f.db_task_id)">
             <i class="fa fa-undo"></i>
           </a>
         </span>
