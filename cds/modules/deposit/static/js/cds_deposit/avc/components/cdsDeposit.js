@@ -404,6 +404,8 @@ function cdsDepositCtrl(
           payload.completed = true;
         } else if (task.status === 'FAILURE') {
           payload.errored = true;
+        } else if (task.status === 'PENDING') {
+          payload.pending = true;
         }
         return payload;
       });
