@@ -58,7 +58,8 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from .errors import ExtractMetadataTaskError, ExtractFramesTaskError
+from .errors import ExtractMetadataTaskError, ExtractFramesTaskError, \
+    TaskRunningError
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..opencast.error import RequestError
 from ..records.utils import to_string
@@ -133,7 +134,10 @@ class CeleryTask(_Task):
     def restart_task(task_id, flow_id, flow_payload):
         """Restart singular task."""
         task = CeleryTask.get_task(task_id)
-
+        if task.status == Status.PENDING:
+            raise TaskRunningError(
+                'Task with id {0} is already running.'.format(str(task.id))
+            )
         # self.stop_task(task)
         # If a task gets send to the queue with the same id, it gets
         # automagically restarted, no need to stop it.
