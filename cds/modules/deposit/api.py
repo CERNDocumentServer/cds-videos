@@ -1025,6 +1025,8 @@ class Video(CDSDeposit):
         if flow_model:
             flow = Flow(model=flow_model)
             return get_flow_tasks_status_by_task(flow)
+        if "state" in self.get("_cds", {}):
+            return self["_cds"]["state"]
         return {}
 
     def generate_duration(self):
