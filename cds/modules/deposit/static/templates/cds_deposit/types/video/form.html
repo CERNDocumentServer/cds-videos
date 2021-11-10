@@ -360,8 +360,9 @@
                           <ul class="list-group" ng-repeat="task in data">
                             <li class="list-group-item">
                               {{task.info.payload.preset_quality}} <span class="label label-default">{{ task.status }}</span>
-                              <a class="pull-right" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, task.id)">
-                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                              <a class="pull-right" ng-style="task.status == 'PENDING' && {'pointer-events': 'none'}" ng-disabled="$ctrl.cdsDepositCtrl.isDraft()" ng-click="task.status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, task.id)">
+                                <i ng-show="task.status != 'PENDING'" class="fa fa-refresh" aria-hidden="true"></i>
+                                <span ng-show="task.status == 'PENDING'"><i class="fa fa-spinner fa-spin"></i></span>
                               </a>
                             </li>
                           </ul>
@@ -370,8 +371,9 @@
                       <span ng-switch-default>
                         <li class="list-group-item">
                           <strong>{{name}}</strong> <span class="label label-default" >{{ data[0].status }}</span>
-                          <a class="pull-right" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, data[0].id)">
-                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                          <a class="pull-right" ng-style="data[0].status == 'PENDING' && {'pointer-events': 'none'}" ng-click="data[0].status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, data[0].id)">
+                            <i ng-show="data[0].status != 'PENDING'" class="fa fa-refresh {{data[0].status}}" aria-hidden="true"></i>
+                            <span ng-show="data[0].status == 'PENDING'"><i class="fa fa-spinner fa-spin"></i></span>
                           </a>
                         </li>
                       </span>
