@@ -693,11 +693,11 @@ class TranscodeVideoTask(AVCTask):
 
     def on_success(self, *args, **kwargs):
         """Override on success."""
-        pass
+        self._update_record()
 
     def on_failure(self, *args, **kwargs):
         """Override on failure."""
-        pass
+        self._update_record()
 
     def _create_or_update_tasks(
             self,
