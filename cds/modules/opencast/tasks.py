@@ -23,6 +23,7 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Celery tasks for Opencast."""
 import os
+import time
 
 import requests
 from flask import current_app
@@ -92,6 +93,7 @@ def _write_file_to_eos(url_to_download, obj, session):
     storage = file_instance.storage(
         default_location=bucket_location)
     directory, filename = storage._get_fs()
+    start = time.time()
     try:
         # XRootD Safe
         output_file = os.path.join(
@@ -107,12 +109,15 @@ def _write_file_to_eos(url_to_download, obj, session):
         if ch:
             f.write(ch)
     f.close()
+    end = time.time()
+    size = file_size_xrootd(output_file)
     with db.session.begin_nested():
         with file_opener_xrootd(output_file, 'rb') as transcoded_file:
             checksum = compute_md5_checksum(transcoded_file)
-        size = file_size_xrootd(output_file)
         file_instance.set_uri(output_file, size, checksum)
         obj.set_file(file_instance)
+
+    return int(end-start), size*0.000001
 
 
 @shared_task
@@ -210,10 +215,10 @@ def on_transcoding_completed(
     ObjectVersionTag.create(obj, 'context_type', 'subformat')
     ObjectVersionTag.create(obj, 'preset_quality', quality)
     try:
-        _write_file_to_eos(url, obj, session)
+        download_time, file_size = _write_file_to_eos(url, obj, session)
     except Exception as e:
         error_message = ('Failed to write transcoded file to EOS. Request '
-                         'failed on: {1}. Error message: {2}').format(
+                         'failed on: {0}. Error message: {1}').format(
             url,
             e.message
         )
@@ -223,12 +228,14 @@ def on_transcoding_completed(
         db.session.commit()
         raise WriteToEOSError(url, e.message)
 
-    # TODO: maybe enrich a bit more the tags of the ObjectVersion
     task.status = Status.SUCCESS
     task.message = "Transcoding succeeded"
     task_payload = task.payload.copy()
     updated_payload = dict(
-        key=obj.key, version_id=str(obj.version_id)
+        key=obj.key,
+        version_id=str(obj.version_id),
+        file_download_time_in_seconds=str(download_time),
+        file_size_mb=str(file_size)
     )
     task_payload.update(**updated_payload)
     task.payload = task_payload
