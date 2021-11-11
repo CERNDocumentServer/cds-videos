@@ -24,14 +24,16 @@
 
 """Opencast API."""
 import os
+import time
 
 import requests
 from xml.etree import ElementTree
 from flask import current_app
+from invenio_files_rest.models import ObjectVersionTag
 from requests_toolbelt import MultipartEncoder
 
 from cds.modules.opencast.error import RequestError
-from cds.modules.xrootd.utils import file_opener_xrootd
+from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 from datetime import datetime, timedelta
 
 
@@ -128,7 +130,13 @@ def _add_metadata(media_package_xml, object_version, session):
     return response.content
 
 
-def _add_track(media_package_xml, video_filepath, video_filename, session):
+def _add_track(
+        media_package_xml,
+        video_filepath,
+        video_filename,
+        session,
+        object_version
+):
     """Adds track to the media package."""
 
     data = MultipartEncoder(
@@ -144,6 +152,7 @@ def _add_track(media_package_xml, video_filepath, video_filename, session):
     url = "{endpoint}/addTrack".format(
         endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
     )
+    start = time.time()
     try:
         response = session.post(
             url,
@@ -154,6 +163,15 @@ def _add_track(media_package_xml, video_filepath, video_filename, session):
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise RequestError(url, e.message)
+    end = time.time()
+    size = file_size_xrootd(video_filepath)
+    ObjectVersionTag.create_or_update(
+        object_version, 'file_upload_time_in_seconds', str(int(end-start))
+    )
+    ObjectVersionTag.create_or_update(
+        object_version, 'file_size_mb', str(size*0.000001)
+    )
+
     return response.content
 
 
@@ -197,7 +215,9 @@ def start_workflow(object_version, qualities):
     acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
     event_id, mp_xml = _create_media_package(session)
     new_mp_xml = _add_metadata(mp_xml, object_version, session)
-    new_mp_xml = _add_track(new_mp_xml, video_filepath, video_filename, session)
+    new_mp_xml = _add_track(
+        new_mp_xml, video_filepath, video_filename, session, object_version
+    )
     new_mp_xml = _add_acl(new_mp_xml, acl_filepath, session)
     _ingest(new_mp_xml, qualities, session)
     session.close()
