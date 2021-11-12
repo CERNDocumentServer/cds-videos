@@ -68,7 +68,7 @@ class StatsResource(MethodView):
                     {"match": {"file": report_number}},
                     {"match": {"file": report_number_movie}},
                     {"match": {"file": report_number_videoclip}},
-                    {"match": {"_type": "events.media_download"}}
+                    {"match": {"_type": "events.videos_media_download"}}
                 ],
                 "minimum_should_match": 2
             }
@@ -81,7 +81,7 @@ class StatsResource(MethodView):
                 "should": [
                     {"match": {"file": report_number}},
                     {"match": {"file": report_number_videorush}},
-                    {"match": {"_type": "events.media_download"}}
+                    {"match": {"_type": "events.videos_media_download"}}
                 ],
                 "minimum_should_match": 2
             }
@@ -113,7 +113,7 @@ class StatsResource(MethodView):
                                 },
                                 {
                                     "match": {
-                                        "_type": "events.pageviews"
+                                        "_type": "events.videos_pageviews"
                                     }
                                 }
                             ]
@@ -172,7 +172,8 @@ class StatsResource(MethodView):
                                         },
                                         {
                                             "match": {
-                                                "_type": "events.pageviews"
+                                                "_type":
+                                                    "events.videos_pageviews"
                                             }
                                         }
                                     ]
