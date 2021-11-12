@@ -1256,9 +1256,11 @@ LOG_USER_ACTIONS_ENABLED = False
 # endpoints for logging user actions
 LOG_USER_ACTIONS_ENDPOINTS = {
     'base_url': None,
-    'media_view': '{base_url}media_view?ext=true&recid={recid}&report_number={'
+    'media_view': '{base_url}cds_videos_media_view?ext=true&'
+                  'recid={recid}&report_number={'
                   'report_number}&format={format}',
-    'media_download': '{base_url}media_download?recid={recid}&report_number={'
-                      'report_number}&format={format}&quality={quality}',
-    'page_view': '{base_url}page_view?recid={recid}&userid={userid}'
+    'media_download': '{base_url}cds_videos_media_download?recid={recid}&'
+                      'report_number={report_number}&'
+                      'format={format}&quality={quality}',
+    'page_view': '{base_url}cds_videos_page_view?recid={recid}&userid={userid}'
 }

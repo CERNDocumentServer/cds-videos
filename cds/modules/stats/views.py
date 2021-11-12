@@ -68,7 +68,7 @@ class StatsResource(MethodView):
                     {"match": {"file": report_number}},
                     {"match": {"file": report_number_movie}},
                     {"match": {"file": report_number_videoclip}},
-                    {"match": {"_type": "events.media_download"}}
+                    {"match": {"_type": "events.cds_videos_media_download"}}
                 ],
                 "minimum_should_match": 2
             }
@@ -81,7 +81,7 @@ class StatsResource(MethodView):
                 "should": [
                     {"match": {"file": report_number}},
                     {"match": {"file": report_number_videorush}},
-                    {"match": {"_type": "events.media_download"}}
+                    {"match": {"_type": "events.cds_videos_media_download"}}
                 ],
                 "minimum_should_match": 2
             }
@@ -91,7 +91,6 @@ class StatsResource(MethodView):
     @need_record_permission('read_permission_factory')
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
-
         es = Elasticsearch([{
             'host': current_app.config['LEGACY_STATS_ELASTIC_HOST'],
             'port': current_app.config['LEGACY_STATS_ELASTIC_PORT'],
@@ -112,14 +111,17 @@ class StatsResource(MethodView):
                             },
                             {
                                 "match": {
-                                    "_type": "events.pageviews"
+                                    "_type": "events.cds_videos_pageviews"
                                 }
                             }
                         ]
                     }
                 }
             }
-            results = es.count(index=ES_INDEX, body=query).get('count', 0)
+            try:
+                results = es.count(index=ES_INDEX, body=query).get('count', 0)
+            except Exception:
+                return make_response("Error getting statistics.", 400)
 
         # Get timestamp-aggregated downloads for specific CDS record
         elif stat == 'downloads':
@@ -150,12 +152,15 @@ class StatsResource(MethodView):
                     }
                 }
             }
-            results = self.transform(
-                es.search(index=ES_INDEX, body=query),
-                stat,
-                key_type)
+            try:
+                results = self.transform(
+                    es.search(index=ES_INDEX, body=query),
+                    stat,
+                    key_type)
+            except Exception:
+                return make_response("Error getting statistics.", 400)
 
-        # Get timestamp-aggregated pageviews for specific CDS record
+            # Get timestamp-aggregated pageviews for specific CDS record
         elif stat == 'pageviews':
             key_type = 'date'
             query = {
@@ -171,7 +176,8 @@ class StatsResource(MethodView):
                                     },
                                     {
                                         "match": {
-                                            "_type": "events.pageviews"
+                                            "_type":
+                                                "events.cds_videos_pageviews"
                                         }
                                     }
                                 ]
@@ -196,12 +202,16 @@ class StatsResource(MethodView):
                     }
                 }
             }
-            results = self.transform(
-                es.search(index=ES_INDEX, body=query),
-                stat,
-                key_type)
+            try:
+                results = self.transform(
+                    es.search(index=ES_INDEX, body=query),
+                    stat,
+                    key_type)
+            except Exception:
+                return make_response("Error getting statistics.", 400)
 
         return make_response(jsonify(results), 200)
+
 
     # Convert retrieved statistics into 'Invenio-Stats' format
     def transform(self, response, metric, key_type):
