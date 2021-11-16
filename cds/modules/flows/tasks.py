@@ -138,9 +138,6 @@ class CeleryTask(_Task):
             raise TaskRunningError(
                 'Task with id {0} is already running.'.format(str(task.id))
             )
-        # self.stop_task(task)
-        # If a task gets send to the queue with the same id, it gets
-        # automagically restarted, no need to stop it.
 
         task.status = Status.STARTED
         db.session.add(task)
@@ -162,10 +159,39 @@ class CeleryTask(_Task):
         )
 
     @staticmethod
+    def restart_group_of_transcoding_tasks(task_ids, flow_id, flow_payload):
+        """Restart a group of transcoding tasks."""
+        kwargs = {}
+        qualities = []
+        kwargs.update(flow_payload)
+        kwargs.update({'flow_id': flow_id})
+
+        for task_id in task_ids:
+            task = TaskMetadata.get(task_id)
+            if task.payload.get("preset_quality"):
+                quality = task.payload.get("preset_quality")
+                qualities.append(quality)
+                kwargs["task_id_"+quality] = str(task.id)
+                task.status = Status.STARTED
+                db.session.add(task)
+                db.session.commit()
+
+        if not qualities:
+            return
+
+        kwargs.update({'qualities': qualities})
+        return (
+            celery_app.tasks.get(TranscodeVideoTask().name).subtask(
+                kwargs=kwargs,
+                immutable=True,
+            ).apply_async()
+        )
+
+    @staticmethod
     def get_ordered_tasks(tasks, flow_id, flow_payload):
-        """."""
+        """Get all tasks in order, to be executed sequentially."""
         def get_signature(task):
-            """."""
+            """Returns celery task."""
             task.status = Status.PENDING
             db.session.add(task)
 
@@ -771,12 +797,12 @@ class TranscodeVideoTask(AVCTask):
 
         # Start Opencast transcoding
         try:
-            event_id = start_workflow(
+            opencast_event_id = start_workflow(
                 self.object,
                 qualities,
             )
         except RequestError as e:
-            event_id = None
+            opencast_event_id = None
             task_status = Status.FAILURE
             task_message = ('Failed to start Opencast transcoding workflow '
                             'for flow with id: {0}. Request failed on: {1}.'
@@ -787,13 +813,13 @@ class TranscodeVideoTask(AVCTask):
                 )
             current_app.logger.error(task_message)
 
-        if event_id:
+        if opencast_event_id:
             ObjectVersionTag.create_or_update(
-                self.object, '_opencast_event_id', event_id
+                self.object, '_opencast_event_id', opencast_event_id
             )
 
         job_info = dict(
-            opencast_event_id=event_id,
+            opencast_event_id=opencast_event_id,
             version_id=str(self.object.version_id),
             master_version_id=str(self.object.version_id),
             key=self.object.key,
