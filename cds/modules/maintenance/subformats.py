@@ -21,17 +21,13 @@
 
 from __future__ import absolute_import, print_function
 
-from celery import chain
 from flask import current_app
-from invenio_db import db
 
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.flows.models import Status
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.flows.status import get_deposit_last_flow
 
-from .tasks import MaintenanceTranscodeVideoTask
+from ..flows.api import Flow
 from ..opencast.utils import can_be_transcoded
 
 id_types = ['recid', 'depid']
@@ -52,8 +48,9 @@ def create_all_missing_subformats(id_type, id_value):
         filter(lambda q: can_be_transcoded(q, w, h), missing)
     )
 
-    # sequential (and immutable) transcoding to avoid MergeConflicts on bucket
-    return transcodables, _schedule(dep_uuid, dones)
+    _restart_transcoding_tasks(dep_uuid, transcodables)
+
+    return transcodables
 
 
 def create_subformat(id_type, id_value, quality):
@@ -64,10 +61,15 @@ def create_subformat(id_type, id_value, quality):
     master, w, h = _get_master_video(video_deposit)
 
     subformat = can_be_transcoded(quality, w, h)
-    return (
-        subformat,
-        _schedule(dep_uuid, [subformat.get('preset_quality')]) if subformat else None,
-    )
+    flow = Flow.get_for_deposit(dep_uuid)
+    task_id = None
+    for task in flow.tasks:
+        if subformat["preset_quality"] == task.payload.get("preset_quality"):
+            task_id = task.id
+            break
+    if task_id:
+        flow.restart_task(task_id)
+    return subformat, task_id
 
 
 def create_all_subformats(id_type, id_value):
@@ -83,9 +85,19 @@ def create_all_subformats(id_type, id_value):
             current_app.config['CDS_OPENCAST_QUALITIES'].keys(),
         )
     )
+    _restart_transcoding_tasks(dep_uuid, transcodables)
 
-    # sequential (and immutable) transcoding to avoid MergeConflicts on bucket
-    return transcodables, _schedule(dep_uuid, transcodables)
+    return transcodables
+
+
+def _restart_transcoding_tasks(deposit_id, qualities):
+    flow = Flow.get_for_deposit(deposit_id)
+    task_ids = []
+    for task in flow.tasks:
+        if task.payload.get("preset_quality") in qualities:
+            task_ids.append(str(task.id))
+
+    flow.restart_transcoding_tasks(task_ids)
 
 
 def _resolve_deposit(id_type, id_value):
@@ -123,24 +135,3 @@ def _validate(id_type=None, quality=None):
         raise Exception(
             '`quality` param must be one of {0}'.format(all_possible_qualities)
         )
-
-
-def _schedule(deposit_id, transcodables):
-    """Schedule tasks to run as a chain to avoid flooding the queue."""
-    if not transcodables:
-        return None
-
-    flow = get_deposit_last_flow(deposit_id)
-
-    # Reset all tasks which quality is within transcodables
-    tasks = []
-    for t in flow.tasks:
-        if not t.payload.get('preset_quality') in transcodables:
-            continue
-        t.status = Status.PENDING
-        db.session.add(t)
-        tasks.append(MaintenanceTranscodeVideoTask().si(**t.payload))
-    # Save task changes so they can start from scratch
-    db.session.commit()
-
-    return chain(tasks).apply_async()
