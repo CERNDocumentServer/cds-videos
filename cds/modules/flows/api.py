@@ -127,8 +127,9 @@ class FlowWrapper(object):
 
     @classmethod
     def get_for_deposit(cls, deposit_id):
-        obj = FlowMetadata.query.filter(FlowMetadata.deposit_id == deposit_id) \
-            .one()
+        obj = FlowMetadata.query.filter(
+        FlowMetadata.deposit_id == deposit_id)\
+            .filter(FlowMetadata.is_last == True).one_or_none()
         return cls(model=obj)
 
     @classmethod
@@ -376,7 +377,14 @@ class Flow(FlowWrapper):
         AsyncResult(task_id).revoke(terminate=True)
 
     def restart_task(self, task_id):
+        """Restart a specific task"""
         CeleryTask.restart_task(task_id, str(self.id), flow_payload=self.payload)
+
+    def restart_transcoding_tasks(self, task_ids):
+        """Restart a group of transcoding tasks."""
+        CeleryTask.restart_group_of_transcoding_tasks(
+            task_ids, str(self.id), flow_payload=self.payload
+        )
 
     def stop(self):
         """Stop the flow."""
