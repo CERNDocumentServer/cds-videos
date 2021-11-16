@@ -52,8 +52,7 @@ def migrate_event(deposit):
 
     original_file = CDSVideosFilesIterator.get_master_video_file(deposit)
     if not original_file:
-
-        return
+        raise Exception
     has_metadata = 'extracted_metadata' in deposit.get('_cds', {})
     has_frames = bool(CDSVideosFilesIterator.get_video_frames(original_file))
     subformats = CDSVideosFilesIterator.get_video_subformats(original_file)
@@ -64,7 +63,7 @@ def migrate_event(deposit):
         deposit_id=deposit_id
     )
 
-    flow = Flow(
+    flow = Flow.create(
         deposit_id=deposit_id,
         user_id=user_id,
         payload=payload
@@ -177,17 +176,22 @@ def main():
         if not is_project_record(rec):
             video_deps.append(rec)
 
-    for video in video_deps:
+    total = len(video_deps)
+    for index, video in enumerate(video_deps):
+        logger.debug("Migrating deposit ({0}/{1})".format(index, total))
         try:
+            logger.debug("Migrating deposit ({0})".format(video.pid))
             migrate_event(video)
+            # we need to commit to re-dump files/tags to the record
+            # and store `_flow_id`
+            video._update_tasks_status()
+            video['_files'] = video._get_files_dump()
+            video.commit()
+            db.session.commit()
+            logger.debug("Migrating deposit ({0}) ended successfully".format(video.pid))
         except Exception:
+            logger.debug("Migrating deposit ({0}) failed".format(video.id))
             failed_deps.append(video)
-        # we need to commit to re-dump files/tags to the record
-        # and store `_flow_id`
-        video._update_tasks_status()
-        video['_files'] = video._get_files_dump()
-        video.commit()
-    db.session.commit()
 
     if failed_deps:
         logger.debug("Failed deposits ({0})".format(len(failed_deps)))
