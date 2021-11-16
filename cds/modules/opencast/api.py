@@ -213,7 +213,7 @@ def start_workflow(object_version, qualities):
     video_filename = object_version.key
     module_dir = os.path.dirname(__file__)
     acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
-    event_id, mp_xml = _create_media_package(session)
+    opencast_event_id, mp_xml = _create_media_package(session)
     new_mp_xml = _add_metadata(mp_xml, object_version, session)
     new_mp_xml = _add_track(
         new_mp_xml, video_filepath, video_filename, session, object_version
@@ -221,4 +221,4 @@ def start_workflow(object_version, qualities):
     new_mp_xml = _add_acl(new_mp_xml, acl_filepath, session)
     _ingest(new_mp_xml, qualities, session)
     session.close()
-    return event_id
+    return opencast_event_id
