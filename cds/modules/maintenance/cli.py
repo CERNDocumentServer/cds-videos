@@ -28,13 +28,13 @@ from flask.cli import with_appcontext
 from invenio_db import db
 from invenio_records_files.models import RecordsBuckets
 
-from cds.modules.deposit.api import Video, deposit_video_resolver
+from cds.modules.deposit.api import Video
+from cds.modules.flows.api import Flow
 from cds.modules.maintenance.subformats import (create_all_missing_subformats,
                                                 create_all_subformats,
                                                 create_subformat)
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from cds.modules.flows.status import get_deposit_last_flow
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 
 
@@ -51,8 +51,8 @@ def subformats():
 # TODO: Test all the commands
 
 @subformats.command()
-@click.option('--recid', 'recid', default=None)
-@click.option('--depid', 'depid', default=None)
+@click.option('--recid', 'recid', help='ID of the video record', default=None)
+@click.option('--depid', 'depid', help='ID of the video deposit', default=None)
 @with_appcontext
 def missing(recid, depid):
     """Create missing subformats given a record id or deposit id."""
@@ -61,13 +61,13 @@ def missing(recid, depid):
 
     value = recid or depid
     type_ = 'recid' if recid else 'depid'
-    output, task_id = create_all_missing_subformats(
+    output = create_all_missing_subformats(
         id_type=type_, id_value=value
     )
     if output:
         click.echo(
-            "Creating the following subformats: {0}. Task id: {1}".format(
-                output, task_id
+            "Creating the following subformats: {0}".format(
+                output
             )
         )
     else:
@@ -81,8 +81,8 @@ def recreate():
 
 @recreate.command()
 @click.argument('quality')
-@click.option('--recid', 'recid', default=None)
-@click.option('--depid', 'depid', default=None)
+@click.option('--recid', 'recid', help='ID of the video record', default=None)
+@click.option('--depid', 'depid', help='ID of the video deposit', default=None)
 @with_appcontext
 def quality(recid, depid, quality):
     """Recreate subformat for the given quality."""
@@ -105,7 +105,7 @@ def quality(recid, depid, quality):
     if output:
         click.echo(
             "Creating the following subformat: {0}. Task id: {1}".format(
-                output, task_id
+                output["preset_quality"], task_id
             )
         )
     else:
@@ -113,8 +113,8 @@ def quality(recid, depid, quality):
 
 
 @recreate.command()
-@click.option('--recid', 'recid', default=None)
-@click.option('--depid', 'depid', default=None)
+@click.option('--recid', 'recid', help='ID of the video record', default=None)
+@click.option('--depid', 'depid', help='ID of the video deposit', default=None)
 @click.option(
     '--yes',
     is_flag=True,
@@ -131,10 +131,10 @@ def all(recid, depid):
     value = recid or depid
     type_ = 'recid' if recid else 'depid'
 
-    output, task_id = create_all_subformats(id_type=type_, id_value=value)
+    output = create_all_subformats(id_type=type_, id_value=value)
     click.echo(
-        "Creating the following subformats: {0}. Task id: {1}".format(
-            output, task_id
+        "Creating the following subformats: {0}.".format(
+            output
         )
     )
 
@@ -145,7 +145,7 @@ def videos():
 
 
 @videos.command()
-@click.option('--recid', 'recid', default=None)
+@click.option('--recid', 'recid', help='ID of the video record', default=None)
 @with_appcontext
 def fix_bucket_conflict(recid):
     """Create missing subformats given a record id or deposit id."""
@@ -213,8 +213,8 @@ def fix_bucket_conflict(recid):
 
 
 @videos.command()
-@click.option('--recid', 'recid', default=None)
-@click.option('--depid', 'depid', default=None)
+@click.option('--recid', 'recid', help='ID of the video record', default=None)
+@click.option('--depid', 'depid', help='ID of the video deposit', default=None)
 @with_appcontext
 def extract_frames(recid, depid):
     """Re-trigger the extract frames task."""
@@ -225,7 +225,7 @@ def extract_frames(recid, depid):
         _, record = record_resolver.resolve(recid)
         depid = record['_deposit']['id']
 
-    flow = get_deposit_last_flow(depid)
+    flow = Flow.get_for_deposit(depid)
 
     for t in flow.tasks:
         if 'ExtractFramesTask' in t.name:

@@ -71,7 +71,7 @@ def _get_status_and_subformats(event_id, session):
     return status, subformats
 
 
-def _group_tasks_by_event_id(tasks):  # TODO: Create unit test
+def _group_tasks_by_opencast_event_id(tasks):  # TODO: Create unit test
     """Group tasks by event_id."""
     groups = defaultdict(list)
     for obj in tasks:
@@ -132,7 +132,7 @@ def check_transcoding_status():
         status=Status.PENDING,
         name=TranscodeVideoTask().name
     ).all()
-    grouped_tasks = _group_tasks_by_event_id(pending_tasks)
+    grouped_tasks = _group_tasks_by_opencast_event_id(pending_tasks)
     for tasks in grouped_tasks:
         event_id = tasks[0].payload["opencast_event_id"]
         try:
