@@ -36,8 +36,9 @@ from invenio_files_rest.models import (
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from cds.modules.records.utils import is_project_record
 from cds.modules.deposit.api import CDSDeposit
+from .tasks import ExtractMetadataTask, ExtractFramesTask, TranscodeVideoTask
 
-from ..opencast.utils import can_be_transcoded
+from ..opencast.utils import can_be_transcoded, find_lowest_quality
 from ..records.api import CDSVideosFilesIterator
 from .api import Flow, uuid
 from .models import Status, TaskMetadata
@@ -96,7 +97,7 @@ def migrate_event(deposit):
         metadata_task = TaskMetadata.create(
             id_=task_id,
             flow_id=str(flow.id),
-            name='cds.modules.flows.tasks.ExtractMetadataTask',
+            name=ExtractMetadataTask().name,
             previous=[],
             payload=payload
         )
@@ -109,7 +110,7 @@ def migrate_event(deposit):
         frames_task = TaskMetadata.create(
             id_=task_id,
             flow_id=str(flow.id),
-            name='cds.modules.flows.tasks.ExtractFramesTask',
+            name=ExtractFramesTask().name,
             previous=[],
             payload=payload
         )
@@ -118,17 +119,26 @@ def migrate_event(deposit):
         db.session.add(frames_task)
 
         # add TranscodeVideoTask
-
-        for subformat in subformat_done:
+        subformats_to_be_processed = subformat_done + missing_subformats
+        if not subformats_to_be_processed:
+            # If there are no subformats to be processed, it means that there
+            # are no subformats done and while checking for the missing ones
+            # the lowest quality is not transcodable, in this case add lowest
+            subformats_to_be_processed = [find_lowest_quality()]
+        for subformat in subformats_to_be_processed:
             task_id = uuid()
+            subformat_payload = payload.copy()
+            subformat_payload.update({"preset_quality": subformat})
             transcode_task = TaskMetadata.create(
                 id_=task_id,
                 flow_id=str(flow.id),
-                name='cds.modules.flows.tasks.TranscodeVideoTask',
+                name=TranscodeVideoTask().name,
                 previous=[],
-                payload=payload
+                payload=subformat_payload
             )
-            transcode_task.status=Status.FAILURE if subformat in missing_subformats else Status.SUCCESS
+            transcode_task.status = Status.FAILURE if subformat in missing_subformats else Status.SUCCESS
+            transcode_task.message = "Missing subformat during migration" if subformat in missing_subformats else "Subformat migrated successfully"
+
             db.session.add(transcode_task)
 
     db.session.commit()
