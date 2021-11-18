@@ -27,8 +27,7 @@ services:
   app:
     build:
       context: ./
-      args:
-        - ENVIRONMENT=DEV
+      dockerfile: ./docker/app/Dockerfile
     image: cds-videos
     environment:
       - "INVENIO_ACCOUNTS_SESSION_REDIS_URL=redis://cache:6379/1"
@@ -42,6 +41,10 @@ services:
       - "INVENIO_SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://cds-videos:cds-videos@db/cds-videos"
       - "INVENIO_WSGI_PROXIES=2"
       - "INVENIO_RATELIMIT_STORAGE_URL=redis://cache:6379/3"
+      - "INVENIO_OAUTHCLIENT_REMOTE_APPS={}"
+      - "INVENIO_LOG_USER_ACTIONS_ENABLED=False"
+      - "INVENIO_ACCOUNTS_LOCAL_LOGIN_ENABLED=True"
+      - "INVENIO_IIIF_GIF_TEMP_FOLDER_PATH=/opt/cds_videos/var/instance/files"
   lb:
     build: ./docker/haproxy/
     image: cds-videos-lb
