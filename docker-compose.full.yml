@@ -30,24 +30,27 @@ services:
       file: docker-services.yml
       service: lb
     links:
-      - frontend
+      - web
   # Frontend
   frontend:
     extends:
       file: docker-services.yml
       service: frontend
     volumes:
-      - static_data:/opt/cds-videos/var/instance/static
-    links:
+      - static_data:/opt/invenio/var/instance/static
+    depends_on:
       - web-ui
       - web-api
+    ports:
+      - "80:80"
+      - "443:443"
   # UI Application
   web-ui:
     extends:
       file: docker-services.yml
       service: app
-    command: uwsgi /opt/cds-videos/var/instance/uwsgi_ui.ini
-    image: cds-videos-web-ui
+    command: bash -c uwsgi --module invenio_app.wsgi_ui:application --socket 0.0.0.0:5000 --master --processes 2 --threads 2 --stats /tmp/stats.socket
+    image: cds-videos-web
     ports:
       - "5000"
     volumes:
@@ -57,15 +60,14 @@ services:
       - es
       - mq
       - db
-  # API Rest Application
   web-api:
     extends:
       file: docker-services.yml
       service: app
-    command: run uwsgi /opt/cds-videos/var/instance/uwsgi_rest.ini
-    image: cds-videos-web-api
+    command: bash -c uwsgi --module invenio_app.wsgi_rest:application --socket 0.0.0.0:5000 --master --processes 2 --threads 2 --stats /tmp/stats.socket
+    image: cds-videos-web
     ports:
-      - "5001"
+      - "5000"
     volumes:
       - static_data:/opt/cds-videos/var/instance/static
     links:
@@ -79,20 +81,13 @@ services:
       file: docker-services.yml
       service: app
     restart: "always"
-    command: "celery worker -A cds.celery --loglevel=INFO"
+    command: bash -c "celery -A invenio_app.celery worker --loglevel=INFO"
     image: cds-videos-worker
     links:
       - cache
       - es
       - mq
       - db
-  # Monitoring
-  flower:
-    extends:
-      file: docker-services.yml
-      service: flower
-    links:
-      - mq
   # Base services
   cache:
     extends:

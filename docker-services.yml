@@ -27,8 +27,11 @@ services:
   app:
     build:
       context: ./
+      dockerfile: ./docker/backend/Dockerfile
       args:
         - ENVIRONMENT=DEV
+        - INVENIO_PIP_REQUIREMENTS_FILE=requirements.pinned.txt
+        - BRANCH_NAME=python3-videos
     image: cds-videos
     environment:
       - "INVENIO_ACCOUNTS_SESSION_REDIS_URL=redis://cache:6379/1"
@@ -92,8 +95,8 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-  flower:
-    image: mher/flower:0.9.7
-    command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
-    ports:
-      - "5555:5555"
+  # flower:
+  #   image: mher/flower:0.9.7
+  #   command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
+  #   ports:
+  #     - "5555:5555"
