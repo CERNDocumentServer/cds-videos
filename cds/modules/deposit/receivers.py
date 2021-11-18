@@ -33,6 +33,9 @@ from invenio_indexer.api import RecordIndexer
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier
 
+from cds.modules.flows.tasks import DownloadTask, ExtractFramesTask, \
+    ExtractMetadataTask, TranscodeVideoTask
+
 from .api import Project
 from .indexer import CDSRecordIndexer
 from .tasks import datacite_register
@@ -52,3 +55,16 @@ def datacite_register_after_publish(sender, action=None, pid=None,
 
         if record.get('doi'):
             datacite_register.delay(recid_pid.pid_value, str(record.id))
+
+
+def register_celery_class_based_tasks(sender, app=None):
+    """Register class based celery tasks as they cannot be autodiscovered.
+
+    Celery 4 doesn't autodiscover class based celery tasks thus we need to
+    register them explicitly.
+    """
+    celery = app.extensions["invenio-celery"].celery
+    celery.tasks.register(ExtractMetadataTask())
+    celery.tasks.register(DownloadTask())
+    celery.tasks.register(ExtractFramesTask())
+    celery.tasks.register(TranscodeVideoTask())
