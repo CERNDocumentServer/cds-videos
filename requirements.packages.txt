@@ -55,7 +55,7 @@ flask-celeryext==0.3.4
 flask-collect==1.2.2
 flask-cors==3.0.10
 flask-debugtoolbar==0.11.0
-flask-iiif==0.6.1
+# flask-iiif==0.6.1
 flask-kvsession==0.6.2
 flask-limiter==1.1.0
 flask-login==0.4.1
@@ -73,9 +73,7 @@ flask-wtf==0.14.3
 flask==1.1.4
 fs==0.5.4
 ftfy==4.4.3
-functools32==3.2.3.post2
 future==0.18.2
-futures==3.3.0
 html5lib==1.1
 idna==2.10
 idutils==0.2.3
@@ -165,6 +163,7 @@ pyopenssl==21.0.0
 pyparsing==2.4.7
 pyrsistent==0.16.1
 pysocks==1.7.1
+pytest-runner==2.6.2
 python-dateutil==2.8.2
 python-editor==1.0.4
 pytz==2021.3

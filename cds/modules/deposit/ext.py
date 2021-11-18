@@ -26,14 +26,18 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
-                                     ExtractMetadataTask, TranscodeVideoTask)
+from invenio_base.signals import app_loaded
 from invenio_deposit.signals import post_action
 from invenio_indexer.signals import before_record_index
 
+from .receivers import index_deposit_after_action, \
+    datacite_register_after_publish, register_celery_class_based_tasks
 from .indexer import cdsdeposit_indexer_receiver
-from .receivers import (datacite_register_after_publish,
-                        index_deposit_after_action)
+from .receivers import (
+    datacite_register_after_publish,
+    index_deposit_after_action,
+    register_celery_class_based_tasks
+)
 
 
 class CDSDepositApp(object):
@@ -48,11 +52,7 @@ class CDSDepositApp(object):
         """Flask application initialization."""
         app.extensions['cds-deposit'] = self
         self.register_signals(app)
-        celery = app.extensions["invenio-celery"].celery
-        celery.tasks.register(ExtractMetadataTask())
-        celery.tasks.register(DownloadTask())
-        celery.tasks.register(ExtractFramesTask())
-        celery.tasks.register(TranscodeVideoTask())
+
 
     @staticmethod
     def register_signals(app):
@@ -67,3 +67,6 @@ class CDSDepositApp(object):
         # register Datacite after publish record
         post_action.connect(
             datacite_register_after_publish, sender=app, weak=False)
+
+        # register class based celery tasks
+        app_loaded.connect(register_celery_class_based_tasks)
