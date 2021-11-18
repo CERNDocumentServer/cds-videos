@@ -100,7 +100,7 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
 # Celery monitoring.
 CELERY_TASK_TRACK_STARTED = True
 # Celery accepted content types.
-CELERY_ACCEPT_CONTENT = ["json", "msgpack", "yaml", "pickle"]
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 """A whitelist of content-types/serializers."""
 
 # Celery Beat schedule

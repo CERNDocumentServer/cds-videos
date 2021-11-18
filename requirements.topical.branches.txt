@@ -30,3 +30,6 @@
 
 # FIXME remove after release
 -e git+https://github.com/inveniosoftware/invenio-files-rest.git@fix-sync-method-1.0.7#egg=invenio-files-rest
+
+# FIXME remove after release
+-e git+https://github.com/inveniosoftware/flask-iiif.git@gif-temp-location-configurable#egg=flask-iiif
