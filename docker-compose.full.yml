@@ -37,37 +37,21 @@ services:
       file: docker-services.yml
       service: frontend
     volumes:
-      - static_data:/opt/cds-videos/var/instance/static
+      - static_data:/opt/cds_videos/var/instance/static
     links:
-      - web-ui
-      - web-api
-  # UI Application
-  web-ui:
+      - web
+  # Application
+  web:
     extends:
       file: docker-services.yml
       service: app
-    command: uwsgi /opt/cds-videos/var/instance/uwsgi_ui.ini
-    image: cds-videos-web-ui
+    command: ["uwsgi --module invenio_app.wsgi:application --socket 0.0.0.0:5000 --master --processes 2 --threads 2 --stats /tmp/stats.socket"]
+    image: cds-videos-web
     ports:
       - "5000"
     volumes:
-      - static_data:/opt/cds-videos/var/instance/static
-    links:
-      - cache
-      - es
-      - mq
-      - db
-  # API Rest Application
-  web-api:
-    extends:
-      file: docker-services.yml
-      service: app
-    command: run uwsgi /opt/cds-videos/var/instance/uwsgi_rest.ini
-    image: cds-videos-web-api
-    ports:
-      - "5001"
-    volumes:
-      - static_data:/opt/cds-videos/var/instance/static
+      - static_data:/opt/cds_videos/var/instance/static
+      - files_data:/opt/cds_videos/var/instance/files
     links:
       - cache
       - es
@@ -79,8 +63,10 @@ services:
       file: docker-services.yml
       service: app
     restart: "always"
-    command: "celery worker -A cds.celery --loglevel=INFO"
+    command: ["celery -A invenio_app.celery worker --loglevel=INFO"]
     image: cds-videos-worker
+    volumes:
+      - files_data:/opt/cds_videos/var/instance/files
     links:
       - cache
       - es
@@ -112,3 +98,4 @@ services:
       service: es
 volumes:
   static_data:
+  files_data:
