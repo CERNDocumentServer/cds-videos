@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.23 (2021-11-19)
+
+- remove lowercase text transformation of emails for record restriction
+- update contact page
+- update record statistics queries and configuration
+
 Version 1.0.22 (2021-10-11)
 
 - add validation when reserving non-existing report number
