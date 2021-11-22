@@ -86,8 +86,3 @@ def can_be_transcoded(subformat_desired_quality, video_width, video_height):
         width=qualitiy_config['width'],
         height=qualitiy_config['height']
     )
-
-
-def build_subformat_key(preset_quality):
-    """Build the object version key connected with the transcoding."""
-    return '{0}.mp4'.format(preset_quality)
