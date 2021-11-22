@@ -725,6 +725,11 @@ class TranscodeVideoTask(AVCTask):
         """Override on success."""
         self._update_record()
 
+    @staticmethod
+    def build_subformat_key(preset_quality):
+        """Build the object version key connected with the transcoding."""
+        return '{0}.mp4'.format(preset_quality)
+
     def on_failure(self, *args, **kwargs):
         """Override on failure."""
         self._update_record()

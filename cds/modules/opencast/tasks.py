@@ -42,7 +42,6 @@ from celery import shared_task
 
 from cds.modules.flows.tasks import TranscodeVideoTask, sync_records_with_deposit_files
 from cds.modules.opencast.error import RequestError, WriteToEOSError
-from cds.modules.opencast.utils import build_subformat_key
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
 
@@ -204,7 +203,7 @@ def on_transcoding_completed(
 
     obj = ObjectVersion.create(
         bucket=task.payload["bucket_id"],
-        key=build_subformat_key(task.payload["preset_quality"])
+        key=TranscodeVideoTask.build_subformat_key(task.payload["preset_quality"])
     )
     ObjectVersionTag.create(
         obj, 'master', master_object_version_version_id
