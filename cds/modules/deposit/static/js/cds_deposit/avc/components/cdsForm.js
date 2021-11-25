@@ -162,6 +162,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
    * Authors
    */
   function formAuthor(author) {
+
     return {
       text: stripCommas(author.name),
       value: author,
@@ -174,6 +175,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Match Lastname, Firstname
     // i.e. Uni Uni , Corn Corn
     // return (3) [" Uni Uni , Corn Corn ", " Uni Uni ", " Corn Corn ", index: 0, input: " Uni Uni , Corn Corn"]
+
     var re = /^(.*),(.*)$/,
         authorName = query.match(re);
 
@@ -181,9 +183,9 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
       return null;
     }
 
-    return formAuthor({
-      name: authorName[1].trim() + ',' + authorName[2].trim()
-    });
+    var authorObj = {name: authorName[1].trim() + ', ' + authorName[2].trim()};
+
+    return formAuthor(authorObj);
   }
 
   this.autocompleteAuthors = autocomplete(
@@ -199,25 +201,20 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     },
     // Response handler
     function(data, query) {
+
       var userInput = authorFromUser(query);
       var suggestions = data.data.map(function (author) {
         var valueObj = {};
-
-        if (author.firstname) {
-          valueObj.name = (author.lastname || '') + ', ' +
-            (author.firstname || '');
-        } else {
-          valueObj.name = (author.name) || '';
+        valueObj.name = author.sn + ', ' + author.givenName;
+        if (author.cernInstituteName) {
+          valueObj.affiliations = [author.cernInstituteName];
         }
-
-        if (author.affiliation) {
-          valueObj.affiliations = [author.affiliation];
+        if (author.mail) {
+          valueObj.email = author.mail;
         }
-        if (author.email) {
-          valueObj.email = author.email;
-        }
+        // rename employeeID
         valueObj.ids = _.reduce({
-          cernccid: 'cern', recid: 'cds', inspireid: 'inspire'
+          employeeID: 'cern'
         }, function(acc, newName, oldName) {
           if (author.hasOwnProperty(oldName)) {
             acc.push({ value: author[oldName], source: newName });
@@ -260,10 +257,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
   this.autocompleteAccess = _.debounce(function(query) {
     var userInput = query.length ? [{ name: query, email: query, isUserInput: true }] : [],
       options = {
-        url: '//cds.cern.ch/submit/get_authors',
-        extraParams: {
-          'relative_curdir': 'cdslabs/videosegroups'
-        }
+        url: '/api/ldap/cern-egroups/',
       };
 
     that.accessSuggestions = userInput;
@@ -279,7 +273,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
           });
       that.accessSuggestions = _.concat(userInput, mappedResults);
     });
-  }, 300);
+  }, 500);
 
   /**
    * Categories and Types
