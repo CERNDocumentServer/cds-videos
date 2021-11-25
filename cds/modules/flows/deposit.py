@@ -1,17 +1,34 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of Invenio.
+# Copyright (C) 2021 CERN.
+#
+# Invenio is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
+#
+# In applying this license, CERN does not
+# waive the privileges and immunities granted to it by virtue of its status
+# as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 from invenio_indexer.tasks import index_record
 
 
-def _index_deposit(deposit):
-    """Index deposit if set."""
-    if deposit:
-        index_record.delay(str(deposit.id))
-
-
-def update_deposit_state(deposit_id=None):
-    """Update deposit state on ElasticSearch."""
+def index_deposit_project(deposit_id=None):
+    """Update deposit and project."""
     from cds.modules.deposit.api import deposit_video_resolver
-    if deposit_id:
-        deposit_video = deposit_video_resolver(deposit_id)
-        _index_deposit(deposit_video)
-        _index_deposit(deposit_video.project)
+
+    deposit_video = deposit_video_resolver(deposit_id)
+    index_record.delay(str(deposit_video.id))
+    index_record.delay(str(deposit_video.project.id))

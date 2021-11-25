@@ -21,13 +21,11 @@
 
 from __future__ import absolute_import, print_function
 
+from cds.modules.records.permissions import record_read_permission_factory
 from elasticsearch import Elasticsearch
-
 from flask import Blueprint, current_app, jsonify, make_response
 from flask.views import MethodView
-
-from cds.modules.records.permissions import record_read_permission_factory
-from invenio_records_rest.views import pass_record, need_record_permission
+from invenio_records_rest.views import need_record_permission, pass_record
 
 # Legaciy code: once invenio-statistics is used, this code will be removed.
 ES_INDEX = 'cds-*'

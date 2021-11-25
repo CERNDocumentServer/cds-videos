@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function
 
 import json
 
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, Bucket
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 
 from ..records.utils import to_string
 

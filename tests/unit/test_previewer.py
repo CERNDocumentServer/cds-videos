@@ -236,11 +236,12 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
         ObjectVersionTag.create(slave, 'master', str(master_obj.version_id))
         return slave
 
-    def create_video_tags(obj, context_type, bitrate=None, smil=True):
+    def create_video_tags(obj, context_type, video_bitrate=None, audio_bitrate=True, smil=True):
         """Create video tags."""
         tags = [('width', 1000), ('height', 1000),
-                ('bit_rate', 123456), ('video_bitrate', bitrate or 123456),
-                ('media_type', 'video'), ('context_type', context_type), ]
+                ('bit_rate', 123456), ('video_bitrate', video_bitrate or 123456),
+                ('media_type', 'video'), ('context_type', context_type),
+                ('audio_bitrate', audio_bitrate or 64)]
         # Append smil tag
         if smil:
             tags.append(('smil', True))
@@ -260,11 +261,11 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
 
     # Create one slave that shouldn't be added to the SMIL file
     no_smil_slave = create_slave(key='test_no_smil.mp4')
-    create_video_tags(no_smil_slave, context_type='subformat', bitrate=9876,
+    create_video_tags(no_smil_slave, context_type='subformat', video_bitrate=9876, audio_bitrate=96,
                       smil=False)
     # and one that should be added to the SMIL file
     yes_smil_slave = create_slave(key='test_no_smil.mp4')
-    create_video_tags(yes_smil_slave, context_type='subformat', bitrate=7654)
+    create_video_tags(yes_smil_slave, context_type='subformat', video_bitrate=7654, audio_bitrate=32)
 
     # publish video
     login_user(User.query.get(users[0]))
@@ -291,9 +292,11 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
             assert get_relative_path(slave_obj) in contents
 
         # check if special file is out of the smile
-        assert 'system-bitrate="9876"' not in contents
+        assert 'video-bitrate="9876"' not in contents
+        assert 'audio-bitrate="96"' not in contents
         # check if special file is inside the smile
-        assert 'system-bitrate="7654"' in contents
+        assert 'video-bitrate="7654"' in contents
+        assert 'audio-bitrate="32)"' in contents
 
 
 def test_vtt_export(previewer_app, db, project_published,

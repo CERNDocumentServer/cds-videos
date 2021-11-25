@@ -47,23 +47,23 @@ from invenio_records_files.api import ObjectVersion
 from invenio_records_files.models import RecordsBuckets
 from requests.exceptions import RequestException
 
+from ..opencast.utils import can_be_transcoded
 from .api import CDSRecord, Keyword
 from .search import KeywordSearch, query_to_objects
-
-# from .symlinks import SymlinksCreator
-from ..opencast.utils import can_be_transcoded
 
 
 def _get_keywords_from_api(url):
     """Get keywords list from API."""
     request = requests.get(
-        url, headers={
-            'User-Agent': current_app.config.get('RECORDS_ID_PROVIDER_AGENT')
-        }).text
+        url,
+        headers={
+            "User-Agent": current_app.config.get("RECORDS_ID_PROVIDER_AGENT")
+        },
+    ).text
 
     keywords = {}
-    for tag in json.loads(request)['tags']:
-        keywords[tag['id']] = dict(name=tag['name'], provenance=url)
+    for tag in json.loads(request)["tags"]:
+        keywords[tag["id"]] = dict(name=tag["name"], provenance=url)
     return keywords
 
 
@@ -73,9 +73,10 @@ def _update_existing_keywords(indexer, keywords_api, keywords_db):
     def _keyword_data(values):
         """Prepare the keyword data."""
         return dict(
-            name=values.get('name'),
-            provenance=values.get('provenance', ''),
-            deleted=values.get('deleted', False))
+            name=values.get("name"),
+            provenance=values.get("provenance", ""),
+            deleted=values.get("deleted", False),
+        )
 
     def _check_if_updated(old_keyword, new_data):
         """Return True in the keyword should be updated."""
@@ -84,7 +85,7 @@ def _update_existing_keywords(indexer, keywords_api, keywords_db):
 
     to_db = []
     to_update_index = []
-    keywords_saved = {k['key_id']: k for k in keywords_db}
+    keywords_saved = {k["key_id"]: k for k in keywords_db}
     keys_saved = keywords_saved.keys()
     # check loaded keywords against the keywords in the database
     for key_id, values in keywords_api.items():
@@ -116,10 +117,12 @@ def _delete_not_existing_keywords(indexer, keywords_api, keywords_db):
     keys_loaded = keywords_api.keys()
     # check if some keywords is deleted
     for keyword in keywords_db:
-        if keyword['deleted'] is False and \
-                keyword['key_id'] not in keys_loaded:
+        if (
+            keyword["deleted"] is False
+            and keyword["key_id"] not in keys_loaded
+        ):
             # soft delete the key_id
-            keyword['deleted'] = True
+            keyword["deleted"] = True
             keyword.commit()
             to_soft_delete.append(str(keyword.id))
 
@@ -127,40 +130,45 @@ def _delete_not_existing_keywords(indexer, keywords_api, keywords_db):
 
 
 def _send_email(subject, body, sender, recipients):
-    current_app.extensions['mail'].send(
-        Message(subject, sender=sender, recipients=recipients, body=body))
+    current_app.extensions["mail"].send(
+        Message(subject, sender=sender, recipients=recipients, body=body)
+    )
 
 
 def _get_all_records_with_bucket():
     """Get query for all registered records with a bucket."""
-    return RecordMetadata.query \
-        .join(PersistentIdentifier,
-              PersistentIdentifier.object_uuid == RecordMetadata.id) \
-        .join(RecordsBuckets) \
-        .join(Bucket) \
-        .join(ObjectVersion) \
+    return (
+        RecordMetadata.query.join(
+            PersistentIdentifier,
+            PersistentIdentifier.object_uuid == RecordMetadata.id,
+        )
+        .join(RecordsBuckets)
+        .join(Bucket)
+        .join(ObjectVersion)
         .filter(
             PersistentIdentifier.status == PIDStatus.REGISTERED,
-            PersistentIdentifier.pid_type == 'recid')
+            PersistentIdentifier.pid_type == "recid",
+        )
+    )
 
 
 def _filter_by_last_created(query, start_date=None, end_date=None):
     """Return records UUIDs filtered by ObjectVersion creation interval."""
     if start_date and end_date:
-        query = query \
-            .filter(ObjectVersion.created >= start_date,
-                    ObjectVersion.created <= end_date)
+        query = query.filter(
+            ObjectVersion.created >= start_date,
+            ObjectVersion.created <= end_date,
+        )
     elif start_date:
-        query = query \
-            .filter(ObjectVersion.created >= start_date)
+        query = query.filter(ObjectVersion.created >= start_date)
     elif end_date:
-        query = query \
-            .filter(ObjectVersion.created <= end_date)
+        query = query.filter(ObjectVersion.created <= end_date)
 
-    return query \
-        .group_by(RecordMetadata.id) \
-        .order_by(sa.func.max(ObjectVersion.created).desc()) \
+    return (
+        query.group_by(RecordMetadata.id)
+        .order_by(sa.func.max(ObjectVersion.created).desc())
         .with_entities(RecordMetadata.id)
+    )
 
 
 @shared_task(bind=True)
@@ -169,59 +177,60 @@ def keywords_harvesting(self, max_retries=5, countdown=5):
     try:
         # load from remote API the up-to-date list of keywords
         keywords_api = _get_keywords_from_api(
-            url=current_app.config['CDS_KEYWORDS_HARVESTER_URL'])
+            url=current_app.config["CDS_KEYWORDS_HARVESTER_URL"]
+        )
 
         # load the list of keywords in the database
         keywords_db = query_to_objects(
-            query=KeywordSearch().params(version=True), cls=Keyword)
+            query=KeywordSearch().params(version=True), cls=Keyword
+        )
 
         # index lists
         indexer = RecordIndexer()
 
         _update_existing_keywords(
-            indexer=indexer,
-            keywords_api=keywords_api,
-            keywords_db=keywords_db)
+            indexer=indexer, keywords_api=keywords_api, keywords_db=keywords_db
+        )
         _delete_not_existing_keywords(
-            indexer=indexer,
-            keywords_api=keywords_api,
-            keywords_db=keywords_db)
+            indexer=indexer, keywords_api=keywords_api, keywords_db=keywords_db
+        )
 
         db.session.commit()
     except RequestException as exc:
         raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
 
 
-@shared_task(ignore_result=True, default_retry_delay=10 * 60)
-def create_symlinks(previous_record, record_uuid):
-    """Create video symlinks."""
-    # FIXME: couldn't find a way to create symlinks with xrootd
-    # record_new = CDSRecord.get_record(record_uuid)
-    # SymlinksCreator().create(previous_record, record_new)
-
-
 def format_file_integrity_report(report):
     """Format the email body for the file integrity report."""
     lines = []
     for entry in report:
-        f = entry['file']
-        lines.append('ID: {}'.format(str(f.id)))
-        lines.append('URI: {}'.format(f.uri))
-        lines.append('Name: {}'.format(entry.get('filename')))
-        lines.append('Created: {}'.format(f.created))
-        lines.append('Checksum: {}'.format(f.checksum))
-        lines.append('Last Check: {}'.format(f.last_check_at))
-        if 'record' in entry:
-            lines.append(u'Record: {}'.format(
-                format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
-                                entry['record'].get('recid'))))
-        if 'deposit' in entry:
-            lines.append(u'Deposit: {}'.format(
-                format_pid_link(
-                    current_app.config['DEPOSIT_UI_ENDPOINT_DEFAULT'],
-                    entry['deposit'].get('_deposit', {}).get('id'))))
-        lines.append(('-' * 80) + '\n')
-    return '\n'.join(lines)
+        f = entry["file"]
+        lines.append("ID: {}".format(str(f.id)))
+        lines.append("URI: {}".format(f.uri))
+        lines.append("Name: {}".format(entry.get("filename")))
+        lines.append("Created: {}".format(f.created))
+        lines.append("Checksum: {}".format(f.checksum))
+        lines.append("Last Check: {}".format(f.last_check_at))
+        if "record" in entry:
+            lines.append(
+                u"Record: {}".format(
+                    format_pid_link(
+                        current_app.config["RECORDS_UI_ENDPOINT"],
+                        entry["record"].get("recid"),
+                    )
+                )
+            )
+        if "deposit" in entry:
+            lines.append(
+                u"Deposit: {}".format(
+                    format_pid_link(
+                        current_app.config["DEPOSIT_UI_ENDPOINT_DEFAULT"],
+                        entry["deposit"].get("_deposit", {}).get("id"),
+                    )
+                )
+            )
+        lines.append(("-" * 80) + "\n")
+    return "\n".join(lines)
 
 
 @shared_task
@@ -239,33 +248,36 @@ def file_integrity_report():
             pass  # Don't fail sending the report in case of some file error
 
     report = []
-    unhealthy_files = (FileInstance.query.filter(
+    unhealthy_files = FileInstance.query.filter(
         sa.or_(
             FileInstance.last_check.is_(None),
-            FileInstance.last_check.is_(False))).order_by(
-                FileInstance.created.desc()))
+            FileInstance.last_check.is_(False),
+        )
+    ).order_by(FileInstance.created.desc())
 
     for f in unhealthy_files:
-        entry = {'file': f}
+        entry = {"file": f}
         for o in f.objects:
-            entry['filename'] = o.key
+            entry["filename"] = o.key
             # Find records/deposits for the files
             rb = RecordsBuckets.query.filter(
-                RecordsBuckets.bucket_id == o.bucket_id).one_or_none()
+                RecordsBuckets.bucket_id == o.bucket_id
+            ).one_or_none()
             if rb and rb.record and rb.record.json:
                 if is_deposit(rb.record.json):
-                    entry['deposit'] = rb.record.json
+                    entry["deposit"] = rb.record.json
                 elif is_record(rb.record.json):
-                    entry['record'] = rb.record.json
+                    entry["record"] = rb.record.json
         report.append(entry)
 
     if report:
         # Format and send the email
-        subject = u'[CDS Videos] Files integrity report [{}]'.format(
-            datetime.now())
+        subject = u"[CDS Videos] Files integrity report [{}]".format(
+            datetime.now()
+        )
         body = format_file_integrity_report(report)
-        sender = current_app.config['NOREPLY_EMAIL']
-        recipients = [current_app.config['CDS_ADMIN_EMAIL']]
+        sender = current_app.config["NOREPLY_EMAIL"]
+        recipients = [current_app.config["CDS_ADMIN_EMAIL"]]
         _send_email(subject, body, sender, recipients)
 
 
@@ -281,13 +293,15 @@ def subformats_integrity_report(start_date=None, end_date=None):
         """
         file_report = {}
         path = obj.file.uri.replace(
-                current_app.config['VIDEOS_XROOTD_ENDPOINT'], '')
+            current_app.config["VIDEOS_XROOTD_ENDPOINT"], ""
+        )
 
         if not os.path.exists(path):
             # Check if the file exists on disk
             file_report = {
-                'file_name': obj.key,
-                'message': 'The file cannot be accessed'}
+                "file_name": obj.key,
+                "message": "The file cannot be accessed",
+            }
 
             # Return the file report and the file accessibility
             return (file_report, False)
@@ -296,16 +310,18 @@ def subformats_integrity_report(start_date=None, end_date=None):
             # Expecting the storage to be mounted on the machine
             probe = ff_probe_all(path)
 
-            if not probe.get('streams'):
+            if not probe.get("streams"):
                 file_report = {
-                    'file_name': obj.key,
-                    'message': 'No video stream'}
+                    "file_name": obj.key,
+                    "message": "No video stream",
+                }
 
         except Exception as e:
             file_report = {
-                'file_name': obj.key,
-                'message': 'Error while running ff_probe_all',
-                'error': repr(e)}
+                "file_name": obj.key,
+                "message": "Error while running ff_probe_all",
+                "error": repr(e),
+            }
 
         # Return the file report and the file accessibility
         return (file_report, True)
@@ -314,80 +330,97 @@ def subformats_integrity_report(start_date=None, end_date=None):
         """Format the email body for the subformats integrity report."""
         lines = []
         for entry in report:
-            lines.append(u'Record: {}'.format(
-                    format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
-                                    entry.get('recid'))))
-            lines.append('Message: {}'.format(entry.get('message')))
+            lines.append(
+                u"Record: {}".format(
+                    format_pid_link(
+                        current_app.config["RECORDS_UI_ENDPOINT"],
+                        entry.get("recid"),
+                    )
+                )
+            )
+            lines.append("Message: {}".format(entry.get("message")))
 
-            if entry.get('report_number'):
-                lines.append('Report number: {}'.format(
-                    entry.get('report_number')))
+            if entry.get("report_number"):
+                lines.append(
+                    "Report number: {}".format(entry.get("report_number"))
+                )
 
-            subreports = entry.get('subreports')
+            subreports = entry.get("subreports")
             if subreports:
-                lines.append(('-' * 10) + '\n')
+                lines.append(("-" * 10) + "\n")
 
                 for subreport in subreports:
-                    lines.append('  File name: {}'.format(
-                        subreport.get('file_name')))
-                    lines.append('  Message: {}'.format(
-                        subreport.get('message')))
+                    lines.append(
+                        "  File name: {}".format(subreport.get("file_name"))
+                    )
+                    lines.append(
+                        "  Message: {}".format(subreport.get("message"))
+                    )
 
-                    if subreport.get('error'):
-                        lines.append('  Error: {}'.format(
-                            subreport.get('error')))
+                    if subreport.get("error"):
+                        lines.append(
+                            "  Error: {}".format(subreport.get("error"))
+                        )
 
-            lines.append(('-' * 80) + '\n')
+            lines.append(("-" * 80) + "\n")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
-    cache = current_cache.get('task_subformats_integrity:details') or {}
+    cache = current_cache.get("task_subformats_integrity:details") or {}
     two_days_ago = datetime.utcnow() - timedelta(days=2)
-    if 'start_date' not in cache:
+    if "start_date" not in cache:
         # Set the start date to 4 days ago
-        cache['start_date'] = datetime.utcnow() - timedelta(days=4)
+        cache["start_date"] = datetime.utcnow() - timedelta(days=4)
 
     record_uuids = _filter_by_last_created(
         _get_all_records_with_bucket(),
-        start_date or cache['start_date'],
-        end_date or two_days_ago)
+        start_date or cache["start_date"],
+        end_date or two_days_ago,
+    )
 
     for record_uuid in record_uuids:
         record = CDSRecord.get_record(record_uuid.id)
         master = CDSVideosFilesIterator.get_master_video_file(record)
 
         if not master:
-            report.append({
-                'recid': record['recid'],
-                'message': 'No master video found for the given record',
-                'report_number': record['report_number'][0]})
+            report.append(
+                {
+                    "recid": record["recid"],
+                    "message": "No master video found for the given record",
+                    "report_number": record["report_number"][0],
+                }
+            )
             continue
 
-        master_obj = as_object_version(master['version_id'])
+        master_obj = as_object_version(master["version_id"])
         subreport_master, accessible = _probe_video_file(master_obj, record)
 
         if not accessible:
             update_cache = False
 
         if subreport_master:
-            report.append({
-                'recid': record['recid'],
-                'message': 'Master file issue report',
-                'report_number': record['report_number'][0],
-                'subreports': subreport_master})
+            report.append(
+                {
+                    "recid": record["recid"],
+                    "message": "Master file issue report",
+                    "report_number": record["report_number"][0],
+                    "subreports": subreport_master,
+                }
+            )
 
         subformats = CDSVideosFilesIterator.get_video_subformats(master)
         if not subformats:
-            report.append({
-                'recid': record['recid'],
-                'message': 'No subformats found'})
+            report.append(
+                {"recid": record["recid"], "message": "No subformats found"}
+            )
             continue
 
         subformats_subreport = []
         for subformat in subformats:
-            subformat_obj = as_object_version(subformat['version_id'])
+            subformat_obj = as_object_version(subformat["version_id"])
             subformat_subreport, accessible = _probe_video_file(
-                subformat_obj, record)
+                subformat_obj, record
+            )
 
             if not accessible:
                 update_cache = False
@@ -396,25 +429,30 @@ def subformats_integrity_report(start_date=None, end_date=None):
                 subformats_subreport.append(subformat_subreport)
 
         if subformats_subreport:
-            report.append({
-                'recid': record['recid'],
-                'message': 'Subformats issues found',
-                'report_number': record['report_number'][0],
-                'subreports': subformats_subreport})
+            report.append(
+                {
+                    "recid": record["recid"],
+                    "message": "Subformats issues found",
+                    "report_number": record["report_number"][0],
+                    "subreports": subformats_subreport,
+                }
+            )
 
     if update_cache:
         # Set the start date for next time when the task will run
-        cache['start_date'] = two_days_ago
+        cache["start_date"] = two_days_ago
         current_cache.set(
-            'task_subformats_integrity:details', cache, timeout=-1)
+            "task_subformats_integrity:details", cache, timeout=-1
+        )
 
     if report:
         # Format and send the email
-        subject = u'[CDS Videos] Subformats integrity report [{}]'.format(
-            datetime.now())
+        subject = u"[CDS Videos] Subformats integrity report [{}]".format(
+            datetime.now()
+        )
         body = _format_report(report)
-        sender = current_app.config['NOREPLY_EMAIL']
-        recipients = [current_app.config['CDS_ADMIN_EMAIL']]
+        sender = current_app.config["NOREPLY_EMAIL"]
+        recipients = [current_app.config["CDS_ADMIN_EMAIL"]]
         _send_email(subject, body, sender, recipients)
 
 
@@ -429,91 +467,117 @@ def missing_subformats_report(start_date=None, end_date=None):
         if not master:
             raise Exception("No master video found for the given record")
 
-        return master, int(master['tags']['width']),\
-            int(master['tags']['height'])
+        return (
+            master,
+            int(master["tags"]["width"]),
+            int(master["tags"]["height"]),
+        )
 
     def _get_missing_subformats(subformats, ar, w, h):
         """Return missing and transcodable subformats."""
-        dones = [subformat['tags']['preset_quality']
-                 for subformat in subformats]
+        dones = [
+            subformat["tags"]["preset_quality"] for subformat in subformats
+        ]
         missing = set(
-            current_app.config['CDS_OPENCAST_QUALITIES'].keys()
+            current_app.config["CDS_OPENCAST_QUALITIES"].keys()
         ) - set(dones)
         transcodables = list(
-            filter(lambda q: can_be_transcoded(q, w, h), missing))
+            filter(lambda q: can_be_transcoded(q, w, h), missing)
+        )
         return transcodables
 
     def _format_report(report):
         """Format the email body for the file integrity report."""
         lines = []
         for entry in report:
-            lines.append('Message: {}'.format(entry.get('message')))
-            lines.append(u'Record: {}'.format(
-                    format_pid_link(current_app.config['RECORDS_UI_ENDPOINT'],
-                                    entry.get('recid'))))
-            lines.append('Report number: {}'.format(
-                entry.get('report_number')))
-            lines.append('Missing subformats: {}'.format(
-                entry.get('missing_subformats')))
-            lines.append(('-' * 80) + '\n')
+            lines.append("Message: {}".format(entry.get("message")))
+            lines.append(
+                u"Record: {}".format(
+                    format_pid_link(
+                        current_app.config["RECORDS_UI_ENDPOINT"],
+                        entry.get("recid"),
+                    )
+                )
+            )
+            lines.append(
+                "Report number: {}".format(entry.get("report_number"))
+            )
+            lines.append(
+                "Missing subformats: {}".format(
+                    entry.get("missing_subformats")
+                )
+            )
+            lines.append(("-" * 80) + "\n")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
-    cache = current_cache.get('task_missing_subformats:details') or {}
-    if 'end_date' not in cache:
+    cache = current_cache.get("task_missing_subformats:details") or {}
+    if "end_date" not in cache:
         # Set the end date to 7 days ago
-        cache['end_date'] = datetime.utcnow() - timedelta(days=7)
+        cache["end_date"] = datetime.utcnow() - timedelta(days=7)
 
     record_uuids = _filter_by_last_created(
-                _get_all_records_with_bucket(),
-                start_date,
-                end_date or cache['end_date'])
+        _get_all_records_with_bucket(),
+        start_date,
+        end_date or cache["end_date"],
+    )
 
     for record_uuid in record_uuids:
         record = CDSRecord.get_record(record_uuid.id)
         master, w, h = _get_master_video(record)
 
         if not master:
-            report.append({
-                'message': 'No master video found for the given record',
-                'recid': record.get('recid'),
-                'report_number': record['report_number'][0]})
+            report.append(
+                {
+                    "message": "No master video found for the given record",
+                    "recid": record.get("recid"),
+                    "report_number": record["report_number"][0],
+                }
+            )
             continue
 
         # check missing subformats
         subformats = CDSVideosFilesIterator.get_video_subformats(master)
         missing = _get_missing_subformats(subformats, w, h)
         if missing:
-            report.append({
-                'message': 'Missing subformats for the given record',
-                'recid': record.get('recid'),
-                'report_number': record['report_number'][0],
-                'missing_subformats': missing})
+            report.append(
+                {
+                    "message": "Missing subformats for the given record",
+                    "recid": record.get("recid"),
+                    "report_number": record["report_number"][0],
+                    "missing_subformats": missing,
+                }
+            )
 
         # check bucket ids consistency
-        bucket_id = master['bucket_id']
-        for f in \
-            subformats + CDSVideosFilesIterator.get_video_frames(master) + \
-                CDSVideosFilesIterator.get_video_subtitles(record):
+        bucket_id = master["bucket_id"]
+        for f in (
+            subformats
+            + CDSVideosFilesIterator.get_video_frames(master)
+            + CDSVideosFilesIterator.get_video_subtitles(record)
+        ):
 
-            if f['bucket_id'] != bucket_id:
-                report.append({
-                    'message': 'Different buckets in the same record',
-                    'recid': record.get('recid'),
-                    'report_number': record['report_number'][0],
-                    'buckets': 'Master: {0} - {1}: {2}'.format(bucket_id,
-                                                               f['key'],
-                                                               f['bucket_id'])
-                })
+            if f["bucket_id"] != bucket_id:
+                report.append(
+                    {
+                        "message": "Different buckets in the same record",
+                        "recid": record.get("recid"),
+                        "report_number": record["report_number"][0],
+                        "buckets": "Master: {0} - {1}: {2}".format(
+                            bucket_id, f["key"], f["bucket_id"]
+                        ),
+                    }
+                )
 
-    cache['end_date'] = datetime.utcnow()
-    current_cache.set('task_missing_subformats:details', cache, timeout=-1)
+    cache["end_date"] = datetime.utcnow()
+    current_cache.set("task_missing_subformats:details", cache, timeout=-1)
 
     if report:
         # Format and send the email
-        subject = u'[CDS Videos] Missing subformats report [{}]'.format(
-            datetime.now())
+        subject = u"[CDS Videos] Missing subformats report [{}]".format(
+            datetime.now()
+        )
         body = _format_report(report)
-        sender = current_app.config['NOREPLY_EMAIL']
-        recipients = [current_app.config['CDS_ADMIN_EMAIL']]
+        sender = current_app.config["NOREPLY_EMAIL"]
+        recipients = [current_app.config["CDS_ADMIN_EMAIL"]]
         _send_email(subject, body, sender, recipients)

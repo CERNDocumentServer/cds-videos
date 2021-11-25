@@ -18,16 +18,13 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Tasks for maintenance scripts."""
+from cds.modules.deposit.api import deposit_video_resolver
+from cds.modules.flows.models import Status
+from cds.modules.flows.tasks import TranscodeVideoTask
+from cds.modules.records.resolver import record_resolver
 from celery import shared_task
 from celery.utils.log import get_task_logger
-
 from invenio_db import db
-
-from cds.modules.flows.models import Status
-
-from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.records.resolver import record_resolver
-from cds.modules.flows.tasks import TranscodeVideoTask
 
 logger = get_task_logger(__name__)
 
@@ -37,16 +34,13 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
     """Transcode without indexing."""
 
     def run(self, *args, **kwargs):
-        super(MaintenanceTranscodeVideoTask, self).run(
-            *args,
-            **kwargs
-        )
+        super(MaintenanceTranscodeVideoTask, self).run(*args, **kwargs)
 
         logger.debug("Updating deposit and record")
         # get deposit and record
         dep_video = deposit_video_resolver(self.deposit_id)
-        if 'recid' in dep_video:
-            rec_video = record_resolver.resolve(dep_video['recid'])[1]
+        if "recid" in dep_video:
+            rec_video = record_resolver.resolve(dep_video["recid"])[1]
             # sync deposit --> record
             dep_video._sync_record_files(record=rec_video)
             rec_video.commit()
@@ -55,5 +49,5 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
         db.session.commit()
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        task_id = kwargs.get('task_id', task_id)
+        task_id = kwargs.get("task_id", task_id)
         self.commit_status(task_id, Status.FAILURE, str(einfo))

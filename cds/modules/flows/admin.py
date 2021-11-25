@@ -24,8 +24,6 @@
 
 """Admin model views for Flows."""
 
-import uuid
-
 from flask import url_for
 from flask_admin.contrib.sqla import ModelView
 from flask_wtf import FlaskForm
@@ -37,6 +35,7 @@ from .models import FlowMetadata, TaskMetadata
 
 def link(text, link_func):
     """Generate a object formatter for links.."""
+
     def object_formatter(v, c, m, p):
         """Format object view link."""
         return Markup('<a href="{0}">{1}</a>'.format(link_func(m), text))
@@ -53,17 +52,27 @@ class FlowModelView(ModelView):
     can_delete = False
     can_view_details = True
     column_formatters = dict(
-        tasks=link('Tasks', lambda o: url_for(
-            'taskmetadata.index_view', search=o.id))
+        tasks=link(
+            "Tasks", lambda o: url_for("taskmetadata.index_view", search=o.id)
+        )
     )
 
-    column_list = ('id', 'name', 'payload', 'created', 'tasks')
+    column_list = (
+        "id",
+        "name",
+        "deposit_id",
+        "payload",
+        "user_id",
+        "is_last",
+        "created",
+        "tasks",
+    )
     column_labels = {
-        'id': 'UUID',
+        "id": "UUID",
     }
 
-    column_searchable_list = ('id', 'payload')
-    column_default_sort = ('updated', True)
+    column_searchable_list = ("id", "deposit_id", "payload")
+    column_default_sort = ("updated", True)
     page_size = 25
 
 
@@ -77,21 +86,26 @@ class TaskModelView(ModelView):
     can_view_details = True
     form_base_class = FlaskForm
 
-    column_list = ('id', 'name', 'flow.id', 'status', 'message', 'payload')
+    column_list = ("id", "name", "flow.id", "status", "payload", "message")
     column_labels = {
-        'id': 'UUID',
-        'flow.id': 'Flow UUID',
+        "id": "UUID",
+        "flow.id": "Flow UUID",
     }
-    column_searchable_list = ('flow.id', 'name')
-
-    column_default_sort = ('flow_id', True)
+    column_searchable_list = ("flow.id", "name", "status")
+    column_default_sort = ("flow_id", True)
     page_size = 25
 
 
 flow_model_view = dict(
-    modelview=FlowModelView, model=FlowMetadata, name='Flows', category='Flows',
+    modelview=FlowModelView,
+    model=FlowMetadata,
+    name="Flows",
+    category="Flows",
 )
 
 task_model_view = dict(
-    modelview=TaskModelView, model=TaskMetadata, name='Tasks', category='Flows',
+    modelview=TaskModelView,
+    model=TaskMetadata,
+    name="Tasks",
+    category="Flows",
 )

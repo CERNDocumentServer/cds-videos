@@ -22,8 +22,8 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Creation of announcements table"""
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '028ba0bf5f85'

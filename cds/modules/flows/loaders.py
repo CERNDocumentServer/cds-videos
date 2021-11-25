@@ -22,8 +22,8 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from flask import request
 from cds.modules.flows.errors import InvalidPayload
+from flask import request
 
 
 def extract_payload():
@@ -31,6 +31,6 @@ def extract_payload():
     if request.is_json:
         # Request.get_json() could be first called with silent=True.
         return request.get_json(silent=False, cache=False)
-    elif request.content_type == 'application/x-www-form-urlencoded':
+    elif request.content_type == "application/x-www-form-urlencoded":
         return dict(request.form)
     raise InvalidPayload(request.content_type)

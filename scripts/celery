@@ -29,7 +29,7 @@ script_path=$(dirname "$0")
 
 export FLASK_ENV=development
 
-celery worker -A invenio_app.celery -l INFO
+celery worker --beat -A invenio_app.celery -l INFO
 
 # If you are running MacOS Big Sur and you have an error with dynamic linker
 # AttributeError: dlsym(RTLD_DEFAULT, AbsoluteToNanoseconds): symbol not found

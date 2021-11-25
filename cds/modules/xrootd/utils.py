@@ -81,6 +81,7 @@ def file_opener_xrootd(path, *args, **kwargs):
     if current_app.config['XROOTD_ENABLED'] and \
             current_app.config['VIDEOS_XROOTD_ENDPOINT'] in path:
         from xrootdpyfs import XRootDPyFS
+
         # Get the filename
         _filename = path.split('/')[-1]
         # Remove filename from the path
@@ -96,6 +97,7 @@ def file_move_xrootd(src, dst, *args, **kwargs):
     if current_app.config['XROOTD_ENABLED'] and \
             current_app.config['VIDEOS_XROOTD_ENDPOINT'] in src:
         from xrootdpyfs import XRootDPyFS
+
         # Get the filename
         _filename_src = src.split('/')[-1]
         _filename_dst = dst.split('/')[-1]

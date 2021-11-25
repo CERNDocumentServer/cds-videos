@@ -9,10 +9,10 @@
 
 
 # revision identifiers, used by Alembic.
-revision = '27de8e449b4a'
+revision = "27de8e449b4a"
 down_revision = None
-branch_labels = (u'invenio-flow',)
-depends_on = 'dbdbc1b19cf2'
+branch_labels = (u"invenio-flow",)
+depends_on = "dbdbc1b19cf2"
 
 
 def upgrade():

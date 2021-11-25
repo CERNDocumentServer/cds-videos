@@ -31,8 +31,9 @@ from os.path import splitext
 from invenio_files_rest.models import as_object_version
 
 
-def on_download_rename_file(sender, obj):
+def on_download_rename_file(sender, **kwargs):
     """Rename files generated from master file when downloading."""
+    obj = kwargs["obj"]
     master_version_id = obj.get_tags().get('master') if obj else None
     if master_version_id:
         master_obj = as_object_version(master_version_id)
