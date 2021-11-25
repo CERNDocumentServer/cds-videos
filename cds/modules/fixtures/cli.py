@@ -44,12 +44,11 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_files.models import RecordsBuckets
 from invenio_sequencegenerator.api import Template
 
-from ..records.minters import catid_minter
-from ..records.api import Category, CDSVideosFilesIterator
-from ..records.serializers.smil import generate_smil_file
-
-
+from ..records.api import Category
 from ..records.api import CDSRecord as Record
+from ..records.api import CDSVideosFilesIterator
+from ..records.minters import catid_minter
+from ..records.serializers.smil import generate_smil_file
 from ..records.tasks import keywords_harvesting
 from ..records.utils import to_string
 

@@ -40,6 +40,10 @@ from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
+from invenio_deposit.api import Deposit, has_status, preserve
+from invenio_deposit.utils import mark_as_action
+from invenio_files_rest.models import (MultipartObject, ObjectVersion,
+                                       ObjectVersionTag, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import (PIDDoesNotExistError, PIDInvalidAction,
                                      ResolverError)
@@ -50,44 +54,36 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from invenio_deposit.api import Deposit, has_status, preserve
-from invenio_deposit.utils import mark_as_action
-from invenio_files_rest.models import (Bucket, Location, MultipartObject,
-                                       ObjectVersion, ObjectVersionTag,
-                                       as_bucket, as_object_version)
-
-from ..flows.api import Flow
+from ..flows.api import (Flow, FlowService,
+                         get_tasks_status_grouped_by_task_name,
+                         merge_tasks_status)
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
-from ..records.tasks import create_symlinks
 from ..records.utils import lowercase_value
 from ..records.validators import PartialDraft4Validator
-from ..flows.status import (
-    get_all_deposit_flows, get_deposit_last_flow, get_flow_tasks_status_by_task,
-     merge_tasks_status
-)
 from .errors import DiscardConflict
 from .resolver import get_video_pid
 
 PRESERVE_FIELDS = (
-    '_cds',
-    '_deposit',
-    '_buckets',
-    '_files',
-    'videos',
-    'recid',
-    'report_number',
-    'publication_date',
-    '_project_id',
-    'doi',
-    '_eos_library_path',
+    "_cds",
+    "_deposit",
+    "_buckets",
+    "_files",
+    "videos",
+    "recid",
+    "report_number",
+    "publication_date",
+    "_project_id",
+    "doi",
+    "_eos_library_path",
 )
 
 
 def required(fields):
     """Check required fields."""
+
     def check(f):
         @wraps(f)
         def wrapper(self, *args, **kwargs):
@@ -95,7 +91,9 @@ def required(fields):
                 if field not in self:
                     raise ValidationError(error)
             return f(self, *args, **kwargs)
+
         return wrapper
+
     return check
 
 
@@ -126,29 +124,31 @@ class CDSDeposit(Deposit):
         """Init."""
         super(CDSDeposit, self).__init__(*args, **kwargs)
         self._update_tasks_status()
-        self['_files'] = self._get_files_dump()
+        self["_files"] = self._get_files_dump()
 
     def _get_files_dump(self):
         """Get files without create the record_bucket."""
         bucket = self.bucket
         if bucket:
             return self.files_iter_cls(
-                self, bucket=bucket,
-                file_cls=self.file_cls).dumps()
+                self, bucket=bucket, file_cls=self.file_cls
+            ).dumps()
         return []
 
     @classmethod
     def get_record(cls, id_, with_deleted=False):
         """Get record instance."""
         deposit = super(CDSDeposit, cls).get_record(
-            id_=id_, with_deleted=with_deleted)
+            id_=id_, with_deleted=with_deleted
+        )
         return deposit
 
     @classmethod
     def get_records(cls, ids, with_deleted=False):
         """Get records."""
         deposits = super(CDSDeposit, cls).get_records(
-            ids=ids, with_deleted=with_deleted)
+            ids=ids, with_deleted=with_deleted
+        )
         return deposits
 
     @classmethod
@@ -169,21 +169,27 @@ class CDSDeposit(Deposit):
 
         Adds bucket creation immediately on deposit creation.
         """
-        if '_deposit' not in data:
+        if "_deposit" not in data:
             id_ = id_ or uuid.uuid4()
             cls.deposit_minter(id_, data)
-        data.setdefault('_cds', {})
-        data['_cds'].setdefault('state', {})
-        data.setdefault('keywords', [])
-        data.setdefault('license', [{
-            'license': 'CERN',
-            'material': '',
-            'url': 'http://copyright.web.cern.ch',
-        }])
-        if '_access' not in data:
-            data.setdefault('_access', {})
+        data.setdefault("_cds", {})
+        data["_cds"].setdefault("state", {})
+        data.setdefault("keywords", [])
+        data.setdefault(
+            "license",
+            [
+                {
+                    "license": "CERN",
+                    "material": "",
+                    "url": "http://copyright.web.cern.ch",
+                }
+            ],
+        )
+        if "_access" not in data:
+            data.setdefault("_access", {})
         deposit = super(CDSDeposit, cls).create(
-            data, id_=id_, validator=PartialDraft4Validator)
+            data, id_=id_, validator=PartialDraft4Validator
+        )
         return deposit
 
     @property
@@ -200,11 +206,13 @@ class CDSDeposit(Deposit):
     def update(self, *args, **kwargs):
         """Update only drafts."""
         # use always lower case in the access rights to prevent problems
-        if '_access' in self:
-            self['_access']['read'] = lowercase_value(
-                self['_access'].get('read', []))
-            self['_access']['update'] = lowercase_value(
-                self['_access'].get('update', []))
+        if "_access" in self:
+            self["_access"]["read"] = lowercase_value(
+                self["_access"].get("read", [])
+            )
+            self["_access"]["update"] = lowercase_value(
+                self["_access"].get("update", [])
+            )
         super(CDSDeposit, self).update(*args, **kwargs)
 
     @preserve(result=False, fields=PRESERVE_FIELDS)
@@ -216,14 +224,14 @@ class CDSDeposit(Deposit):
     def report_number(self):
         """Return report number."""
         try:
-            return self['report_number'][0]
+            return self["report_number"][0]
         except KeyError:
             return None
 
     @report_number.setter
     def report_number(self, value):
         """Set new report number."""
-        self['report_number'] = [value]
+        self["report_number"] = [value]
 
     def _publish_new(self, id_=None):
         """Mint report number immediately before first publishing."""
@@ -240,7 +248,7 @@ class CDSDeposit(Deposit):
         if self.sequence_name:
             report_number_minter(id_, self, **kwargs)
 
-    @has_status(status='published')
+    @has_status(status="published")
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator of this Deposit class.
 
@@ -252,15 +260,15 @@ class CDSDeposit(Deposit):
 
     def commit(self, **kwargs):
         """Set partial validator as default."""
-        if 'validator' not in kwargs:
-            kwargs['validator'] = PartialDraft4Validator
+        if "validator" not in kwargs:
+            kwargs["validator"] = PartialDraft4Validator
         return super(CDSDeposit, self).commit(**kwargs)
 
     @classmethod
     def get_record_schema(cls):
         """Get record schema."""
-        prefix = current_app.config['DEPOSIT_JSONSCHEMAS_PREFIX']
-        schema = cls._schema[len(prefix):]
+        prefix = current_app.config["DEPOSIT_JSONSCHEMAS_PREFIX"]
+        schema = cls._schema[len(prefix) :]
         return current_jsonschemas.path_to_url(schema)
 
     def dumps(self, **kwargs):
@@ -270,8 +278,8 @@ class CDSDeposit(Deposit):
 
     def _update_tasks_status(self):
         """Update tasks status."""
-        if '_cds' in self:
-            self['_cds']['state'] = self._current_tasks_status()
+        if "_cds" in self:
+            self["_cds"]["state"] = self._current_tasks_status()
 
     def _current_tasks_status(self):
         """Return default. Override method to handle different task status."""
@@ -288,12 +296,12 @@ class CDSDeposit(Deposit):
             snapshot = self.files.bucket.snapshot()
             self._fix_tags_refs_to_master(bucket=snapshot)
             # dump after fixing references
-            data['_files'] = self.files.dumps(bucket=snapshot.id)
+            data["_files"] = self.files.dumps(bucket=snapshot.id)
             snapshot.locked = False
 
             data = self._generate_smil_file(record_id, data, snapshot)
             # dump after smil generation
-            data['_files'] = self.files.dumps(bucket=snapshot.id)
+            data["_files"] = self.files.dumps(bucket=snapshot.id)
             # dump the snapshot id to the record bucket
             # we need this to avoid creatng a new bucket on `Record.create(...)`
             data["_buckets"]["record"] = str(snapshot.id)
@@ -301,9 +309,9 @@ class CDSDeposit(Deposit):
 
             yield data
 
-            db.session.add(RecordsBuckets(
-                record_id=record_id, bucket_id=snapshot.id
-            ))
+            db.session.add(
+                RecordsBuckets(record_id=record_id, bucket_id=snapshot.id)
+            )
         else:
             yield
 
@@ -311,46 +319,46 @@ class CDSDeposit(Deposit):
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a deposit."""
         try:
-            self['_cds']['modified_by'] = int(current_user.get_id())
+            self["_cds"]["modified_by"] = int(current_user.get_id())
         except AttributeError:
             current_app.logger.warning(
-                'No current user found, keeping previous value for'
-                ' _cds.modified_by')
-        if 'publication_date' not in self:
+                "No current user found, keeping previous value for"
+                " _cds.modified_by"
+            )
+        if "publication_date" not in self:
             now = datetime.datetime.utcnow().date().isoformat()
-            self['publication_date'] = now
+            self["publication_date"] = now
         return super(CDSDeposit, self).publish(pid=pid, id_=id_, **kwargs)
 
     def has_keyword(self, keyword):
         """Check if the video has the kwyword."""
         kw_ref = keyword.ref
-        return any(keyword['$ref'] == kw_ref
-                   for keyword in self['keywords'])
+        return any(keyword["$ref"] == kw_ref for keyword in self["keywords"])
 
     def add_keyword(self, keyword):
         """Add a new keyword."""
         if not self.has_keyword(keyword):
-            self['keywords'].append({'$ref': keyword.ref})
+            self["keywords"].append({"$ref": keyword.ref})
 
     def remove_keyword(self, keyword):
         """Remove a keyword."""
         ref = keyword.ref
-        self['keywords'] = list(filter(
-            lambda x: x['$ref'] != ref, self['keywords']
-        ))
+        self["keywords"] = list(
+            filter(lambda x: x["$ref"] != ref, self["keywords"])
+        )
 
     def has_record(self):
         """Check if deposit is published at least one time."""
-        return self['_deposit'].get('pid') is not None
+        return self["_deposit"].get("pid") is not None
 
     def is_published(self):
         """Check if deposit is currently published."""
-        return self['_deposit']['status'] == 'published'
+        return self["_deposit"]["status"] == "published"
 
     def has_minted_doi(self):
         """Check if deposit has a minted DOI."""
-        if self.get('doi'):
-            return is_local_doi(self['doi']) if self.has_record() else False
+        if self.get("doi"):
+            return is_local_doi(self["doi"]) if self.has_record() else False
         return False  # There is no DOI at all
 
     def _prepare_edit(self, record):
@@ -372,11 +380,11 @@ class CDSDeposit(Deposit):
             self.files.bucket.sync(bucket=bucket, delete_extras=False)
             self._fix_tags_refs_to_master(bucket=bucket)
             # dump after fixing references
-            record['_files'] = self.files.dumps(bucket=bucket.id)
+            record["_files"] = self.files.dumps(bucket=bucket.id)
 
             record = self._generate_smil_file(record.id, record, bucket)
             # dump after smil generation
-            record['_files'] = self.files.dumps(bucket=bucket.id)
+            record["_files"] = self.files.dumps(bucket=bucket.id)
             bucket.locked = True
 
         return record
@@ -387,12 +395,17 @@ class CDSDeposit(Deposit):
         # snapshot bucket for the each file
         snapshot_obj_list = ObjectVersion.get_by_bucket(bucket=bucket)
         old_to_new_version = {
-            str(self.files[obj.key]['version_id']): str(obj.version_id)
+            str(self.files[obj.key]["version_id"]): str(obj.version_id)
             for obj in snapshot_obj_list
-            if 'master' not in obj.get_tags() and obj.key in self.files}
+            if "master" not in obj.get_tags() and obj.key in self.files
+        }
         # list of tags with 'master' key
-        slave_tags = [tag for obj in snapshot_obj_list for tag in obj.tags
-                      if tag.key == 'master']
+        slave_tags = [
+            tag
+            for obj in snapshot_obj_list
+            for tag in obj.tags
+            if tag.key == "master"
+        ]
         # change master of slave videos to new master object versions
         for tag in slave_tags:
             # note: the smil file probably already point to the right
@@ -408,6 +421,7 @@ class CDSDeposit(Deposit):
         if master_video:
             assert not bucket.locked
             from cds.modules.records.serializers.smil import generate_smil_file
+
             generate_smil_file(record_id, data, bucket, master_video)
         return data
 
@@ -415,13 +429,13 @@ class CDSDeposit(Deposit):
 # TODO move inside Video class
 def video_build_url(video_id):
     """Build video url."""
-    return 'https://cds.cern.ch/api/deposits/video/{0}'.format(str(video_id))
+    return "https://cds.cern.ch/api/deposits/video/{0}".format(str(video_id))
 
 
 # TODO move inside Video class
 def record_build_url(video_id):
     """Build video url."""
-    return 'https://cds.cern.ch/api/record/{0}'.format(str(video_id))
+    return "https://cds.cern.ch/api/record/{0}".format(str(video_id))
 
 
 def record_unbuild_url(url):
@@ -434,7 +448,7 @@ def is_deposit(url):
     """Check if it's a deposit or a record."""
     # TODO can we improve check?
     try:
-        return 'deposit' in url
+        return "deposit" in url
     except TypeError:
         return False
 
@@ -442,28 +456,32 @@ def is_deposit(url):
 def get_master_object(bucket):
     """Get master ObjectVersion from a bucket."""
     # TODO do as we do in `get_master_video_file()`?
-    return ObjectVersion.get_by_bucket(bucket)\
-        .join(ObjectVersionTag)\
+    return (
+        ObjectVersion.get_by_bucket(bucket)
+        .join(ObjectVersionTag)
         .filter(
-            ObjectVersionTag.key == 'context_type',
-            ObjectVersionTag.value == 'master')\
+            ObjectVersionTag.key == "context_type",
+            ObjectVersionTag.value == "master",
+        )
         .one_or_none()
+    )
 
 
 def is_project_record(record):
     """Check if it is a project record."""
-    project_schema = current_app.config['DEPOSIT_JSONSCHEMAS_PREFIX'] + \
-        current_jsonschemas.url_to_path(record['$schema'])
+    project_schema = current_app.config[
+        "DEPOSIT_JSONSCHEMAS_PREFIX"
+    ] + current_jsonschemas.url_to_path(record["$schema"])
     return project_schema == Project._schema
 
 
 class Project(CDSDeposit):
     """Define API for a project."""
 
-    sequence_name = 'project-v1_0_0'
+    sequence_name = "project-v1_0_0"
     """Sequence identifier."""
 
-    _schema = 'deposits/records/videos/project/project-v1.0.0.json'
+    _schema = "deposits/records/videos/project/project-v1.0.0.json"
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
@@ -471,18 +489,19 @@ class Project(CDSDeposit):
 
         Adds bucket creation immediately on deposit creation.
         """
-        kwargs.setdefault('bucket_location', 'videos')
-        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
-        data.setdefault('videos', [])
-        data.setdefault('_access', {})
-        data.setdefault('_cds', {})
+        kwargs.setdefault("bucket_location", "videos")
+        data["$schema"] = current_jsonschemas.path_to_url(cls._schema)
+        data.setdefault("videos", [])
+        data.setdefault("_access", {})
+        data.setdefault("_cds", {})
         # Add the current user to the ``_access.update`` list
         try:
-            data['_access']['update'] = [current_user.email]
-            data['_cds']['current_user_mail'] = current_user.email
+            data["_access"]["update"] = [current_user.email]
+            data["_cds"]["current_user_mail"] = current_user.email
         except AttributeError:
             current_app.logger.warning(
-                'No current user found, _access.update will stay empty.')
+                "No current user found, _access.update will stay empty."
+            )
         return super(Project, cls).create(data, id_=id_, **kwargs)
 
     @property
@@ -496,16 +515,16 @@ class Project(CDSDeposit):
 
         :returns: A list of video ids.
         """
-        if len(self['videos']) > 0 and self['videos'][0].get('$ref', ''):
+        if len(self["videos"]) > 0 and self["videos"][0].get("$ref", ""):
             return [record_unbuild_url(ref) for ref in self._video_refs]
 
         #  return []
         ids = []
-        for video in self['videos']:
+        for video in self["videos"]:
             if Video(video).is_published():
-                ids.append(video['_deposit'].get('pid'))
+                ids.append(video["_deposit"].get("pid"))
             else:
-                ids.append(video['_deposit']['id'])
+                ids.append(video["_deposit"]["id"])
         return ids
 
     @property
@@ -515,9 +534,9 @@ class Project(CDSDeposit):
         :returns: A list of video references.
         """
         refs = []
-        for video in self.get('videos', []):
-            if '$ref' in video:
-                refs.append(video['$ref'])
+        for video in self.get("videos", []):
+            if "$ref" in video:
+                refs.append(video["$ref"])
             else:
                 refs.append(Video(video).ref)
         return refs
@@ -542,7 +561,7 @@ class Project(CDSDeposit):
         for (key, value) in enumerate(self._video_refs):
             try:
                 index = old_refs.index(value)
-                self['videos'][key] = {'$ref': new_refs[index]}
+                self["videos"][key] = {"$ref": new_refs[index]}
             except ValueError:
                 pass
 
@@ -552,24 +571,30 @@ class Project(CDSDeposit):
         :param refs: List contains the video references to delete.
         """
         for index in self._find_refs(refs).keys():
-            del self['videos'][index]
+            del self["videos"][index]
 
     def _publish_videos(self):
         """Publish all videos that are still deposits."""
         # get reference of all video deposits still not published
-        refs_old = [video_ref for video_ref in self._video_refs
-                    if is_deposit(video_ref)]
+        refs_old = [
+            video_ref
+            for video_ref in self._video_refs
+            if is_deposit(video_ref)
+        ]
 
         # extract the PIDs from the video deposits
         ids_old = [record_unbuild_url(video_ref) for video_ref in refs_old]
 
         # publish them and get the new PID
-        videos_published = [video.publish().commit()
-                            for video in deposit_videos_resolver(ids_old)]
+        videos_published = [
+            video.publish().commit()
+            for video in deposit_videos_resolver(ids_old)
+        ]
 
         # get new video references
-        refs_new = [record_build_url(video['recid'])
-                    for video in videos_published]
+        refs_new = [
+            record_build_url(video["recid"]) for video in videos_published
+        ]
 
         # update project video references
         self._update_videos(refs_old, refs_new)
@@ -579,14 +604,17 @@ class Project(CDSDeposit):
     def _publish_new(self, id_=None):
         """Publish new project and update all the video pointers."""
         record = super(Project, self)._publish_new(id_=id_)
-        patch = [{
-            'op': 'replace',
-            'path': '/_project_id',
-            'value': str(record['recid'])
-        }]
+        patch = [
+            {
+                "op": "replace",
+                "path": "/_project_id",
+                "value": str(record["recid"]),
+            }
+        ]
         for video_id in self.video_ids:
             video = CDSRecord.get_record(
-                record_resolver.resolve(video_id)[0].object_uuid)
+                record_resolver.resolve(video_id)[0].object_uuid
+            )
             video.patch(patch).commit()
         return record
 
@@ -611,7 +639,7 @@ class Project(CDSDeposit):
         """Discard project changes."""
         _, record = self.fetch_published()
         # if the list of videos is different return error
-        if self['videos'] != record['videos']:
+        if self["videos"] != record["videos"]:
             raise DiscardConflict()
         # discard project
         return super(Project, self).discard(pid=pid)
@@ -622,27 +650,27 @@ class Project(CDSDeposit):
         indices = self._find_refs([video_ref])
         if indices:
             # update video refs
-            self['videos'][indices[video_ref]] = {'$ref': video_ref}
+            self["videos"][indices[video_ref]] = {"$ref": video_ref}
         else:
             # add new one
-            self['videos'].append({'$ref': video_ref})
+            self["videos"].append({"$ref": video_ref})
 
     def delete(self, force=True, pid=None):
         """Delete a project."""
         videos = deposit_videos_resolver(self.video_ids)
         # check if I can delete all videos
-        if any(video['_deposit'].get('pid') for video in videos):
+        if any(video["_deposit"].get("pid") for video in videos):
             raise PIDInvalidAction()
         # delete all videos
         for video in videos:
             video.delete(force=force)
             # mark video PIDs as DELETED
-            pid = get_video_pid(pid_value=video['_deposit']['id'])
+            pid = get_video_pid(pid_value=video["_deposit"]["id"])
             if not pid.is_deleted():
                 pid.delete()
         return super(Project, self).delete(force=force, pid=pid)
 
-    @has_status(status='draft')
+    @has_status(status="draft")
     def reserve_report_number(self):
         """Reserve project's report number until first publishing."""
         report_number_minter(None, self)
@@ -651,42 +679,48 @@ class Project(CDSDeposit):
         """Mint project's report number."""
         assert self.report_number is not None
         # Register reserved report number
-        pid = PersistentIdentifier.get('rn', self.report_number)
-        pid.assign('rec', id_, overwrite=True)
+        pid = PersistentIdentifier.get("rn", self.report_number)
+        pid.assign("rec", id_, overwrite=True)
         assert pid.register()
 
-    @required({
-        'category': 'Category field not found in the project',
-        'type': 'Type field not found in the project',
-    })
+    @required(
+        {
+            "category": "Category field not found in the project",
+            "type": "Type field not found in the project",
+        }
+    )
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Projects."""
         try:
-            year = arrow.get(self['date']).year
+            year = arrow.get(self["date"]).year
         except KeyError:
             year = datetime.date.today().year
 
-        return Sequence(self.sequence_name,
-                        year=year,
-                        category=self['category'],
-                        type=self['type']), kwargs
+        return (
+            Sequence(
+                self.sequence_name,
+                year=year,
+                category=self["category"],
+                type=self["type"],
+            ),
+            kwargs,
+        )
 
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
         status = {}
         for video in self.videos:
-            status = merge_tasks_status(
-                status, video['_cds'].get('state', {}))
+            status = merge_tasks_status(status, video["_cds"].get("state", {}))
         return status
 
     @classmethod
     def build_video_ref(cls, video):
         """Build the video reference."""
         if video.is_published():
-            url = record_build_url(video['_deposit']['pid']['value'])
+            url = record_build_url(video["_deposit"]["pid"]["value"])
         else:
-            url = video_build_url(video['_deposit']['id'])
-        return {'$ref': url}
+            url = video_build_url(video["_deposit"]["id"])
+        return {"$ref": url}
 
     @property
     def videos(self):
@@ -696,9 +730,9 @@ class Project(CDSDeposit):
             if is_deposit(ref):
                 videos.append(deposit_video_resolver(record_unbuild_url(ref)))
             else:
-                videos.append(record_resolver.resolve(
-                    record_unbuild_url(ref)
-                )[1])
+                videos.append(
+                    record_resolver.resolve(record_unbuild_url(ref))[1]
+                )
         return videos
 
     def update(self, *args, **kwargs):
@@ -716,7 +750,7 @@ class Project(CDSDeposit):
                 video.commit(validator=PartialDraft4Validator)
             if not isinstance(video, Video):
                 # if it's a record, sync also video deposit
-                deposit_video = deposit_video_resolver(video['_deposit']['id'])
+                deposit_video = deposit_video_resolver(video["_deposit"]["id"])
                 if self._sync_fields(video=deposit_video):
                     deposit_video.commit(validator=PartialDraft4Validator)
 
@@ -724,21 +758,23 @@ class Project(CDSDeposit):
         """Sync some fields from project."""
         changed = False
         # Only change metadata if the video is not published
-        project_access = self.get('_access', {}).get('update')
-        project_created_by = self['_deposit'].get('created_by')
+        project_access = self.get("_access", {}).get("update")
+        project_created_by = self["_deposit"].get("created_by")
 
-        if video.get('_access', {}).get('update') != project_access \
-                and project_access:
+        if (
+            video.get("_access", {}).get("update") != project_access
+            and project_access
+        ):
             changed = True
             # sync access rights
-            if '_access' in video:
-                video['_access']['update'] = deepcopy(project_access)
+            if "_access" in video:
+                video["_access"]["update"] = deepcopy(project_access)
             else:
-                video['_access'] = dict(update=deepcopy(project_access))
-        if video['_deposit'].get('created_by') != project_created_by:
+                video["_access"] = dict(update=deepcopy(project_access))
+        if video["_deposit"].get("created_by") != project_created_by:
             changed = True
             # sync owner
-            video['_deposit']['created_by'] = project_created_by
+            video["_deposit"]["created_by"] = project_created_by
 
         return changed
 
@@ -746,15 +782,15 @@ class Project(CDSDeposit):
 class Video(CDSDeposit):
     """Define API for a video."""
 
-    sequence_name = 'video-v1_0_0'
+    sequence_name = "video-v1_0_0"
     """Sequence identifier."""
 
-    _schema = 'deposits/records/videos/video/video-v1.0.0.json'
+    _schema = "deposits/records/videos/video/video-v1.0.0.json"
 
     _tasks_initial_state = {
-        'file_transcode': states.PENDING,
-        'file_video_extract_frames': states.PENDING,
-        'file_video_metadata_extraction': states.PENDING
+        "file_transcode": states.PENDING,
+        "file_video_extract_frames": states.PENDING,
+        "file_video_metadata_extraction": states.PENDING,
     }
 
     @classmethod
@@ -763,17 +799,20 @@ class Video(CDSDeposit):
 
         Adds bucket creation immediately on deposit creation.
         """
-        kwargs.setdefault('bucket_location', 'videos')
-        project_id = data.get('_project_id')
-        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+        kwargs.setdefault("bucket_location", "videos")
+        project_id = data.get("_project_id")
+        data["$schema"] = current_jsonschemas.path_to_url(cls._schema)
         # set default copyright
-        data.setdefault('copyright', {
-            'holder': 'CERN',
-            'year': str(datetime.date.today().year),
-            'url': 'http://copyright.web.cern.ch',
-        })
-        data.setdefault('_cds', {})
-        data['_cds'].setdefault('state', cls._tasks_initial_state)
+        data.setdefault(
+            "copyright",
+            {
+                "holder": "CERN",
+                "year": str(datetime.date.today().year),
+                "url": "http://copyright.web.cern.ch",
+            },
+        )
+        data.setdefault("_cds", {})
+        data["_cds"].setdefault("state", cls._tasks_initial_state)
 
         project = deposit_project_resolver(project_id)
         # create video
@@ -783,8 +822,8 @@ class Video(CDSDeposit):
         # copy access rights from project
         project._sync_fields(video=video_new)
         # copy license only at creation time
-        if not video_new.get('license'):
-            video_new['license'] = deepcopy(project.get('license'))
+        if not video_new.get("license"):
+            video_new["license"] = deepcopy(project.get("license"))
 
         project.commit()
         video_new.commit()
@@ -793,17 +832,17 @@ class Video(CDSDeposit):
     @property
     def ref(self):
         """Get video url (for the record if it's published)."""
-        if self.status == 'published':
-            return record_build_url(self['recid'])
+        if self.status == "published":
+            return record_build_url(self["recid"])
         else:
-            return video_build_url(self['_deposit']['id'])
+            return video_build_url(self["_deposit"]["id"])
 
     @property
     def project(self):
         """Get the related project."""
-        if not hasattr(self, '_project'):
+        if not hasattr(self, "_project"):
             try:
-                project_id = self['_project_id']
+                project_id = self["_project_id"]
             except KeyError:
                 return None
             try:
@@ -812,31 +851,32 @@ class Video(CDSDeposit):
             except PIDDoesNotExistError:
                 # get the record project
                 _, record = record_resolver.resolve(project_id)
-                project_id = record['_deposit']['id']
+                project_id = record["_deposit"]["id"]
                 self._project = deposit_project_resolver(project_id=project_id)
         return self._project
 
     @project.setter
     def project(self, project):
         """Set a project."""
-        self['_project_id'] = project['_deposit']['id']
+        self["_project_id"] = project["_deposit"]["id"]
         project._add_video(self)
 
     def _rename_subtitles(self):
         """Rename subtitles."""
         # Pattern to extract subtitle's filename and iso language
-        pattern = re.compile('.*_(?P<iso_lang>[a-zA-Z]{2})\.vtt$')
+        pattern = re.compile(".*_(?P<iso_lang>[a-zA-Z]{2})\.vtt$")
         subtitles = CDSVideosFilesIterator.get_video_subtitles(self)
         for subtitle_file in subtitles:
-            subtitle_obj = as_object_version(subtitle_file['version_id'])
-            match = pattern.match(subtitle_file['key'])
+            subtitle_obj = as_object_version(subtitle_file["version_id"])
+            match = pattern.match(subtitle_file["key"])
             if match:
-                subtitle_obj_key = '{}_{}.vtt'.format(self['report_number'][0],
-                                                      match.group('iso_lang'))
+                subtitle_obj_key = "{}_{}.vtt".format(
+                    self["report_number"][0], match.group("iso_lang")
+                )
                 obj = ObjectVersion.create(
                     bucket=subtitle_obj.bucket,
                     key=subtitle_obj_key,
-                    _file_id=subtitle_obj.file_id
+                    _file_id=subtitle_obj.file_id,
                 )
                 # copy tags to the newly created object version
                 for tag in subtitle_obj.tags:
@@ -845,18 +885,19 @@ class Video(CDSDeposit):
 
     def _rename_master_file(self, master_file):
         """Rename master file."""
-        master_obj = as_object_version(master_file['version_id'])
-        master_obj.key = '{}.{}'.format(
-            self['report_number'][0],
-            master_file.get('content_type')
-            or splitext(master_file['key'])[1][1:].lower())
+        master_obj = as_object_version(master_file["version_id"])
+        master_obj.key = "{}.{}".format(
+            self["report_number"][0],
+            master_file.get("content_type")
+            or splitext(master_file["key"])[1][1:].lower(),
+        )
         db.session.add(master_obj)
 
     def _publish_new(self, id_=None):
         """Rename master file and subtitles and publish for the first time."""
         id_ = id_ or uuid.uuid4()
         self.mint_report_number(id_)
-        self['_files'] = self.files.dumps()
+        self["_files"] = self.files.dumps()
 
         master_file = CDSVideosFilesIterator.get_master_video_file(self)
         # This is needed because in tests there is not always a master file
@@ -868,13 +909,14 @@ class Video(CDSDeposit):
 
     def _publish_edited(self):
         """Rename subtitles and publish."""
-        self['_files'] = self.files.dumps()
+        self["_files"] = self.files.dumps()
         self._rename_subtitles()
         # dump again renamed subtitles
-        self['_files'] = self.files.dumps()
+        self["_files"] = self.files.dumps()
 
         from cds.modules.records.permissions import is_public
-        if is_public(self, 'read'):
+
+        if is_public(self, "read"):
             # Mint the doi if necessary
             doi_minter(record_uuid=self.id, data=self)
 
@@ -884,17 +926,19 @@ class Video(CDSDeposit):
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a video and update the related project."""
         # save a copy of the old PID
-        video_old_id = self['_deposit']['id']
+        video_old_id = self["_deposit"]["id"]
         try:
-            self['category'] = self.project['category']
-            self['type'] = self.project['type']
+            self["category"] = self.project["category"]
+            self["type"] = self.project["type"]
         except KeyError:
             raise ValidationError(
-                message='category and/or type not found in the project')
-        if '_access' not in self:
-            self['_access'] = {}
-        self['_access']['update'] = self.project.get(
-            '_access', {}).get('update', [])
+                message="category and/or type not found in the project"
+            )
+        if "_access" not in self:
+            self["_access"] = {}
+        self["_access"]["update"] = self.project.get("_access", {}).get(
+            "update", []
+        )
         self.project._sync_fields(self)
         # generate human-readable duration
         self.generate_duration()
@@ -902,7 +946,7 @@ class Video(CDSDeposit):
         self._create_tags()
 
         previous_record = None
-        if 'pid' in self['_deposit']:
+        if "pid" in self["_deposit"]:
             try:
                 _, previous_record = self.fetch_published()
                 previous_record = deepcopy(previous_record)
@@ -911,21 +955,17 @@ class Video(CDSDeposit):
                 pass
 
         # publish the video
-        video_published = super(Video, self).publish(pid=pid, id_=id_,
-                                                     **kwargs)
+        video_published = super(Video, self).publish(
+            pid=pid, id_=id_, **kwargs
+        )
         _, record_new = self.fetch_published()
 
         # update associated project
         video_published.project._update_videos(
             [video_build_url(video_old_id)],
-            [record_build_url(record_new['recid'])]
+            [record_build_url(record_new["recid"])],
         )
         video_published.project.commit()
-
-        # create file symlinks delayed (waiting the commit)
-        create_symlinks.s(
-            previous_record=previous_record, record_uuid=str(record_new.id)
-        ).apply_async(countdown=90)
 
         return video_published
 
@@ -933,15 +973,15 @@ class Video(CDSDeposit):
     def edit(self, pid=None):
         """Edit a video and update the related project."""
         # save a copy of the recid
-        video_old_id = self['recid']
+        video_old_id = self["recid"]
         # edit the video
         video_new = super(Video, self).edit(pid=pid)
         # update project reference from recid to depid
-        video_new['_project_id'] = self.project['_deposit']['id']
+        video_new["_project_id"] = self.project["_deposit"]["id"]
         # update associated project
         video_new.project._update_videos(
             [record_build_url(video_old_id)],
-            [video_build_url(video_new['_deposit']['id'])]
+            [video_build_url(video_new["_deposit"]["id"])],
         )
         video_new.project.commit()
         assert video_new.report_number
@@ -949,9 +989,11 @@ class Video(CDSDeposit):
 
     def _clean_tasks(self):
         """Clean all tasks."""
-        flows = get_all_deposit_flows(deposit_id=self['_deposit']['id'])
+        flows = Flow.get_by_deposit(
+            deposit_id=self["_deposit"]["id"], is_last=False, multiple=True
+        )
         for flow in flows:
-            Flow(model=flow).delete()
+            FlowService(flow).delete()
 
     @mark_as_action
     def delete(self, force=True, pid=None):
@@ -973,24 +1015,25 @@ class Video(CDSDeposit):
         video_old_ref = self.ref
         video_discarded = super(Video, self).discard(pid=pid)
         video_discarded.project._update_videos(
-            [video_old_ref],
-            [video_discarded.ref]
+            [video_old_ref], [video_discarded.ref]
         )
         return video_discarded
 
     def assign_report_number(self, report_number):
         """Assign a report number to the video and parent."""
         project = self.project
-        project_rn = report_number.rsplit('-', 1)[0]
+        project_rn = report_number.rsplit("-", 1)[0]
         if project.report_number is None:
-            project['report_number'] = [project_rn]
+            project["report_number"] = [project_rn]
             project.commit()
-        elif project_rn != project['report_number'][0]:
+        elif project_rn != project["report_number"][0]:
             raise ValueError(
-                '{0} does not match the project report number {1}'.format(
-                    report_number, project['report_number'][0]))
+                "{0} does not match the project report number {1}".format(
+                    report_number, project["report_number"][0]
+                )
+            )
 
-        self['report_number'] = [report_number]
+        self["report_number"] = [report_number]
         self.commit()
 
     def mint_report_number(self, id_, **kwargs):
@@ -1004,90 +1047,101 @@ class Video(CDSDeposit):
 
         if self.report_number is not None:
             # Register reserved report number
-            pid = PersistentIdentifier.get('rn', self.report_number)
-            pid.assign('rec', id_, overwrite=True)
+            pid = PersistentIdentifier.get("rn", self.report_number)
+            pid.assign("rec", id_, overwrite=True)
             assert pid.register()
         else:
             super(Video, self).mint_report_number(
-                id_, parent_report_number=self.project.report_number)
+                id_, parent_report_number=self.project.report_number
+            )
 
-    @has_status(status='published')
+    @has_status(status="published")
     def get_report_number_sequence(self, **kwargs):
         """Get the sequence generator for Videos."""
-        assert 'parent_report_number' in kwargs
-        parent_rn = kwargs.pop('parent_report_number')
+        assert "parent_report_number" in kwargs
+        parent_rn = kwargs.pop("parent_report_number")
         parent_name = self.project.sequence_name
         return Sequence(self.sequence_name, **{parent_name: parent_rn}), kwargs
 
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
-        flow_model = get_deposit_last_flow(self['_deposit']['id'])
-        if flow_model:
-            flow = Flow(model=flow_model)
-            return get_flow_tasks_status_by_task(flow)
+        flow = Flow.get_by_deposit(self["_deposit"]["id"])
+        if flow:
+            return get_tasks_status_grouped_by_task_name(flow)
         if "state" in self.get("_cds", {}):
             return self["_cds"]["state"]
         return {}
 
     def generate_duration(self):
         """Generate human-readable duration field."""
-        seconds = float(self['_cds']['extracted_metadata']['duration'])
+        seconds = float(self["_cds"]["extracted_metadata"]["duration"])
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
-        self['duration'] = '{0:02d}:{1:02d}:{2:02d}'.format(
-            int(hours), int(minutes), int(seconds))
+        self["duration"] = "{0:02d}:{1:02d}:{2:02d}".format(
+            int(hours), int(minutes), int(seconds)
+        )
 
     def _create_tags(self):
         """Create additional tags."""
         # Subtitle file
         pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
-        objs = [o for o in sorted_files_from_bucket(self._bucket)
-                if pattern.match(o.key)]
+        objs = [
+            o
+            for o in sorted_files_from_bucket(self._bucket)
+            if pattern.match(o.key)
+        ]
         with db.session.begin_nested():
             for obj in objs:
                 # language tag
                 found = pattern.findall(obj.key)
                 if len(found) == 1:
                     lang = found[0]
-                    ObjectVersionTag.create_or_update(obj, 'language', lang)
+                    ObjectVersionTag.create_or_update(obj, "language", lang)
                 else:
                     # clean to be sure there is no some previous value
-                    ObjectVersionTag.delete(obj, 'language')
+                    ObjectVersionTag.delete(obj, "language")
                 # other tags
-                ObjectVersionTag.create_or_update(obj, 'content_type', 'vtt')
+                ObjectVersionTag.create_or_update(obj, "content_type", "vtt")
                 ObjectVersionTag.create_or_update(
-                    obj, 'context_type', 'subtitle')
+                    obj, "context_type", "subtitle"
+                )
                 ObjectVersionTag.create_or_update(
-                    obj, 'media_type', 'subtitle')
+                    obj, "media_type", "subtitle"
+                )
                 # refresh object
                 db.session.refresh(obj)
 
             # Poster frame
-            pattern = re.compile('^poster\.(jpg|png)$')
+            pattern = re.compile("^poster\.(jpg|png)$")
             try:
-                poster = [o for o in sorted_files_from_bucket(self._bucket)
-                          if pattern.match(o.key)][0]
+                poster = [
+                    o
+                    for o in sorted_files_from_bucket(self._bucket)
+                    if pattern.match(o.key)
+                ][0]
             except IndexError:
                 return
 
             ext = pattern.findall(poster.key)[0]
             # frame tags
-            ObjectVersionTag.create_or_update(poster, 'content_type', ext)
-            ObjectVersionTag.create_or_update(poster, 'context_type', 'poster')
-            ObjectVersionTag.create_or_update(poster, 'media_type', 'image')
+            ObjectVersionTag.create_or_update(poster, "content_type", ext)
+            ObjectVersionTag.create_or_update(poster, "context_type", "poster")
+            ObjectVersionTag.create_or_update(poster, "media_type", "image")
             # refresh object
             db.session.refresh(poster)
 
 
 project_resolver = Resolver(
-    pid_type='depid', object_type='rec',
-    getter=partial(Project.get_record, with_deleted=True)
+    pid_type="depid",
+    object_type="rec",
+    getter=partial(Project.get_record, with_deleted=True),
 )
 
 
 video_resolver = Resolver(
-    pid_type='depid', object_type='rec',
-    getter=partial(Video.get_record, with_deleted=True)
+    pid_type="depid",
+    object_type="rec",
+    getter=partial(Video.get_record, with_deleted=True),
 )
 
 

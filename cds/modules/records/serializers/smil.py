@@ -25,8 +25,11 @@ from __future__ import absolute_import, print_function
 
 from flask import render_template
 from invenio_db import db
-from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
-                                       as_object_version)
+from invenio_files_rest.models import (
+    ObjectVersion,
+    ObjectVersionTag,
+    as_object_version,
+)
 from invenio_rest.errors import FieldError, RESTValidationError
 from six import BytesIO
 
@@ -46,10 +49,12 @@ class SmilSerializer(object):
         :param record: Record instance.
         :param links_factory: Factory function for record links.
         """
-        if record['$schema'] != Video.get_record_schema() and not kwargs.get(
-                'skip_schema_validation'):
+        if record["$schema"] != Video.get_record_schema() and not kwargs.get(
+            "skip_schema_validation"
+        ):
             raise RESTValidationError(
-                errors=[FieldError(str(record.id), 'Unsupported format')])
+                errors=[FieldError(str(record.id), "Unsupported format")]
+            )
         return Smil(record=record).format()
 
 
@@ -63,7 +68,7 @@ class Smil(object):
     def format(self):
         """Return the contents of the smil file as a string."""
         videos_data = self._format_videos(self.record)
-        return render_template('cds_records/video.smil', videos=videos_data)
+        return render_template("cds_records/video.smil", videos=videos_data)
 
     def _sort(self, subformats):
         """Returns the subformats sorted in a specific order.
@@ -77,11 +82,11 @@ class Smil(object):
         index = None
         for idx, subformat in enumerate(subformats):
             # get the index of the 720p video subformat video
-            if (subformat.get('tags', {}).get('height') == '720'):
+            if subformat.get("tags", {}).get("height") == "720":
                 index = idx
                 break
             # get the index of the 480p video subformat video
-            if (subformat.get('tags', {}).get('height') == '480'):
+            if subformat.get("tags", {}).get("height") == "480":
                 index = idx
 
         # move the 720p/480p video subformat to the beginning
@@ -97,15 +102,19 @@ class Smil(object):
             CDSVideosFilesIterator.get_video_subformats(master_file)
         )
         for video in sorted_subformats:
-            tags = video['tags']
+            tags = video["tags"]
             # If the 'smil' config variable is False,
             # don't add this video to the SMIL file
-            if tags.get('smil', False):
-                yield dict(
-                    src=get_relative_path(video['version_id']),
-                    width=tags['width'],
-                    height=tags['height'],
-                    bit_rate=tags['video_bitrate'])
+            if not tags.get("smil", False):
+                continue
+
+            bitrate = tags.get("total_bitrate", tags.get("video_bitrate", ""))
+            yield dict(
+                src=get_relative_path(video["version_id"]),
+                width=tags["width"],
+                height=tags["height"],
+                total_bitrate=bitrate,
+            )
 
 
 def generate_smil_file(record_id, record, bucket, master_object, **kwargs):
@@ -114,14 +123,17 @@ def generate_smil_file(record_id, record, bucket, master_object, **kwargs):
 
     # Generate SMIL file
     master_key = master_object.key
-    smil_key = '{0}.smil'.format(master_key.rsplit('.', 1)[0])
+    smil_key = "{0}.smil".format(master_key.rsplit(".", 1)[0])
     smil_content = SmilSerializer.serialize(record_id, record, **kwargs)
 
     # Create ObjectVersion for SMIL file
     with db.session.begin_nested():
         obj = ObjectVersion.create(
-            bucket=bucket, key=smil_key, stream=BytesIO(smil_content.encode()),
-            size=len(smil_content))  # TODO: verify!
-        ObjectVersionTag.create(obj, 'master', str(master_object.version_id))
-        ObjectVersionTag.create(obj, 'context_type', 'playlist')
-        ObjectVersionTag.create(obj, 'media_type', 'text')
+            bucket=bucket,
+            key=smil_key,
+            stream=BytesIO(smil_content.encode()),
+            size=len(smil_content),
+        )  # TODO: verify!
+        ObjectVersionTag.create(obj, "master", str(master_object.version_id))
+        ObjectVersionTag.create(obj, "context_type", "playlist")
+        ObjectVersionTag.create(obj, "media_type", "text")

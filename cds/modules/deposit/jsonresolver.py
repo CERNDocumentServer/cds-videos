@@ -28,7 +28,7 @@ from __future__ import absolute_import, print_function
 
 import jsonresolver
 
-from .api import deposit_video_resolver, deposit_project_resolver
+from .api import deposit_project_resolver, deposit_video_resolver
 
 
 @jsonresolver.route('/api/deposits/project/<path:path>', host='cds.cern.ch')

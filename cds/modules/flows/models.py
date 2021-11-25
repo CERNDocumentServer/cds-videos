@@ -27,17 +27,16 @@
 import logging
 import uuid
 from enum import Enum, unique
-from invenio_accounts.models import User
 
+from invenio_accounts.models import User
 from invenio_db import db
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import JSONType, UUIDType
 
-logger = logging.getLogger('cds-flow')
+logger = logging.getLogger("cds-flow")
 
 
 def as_task(value):
@@ -46,19 +45,20 @@ def as_task(value):
     :param value: A :class:`invenio_flow.models.TaskMetadata` or a Task Id.
     :returns:  A :class:`invenio_flow.models.TaskMetadata` instance.
     """
-    return value if isinstance(value, TaskMetadata) else \
-        TaskMetadata.get(value)
+    return (
+        value if isinstance(value, TaskMetadata) else TaskMetadata.get(value)
+    )
 
 
 @unique
 class Status(Enum):
     """Constants for possible task status."""
 
-    PENDING = 'PENDING'
-    STARTED = 'STARTED'
-    SUCCESS = 'SUCCESS'
-    FAILURE = 'FAILURE'
-    CANCELLED = 'CANCELLED'
+    PENDING = "PENDING"
+    STARTED = "STARTED"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    CANCELLED = "CANCELLED"
 
     @classmethod
     def compute_status(cls, statuses):
@@ -106,21 +106,32 @@ class Status(Enum):
 class FlowMetadata(db.Model, Timestamp):
     """Flow database model."""
 
-    __tablename__ = 'flows_flow'
+    __tablename__ = "flows_flow"
 
-    id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4,)
+    id = db.Column(
+        UUIDType,
+        primary_key=True,
+        default=uuid.uuid4,
+    )
     """Flow identifier."""
 
-    name = db.Column(
-        db.String, nullable=False
-    )  # TODO: Most likely I don't need this one
+    name = db.Column(db.String, nullable=False)
     """Flow name."""
 
     payload = db.Column(
         db.JSON()
-        .with_variant(postgresql.JSONB(none_as_null=True), 'postgresql',)
-        .with_variant(JSONType(), 'sqlite',)
-        .with_variant(JSONType(), 'mysql',),
+        .with_variant(
+            postgresql.JSONB(none_as_null=True),
+            "postgresql",
+        )
+        .with_variant(
+            JSONType(),
+            "sqlite",
+        )
+        .with_variant(
+            JSONType(),
+            "mysql",
+        ),
         default=lambda: dict(),
         nullable=True,
     )
@@ -141,46 +152,46 @@ class FlowMetadata(db.Model, Timestamp):
 
     def __repr__(self):
         """Flow representation."""
-        return '<Workflow {name} {status}: {payload}>'.format(**self.to_dict())
+        return "<Workflow {name} {status}: {payload}>".format(**self.to_dict())
 
     @classmethod
     def get(cls, id_):
         """Get a flow object from the DB."""
         return cls.query.get(id_)
 
+    @classmethod
+    def get_by_deposit(cls, deposit_id, is_last=True, multiple=False):
+        """Get tasks by deposit id."""
+        query = FlowMetadata.query.filter_by(
+            deposit_id=str(deposit_id)
+        ).filter_by(is_last=is_last)
+
+        return query.all() if multiple else query.one_or_none()
+
     def to_dict(self):
         """Flow dictionary representation."""
         return {
-            'id': str(self.id),
-            'created': self.created.isoformat(),
-            'updated': self.updated.isoformat(),
-            'name': self.name,
-            'payload': self.payload,
-            'status': str(self.status),
-            'user': str(self.user_id),
+            "id": str(self.id),
+            "created": self.created.isoformat(),
+            "updated": self.updated.isoformat(),
+            "name": self.name,
+            "payload": self.payload,
+            "status": str(self.status),
+            "user": str(self.user_id),
         }
 
 
 class TaskMetadata(db.Model, Timestamp):
     """Task database model."""
 
-    __tablename__ = 'flows_task'
+    __tablename__ = "flows_task"
 
-    id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4,)
-    """Task identifier."""
-
-    previous = db.Column(
-        db.JSON()
-        .with_variant(postgresql.JSONB(none_as_null=True), 'postgresql',)
-        .with_variant(JSONType(), 'sqlite',)
-        .with_variant(JSONType(), 'mysql',),
-        default=lambda: list(),
-        nullable=True,
+    id = db.Column(
+        UUIDType,
+        primary_key=True,
+        default=uuid.uuid4,
     )
-    """List of tasks that need to run before this one, if any.
-
-    This is mainly used by visuals to create the flow diagram.
-    """
+    """Task identifier."""
 
     flow_id = db.Column(
         UUIDType,
@@ -189,7 +200,7 @@ class TaskMetadata(db.Model, Timestamp):
     )
     """Task flow instance."""
 
-    flow = db.relationship(FlowMetadata, backref='tasks', lazy='subquery')
+    flow = db.relationship(FlowMetadata, backref="tasks", lazy="subquery")
     """Relationship to the FlowMetadata."""
 
     name = db.Column(db.String, nullable=False)
@@ -197,40 +208,49 @@ class TaskMetadata(db.Model, Timestamp):
 
     payload = db.Column(
         db.JSON()
-        .with_variant(postgresql.JSONB(none_as_null=True), 'postgresql',)
-        .with_variant(JSONType(), 'sqlite',)
-        .with_variant(JSONType(), 'mysql',),
+        .with_variant(
+            postgresql.JSONB(none_as_null=True),
+            "postgresql",
+        )
+        .with_variant(
+            JSONType(),
+            "sqlite",
+        )
+        .with_variant(
+            JSONType(),
+            "mysql",
+        ),
         default=lambda: dict(),
         nullable=True,
     )
     """Flow payload in JSON format, typically args and kwagrs."""
 
     status = db.Column(
-        db.Enum(Status), nullable=False, default=Status.PENDING,
+        db.Enum(Status),
+        nullable=False,
+        default=Status.PENDING,
     )
     """Status of the task, i.e. pending, success, failure."""
 
-    message = db.Column(db.String, nullable=False, default='')
+    message = db.Column(db.String, nullable=False, default="")
     """Task status message."""
 
     @classmethod
-    def create(cls, name, flow_id, id_=None, payload=None, previous=None):
+    def create(cls, flow_id, name, payload=None, status=Status.PENDING):
         """Create a new Task."""
         try:
             with db.session.begin_nested():
                 obj = cls(
-                    id=id_ or uuid.uuid4(),
                     flow_id=flow_id,
                     name=name,
                     payload=payload or {},
-                    previous=previous or [],
+                    status=status,
                 )
                 db.session.add(obj)
-            logger.info('Created new Task %s', obj)
+            logger.info("Created new Task %s", obj)
         except SQLAlchemyError:
             logger.exception(
-                'Failed to create Task with %s, %s, %s, %s',
-                id_,
+                "Failed to create Task with %s, %s, %s",
                 flow_id,
                 name,
                 payload,
@@ -239,32 +259,24 @@ class TaskMetadata(db.Model, Timestamp):
         return obj
 
     @classmethod
-    def create_or_update(
-            cls, name, flow_id, id_=None, payload=None, previous=None
-    ):
-        """Create or update a new Task."""
-        task = cls.get(id_)
-        if task:
-            return task
-        else:
-            task = cls.create(name, flow_id, id_, payload, previous)
-        return task
-
-    @classmethod
     def get(cls, id_):
         """Get a task object from the DB."""
         return cls.query.get(id_)
 
+    @classmethod
+    def get_all_by_flow_task_name(cls, flow_id, name):
+        """Get tasks by flow id and name."""
+        return cls.query.filter_by(flow_id=flow_id, name=name).all()
+
     def to_dict(self):
         """Task dictionary representation."""
         return {
-            'id': str(self.id),
-            'flow_id': str(self.flow_id),
-            'created': self.created.isoformat(),
-            'updated': self.updated.isoformat(),
-            'name': self.name,
-            'payload': self.payload,
-            'status': str(self.status),
-            'message': self.message,
-            'previous': self.previous,
+            "id": str(self.id),
+            "flow_id": str(self.flow_id),
+            "created": self.created.isoformat(),
+            "updated": self.updated.isoformat(),
+            "name": self.name,
+            "payload": self.payload,
+            "status": str(self.status),
+            "message": self.message,
         }

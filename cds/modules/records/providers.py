@@ -36,7 +36,7 @@ from invenio_pidstore.providers.recordid import RecordIdProvider
 class CDSRecordIdProvider(RecordIdProvider):
     """Record identifier provider."""
 
-    pid_type = 'recid'
+    pid_type = "recid"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -53,7 +53,7 @@ class CDSRecordIdProvider(RecordIdProvider):
 class CDSReportNumberProvider(BaseProvider):
     """Report number provider."""
 
-    pid_type = 'rn'
+    pid_type = "rn"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -66,13 +66,14 @@ class CDSReportNumberProvider(BaseProvider):
     def create(cls, object_type=None, object_uuid=None, data=None, **kwargs):
         """Create a new report number."""
         # assert isinstance(data, CDSDeposit)
-        if 'pid_value' not in kwargs:
+        if "pid_value" not in kwargs:
             sequence, kwargs = data.get_report_number_sequence(**kwargs)
-            kwargs['pid_value'] = sequence.next()
+            kwargs["pid_value"] = sequence.next()
 
-        kwargs.setdefault('status', cls.default_status)
+        kwargs.setdefault("status", cls.default_status)
         if object_type and object_uuid:
-            kwargs['status'] = PIDStatus.REGISTERED
+            kwargs["status"] = PIDStatus.REGISTERED
 
         return super(CDSReportNumberProvider, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )
