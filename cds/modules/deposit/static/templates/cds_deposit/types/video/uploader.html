@@ -65,15 +65,14 @@
       <td>
       </td>
       <td class="text-center">
-        <span ng-show="f.percentage > 0 && !f.completed && !f.errored && !f.revoked">{{ f.percentage | toInt }} %</span>
-        <span ng-show="!f.percentage && !f.completed && !f.errored && !f.revoked"><i class="fa fa-spinner fa-spin"></i></span>
+        <span ng-show="f.pending || f.started"><i class="fa fa-spinner fa-spin"></i></span>
         <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.completed && !f.errored" class="text-success">Done</span>
-        <span ng-show="f.revoked && !f.errored" class="text-warning">Not applicable</span>
+        <span ng-show="f.completed" class="text-success">Done</span>
+        <span ng-show="f.revoked || f.cancelled" class="text-warning">-</span>
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
-          <a ng-show="!f.pending && !f.started" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags._flow_id, f.db_task_id)">
+          <a ng-show="!f.pending && !f.started" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags.flow_id, f.task_id)">
             <i class="fa fa-undo"></i>
           </a>
         </span>

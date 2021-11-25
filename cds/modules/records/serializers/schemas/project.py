@@ -20,15 +20,14 @@
 
 from __future__ import absolute_import
 
-from marshmallow import fields, post_load, Schema
 from invenio_jsonschemas import current_jsonschemas
+from marshmallow import Schema, fields, post_load
 
 from ....deposit.api import Project, deposit_video_resolver
-from .common import \
-    AccessSchema, BucketSchema, ContributorSchema, \
-    DepositSchema, ExternalSystemIdentifiersField, LicenseSchema, \
-    OaiSchema, StrictKeysSchema, TitleSchema, \
-    TranslationsSchema, KeywordsSchema
+from .common import (AccessSchema, BucketSchema, ContributorSchema,
+                     DepositSchema, ExternalSystemIdentifiersField,
+                     KeywordsSchema, LicenseSchema, OaiSchema,
+                     StrictKeysSchema, TitleSchema, TranslationsSchema)
 from .doi import DOI
 
 

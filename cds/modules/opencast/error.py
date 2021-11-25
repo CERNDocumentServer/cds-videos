@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 
 class OpencastError(Exception):
     """Base class for exceptions in this module."""
+
     pass
 
 
@@ -41,8 +42,9 @@ class MissingEventId(OpencastError):
 
     def __str__(self):
         """Error message."""
-        return 'Opencast event id is missing in Task with id: {0} .'.format(
-            self.task_id)
+        return "Opencast event id is missing in Task with id: {0} .".format(
+            self.task_id
+        )
 
 
 class MissingResolutionError(OpencastError):
@@ -54,7 +56,7 @@ class MissingResolutionError(OpencastError):
 
     def __str__(self):
         """Error message."""
-        return 'Resolution not support {0}.'.format(self.resolution)
+        return "Resolution not support {0}.".format(self.resolution)
 
 
 class TooHighResolutionError(OpencastError):
@@ -70,11 +72,9 @@ class TooHighResolutionError(OpencastError):
     def __str__(self):
         """Error message."""
         return (
-            'Resolution {1}x{2} is higher than the maximum resolution accepted'
-            ' {3}x{4}.'
-        ).format(
-            self._width, self._height, self._max_weight, self._max_height
-        )
+            "Resolution {1}x{2} is higher than the maximum resolution accepted"
+            " {3}x{4}."
+        ).format(self._width, self._height, self._max_weight, self._max_height)
 
 
 class RequestError(OpencastError):
@@ -85,7 +85,7 @@ class RequestError(OpencastError):
         self.message = message
 
     def __str__(self):
-        return 'Failed to perform {0}. Error message: {1}'.format(
+        return "Failed to perform {0}. Error message: {1}".format(
             self.url, self.message
         )
 
@@ -98,7 +98,7 @@ class WriteToEOSError(OpencastError):
         self.message = message
 
     def __str__(self):
-        return ('Failed to write transcoded file to EOS Request failed on: '
-                '{1}. Error message: {2}').format(
-                    self.url, self.message
-                )
+        return (
+            "Failed to write transcoded file to EOS Request failed on: "
+            "{1}. Error message: {2}"
+        ).format(self.url, self.message)

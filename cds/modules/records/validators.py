@@ -31,9 +31,9 @@ from jsonschema.validators import Draft4Validator, extend
 PartialDraft4Validator = extend(
     Draft4Validator,
     {
-        'required': None,
-        'minItems': None,
-        'maxItems': None,
-        'uniqueItems': None
-    }
+        "required": None,
+        "minItems": None,
+        "maxItems": None,
+        "uniqueItems": None,
+    },
 )

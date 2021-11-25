@@ -26,7 +26,6 @@ from os.path import join, relpath, split
 
 from flask import current_app, url_for
 from invenio_files_rest.models import ObjectVersion, as_object_version
-
 from invenio_previewer.api import PreviewFile
 
 

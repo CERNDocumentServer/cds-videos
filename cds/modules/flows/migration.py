@@ -27,21 +27,18 @@
 
 import logging
 
+from cds.modules.deposit.api import CDSDeposit
+from cds.modules.records.utils import is_project_record
 from flask import current_app
 from invenio_db import db
-from invenio_files_rest.models import (
-    ObjectVersionTag,
-    as_object_version,
-)
+from invenio_files_rest.models import ObjectVersionTag, as_object_version
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
-from cds.modules.records.utils import is_project_record
-from cds.modules.deposit.api import CDSDeposit
-from .tasks import ExtractMetadataTask, ExtractFramesTask, TranscodeVideoTask
 
 from ..opencast.utils import can_be_transcoded, find_lowest_quality
 from ..records.api import CDSVideosFilesIterator
-from .api import Flow, uuid
+from .api import Flow
 from .models import Status, TaskMetadata
+from .tasks import ExtractFramesTask, ExtractMetadataTask, TranscodeVideoTask
 
 
 def migrate_event(deposit):
@@ -54,68 +51,56 @@ def migrate_event(deposit):
     original_file = CDSVideosFilesIterator.get_master_video_file(deposit)
     if not original_file:
         raise Exception
-    has_metadata = 'extracted_metadata' in deposit.get('_cds', {})
+    has_metadata = "extracted_metadata" in deposit.get("_cds", {})
     has_frames = bool(CDSVideosFilesIterator.get_video_frames(original_file))
     subformats = CDSVideosFilesIterator.get_video_subformats(original_file)
     payload = dict(
         version_id=original_file["version_id"],
         key=original_file["key"],
-        bucket_id=deposit['_buckets']['deposit'],
-        deposit_id=deposit_id
-    )
-
-    flow = Flow.create(
+        bucket_id=deposit["_buckets"]["deposit"],
         deposit_id=deposit_id,
-        user_id=user_id,
-        payload=payload
     )
 
-    # Create the object tag for _flow_id
+    flow = Flow.create(deposit_id=deposit_id, user_id=user_id, payload=payload)
+
+    # Create the object tag for flow_id
     object_version = as_object_version(original_file["version_id"])
-    ObjectVersionTag.create_or_update(
-            object_version, '_flow_id', str(flow.id)
-        )
+    ObjectVersionTag.create_or_update(object_version, "flow_id", str(flow.id))
 
     subformat_done = [
-        f.get('tags', {}).get('preset_quality', '') for f in subformats
+        f.get("tags", {}).get("preset_quality", "") for f in subformats
     ]
     missing_subformats = [
         s
-        for s in set(current_app.config['CDS_OPENCAST_QUALITIES'].keys()) - set(subformat_done)
+        for s in set(current_app.config["CDS_OPENCAST_QUALITIES"].keys())
+        - set(subformat_done)
         if can_be_transcoded(
             s,
-            int(original_file['tags']['width']),
-            int(original_file['tags']['height']),
+            int(original_file["tags"]["width"]),
+            int(original_file["tags"]["height"]),
         )
     ]
 
     with db.session.begin_nested():
         # add ExtractMetadataTask
-        task_id = uuid()
         payload["flow_id"] = str(flow.id)
 
         metadata_task = TaskMetadata.create(
-            id_=task_id,
             flow_id=str(flow.id),
-            name=ExtractMetadataTask().name,
-            previous=[],
-            payload=payload
+            name=ExtractMetadataTask.name,
+            payload=payload,
         )
-        metadata_task.status = Status.SUCCESS if has_metadata else Status.FAILURE
+        metadata_task.status = (
+            Status.SUCCESS if has_metadata else Status.FAILURE
+        )
         db.session.add(metadata_task)
 
         # add ExtractFramesTask
-        task_id = uuid()
-
         frames_task = TaskMetadata.create(
-            id_=task_id,
-            flow_id=str(flow.id),
-            name=ExtractFramesTask().name,
-            previous=[],
-            payload=payload
+            flow_id=str(flow.id), name=ExtractFramesTask.name, payload=payload
         )
 
-        frames_task.status=Status.SUCCESS if has_frames else Status.FAILURE
+        frames_task.status = Status.SUCCESS if has_frames else Status.FAILURE
         db.session.add(frames_task)
 
         # add TranscodeVideoTask
@@ -126,18 +111,23 @@ def migrate_event(deposit):
             # the lowest quality is not transcodable, in this case add lowest
             subformats_to_be_processed = [find_lowest_quality()]
         for subformat in subformats_to_be_processed:
-            task_id = uuid()
             subformat_payload = payload.copy()
             subformat_payload.update({"preset_quality": subformat})
             transcode_task = TaskMetadata.create(
-                id_=task_id,
                 flow_id=str(flow.id),
-                name=TranscodeVideoTask().name,
-                previous=[],
-                payload=subformat_payload
+                name=TranscodeVideoTask.name,
+                payload=subformat_payload,
             )
-            transcode_task.status = Status.FAILURE if subformat in missing_subformats else Status.SUCCESS
-            transcode_task.message = "Missing subformat during migration" if subformat in missing_subformats else "Subformat migrated successfully"
+            transcode_task.status = (
+                Status.FAILURE
+                if subformat in missing_subformats
+                else Status.SUCCESS
+            )
+            transcode_task.message = (
+                "Missing subformat during migration"
+                if subformat in missing_subformats
+                else "Subformat migrated successfully"
+            )
 
             db.session.add(transcode_task)
 
@@ -154,14 +144,19 @@ def main():
 
         :param pid_type: String representing the PID type value, for example 'recid'.
         """
-        pids = PersistentIdentifier.query.filter(PersistentIdentifier.pid_type == pid_type).filter(
-            PersistentIdentifier.status == PIDStatus.REGISTERED).all()
+        pids = (
+            PersistentIdentifier.query.filter(
+                PersistentIdentifier.pid_type == pid_type
+            )
+            .filter(PersistentIdentifier.status == PIDStatus.REGISTERED)
+            .all()
+        )
         return pids
 
     def get(name, filepath):
         logger = logging.getLogger(name)
         logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 
         fh = logging.FileHandler(filepath)
         fh.setFormatter(formatter)
@@ -175,7 +170,7 @@ def main():
 
         return logger
 
-    filepath = '/tmp/failed_migrated_videos_to_new_flows.log'
+    filepath = "/tmp/failed_migrated_videos_to_new_flows.log"
     logger = get("failed_migrated_videos_to_new_flows", filepath)
     all_deps = get_all_pids_by("depid")
     video_deps = []
@@ -193,12 +188,14 @@ def main():
             logger.debug("Migrating deposit ({0})".format(video.pid))
             migrate_event(video)
             # we need to commit to re-dump files/tags to the record
-            # and store `_flow_id`
+            # and store `flow_id`
             video._update_tasks_status()
-            video['_files'] = video._get_files_dump()
+            video["_files"] = video._get_files_dump()
             video.commit()
             db.session.commit()
-            logger.debug("Migrating deposit ({0}) ended successfully".format(video.pid))
+            logger.debug(
+                "Migrating deposit ({0}) ended successfully".format(video.pid)
+            )
         except Exception:
             logger.debug("Migrating deposit ({0}) failed".format(video.id))
             failed_deps.append(video)

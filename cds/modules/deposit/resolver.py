@@ -30,7 +30,6 @@ from functools import partial
 
 from ..records.resolver import get_pid
 
-
 get_project_pid = partial(get_pid, pid_type='depid')
 
 get_video_pid = partial(get_pid, pid_type='depid')

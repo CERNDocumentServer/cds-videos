@@ -26,22 +26,25 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app, request, url_for
-from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_rest.links import default_links_factory
-
 from cds.modules.deposit.api import is_project_record, project_resolver
 from cds.modules.records.permissions import deposit_update_permission_factory
 from cds.modules.records.resolver import record_resolver
+from flask import current_app, request, url_for
+from invenio_pidstore.errors import PIDDoesNotExistError
+from invenio_records_rest.links import default_links_factory
 
 
 def _build_record_project_links(project_pid):
     """Get project links."""
     return {
-        'project': url_for('invenio_records_rest.recid_item',
-                           pid_value=project_pid.pid_value, _external=True),
-        'project_html': current_app.config['RECORD_UI_ENDPOINT'].format(
-            scheme=request.scheme, host=request.host,
+        "project": url_for(
+            "invenio_records_rest.recid_item",
+            pid_value=project_pid.pid_value,
+            _external=True,
+        ),
+        "project_html": current_app.config["RECORD_UI_ENDPOINT"].format(
+            scheme=request.scheme,
+            host=request.host,
             pid_value=project_pid.pid_value,
         ),
     }
@@ -50,12 +53,13 @@ def _build_record_project_links(project_pid):
 def _build_deposit_project_links(deposit_project):
     """Get deposit video links."""
     project_pid, deposit = deposit_project
-    url = current_app.config['DEPOSIT_PROJECT_UI_ENDPOINT']
+    url = current_app.config["DEPOSIT_PROJECT_UI_ENDPOINT"]
     links = {}
     if deposit_update_permission_factory(record=deposit).can():
-        links['project_edit'] = url.format(
-            scheme=request.scheme, host=request.host,
-            pid_value=project_pid.pid_value
+        links["project_edit"] = url.format(
+            scheme=request.scheme,
+            host=request.host,
+            pid_value=project_pid.pid_value,
         )
     return links
 
@@ -64,10 +68,9 @@ def _fill_video_extra_links(record, links):
     """Add extra links if it's a video."""
     project = None
     try:
-        pid, project = record_resolver.resolve(record['_project_id'])
+        pid, project = record_resolver.resolve(record["_project_id"])
         # include record project links
-        links.update(**_build_record_project_links(
-            project_pid=pid))
+        links.update(**_build_record_project_links(project_pid=pid))
     except KeyError:
         # Most likely are dealing with a project
         if is_project_record(record):
@@ -75,16 +78,20 @@ def _fill_video_extra_links(record, links):
     except PIDDoesNotExistError:
         # The project has not being published yet
         try:
-            pid, project = project_resolver.resolve(record['_project_id'])
+            pid, project = project_resolver.resolve(record["_project_id"])
         except PIDDoesNotExistError:
             pass
 
     try:
         # include deposit project links
         if project:
-            links.update(**_build_deposit_project_links(
-                deposit_project=project_resolver.resolve(
-                    project['_deposit']['id'])))
+            links.update(
+                **_build_deposit_project_links(
+                    deposit_project=project_resolver.resolve(
+                        project["_deposit"]["id"]
+                    )
+                )
+            )
     except (KeyError, PIDDoesNotExistError):
         pass
 
