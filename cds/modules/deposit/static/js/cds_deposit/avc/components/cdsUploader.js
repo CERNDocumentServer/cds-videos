@@ -113,7 +113,7 @@ function cdsUploaderCtrl(
         }
         if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
           _subpromise = Upload.http(
-            _prepareLocalFileWebhooks(upload, response)
+            _startWorkflow(upload, response)
           );
         } else {
           var d = $q.defer();
@@ -190,7 +190,7 @@ function cdsUploaderCtrl(
   }
 
   /*
-   * Prepare http request of Remote File Upload with Webhooks
+   * Start workflow
    */
   function _prepareRemoteFileWebhooks(file) {
     return {
@@ -211,7 +211,7 @@ function cdsUploaderCtrl(
   /*
    * Prepare http request of Local File Upload with Webhooks
    */
-  function _prepareLocalFileWebhooks(file, response) {
+  function _startWorkflow(file, response) {
     return {
       method: "POST",
       url: that.remoteMasterReceiver,
@@ -246,7 +246,7 @@ function cdsUploaderCtrl(
 
   function restartWorkflow() {
     var master = that.cdsDepositCtrl.findMasterFile();
-    var args = _prepareRestart(master.tags._flow_id);
+    var args = _prepareRestart(master.tags.flow_id);
     $http(args).then(
       function success() {
         toaster.pop({
@@ -336,7 +336,7 @@ function cdsUploaderCtrl(
           that.confirmNewMaster = true;
           that.newMasterName = newMasterFile.name;
           that.newMasterDefer = $q.defer();
-          // Update thow many times the master file has been replaced.
+          // Update how many times the master file has been replaced.
           // It is useful to indicate in the UI how many times
           // the file has been changed. Note is only used for UI, the number
           // means nothing.
@@ -357,7 +357,7 @@ function cdsUploaderCtrl(
             that.files.push(newMasterFile);
             that.queue.push(newMasterFile);
             // Upload the video file
-            var old_flow_id = old_master[0]["tags"]["_flow_id"];
+            var old_flow_id = old_master[0]["tags"]["flow_id"];
             that.deleteFlow(old_flow_id).then(
               function success(response) {
                 that.cdsDepositCtrl.previewer = null;

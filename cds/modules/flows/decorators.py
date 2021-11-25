@@ -24,22 +24,23 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Useful decorators."""
+
 from functools import wraps
 
 from celery import shared_task
-from flask import request, jsonify
+from flask import jsonify, request
 from flask_login import current_user
 from flask_restful import abort
 
 from .api import Flow
-from .errors import FlowDoesNotExist, InvalidPayload, FlowsError
+from .errors import FlowDoesNotExist, FlowsError, InvalidPayload
 from .permissions import can
 from .tasks import CeleryTask
 
 
 def task(*args, **kwargs):
     """Wrapper around shared task to set default base class."""
-    kwargs.setdefault('base', CeleryTask)
+    kwargs.setdefault("base", CeleryTask)
     return shared_task(*args, **kwargs)
 
 
@@ -51,9 +52,10 @@ def need_permission(action_name):
 
     def need_flow_permission_builder(f):
         @wraps(f)
-        def need_flow_permission_decorator(self, user_id=None, *args,
-                                           **kwargs):
-            flow = kwargs.get('flow')
+        def need_flow_permission_decorator(
+            self, user_id=None, *args, **kwargs
+        ):
+            flow = kwargs.get("flow")
             # Check if user can perform requested action
             if not can(user_id, flow=flow, action=action_name):
                 abort(403)
@@ -71,6 +73,7 @@ def need_permission(action_name):
 
 def pass_user_id(f):
     """Decorator to retrieve user ID."""
+
     @wraps(f)
     def inner(self, *args, **kwargs):
         try:
@@ -81,39 +84,47 @@ def pass_user_id(f):
 
         kwargs.update(user_id=user_id)
         return f(self, *args, **kwargs)
+
     return inner
 
 
 def pass_flow(f):
     """Decorator to retrieve flow."""
+
     @wraps(f)
     def inner(self, flow_id=None, *args, **kwargs):
-        flow = Flow.get_flow(flow_id)
+        flow = Flow.get(flow_id)
         kwargs.update(flow=flow)
         return f(self, *args, **kwargs)
+
     return inner
 
 
 def error_handler(f):
     """Return a json payload and appropriate status code on exception."""
+
     @wraps(f)
     def inner(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except FlowDoesNotExist:
-            return jsonify(
-                status=404,
-                description='Receiver does not exists.'
-            ), 404
+            return (
+                jsonify(status=404, description="Receiver does not exists."),
+                404,
+            )
         except InvalidPayload as e:
-            return jsonify(
-                status=415,
-                description='Receiver does not support the'
-                            ' content-type "%s".' % e.args[0]
-            ), 415
+            return (
+                jsonify(
+                    status=415,
+                    description="Receiver does not support the"
+                    ' content-type "%s".' % e.args[0],
+                ),
+                415,
+            )
         except FlowsError:
-            return jsonify(
-                status=500,
-                description='Internal server error'
-            ), 500
+            return (
+                jsonify(status=500, description="Internal server error"),
+                500,
+            )
+
     return inner

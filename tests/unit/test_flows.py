@@ -41,14 +41,9 @@ from invenio_records.models import RecordMetadata
 
 from cds.modules.deposit.api import (deposit_project_resolver,
                                      deposit_video_resolver)
-from cds.modules.flows.api import Flow
-from cds.modules.flows.status import (get_all_deposit_flows,
-                                      get_flow_tasks_status_by_task)
+from cds.modules.flows.api import FlowService
+from cds.modules.flows.status import (get_tasks_status_grouped_by_task_name)
 from cds.modules.flows.models import FlowMetadata
-from helpers import (
-    get_indexed_records_from_mock, get_object_count,
-    get_presets_applied, get_tag_count, mock_current_user,
-)
 
 
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
@@ -137,7 +132,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
         flows = get_all_deposit_flows(video['_deposit']['id'])
 
         # check deposit tasks status
-        tasks_status = get_flow_tasks_status_by_task(flows)
+        tasks_status = get_tasks_status_grouped_by_task_name(flows)
         assert len(tasks_status) == 4
         assert 'file_download' in tasks_status
         assert 'file_transcode' in tasks_status
@@ -266,7 +261,7 @@ def test_avc_workflow_clean_download(
 
     assert ObjectVersionTag.query.count() == get_tag_count()
     flow = FlowMetadata.query.first()
-    flow = Flow(model=flow)
+    flow = FlowService(model=flow)
     # [[ CLEAN DOWNLOAD ]]
     flow.clean_task(task_name='file_download')
 
@@ -325,7 +320,7 @@ def test_avc_workflow_clean_video_frames(
     flow = FlowMetadata.query.first()
 
     # [[ CLEAN VIDEO EXTRACT FRAMES ]]
-    flow = Flow(model=flow)
+    flow = FlowService(model=flow)
     flow.clean_task(task_name='file_video_extract_frames')
 
     # check extracted metadata is not there
@@ -372,7 +367,7 @@ def test_avc_workflow_clean_video_transcode(
     for i, preset_quality in enumerate(presets, 1):
         # Clean transcode task for each preset
 
-        flow = Flow(model=FlowMetadata.query.first())
+        flow = FlowService(model=FlowMetadata.query.first())
         flow.clean_task(flow=flow, task_name='file_transcode',
                         preset_quality=preset_quality)
 
@@ -417,7 +412,7 @@ def test_avc_workflow_clean_extract_metadata(
     assert ObjectVersionTag.query.count() == get_tag_count()
     # [[ CLEAN VIDEO METADATA EXTRACTION ]]
     flow = FlowMetadata.query.first()
-    flow = Flow(model=flow)
+    flow = FlowService(model=flow)
     flow.clean_task(task_name='file_video_metadata_extraction')
 
     # check extracted metadata is not there

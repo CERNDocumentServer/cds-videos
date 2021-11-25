@@ -21,23 +21,25 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
+
 import json
 
-from flask import request, jsonify, url_for, Blueprint
+from cds.modules.flows.api import Flow, FlowService
+from cds.modules.flows.decorators import (
+    error_handler,
+    need_permission,
+    pass_flow,
+    pass_user_id,
+)
+from cds.modules.flows.loaders import extract_payload
+from cds.modules.flows.serializers import make_response, serialize_flow
+from flask import Blueprint
 from flask.views import MethodView
 from flask_restful import abort
 from invenio_db import db
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
 
-from cds.modules.flows.api import Flow
-from cds.modules.flows._compat import delete_cached_json_for
-from cds.modules.flows.decorators import error_handler, pass_user_id, \
-    pass_flow, need_permission
-from cds.modules.flows.errors import InvalidPayload
-from cds.modules.flows.loaders import extract_payload
-from cds.modules.flows.serializers import make_response, serialize_flow
-
-blueprint = Blueprint('cds_flows', __name__)
+blueprint = Blueprint("cds_flows", __name__)
 
 
 class TaskResource(MethodView):
@@ -47,25 +49,25 @@ class TaskResource(MethodView):
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('update')
+    @need_permission("update")
     def put(self, user_id, flow, task_id):
         """Handle PUT request: restart a task."""
         try:
             flow.restart_task(task_id)
             db.session.commit()
         except KeyError:
-            return '', 400
-        return '', 204
+            return "", 400
+        return "", 204
 
     @require_api_auth()
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('delete')
+    @need_permission("delete")
     def delete(self, user_id, flow, task_id):
         """Handle DELETE request: stop and clean a task."""
         # TODO not used?
-        return '', 400
+        return "", 400
 
 
 class FlowFeedbackResource(MethodView):
@@ -75,7 +77,7 @@ class FlowFeedbackResource(MethodView):
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('read')
+    @need_permission("read")
     def get(self, user_id, flow):
         """Handle GET request: get more flow information."""
         code, status = serialize_flow(flow)
@@ -88,27 +90,27 @@ class FlowListResource(MethodView):
     @require_api_auth()
     @error_handler
     @pass_user_id
-    @need_permission('create')
+    @need_permission("create")
     def post(self, user_id):
         """Handle POST request."""
         data = extract_payload()
+        assert data["bucket_id"]
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
-        new_flow = Flow.create(deposit_id=data["deposit_id"],
-                        user_id=user_id,
-                        payload=dict(
-                            version_id=data.get("version_id"),
-                            key=data["key"],
-                            bucket_id=data.get("bucket_id"),
-                            uri=data.get("uri"),
-                            deposit_id=data.get("deposit_id")
-                        )
-                        )
-        new_flow_id = new_flow.id
-        new_flow.run()
+        flow = Flow.create(
+            deposit_id=data["deposit_id"],
+            user_id=user_id,
+            payload=dict(
+                version_id=data.get("version_id"),
+                key=data["key"],
+                bucket_id=data["bucket_id"],
+                uri=data.get("uri"),
+                deposit_id=data["deposit_id"],
+            ),
+        )
+        FlowService(flow).run()
         db.session.commit()
-        flow = Flow.get_flow(new_flow_id)
         return make_response(flow)
 
     def options(self, receiver_id, receiver):
@@ -120,70 +122,62 @@ class FlowResource(MethodView):
     """Flow resource."""
 
     @require_api_auth()
-    @require_oauth_scopes('flows:flow')
+    @require_oauth_scopes("flows:flow")
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('read')
+    @need_permission("read")
     def get(self, user_id, flow):
         """Handle GET request - get flow status."""
         return make_response(flow)
 
     @require_api_auth()
-    @require_oauth_scopes('flows:flow')
+    @require_oauth_scopes("flows:flow")
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('update')
+    @need_permission("update")
     def put(self, user_id, flow):
         """Handle PUT request - restart flow."""
-        flow_id = flow.id
-        flow.restart()
-        db.session.commit()
-        flow = Flow.get_flow(flow_id)
+        FlowService(flow).run()
         return make_response(flow)
 
     @require_api_auth()
-    @require_oauth_scopes('flows:flow')
+    @require_oauth_scopes("flows:flow")
     @error_handler
     @pass_user_id
     @pass_flow
-    @need_permission('delete')
+    @need_permission("delete")
     def delete(self, user_id, flow):
         """Handle DELETE request.
 
         Clears flow tasks and updates dependent entities e.g deposit.
         """
-        flow_id = flow.id
-        flow.delete()
-
-        # TODO: do we really need that?
-        flow = Flow.get_flow(flow_id)
-        response, code = make_response(flow)
-        return response, 200
+        FlowService(flow).delete()
+        return "", 204
 
 
-task_item = TaskResource.as_view('task_item')
-flow_feedback_item = FlowFeedbackResource.as_view('flow_feedback_item')
+task_item = TaskResource.as_view("task_item")
+flow_feedback_item = FlowFeedbackResource.as_view("flow_feedback_item")
 
-flow_list = FlowListResource.as_view('flow_list')
-flow_item = FlowResource.as_view('flow_item')
+flow_list = FlowListResource.as_view("flow_list")
+flow_item = FlowResource.as_view("flow_item")
 
 blueprint.add_url_rule(
-    '/flows/',
+    "/flows/",
     view_func=flow_list,
 )
 blueprint.add_url_rule(
-    '/flows/<string:flow_id>',
+    "/flows/<string:flow_id>",
     view_func=flow_item,
 )
 
 blueprint.add_url_rule(
-    '/flows/<string:flow_id>/tasks/<string:task_id>',
+    "/flows/<string:flow_id>/tasks/<string:task_id>",
     view_func=task_item,
 )
 
 blueprint.add_url_rule(
-    '/flows/<string:flow_id>/feedback',
+    "/flows/<string:flow_id>/feedback",
     view_func=flow_feedback_item,
 )

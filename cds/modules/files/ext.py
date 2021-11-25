@@ -44,8 +44,7 @@ class CDSFilesRestApp(object):
         app.extensions['cds-files-rest'] = self
         self.register_signals(app)
 
-    @staticmethod
-    def register_signals(app):
+    def register_signals(self, app):
         """Register CDS files rest signals."""
         file_downloaded.connect(
             on_download_rename_file, sender=app, weak=False)
