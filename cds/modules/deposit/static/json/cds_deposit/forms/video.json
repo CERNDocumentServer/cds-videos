@@ -239,14 +239,11 @@
           "required": true,
           "description": "",
           "options": {
-            "refreshDelay": 100,
+            "refreshDelay": 500,
             "mergeObjects": true,
             "required": true,
             "asyncCallback": "$ctrl.autocompleteAuthors",
-            "url": "//cds.cern.ch/submit/get_authors",
-            "extraParams": {
-              "relative_curdir": "cdslabs/videos"
-            }
+            "url": "/api/ldap/cern-users/"
           }
         },
         {

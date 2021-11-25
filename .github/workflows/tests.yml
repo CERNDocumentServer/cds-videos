@@ -35,6 +35,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install ffmpeg
+      - name: Install ldap dependencies
+        run: |
+          sudo apt-get install libsasl2-dev python-dev libldap2-dev libssl-dev
 
       - name: Checkout
         uses: actions/checkout@v2
