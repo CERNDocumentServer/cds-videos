@@ -228,7 +228,7 @@
             ></form>
             <hr class="my-15" />
             <div class="alert alert-info">
-              <h4>Record restrictions</h4>
+              <h4>Video restrictions</h4>
               <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
                 <select
                   ng-model="$ctrl.permissions"
@@ -245,7 +245,7 @@
                 </select>
                 <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read" class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
                   <label class="control-label ng-binding">
-                    Choose who has access to the record
+                    Choose who can access the video page and watch it, when published.
                   </label>
                   <ui-select
                    multiple

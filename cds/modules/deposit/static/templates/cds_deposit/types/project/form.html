@@ -115,7 +115,7 @@
             </li>
             <li role="presentation" ng-class="{active: active=='access'}">
               <a ng-click="active='access'" role="tab" data-toggle="tab">
-                Share
+                Project editors
               </a>
             </li>
             <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
@@ -152,7 +152,7 @@
                 <div class="col-sm-12">
                   <hr class="my-15" />
                   <div class="alert alert-info">
-                    <h4>Record restrictions</h4>
+                    <h4>Project restrictions</h4>
                     <div ng-show="$ctrl.cdsDepositCtrl.record.category">
                       <select
                         ng-model="$ctrl.permissions"
@@ -169,7 +169,7 @@
                       </select>
                       <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"  class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
                         <label class="control-label ng-binding">
-                          Choose who has access to the record
+                          Choose who can access the project page when published.
                         </label>
                         <ui-select
                          multiple
@@ -248,7 +248,7 @@
             <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
               <div ng-init="$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update" class="row">
                 <div class="col-sm-12">
-                  <h4>Grant access to the project</h4>
+                  <h4>Grant edit access to the project</h4>
                   <ui-select
                    multiple
                    on-select="$ctrl.onSelectValue($item, $model, '_access.update');$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update"
@@ -266,7 +266,7 @@
                    <ui-select-choices
                     repeat="suggestion.email as suggestion in $ctrl.accessSuggestions"
                     refresh="$ctrl.autocompleteAccess($select.search)"
-                    refresh-delay="100"
+                    refresh-delay="500"
                    >
                      <div ng-bind-html="suggestion.name | highlight: $select.search"></div>
                      <small ng-if="!suggestion.isUserInput"><{{suggestion.email}}></small>

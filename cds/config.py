@@ -1380,3 +1380,5 @@ CDS_OPENCAST_API_ENDPOINT_EVENTS = "{host}/api/events".format(
     host=CDS_OPENCAST_HOST
 )  # noqa
 CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT = False
+
+CDS_LDAP_URL = "ldap://xldap.cern.ch"
