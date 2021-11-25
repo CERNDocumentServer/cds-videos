@@ -28,15 +28,15 @@ from __future__ import absolute_import, print_function
 
 from invenio_pidstore.fetchers import FetchedPID
 
-from .providers import CDSReportNumberProvider, CDSRecordIdProvider
+from .providers import CDSRecordIdProvider, CDSReportNumberProvider
 
 
 def recid_fetcher(record_uuid, data):
     """Fetch PID from record."""
     return FetchedPID(
         provider=CDSRecordIdProvider,
-        pid_type='recid',
-        pid_value=str(data['recid'])
+        pid_type="recid",
+        pid_value=str(data["recid"]),
     )
 
 
@@ -44,33 +44,27 @@ def report_number_fetcher(record_uuid, data):
     """Fetch report number."""
     return FetchedPID(
         provider=CDSReportNumberProvider,
-        pid_type='rn',
-        pid_value=str(data['report_number'][0])
+        pid_type="rn",
+        pid_value=str(data["report_number"][0]),
     )
 
 
 def doi_fetcher(record_uuid, data):
     """Fetch DOI."""
     return FetchedPID(
-        provider=None,
-        pid_type='doi',
-        pid_value=str(data['doi'])
+        provider=None, pid_type="doi", pid_value=str(data["doi"])
     )
 
 
 def kwid_fetcher(record_uuid, data):
     """Fetch PID from keyword record."""
     return FetchedPID(
-        provider=None,
-        pid_type='kwid',
-        pid_value=str(data['key_id'])
+        provider=None, pid_type="kwid", pid_value=str(data["key_id"])
     )
 
 
 def catid_fetcher(record_uuid, data):
     """Fetch PID from category record."""
     return FetchedPID(
-        provider=None,
-        pid_type='catid',
-        pid_value=str(data['name'])
+        provider=None, pid_type="catid", pid_value=str(data["name"])
     )

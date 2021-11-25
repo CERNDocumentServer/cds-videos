@@ -53,7 +53,7 @@ from cds.modules.records.minters import catid_minter
 from cds.modules.flows.tasks import (
     AVCTask, TranscodeVideoTask, ExtractMetadataTask, update_record
 )
-from cds.modules.flows.api import Flow
+from cds.modules.flows.api import FlowService
 from cds.modules.flows.models import Status
 
 import random
@@ -548,7 +548,7 @@ def mock_build_flow_status_json(flow_json):
     return status
 
 
-class TestFlow(Flow):
+class TestFlow(FlowService):
 
     def build_steps(self):
         self._tasks.append((sse_simple_add(), {'x': 1, 'y': 2}))

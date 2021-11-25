@@ -28,13 +28,14 @@ from __future__ import absolute_import
 
 import json
 from fractions import gcd
-
-from flask import current_app as app
 from itertools import count, takewhile
 from subprocess import STDOUT, CalledProcessError, check_output
 
-from .errors import FrameExtractionInvalidArguments, FFmpegExecutionError, \
-    MetadataExtractionExecutionError, FrameExtractionExecutionError
+from flask import current_app as app
+
+from .errors import (FFmpegExecutionError, FrameExtractionExecutionError,
+                     FrameExtractionInvalidArguments,
+                     MetadataExtractionExecutionError)
 
 
 def ff_probe(input_filename, field):

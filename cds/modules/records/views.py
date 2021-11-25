@@ -22,15 +22,8 @@
 from __future__ import absolute_import, print_function
 
 import six
-
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    make_response,
-    render_template,
-    request
-)
+from flask import (Blueprint, abort, current_app, flash, make_response,
+                   render_template, request)
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
@@ -39,21 +32,18 @@ from werkzeug.utils import import_string
 from ..deposit.api import Project, Video
 from ..deposit.fetcher import deposit_fetcher
 from .forms import RecordDeleteForm
-from .utils import (
-    delete_project_record,
-    delete_video_record,
-    is_project_record
-)
+from .utils import (delete_project_record, delete_video_record,
+                    is_project_record)
 
 blueprint = Blueprint(
-    'cds_records',
+    "cds_records",
     __name__,
-    template_folder='templates',
-    static_folder='static',
+    template_folder="templates",
+    static_folder="static",
 )
 
 
-@blueprint.app_template_filter('pidstatus')
+@blueprint.app_template_filter("pidstatus")
 def pidstatus_title(pid):
     """Get PID status full name."""
     if pid:
@@ -63,36 +53,36 @@ def pidstatus_title(pid):
 
 def stats_recid(pid, record, template=None, **kwargs):
     """Preview file for given record."""
-    return render_template('cds_records/record_stats.html', record=record)
+    return render_template("cds_records/record_stats.html", record=record)
 
 
 def records_ui_export(pid, record, template=None, **kwargs):
     """Export a record."""
-    formats = current_app.config.get('CDS_RECORDS_EXPORTFORMATS')
-    fmt = request.view_args.get('format')
+    formats = current_app.config.get("CDS_RECORDS_EXPORTFORMATS")
+    fmt = request.view_args.get("format")
 
     if formats.get(fmt) is None:
         return (
-            render_template('cds_records/records_export_unsupported.html'),
+            render_template("cds_records/records_export_unsupported.html"),
             410,
         )
     else:
-        serializer = import_string(formats[fmt]['serializer'])
+        serializer = import_string(formats[fmt]["serializer"])
         data = serializer.serialize(pid, record)
-        if 'raw' in request.args:
+        if "raw" in request.args:
             response = make_response(data)
-            response.headers['Content-Type'] = formats[fmt]['mimetype']
+            response.headers["Content-Type"] = formats[fmt]["mimetype"]
             return response
         else:
             if isinstance(data, six.binary_type):
-                data = data.decode('utf8')
+                data = data.decode("utf8")
 
             return render_template(
                 template,
                 pid=pid,
                 record=record,
                 data=data,
-                format_title=formats[fmt]['title'],
+                format_title=formats[fmt]["title"],
             )
 
 
@@ -100,7 +90,7 @@ def records_ui_delete(pid, record, template=None, **kwargs):
     """Delete a record."""
     pids = [pid]
     try:
-        pids.append(PersistentIdentifier.get('doi', record['doi']))
+        pids.append(PersistentIdentifier.get("doi", record["doi"]))
     except (PIDDoesNotExistError, KeyError):
         # Dealing with a project?
         pass
@@ -108,8 +98,8 @@ def records_ui_delete(pid, record, template=None, **kwargs):
     try:
         pids.extend(
             [
-                PersistentIdentifier.get('rn', rn)
-                for rn in record.get('report_number', [])
+                PersistentIdentifier.get("rn", rn)
+                for rn in record.get("report_number", [])
             ]
         )
     except PIDDoesNotExistError:
@@ -125,37 +115,37 @@ def records_ui_delete(pid, record, template=None, **kwargs):
     deposit_cls = Project if is_project else Video
     depid, deposit = Resolver(
         pid_type=depid.pid_type,
-        object_type='rec',
+        object_type="rec",
         getter=deposit_cls.get_record,
     ).resolve(depid.pid_value)
 
     pids.append(depid)
 
     form = RecordDeleteForm()
-    form.standard_reason.choices = current_app.config['CDS_REMOVAL_REASONS']
+    form.standard_reason.choices = current_app.config["CDS_REMOVAL_REASONS"]
     form._id = pid
     if form.validate_on_submit():
         if form.confirm.data != str(pid.object_uuid):
             flash(
-                'Incorrect record identifier (UUID): {}'.format(
+                "Incorrect record identifier (UUID): {}".format(
                     form.confirm.data
                 ),
-                category='error',
+                category="error",
             )
         elif (
             is_project
             and not form.delete_videos.data
-            and len(record.get('videos', [])) >= 0
+            and len(record.get("videos", [])) >= 0
         ):
             flash(
                 'To delete a project with videos you must check the "Delete '
                 'videos recursively" field.',
-                category='error',
+                category="error",
             )
         else:
             reason = (
                 form.reason.data
-                or dict(current_app.config['CDS_REMOVAL_REASONS'])[
+                or dict(current_app.config["CDS_REMOVAL_REASONS"])[
                     form.standard_reason.data
                 ]
             )
@@ -167,16 +157,16 @@ def records_ui_delete(pid, record, template=None, **kwargs):
                 record.id, reason=reason, hard=form.hard_delete.data
             )
             flash(
-                'Record {} and linked objects successfully deleted. '
-                'See report for details.'.format(pid_value),
-                category='success',
+                "Record {} and linked objects successfully deleted. "
+                "See report for details.".format(pid_value),
+                category="success",
             )
             return render_template(
-                'cds_records/records_delete_report.html', report=report
+                "cds_records/records_delete_report.html", report=report
             )
 
     return render_template(
-        'cds_records/record_delete.html',
+        "cds_records/record_delete.html",
         form=form,
         pid=pid,
         pids=pids,

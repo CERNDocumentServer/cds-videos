@@ -42,8 +42,10 @@ def lowercase_filter(field_name):
     :param field_name: Field name.
     :returns: Lowercase terms for given field.
     """
+
     def inner(values):
-        return Q('terms', **{field_name: [val.lower() for val in values]})
+        return Q("terms", **{field_name: [val.lower() for val in values]})
+
     return inner
 
 
@@ -57,18 +59,19 @@ def cern_filter():
     provides = get_user_provides()
 
     # Filter for public records
-    public = Q('missing', field='_access.read')
+    public = Q("missing", field="_access.read")
     # Filter for restricted records, that the user has access to
-    read_restricted = Q('terms', **{'_access.read': provides})
-    write_restricted = Q('terms', **{'_access.update': provides})
+    read_restricted = Q("terms", **{"_access.read": provides})
+    write_restricted = Q("terms", **{"_access.update": provides})
     # Filter records where the user is owner
-    owner = Q('match',
-              **{'_deposit.created_by': getattr(current_user, 'id', 0)})
+    owner = Q(
+        "match", **{"_deposit.created_by": getattr(current_user, "id", 0)}
+    )
 
     # OR all the filters
     combined_filter = public | read_restricted | write_restricted | owner
 
-    return Q('bool', filter=[combined_filter])
+    return Q("bool", filter=[combined_filter])
 
 
 class RecordVideosSearch(RecordsSearch):
@@ -77,9 +80,9 @@ class RecordVideosSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = 'records-videos-video'
+        index = "records-videos-video"
         doc_types = None
-        fields = ('*',)
+        fields = ("*",)
         default_filter = DefaultFilter(cern_filter)
 
 
@@ -92,9 +95,9 @@ class KeywordSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = 'keywords-keyword-v1.0.0'
+        index = "keywords-keyword-v1.0.0"
         doc_types = None
-        fields = ('*',)
+        fields = ("*",)
 
 
 class NotDeletedKeywordSearch(RecordsSearch):
@@ -106,11 +109,11 @@ class NotDeletedKeywordSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = 'keywords-keyword-v1.0.0'
+        index = "keywords-keyword-v1.0.0"
         doc_types = None
-        fields = ('*',)
+        fields = ("*",)
         default_filter = DefaultFilter(
-            Q('bool', filter=[Q('match', deleted=False)])
+            Q("bool", filter=[Q("match", deleted=False)])
         )
 
 

@@ -46,21 +46,21 @@ def dump_object(obj):
     tags = obj.get_tags()
     # File information
     content_type = splitext(obj.key)[1][1:].lower()
-    context_type = tags.pop('context_type', '')
-    media_type = tags.pop('media_type', '')
+    context_type = tags.pop("context_type", "")
+    media_type = tags.pop("media_type", "")
     return {
-        'key': obj.key,
-        'bucket_id': str(obj.bucket_id),
-        'version_id': str(obj.version_id),
-        'checksum': obj.file.checksum if obj.file else '',
-        'size': obj.file.size if obj.file else 0,
-        'file_id': str(obj.file_id),
-        'completed': obj.file is not None,
-        'content_type': content_type,
-        'context_type': context_type,
-        'media_type': media_type,
-        'tags': tags,
-        'links': _build_file_links(obj)
+        "key": obj.key,
+        "bucket_id": str(obj.bucket_id),
+        "version_id": str(obj.version_id),
+        "checksum": obj.file.checksum if obj.file else "",
+        "size": obj.file.size if obj.file else 0,
+        "file_id": str(obj.file_id),
+        "completed": obj.file is not None,
+        "content_type": content_type,
+        "context_type": context_type,
+        "media_type": media_type,
+        "tags": tags,
+        "links": _build_file_links(obj),
     }
 
 
@@ -68,25 +68,25 @@ def _build_file_links(obj):
     """Return a dict with file links."""
     return dict(
         self=(
-            u'{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}'
-            .format(
+            u"{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}".format(
                 # TODO: JSONSchema host is not the best solution here.
-                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
-                host=current_app.config['JSONSCHEMAS_HOST'],
-                api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
+                scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
+                host=current_app.config["JSONSCHEMAS_HOST"],
+                api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
                 bucket=obj.bucket_id,
                 key=obj.key,
                 version_id=obj.version_id,
-            )),
-        deleteFile=u'{scheme}://{host}/{api}/{bucket}/{key}'
-            .format(
-                # TODO: JSONSchema host is not the best solution here.
-                scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
-                host=current_app.config['JSONSCHEMAS_HOST'],
-                api=current_app.config['DEPOSIT_FILES_API'].strip('/'),
-                bucket=obj.bucket_id,
-                key=obj.key,
-            ))
+            )
+        ),
+        deleteFile=u"{scheme}://{host}/{api}/{bucket}/{key}".format(
+            # TODO: JSONSchema host is not the best solution here.
+            scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
+            host=current_app.config["JSONSCHEMAS_HOST"],
+            api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
+            bucket=obj.bucket_id,
+            key=obj.key,
+        ),
+    )
 
 
 def dump_generic_object(obj, data):
@@ -94,13 +94,18 @@ def dump_generic_object(obj, data):
     obj_dump = dump_object(obj)
     # if it's a master, get all the depending object and add them inside
     # <context_type> as a list order by key.
-    for slave in ObjectVersion.get_by_bucket(bucket=obj.bucket).join(
-            ObjectVersion.tags).filter(
-                ObjectVersionTag.key == 'master',
-                ObjectVersionTag.value == str(obj.version_id)).order_by(
-                    func.length(ObjectVersion.key), ObjectVersion.key):
-        obj_dump.setdefault(slave.get_tags()['context_type'], []).append(
-            dump_object(slave))
+    for slave in (
+        ObjectVersion.get_by_bucket(bucket=obj.bucket)
+        .join(ObjectVersion.tags)
+        .filter(
+            ObjectVersionTag.key == "master",
+            ObjectVersionTag.value == str(obj.version_id),
+        )
+        .order_by(func.length(ObjectVersion.key), ObjectVersion.key)
+    ):
+        obj_dump.setdefault(slave.get_tags()["context_type"], []).append(
+            dump_object(slave)
+        )
     # Sort slaves by key within their lists
     data.update(obj_dump)
 
@@ -110,10 +115,10 @@ class CDSFileObject(FileObject):
 
     @classmethod
     def _link(cls, bucket_id, key, _external=True):
-        return u'{scheme}://{host}/{api}/{bucket_id}/{key}'.format(
-            scheme=current_app.config['JSONSCHEMAS_URL_SCHEME'],
-            host=current_app.config['JSONSCHEMAS_HOST'],
-            api=current_app.config['DEPOSIT_FILES_API'].lstrip('/'),
+        return u"{scheme}://{host}/{api}/{bucket_id}/{key}".format(
+            scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
+            host=current_app.config["JSONSCHEMAS_HOST"],
+            api=current_app.config["DEPOSIT_FILES_API"].lstrip("/"),
             bucket_id=bucket_id,
             key=key,
         )
@@ -131,7 +136,7 @@ class CDSFilesIterator(FilesIterator):
         """Serialize files from a bucket."""
         files = []
         for o in sorted_files_from_bucket(bucket or self.bucket, self.keys):
-            if 'master' in o.get_tags():
+            if "master" in o.get_tags():
                 continue
             dump = self.file_cls(o, self.filesmap.get(o.key, {})).dumps()
             if dump:
@@ -146,9 +151,11 @@ class CDSVideosFilesIterator(CDSFilesIterator):
     def get_master_video_file(record):
         """Get master video file from a Video record."""
         try:
-            return next(f for f in record['_files']
-                        if f['media_type'] == 'video'
-                        and f['context_type'] == 'master')
+            return next(
+                f
+                for f in record["_files"]
+                if f["media_type"] == "video" and f["context_type"] == "master"
+            )
         except StopIteration:
             return {}
 
@@ -156,33 +163,38 @@ class CDSVideosFilesIterator(CDSFilesIterator):
     def get_video_subformats(master_file):
         """Get list of video subformats."""
         return [
-            video for video in master_file.get('subformat', [])
-            if video['media_type'] == 'video'
-            and video['context_type'] == 'subformat'
+            video
+            for video in master_file.get("subformat", [])
+            if video["media_type"] == "video"
+            and video["context_type"] == "subformat"
         ]
 
     @staticmethod
     def get_video_subtitles(record):
         """Get list of video subtitles."""
         return [
-            f for f in record['_files']
-            if f['context_type'] == 'subtitle' and 'language' in f['tags']
+            f
+            for f in record["_files"]
+            if f["context_type"] == "subtitle" and "language" in f["tags"]
         ]
 
     @staticmethod
     def get_video_frames(master_file):
         """Get sorted list of video frames."""
         return sorted(
-            master_file.get('frame', []),
-            key=lambda s: float(s['tags']['timestamp']))
+            master_file.get("frame", []),
+            key=lambda s: float(s["tags"]["timestamp"]),
+        )
 
     @staticmethod
     def get_video_posterframe(record):
         """Get the video poster frame."""
         # First check if we have a custom thumbnail for this video
-        for f in record.get('_files'):
-            if f.get('context_type') == 'poster' and f.get(
-                    'media_type') == 'image':
+        for f in record.get("_files"):
+            if (
+                f.get("context_type") == "poster"
+                and f.get("media_type") == "image"
+            ):
                 return f
 
         # If not return the first frame from the list
@@ -209,8 +221,8 @@ class CDSRecord(Record):
     def depid(self):
         """Return depid of the record."""
         return PersistentIdentifier.get(
-            pid_type='depid', pid_value=self.get('_deposit', {}).get('id'))
-
+            pid_type="depid", pid_value=self.get("_deposit", {}).get("id")
+        )
 
     @classmethod
     def create_bucket(cls, data):
@@ -240,34 +252,31 @@ class CDSRecord(Record):
 class Keyword(Record):
     """Define API for a keywords."""
 
-    _schema = 'keywords/keyword-v1.0.0.json'
+    _schema = "keywords/keyword-v1.0.0.json"
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
         """Create a keyword."""
-        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+        data["$schema"] = current_jsonschemas.path_to_url(cls._schema)
 
-        key_id = data.get('key_id', None)
-        name = data.get('name', None)
-        data.setdefault('deleted', False)
+        key_id = data.get("key_id", None)
+        name = data.get("name", None)
+        data.setdefault("deleted", False)
 
         if not id_:
             id_ = uuid.uuid4()
             kwid_minter(id_, data)
 
-        data['suggest_name'] = {
-            'input': name,
-            'payload': {
-                'key_id': key_id,
-                'name': name
-            },
+        data["suggest_name"] = {
+            "input": name,
+            "payload": {"key_id": key_id, "name": name},
         }
         return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
 
     @property
     def ref(self):
         """Get the url."""
-        return Keyword.get_ref(self['key_id'])
+        return Keyword.get_ref(self["key_id"])
 
     @classmethod
     def get_id(cls, ref):
@@ -277,23 +286,21 @@ class Keyword(Record):
     @classmethod
     def get_ref(cls, id_):
         """Get reference from an ID."""
-        return 'https://cds.cern.ch/api/keywords/{0}'.format(str(id_))
+        return "https://cds.cern.ch/api/keywords/{0}".format(str(id_))
 
 
 class Category(Record):
     """Define API for a category."""
 
-    _schema = 'categories/category-v1.0.0.json'
+    _schema = "categories/category-v1.0.0.json"
 
     @classmethod
     def create(cls, data, id_=None, **kwargs):
         """Create a category."""
-        data['$schema'] = current_jsonschemas.path_to_url(cls._schema)
+        data["$schema"] = current_jsonschemas.path_to_url(cls._schema)
 
-        data['suggest_name'] = {
-            'input': data.get('name', None),
-            'payload': {
-                'types': data.get('types', [])
-            }
+        data["suggest_name"] = {
+            "input": data.get("name", None),
+            "payload": {"types": data.get("types", [])},
         }
         return super(Category, cls).create(data=data, id_=id_, **kwargs)

@@ -23,202 +23,203 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Opencast API."""
+
 import os
 import time
+from datetime import datetime
+from xml.etree import ElementTree
 
 import requests
-from xml.etree import ElementTree
+from cds.modules.opencast.error import RequestError
+from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 from flask import current_app
 from invenio_files_rest.models import ObjectVersionTag
 from requests_toolbelt import MultipartEncoder
 
-from cds.modules.opencast.error import RequestError
-from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
-from datetime import datetime, timedelta
 
+class OpenCastRequestSession:
+    def __init__(self, username, password, verify_cert=True):
+        """Constructor."""
+        self.username = username
+        self.password = password
+        self.verify_cert = verify_cert
 
-def _create_media_package(session):
-    """Creates the media package and returns the event_id."""
-    url = "{endpoint}/createMediaPackage".format(
-        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-    )
-    try:
-        response = session.get(
-            url,
-            verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT']
+    def __enter__(self):
+        self.session = requests.Session()
+        self.session.auth = (
+            self.username,
+            self.password,
         )
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        raise RequestError(url, e.message)
-    # get the media package id, which is also the event id
-    tree = ElementTree.fromstring(response.content)
-    media_package_id = tree.attrib["id"]
-    return media_package_id, response.content
+        self.session.verify = self.verify_cert
+        return self.session
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.session.close()
 
 
-def _add_acl(media_package_xml, acl_filepath, session):
-    """Adds required acl file to the media package."""
-    url = "{endpoint}/addAttachment".format(
-        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-    )
-    form_data = dict(
-        mediaPackage=media_package_xml,
-        flavor="security/xacml+episode"
-    )
+class OpenCast:
+    def __init__(self, video, object_version):
+        """Constructor."""
+        self.video = video
+        self.object_version = object_version
+        self.BASE_URL = current_app.config["CDS_OPENCAST_API_ENDPOINT_INGEST"]
 
-    with open(acl_filepath, "rb") as f:
-        files = dict(
-            acl=f
+        module_dir = os.path.dirname(__file__)
+        self.acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
+
+    def run(self, qualities):
+        """Submit workflow to OpenCast."""
+        session_context = OpenCastRequestSession(
+            current_app.config["CDS_OPENCAST_API_USERNAME"],
+            current_app.config["CDS_OPENCAST_API_PASSWORD"],
+            current_app.config["CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT"],
         )
+        with session_context as session:
+            opencast_event_id, mp_xml = self._create_media_package(session)
+            new_mp_xml = self._add_metadata(session, mp_xml, qualities)
+            new_mp_xml = self._add_track(session, new_mp_xml)
+            new_mp_xml = self._add_acl(session, new_mp_xml)
+            self._ingest(session, new_mp_xml, qualities)
+
+        return opencast_event_id
+
+    def _create_media_package(self, session):
+        """Creates the media package and returns the event_id."""
+        url = self.BASE_URL + "/createMediaPackage"
         try:
-            response = session.post(
-                url,
-                files=files,
-                data=form_data,
-                verify=current_app.config[
-                    'CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT'
-                ]
-            )
+            response = session.get(url)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise RequestError(url, e.message)
+        # get the media package id, which is also the event id
+        tree = ElementTree.fromstring(response.content)
+        media_package_id = tree.attrib["id"]
+        return media_package_id, response.content
+
+    def _add_metadata(self, session, media_package_xml, qualities):
+        """Adds metadata to the media package."""
+        xml_metadata = """<?xml version="1.0" encoding="UTF-8" ?>
+        <dublincore
+            xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
+            xmlns:dcterms="http://purl.org/dc/terms/"
+            xmlns:oc="http://www.opencastproject.org/matterhorn/"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <dcterms:creator>CDS Videos</dcterms:creator>
+                <dcterms:contributor>No contributor</dcterms:contributor>
+                <dcterms:created>{start}</dcterms:created>
+                <dcterms:description>{description}</dcterms:description>
+                <dcterms:subject>cds videos</dcterms:subject>
+                <dcterms:language>eng</dcterms:language>
+                <dcterms:spatial>Remote</dcterms:spatial>
+                <dcterms:title>{title}</dcterms:title>
+                <dcterms:isPartOf>{series_id}</dcterms:isPartOf>
+        </dublincore>
+        """
+        label_project = "CDS Videos"
+        label_title = self.video.get("title", {}).get("title", "")
+        label_deposit = "deposit id: {0}".format(self.video.id)
+        title = " - ".join(
+            x for x in [label_project, label_title, label_deposit] if x
+        )
+
+        description = """{title} - {deposit} - object version: {object_version} - qualities: {qualities}""".format(
+            title=label_title,
+            deposit=label_deposit,
+            object_version=self.object_version.version_id,
+            qualities=" - ".join(qualities),
+        )
+
+        now = datetime.utcnow()
+        start = now.strftime("%Y-%m-%dT%H:%M:%S")
+        form_data = dict(
+            mediaPackage=media_package_xml,
+            flavor="dublincore/episode",
+            dublinCore=xml_metadata.format(
+                start=start,
+                series_id=current_app.config["CDS_OPENCAST_SERIES_ID"],
+                title=title,
+                description=description,
+            ),
+        )
+
+        url = self.BASE_URL + "/addDCCatalog"
+        try:
+            response = session.post(url, data=form_data)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             raise RequestError(url, e.message)
         return response.content
 
+    def _add_track(self, session, media_package_xml):
+        """Adds track to the media package."""
+        video_filepath = self.object_version.file.uri
+        video_filename = self.object_version.key
 
-def _add_metadata(media_package_xml, object_version, session):
-    """Adds metadata to the media package."""
-    xml_metadata = """<?xml version="1.0" encoding="UTF-8" ?>
-    <dublincore
-        xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
-        xmlns:dcterms="http://purl.org/dc/terms/"
-        xmlns:oc="http://www.opencastproject.org/matterhorn/"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <dcterms:creator>CDS Videos</dcterms:creator>
-            <dcterms:contributor>No contributor</dcterms:contributor>
-            <dcterms:created>{start}</dcterms:created>
-            <dcterms:description>descr - CDS Videos test</dcterms:description>
-            <dcterms:subject>cds videos</dcterms:subject>
-            <dcterms:language>eng</dcterms:language>
-            <dcterms:spatial>Remote</dcterms:spatial>
-            <dcterms:title>ObjectVersion version_id: {version_id}</dcterms:title>
-            <dcterms:isPartOf>{series_id}</dcterms:isPartOf>
-    </dublincore>
-    """
-    now = datetime.utcnow()
-    start = now.strftime("%Y-%m-%dT%H:%M:%S")
-    form_data = dict(
-        mediaPackage=media_package_xml,
-        flavor="dublincore/episode",
-        dublinCore=xml_metadata.format(
-            start=start,
-            series_id=current_app.config['CDS_OPENCAST_SERIES_ID_TEST'],
-            version_id=object_version.version_id
-        ),
-    )
-    url = "{endpoint}/addDCCatalog".format(
-        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-    )
-    try:
-        response = session.post(
-            url,
-            data=form_data,
-            verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT']
-        )
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        raise RequestError(url, e.message)
-    return response.content
-
-
-def _add_track(
-        media_package_xml,
-        video_filepath,
-        video_filename,
-        session,
-        object_version
-):
-    """Adds track to the media package."""
-
-    data = MultipartEncoder(
-        fields=dict(
-            mediaPackage=media_package_xml,
-            flavor="presenter/source",
-            file=(
-                video_filename,
-                file_opener_xrootd(video_filepath, 'rb')
+        url = self.BASE_URL + "/addTrack"
+        data = MultipartEncoder(
+            fields=dict(
+                mediaPackage=media_package_xml,
+                flavor="presenter/source",
+                file=(
+                    video_filename,
+                    file_opener_xrootd(video_filepath, "rb"),
+                ),
             )
         )
-    )
-    url = "{endpoint}/addTrack".format(
-        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-    )
-    start = time.time()
-    try:
-        response = session.post(
-            url,
-            data=data,
-            headers={'Content-Type': data.content_type},
-            verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT']
+        start = time.time()
+        try:
+            response = session.post(
+                url,
+                data=data,
+                headers={"Content-Type": data.content_type},
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise RequestError(url, e.message)
+        end = time.time()
+
+        size = file_size_xrootd(video_filepath)
+        ObjectVersionTag.create_or_update(
+            self.object_version,
+            "file_upload_time_in_seconds",
+            str(int(end - start)),
         )
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        raise RequestError(url, e.message)
-    end = time.time()
-    size = file_size_xrootd(video_filepath)
-    ObjectVersionTag.create_or_update(
-        object_version, 'file_upload_time_in_seconds', str(int(end-start))
-    )
-    ObjectVersionTag.create_or_update(
-        object_version, 'file_size_mb', str(size*0.000001)
-    )
-
-    return response.content
-
-
-def _ingest(media_package_xml, qualities, session):
-    """Triggers transcoding of subformats."""
-    form_data = dict(
-        mediaPackage=media_package_xml,
-    )
-
-    url = "{endpoint}/ingest/cern-cds-videos".format(
-        endpoint=current_app.config['CDS_OPENCAST_API_ENDPOINT_INGEST']
-    )
-
-    for quality in current_app.config['CDS_OPENCAST_QUALITIES'].keys():
-        if quality not in qualities:
-            dict_key = 'flagQuality{0}'.format(quality)
-            form_data.update({dict_key: "false"})
-
-    try:
-        response = session.post(
-            url,
-            data=form_data,
-            verify=current_app.config['CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT']
+        ONE_MB = 0.000001
+        ObjectVersionTag.create_or_update(
+            self.object_version, "file_size_mb", str(size * ONE_MB)
         )
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        raise RequestError(url, e.message)
-    return response.content
 
+        return response.content
 
-def start_workflow(object_version, qualities):
-    """Starts opencast workflow."""
-    session = requests.Session()
-    session.auth = (
-        current_app.config['CDS_OPENCAST_API_USERNAME'],
-        current_app.config['CDS_OPENCAST_API_PASSWORD']
-    )
-    video_filepath = object_version.file.uri
-    video_filename = object_version.key
-    module_dir = os.path.dirname(__file__)
-    acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
-    opencast_event_id, mp_xml = _create_media_package(session)
-    new_mp_xml = _add_metadata(mp_xml, object_version, session)
-    new_mp_xml = _add_track(
-        new_mp_xml, video_filepath, video_filename, session, object_version
-    )
-    new_mp_xml = _add_acl(new_mp_xml, acl_filepath, session)
-    _ingest(new_mp_xml, qualities, session)
-    session.close()
-    return opencast_event_id
+    def _add_acl(self, session, media_package_xml):
+        """Adds required acl file to the media package."""
+        url = self.BASE_URL + "/addAttachment"
+
+        form_data = dict(
+            mediaPackage=media_package_xml, flavor="security/xacml+episode"
+        )
+
+        with open(self.acl_filepath, "rb") as f:
+            files = dict(acl=f)
+            try:
+                response = session.post(url, files=files, data=form_data)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                raise RequestError(url, e.message)
+            return response.content
+
+    def _ingest(self, session, media_package_xml, qualities):
+        """Triggers transcoding of subformats."""
+        form_data = dict(mediaPackage=media_package_xml)
+        for quality in current_app.config["CDS_OPENCAST_QUALITIES"].keys():
+            if quality not in qualities:
+                dict_key = "flagQuality{0}".format(quality)
+                form_data.update({dict_key: "false"})
+
+        url = self.BASE_URL + "/ingest/cern-cds-videos"
+        try:
+            response = session.post(url, data=form_data)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise RequestError(url, e.message)
+        return response.content

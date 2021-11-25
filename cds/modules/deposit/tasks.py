@@ -28,21 +28,20 @@ from __future__ import absolute_import, print_function
 
 from datetime import datetime, timedelta
 
-from invenio_db import db
-from flask import current_app
 from celery import shared_task
+from flask import current_app
 from invenio_cache import current_cache
+from invenio_db import db
 from invenio_indexer.api import RecordIndexer
-from invenio_records.models import RecordMetadata
-from invenio_records_files.api import Record
+from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
-from invenio_jsonschemas import current_jsonschemas
+from invenio_records.models import RecordMetadata
+from invenio_records_files.api import Record
 
-from .api import Video, Project
-from .search import AllDraftDepositsSearch
-from ...modules.records.serializers import datacite_v31
 from ...modules.records.minters import is_local_doi
+from ...modules.records.serializers import datacite_v31
+from .api import Project
 
 
 @shared_task(
@@ -86,56 +85,6 @@ def datacite_register(
     except Exception as exc:
         db.session.rollback()
         raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
-
-
-def _is_state_changed(record, deposit):
-    """Return True if the celery tasks state changed."""
-    state_r = record["_cds"].get("state", {})
-    state_d = deposit["_cds"].get("state", {})
-    return state_r != state_d
-
-
-def _get_deposits_split_by_type(query):
-    """Get video/projects and both as records."""
-    video_schema = current_jsonschemas.path_to_url(Video._schema)
-    project_schema = current_jsonschemas.path_to_url(Project._schema)
-    # get list of videos, project and both as records
-    video_ids = []
-    project_ids = []
-    record_ids = []
-    for data in query.scan():
-        if data["$schema"] == project_schema:
-            project_ids.append(data.meta.id)
-        if data["$schema"] == video_schema:
-            video_ids.append(data.meta.id)
-        record_ids.append(data.meta.id)
-    records = {r.id: r for r in Record.get_records(record_ids)}
-    projects = Project.get_records(project_ids)
-    videos = Video.get_records(video_ids)
-    return (videos, projects, records)
-
-
-@shared_task(
-    ignore_result=True, rate_limit="100/m", default_retry_delay=10 * 60
-)
-def preserve_celery_states_on_db():
-    """Preserve in db the celery tasks state."""
-    (videos, projects, records) = _get_deposits_split_by_type(
-        query=AllDraftDepositsSearch()
-    )
-    ids = []
-    # commit only the ones who should be update
-    for video in videos:
-        if _is_state_changed(records[video.id], video):
-            video.commit()
-            ids.append(str(video.id))
-    for project in projects:
-        if _is_state_changed(records[project.id], project):
-            project.commit()
-            ids.append(str(project.id))
-    db.session.commit()
-    if ids:
-        RecordIndexer().bulk_index(iter(ids))
 
 
 @shared_task(ignore_result=True, rate_limit="100/m")

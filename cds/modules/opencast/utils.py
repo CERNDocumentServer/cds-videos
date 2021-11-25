@@ -31,7 +31,7 @@ def find_lowest_quality():
     lowest_height = 100000
     lowest_quality = None
     for quality, preset_items in current_app.config[
-            'CDS_OPENCAST_QUALITIES'
+        "CDS_OPENCAST_QUALITIES"
     ].items():
         if preset_items["height"] < lowest_height:
             lowest_height = preset_items["height"]
@@ -49,10 +49,11 @@ def get_qualities(video_height=None, video_width=None):
     """
     qualities = []
     for quality, preset_items in current_app.config[
-        'CDS_OPENCAST_QUALITIES'
+        "CDS_OPENCAST_QUALITIES"
     ].items():
-        if (video_height and video_height >= preset_items['height']) or \
-                (video_width and video_width >= preset_items['width']):
+        if (video_height and video_height >= preset_items["height"]) or (
+            video_width and video_width >= preset_items["width"]
+        ):
             qualities.append(quality)
     if not qualities:
         lowest_quality = find_lowest_quality()
@@ -70,19 +71,20 @@ def can_be_transcoded(subformat_desired_quality, video_width, video_height):
     be generated, or False otherwise
     """
     try:
-        qualitiy_config = current_app.config[
-            'CDS_OPENCAST_QUALITIES'
-        ][subformat_desired_quality]
+        qualitiy_config = current_app.config["CDS_OPENCAST_QUALITIES"][
+            subformat_desired_quality
+        ]
     except KeyError:
         return None
 
-    if video_height < qualitiy_config[
-        'height'
-    ] or video_width < qualitiy_config['width']:
+    if (
+        video_height < qualitiy_config["height"]
+        or video_width < qualitiy_config["width"]
+    ):
         return None
 
     return dict(
         preset_quality=subformat_desired_quality,
-        width=qualitiy_config['width'],
-        height=qualitiy_config['height']
+        width=qualitiy_config["width"],
+        height=qualitiy_config["height"],
     )

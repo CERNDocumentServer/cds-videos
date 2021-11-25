@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 
 import mock
 
-from cds.modules.flows.api import Flow
+from cds.modules.flows.api import FlowService
 from cds.modules.flows.models import TaskMetadata
 from cds.modules.flows.tasks import CeleryTask
 from cds.modules.flows.decorators import task
@@ -72,17 +72,17 @@ def test_basic_flow_api_usage(db, users):
             t = TaskMetadata.get(kwargs['task_id'])
             assert t.status.value == 'PENDING'
             assert t.message == 'Running for {}'.format(times)
-            f = Flow.get_flow(kwargs['flow_id'])
+            f = FlowService.get_flow(kwargs['flow_id'])
             assert str(f.status) == 'PENDING'
 
             # Reschedule the task to mimic breaking long standing tasks
             times = times - 1
             self.retry(args=(times,), kwargs=kwargs)
 
-    flow = Flow.create('test',
-                       payload=dict(common='common-arg', common2='common2'),
-                       user_id="1", deposit_id="test",
-                       )
+    flow = FlowService.create('test',
+                              payload=dict(common='common-arg', common2='common2'),
+                              user_id="1", deposit_id="test",
+                              )
     flow_id = flow.id
     assert str(flow.status) == 'PENDING'
 
@@ -95,7 +95,7 @@ def test_basic_flow_api_usage(db, users):
 
     # patch the flow build
     with mock.patch("cds.modules.flows.api.Flow.build_steps", build):
-        flow = Flow.get_flow(flow_id)
+        flow = FlowService.get_flow(flow_id)
         flow.assemble()
         # Save tasks and flow before running
         db.session.commit()
@@ -104,7 +104,7 @@ def test_basic_flow_api_usage(db, users):
 
         flow.start()
 
-        flow = Flow.get_flow(flow_id)
+        flow = FlowService.get_flow(flow_id)
         assert str(flow.status) == 'SUCCESS'
 
         task_status = flow.json['tasks'][0]
@@ -120,7 +120,7 @@ def test_basic_flow_api_usage(db, users):
         )
         flow_id = flow.id
         assert str(flow.status) == 'PENDING'
-        flow = Flow.get_flow(flow_id)
+        flow = FlowService.get_flow(flow_id)
         flow.assemble()
 
         # Save tasks and flow before running
@@ -132,7 +132,7 @@ def test_basic_flow_api_usage(db, users):
 
         # assert flow_id != old_flow_id
 
-        flow = Flow.get_flow(flow_id)
+        flow = FlowService.get_flow(flow_id)
 
         # Restart task
         flow.restart_task(task_status['id'])

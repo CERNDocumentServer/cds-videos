@@ -21,16 +21,16 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app
-
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
+from flask import current_app
 
-from ..flows.api import Flow
+from ..flows.api import Flow, FlowService
+from ..flows.tasks import TranscodeVideoTask
 from ..opencast.utils import can_be_transcoded
 
-id_types = ['recid', 'depid']
+id_types = ["recid", "depid"]
 
 
 def create_all_missing_subformats(id_type, id_value):
@@ -40,17 +40,22 @@ def create_all_missing_subformats(id_type, id_value):
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
     subformats = CDSVideosFilesIterator.get_video_subformats(master)
-    dones = [subformat['tags']['preset_quality'] for subformat in subformats]
-    missing = set(
-        current_app.config['CDS_OPENCAST_QUALITIES'].keys()
-    ) - set(dones)
-    transcodables = list(
-        filter(lambda q: can_be_transcoded(q, w, h), missing)
+    dones = [subformat["tags"]["preset_quality"] for subformat in subformats]
+    missing = set(current_app.config["CDS_OPENCAST_QUALITIES"].keys()) - set(
+        dones
+    )
+    transcodables_qualities = list(
+        filter(
+            lambda q: can_be_transcoded(q, w, h),
+            missing,
+        )
     )
 
-    _restart_transcoding_tasks(dep_uuid, transcodables)
+    flow = Flow.get_by_deposit(dep_uuid)
+    service = FlowService(flow)
+    _run_transcoding_for(str(flow.id), service, transcodables_qualities)
 
-    return transcodables
+    return transcodables_qualities
 
 
 def create_subformat(id_type, id_value, quality):
@@ -61,15 +66,16 @@ def create_subformat(id_type, id_value, quality):
     master, w, h = _get_master_video(video_deposit)
 
     subformat = can_be_transcoded(quality, w, h)
-    flow = Flow.get_for_deposit(dep_uuid)
-    task_id = None
-    for task in flow.tasks:
-        if subformat["preset_quality"] == task.payload.get("preset_quality"):
-            task_id = task.id
-            break
-    if task_id:
-        flow.restart_task(task_id)
-    return subformat, task_id
+    if subformat:
+        flow = Flow.get_by_deposit(dep_uuid)
+        assert flow, "Cannot find Flow for given deposit id {0}".format(
+            dep_uuid
+        )
+
+        service = FlowService(flow)
+        _run_transcoding_for(str(flow.id), service, [quality])
+
+    return subformat["preset_quality"] if subformat else None
 
 
 def create_all_subformats(id_type, id_value):
@@ -79,33 +85,38 @@ def create_all_subformats(id_type, id_value):
     video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
 
-    transcodables = list(
+    transcodables_qualities = list(
         filter(
             lambda q: can_be_transcoded(q, w, h),
-            current_app.config['CDS_OPENCAST_QUALITIES'].keys(),
+            current_app.config["CDS_OPENCAST_QUALITIES"].keys(),
         )
     )
-    _restart_transcoding_tasks(dep_uuid, transcodables)
 
-    return transcodables
+    flow = Flow.get_by_deposit(dep_uuid)
+    service = FlowService(flow)
+    _run_transcoding_for(str(flow.id), service, transcodables_qualities)
+
+    return transcodables_qualities
 
 
-def _restart_transcoding_tasks(deposit_id, qualities):
-    flow = Flow.get_for_deposit(deposit_id)
-    task_ids = []
-    for task in flow.tasks:
-        if task.payload.get("preset_quality") in qualities:
-            task_ids.append(str(task.id))
-
-    flow.restart_transcoding_tasks(task_ids)
+def _run_transcoding_for(flow_id, service, qualities):
+    """Run transcoding for the given qualities."""
+    for quality in qualities:
+        task = TranscodeVideoTask.get_flow_task_by_quality(
+            flow_id, quality
+        )
+        if task:
+            service.restart_task(task, qualities=[quality])
+        else:
+            service.run_celery_task(TranscodeVideoTask(), qualities=[quality])
 
 
 def _resolve_deposit(id_type, id_value):
     """Return the deposit video."""
     depid = id_value
-    if id_type == 'recid':
+    if id_type == "recid":
         _, record = record_resolver.resolve(id_value)
-        depid = record['_deposit']['id']
+        depid = record["_deposit"]["id"]
 
     return deposit_video_resolver(depid), depid
 
@@ -118,20 +129,20 @@ def _get_master_video(video_deposit):
 
     return (
         master,
-        int(master['tags']['width']),
-        int(master['tags']['height']),
+        int(master["tags"]["width"]),
+        int(master["tags"]["height"]),
     )
 
 
 def _validate(id_type=None, quality=None):
     """Validate input parameters."""
     if id_type not in id_types:
-        raise Exception('`id_type` param must be one of {0}'.format(id_types))
+        raise Exception("`id_type` param must be one of {0}".format(id_types))
 
     all_possible_qualities = current_app.config[
-        'CDS_OPENCAST_QUALITIES'
+        "CDS_OPENCAST_QUALITIES"
     ].keys()
     if quality and quality not in all_possible_qualities:
         raise Exception(
-            '`quality` param must be one of {0}'.format(all_possible_qualities)
+            "`quality` param must be one of {0}".format(all_possible_qualities)
         )

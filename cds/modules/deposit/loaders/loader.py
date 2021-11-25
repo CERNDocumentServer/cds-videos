@@ -23,7 +23,7 @@ from __future__ import absolute_import
 
 import json
 
-from flask import request, has_request_context, current_app
+from flask import current_app, has_request_context, request
 from invenio_rest.errors import RESTValidationError
 
 

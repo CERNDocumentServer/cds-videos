@@ -93,22 +93,3 @@ class DepositVideosSearch(RecordsSearch):
         doc_types = None
         fields = ('*', )
         default_filter = DefaultFilter(cern_filter)
-
-
-def all_drafts_filter():
-    """Filter published videos/projects."""
-    return Q('bool', filter=[
-        Q('match', **{'_deposit.status': 'draft'})
-    ])
-
-
-class AllDraftDepositsSearch(RecordsSearch):
-    """Default search class."""
-
-    class Meta:
-        """Configuration to get all deposits project/videos."""
-
-        index = 'deposits-records-videos'
-        doc_types = None
-        fields = ('*', )
-        default_filter = DefaultFilter(all_drafts_filter)

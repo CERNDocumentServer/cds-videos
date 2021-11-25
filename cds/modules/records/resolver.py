@@ -27,10 +27,11 @@
 from __future__ import absolute_import, print_function
 
 from functools import partial
+
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
 
-from .api import Keyword, CDSRecord
+from .api import CDSRecord, Keyword
 
 
 def get_pid(pid_type, pid_value):
@@ -41,15 +42,17 @@ def get_pid(pid_type, pid_value):
 
 
 keyword_resolver = Resolver(
-    pid_type='kwid', object_type='rec',
-    getter=partial(Keyword.get_record, with_deleted=True)
+    pid_type="kwid",
+    object_type="rec",
+    getter=partial(Keyword.get_record, with_deleted=True),
 )
 
 
 record_resolver = Resolver(
-    pid_type='recid', object_type='rec',
-    getter=partial(CDSRecord.get_record, with_deleted=True)
+    pid_type="recid",
+    object_type="rec",
+    getter=partial(CDSRecord.get_record, with_deleted=True),
 )
 
 
-get_record_pid = partial(get_pid, pid_type='recid')
+get_record_pid = partial(get_pid, pid_type="recid")
