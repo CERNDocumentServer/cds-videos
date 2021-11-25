@@ -27,13 +27,13 @@ from __future__ import absolute_import, print_function
 from flask import current_app
 from flask_security import current_user
 from invenio_access import Permission
+from invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
-from invenio_deposit.permissions import action_admin_access
 
-from .utils import is_deposit, is_record, get_user_provides, lowercase_value
 from .api import CDSRecord as Record
+from .utils import get_user_provides, is_deposit, is_record, lowercase_value
 
 
 def files_permission_factory(obj, action=None):
@@ -76,50 +76,50 @@ def record_permission_factory(record=None, action=None):
 
 def record_create_permission_factory(record=None):
     """Create permission factory."""
-    return record_permission_factory(record=record, action='create')
+    return record_permission_factory(record=record, action="create")
 
 
 def record_read_permission_factory(record=None):
     """Read permission factory."""
-    return record_permission_factory(record=record, action='read')
+    return record_permission_factory(record=record, action="read")
 
 
 def record_read_eos_path_permission_factory(record=None):
     """Read permission factory."""
-    return record_permission_factory(record=record, action='read-eos-path')
+    return record_permission_factory(record=record, action="read-eos-path")
 
 
 def record_read_files_permission_factory(record=None):
     """Read permission factory."""
-    return record_permission_factory(record=record, action='read-files')
+    return record_permission_factory(record=record, action="read-files")
 
 
 def record_update_permission_factory(record=None):
     """Update permission factory."""
-    return record_permission_factory(record=record, action='update')
+    return record_permission_factory(record=record, action="update")
 
 
 def record_delete_permission_factory(record=None):
     """Delete permission factory."""
-    return record_permission_factory(record=record, action='delete')
+    return record_permission_factory(record=record, action="delete")
 
 
 def deposit_read_permission_factory(record=None):
     """Record permission factory."""
-    if record and 'deposits' in record['$schema']:
-        return DepositPermission.create(record=record, action='read')
+    if record and "deposits" in record["$schema"]:
+        return DepositPermission.create(record=record, action="read")
     else:
-        return RecordPermission.create(record=record, action='read')
+        return RecordPermission.create(record=record, action="read")
 
 
 def deposit_update_permission_factory(record=None):
     """Deposit permission factory."""
-    return DepositPermission.create(record=record, action='update')
+    return DepositPermission.create(record=record, action="update")
 
 
 def deposit_delete_permission_factory(record=None):
     """Deposit permission factory."""
-    return DepositPermission.create(record=record, action='delete')
+    return DepositPermission.create(record=record, action="delete")
 
 
 #
@@ -132,16 +132,16 @@ class DepositFilesPermission(object):
     """
 
     update_actions = [
-        'bucket-read',
-        'bucket-read-versions',
-        'bucket-update',
-        'bucket-listmultiparts',
-        'object-read',
-        'object-read-version',
-        'object-delete',
-        'object-delete-version',
-        'multipart-read',
-        'multipart-delete',
+        "bucket-read",
+        "bucket-read-versions",
+        "bucket-update",
+        "bucket-listmultiparts",
+        "object-read",
+        "object-read-version",
+        "object-delete",
+        "object-delete-version",
+        "multipart-read",
+        "multipart-delete",
     ]
 
     def __init__(self, record, func):
@@ -177,15 +177,15 @@ class RecordFilesPermission(DepositFilesPermission):
     """
 
     read_actions = [
-        'bucket-read',
-        'object-read',
+        "bucket-read",
+        "object-read",
     ]
 
     admin_actions = [
-        'bucket-read',
-        'bucket-read-versions',
-        'object-read',
-        'object-read-version',
+        "bucket-read",
+        "bucket-read-versions",
+        "object-read",
+        "object-read-version",
     ]
 
     @classmethod
@@ -208,12 +208,12 @@ class RecordPermission(object):
     - Delete access given to admins only.
     """
 
-    create_actions = ['create']
-    read_actions = ['read']
-    read_files_actions = ['read-files']
-    read_eos_path_actions = ['read-eos-path']
-    update_actions = ['update']
-    delete_actions = ['delete']
+    create_actions = ["create"]
+    read_actions = ["read"]
+    read_files_actions = ["read-files"]
+    read_eos_path_actions = ["read-eos-path"]
+    update_actions = ["update"]
+    delete_actions = ["delete"]
 
     def __init__(self, record, func, user):
         """Initialize a file permission object."""
@@ -282,7 +282,7 @@ def is_public(data, action):
     In practice this means that the record doesn't have the ``access`` key or
     the action is not inside access or is empty.
     """
-    return '_access' not in data or not data.get('_access', {}).get(action)
+    return "_access" not in data or not data.get("_access", {}).get(action)
 
 
 def has_read_files_permission(user, record):
@@ -291,12 +291,14 @@ def has_read_files_permission(user, record):
     # Same permissions as for record itself
 
     # Allow everyone for public records
-    if is_public(record, 'read'):
+    if is_public(record, "read"):
         return True
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = [lowercase_value(value) for value in record['_access']['read']]
+    read_access_groups = [
+        lowercase_value(value) for value in record["_access"]["read"]
+    ]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -307,12 +309,14 @@ def has_read_files_permission(user, record):
 def has_read_record_permission(user, record):
     """Check if user has read access to the record."""
     # Allow everyone for public records
-    if is_public(record, 'read'):
+    if is_public(record, "read"):
         return True
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = [lowercase_value(value) for value in record['_access']['read']]
+    read_access_groups = [
+        lowercase_value(value) for value in record["_access"]["read"]
+    ]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -324,7 +328,7 @@ def has_read_record_eos_path_permission(user, record):
     """Check if user has eos path permissions."""
     user_provides = get_user_provides()
     # Allow e-group members only
-    read_access_groups = current_app.config.get('VIDEOS_EOS_PATH_EGROUPS', [])
+    read_access_groups = current_app.config.get("VIDEOS_EOS_PATH_EGROUPS", [])
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -336,15 +340,17 @@ def has_update_permission(user, record):
     user_id = int(user.get_id()) if user.is_authenticated else None
 
     # Allow owners
-    deposit_creator = record.get('_deposit', {}).get('created_by', -1)
+    deposit_creator = record.get("_deposit", {}).get("created_by", -1)
     if user_id == deposit_creator:
         return True
 
     # Allow based in the '_access' key
     user_provides = get_user_provides()
     # set.isdisjoint() is faster than set.intersection()
-    allowed_users = [lowercase_value(value) for value in \
-        record.get('_access', {}).get('update', [])]
+    allowed_users = [
+        lowercase_value(value)
+        for value in record.get("_access", {}).get("update", [])
+    ]
     if allowed_users and not set(user_provides).isdisjoint(set(allowed_users)):
         return True
 

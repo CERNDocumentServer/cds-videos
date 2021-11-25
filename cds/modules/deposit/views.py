@@ -32,7 +32,6 @@ from flask_security import current_user, login_required
 from invenio_db import db
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_ui.signals import record_viewed
-
 from invenio_sequencegenerator.api import Sequence, Template
 
 from ..records.permissions import (has_admin_permission,

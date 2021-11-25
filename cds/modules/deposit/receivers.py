@@ -27,11 +27,11 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
-from invenio_pidstore.models import PersistentIdentifier
-from invenio_indexer.api import RecordIndexer
 from invenio_deposit.receivers import \
     index_deposit_after_publish as original_index_deposit_after_publish
+from invenio_indexer.api import RecordIndexer
 from invenio_jsonschemas import current_jsonschemas
+from invenio_pidstore.models import PersistentIdentifier
 
 from .api import Project
 from .indexer import CDSRecordIndexer

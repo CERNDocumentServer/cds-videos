@@ -35,7 +35,7 @@ from invenio_pidstore.providers.base import BaseProvider
 class CDSRecordIdProvider(BaseProvider):
     """Record identifier provider."""
 
-    pid_type = 'recid'
+    pid_type = "recid"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -52,38 +52,42 @@ class CDSRecordIdProvider(BaseProvider):
     def create(cls, object_type=None, object_uuid=None, **kwargs):
         """Create a new record identifier."""
         # Request next integer in recid sequence.
-        assert 'pid_value' not in kwargs
+        assert "pid_value" not in kwargs
 
-        provider_url = current_app.config.get('RECORDS_ID_PROVIDER_ENDPOINT',
-                                              None)
+        provider_url = current_app.config.get(
+            "RECORDS_ID_PROVIDER_ENDPOINT", None
+        )
         if not provider_url:
             # Don't query external service in DEBUG mode
-            kwargs['pid_value'] = str(RecordIdentifier.next())
+            kwargs["pid_value"] = str(RecordIdentifier.next())
         else:
             response = requests.get(
                 provider_url,
                 headers={
-                    'User-Agent':
-                    current_app.config.get('RECORDS_ID_PROVIDER_AGENT')
-                })
+                    "User-Agent": current_app.config.get(
+                        "RECORDS_ID_PROVIDER_AGENT"
+                    )
+                },
+            )
 
-            if not response.ok or response.text.strip().startswith('[ERROR]'):
+            if not response.ok or response.text.strip().startswith("[ERROR]"):
                 raise PersistentIdentifierError(response.text)
 
-            kwargs['pid_value'] = response.text
+            kwargs["pid_value"] = response.text
 
-        kwargs.setdefault('status', cls.default_status)
+        kwargs.setdefault("status", cls.default_status)
         if object_type and object_uuid:
-            kwargs['status'] = PIDStatus.REGISTERED
+            kwargs["status"] = PIDStatus.REGISTERED
 
         return super(CDSRecordIdProvider, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )
 
 
 class CDSReportNumberProvider(BaseProvider):
     """Report number provider."""
 
-    pid_type = 'rn'
+    pid_type = "rn"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -96,13 +100,14 @@ class CDSReportNumberProvider(BaseProvider):
     def create(cls, object_type=None, object_uuid=None, data=None, **kwargs):
         """Create a new report number."""
         # assert isinstance(data, CDSDeposit)
-        if 'pid_value' not in kwargs:
+        if "pid_value" not in kwargs:
             sequence, kwargs = data.get_report_number_sequence(**kwargs)
-            kwargs['pid_value'] = sequence.next()
+            kwargs["pid_value"] = sequence.next()
 
-        kwargs.setdefault('status', cls.default_status)
+        kwargs.setdefault("status", cls.default_status)
         if object_type and object_uuid:
-            kwargs['status'] = PIDStatus.REGISTERED
+            kwargs["status"] = PIDStatus.REGISTERED
 
         return super(CDSReportNumberProvider, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )

@@ -234,7 +234,7 @@ function cdsDepositCtrl(
 
     this.restartFailedSubformats = function(subformatKeys) {
       var master = that.findMasterFile();
-      var flowId = master.tags._flow_id;
+      var flowId = master.tags.flow_id;
       master.subformat.forEach(
         function(subformat) {
           if (subformatKeys.includes(subformat.key)) {
@@ -248,7 +248,7 @@ function cdsDepositCtrl(
           var restartFlows = data.filter(function(taskInfo) {
             return subformatKeys.includes(taskInfo.info.payload.key);
           }).map(function(taskInfo) {
-            var flowId = taskInfo.info.payload.tags._flow_id;
+            var flowId = taskInfo.info.payload.tags.flow_id;
             var taskId = taskInfo.id;
             return that.restartFlow(flowId, taskId);
           });
@@ -265,7 +265,6 @@ function cdsDepositCtrl(
         that.stateReporter[state] = {
           status: 'PENDING',
           message: state,
-          payload: { percentage: 0 },
         };
       });
       _.forEach(that.record._cds.state, function(value, state) {
@@ -277,15 +276,6 @@ function cdsDepositCtrl(
     that.processSubformats = function() {
       var masterFile = that.findMasterFile();
       if (masterFile && masterFile.subformat) {
-        var subformats = masterFile.subformat;
-        // Sort by key length and key
-        subformats = _.chain(subformats).filter(function(subformat) {
-            return subformat.hasOwnProperty('key');
-          }).sortBy('key').sortBy(function(subformat) {
-            return subformat.key.length;
-          }).value();
-        masterFile.subformat = subformats;
-
         // Update failed subformat list
         that.failedSubformatKeys = subformats.filter(function(subformat) {
           return subformat.errored;
@@ -300,7 +290,7 @@ function cdsDepositCtrl(
 
         var fetchPresetsPromise = $q.resolve();
         if (that.presets && that.presets.length == 0) {
-          var flowId = masterFile.tags._flow_id;
+          var flowId = masterFile.tags.flow_id;
           if (flowId) {
             var flowUrl = urlBuilder.flowInfo({flowId: flowId});
             var updatePresets = function (resp) {
@@ -435,7 +425,7 @@ function cdsDepositCtrl(
       // Update only if it is ``draft``
       if (force === true || that.isDraft() || that.statusIsPending()){
         var masterFile = that.findMasterFile();
-        var flowId = _.get(masterFile, 'tags._flow_id', undefined);
+        var flowId = _.get(masterFile, 'tags.flow_id', undefined);
         that.flowId = flowId;
         if (flowId) {
           that.getTaskFeedback(flowId)

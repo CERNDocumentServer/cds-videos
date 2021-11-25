@@ -22,7 +22,6 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint
-
 from flask_iiif import IIIF
 
 blueprint = Blueprint(

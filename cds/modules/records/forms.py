@@ -28,13 +28,8 @@ from __future__ import absolute_import, print_function
 
 from flask_babelex import lazy_gettext as _
 from flask_wtf import FlaskForm
-from wtforms import (
-    BooleanField,
-    SelectField,
-    StringField,
-    SubmitField,
-    TextAreaField
-)
+from wtforms import (BooleanField, SelectField, StringField, SubmitField,
+                     TextAreaField)
 from wtforms.validators import InputRequired
 
 
@@ -47,39 +42,45 @@ class RecordDeleteForm(FlaskForm):
     """Form for deleting a record."""
 
     reason = TextAreaField(
-        _('Removal reason (custom)'),
+        _("Removal reason (custom)"),
         description=_(
-            'Please provide a reason for removing the record. This reason will'
-            ' be displayed on the record tombstone page.'),
+            "Please provide a reason for removing the record. This reason will"
+            " be displayed on the record tombstone page."
+        ),
         filters=[strip_filter],
     )
 
     standard_reason = SelectField(
-        _('Removal reason (standard options)'),
+        _("Removal reason (standard options)"),
         coerce=str,
     )
 
     delete_videos = BooleanField(
-        _('Delete videos recursively?'),
+        _("Delete videos recursively?"),
         default=False,
         description=_(
-            'All videos attached to this project will be deleted too.'),
+            "All videos attached to this project will be deleted too."
+        ),
     )
 
     hard_delete = BooleanField(
-        _('Remove completely the record? (AKA Hard delete)'),
+        _("Remove completely the record? (AKA Hard delete)"),
         default=False,
         description=_(
-            'All will be removed, versions, files, PIDs, dental records... '
-            'Recovery of any kind will not be possible.'),
+            "All will be removed, versions, files, PIDs, dental records... "
+            "Recovery of any kind will not be possible."
+        ),
     )
 
     confirm = StringField(
-        _('Confirm deletion'), [
+        _("Confirm deletion"),
+        [
             InputRequired(),
         ],
         description=_(
-            'Please manually type the record identifier (UUID) in order to '
-            'confirm the deletion.'))
+            "Please manually type the record identifier (UUID) in order to "
+            "confirm the deletion."
+        ),
+    )
 
     delete = SubmitField(_("Permanently delete record"))

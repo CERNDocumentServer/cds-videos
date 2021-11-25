@@ -31,25 +31,27 @@ import os
 import shutil
 import signal
 import tempfile
-from functools import partial
 
 import jsonpatch
 import requests
+from cds.modules.flows.models import Status as FlowTaskStatus
+from cds.modules.flows.models import TaskMetadata
 from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
-from flask import current_app
-
-from .deposit import update_deposit_state
-from celery.states import FAILURE, STARTED, SUCCESS
 from celery.result import AsyncResult
+from celery.states import FAILURE, STARTED, SUCCESS
 from celery.task.control import revoke
 from celery.utils.log import get_task_logger
+from flask import current_app
 from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
-from invenio_files_rest.models import (ObjectVersion,
-                                       ObjectVersionTag, as_bucket,
-                                       as_object_version)
+from invenio_files_rest.models import (
+    ObjectVersion,
+    ObjectVersionTag,
+    as_bucket,
+    as_object_version,
+)
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
@@ -58,18 +60,14 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from .errors import ExtractMetadataTaskError, ExtractFramesTaskError, \
-    TaskRunningError
 from ..ffmpeg import ff_frames, ff_probe_all
+from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
-from ..records.utils import to_string
-from ..opencast.api import start_workflow
 from ..opencast.utils import get_qualities
+from ..records.utils import to_string
 from ..xrootd.utils import file_opener_xrootd
-from .files import move_file_into_local, dispose_object_version
-from .models import as_task
-
-from cds.modules.flows.models import TaskMetadata, Status
+from .deposit import index_deposit_project
+from .files import dispose_object_version, move_file_into_local
 
 logger = get_task_logger(__name__)
 
@@ -80,192 +78,40 @@ class CeleryTask(_Task):
     This class is a wrapper around ``celery.Task``
     """
 
-    def commit_status(self, task_id, state=Status.PENDING, message=''):
-        """Commit task status to the database."""
-        with celery_app.flask_app.app_context():
-            task = self.get_task(task_id)
-            task.status = state
-            task.message = message
-            db.session.merge(task)
-            db.session.commit()
-
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Update task status on database."""
-        task_id = kwargs.get('task_id', task_id)
-        self.commit_status(task_id, Status.FAILURE, str(einfo))
+        with celery_app.flask_app.app_context():
+            for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+                self.flow_id, self.name
+            ):
+                flow_task_metadata.status = FlowTaskStatus.FAILURE
+                flow_task_metadata.message = str(einfo)
+            db.session.commit()
+
         super(CeleryTask, self).on_failure(exc, task_id, args, kwargs, einfo)
+
+        self._reindex_video_project()
 
     def on_success(self, retval, task_id, args, kwargs):
         """Update tasks status on database."""
-        task_id = kwargs.get('task_id', task_id)
-        self.commit_status(
-            task_id,
-            Status.SUCCESS,
-            '{}'.format(retval),
-        )
+        with celery_app.flask_app.app_context():
+            for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+                self.flow_id, self.name
+            ):
+                flow_task_metadata.status = FlowTaskStatus.SUCCESS
+                flow_task_metadata.message = "{}".format(retval)
+            db.session.commit()
+
         super(CeleryTask, self).on_success(retval, task_id, args, kwargs)
 
-    @staticmethod
-    def get_status(task_id):
-        """Get singular task status."""
-        task = CeleryTask.get_task(task_id)
-        return {'status': str(task.status), 'message': task.message}
+        self._reindex_video_project()
 
     @staticmethod
-    def get_task(task_id):
-        """Get singular task from database."""
-        try:
-            task = as_task(task_id)
-            return task
-        except Exception:
-            raise KeyError('Task ID %s not found', task_id)
-
-    @staticmethod
-    def stop_task(task_id):
+    def stop_task(celery_task_id):
         """Stop singular task."""
-        task = CeleryTask.get_task(task_id)
-
-        if task.status == Status.PENDING:
-            revoke(str(task.id), terminate=True, signal='SIGKILL')
-            result = AsyncResult(str(task.id))
-            result.forget()
-
-    @staticmethod
-    def restart_task(task_id, flow_id, flow_payload):
-        """Restart singular task."""
-        task = CeleryTask.get_task(task_id)
-        if task.status == Status.PENDING:
-            raise TaskRunningError(
-                'Task with id {0} is already running.'.format(str(task.id))
-            )
-
-        task.status = Status.STARTED
-        db.session.add(task)
-
-        kwargs = {}
-        kwargs.update(task.payload)
-        kwargs.update(flow_payload)
-        kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
-        if kwargs.get("preset_quality"):
-            kwargs["qualities"] = [kwargs["preset_quality"]]
-            kwargs["task_id_"+kwargs["preset_quality"]] = str(task.id)
-
-        return (
-            celery_app.tasks.get(task.name).subtask(
-                task_id=str(task.id),
-                kwargs=kwargs,
-                immutable=True,
-            ).apply_async()
-        )
-
-    @staticmethod
-    def restart_group_of_transcoding_tasks(task_ids, flow_id, flow_payload):
-        """Restart a group of transcoding tasks."""
-        kwargs = {}
-        qualities = []
-        kwargs.update(flow_payload)
-        kwargs.update({'flow_id': flow_id})
-
-        for task_id in task_ids:
-            task = TaskMetadata.get(task_id)
-            if task.payload.get("preset_quality"):
-                quality = task.payload.get("preset_quality")
-                qualities.append(quality)
-                kwargs["task_id_"+quality] = str(task.id)
-                task.status = Status.STARTED
-                db.session.add(task)
-                db.session.commit()
-
-        if not qualities:
-            return
-
-        kwargs.update({'qualities': qualities})
-        return (
-            celery_app.tasks.get(TranscodeVideoTask().name).subtask(
-                kwargs=kwargs,
-                immutable=True,
-            ).apply_async()
-        )
-
-    @staticmethod
-    def get_ordered_tasks(tasks, flow_id, flow_payload):
-        """Get all tasks in order, to be executed sequentially."""
-        def get_signature(task):
-            """Returns celery task."""
-            task.status = Status.PENDING
-            db.session.add(task)
-
-            kwargs = {}
-            kwargs.update(task.payload)
-            kwargs.update(flow_payload)
-            kwargs.update({'flow_id': flow_id, 'task_id': str(task.id)})
-
-            return (
-                celery_app.tasks.get(task.name).subtask(
-                    task_id=str(task.id),
-                    kwargs=kwargs,
-                    immutable=True,
-                )
-            )
-
-        signature_list = []
-        qualities = []
-        extract_metadata_task = filter(
-            lambda task: task.name == ExtractMetadataTask().name, tasks
-        )
-        extract_frames_task = filter(
-            lambda task: task.name == ExtractFramesTask().name, tasks
-        )
-        transcode_video_tasks = filter(
-            lambda task: task.name == TranscodeVideoTask().name, tasks
-        )
-
-        if len(extract_metadata_task) == 1:
-            signature_list.append(get_signature(extract_metadata_task[0]))
-        else:
-            raise ExtractMetadataTaskError(
-                'There should be only one extract_metadata_task in flow with '
-                'flow_id: {0}, but instead there are {1}.'.format(
-                    flow_id,
-                    len(extract_metadata_task)
-                )
-            )
-
-        if len(extract_frames_task) == 1:
-            signature_list.append(get_signature(extract_frames_task[0]))
-        else:
-            raise ExtractFramesTaskError(
-                'There should be only one extract_frames_task in flow with '
-                'flow_id: {0}, but instead there are {1}.'.format(
-                    flow_id,
-                    len(extract_frames_task)
-                )
-            )
-
-        transcode_kwargs = {}
-        for transcode_video_task in transcode_video_tasks:
-            quality = transcode_video_task.payload["preset_quality"]
-            qualities.append(quality)
-            transcode_video_task.status = Status.STARTED
-            db.session.add(transcode_video_task)
-            transcode_kwargs.update(transcode_video_task.payload)
-            transcode_kwargs.update(flow_payload)
-            transcode_kwargs.update(
-                {'flow_id': flow_id, 'qualities': qualities}
-            )
-            task_key = "task_id_" + quality
-            transcode_kwargs[task_key] = str(transcode_video_task.id)
-
-        if transcode_video_tasks:
-            task = transcode_video_tasks[0]
-            signature = celery_app.tasks.get(task.name).subtask(
-                task_id=str(task.id),
-                kwargs=transcode_kwargs,
-                immutable=True,
-            )
-            signature_list.append(signature)
-
-        return signature_list
+        revoke(str(celery_task_id), terminate=True, signal="SIGKILL")
+        result = AsyncResult(str(celery_task_id))
+        result.forget()
 
 
 class AVCTask(CeleryTask):
@@ -273,35 +119,35 @@ class AVCTask(CeleryTask):
 
     abstract = True
 
-    @property
-    def name(self):
-        return '.'.join([self.__module__, self.__name__])
+    _base_payload = {}
 
-    def _extract_call_arguments(self, arg_list, **kwargs):
+    def _pop_call_arguments(self, arg_list, **kwargs):
         for name in arg_list:
             setattr(self, name, kwargs.pop(name, None))
         return kwargs
 
     def __call__(self, *args, **kwargs):
         """Extract keyword arguments."""
-        arg_list = ['flow_id', 'deposit_id', 'key']
-        kwargs = self._extract_call_arguments(arg_list, **kwargs)
+        arg_list = ["flow_id", "deposit_id", "key"]
+        kwargs = self._pop_call_arguments(arg_list, **kwargs)
         with self.app.flask_app.app_context():
-            if kwargs.get('_clean', False):
+            if kwargs.get("_clean", False):
                 self.clean(*args, **kwargs)
 
-            self.object = as_object_version(kwargs.pop('version_id', None))
-            if self.object:
-                self.obj_id = str(self.object.version_id)
+            self.object_version = as_object_version(
+                kwargs.pop("version_id", None)
+            )
+            self.object_version_id = str(self.object_version.version_id)
             self.set_base_payload()
+
             return self.run(*args, **kwargs)
 
     def update_state(self, task_id=None, state=None, meta=None):
-        """."""
-        self._base_payload.update(meta.get('payload', {}))
-        meta['payload'] = self._base_payload
+        """Update celery task state."""
+        self._base_payload.update(meta.get("payload", {}))
+        meta["payload"] = self._base_payload
         super(AVCTask, self).update_state(task_id, state, meta)
-        logging.debug('Update State: {0} {1}'.format(state, meta))
+        logging.debug("Update State: {0} {1}".format(state, meta))
 
     def _meta_exception_envelope(self, exc):
         """Create a envelope for exceptions.
@@ -310,69 +156,109 @@ class AVCTask(CeleryTask):
         exceptions.
         """
         meta = dict(message=str(exc), payload=self._base_payload)
-        return dict(
-            exc_message=meta,
-            exc_type=exc.__class__.__name__
-        )
+        return dict(exc_message=meta, exc_type=exc.__class__.__name__)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """When an error occurs, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             exception = self._meta_exception_envelope(exc=exc)
             self.update_state(task_id=task_id, state=FAILURE, meta=exception)
-            self._update_record()
-            logging.debug('Failure: {0}'.format(exception))
+            self._reindex_video_project()
+            logging.debug("Failure: {0}".format(exception))
         super(AVCTask, self).on_failure(
-            exc=exc, task_id=task_id, args=args, kwargs=kwargs, einfo=einfo)
+            exc=exc, task_id=task_id, args=args, kwargs=kwargs, einfo=einfo
+        )
 
     def on_success(self, exc, task_id, args, kwargs):
         """When end correctly, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
             self.update_state(task_id=task_id, state=SUCCESS, meta=meta)
-            self._update_record()
-            logging.debug('Success: {0}'.format(meta))
+            self._reindex_video_project()
+            logging.debug("Success: {0}".format(meta))
         super(AVCTask, self).on_success(
-            retval=exc, task_id=task_id, args=args, kwargs=kwargs)
+            retval=exc, task_id=task_id, args=args, kwargs=kwargs
+        )
 
-    def _update_record(self):
-        # update record state
+    def _reindex_video_project(self):
+        """Reindex video and project."""
         with celery_app.flask_app.app_context():
-            deposit_id = self._base_payload.get('deposit_id')
-            if deposit_id:
-                update_deposit_state(
-                    deposit_id=self._base_payload.get('deposit_id'))
+            deposit_id = self._base_payload["deposit_id"]
+            index_deposit_project(deposit_id)
 
     @staticmethod
     def set_revoke_handler(handler):
         """Set handler to be executed when the task gets revoked."""
+
         def _handler(signum, frame):
             with celery_app.flask_app.app_context():
                 handler()
+
         signal.signal(signal.SIGTERM, _handler)
 
-    def set_base_payload(self, payload=None):
+    def set_base_payload(self):
         """Set default base payload."""
-        self._base_payload = {
-            'deposit_id': self.deposit_id,
-            'flow_id': self.flow_id,
-            'type': self._type,
-        }
-        if self.object:
-            self._base_payload.update(
-                tags=self.object.get_tags(),
-                version_id=str(self.object.version_id)
-            )
-        if payload:
-            self._base_payload.update(**payload)
+        self._base_payload = dict(
+            deposit_id=self.deposit_id,
+            flow_id=self.flow_id,
+            name=self.name,
+            key=self.key,
+            tags=self.object_version.get_tags(),
+            master_id=self.object_version_id,
+        )
+
+    def get_full_payload(self, **kwargs):
+        """Get full payload merging base payload and kwargs."""
+        _payload = dict()
+
+        # base payload EXAMPLE
+        # {'deposit_id': <value>, 'tags':
+        #   {u'context_type': u'master', u'media_type': u'video',
+        #    u'preview': u'true', u'flow_id': <value>},
+        # 'name': <celery task name>,
+        # 'master_version_id': <value>,
+        # 'flow_id': <value>,
+        # 'key': <value>}
+        _payload.update(self._base_payload)
+
+        # kwargs EXAMPLE
+        # {'uri': None, 'bucket_id': <value>}
+        _payload.update(kwargs)
+        return _payload
+
+    @classmethod
+    def create_flow_tasks(cls, payload):
+        """Return a list of created Flow Tasks for the current Celery task."""
+        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+            payload["flow_id"], cls.name
+        )
+        if not flow_tasks_metadata:
+            flow_tasks_metadata = [
+                TaskMetadata.create(flow_id=payload["flow_id"], name=cls.name)
+            ]
+
+        for t in flow_tasks_metadata:
+            t.payload = payload
+
+        return flow_tasks_metadata
+
+    def get_or_create_flow_task(self):
+        """Get or create the Flow TaskMetadata for the current flow/task."""
+        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+            self.flow_id, self.name
+        )
+        if not flow_tasks_metadata:
+            flow_task_metadata = TaskMetadata.create(self.flow_id, self.name)
+        else:
+            assert len(flow_tasks_metadata) == 1
+            flow_task_metadata = flow_tasks_metadata[0]
+        return flow_task_metadata
 
 
 class DownloadTask(AVCTask):
     """Download task."""
 
-    def __init__(self):
-        """Init."""
-        self._type = 'file_download'
+    name = "file_download"
 
     @staticmethod
     def clean(version_id, *args, **kwargs):
@@ -387,13 +273,19 @@ class DownloadTask(AVCTask):
         :param self: reference to instance of task base class
         :param uri: URL of the file to download.
         """
-        self._base_payload.update(key=self.object.key)
+        self._base_payload.update(key=self.object_version.key)
+
+        flow_task_metadata = self.get_or_create_flow_task()
+        kwargs["celery_task_id"] = str(self.request.id)
+        flow_task_metadata.payload = self.get_full_payload(**kwargs)
+        flow_task_metadata.status = FlowTaskStatus.STARTED
+        db.session.commit()
 
         # Make HTTP request
         response = requests.get(uri, stream=True)
 
-        if 'Content-Length' in response.headers:
-            headers_size = int(response.headers.get('Content-Length'))
+        if "Content-Length" in response.headers:
+            headers_size = int(response.headers.get("Content-Length"))
         else:
             headers_size = None
 
@@ -401,98 +293,101 @@ class DownloadTask(AVCTask):
             """Progress reporter."""
             size = size or headers_size
             if size is None:
-                # FIXME decide on proper error-handling behaviour
-                raise RuntimeError('Cannot locate "Content-Length" header.')
+                err = 'Cannot locate "Content-Length" header.'
+                flow_task_metadata.status = FlowTaskStatus.FAILURE
+                flow_task_metadata.message = err
+                db.session.commit()
+                raise RuntimeError(err)
             meta = dict(
                 payload=dict(
                     size=size,
                     total=total,
-                    percentage=total * 100 / size, ),
-                message='Downloading {0} of {1}'.format(total, size), )
-
+                    percentage=total * 100 / size,
+                ),
+                message="Downloading {0} of {1}".format(total, size),
+            )
             self.update_state(state=STARTED, meta=meta)
+            # should report state here to TaskMetadata
 
-        self.object.set_contents(response.raw,
-                                 progress_callback=progress_updater,
-                                 size=headers_size)
+        self.object_version.set_contents(
+            response.raw, progress_callback=progress_updater, size=headers_size
+        )
 
         db.session.commit()
-
-        return self.obj_id
 
 
 class ExtractMetadataTask(AVCTask):
     """Extract metadata task."""
 
     format_keys = [
-        'duration',
-        'bit_rate',
-        'size',
+        "duration",
+        "bit_rate",
+        "size",
     ]
     stream_keys = [
-        'avg_frame_rate',
-        'codec_name',
-        'codec_long_name',
-        'width',
-        'height',
-        'nb_frames',
-        'display_aspect_ratio',
-        'color_range',
+        "avg_frame_rate",
+        "codec_name",
+        "codec_long_name",
+        "width",
+        "height",
+        "nb_frames",
+        "display_aspect_ratio",
+        "color_range",
     ]
 
     _all_keys = format_keys + stream_keys
 
-    def __init__(self):
-        """Init."""
-        self._type = 'file_video_metadata_extraction'
+    name = "file_video_metadata_extraction"
 
     def clean(self, deposit_id, version_id, *args, **kwargs):
         """Undo metadata extraction."""
         # 1. Revert patch on record
-        recid = str(PersistentIdentifier.get(
-            'depid', deposit_id).object_uuid)
-        patch = [{
-            'op': 'remove',
-            'path': '/_cds/extracted_metadata',
-        }]
-        validator = 'cds.modules.records.validators.PartialDraft4Validator'
+        pid = PersistentIdentifier.get("depid", deposit_id)
+        recid = str(pid.object_uuid)
+        patch = [
+            {
+                "op": "remove",
+                "path": "/_cds/extracted_metadata",
+            }
+        ]
+        validator = "cds.modules.records.validators.PartialDraft4Validator"
         try:
             patch_record(recid=recid, patch=patch, validator=validator)
         except jsonpatch.JsonPatchConflict as c:
             logger.warning(
-                'Failed to apply JSON Patch to deposit %s: %s', recid, c
+                "Failed to apply JSON Patch to deposit %s: %s", recid, c
             )
 
         # Delete tmp file if any
         obj = as_object_version(version_id)
-        temp_location = obj.get_tags().get('temp_location', None)
+        temp_location = obj.get_tags().get("temp_location", None)
         if temp_location:
             shutil.rmtree(temp_location)
-            ObjectVersionTag.delete(obj, 'temp_location')
+            ObjectVersionTag.delete(obj, "temp_location")
             db.session.commit()
 
     @classmethod
-    def get_metadata_tags(cls, object_=None, uri=None):
-        """Get metadata tags."""
+    def get_metadata_from_video_file(cls, object_=None, uri=None):
+        """Get metadata from video file."""
         # Extract video's metadata using `ff_probe`
         if uri:
             metadata = ff_probe_all(uri)
         else:
             with move_file_into_local(object_) as url:
                 metadata = ff_probe_all(url)
-        return dict(metadata['format'], **metadata['streams'][0])
+        return dict(metadata["format"], **metadata["streams"][0])
 
     @classmethod
-    def create_metadata_tags(cls, object_, keys, uri=None):
-        """Extract metadata from the video and create corresponding tags."""
-
-        extracted_dict = cls.get_metadata_tags(object_=object_, uri=uri)
+    def create_metadata_tags(cls, metadata, object_, keys):
+        """Create corresponding tags."""
         # Add technical information to the ObjectVersion as Tags
-        [ObjectVersionTag.create_or_update(object_, k, to_string(v))
-         for k, v in extracted_dict.items()
-         if k in keys]
+        [
+            ObjectVersionTag.create_or_update(object_, k, to_string(v))
+            for k, v in metadata.items()
+            if k in keys
+        ]
         db.session.refresh(object_)
-        return extracted_dict
+        return metadata
 
     def run(self, uri=None, *args, **kwargs):
         """Extract metadata from given video file.
@@ -503,40 +398,53 @@ class ExtractMetadataTask(AVCTask):
 
         :param self: reference to instance of task base class
         """
-        recid = str(PersistentIdentifier.get(
-            'depid', self.deposit_id).object_uuid)
+        pid = PersistentIdentifier.get("depid", self.deposit_id)
+        recid = str(pid.object_uuid)
 
         self._base_payload.update(uri=uri)
 
+        flow_task_metadata = self.get_or_create_flow_task()
+        kwargs["celery_task_id"] = str(self.request.id)
+        flow_task_metadata.status = FlowTaskStatus.STARTED
+        flow_task_metadata.payload = self.get_full_payload(**kwargs)
+        db.session.commit()
+
+        metadata = self.get_metadata_from_video_file(
+            object_=self.object_version, uri=uri
+        )
         try:
             extracted_dict = self.create_metadata_tags(
-                uri=uri, object_=self.object, keys=self._all_keys)
+                metadata, self.object_version, self._all_keys
+            )
         except Exception:
             db.session.rollback()
             raise
 
-        tags = self.object.get_tags()
-
+        tags = self.object_version.get_tags()
+        flow_task_metadata.message = "Extracted: " + json.dumps(tags)
         db.session.commit()
 
         # Insert metadata into deposit's metadata
-        patch = [{
-            'op': 'add',
-            'path': '/_cds/extracted_metadata',
-            'value': extracted_dict
-        }]
-        validator = 'cds.modules.records.validators.PartialDraft4Validator'
-        update_record.s(
-            recid=recid, patch=patch, validator=validator).apply()
+        patch = [
+            {
+                "op": "add",
+                "path": "/_cds/extracted_metadata",
+                "value": extracted_dict,
+            }
+        ]
+        validator = "cds.modules.records.validators.PartialDraft4Validator"
+        update_record.s(recid=recid, patch=patch, validator=validator).apply()
 
-        # Update state
-        self.update_state(
-            state=SUCCESS,
+        # update Celery task payload with tags
+        self._base_payload.update(
             meta=dict(
                 payload=dict(
                     tags=tags,
-                    extracted_metadata=extracted_dict,),
-                message='Attached video metadata'))
+                    extracted_metadata=extracted_dict,
+                ),
+                message="Attached video metadata",
+            )
+        )
 
         return json.dumps(extracted_dict)
 
@@ -544,9 +452,7 @@ class ExtractMetadataTask(AVCTask):
 class ExtractFramesTask(AVCTask):
     """Extract frames task."""
 
-    def __init__(self):
-        """Init."""
-        self._type = 'file_video_extract_frames'
+    name = "file_video_extract_frames"
 
     @staticmethod
     def clean(version_id, *args, **kwargs):
@@ -555,22 +461,25 @@ class ExtractFramesTask(AVCTask):
         # automatically, all tags connected
         tag_alias_1 = aliased(ObjectVersionTag)
         tag_alias_2 = aliased(ObjectVersionTag)
-        slaves = ObjectVersion.query \
-            .join(tag_alias_1, ObjectVersion.tags) \
-            .join(tag_alias_2, ObjectVersion.tags) \
+        slaves = (
+            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
+            .join(tag_alias_2, ObjectVersion.tags)
             .filter(
-                tag_alias_1.key == 'master',
-                tag_alias_1.value == version_id) \
-            .filter(tag_alias_2.key == 'context_type',
-                    tag_alias_2.value.in_(['frame', 'frames-preview'])) \
+                tag_alias_1.key == "master", tag_alias_1.value == version_id
+            )
+            .filter(
+                tag_alias_2.key == "context_type",
+                tag_alias_2.value.in_(["frame", "frames-preview"]),
+            )
             .all()
+        )
         # FIXME do a test for check separately every "undo" when
-        # run a AVC workflow
         for slave in slaves:
             dispose_object_version(slave)
 
-    def run(self, frames_start=5, frames_end=95, frames_gap=10,
-            *args, **kwargs):
+    def run(
+        self, frames_start=5, frames_end=95, frames_gap=10, *args, **kwargs
+    ):
         """Extract images from some frames of the video.
 
         Each of the frame images generates an ``ObjectVersion`` tagged as
@@ -582,55 +491,73 @@ class ExtractFramesTask(AVCTask):
         :param frames_gap: percentage between frames from start to end,
             default 10.
         """
+        # create or update the TaskMetadata db row
+        flow_task_metadata = self.get_or_create_flow_task()
+        kwargs["celery_task_id"] = str(self.request.id)
+        flow_task_metadata.payload = self.get_full_payload(**kwargs)
+        flow_task_metadata.status = FlowTaskStatus.STARTED
+        db.session.commit()
+
         output_folder = tempfile.mkdtemp()
 
         # Remove temporary directory on abrupt execution halts.
-        self.set_revoke_handler(lambda: shutil.rmtree(output_folder,
-                                                      ignore_errors=True))
+        self.set_revoke_handler(
+            lambda: shutil.rmtree(output_folder, ignore_errors=True)
+        )
 
         # Calculate time positions
         options = self._time_position(
-            duration=self._base_payload['tags']['duration'],
-            frames_start=frames_start, frames_end=frames_end,
-            frames_gap=frames_gap
+            duration=self._base_payload["tags"]["duration"],
+            frames_start=frames_start,
+            frames_end=frames_end,
+            frames_gap=frames_gap,
         )
 
         def progress_updater(current_frame):
             """Progress reporter."""
-            percentage = current_frame / options['number_of_frames'] * 100
+            percentage = current_frame / options["number_of_frames"] * 100
             meta = dict(
-                payload=dict(
-                    size=options['duration'],
-                    percentage=percentage
+                payload=dict(size=options["duration"], percentage=percentage),
+                message="Extracting frames [{0} out of {1}]".format(
+                    current_frame, options["number_of_frames"]
                 ),
-                message='Extracting frames [{0} out of {1}]'.format(
-                    current_frame, options['number_of_frames']),
             )
-            logging.debug(meta['message'])
+            logging.debug(meta["message"])
             self.update_state(state=STARTED, meta=meta)
 
         try:
-            frames = self._create_frames(frames=self._create_tmp_frames(
-                object_=self.object,
-                output_dir=output_folder,
-                progress_updater=progress_updater, **options
-            ), object_=self.object, **options)
+            frames = self._create_frames(
+                frames=self._create_tmp_frames(
+                    object_=self.object_version,
+                    output_dir=output_folder,
+                    progress_updater=progress_updater,
+                    **options
+                ),
+                object_=self.object_version,
+                **options
+            )
         except Exception:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
-            self.clean(version_id=self.obj_id)
+            self.clean(version_id=self.object_version_id)
             raise
+
         # Generate GIF images
-        self._create_gif(bucket=str(self.object.bucket.id), frames=frames,
-                         output_dir=output_folder, master_id=self.obj_id)
+        self._create_gif(
+            bucket=str(self.object_version.bucket.id),
+            frames=frames,
+            output_dir=output_folder,
+            master_id=self.object_version_id,
+        )
 
         # Cleanup
         shutil.rmtree(output_folder)
         db.session.commit()
 
     @classmethod
-    def _time_position(cls, duration, frames_start=5, frames_end=95,
-                       frames_gap=10):
+    def _time_position(
+        cls, duration, frames_start=5, frames_end=95, frames_gap=10
+    ):
         """Calculate time positions."""
         duration = float(duration)
         time_step = duration * frames_gap / 100
@@ -640,26 +567,42 @@ class ExtractFramesTask(AVCTask):
         number_of_frames = ((frames_end - frames_start) / frames_gap) + 1
 
         return {
-            'duration': duration, 'start_time': start_time,
-            'end_time': end_time, 'time_step': time_step,
-            'number_of_frames': number_of_frames,
+            "duration": duration,
+            "start_time": start_time,
+            "end_time": end_time,
+            "time_step": time_step,
+            "number_of_frames": number_of_frames,
         }
 
     @classmethod
-    def _create_tmp_frames(cls, object_, start_time, end_time, time_step,
-                           duration, output_dir, progress_updater=None,
-                           **kwargs):
+    def _create_tmp_frames(
+        cls,
+        object_,
+        start_time,
+        end_time,
+        time_step,
+        duration,
+        output_dir,
+        progress_updater=None,
+        **kwargs
+    ):
         """Create frames in temporary files."""
         # Generate frames
         with move_file_into_local(object_) as url:
-            ff_frames(input_file=url,
-                      start=start_time, end=end_time, step=time_step,
-                      duration=duration, progress_callback=progress_updater,
-                      output=os.path.join(output_dir, 'frame-{:d}.jpg'))
+            ff_frames(
+                input_file=url,
+                start=start_time,
+                end=end_time,
+                step=time_step,
+                duration=duration,
+                progress_callback=progress_updater,
+                output=os.path.join(output_dir, "frame-{:d}.jpg"),
+            )
         # sort them
         sorted_ff_frames = sorted(
             os.listdir(output_dir),
-            key=lambda f: int(f.rsplit('-', 1)[1].split('.', 1)[0]))
+            key=lambda f: int(f.rsplit("-", 1)[1].split(".", 1)[0]),
+        )
         # return full path
         return [os.path.join(output_dir, path) for path in sorted_ff_frames]
 
@@ -667,102 +610,147 @@ class ExtractFramesTask(AVCTask):
     def _create_frames(cls, frames, object_, start_time, time_step, **kwargs):
         """Create frames."""
 
-        [cls._create_object(
-            bucket=object_.bucket, key=os.path.basename(filename),
-            stream=file_opener_xrootd(filename, 'rb'),
-            size=os.path.getsize(filename),
-            media_type='image', context_type='frame',
-            master_id=object_.version_id,
-            timestamp=start_time + (i + 1) * time_step)
-         for i, filename in enumerate(frames)]
+        [
+            cls._create_object(
+                bucket=object_.bucket,
+                key=os.path.basename(filename),
+                stream=file_opener_xrootd(filename, "rb"),
+                size=os.path.getsize(filename),
+                media_type="image",
+                context_type="frame",
+                master_id=object_.version_id,
+                timestamp=start_time + (i + 1) * time_step,
+            )
+            for i, filename in enumerate(frames)
+        ]
 
         return frames
 
     @classmethod
     def _create_gif(cls, bucket, frames, output_dir, master_id):
         """Generate a gif image."""
-        gif_filename = 'frames.gif'
+        gif_filename = "frames.gif"
         bucket = as_bucket(bucket)
 
         images = []
         for f in frames:
-            image = Image.open(file_opener_xrootd(f, 'rb'))
+            image = Image.open(file_opener_xrootd(f, "rb"))
             # Convert image for better quality
-            im = image.convert('RGB').convert(
-                'P', palette=Image.ADAPTIVE, colors=255
+            im = image.convert("RGB").convert(
+                "P", palette=Image.ADAPTIVE, colors=255
             )
             images.append(im)
         gif_image = create_gif_from_frames(images)
         gif_fullpath = os.path.join(output_dir, gif_filename)
         gif_image.save(gif_fullpath, save_all=True)
-        cls._create_object(bucket=bucket, key=gif_filename,
-                           stream=open(gif_fullpath, 'rb'),
-                           size=os.path.getsize(gif_fullpath),
-                           media_type='image', context_type='frames-preview',
-                           master_id=master_id)
+        cls._create_object(
+            bucket=bucket,
+            key=gif_filename,
+            stream=open(gif_fullpath, "rb"),
+            size=os.path.getsize(gif_fullpath),
+            media_type="image",
+            context_type="frames-preview",
+            master_id=master_id,
+        )
 
     @classmethod
-    def _create_object(cls, bucket, key, stream, size, media_type,
-                       context_type, master_id, **tags):
+    def _create_object(
+        cls,
+        bucket,
+        key,
+        stream,
+        size,
+        media_type,
+        context_type,
+        master_id,
+        **tags
+    ):
         """Create object versions with given type and tags."""
         obj = ObjectVersion.create(
-            bucket=bucket, key=key, stream=stream, size=size)
-        ObjectVersionTag.create(obj, 'master', str(master_id))
-        ObjectVersionTag.create(obj, 'media_type', media_type)
-        ObjectVersionTag.create(obj, 'context_type', context_type)
+            bucket=bucket, key=key, stream=stream, size=size
+        )
+        ObjectVersionTag.create(obj, "master", str(master_id))
+        ObjectVersionTag.create(obj, "media_type", media_type)
+        ObjectVersionTag.create(obj, "context_type", context_type)
         [ObjectVersionTag.create(obj, k, to_string(tags[k])) for k in tags]
 
 
 class TranscodeVideoTask(AVCTask):
-    """Transcode video task."""
+    """Transcode video task.
 
-    def __init__(self):
-        """Init."""
-        self._type = 'file_transcode'
-        self._base_payload = {}  # {'type': self._type}
+    This is CeleryTask is different from the others because there will be
+    only one CeleryTask for `n` TaskMetadata db rows (1 per quality)
+    """
+
+    name = "file_transcode"
+
+    @classmethod
+    def create_flow_tasks(cls, payload):
+        """Override default implementation to create Tasks per qualities."""
+        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+            payload["flow_id"], cls.name
+        )
+
+        flow_tasks = []
+        for quality in current_app.config["CDS_OPENCAST_QUALITIES"].keys():
+            flow_task_metadata = None
+            if flow_tasks_metadata:
+                flow_task_metadata = cls._get_flow_task_by_quality(
+                    flow_tasks_metadata, quality
+                )
+
+            if not flow_task_metadata:
+                flow_task_metadata = TaskMetadata.create(
+                    flow_id=payload["flow_id"], name=cls.name
+                )
+
+            payload["preset_quality"] = quality
+            flow_task_metadata.payload = payload
+            flow_tasks.append(flow_task_metadata)
+        return flow_tasks
+
+    @classmethod
+    def _get_flow_task_by_quality(cls, flow_tasks, quality):
+        """Get flow task by checking the preset quality field."""
+        flow_task_metadata = [
+            task
+            for task in flow_tasks
+            if task.payload["preset_quality"] == quality
+        ]
+        return flow_task_metadata[0] if len(flow_task_metadata) == 1 else None
+
+    def _update_flow_tasks(self, qualities, status, message, **kwargs):
+        """Create or update the TaskMetadata status and message."""
+        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+            self.flow_id, self.name
+        )
+        for quality in qualities:
+            flow_task_metadata = self._get_flow_task_by_quality(
+                flow_tasks_metadata, quality
+            )
+            assert flow_task_metadata
+
+            new_payload = dict(flow_task_metadata.payload)
+            new_payload.update(
+                preset_quality=quality,
+                opencast_publication_tag=current_app.config[
+                    "CDS_OPENCAST_QUALITIES"
+                ][quality]["opencast_publication_tag"],
+                **kwargs  # may contain `opencast_event_id`
+            )
+            # JSONb cols needs to be assigned (not updated) to be persisted
+            flow_task_metadata.payload = new_payload
+
+            flow_task_metadata.status = status
+            flow_task_metadata.message = message
+
+        db.session.commit()
 
     def on_success(self, *args, **kwargs):
-        """Override on success."""
-        self._update_record()
-
-    @staticmethod
-    def build_subformat_key(preset_quality):
-        """Build the object version key connected with the transcoding."""
-        return '{0}.mp4'.format(preset_quality)
-
-    def on_failure(self, *args, **kwargs):
-        """Override on failure."""
-        self._update_record()
-
-    def _create_or_update_tasks(
-            self,
-            tasks_qualities,
-            job_info,
-            task_status,
-            task_message,
-            *args,
-            **kwargs
-    ):
-        for quality in tasks_qualities:
-            task_id_key = "task_id_" + quality
-            task = TaskMetadata.create_or_update(
-                id_=kwargs[task_id_key] if kwargs.get("qualities") else None,
-                flow_id=self.object.get_tags()['_flow_id'],
-                name=TranscodeVideoTask().name,
-                payload=kwargs,
-            )
-            task.status = task_status
-            task.message = task_message
-            task_payload = task.payload.copy()
-            task_payload.update(
-                preset_quality=quality,
-                opencast_publication_tag=
-                current_app.config['CDS_OPENCAST_QUALITIES'][quality][
-                    "opencast_publication_tag"],
-                db_task_id=str(task.id),
-                **job_info)
-            task.payload = task_payload
-            db.session.commit()
+        """Override on success. Transcoding should not set tasks to SUCCESS."""
+        # simply reindex the video and project. The status of the tasks will
+        # be set by the Celery task that checks the status on OpenCast.
+        self._reindex_video_project()
 
     def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
@@ -773,69 +761,92 @@ class TranscodeVideoTask(AVCTask):
     def run(self, *args, **kwargs):
         """Launch video transcoding.
 
-        Create one Task for every quality.
+        Ensure that only TaskMetadata for transcodable quality
+        for every quality.
 
         :param self: reference to instance of task base class
         """
-        task_status = Status.PENDING
-        task_message = "Started transcoding."
-        tags = self.object.get_tags()
+        tags = self.object_version.get_tags()
         # Get master file's width x height
-        width = int(tags['width']) if 'width' in tags else None
-        height = int(tags['height']) if 'height' in tags else None
+        width = int(tags["width"]) if "width" in tags else None
+        height = int(tags["height"]) if "height" in tags else None
 
-        if 'qualities' in kwargs:
-            qualities = kwargs["qualities"]
-        else:
-            qualities = get_qualities(
-                video_height=height, video_width=width
+        # make sure that requested qualities, if any, are transcodable
+        transcodable_qualities = get_qualities(
+            video_height=height, video_width=width
+        )
+        wanted_qualities = kwargs.get("qualities", transcodable_qualities)
+        # exclude wanted qualities that are not transcodable
+        qualities = list(
+            set(wanted_qualities).intersection(set(transcodable_qualities))
+        )
+
+        # revoke not transcodable qualities
+        for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+            self.flow_id, self.name
+        ):
+            # skip previous tasks that were already run and might be succeeded
+            # or cancelled, in case we are restarting one specific quality
+            if flow_task_metadata.status != FlowTaskStatus.PENDING:
+                continue
+            preset_quality = flow_task_metadata.payload["preset_quality"]
+            if preset_quality not in qualities:
+                flow_task_metadata.status = FlowTaskStatus.CANCELLED
+                flow_task_metadata.message = (
+                    "The quality {0} cannot be transcoded.".format(
+                        preset_quality
+                    )
+                )
+
+            # store the celery task id and base payload in all flow tasks
+            new_payload = dict(flow_task_metadata.payload)
+            new_payload.update(
+                celery_task_id=str(self.request.id), **self._base_payload
             )
+            # JSONb cols needs to be assigned (not updated) to be persisted
+            flow_task_metadata.payload = new_payload
+        db.session.commit()
 
         self.set_revoke_handler(
-            lambda: self._create_or_update_tasks(
-                tasks_qualities=qualities,
-                job_info={},
-                task_status=Status.FAILURE,
-                task_message="Abrupt celery stop", **kwargs
+            lambda: self._update_flow_tasks(
+                qualities=qualities,
+                status=FlowTaskStatus.FAILURE,
+                message="Abrupt celery stop",
             )
         )
 
-        # Start Opencast transcoding
+        # launch transcoding workflow in OpenCast
+        flow_task_status = FlowTaskStatus.STARTED
+        flow_task_message = "Started transcoding workflow."
+
+        opencast_event_id = None
+        from cds.modules.deposit.api import deposit_video_resolver
+
+        deposit_video = deposit_video_resolver(self.deposit_id)
         try:
-            opencast_event_id = start_workflow(
-                self.object,
-                qualities,
+            opencast = OpenCast(deposit_video, self.object_version)
+            opencast_event_id = opencast.run(qualities)
+
+            # store the OpenCast event id in the tags
+            ObjectVersionTag.create_or_update(
+                self.object_version, "_opencast_event_id", opencast_event_id
             )
         except RequestError as e:
-            opencast_event_id = None
-            task_status = Status.FAILURE
-            task_message = ('Failed to start Opencast transcoding workflow '
-                            'for flow with id: {0}. Request failed on: {1}.'
-                            ' Error message: {2}'). format(
-                    self.object.get_tags()['_flow_id'],
-                    e.url,
-                    e.message
-                )
-            current_app.logger.error(task_message)
+            flow_task_status = FlowTaskStatus.FAILURE
+            flow_task_message = (
+                "Failed to start Opencast transcoding workflow "
+                "for flow with id: {0}. Request failed on: {1}."
+                " Error message: {2}"
+            ).format(self.flow_id, e.url, e.message)
+            db.session.commit()
+            current_app.logger.error(flow_task_message)
 
-        if opencast_event_id:
-            ObjectVersionTag.create_or_update(
-                self.object, '_opencast_event_id', opencast_event_id
-            )
-
-        job_info = dict(
+        self._update_flow_tasks(
+            qualities,
+            flow_task_status,
+            flow_task_message,
             opencast_event_id=opencast_event_id,
-            version_id=str(self.object.version_id),
-            master_version_id=str(self.object.version_id),
-            key=self.object.key,
-            tags=self.object.get_tags(),
         )
-
-        self._create_or_update_tasks(
-            qualities, job_info, task_status, task_message, **kwargs
-        )
-
-        return job_info['version_id']
 
 
 def patch_record(recid, patch, validator=None):
@@ -850,10 +861,12 @@ def patch_record(recid, patch, validator=None):
 
 
 @shared_task(bind=True)
-def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
-                                    countdown=5):
+def sync_records_with_deposit_files(
+    self, deposit_id, max_retries=5, countdown=5
+):
     """Low level files synchronize."""
     from cds.modules.deposit.api import deposit_video_resolver
+
     deposit_video = deposit_video_resolver(deposit_id)
     db.session.refresh(deposit_video.model)
     if deposit_video.is_published():
@@ -868,7 +881,8 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
         except Exception as exc:
             db.session.rollback()
             raise self.retry(
-                max_retries=max_retries, countdown=countdown, exc=exc)
+                max_retries=max_retries, countdown=countdown, exc=exc
+            )
         # index the record again
         _, record_video = deposit_video.fetch_published()
         RecordIndexer().index(record_video)
@@ -878,8 +892,9 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5,
 # Patch record
 #
 @shared_task(bind=True)
-def update_record(self, recid, patch, validator=None,
-                  max_retries=5, countdown=5):
+def update_record(
+    self, recid, patch, validator=None, max_retries=5, countdown=5
+):
     """Update a given record with a patch.
 
     Retries ``max_retries`` after ``countdown`` seconds.
@@ -892,23 +907,23 @@ def update_record(self, recid, patch, validator=None,
     """
     if patch:
         try:
-            patch_record(recid=recid, patch=patch,
-                         validator=validator)
+            patch_record(recid=recid, patch=patch, validator=validator)
             db.session.commit()
             return recid
         except ConcurrentModificationError as exc:
             db.session.rollback()
             raise self.retry(
-                max_retries=max_retries, countdown=countdown, exc=exc)
+                max_retries=max_retries, countdown=countdown, exc=exc
+            )
 
 
 def get_patch_tasks_status(deposit):
     """Get the patch to apply to update record tasks status."""
-    old_status = deposit['_cds']['state']
+    old_status = deposit["_cds"]["state"]
     new_status = deposit._current_tasks_status()
     # create tasks status patch
     patches = jsonpatch.make_patch(old_status, new_status).patch
     # make it suitable for the deposit
     for patch in patches:
-        patch['path'] = '/_cds/state{0}'.format(patch['path'])
+        patch["path"] = "/_cds/state{0}".format(patch["path"])
     return patches

@@ -26,10 +26,9 @@
 
 from datetime import datetime
 
+from invenio_db import db
 from sqlalchemy import and_, or_
 from sqlalchemy_utils.models import Timestamp
-
-from invenio_db import db
 
 
 class Announcement(db.Model, Timestamp):

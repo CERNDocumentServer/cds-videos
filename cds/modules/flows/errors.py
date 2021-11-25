@@ -47,5 +47,5 @@ class ExtractFramesTaskError(FlowsError):
     """Raised when the extract frames task ."""
 
 
-class TaskRunningError(FlowsError):
+class TaskAlreadyRunningError(FlowsError):
     """Raised when a task is restarted while is running."""

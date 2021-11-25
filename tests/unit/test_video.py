@@ -55,10 +55,10 @@ from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      record_video_resolver,
                                      deposit_video_resolver)
 from cds.modules.deposit.indexer import CDSRecordIndexer
-from cds.modules.flows.api import Flow
+from cds.modules.flows.api import FlowService
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.flows.status import get_all_deposit_flows, \
-    get_flow_tasks_status_by_task
+    get_tasks_status_grouped_by_task_name
 from cds.modules.fixtures.video_utils import add_master_to_video
 
 from helpers import mock_current_user, prepare_videos_for_publish, \
@@ -260,7 +260,7 @@ def test_video_delete_with_workflow(api_app, users, api_project,
     version_id = str(local_file)
 
     mock_delete = MagicMock(return_value=None)
-    Flow.delete = mock_delete
+    FlowService.delete = mock_delete
 
     headers = [('Content-Type', 'application/json')]
     payload = json.dumps(dict(somekey='somevalue'))
@@ -341,7 +341,7 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
         assert flows[1].payload['deposit_id'] == video_1_depid
         # check computed status
 
-        status = get_flow_tasks_status_by_task(flows)
+        status = get_tasks_status_grouped_by_task_name(flows)
 
         assert status['sse_simple_add'] == states.SUCCESS
         assert status['sse_failing_task'] == states.FAILURE
