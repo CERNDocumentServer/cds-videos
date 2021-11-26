@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.24 (2021-11-26)
+
+- decouple recid provider from CDS
+
 Version 1.0.23 (2021-11-19)
 
 - remove lowercase text transformation of emails for record restriction
