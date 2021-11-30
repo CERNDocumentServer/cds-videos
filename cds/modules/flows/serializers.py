@@ -59,10 +59,12 @@ def make_response(flow):
     response = {}
     response.update(flow_response_links(flow))
     response.update(serialize_flow_tasks(flow))
+
+    presets = list(current_app.config["CDS_OPENCAST_QUALITIES"].keys())
     response.update(
         {
             "flow_status": str(flow.status),
-            "presets": current_app.config["CDS_OPENCAST_QUALITIES"].keys(),
+            "presets": presets,
             "deposit_id": flow.deposit_id,
         }
     )
