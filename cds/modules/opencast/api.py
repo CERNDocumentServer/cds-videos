@@ -117,9 +117,11 @@ class OpenCast:
         """
         label_project = "CDS Videos"
         label_title = self.video.get("title", {}).get("title", "")
-        label_deposit = "deposit id: {0}".format(self.video.id)
+        record_pid = self.video["_deposit"].get("pid")
+        label_record = "recid: {0}" if record_pid else ""
+        label_deposit = "depid: {0}".format(self.video["_deposit"]["id"])
         title = " - ".join(
-            x for x in [label_project, label_title, label_deposit] if x
+            x for x in [label_project, label_title, label_record, label_deposit] if x
         )
 
         description = """{title} - {deposit} - object version: {object_version} - qualities: {qualities}""".format(

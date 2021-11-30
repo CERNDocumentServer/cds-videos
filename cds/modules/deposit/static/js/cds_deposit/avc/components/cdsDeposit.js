@@ -54,6 +54,9 @@ function cdsDepositCtrl(
     return that.record._deposit.status === 'published';
   };
 
+  // used in the Admin panel to restart tasks
+  this.allFlowsTasksByName = {}
+
   this.cachedFlowTasksById = {};
 
   this.isProjectPublished = function() {
@@ -178,14 +181,14 @@ function cdsDepositCtrl(
     }
 
     this.triggerRestartFlowTask = function(flowId, taskId) {
-      that.restartFlow(flowId, taskId)
+      that.restartFlowTask(flowId, taskId)
         .then(function() {
           // Fetch feedback to update the Interface
           that.fetchFlowTasksStatuses();
         })
     }
 
-    this.restartFlow = function(flowId, taskId) {
+    this.restartFlowTask = function(flowId, taskId) {
       var url = urlBuilder.restartTask({ taskId: taskId, flowId: flowId });
       return cdsAPI.action(url, 'PUT');
     };
@@ -359,6 +362,7 @@ function cdsDepositCtrl(
           that.getTaskFeedback(flowId)
             .then(function(data) {
               var tasksById = _.groupBy(data, 'id');
+              that.allFlowsTasksByName = _.groupBy(data, 'name');
               // each taskId is an array: '1233': [task]
               // remove the array for each key to make it simple to use
               for (var key in tasksById) {
