@@ -37,11 +37,11 @@ function cdsDepositsConfig(
 
   // Initialize statuses provider
   depositStatusesProvider.setValues({
-    PENDING: 'DEPOSIT_STATE/PENDING',
-    STARTED: 'DEPOSIT_STATE/STARTED',
-    FAILURE: 'DEPOSIT_STATE/FAILURE',
-    SUCCESS: 'DEPOSIT_STATE/SUCCESS',
-    REVOKED: 'DEPOSIT_STATE/REVOKED',
+    PENDING: 'PENDING',
+    STARTED: 'STARTED',
+    FAILURE: 'FAILURE',
+    SUCCESS: 'SUCCESS',
+    CANCELLED: 'CANCELLED',
   });
 
   // Initialize extracted metadata pre-fill
@@ -103,7 +103,7 @@ function cdsDepositsConfig(
     categories: '/api/categories',
     video: '/deposit/<%=deposit%>/preview/video/<%=key%>',
     flowInfo: '/api/flows/<%=flowId%>',
-    restartFlow: '/api/flows/<%=flowId%>/tasks/<%=taskId%>',
+    restartTask: '/api/flows/<%=flowId%>/tasks/<%=taskId%>',
     taskFeedback: '/api/flows/<%=flowId%>/feedback',
     selfVideo: '/api/deposits/video/<%=deposit%>',
     bucketVideo: '/api/files/<%=bucket%>',

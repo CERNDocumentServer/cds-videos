@@ -50,7 +50,7 @@ function cdsDepositsCtrl(
     STARTED: [],
     FAILURE: [],
     SUCCESS: [],
-    REVOKED: [],
+    CANCELLED: [],
   }
   // Show message when window is closing
   this.onExit = false;
@@ -85,19 +85,15 @@ function cdsDepositsCtrl(
     });
 
     cdsAPI.resolveJSON(this.projectSchema).then(function(response) {
-      console.log("masterschema", response.data)
       that.masterSchemaResolved = response.data;
     });
     cdsAPI.resolveJSON(this.videoSchema).then(function(response) {
-      console.log("childrenSchema", response.data)
       that.childrenSchemaResolved = response.data;
     });
     cdsAPI.resolveJSON(this.videoForm).then(function(response) {
-      console.log("childrenForm", response.data)
       that.childrenFormResolved = response.data;
     });
     cdsAPI.resolveJSON(this.projectForm).then(function(response) {
-      console.log("masterForm", response.data)
       that.masterFormResolved = response.data;
     });
 
@@ -436,8 +432,7 @@ function cdsDeposits() {
       videoExtensions: '@?',
       // Show restricted fields
       showAvcRestrictedFields: '=?',
-      // Show admin Interface
-      showAdminInterface: '=?',
+      isSuperAdmin: '=?',
     },
     controller: cdsDepositsCtrl,
     templateUrl: function($element, $attrs) {

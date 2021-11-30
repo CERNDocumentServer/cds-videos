@@ -30,7 +30,7 @@ from __future__ import absolute_import, print_function
 import mock
 
 from cds.modules.flows.api import FlowService
-from cds.modules.flows.models import TaskMetadata
+from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.tasks import CeleryTask
 from cds.modules.flows.decorators import task
 
@@ -69,7 +69,7 @@ def test_basic_flow_api_usage(db, users):
                 kwargs['task_id'], message='Running for {}'.format(times)
             )
             # Testing message updates
-            t = TaskMetadata.get(kwargs['task_id'])
+            t = FlowTaskMetadata.get(kwargs['task_id'])
             assert t.status.value == 'PENDING'
             assert t.message == 'Running for {}'.format(times)
             f = FlowService.get_flow(kwargs['flow_id'])

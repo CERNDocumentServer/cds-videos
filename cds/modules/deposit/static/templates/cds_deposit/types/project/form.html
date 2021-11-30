@@ -118,7 +118,7 @@
                 Share
               </a>
             </li>
-            <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
+            <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
               <a ng-click="active='admin'" role="tab" data-toggle="tab">
                 <i class="fa fa-bug" aria-hidden="true"></i> Admin
               </a>
@@ -286,7 +286,7 @@
               </div>
             </div>
             <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
-              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface" class="panel panel-danger">
+              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin" class="panel panel-danger">
                 <div class="panel-heading">Danger Zone</div>
                 <div class="panel-body">
                     <button

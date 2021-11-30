@@ -40,8 +40,6 @@ from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
-from invenio_deposit.api import Deposit, has_status, preserve
-from invenio_deposit.utils import mark_as_action
 from invenio_files_rest.models import (MultipartObject, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
 from invenio_jsonschemas import current_jsonschemas
@@ -54,9 +52,12 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from ..flows.api import (Flow, FlowService,
-                         get_tasks_status_grouped_by_task_name,
+from invenio_deposit.api import Deposit, has_status, preserve
+from invenio_deposit.utils import mark_as_action
+
+from ..flows.api import (FlowService, get_tasks_status_grouped_by_task_name,
                          merge_tasks_status)
+from ..flows.models import FlowMetadata
 from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
                            CDSVideosFilesIterator)
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
@@ -989,7 +990,7 @@ class Video(CDSDeposit):
 
     def _clean_tasks(self):
         """Clean all tasks."""
-        flows = Flow.get_by_deposit(
+        flows = FlowMetadata.get_by_deposit(
             deposit_id=self["_deposit"]["id"], is_last=False, multiple=True
         )
         for flow in flows:
@@ -1065,7 +1066,7 @@ class Video(CDSDeposit):
 
     def _current_tasks_status(self):
         """Return up-to-date tasks status."""
-        flow = Flow.get_by_deposit(self["_deposit"]["id"])
+        flow = FlowMetadata.get_by_deposit(self["_deposit"]["id"])
         if flow:
             return get_tasks_status_grouped_by_task_name(flow)
         if "state" in self.get("_cds", {}):

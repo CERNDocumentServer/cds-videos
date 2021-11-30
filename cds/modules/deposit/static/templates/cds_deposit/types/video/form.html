@@ -74,20 +74,6 @@
             <strong>Error: {{ $ctrl.cdsDepositCtrl.stateReporter[status].message | taskRepr }}</strong>
         </div>
       </div>
-      <!-- Failed transcodings -->
-      <div class="alert alert-danger clearfix" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length" role="alert">
-        <div class="pull-left">
-          <b>Failed transcodings:</b>
-          <ul>
-            <li ng-repeat="key in $ctrl.cdsDepositCtrl.failedSubformatKeys">
-              {{ key }}
-            </li>
-          </ul>
-        </div>
-        <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats($ctrl.cdsDepositCtrl.failedSubformatKeys)">
-          <i class="fa fa-undo"></i>
-        </button>
-      </div>
       <!-- PENDING -->
       <div ng-show="$ctrl.cdsDepositCtrl.displayPending()">
         <div class="progress">
@@ -206,7 +192,6 @@
           <li role="presentation" ng-class="{active: active=='files'}">
             <a ng-click="active='files'" role="tab" data-toggle="tab">
               Files
-              <small uib-tooltip-html="'Files error.'" ng-show="$ctrl.cdsDepositCtrl.failedSubformatKeys.length || $ctrl.cdsDepositCtrl.stateReporter.file_video_metadata_extraction.status == 'FAILURE' || $ctrl.cdsDepositCtrl.stateReporter.file_video_extract_frames.status == 'FAILURE'"><i class="fa fa-exclamation-circle text-danger"></i></small>
             </a>
           </li>
           <li role="presentation" ng-class="{active: active=='licenses'}">
@@ -224,7 +209,7 @@
               Related links
             </a>
           </li>
-          <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
+          <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
             <a ng-click="active='admin'" role="tab" data-toggle="tab">
               <i class="fa fa-bug" aria-hidden="true"></i> Admin
             </a>
@@ -347,7 +332,7 @@
           </div>
           <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
             <div class="panel panel-default">
-              <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartAllEvents()" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
+              <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId)" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
               <div class="panel-body">
                 <ul class="list-group" ng-repeat="(name, data) in $ctrl.cdsDepositCtrl.availableFlowsTasks">
                   <span ng-switch="name">
@@ -357,7 +342,7 @@
                           <ul class="list-group" ng-repeat="task in data">
                             <li class="list-group-item">
                               {{task.info.payload.preset_quality}} <span class="label label-default">{{ task.status }}</span>
-                              <a class="pull-right" ng-style="(task.status == 'PENDING' || task.status == 'STARTED') && {'pointer-events': 'none'}" ng-disabled="$ctrl.cdsDepositCtrl.isDraft()" ng-click="task.status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, task.id)">
+                              <a class="pull-right" ng-style="(task.status == 'PENDING' || task.status == 'STARTED') && {'pointer-events': 'none'}" ng-disabled="$ctrl.cdsDepositCtrl.isDraft()" ng-click="task.status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlowTask($ctrl.cdsDepositCtrl.flowId, task.id)">
                                 <i ng-show="task.status != 'PENDING' && task.status != 'STARTED'" class="fa fa-refresh" aria-hidden="true"></i>
                                 <span ng-show="task.status == 'PENDING' || task.status == 'STARTED'"><i class="fa fa-spinner fa-spin"></i></span>
                               </a>
@@ -368,7 +353,7 @@
                       <span ng-switch-default>
                         <li class="list-group-item">
                           <strong>{{name}}</strong> <span class="label label-default" >{{ data[0].status }}</span>
-                          <a class="pull-right" ng-style="(data[0].status == 'PENDING' || data[0].status == 'STARTED') && {'pointer-events': 'none'}" ng-click="data[0].status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId, data[0].id)">
+                          <a class="pull-right" ng-style="(data[0].status == 'PENDING' || data[0].status == 'STARTED') && {'pointer-events': 'none'}" ng-click="data[0].status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlowTask($ctrl.cdsDepositCtrl.flowId, data[0].id)">
                             <i ng-show="data[0].status != 'PENDING' && data[0].status != 'STARTED'" class="fa fa-refresh {{data[0].status}}" aria-hidden="true"></i>
                             <span ng-show="data[0].status == 'PENDING' || data[0].status == 'STARTED'"><i class="fa fa-spinner fa-spin"></i></span>
                           </a>

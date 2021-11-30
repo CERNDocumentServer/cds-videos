@@ -74,10 +74,9 @@ CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
 NOREPLY_EMAIL = "no-reply@cern.ch"
 MAIL_SUPPRESS_SEND = True
 
-# TODO: Rate limiting
+# Rate limiting
 # =============
-#: Storage for ratelimiter.
-# RATELIMIT_STORAGE_URL = 'redis://localhost:6379/3'
+RATELIMIT_ENABLED = False
 
 ###############################################################################
 # Translations & Time
@@ -853,7 +852,7 @@ SECURITY_LOGIN_SALT = "CHANGE_ME"
 # See details on
 # http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
 
-APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "localhost.cern.ch"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
 
 ###############################################################################
