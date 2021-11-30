@@ -25,9 +25,6 @@
 
 from __future__ import absolute_import, print_function
 
-import requests
-from flask import current_app
-from invenio_pidstore.errors import PersistentIdentifierError
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.base import BaseProvider
 from invenio_pidstore.providers.recordid import RecordIdProvider

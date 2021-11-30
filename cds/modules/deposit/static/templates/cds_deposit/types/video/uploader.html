@@ -77,7 +77,7 @@
       </td>
       <td ng-show="f" class="text-center">
         <span ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
-          <a ng-show="f.status_failure || f.status_success" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlowTask(f.tags.flow_id, f.tags.task_id)">
+          <a ng-show="f.status_failure || f.status_success" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlowTask(f.flow_id, f.task_id)">
             <i class="fa fa-undo"></i>
           </a>
         </span>
