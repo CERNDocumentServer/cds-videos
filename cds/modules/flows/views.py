@@ -24,20 +24,18 @@
 
 import json
 
-from cds.modules.flows.api import Flow, FlowService
-from cds.modules.flows.decorators import (
-    error_handler,
-    need_permission,
-    pass_flow,
-    pass_user_id,
-)
-from cds.modules.flows.loaders import extract_payload
-from cds.modules.flows.serializers import make_response, serialize_flow
 from flask import Blueprint
 from flask.views import MethodView
 from flask_restful import abort
 from invenio_db import db
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
+
+from cds.modules.flows.api import FlowService
+from cds.modules.flows.decorators import (error_handler, need_permission,
+                                          pass_flow, pass_user_id)
+from cds.modules.flows.loaders import extract_payload
+from cds.modules.flows.models import FlowMetadata
+from cds.modules.flows.serializers import make_response, serialize_flow
 
 blueprint = Blueprint("cds_flows", __name__)
 
@@ -98,7 +96,7 @@ class FlowListResource(MethodView):
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
-        flow = Flow.create(
+        flow = FlowMetadata.create(
             deposit_id=data["deposit_id"],
             user_id=user_id,
             payload=dict(

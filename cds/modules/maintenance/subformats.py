@@ -21,12 +21,14 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import current_app
+
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
-from flask import current_app
 
-from ..flows.api import Flow, FlowService
+from ..flows.api import FlowService
+from ..flows.models import FlowMetadata
 from ..flows.tasks import TranscodeVideoTask
 from ..opencast.utils import can_be_transcoded
 
@@ -51,7 +53,7 @@ def create_all_missing_subformats(id_type, id_value):
         )
     )
 
-    flow = Flow.get_by_deposit(dep_uuid)
+    flow = FlowMetadata.get_by_deposit(dep_uuid)
     service = FlowService(flow)
     _run_transcoding_for(str(flow.id), service, transcodables_qualities)
 
@@ -67,7 +69,7 @@ def create_subformat(id_type, id_value, quality):
 
     subformat = can_be_transcoded(quality, w, h)
     if subformat:
-        flow = Flow.get_by_deposit(dep_uuid)
+        flow = FlowMetadata.get_by_deposit(dep_uuid)
         assert flow, "Cannot find Flow for given deposit id {0}".format(
             dep_uuid
         )
@@ -92,7 +94,7 @@ def create_all_subformats(id_type, id_value):
         )
     )
 
-    flow = Flow.get_by_deposit(dep_uuid)
+    flow = FlowMetadata.get_by_deposit(dep_uuid)
     service = FlowService(flow)
     _run_transcoding_for(str(flow.id), service, transcodables_qualities)
 

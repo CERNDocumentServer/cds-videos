@@ -34,8 +34,8 @@ import tempfile
 
 import jsonpatch
 import requests
-from cds.modules.flows.models import Status as FlowTaskStatus
-from cds.modules.flows.models import TaskMetadata
+from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
+from cds.modules.flows.models import FlowTaskMetadata
 from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
@@ -81,7 +81,7 @@ class CeleryTask(_Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Update task status on database."""
         with celery_app.flask_app.app_context():
-            for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+            for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
                 self.flow_id, self.name
             ):
                 flow_task_metadata.status = FlowTaskStatus.FAILURE
@@ -95,7 +95,7 @@ class CeleryTask(_Task):
     def on_success(self, retval, task_id, args, kwargs):
         """Update tasks status on database."""
         with celery_app.flask_app.app_context():
-            for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+            for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
                 self.flow_id, self.name
             ):
                 flow_task_metadata.status = FlowTaskStatus.SUCCESS
@@ -229,12 +229,12 @@ class AVCTask(CeleryTask):
     @classmethod
     def create_flow_tasks(cls, payload):
         """Return a list of created Flow Tasks for the current Celery task."""
-        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
             payload["flow_id"], cls.name
         )
         if not flow_tasks_metadata:
             flow_tasks_metadata = [
-                TaskMetadata.create(flow_id=payload["flow_id"], name=cls.name)
+                FlowTaskMetadata.create(flow_id=payload["flow_id"], name=cls.name)
             ]
 
         for t in flow_tasks_metadata:
@@ -244,11 +244,11 @@ class AVCTask(CeleryTask):
 
     def get_or_create_flow_task(self):
         """Get or create the Flow TaskMetadata for the current flow/task."""
-        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
             self.flow_id, self.name
         )
         if not flow_tasks_metadata:
-            flow_task_metadata = TaskMetadata.create(self.flow_id, self.name)
+            flow_task_metadata = FlowTaskMetadata.create(self.flow_id, self.name)
         else:
             assert len(flow_tasks_metadata) == 1
             flow_task_metadata = flow_tasks_metadata[0]
@@ -277,6 +277,7 @@ class DownloadTask(AVCTask):
 
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
+        kwargs["task_id"] = str(flow_task_metadata.id)
         flow_task_metadata.payload = self.get_full_payload(**kwargs)
         flow_task_metadata.status = FlowTaskStatus.STARTED
         db.session.commit()
@@ -405,6 +406,7 @@ class ExtractMetadataTask(AVCTask):
 
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
+        kwargs["task_id"] = str(flow_task_metadata.id)
         flow_task_metadata.status = FlowTaskStatus.STARTED
         flow_task_metadata.payload = self.get_full_payload(**kwargs)
         db.session.commit()
@@ -494,6 +496,7 @@ class ExtractFramesTask(AVCTask):
         # create or update the TaskMetadata db row
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
+        kwargs["task_id"] = str(flow_task_metadata.id)
         flow_task_metadata.payload = self.get_full_payload(**kwargs)
         flow_task_metadata.status = FlowTaskStatus.STARTED
         db.session.commit()
@@ -687,7 +690,7 @@ class TranscodeVideoTask(AVCTask):
     @classmethod
     def create_flow_tasks(cls, payload):
         """Override default implementation to create Tasks per qualities."""
-        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
             payload["flow_id"], cls.name
         )
 
@@ -700,7 +703,7 @@ class TranscodeVideoTask(AVCTask):
                 )
 
             if not flow_task_metadata:
-                flow_task_metadata = TaskMetadata.create(
+                flow_task_metadata = FlowTaskMetadata.create(
                     flow_id=payload["flow_id"], name=cls.name
                 )
 
@@ -721,7 +724,7 @@ class TranscodeVideoTask(AVCTask):
 
     def _update_flow_tasks(self, qualities, status, message, **kwargs):
         """Create or update the TaskMetadata status and message."""
-        flow_tasks_metadata = TaskMetadata.get_all_by_flow_task_name(
+        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
             self.flow_id, self.name
         )
         for quality in qualities:
@@ -782,7 +785,7 @@ class TranscodeVideoTask(AVCTask):
         )
 
         # revoke not transcodable qualities
-        for flow_task_metadata in TaskMetadata.get_all_by_flow_task_name(
+        for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
             self.flow_id, self.name
         ):
             # skip previous tasks that were already run and might be succeeded
@@ -801,7 +804,9 @@ class TranscodeVideoTask(AVCTask):
             # store the celery task id and base payload in all flow tasks
             new_payload = dict(flow_task_metadata.payload)
             new_payload.update(
-                celery_task_id=str(self.request.id), **self._base_payload
+                task_id=str(flow_task_metadata.id),
+                celery_task_id=str(self.request.id),
+                **self._base_payload
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
             flow_task_metadata.payload = new_payload

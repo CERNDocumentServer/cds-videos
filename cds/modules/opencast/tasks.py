@@ -37,8 +37,8 @@ from invenio_files_rest.models import (FileInstance, ObjectVersion,
 from invenio_pidstore.errors import PIDDeletedError
 
 from cds.modules.flows.deposit import index_deposit_project
-from cds.modules.flows.models import Status as FlowTaskStatus
-from cds.modules.flows.models import TaskMetadata
+from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
+from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.tasks import (TranscodeVideoTask,
                                      sync_records_with_deposit_files)
 from cds.modules.opencast.api import OpenCastRequestSession
@@ -138,7 +138,7 @@ def get_opencast_events(grouped_flow_tasks):
 def check_transcoding_status():
     """Update all finished transcoding tasks."""
 
-    started_transcoding_tasks = TaskMetadata.query.filter_by(
+    started_transcoding_tasks = FlowTaskMetadata.query.filter_by(
         status=FlowTaskStatus.STARTED, name=TranscodeVideoTask.name
     ).all()
     grouped_flow_tasks = _group_tasks_by_opencast_event_id(
@@ -249,7 +249,7 @@ def _write_file_to_eos(url_to_download, obj):
 @shared_task
 def on_transcoding_completed(flow_task_id, opencast_subformat):
     """Update Task status and files by streaming it to EOS."""
-    flow_task = TaskMetadata.query.get(flow_task_id)
+    flow_task = FlowTaskMetadata.query.get(flow_task_id)
     opencast_event_id = flow_task.payload["opencast_event_id"]
     preset_quality = flow_task.payload["preset_quality"]
     master_object_version = as_object_version(
@@ -263,7 +263,7 @@ def on_transcoding_completed(flow_task_id, opencast_subformat):
     try:
         deposit_video = deposit_video_resolver(deposit_id)
     except PIDDeletedError:
-        flow_task = TaskMetadata.query.get(flow_task_id)
+        flow_task = FlowTaskMetadata.query.get(flow_task_id)
         flow_task.status = FlowTaskStatus.CANCELLED
         flow_task.message = "Video was deleted"
         db.session.commit()
@@ -337,7 +337,7 @@ def on_celery_task_failed(request, exc, traceback, data, **kwargs):
 def _set_flow_tasks_to_failed(flow_tasks_ids_with_error):
     """Set the given Flow Task to failed."""
     for id_, error in flow_tasks_ids_with_error:
-        flow_task = TaskMetadata.query.get(id_)
+        flow_task = FlowTaskMetadata.query.get(id_)
         flow_task.status = FlowTaskStatus.FAILURE
         flow_task.message = error
 

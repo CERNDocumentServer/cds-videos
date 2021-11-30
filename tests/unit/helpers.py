@@ -54,7 +54,7 @@ from cds.modules.flows.tasks import (
     AVCTask, TranscodeVideoTask, ExtractMetadataTask, update_record
 )
 from cds.modules.flows.api import FlowService
-from cds.modules.flows.models import Status
+from cds.modules.flows.models import FlowTaskStatus
 
 import random
 import uuid
@@ -520,11 +520,11 @@ def get_migration_streams(datadir):
 
 
 def mock_compute_status(cls, statuses):
-    return Status.FAILURE
+    return FlowTaskStatus.FAILURE
 
 
 def mock_compute_status(cls, statuses):
-    return Status.FAILURE
+    return FlowTaskStatus.FAILURE
 
 
 def mock_build_flow_status_json(flow_json):
