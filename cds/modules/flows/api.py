@@ -37,7 +37,7 @@ from .deposit import index_deposit_project
 from .errors import TaskAlreadyRunningError
 from .files import init_object_version
 from .models import FlowMetadata
-from .models import Status as FlowStatus
+from .models import FlowTaskStatus
 from .models import as_task
 from .tasks import (
     CeleryTask,
@@ -57,7 +57,7 @@ def get_tasks_status_grouped_by_task_name(flow):
         results[task.name].append(task.status)
 
     return {
-        k: str(FlowStatus.compute_status(v)) for k, v in results.items() if v
+        k: str(FlowTaskStatus.compute_status(v)) for k, v in results.items() if v
     }
 
 
@@ -68,7 +68,7 @@ def merge_tasks_status(statuses_1, statuses_2):
 
     for task in task_names:
         task_statuses_values = [statuses_1.get(task), statuses_2.get(task)]
-        statuses[task] = str(FlowStatus.compute_status(task_statuses_values))
+        statuses[task] = str(FlowTaskStatus.compute_status(task_statuses_values))
     return statuses
 
 
@@ -139,119 +139,12 @@ class AVCFlowCeleryTasks:
         return celery_chain(*celery_tasks_signatures)
 
 
-class Flow:
-    """Flow Model wrapper class."""
-
-    def __init__(self, model=None):
-        """Initialize the flow object."""
-        self.model = model
-
-    @classmethod
-    def create(
-        cls, deposit_id, name="AVCWorkflow", payload=None, user_id=None
-    ):
-        """Create a new flow instance and store it in the database."""
-        with db.session.begin_nested():
-            obj = FlowMetadata(
-                name=name,
-                payload=payload or dict(),
-                user_id=user_id,
-                deposit_id=deposit_id,
-            )
-            db.session.add(obj)
-        logger.info("Created new Flow %s", obj)
-        return cls(model=obj)
-
-    @property
-    def id(self):
-        """Get flow identifier."""
-        return self.model.id if self.model else None
-
-    @property
-    def deposit_id(self):
-        """Get flow identifier."""
-        return self.model.deposit_id if self.model else None
-
-    @property
-    def name(self):
-        """Get flow name."""
-        return self.model.name if self.model else None
-
-    @property
-    def payload(self):
-        """Get flow payload."""
-        return self.model.payload if self.model else None
-
-    @payload.setter
-    def payload(self, value):
-        """Update payload."""
-        if self.model:
-            self.model.payload = value
-            db.session.merge(self.model)
-
-    @property
-    def tasks(self):
-        """Get flow tasks."""
-        return self.model.tasks if self.model else []
-
-    @property
-    def created(self):
-        """Get creation timestamp."""
-        return self.model.created if self.model else None
-
-    @property
-    def updated(self):
-        """Get last updated timestamp."""
-        return self.model.updated if self.model else None
-
-    def to_dict(self):
-        """Return a dictionary representation."""
-        if self.model is None:
-            return None
-        res = self.model.to_dict()
-        res.update({"tasks": [t.to_dict() for t in self.model.tasks]})
-        return res
-
-    @property
-    def status(self):
-        return self.model.status if self.model else None
-
-    @classmethod
-    def get(cls, id_):
-        """Retrieve a Flow from the database by Id."""
-        obj = FlowMetadata.get(id_)
-        return cls(model=obj) if obj else None
-
-    @property
-    def is_last(self):
-        """Check if flow is the last one associated with the deposit_id."""
-        return self.model.is_last if self.model else None
-
-    @is_last.setter
-    def is_last(self, value):
-        """Update payload."""
-        if self.model:
-            self.model.is_last = value
-            db.session.merge(self.model)
-
-    @classmethod
-    def get_by_deposit(cls, deposit_id, is_last=True, multiple=False):
-        """Get one or all flows by deposit id."""
-        objs = FlowMetadata.get_by_deposit(
-            deposit_id, is_last=is_last, multiple=multiple
-        )
-        if multiple:
-            return [cls(model=obj) for obj in objs]
-        else:
-            return cls(model=objs) if objs else None
-
-
 class FlowService:
     """Flow service."""
 
-    def __init__(self, flow):
+    def __init__(self, flow_metadata):
         """Constructor."""
-        self.flow = flow
+        self.flow_metadata = flow_metadata
 
     def run(self):
         """Run workflow for video transcoding.
@@ -280,11 +173,11 @@ class FlowService:
           * :func: `~cds.modules.flows.tasks.ExtractFramesTask`
           * :func: `~cds.modules.flows.tasks.TranscodeVideoTask`
         """
-        flow_id = str(self.flow.id)
-        payload = self.flow.payload
+        flow_id = str(self.flow_metadata.id)
+        payload = self.flow_metadata.payload
         payload["flow_id"] = flow_id
 
-        deposit_id = self.flow.deposit_id
+        deposit_id = self.flow_metadata.deposit_id
         has_deposit = deposit_id
 
         has_remote_file_to_download = payload.get("uri", False)
@@ -297,10 +190,10 @@ class FlowService:
         assert has_filename
 
         # create the object version if doesn't exist
-        object_version = init_object_version(self.flow)
+        object_version = init_object_version(self.flow_metadata)
         version_id = str(object_version.version_id)
         payload["version_id"] = version_id
-        db_flag_modified(self.flow.model, "payload")
+        db_flag_modified(self.flow_metadata, "payload")
         db.session.commit()
 
         # start the celery tasks for the flow
@@ -318,7 +211,7 @@ class FlowService:
         a specific deposit_id.
         """
         self.clean()
-        self.flow.is_last = False
+        self.flow_metadata.is_last = False
         db.session.commit()
 
     @staticmethod
@@ -333,7 +226,7 @@ class FlowService:
     def restart_task(self, task, **kwargs):
         """Restart a specific task"""
         task_metadata = as_task(task)
-        if task_metadata.status == FlowStatus.PENDING:
+        if task_metadata.status == FlowTaskStatus.PENDING:
             raise TaskAlreadyRunningError(
                 "Task with id {0} is already running.".format(
                     str(task_metadata.id)
@@ -356,7 +249,7 @@ class FlowService:
 
     def _start_celery_task(self, celery_task, **kwargs):
         """Start a specific celery task."""
-        payload = self.flow.payload
+        payload = self.flow_metadata.payload
         payload = dict(
             deposit_id=payload["deposit_id"],
             flow_id=payload["flow_id"],
@@ -369,19 +262,19 @@ class FlowService:
 
     def stop(self):
         """Stop the flow."""
-        for task in self.flow.tasks:
+        for task in self.flow_metadata.tasks:
             celery_task_id = task.payload["celery_task_id"]
             CeleryTask.stop_task(celery_task_id)
-            task.status = FlowStatus.CANCELLED
+            task.status = FlowTaskStatus.CANCELLED
         db.session.commit()
 
     def clean(self):
         """Delete tasks and everything created by them."""
         self.stop()
 
-        payload = self.flow.payload
+        payload = self.flow_metadata.payload
 
-        remote_file_was_downloaded = self.flow.payload.get("uri", False)
+        remote_file_was_downloaded = self.flow_metadata.payload.get("uri", False)
         if remote_file_was_downloaded:
             AVCFlowCeleryTasks.clean_task("file_download", **payload)
 

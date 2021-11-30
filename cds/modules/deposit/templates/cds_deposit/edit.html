@@ -58,7 +58,7 @@
       form-templates='{{ config.DEPOSIT_FORM_TEMPLATES | tojson }}'
       form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
       show-avc-restricted-fields="{{ record | check_avc_permissions | lower }}"
-      show-admin-interface="{{ record | check_if_super_admin | lower }}"
+      is-super-admin="{{ record | check_if_super_admin | lower }}"
   >
   </cds-deposits>
   {{ jwt() }}
