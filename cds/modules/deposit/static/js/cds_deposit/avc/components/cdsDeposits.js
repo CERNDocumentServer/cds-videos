@@ -34,12 +34,8 @@ function cdsDepositsCtrl(
   that.childrenFormResolved = {};
   that.masterFormResolved = {};
 
-  // Interval Autoupdate
-  this.autoUpdateInterval = null;
-
   this.$onDestroy = function() {
     try {
-      $interval.cancel(that.autoUpdateInterval);
       // On destroy delete the event listener
       delete $window.onbeforeunload;
     } catch (error) {}

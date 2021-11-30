@@ -238,7 +238,11 @@ class AVCTask(CeleryTask):
             ]
 
         for t in flow_tasks_metadata:
-            t.payload = payload
+            t.status = FlowTaskStatus.PENDING
+
+            new_payload = dict(t.payload)
+            new_payload.update(payload)
+            t.payload = new_payload
 
         return flow_tasks_metadata
 
@@ -687,29 +691,41 @@ class TranscodeVideoTask(AVCTask):
 
     name = "file_transcode"
 
+    @staticmethod
+    def _init_flow_task(task_metadata, payload, quality=None):
+        """Init the flow task metadata."""
+        task_metadata.status = FlowTaskStatus.PENDING
+
+        new_payload = dict(task_metadata.payload)
+        new_payload.update(payload)
+        new_payload.setdefault("preset_quality", quality)
+
+        task_metadata.payload = new_payload
+        return task_metadata
+
     @classmethod
     def create_flow_tasks(cls, payload):
         """Override default implementation to create Tasks per qualities."""
-        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
+        task_id = payload.get("task_id")
+        if task_id:
+            # start only one specific task id
+            t = FlowTaskMetadata.get(task_id)
+            t = TranscodeVideoTask._init_flow_task(t, payload)
+            return [t]
+
+        ts = FlowTaskMetadata.get_all_by_flow_task_name(
             payload["flow_id"], cls.name
         )
 
         flow_tasks = []
         for quality in current_app.config["CDS_OPENCAST_QUALITIES"].keys():
-            flow_task_metadata = None
-            if flow_tasks_metadata:
-                flow_task_metadata = cls._get_flow_task_by_quality(
-                    flow_tasks_metadata, quality
-                )
-
-            if not flow_task_metadata:
-                flow_task_metadata = FlowTaskMetadata.create(
+            t = cls._get_flow_task_by_quality(ts, quality) if ts else None
+            if not t:
+                t = FlowTaskMetadata.create(
                     flow_id=payload["flow_id"], name=cls.name
                 )
-
-            payload["preset_quality"] = quality
-            flow_task_metadata.payload = payload
-            flow_tasks.append(flow_task_metadata)
+            t = TranscodeVideoTask._init_flow_task(t, payload, quality)
+            flow_tasks.append(t)
         return flow_tasks
 
     @classmethod
@@ -722,20 +738,16 @@ class TranscodeVideoTask(AVCTask):
         ]
         return flow_task_metadata[0] if len(flow_task_metadata) == 1 else None
 
-    def _update_flow_tasks(self, qualities, status, message, **kwargs):
+    def _update_flow_tasks(self, flow_tasks, status, message, **kwargs):
         """Create or update the TaskMetadata status and message."""
-        flow_tasks_metadata = FlowTaskMetadata.get_all_by_flow_task_name(
-            self.flow_id, self.name
-        )
-        for quality in qualities:
-            flow_task_metadata = self._get_flow_task_by_quality(
-                flow_tasks_metadata, quality
-            )
-            assert flow_task_metadata
+        for flow_task_metadata in flow_tasks:
+            flow_task_metadata.status = status
+            flow_task_metadata.message = message
+
+            quality = flow_task_metadata.payload["preset_quality"]
 
             new_payload = dict(flow_task_metadata.payload)
             new_payload.update(
-                preset_quality=quality,
                 opencast_publication_tag=current_app.config[
                     "CDS_OPENCAST_QUALITIES"
                 ][quality]["opencast_publication_tag"],
@@ -743,9 +755,6 @@ class TranscodeVideoTask(AVCTask):
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
             flow_task_metadata.payload = new_payload
-
-            flow_task_metadata.status = status
-            flow_task_metadata.message = message
 
         db.session.commit()
 
@@ -761,14 +770,8 @@ class TranscodeVideoTask(AVCTask):
         if object_version:
             dispose_object_version(object_version)
 
-    def run(self, *args, **kwargs):
-        """Launch video transcoding.
-
-        Ensure that only TaskMetadata for transcodable quality
-        for every quality.
-
-        :param self: reference to instance of task base class
-        """
+    def _get_transcodable_flow_tasks_or_cancel(self, wanted_qualities=None):
+        """Get transcodable flow tasks or set them to CANCELLED."""
         tags = self.object_version.get_tags()
         # Get master file's width x height
         width = int(tags["width"]) if "width" in tags else None
@@ -778,43 +781,58 @@ class TranscodeVideoTask(AVCTask):
         transcodable_qualities = get_qualities(
             video_height=height, video_width=width
         )
-        wanted_qualities = kwargs.get("qualities", transcodable_qualities)
+        wanted_qualities = wanted_qualities or transcodable_qualities
         # exclude wanted qualities that are not transcodable
         qualities = list(
             set(wanted_qualities).intersection(set(transcodable_qualities))
         )
 
-        # revoke not transcodable qualities
-        for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
-            self.flow_id, self.name
-        ):
-            # skip previous tasks that were already run and might be succeeded
-            # or cancelled, in case we are restarting one specific quality
-            if flow_task_metadata.status != FlowTaskStatus.PENDING:
-                continue
-            preset_quality = flow_task_metadata.payload["preset_quality"]
-            if preset_quality not in qualities:
-                flow_task_metadata.status = FlowTaskStatus.CANCELLED
-                flow_task_metadata.message = (
-                    "The quality {0} cannot be transcoded.".format(
-                        preset_quality
-                    )
-                )
+        # start only PENDING tasks
+        ts = FlowTaskMetadata.get_all_by_flow_task_name(self.flow_id,
+                                                        self.name)
+        ts = [t for t in ts if t.status == FlowTaskStatus.PENDING]
 
-            # store the celery task id and base payload in all flow tasks
-            new_payload = dict(flow_task_metadata.payload)
+        flow_tasks = []
+        for t in ts:
+            # update payload with Celery task id and base payload
+            new_payload = dict(t.payload)
             new_payload.update(
-                task_id=str(flow_task_metadata.id),
+                task_id=str(t.id),
                 celery_task_id=str(self.request.id),
                 **self._base_payload
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
-            flow_task_metadata.payload = new_payload
+            t.payload = new_payload
+
+            # cancel not transcodable qualities
+            preset_quality = t.payload["preset_quality"]
+            if preset_quality not in qualities:
+                t.status = FlowTaskStatus.CANCELLED
+                t.message = (
+                    "The quality {0} cannot be transcoded.".format(
+                        preset_quality
+                    )
+                )
+            else:
+                # good, it can be transcoded
+                flow_tasks.append(t)
         db.session.commit()
+        return flow_tasks
+
+    def run(self, *args, **kwargs):
+        """Launch video transcoding.
+
+        Ensure that only TaskMetadata for transcodable quality
+        for every quality.
+
+        :param self: reference to instance of task base class
+        """
+        wanted_qualities = kwargs.get("qualities", [])
+        flow_tasks = self._get_transcodable_flow_tasks_or_cancel(wanted_qualities)
 
         self.set_revoke_handler(
             lambda: self._update_flow_tasks(
-                qualities=qualities,
+                flow_tasks=flow_tasks,
                 status=FlowTaskStatus.FAILURE,
                 message="Abrupt celery stop",
             )
@@ -830,7 +848,9 @@ class TranscodeVideoTask(AVCTask):
         deposit_video = deposit_video_resolver(self.deposit_id)
         try:
             opencast = OpenCast(deposit_video, self.object_version)
-            opencast_event_id = opencast.run(qualities)
+            qualities_to_transcode = [t.payload["preset_quality"] for t in
+                                      flow_tasks]
+            opencast_event_id = opencast.run(qualities_to_transcode)
 
             # store the OpenCast event id in the tags
             ObjectVersionTag.create_or_update(
@@ -847,9 +867,9 @@ class TranscodeVideoTask(AVCTask):
             current_app.logger.error(flow_task_message)
 
         self._update_flow_tasks(
-            qualities,
-            flow_task_status,
-            flow_task_message,
+            flow_tasks=flow_tasks,
+            status=flow_task_status,
+            message=flow_task_message,
             opencast_event_id=opencast_event_id,
         )
 

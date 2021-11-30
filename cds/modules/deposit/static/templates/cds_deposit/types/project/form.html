@@ -286,7 +286,11 @@
               </div>
             </div>
             <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
-              <div ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin" class="panel panel-danger">
+              <div class="mb-10 text-center">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+                <a href="{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.projectLinks.self}}" target="_blank">See JSON</a>
+              </div>
+              <div class="panel panel-danger">
                 <div class="panel-heading">Danger Zone</div>
                 <div class="panel-body">
                     <button

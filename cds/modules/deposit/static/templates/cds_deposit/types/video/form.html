@@ -331,10 +331,14 @@
             ></form>
           </div>
           <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
+            <div class="mb-10 text-center">
+              <i class="fa fa-external-link" aria-hidden="true"></i>
+              <a href="/api/deposits/video/{{$ctrl.cdsDepositCtrl.record._deposit.id}}" target="_blank">See JSON</a>
+            </div>
             <div class="panel panel-default">
               <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId)" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
               <div class="panel-body">
-                <ul class="list-group" ng-repeat="(name, data) in $ctrl.cdsDepositCtrl.availableFlowsTasks">
+                <ul class="list-group" ng-repeat="(name, data) in $ctrl.cdsDepositCtrl.allFlowsTasksByName">
                   <span ng-switch="name">
                     <span ng-switch-when="file_transcode">
                       <li class="list-group-item">
@@ -342,9 +346,9 @@
                           <ul class="list-group" ng-repeat="task in data">
                             <li class="list-group-item">
                               {{task.info.payload.preset_quality}} <span class="label label-default">{{ task.status }}</span>
-                              <a class="pull-right" ng-style="(task.status == 'PENDING' || task.status == 'STARTED') && {'pointer-events': 'none'}" ng-disabled="$ctrl.cdsDepositCtrl.isDraft()" ng-click="task.status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlowTask($ctrl.cdsDepositCtrl.flowId, task.id)">
-                                <i ng-show="task.status != 'PENDING' && task.status != 'STARTED'" class="fa fa-refresh" aria-hidden="true"></i>
-                                <span ng-show="task.status == 'PENDING' || task.status == 'STARTED'"><i class="fa fa-spinner fa-spin"></i></span>
+                              <a class="pull-right" ng-style="(task.status == 'PENDING' || task.status == 'STARTED' || task.status == 'CANCELLED') && {'pointer-events': 'none'}" ng-disabled="$ctrl.cdsDepositCtrl.isDraft() || task.status == 'PENDING' || task.status == 'STARTED' || task.status == 'CANCELLED'" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlowTask(task.info.payload.flow_id, task.info.payload.task_id)">
+                                <i ng-show="task.status == 'SUCCESS' || task.status == 'FAILURE'" class="fa fa-refresh {{task.status}}" aria-hidden="true"></i>
+                                <i ng-show="task.status == 'PENDING' || task.status == 'STARTED'" class="fa fa-spinner fa-spin"></i>
                               </a>
                             </li>
                           </ul>
@@ -353,9 +357,9 @@
                       <span ng-switch-default>
                         <li class="list-group-item">
                           <strong>{{name}}</strong> <span class="label label-default" >{{ data[0].status }}</span>
-                          <a class="pull-right" ng-style="(data[0].status == 'PENDING' || data[0].status == 'STARTED') && {'pointer-events': 'none'}" ng-click="data[0].status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlowTask($ctrl.cdsDepositCtrl.flowId, data[0].id)">
-                            <i ng-show="data[0].status != 'PENDING' && data[0].status != 'STARTED'" class="fa fa-refresh {{data[0].status}}" aria-hidden="true"></i>
-                            <span ng-show="data[0].status == 'PENDING' || data[0].status == 'STARTED'"><i class="fa fa-spinner fa-spin"></i></span>
+                          <a class="pull-right" ng-style="(data[0].status == 'PENDING' || data[0].status == 'STARTED') && {'pointer-events': 'none'}" ng-click="data[0].status != 'PENDING' && $ctrl.cdsDepositCtrl.triggerRestartFlowTask(data[0].info.payload.flow_id, data[0].info.payload.task_id)">
+                            <i ng-show="data[0].status == 'SUCCESS' || data[0].status == 'FAILURE'" class="fa fa-refresh {{data[0].status}}" aria-hidden="true"></i>
+                            <i ng-show="data[0].status == 'PENDING' || data[0].status == 'STARTED'" class="fa fa-spinner fa-spin"></i>
                           </a>
                         </li>
                       </span>
