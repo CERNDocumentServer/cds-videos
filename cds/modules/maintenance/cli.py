@@ -86,8 +86,7 @@ def quality(recid, depid, quality):
     value = recid or depid
     type_ = "recid" if recid else "depid"
 
-    qualities = current_app.config["CDS_OPENCAST_QUALITIES"].keys()
-
+    qualities = list(current_app.config["CDS_OPENCAST_QUALITIES"].keys())
     if quality not in qualities:
         raise ClickException(
             "Input quality must be one of {0}".format(qualities)
