@@ -46,10 +46,10 @@
         <span ng-show="f.size == undefined">Unknown</span>
       </td>
       <td class="text-center">
-        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
-        <span ng-show="f.processing && !f.errored">Processing...</span>
-        <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">✓</span>
+        <span ng-show="f.percentage < 100 && !f.status_failure">{{ f.percentage }} %</span>
+        <span ng-show="f.status_pending || f.status_started">Processing...</span>
+        <span ng-show="f.status_failure" class="text-danger">Error</span>
+        <span ng-show="(f.status_completed || f.percentage==100) && !f.status_failure" class="text-success">✓</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.context_type ==='master' || f.percentage < 100" ng-click="$ctrl.remove(f.key)">
@@ -82,17 +82,10 @@
       <td>
       </td>
       <td class="text-center">
-        <span ng-if="f.percentage > 0 && !f.completed && !f.errored">{{ f.percentage | toInt }} %</span>
-        <span ng-if="!f.percentage && !f.completed && !f.errored"><i class="fa fa-spinner fa-spin"></i></span>
-        <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.completed && !f.errored" class="text-success">✓</span>
-      </td>
-      <td ng-show="f" class="text-center">
-        <span ng-show="f.errored">
-          <a ng-click="$ctrl.cdsDepositCtrl.restartFailedSubformats([f.key])">
-            <i class="fa fa-undo"></i>
-          </a>
-        </span>
+        <span ng-if="f.percentage > 0 && !f.status_completed && !f.status_failure">{{ f.percentage | toInt }} %</span>
+        <span ng-if="!f.percentage && !f.status_completed && !f.status_failure"><i class="fa fa-spinner fa-spin"></i></span>
+        <span ng-show="f.status_failure" class="text-danger">Error</span>
+        <span ng-show="f.status_completed && !f.status_failure" class="text-success">✓</span>
       </td>
     </tr>
     <tr class="warning" ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.frame">

@@ -34,10 +34,10 @@
         <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.size == undefined">Unknown</span>
       </td>
       <td class="text-center">
-        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.percentage < 100 && !$ctrl.cdsDepositCtrl.currentMasterFile.errored">{{ f.percentage }} %</span>
-        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.processing && !$ctrl.cdsDepositCtrl.currentMasterFile.errored">Processing...</span>
-        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.errored" class="text-danger">Error</span>
-        <span ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.completed || $ctrl.cdsDepositCtrl.currentMasterFile.percentage==100) && !$ctrl.cdsDepositCtrl.currentMasterFile.errored" class="text-success">✓</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.percentage < 100 && !$ctrl.cdsDepositCtrl.currentMasterFile.status_failure">{{ f.percentage }} %</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.status_pending || $ctrl.cdsDepositCtrl.currentMasterFile.status_started">Processing...</span>
+        <span ng-show="$ctrl.cdsDepositCtrl.currentMasterFile.status_failure" class="text-danger">Error</span>
+        <span ng-show="($ctrl.cdsDepositCtrl.currentMasterFile.status_completed || $ctrl.cdsDepositCtrl.currentMasterFile.percentage==100) && !$ctrl.cdsDepositCtrl.currentMasterFile.status_failure" class="text-success">✓</span>
       </td>
       <td ng-show="$ctrl.cdsDepositCtrl.currentMasterFile" class="text-center">
         <a ng-click="dialogShown = true"><i class="fa fa-info"></i></a>
@@ -59,20 +59,25 @@
         </a>
       </td>
     </tr>
-    <!-- We rely on f.preset_quality because it's dumped when creating the task and not when the task finishes i.e tags.preset_quality. For old videos, i.e old sorenson tasks, we rely on tags.preset_qaulity -->
+    <!-- We rely on f.preset_quality because it's dumped when creating the task and not when the task finishes i.e tags.preset_quality. For old videos, we rely on tags.preset_quality -->
     <tr ng-if="f.preset_quality || f.tags.preset_quality" class="sel-file" ng-repeat="f in $ctrl.cdsDepositCtrl.currentMasterFile.subformat" ng-show="!showSubformats">
-      <td title="{{f.preset_quality || f.tags.preset_quality }}">{{f.preset_quality || f.tags.preset_quality }}
-      <td>
-      </td>
+      <td title="{{f.preset_quality || f.tags.preset_quality }}">{{f.preset_quality || f.tags.preset_quality }}</td>
+      <td></td>
       <td class="text-center">
-        <span ng-show="f.pending || f.started"><i class="fa fa-spinner fa-spin"></i></span>
-        <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="f.completed" class="text-success">Done</span>
-        <span ng-show="f.revoked || f.cancelled" class="text-warning">-</span>
+        <span ng-show="f.status_pending || f.status_started">
+          <i class="fa fa-spinner fa-spin"></i>
+        </span>
+        <span ng-show="f.status_failure" class="text-danger">Error</span>
+        <span ng-show="f.status_completed" class="text-success">Done</span>
+        <span ng-show="f.status_cancelled" class="text-muted">
+          <small>
+            <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" tooltip title="Subformat quality skipped because the uploaded video file resolution is smaller."></i>
+          </small>
+        </span>
       </td>
       <td ng-show="f" class="text-center">
-        <span ng-show="f.errored || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.showAdminInterface">
-          <a ng-show="!f.pending && !f.started" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow(f.tags.flow_id, f.task_id)">
+        <span ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
+          <a ng-show="f.status_failure || f.status_success" ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlowTask(f.tags.flow_id, f.tags.task_id)">
             <i class="fa fa-undo"></i>
           </a>
         </span>
@@ -197,10 +202,10 @@
         <span ng-show="f.size == undefined">Unknown</span>
       </td>
       <td class="text-center">
-        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
-        <span ng-show="f.processing && !f.errored">Processing...</span>
-        <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
+        <span ng-show="f.percentage < 100 && !f.status_failure">{{ f.percentage }} %</span>
+        <span ng-show="f.status_pending || f.status_started">Processing...</span>
+        <span ng-show="f.status_failure" class="text-danger">Error</span>
+        <span ng-show="(f.status_completed || f.percentage==100) && !f.status_failure" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
@@ -246,10 +251,10 @@
         <span ng-show="f.size == undefined">Unknown</span>
       </td>
       <td class="text-center">
-        <span ng-show="f.percentage < 100 && !f.errored">{{ f.percentage }} %</span>
-        <span ng-show="f.processing && !f.errored">Processing...</span>
-        <span ng-show="f.errored" class="text-danger">Error</span>
-        <span ng-show="(f.completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
+        <span ng-show="f.percentage < 100 && !f.status_failure">{{ f.percentage }} %</span>
+        <span ng-show="f.status_pending || f.status_started">Processing...</span>
+        <span ng-show="f.status_failure" class="text-danger">Error</span>
+        <span ng-show="(f.status_completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
         <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">

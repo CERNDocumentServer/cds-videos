@@ -73,7 +73,7 @@ function cdsUploaderCtrl(
    */
   function _error(key) {
     that.updateFile(key, {
-      errored: true,
+      status_failure: true,
       percentage: 0,
     });
   }
@@ -83,7 +83,7 @@ function cdsUploaderCtrl(
    */
   function _subformatError(key) {
     that.updateSubformat(key, {
-      errored: true,
+      status_failure: true,
       percentage: 0,
     });
   }
@@ -244,21 +244,20 @@ function cdsUploaderCtrl(
    * Restart workflow for the existing master file
    */
 
-  function restartWorkflow() {
-    var master = that.cdsDepositCtrl.findMasterFile();
-    var args = _prepareRestart(master.tags.flow_id);
+  function restartFlow(flowId) {
+    var args = _prepareRestart(flowId);
     $http(args).then(
       function success() {
         toaster.pop({
           type: "info",
-          title: "Workflow has been restarted!",
+          title: "Flow has been restarted!",
           bodyOutputType: "trustedHtml",
         });
       },
       function error() {
         toaster.pop({
           type: "info",
-          title: "Workflow cannot be restarted!",
+          title: "Flow cannot be restarted!",
           bodyOutputType: "trustedHtml",
         });
       }
@@ -523,7 +522,7 @@ function cdsUploaderCtrl(
       // Find the index of the subformat
       var subformats = master.subformat;
       var index = _.findIndex(subformats, { key: key });
-      if (index > -1 && !subformats[index].errored) {
+      if (index > -1 && !subformats[index].status_failure) {
         subformats[index] = angular.merge({}, subformats[index], data);
       } else if (index == -1) {
         subformats.push(angular.merge({ key: key }, data));
@@ -591,7 +590,10 @@ function cdsUploaderCtrl(
   };
 
   // Restart the whole workflow
-  $scope.$on("cds.deposit.workflow.restart", restartWorkflow);
+  $scope.$on("cds.deposit.workflow.restart", function(event, flowId) {
+    restartFlow(flowId);
+  });
+
 }
 
 cdsUploaderCtrl.$inject = [
