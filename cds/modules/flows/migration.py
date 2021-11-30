@@ -27,17 +27,17 @@
 
 import logging
 
-from cds.modules.deposit.api import CDSDeposit
-from cds.modules.records.utils import is_project_record
 from flask import current_app
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersionTag, as_object_version
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
+from cds.modules.deposit.api import CDSDeposit
+from cds.modules.records.utils import is_project_record
+
 from ..opencast.utils import can_be_transcoded, find_lowest_quality
 from ..records.api import CDSVideosFilesIterator
-from .api import Flow
-from .models import Status, TaskMetadata
+from .models import FlowMetadata, FlowTaskMetadata, FlowTaskStatus
 from .tasks import ExtractFramesTask, ExtractMetadataTask, TranscodeVideoTask
 
 
@@ -61,7 +61,7 @@ def migrate_event(deposit):
         deposit_id=deposit_id,
     )
 
-    flow = Flow.create(deposit_id=deposit_id, user_id=user_id, payload=payload)
+    flow = FlowMetadata.create(deposit_id=deposit_id, user_id=user_id, payload=payload)
 
     # Create the object tag for flow_id
     object_version = as_object_version(original_file["version_id"])
@@ -85,22 +85,22 @@ def migrate_event(deposit):
         # add ExtractMetadataTask
         payload["flow_id"] = str(flow.id)
 
-        metadata_task = TaskMetadata.create(
+        metadata_task = FlowTaskMetadata.create(
             flow_id=str(flow.id),
             name=ExtractMetadataTask.name,
             payload=payload,
         )
         metadata_task.status = (
-            Status.SUCCESS if has_metadata else Status.FAILURE
+            FlowTaskStatus.SUCCESS if has_metadata else FlowTaskStatus.FAILURE
         )
         db.session.add(metadata_task)
 
         # add ExtractFramesTask
-        frames_task = TaskMetadata.create(
+        frames_task = FlowTaskMetadata.create(
             flow_id=str(flow.id), name=ExtractFramesTask.name, payload=payload
         )
 
-        frames_task.status = Status.SUCCESS if has_frames else Status.FAILURE
+        frames_task.status = FlowTaskStatus.SUCCESS if has_frames else FlowTaskStatus.FAILURE
         db.session.add(frames_task)
 
         # add TranscodeVideoTask
@@ -113,15 +113,15 @@ def migrate_event(deposit):
         for subformat in subformats_to_be_processed:
             subformat_payload = payload.copy()
             subformat_payload.update({"preset_quality": subformat})
-            transcode_task = TaskMetadata.create(
+            transcode_task = FlowTaskMetadata.create(
                 flow_id=str(flow.id),
                 name=TranscodeVideoTask.name,
                 payload=subformat_payload,
             )
             transcode_task.status = (
-                Status.FAILURE
+                FlowTaskStatus.FAILURE
                 if subformat in missing_subformats
-                else Status.SUCCESS
+                else FlowTaskStatus.SUCCESS
             )
             transcode_task.message = (
                 "Missing subformat during migration"

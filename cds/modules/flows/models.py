@@ -46,61 +46,8 @@ def as_task(value):
     :returns:  A :class:`invenio_flow.models.TaskMetadata` instance.
     """
     return (
-        value if isinstance(value, TaskMetadata) else TaskMetadata.get(value)
+        value if isinstance(value, FlowTaskMetadata) else FlowTaskMetadata.get(value)
     )
-
-
-@unique
-class Status(Enum):
-    """Constants for possible task status."""
-
-    PENDING = "PENDING"
-    STARTED = "STARTED"
-    SUCCESS = "SUCCESS"
-    FAILURE = "FAILURE"
-    CANCELLED = "CANCELLED"
-
-    @classmethod
-    def compute_status(cls, statuses):
-        """Compute the general status from a list."""
-        # Make statuses always enum in case they are strings,
-        # it doesn't hurt much
-        statuses = [Status(s) for s in statuses if s is not None]
-        if not statuses:
-            return cls.PENDING
-
-        if all(s == cls.SUCCESS for s in statuses):
-            return cls.SUCCESS
-
-        for status in (cls.PENDING, cls.FAILURE, cls.CANCELLED):
-            # returns first status it finds, for the provided list
-            # checks if PENDING, then FAILURE and CANCELLED
-            if any(s == status for s in statuses):
-                return status
-
-        return cls.PENDING
-
-    @classmethod
-    def status_to_http(cls, status):
-        """Convert Flow state into HTTP code."""
-        STATES_TO_HTTP = {
-            cls.PENDING: 201,
-            cls.STARTED: 201,
-            cls.FAILURE: 500,
-            cls.SUCCESS: 200,
-            cls.CANCELLED: 409,
-        }
-
-        try:
-            status = Status(status)
-        except ValueError:
-            pass
-
-        return STATES_TO_HTTP.get(status, 404)
-
-    def __str__(self):
-        """Return its value."""
-        return self.value
 
 
 class FlowMetadata(db.Model, Timestamp):
@@ -148,16 +95,27 @@ class FlowMetadata(db.Model, Timestamp):
     @hybrid_property
     def status(self):
         """Overall flow status computed from tasks statuses."""
-        return Status.compute_status([t.status for t in self.tasks])
-
-    def __repr__(self):
-        """Flow representation."""
-        return "<Workflow {name} {status}: {payload}>".format(**self.to_dict())
+        return FlowTaskStatus.compute_status([t.status for t in self.tasks])
 
     @classmethod
     def get(cls, id_):
         """Get a flow object from the DB."""
         return cls.query.get(id_)
+
+    @classmethod
+    def create(
+            cls, deposit_id, name="AVCWorkflow", payload=None, user_id=None
+    ):
+        """Create a new flow instance and store it in the database."""
+        with db.session.begin_nested():
+            obj = cls(
+                name=name,
+                payload=payload or dict(),
+                user_id=user_id,
+                deposit_id=deposit_id,
+            )
+            db.session.add(obj)
+        return obj
 
     @classmethod
     def get_by_deposit(cls, deposit_id, is_last=True, multiple=False):
@@ -177,12 +135,69 @@ class FlowMetadata(db.Model, Timestamp):
             "name": self.name,
             "payload": self.payload,
             "status": str(self.status),
+            "tasks": [t.to_dict() for t in self.tasks],
             "user": str(self.user_id),
         }
 
+    def __repr__(self):
+        """Flow representation."""
+        return "<Workflow {name} {status}: {payload}>".format(**self.to_dict())
 
-class TaskMetadata(db.Model, Timestamp):
-    """Task database model."""
+
+@unique
+class FlowTaskStatus(Enum):
+    """Constants for possible task status."""
+
+    PENDING = "PENDING"
+    STARTED = "STARTED"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    CANCELLED = "CANCELLED"
+
+    @classmethod
+    def compute_status(cls, statuses):
+        """Compute the general status from a list."""
+        # make sure each item is an enum
+        statuses = [FlowTaskStatus(s) for s in statuses if s is not None]
+        if not statuses or cls.PENDING in statuses:
+            return cls.PENDING
+
+        # no PENDING
+        if cls.STARTED in statuses:
+            return cls.STARTED
+
+        # no PENDING or STARTED
+        if cls.FAILURE in statuses:
+            return cls.FAILURE
+
+        # no PENDING or STARTED or FAILURE
+        if cls.SUCCESS in statuses:
+            return cls.SUCCESS
+
+        # it should not happened that all are CANCELLED, but just in case
+        return cls.CANCELLED
+
+    @classmethod
+    def status_to_http(cls, status):
+        """Convert Flow state into HTTP code."""
+        STATES_TO_HTTP = {
+            cls.PENDING: 201,
+            cls.STARTED: 201,
+            cls.FAILURE: 500,
+            cls.SUCCESS: 200,
+            cls.CANCELLED: 409,
+        }
+
+        status = FlowTaskStatus(status)
+        return STATES_TO_HTTP.get(status, 404)
+
+    def __str__(self):
+        """Return its value."""
+        return self.value
+
+
+class FlowTaskMetadata(db.Model, Timestamp):
+    """Flow Task database model."""
 
     __tablename__ = "flows_task"
 
@@ -226,9 +241,9 @@ class TaskMetadata(db.Model, Timestamp):
     """Flow payload in JSON format, typically args and kwagrs."""
 
     status = db.Column(
-        db.Enum(Status),
+        db.Enum(FlowTaskStatus),
         nullable=False,
-        default=Status.PENDING,
+        default=FlowTaskStatus.PENDING,
     )
     """Status of the task, i.e. pending, success, failure."""
 
@@ -236,7 +251,7 @@ class TaskMetadata(db.Model, Timestamp):
     """Task status message."""
 
     @classmethod
-    def create(cls, flow_id, name, payload=None, status=Status.PENDING):
+    def create(cls, flow_id, name, payload=None, status=FlowTaskStatus.PENDING):
         """Create a new Task."""
         try:
             with db.session.begin_nested():

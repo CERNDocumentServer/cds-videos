@@ -32,8 +32,8 @@ from flask import jsonify, request
 from flask_login import current_user
 from flask_restful import abort
 
-from .api import Flow
 from .errors import FlowDoesNotExist, FlowsError, InvalidPayload
+from .models import FlowMetadata
 from .permissions import can
 from .tasks import CeleryTask
 
@@ -93,7 +93,7 @@ def pass_flow(f):
 
     @wraps(f)
     def inner(self, flow_id=None, *args, **kwargs):
-        flow = Flow.get(flow_id)
+        flow = FlowMetadata.get(flow_id)
         kwargs.update(flow=flow)
         return f(self, *args, **kwargs)
 

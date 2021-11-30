@@ -25,12 +25,11 @@
 from __future__ import absolute_import, print_function
 
 import json
-from collections import defaultdict
 
 from flask import current_app, jsonify, url_for
 from invenio_files_rest.models import as_object_version
 
-from ..flows.models import Status as FlowStatus
+from ..flows.models import FlowTaskStatus
 from .tasks import DownloadTask, ExtractMetadataTask
 
 
@@ -55,7 +54,7 @@ def make_response(flow):
     if not flow.is_last:
         code = 410
     else:
-        code = FlowStatus.status_to_http(flow.status)
+        code = FlowTaskStatus.status_to_http(flow.status)
 
     response = {}
     response.update(flow_response_links(flow))
@@ -169,7 +168,7 @@ def get_flow_task_statuses(task_dict):
 
 def serialize_flow(flow):
     """Get the serialized flow status."""
-    response_code = FlowStatus.status_to_http(flow.status)
+    response_code = FlowTaskStatus.status_to_http(flow.status)
     if not flow.is_last:
         # in case the flow has been replaced
         # return what was already in the response

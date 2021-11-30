@@ -18,8 +18,9 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Tasks for maintenance scripts."""
+
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.flows.models import Status
+from cds.modules.flows.models import FlowTaskStatus
 from cds.modules.flows.tasks import TranscodeVideoTask
 from cds.modules.records.resolver import record_resolver
 from celery import shared_task
@@ -50,4 +51,4 @@ class MaintenanceTranscodeVideoTask(TranscodeVideoTask):
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         task_id = kwargs.get("task_id", task_id)
-        self.commit_status(task_id, Status.FAILURE, str(einfo))
+        self.commit_status(task_id, FlowTaskStatus.FAILURE, str(einfo))

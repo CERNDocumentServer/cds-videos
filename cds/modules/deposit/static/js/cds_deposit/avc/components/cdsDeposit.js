@@ -24,9 +24,6 @@ function cdsDepositCtrl(
   // The Upload Queue
   this.filesQueue = [];
 
-  // Checkout
-  this.lastUpdated = new Date();
-
   // Add depositExtractedMetadata to the scope
   this.depositExtractedMetadata = depositExtractedMetadata;
 
@@ -44,9 +41,6 @@ function cdsDepositCtrl(
 
   this.previewer = null;
 
-  // Failed subformats list
-  that.failedSubformatKeys = [];
-
   // Action loading
   that.actionLoading = false;
 
@@ -60,11 +54,7 @@ function cdsDepositCtrl(
     return that.record._deposit.status === 'published';
   };
 
-  // Webhooks available tasks
-  this.availableFlowsTasks = {};
-
-  // Webhooks flow_id
-  this.flowId = null;
+  this.cachedFlowTasksById = {};
 
   this.isProjectPublished = function() {
     var isPublished;
@@ -92,8 +82,8 @@ function cdsDepositCtrl(
   this.changeShowAll = function(hide) {
     that.showAll = (hide) ? false : true;
   }
-  // Initilize stateCurrent
-  this.stateCurrent = null;
+  // Initialize cachedCdsState
+  this.cachedCdsState = null;
 
   this.$onDestroy = function() {
     try {
@@ -117,12 +107,12 @@ function cdsDepositCtrl(
     // Loading
     this.loading = false;
 
-    this.findFilesByContextType = function(type) {
-      return _.find(that.record._files, {'context_type': type});
+    function findFilesByContextType(recordFiles, type) {
+      return _.find(recordFiles, {'context_type': type});
     }
 
     this.findMasterFile = function() {
-      return this.findFilesByContextType('master');
+      return findFilesByContextType(that.record._files, 'master');
     };
 
     function accessElement(obj, elem, value) {
@@ -174,88 +164,30 @@ function cdsDepositCtrl(
       that.setDirty();
     };
 
-    this.flattenFeedbackData = function(data, taskName, taskStatus) {
-      data = _.flatten(data.data, true);
-      if (taskName || taskStatus) {
-        return data.filter(function (taskInfo) {
-          return (!taskName || taskInfo.name === taskName) &&
-            (!taskStatus || taskInfo.status === taskStatus);
-        });
-      } else {
-        return data;
-      }
-    }
-
-    this.getTaskFeedback = function(flowId, taskName, taskStatus) {
+    this.getTaskFeedback = function(flowId) {
       var url = urlBuilder.taskFeedback({ flowId: flowId });
       return cdsAPI.action(url, 'GET', {}, jwt).then(function(data) {
-        return that.flattenFeedbackData(data, taskName, taskStatus)
+        return _.flatten(data.data, true);
       }).catch(function(e) {
-        return that.flattenFeedbackData(e, taskName, taskStatus)
+        return _.flatten(e.data, true);
       });
     };
 
-    this.triggerRestartAllEvents = function() {
-      // Trigger restart workflow
-      // Update record state
-       that.record._cds.state["file_transcode"] = "STARTED";
-       that.record._cds.state["file_video_extract_frames"] = "PENDING";
-       that.record._cds.state["file_video_metadata_extraction"] = "PENDING";
-
-       // Update deposit state
-       that.cdsDepositsCtrl.master.metadata._cds.state["file_transcode"] = "STARTED";
-       that.cdsDepositsCtrl.master.metadata._cds.state["file_video_extract_frames"] = "PENDING";
-       that.cdsDepositsCtrl.master.metadata._cds.state["file_video_metadata_extraction"] = "PENDING";
-
-      $scope.$broadcast('cds.deposit.workflow.restart');
+    this.triggerRestartFlow = function(flowId) {
+      $scope.$broadcast('cds.deposit.workflow.restart', flowId);
     }
 
-    this.triggerRestartFlow = function(flowId, taskId) {
+    this.triggerRestartFlowTask = function(flowId, taskId) {
       that.restartFlow(flowId, taskId)
         .then(function() {
           // Fetch feedback to update the Interface
-          that.fetchCurrentStatuses();
+          that.fetchFlowTasksStatuses();
         })
     }
 
     this.restartFlow = function(flowId, taskId) {
-      //Update record and deposit state
-      for (const [key, value] of Object.entries(this.availableFlowsTasks)) {
-        value.forEach(function(item) {
-            if (taskId === item.id) {
-                that.record._cds.state[item.name] = "STARTED";
-                that.cdsDepositsCtrl.master.metadata._cds.state[item.name] = "STARTED";
-            }
-        });
-      }
-      var url = urlBuilder.restartFlow({ taskId: taskId, flowId: flowId });
+      var url = urlBuilder.restartTask({ taskId: taskId, flowId: flowId });
       return cdsAPI.action(url, 'PUT');
-    };
-
-    this.restartFailedSubformats = function(subformatKeys) {
-      var master = that.findMasterFile();
-      var flowId = master.tags.flow_id;
-      master.subformat.forEach(
-        function(subformat) {
-          if (subformatKeys.includes(subformat.key)) {
-            subformat.errored = false;
-            subformat.percentage = 0;
-          }
-        });
-      that.processSubformats();
-      that.getTaskFeedback(flowId, 'file_transcode')
-        .then(function(data) {
-          var restartFlows = data.filter(function(taskInfo) {
-            return subformatKeys.includes(taskInfo.info.payload.key);
-          }).map(function(taskInfo) {
-            var flowId = taskInfo.info.payload.tags.flow_id;
-            var taskId = taskInfo.id;
-            return that.restartFlow(flowId, taskId);
-          });
-          $q.all(restartFlows).then(function() {
-            that.fetchCurrentStatuses();
-          });
-      });
     };
 
     this.initializeStateReported = function() {
@@ -274,179 +206,179 @@ function cdsDepositCtrl(
     };
 
     that.processSubformats = function() {
-      var masterFile = that.findMasterFile();
-      if (masterFile && masterFile.subformat) {
-        // Update failed subformat list
-        that.failedSubformatKeys = subformats.filter(function(subformat) {
-          return subformat.errored;
-        }).map(function(subformat) {
-          return subformat.key;
-        });
-
-        var subformatsFinished = subformats.filter(
-          function(subformat) {
-            return subformat.completed;
-          }).length;
-
-        var fetchPresetsPromise = $q.resolve();
-        if (that.presets && that.presets.length == 0) {
-          var flowId = masterFile.tags.flow_id;
-          if (flowId) {
-            var flowUrl = urlBuilder.flowInfo({flowId: flowId});
-            var updatePresets = function (resp) {
-              that.presets = angular.copy(resp.data.presets);
-            };
-            fetchPresetsPromise = cdsAPI.action(flowUrl, 'GET', {}, jwt)
-              .then(updatePresets, updatePresets);
-          }
-        }
-        fetchPresetsPromise.then(function() {
-          if (that.presets && that.presets.length > 0) {
-            that.stateReporter['file_transcode'] = angular.merge(
-              that.stateReporter['file_transcode'], {
-                payload: {
-                  percentage: subformatsFinished / that.presets.length * 100,
-                },
-              });
-          }
-        });
-      }
+//      var masterFile = that.findMasterFile();
+//      if (masterFile && masterFile.subformat) {
+//        var subformatsFinished = subformats.filter(
+//          function(subformat) {
+//            return subformat.completed;
+//          }).length;
+//
+//        var getFlowPromise = $q.resolve();
+//        if (that.presets && that.presets.length == 0) {
+//          var flowId = masterFile.tags.flow_id;
+//          if (flowId) {
+//            var flowUrl = urlBuilder.flowInfo({flowId: flowId});
+//            var updatePresets = function (resp) {
+//              that.presets = angular.copy(resp.data.presets);
+//            };
+//            getFlowPromise = cdsAPI.action(flowUrl, 'GET', {}, jwt)
+//              .then(updatePresets, updatePresets);
+//          }
+//        }
+//        getFlowPromise.then(function() {
+//          if (that.presets && that.presets.length > 0) {
+//            that.stateReporter['file_transcode'] = angular.merge(
+//              that.stateReporter['file_transcode'], {
+//                payload: {
+//                  percentage: subformatsFinished / that.presets.length * 100,
+//                },
+//              });
+//          }
+//        });
+//      }
     };
 
-    this.videoPreviewer = function(deposit, key) {
-      var videoUrl;
-
+    this.videoPreviewer = function() {
       var master = that.findMasterFile();
       if (master && master.subformat) {
         var finishedSubformats = master.subformat.filter(function(fmt) {
           return fmt.completed && !_.isEmpty(fmt.checksum);
         });
-        if (finishedSubformats[0]) {
-          videoUrl = urlBuilder.video({
+        if (finishedSubformats.length > 0) {
+          var videoUrl = urlBuilder.video({
             deposit: that.record._deposit.id,
             key: finishedSubformats[0].key,
           });
+          that.previewer = $sce.trustAsResourceUrl(videoUrl);
         }
-      }
-      if (videoUrl) {
-        that.previewer = $sce.trustAsResourceUrl(videoUrl);
       }
     };
 
+    // update deposit files only because metadata might have been changed in the form
+    // but not yet saved
     this.updateDeposit = function(deposit) {
-      that.record._files[0]?.subformat?.sort(
-        (a,b) => a.key.localeCompare(b.key)
-      );
+//      that.record._files[0]?.subformat?.sort(
+//        (a,b) => a.key.localeCompare(b.key)
+//      );
+//      deposit._files[0]?.subformat?.sort(
+//        (a,b) => a.key.localeCompare(b.key)
+//      );
+//      that.record._files = angular.merge(
+//        [],
+//        that.record._files,
+//        deposit._files || []
+//      );
+      // sort subformat by key to display them nicely
       deposit._files[0]?.subformat?.sort(
-        (a,b) => a.key.localeCompare(b.key)
+        // take advantage of JS: parseInt("1080p") -> 1080
+        (a, b) => parseInt(a.key) < parseInt(b.key)
       );
-      that.record._files = angular.merge(
-        [],
-        that.record._files,
-        deposit._files || []
-      );
-      that.processSubformats();
+      that.record._files = angular.copy(deposit._files);
+
+//      that.processSubformats();
       that.currentMasterFile = that.findMasterFile();
 
       // Check for new state
-      that.record._cds.state = angular.merge(
-        that.record._cds.state,
+//      that.record._cds.state = angular.merge(
+//        that.record._cds.state,
+//        deposit._cds.state || {}
+//      );
+
+      that.record._cds.state = angular.copy(
         deposit._cds.state || {}
       );
 
       if (_.isEmpty(that.previewer)) {
         that.videoPreviewer();
       }
-      that.lastUpdated = new Date();
     };
 
 
-    this.updateTaskStates = function () {
-      for (const key in that.availableFlowsTasks) {
-        if (
-        that.record._cds.state[key] != "PENDING" &&
-        that.record._cds.state[key] != "STARTED"
-        ) {
-          continue;
-        }
-        updated_status = "SUCCESS";
-        for (const task of that.availableFlowsTasks[key]) {
-          if (
-          ["PENDING", "FAILURE", "CANCELLED", "STARTED"].includes(task.status)
-          ) {
-            updated_status = task.status;
-            break;
-          }
-        }
-        that.record._cds.state[key] = updated_status;
-        // Need to fetchRecord after task was processed
-        if (["FAILURE", "CANCELLED", "SUCCESS"].includes(updated_status)) {
-          that.cdsDepositsCtrl.fetchRecord();
+    this.refetchRecordOnTaskStatusChanged = function (flowTasksById) {
+      // init if not set yet
+      var cachedFlowTasksById = _.isEmpty(that.cachedFlowTasksById) ? angular.copy(flowTasksById) : that.cachedFlowTasksById;
+
+      var reFetchRecord = false;
+      for (var taskId in flowTasksById) {
+        var cachedTask = _.get(cachedFlowTasksById, taskId, null);
+        if (!cachedTask) {
+          // something wrong with the cached tasks, maybe a flow restart?
+          // refetch the record to be sure
+          reFetchRecord = true;
           break;
         }
+
+        var statusHasChanged = flowTasksById[taskId]["status"] !== cachedTask["status"];
+        if (statusHasChanged) {
+          reFetchRecord = true;
+          break;
+        }
+      }
+
+      // update cache
+      that.cachedFlowTasksById = angular.copy(flowTasksById);
+
+      if (reFetchRecord) {
+        that.cdsDepositsCtrl.fetchRecord();
       }
     };
 
 
-    this.updateMasterFileSubformats = function() {
+    this.updateSubformatsTranscodingStatus = function(flowTasks) {
       // Updates master file subformats field, needed for files tab
-      var transcodeTasks = that.availableFlowsTasks.file_transcode;
-      var masterFile = that.findMasterFile();
-      var subformatsNew = transcodeTasks.filter(function(task) {
+      var transcodingTasks = _.groupBy(flowTasks, "name")["file_transcode"];
+      var subformatsNew = transcodingTasks.filter(function(task) {
         return task.info;
       }).map(function(task) {
         var payload = task.info.payload;
         if (task.status === 'SUCCESS') {
-          payload.completed = true;
+          payload.status_completed = true;
         } else if (task.status === 'FAILURE') {
-          payload.errored = true;
+          payload.status_failure = true;
         } else if (task.status === 'PENDING') {
-          payload.pending = true;
+          payload.status_pending = true;
         } else if (task.status === 'STARTED') {
-          payload.started = true;
+          payload.status_started = true;
+        } else if (task.status === 'CANCELLED') {
+          payload.status_cancelled = true;
         }
         return payload;
       });
+
+      var masterFile = that.findMasterFile();
       masterFile.subformat = subformatsNew;
     }
 
-    this.statusIsPending = function() {
-    // Check if record has some pending task
-      for (const key of Object.keys(that.record._cds.state)) {
-        if (that.record._cds.state[key] === "PENDING") {
-            return true;
-        }
-      }
-      return false
-    }
-
     // Refresh tasks from feedback endpoint
-    this.fetchCurrentStatuses = function(force = false) {
-      // Update only if it is ``draft``
-      if (force === true || that.isDraft() || that.statusIsPending()){
+    this.fetchFlowTasksStatuses = function() {
+      if (that.isDraft() ){
         var masterFile = that.findMasterFile();
         var flowId = _.get(masterFile, 'tags.flow_id', undefined);
-        that.flowId = flowId;
         if (flowId) {
           that.getTaskFeedback(flowId)
             .then(function(data) {
-              var groupedTasks = _.groupBy(data, 'name');
-              var transcodeTasks = groupedTasks.file_transcode;
-              // Update the available task flows
-              that.availableFlowsTasks = groupedTasks;
-              var transcodeTasks = groupedTasks.file_transcode;
+              var tasksById = _.groupBy(data, 'id');
+              // each taskId is an array: '1233': [task]
+              // remove the array for each key to make it simple to use
+              for (var key in tasksById) {
+                tasksById[key] = tasksById[key][0]
+              }
+              // Update task states in record
+              that.refetchRecordOnTaskStatusChanged(tasksById);
+              // Update subformats status to display each status in the UI
+
+
+
+              //              that.processSubformats();
+
+
+
+              that.updateSubformatsTranscodingStatus(data);
+
               // Update the state reporter with all the new info
               data.forEach(function(task) {
-                that.updateStateReporter(task.name, task.info, task.status);
+                that.updateStateReporter(task["name"], task["info"], task["status"]);
               });
-              // Update task states in record
-              that.updateTaskStates();
-              // Update subformat info
-              if (!transcodeTasks) {
-                return;
-              }
-              that.processSubformats();
-              that.updateMasterFileSubformats();
             });
         }
       }
@@ -515,50 +447,37 @@ function cdsDepositCtrl(
     };
 
     // Calculate the transcode
-    this.updateStateReporter = function(type, data, status) {
-      if (data) {
-        if (status && !data.status) {
-          data.status = status;
-        }
-        if (type === 'file_transcode') {
-          if (!_.isEmpty(data.status) && data.status === 'SUCCESS' && _.isEmpty(that.previewer)) {
-            that.videoPreviewer(
-              data.payload.deposit_id,
-              data.payload.key
-            );
-          }
-        } else {
-          if (that.stateReporter[type].status !== data.status) {
-            // Get metadata
-            $scope.$broadcast('cds.deposit.task', type, data.status, data);
-          }
-          that.stateReporter[type] = angular.copy(data);
-        }
+    this.updateStateReporter = function(name, info, status) {
+      if (status && !info.status) {
+        info.status = status;
       }
+      if (that.stateReporter[name].status !== info.status) {
+        // Get metadata
+        $scope.$broadcast('cds.deposit.task', name, info.status, info);
+      }
+      that.stateReporter[name] = angular.copy(info);
     };
 
     this.calculateCurrentState = function() {
       // The state has been changed update the current
-      var stateCurrent = null;
+      var cachedCdsState = null;
       depositStates.forEach(function(task) {
         var state = that.record._cds.state[task];
-        if ((state === 'STARTED' || state === 'PENDING') && !stateCurrent) {
-          stateCurrent = task;
+        if ((state === 'STARTED' || state === 'PENDING') && !cachedCdsState) {
+          cachedCdsState = task;
         }
       });
-      that.stateCurrent = stateCurrent;
+      that.cachedCdsState = cachedCdsState;
       // Change the Deposit Status
       var values = _.values(that.record._cds.state);
       if (!values.length) {
         that.depositStatusCurrent = null;
       } else if (values.includes('FAILURE')) {
         that.depositStatusCurrent = depositStatuses.FAILURE;
-      } else if (values.includes('STARTED')) {
+      } else if (values.includes('STARTED') || values.includes('PENDING')) {
         that.depositStatusCurrent = depositStatuses.STARTED;
-      } else if (!values.includes('PENDING')) {
-        that.depositStatusCurrent = depositStatuses.SUCCESS;
       } else {
-        that.depositStatusCurrent = depositStatuses.STARTED;
+        that.depositStatusCurrent = depositStatuses.SUCCESS;
       }
     };
 
@@ -621,14 +540,13 @@ function cdsDepositCtrl(
     this.currentMasterFile = this.findMasterFile();
     // Initialize state reporter
     this.initializeStateReported();
-    // Set stateCurrent
-    that.stateCurrent = null;
+    // Set cachedCdsState
+    that.cachedCdsState = null;
     // Check for previewer
     that.videoPreviewer();
     // Update subformat statuses
-    force = true
-    that.fetchCurrentStatuses(force);
-    that.fetchStatusInterval = $interval(that.fetchCurrentStatuses, 5000);
+    that.fetchFlowTasksStatuses();
+    that.fetchStatusInterval = $interval(that.fetchFlowTasksStatuses, 5000);
     // What the order of contributors and check make it dirty, throttle the
     // function for 1sec
     $scope.$watch(
@@ -667,14 +585,14 @@ function cdsDepositCtrl(
 
     this.displayPending = function() {
       return that.depositStatusCurrent === that.depositStatuses.PENDING ||
-        that.stateCurrent === null &&
+        that.cachedCdsState === null &&
           that.depositStatusCurrent !== that.depositStatuses.FAILURE &&
           that.depositStatusCurrent !== that.depositStatuses.SUCCESS;
     };
 
     this.displayStarted = function() {
       return that.depositStatusCurrent === that.depositStatuses.STARTED &&
-        that.stateCurrent !== null;
+        that.cachedCdsState !== null;
     };
 
     this.displaySuccess = function() {
@@ -843,9 +761,14 @@ function cdsDepositCtrl(
       that.framesReady = false;
     }
   }, true);
+
   // Listen for any updates
   $scope.$on('cds.deposit.metadata.update.' + that.id, function(evt, data) {
     that.updateDeposit(data);
+    // after having fetched the record, we need to immediately fetch the statused because
+    // otherwise CANCELLED subformats disappears for a few seconds given that they are
+    // not part of the `_files[0].subformats` just fetched
+    that.fetchFlowTasksStatuses();
   });
 
   $window.onbeforeunload = function() {

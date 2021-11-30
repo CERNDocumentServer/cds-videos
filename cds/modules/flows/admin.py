@@ -30,7 +30,7 @@ from flask_wtf import FlaskForm
 from invenio_admin.filters import FilterConverter
 from markupsafe import Markup
 
-from .models import FlowMetadata, TaskMetadata
+from .models import FlowMetadata, FlowTaskMetadata
 
 
 def link(text, link_func):
@@ -105,7 +105,7 @@ flow_model_view = dict(
 
 task_model_view = dict(
     modelview=TaskModelView,
-    model=TaskMetadata,
+    model=FlowTaskMetadata,
     name="Tasks",
     category="Flows",
 )
