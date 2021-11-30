@@ -36,7 +36,6 @@ from sqlalchemy.orm.attributes import flag_modified as db_flag_modified
 from .deposit import index_deposit_project
 from .errors import TaskAlreadyRunningError
 from .files import init_object_version
-from .models import FlowMetadata
 from .models import FlowTaskStatus
 from .models import as_task
 from .tasks import (
@@ -226,7 +225,7 @@ class FlowService:
     def restart_task(self, task, **kwargs):
         """Restart a specific task"""
         task_metadata = as_task(task)
-        if task_metadata.status == FlowTaskStatus.PENDING:
+        if task_metadata.status in [FlowTaskStatus.PENDING, FlowTaskStatus.STARTED]:
             raise TaskAlreadyRunningError(
                 "Task with id {0} is already running.".format(
                     str(task_metadata.id)
@@ -244,10 +243,12 @@ class FlowService:
                     return celery_task
             raise
 
-        celery_task = find_celery_task_by_name(task_metadata.name)
-        self._start_celery_task(celery_task, **kwargs)
+        celery_task_cls = find_celery_task_by_name(task_metadata.name)
 
-    def _start_celery_task(self, celery_task, **kwargs):
+        kwargs["task_id"] = str(task_metadata.id)
+        self._start_celery_task(celery_task_cls, **kwargs)
+
+    def _start_celery_task(self, celery_task_cls, **kwargs):
         """Start a specific celery task."""
         payload = self.flow_metadata.payload
         payload = dict(
@@ -257,8 +258,10 @@ class FlowService:
             version_id=payload["version_id"],
             **kwargs
         )
+        celery_task = celery_task_cls()
+        celery_task.create_flow_tasks(payload)
 
-        celery_task().s(**payload).apply_async()
+        celery_task.s(**payload).apply_async()
 
     def stop(self):
         """Stop the flow."""
