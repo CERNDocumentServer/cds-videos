@@ -29,6 +29,7 @@ from flask.views import MethodView
 from flask_restful import abort
 from invenio_db import db
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
+from invenio_pidstore.errors import PIDDoesNotExistError
 
 from cds.modules.flows.api import FlowService
 from cds.modules.flows.decorators import (error_handler, need_permission,
@@ -51,9 +52,10 @@ class TaskResource(MethodView):
     def put(self, user_id, flow, task_id):
         """Handle PUT request: restart a task."""
         try:
-            flow.restart_task(task_id)
+            service = FlowService(flow)
+            service.restart_task(task_id)
             db.session.commit()
-        except KeyError:
+        except PIDDoesNotExistError:
             return "", 400
         return "", 204
 
@@ -64,7 +66,6 @@ class TaskResource(MethodView):
     @need_permission("delete")
     def delete(self, user_id, flow, task_id):
         """Handle DELETE request: stop and clean a task."""
-        # TODO not used?
         return "", 400
 
 

@@ -28,7 +28,7 @@ function cdsUploaderCtrl(
   function updateMasterFileUpload(state, percentage) {
     var masterFile = that.cdsDepositCtrl.findMasterFile();
     if (!masterFile) {
-      that.cdsDepositCtrl.stateCurrent = "file_upload";
+      that.cdsDepositCtrl.currentStartedTaskName = "file_upload";
       that.cdsDepositCtrl.updateStateReporter(
         "file_upload",
         {
@@ -38,7 +38,7 @@ function cdsUploaderCtrl(
         },
         state
       );
-      that.cdsDepositCtrl.calculateCurrentState();
+      that.cdsDepositCtrl.calculateCurrentDepositStatus();
     }
   }
 
