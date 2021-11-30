@@ -123,7 +123,7 @@ class AVCTask(CeleryTask):
 
     def _pop_call_arguments(self, arg_list, **kwargs):
         for name in arg_list:
-            setattr(self, name, kwargs.pop(name, None))
+            setattr(self, name, kwargs.pop(name))
         return kwargs
 
     def __call__(self, *args, **kwargs):

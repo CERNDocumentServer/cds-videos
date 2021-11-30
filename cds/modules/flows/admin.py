@@ -53,7 +53,7 @@ class FlowModelView(ModelView):
     can_view_details = True
     column_formatters = dict(
         tasks=link(
-            "Tasks", lambda o: url_for("taskmetadata.index_view", search=o.id)
+            "Tasks", lambda o: url_for("flowtaskmetadata.index_view", search=o.id)
         )
     )
 

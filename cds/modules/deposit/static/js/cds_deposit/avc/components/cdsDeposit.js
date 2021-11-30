@@ -82,8 +82,8 @@ function cdsDepositCtrl(
   this.changeShowAll = function(hide) {
     that.showAll = (hide) ? false : true;
   }
-  // Initialize cachedCdsState
-  this.cachedCdsState = null;
+  // Initialize currentStartedTaskName
+  this.currentStartedTaskName = null;
 
   this.$onDestroy = function() {
     try {
@@ -202,7 +202,7 @@ function cdsDepositCtrl(
       _.forEach(that.record._cds.state, function(value, state) {
         that.stateReporter[state].status = value;
       });
-      that.calculateCurrentState();
+      that.calculateCurrentDepositStatus();
     };
 
     that.processSubformats = function() {
@@ -330,6 +330,7 @@ function cdsDepositCtrl(
       var subformatsNew = transcodingTasks.filter(function(task) {
         return task.info;
       }).map(function(task) {
+        // inject `status_completed`
         var payload = task.info.payload;
         if (task.status === 'SUCCESS') {
           payload.status_completed = true;
@@ -345,8 +346,8 @@ function cdsDepositCtrl(
         return payload;
       });
 
-      var masterFile = that.findMasterFile();
-      masterFile.subformat = subformatsNew;
+      that.currentMasterFile = that.findMasterFile();
+      that.currentMasterFile.subformat = subformatsNew;
     }
 
     // Refresh tasks from feedback endpoint
@@ -458,26 +459,30 @@ function cdsDepositCtrl(
       that.stateReporter[name] = angular.copy(info);
     };
 
-    this.calculateCurrentState = function() {
+    this.calculateCurrentDepositStatus = function() {
       // The state has been changed update the current
-      var cachedCdsState = null;
-      depositStates.forEach(function(task) {
+      var currentStartedTaskName = null;
+      for (var task of depositStates) {
         var state = that.record._cds.state[task];
-        if ((state === 'STARTED' || state === 'PENDING') && !cachedCdsState) {
-          cachedCdsState = task;
+        if (state === 'STARTED') {
+          currentStartedTaskName = task;
+          break;
         }
-      });
-      that.cachedCdsState = cachedCdsState;
+      }
+      that.currentStartedTaskName = currentStartedTaskName;
+
       // Change the Deposit Status
       var values = _.values(that.record._cds.state);
       if (!values.length) {
-        that.depositStatusCurrent = null;
-      } else if (values.includes('FAILURE')) {
-        that.depositStatusCurrent = depositStatuses.FAILURE;
-      } else if (values.includes('STARTED') || values.includes('PENDING')) {
-        that.depositStatusCurrent = depositStatuses.STARTED;
+        that.currentDepositStatus = null;
+      } else if (values.includes(depositStatuses.FAILURE)) {
+        that.currentDepositStatus = depositStatuses.FAILURE;
+      } else if (values.includes(depositStatuses.STARTED)) {
+        that.currentDepositStatus = depositStatuses.STARTED;
+      } else if (values.includes(depositStatuses.PENDING)) {
+        that.currentDepositStatus = depositStatuses.PENDING;
       } else {
-        that.depositStatusCurrent = depositStatuses.SUCCESS;
+        that.currentDepositStatus = depositStatuses.SUCCESS;
       }
     };
 
@@ -538,10 +543,10 @@ function cdsDepositCtrl(
     });
 
     this.currentMasterFile = this.findMasterFile();
+    // Set currentStartedTaskName
+    that.currentStartedTaskName = null;
     // Initialize state reporter
     this.initializeStateReported();
-    // Set cachedCdsState
-    that.cachedCdsState = null;
     // Check for previewer
     that.videoPreviewer();
     // Update subformat statuses
@@ -580,23 +585,19 @@ function cdsDepositCtrl(
     });
 
     this.displayFailure = function() {
-      return that.depositStatusCurrent === that.depositStatuses.FAILURE;
+      return that.currentDepositStatus === that.depositStatuses.FAILURE;
     };
 
     this.displayPending = function() {
-      return that.depositStatusCurrent === that.depositStatuses.PENDING ||
-        that.cachedCdsState === null &&
-          that.depositStatusCurrent !== that.depositStatuses.FAILURE &&
-          that.depositStatusCurrent !== that.depositStatuses.SUCCESS;
+      return that.currentDepositStatus === that.depositStatuses.PENDING;
     };
 
     this.displayStarted = function() {
-      return that.depositStatusCurrent === that.depositStatuses.STARTED &&
-        that.cachedCdsState !== null;
+      return that.currentDepositStatus === that.depositStatuses.STARTED;
     };
 
     this.displaySuccess = function() {
-      return that.depositStatusCurrent === that.depositStatuses.SUCCESS &&
+      return that.currentDepositStatus === that.depositStatuses.SUCCESS &&
         !that.isPublished() &&
         !that.record.recid;
     };
@@ -605,7 +606,7 @@ function cdsDepositCtrl(
       // Get only the latest response (in case of multiple actions)
       var response = (responses[responses.length - 1] || responses).data;
       // Update record: use _ and not ng because otherwise it will destroy references to the parent record
-      that.record = _.merge(that.record, response.metadata);
+      that.record = _.merge(that.record, response.metadata);
     };
 
     this.postErrorProcess = function(response) {
@@ -753,7 +754,7 @@ function cdsDepositCtrl(
   $scope.$watch('$ctrl.record._cds.state', function(newVal, oldVal, scope) {
     if (!_.isEqual(newVal, oldVal)){
       // The states have been changed
-      that.calculateCurrentState();
+      that.calculateCurrentDepositStatus();
     }
     if (newVal['file_video_extract_frames'] === 'SUCCESS') {
       that.framesReady = true;
@@ -765,7 +766,7 @@ function cdsDepositCtrl(
   // Listen for any updates
   $scope.$on('cds.deposit.metadata.update.' + that.id, function(evt, data) {
     that.updateDeposit(data);
-    // after having fetched the record, we need to immediately fetch the statused because
+    // after having fetched the record, we need to immediately fetch the statuses because
     // otherwise CANCELLED subformats disappears for a few seconds given that they are
     // not part of the `_files[0].subformats` just fetched
     that.fetchFlowTasksStatuses();

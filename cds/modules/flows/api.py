@@ -258,7 +258,7 @@ class FlowService:
             **kwargs
         )
 
-        celery_task().apply_async(**payload)
+        celery_task().s(**payload).apply_async()
 
     def stop(self):
         """Stop the flow."""
