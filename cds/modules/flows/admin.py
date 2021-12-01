@@ -53,7 +53,8 @@ class FlowModelView(ModelView):
     can_view_details = True
     column_formatters = dict(
         tasks=link(
-            "Tasks", lambda o: url_for("flowtaskmetadata.index_view", search=o.id)
+            "Tasks",
+            lambda o: url_for("flowtaskmetadata.index_view", search=o.id),
         )
     )
 
@@ -64,8 +65,9 @@ class FlowModelView(ModelView):
         "payload",
         "user_id",
         "is_last",
-        "created",
         "tasks",
+        "created",
+        "updated",
     )
     column_labels = {
         "id": "UUID",
@@ -86,7 +88,16 @@ class TaskModelView(ModelView):
     can_view_details = True
     form_base_class = FlaskForm
 
-    column_list = ("id", "name", "flow.id", "status", "payload", "message")
+    column_list = (
+        "id",
+        "name",
+        "flow.id",
+        "status",
+        "payload",
+        "message",
+        "created",
+        "updated",
+    )
     column_labels = {
         "id": "UUID",
         "flow.id": "Flow UUID",

@@ -22,19 +22,22 @@
 from __future__ import absolute_import, print_function
 
 import click
-from cds.modules.deposit.api import Video
-from cds.modules.flows.api import FlowService
-from cds.modules.maintenance.subformats import (create_all_missing_subformats,
-                                                create_all_subformats,
-                                                create_subformat)
-from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.records.resolver import record_resolver
 from click import ClickException
 from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_records_files.models import RecordsBuckets
+
+from cds.modules.deposit.api import Video
+from cds.modules.flows.deposit import index_deposit_project
+from cds.modules.flows.models import FlowMetadata
+from cds.modules.flows.tasks import ExtractFramesTask
+from cds.modules.maintenance.subformats import (create_all_missing_subformats,
+                                                create_all_subformats,
+                                                create_subformat)
+from cds.modules.records.api import CDSVideosFilesIterator
+from cds.modules.records.resolver import record_resolver
 
 
 def abort_if_false(ctx, param, value):
@@ -208,9 +211,23 @@ def extract_frames(recid, depid):
         _, record = record_resolver.resolve(recid)
         depid = record["_deposit"]["id"]
 
-    flow = FlowService.get_for_deposit(depid)
+    flow_metadata = FlowMetadata.get_by_deposit(depid)
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
+        depid
+    )
 
-    for t in flow.tasks:
-        if "ExtractFramesTask" in t.name:
-            flow.restart_task(t)
+    payload = flow_metadata.payload
+    payload = dict(
+        deposit_id=payload["deposit_id"],
+        flow_id=payload["flow_id"],
+        key=payload["key"],
+        version_id=payload["version_id"],
+    )
+
+    ExtractFramesTask.create_flow_tasks(payload)
     db.session.commit()
+
+    ExtractFramesTask().s(**payload).apply_async()
+
+    db.session.commit()
+    index_deposit_project(payload["deposit_id"])

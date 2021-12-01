@@ -176,7 +176,9 @@ function cdsDepositCtrl(
       });
     };
 
-    this.triggerRestartFlow = function(flowId) {
+    this.triggerRestartFlow = function() {
+      var masterFile = that.findMasterFile();
+      var flowId = _.get(masterFile, 'tags.flow_id', undefined);
       $scope.$broadcast('cds.deposit.workflow.restart', flowId);
     }
 
@@ -208,39 +210,6 @@ function cdsDepositCtrl(
       that.calculateCurrentDepositStatus();
     };
 
-    that.processSubformats = function() {
-//      var masterFile = that.findMasterFile();
-//      if (masterFile && masterFile.subformat) {
-//        var subformatsFinished = subformats.filter(
-//          function(subformat) {
-//            return subformat.completed;
-//          }).length;
-//
-//        var getFlowPromise = $q.resolve();
-//        if (that.presets && that.presets.length == 0) {
-//          var flowId = masterFile.tags.flow_id;
-//          if (flowId) {
-//            var flowUrl = urlBuilder.flowInfo({flowId: flowId});
-//            var updatePresets = function (resp) {
-//              that.presets = angular.copy(resp.data.presets);
-//            };
-//            getFlowPromise = cdsAPI.action(flowUrl, 'GET', {}, jwt)
-//              .then(updatePresets, updatePresets);
-//          }
-//        }
-//        getFlowPromise.then(function() {
-//          if (that.presets && that.presets.length > 0) {
-//            that.stateReporter['file_transcode'] = angular.merge(
-//              that.stateReporter['file_transcode'], {
-//                payload: {
-//                  percentage: subformatsFinished / that.presets.length * 100,
-//                },
-//              });
-//          }
-//        });
-//      }
-    };
-
     this.videoPreviewer = function() {
       var master = that.findMasterFile();
       if (master && master.subformat) {
@@ -260,33 +229,13 @@ function cdsDepositCtrl(
     // update deposit files only because metadata might have been changed in the form
     // but not yet saved
     this.updateDeposit = function(deposit) {
-//      that.record._files[0]?.subformat?.sort(
-//        (a,b) => a.key.localeCompare(b.key)
-//      );
-//      deposit._files[0]?.subformat?.sort(
-//        (a,b) => a.key.localeCompare(b.key)
-//      );
-//      that.record._files = angular.merge(
-//        [],
-//        that.record._files,
-//        deposit._files || []
-//      );
       // sort subformat by key to display them nicely
       deposit._files[0]?.subformat?.sort(
         // take advantage of JS: parseInt("1080p") -> 1080
         (a, b) => parseInt(a.key) < parseInt(b.key)
       );
       that.record._files = angular.copy(deposit._files);
-
-//      that.processSubformats();
       that.currentMasterFile = that.findMasterFile();
-
-      // Check for new state
-//      that.record._cds.state = angular.merge(
-//        that.record._cds.state,
-//        deposit._cds.state || {}
-//      );
-
       that.record._cds.state = angular.copy(
         deposit._cds.state || {}
       );
@@ -370,13 +319,6 @@ function cdsDepositCtrl(
               }
               // Update task states in record
               that.refetchRecordOnTaskStatusChanged(tasksById);
-              // Update subformats status to display each status in the UI
-
-
-
-              //              that.processSubformats();
-
-
 
               that.updateSubformatsTranscodingStatus(data);
 
