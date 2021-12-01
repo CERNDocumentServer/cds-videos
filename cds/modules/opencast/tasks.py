@@ -145,6 +145,10 @@ def check_transcoding_status():
         started_transcoding_tasks
     )
 
+    if not grouped_flow_tasks:
+        # nothing to do
+        return
+
     opencast_events = get_opencast_events(grouped_flow_tasks)
 
     for started_flow_tasks in grouped_flow_tasks:

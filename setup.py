@@ -219,7 +219,6 @@ setup(
         'invenio_celery.tasks': [
             'cds_celery_tasks = cds.modules.flows.tasks',
             'cds_deposit_tasks = cds.modules.deposit',
-            'cds_maintenance_tasks = cds.modules.maintenance.tasks',
             'cds_opencast_tasks = cds.modules.opencast.tasks',
             'cds_records_tasks = cds.modules.records',
         ],

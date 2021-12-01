@@ -54,7 +54,6 @@ class TaskResource(MethodView):
         try:
             service = FlowService(flow)
             service.restart_task(task_id)
-            db.session.commit()
         except PIDDoesNotExistError:
             return "", 400
         return "", 204
@@ -140,20 +139,6 @@ class FlowResource(MethodView):
         """Handle PUT request - restart flow."""
         FlowService(flow).run()
         return make_response(flow)
-
-    @require_api_auth()
-    @require_oauth_scopes("flows:flow")
-    @error_handler
-    @pass_user_id
-    @pass_flow
-    @need_permission("delete")
-    def delete(self, user_id, flow):
-        """Handle DELETE request.
-
-        Clears flow tasks and updates dependent entities e.g deposit.
-        """
-        FlowService(flow).delete()
-        return "", 204
 
 
 task_item = TaskResource.as_view("task_item")

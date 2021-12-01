@@ -357,22 +357,8 @@ function cdsUploaderCtrl(
             that.queue.push(newMasterFile);
             // Upload the video file
             var old_flow_id = old_master[0]["tags"]["flow_id"];
-            that.deleteFlow(old_flow_id).then(
-              function success(response) {
-                that.cdsDepositCtrl.previewer = null;
-                that.upload();
-              },
-              function error(response) {
-                // Inform the parents
-                $scope.$emit("cds.deposit.error", response);
-                // Error uploading notification
-                toaster.pop({
-                  type: "error",
-                  title: "Error replacing the file: workflow failed to start.",
-                  bodyOutputType: "trustedHtml",
-                });
-              }
-            );
+            that.cdsDepositCtrl.previewer = null;
+            that.upload();
           });
         }
       }
@@ -388,12 +374,6 @@ function cdsUploaderCtrl(
       return file.receiver
         ? _prepareRemoteFileWebhooks(file)
         : _prepareLocalFile(file);
-    };
-
-    this.deleteFlow = function (flow_id) {
-      var url = that.remoteMasterReceiver + flow_id;
-      var args = that.prepareDelete(url);
-      return $http(args);
     };
 
     this.prepareDelete = function (url) {
