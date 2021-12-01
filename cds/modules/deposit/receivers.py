@@ -27,16 +27,10 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
-from invenio_deposit.receivers import \
-    index_deposit_after_publish as original_index_deposit_after_publish
-from invenio_indexer.api import RecordIndexer
-from invenio_jsonschemas import current_jsonschemas
-from invenio_pidstore.models import PersistentIdentifier
 
-from cds.modules.flows.tasks import DownloadTask, ExtractFramesTask, \
-    ExtractMetadataTask, TranscodeVideoTask
+from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
+                                     ExtractMetadataTask, TranscodeVideoTask)
 
-from .api import Project
 from .indexer import CDSRecordIndexer
 from .tasks import datacite_register
 
@@ -46,14 +40,17 @@ def index_deposit_after_action(sender, action=None, pid=None, deposit=None):
     CDSRecordIndexer().index(deposit, action)
 
 
-def datacite_register_after_publish(sender, action=None, pid=None,
-                                    deposit=None):
+def datacite_register_after_publish(
+    sender, action=None, pid=None, deposit=None
+):
     """Mind DOI with DataCite after the deposit has been published."""
-    if action == "publish" and \
-            current_app.config['DEPOSIT_DATACITE_MINTING_ENABLED']:
+    if (
+        action == "publish"
+        and current_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"]
+    ):
         recid_pid, record = deposit.fetch_published()
 
-        if record.get('doi'):
+        if record.get("doi"):
             datacite_register.delay(recid_pid.pid_value, str(record.id))
 
 

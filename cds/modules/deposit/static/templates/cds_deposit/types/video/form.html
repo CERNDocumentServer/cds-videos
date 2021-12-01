@@ -336,7 +336,7 @@
               <a href="/api/deposits/video/{{$ctrl.cdsDepositCtrl.record._deposit.id}}" target="_blank">See JSON</a>
             </div>
             <div class="panel panel-default">
-              <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow($ctrl.cdsDepositCtrl.flowId)" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
+              <div class="panel-heading">Restart tasks <a ng-click="$ctrl.cdsDepositCtrl.triggerRestartFlow()" class="btn pull-right btn-xs btn-link"><i class="fa fa-refresh" aria-hidden="true"></i> Restart All</a></div>
               <div class="panel-body">
                 <ul class="list-group" ng-repeat="(name, data) in $ctrl.cdsDepositCtrl.allFlowsTasksByName">
                   <span ng-switch="name">

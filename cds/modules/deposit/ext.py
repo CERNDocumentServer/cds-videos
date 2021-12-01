@@ -53,7 +53,6 @@ class CDSDepositApp(object):
         app.extensions['cds-deposit'] = self
         self.register_signals(app)
 
-
     @staticmethod
     def register_signals(app):
         """Register CDS Deposit signals."""
@@ -61,7 +60,7 @@ class CDSDepositApp(object):
         # note: if publish a project -> index also videos
         post_action.connect(index_deposit_after_action,
                             sender=app, weak=False)
-        # if it's a project/video, expands informations before index
+        # if it's a project/video, expands information before index
         before_record_index.connect(
             cdsdeposit_indexer_receiver, sender=app, weak=False)
         # register Datacite after publish record

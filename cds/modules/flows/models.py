@@ -46,7 +46,9 @@ def as_task(value):
     :returns:  A :class:`invenio_flow.models.TaskMetadata` instance.
     """
     return (
-        value if isinstance(value, FlowTaskMetadata) else FlowTaskMetadata.get(value)
+        value
+        if isinstance(value, FlowTaskMetadata)
+        else FlowTaskMetadata.get(value)
     )
 
 
@@ -83,7 +85,7 @@ class FlowMetadata(db.Model, Timestamp):
         nullable=True,
     )
 
-    is_last = db.Column(db.Boolean, default=True)
+    is_last = db.Column(db.Boolean, nullable=False, default=True)
     """Flag pointing to the last flow associated with a deposit."""
 
     user_id = db.Column(db.Integer(), db.ForeignKey(User.id), nullable=False)
@@ -91,6 +93,8 @@ class FlowMetadata(db.Model, Timestamp):
 
     deposit_id = db.Column(db.String, nullable=False)
     """Deposit for which the flow was triggered."""
+
+    __table_args__ = (db.UniqueConstraint("id", "deposit_id"),)
 
     @hybrid_property
     def status(self):
@@ -104,10 +108,17 @@ class FlowMetadata(db.Model, Timestamp):
 
     @classmethod
     def create(
-            cls, deposit_id, name="AVCWorkflow", payload=None, user_id=None
+        cls, deposit_id, name="AVCWorkflow", payload=None, user_id=None
     ):
         """Create a new flow instance and store it in the database."""
         with db.session.begin_nested():
+            latest_flow = cls.query.filter(
+                cls.deposit_id == deposit_id, cls.is_last.is_(True)
+            ).one_or_none()
+            if latest_flow is not None:
+                latest_flow.is_last = False
+                db.session.add(latest_flow)
+
             obj = cls(
                 name=name,
                 payload=payload or dict(),
@@ -122,7 +133,7 @@ class FlowMetadata(db.Model, Timestamp):
         """Get tasks by deposit id."""
         query = FlowMetadata.query.filter_by(
             deposit_id=str(deposit_id)
-        ).filter_by(is_last=is_last)
+        ).filter(cls.is_last.is_(is_last))
 
         return query.all() if multiple else query.one_or_none()
 
@@ -251,7 +262,9 @@ class FlowTaskMetadata(db.Model, Timestamp):
     """Task status message."""
 
     @classmethod
-    def create(cls, flow_id, name, payload=None, status=FlowTaskStatus.PENDING):
+    def create(
+        cls, flow_id, name, payload=None, status=FlowTaskStatus.PENDING
+    ):
         """Create a new Task."""
         try:
             with db.session.begin_nested():

@@ -1,5 +1,5 @@
 <modal-dialog dialog-title="Replace master file" show="$ctrl.confirmNewMaster" >
-  <p>Are you sure you want to replace the master file with {{ $ctrl.newMasterName }}?</p>
+  <p>Are you sure you want to replace the previously uploaded file with {{ $ctrl.newMasterName }}?</p>
   <hr class="mt-30 mb-10" />
   <p class="pull-right">
     <button class="btn btn-default" ng-click="$parent.hideModal(); $ctrl.newMasterDefer.reject()">Cancel</button>
@@ -69,9 +69,9 @@
         </span>
         <span ng-show="f.status_failure" class="text-danger">Error</span>
         <span ng-show="f.status_completed" class="text-success">Done</span>
-        <span ng-show="f.status_cancelled" class="text-muted">
+        <span ng-show="f.status_cancelled" class="text-muted" tooltip>
           <small>
-            <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" tooltip title="Subformat quality skipped because the uploaded video file resolution is smaller."></i>
+            <i class="fa fa-info-circle" rel="tooltip" data-toggle="tooltip" data-placement="top" title="Subformat quality skipped because the uploaded video resolution is smaller than this quality"></i>
           </small>
         </span>
       </td>
