@@ -8,8 +8,11 @@
     </p>
   </modal-dialog>
   <modal-dialog show="form.publishInfoShown" dialog-title="Publish video" >
-  The video workflow is still processing.<br>
-  Are you sure you want publish the video?<br>
+    The video workflow is still processing.<br><br>
+    You can publish the video even if not all video subformats have been generated yet.<br>
+    Before publishing the video, make sure that at least on subformats has been completed by checking the "Files" tab.<br>
+    Completed video subformats will be automatically published.<br><br>
+    Do you want publish the video?<br>
   <hr class="mt-30 mb-10" />
     <p class="pull-right">
       <button class="btn btn-default" ng-click="$parent.hideModal()">No</button>

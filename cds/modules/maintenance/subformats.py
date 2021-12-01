@@ -22,12 +22,14 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
+from invenio_db import db
 
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
 
 from ..flows.api import FlowService
+from ..flows.deposit import index_deposit_project
 from ..flows.models import FlowMetadata
 from ..flows.tasks import TranscodeVideoTask
 from ..opencast.utils import can_be_transcoded
@@ -39,7 +41,7 @@ def create_all_missing_subformats(id_type, id_value):
     """Create all missing subformats."""
     _validate(id_type=id_type)
 
-    video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
+    depid, video_deposit = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
     subformats = CDSVideosFilesIterator.get_video_subformats(master)
     dones = [subformat["tags"]["preset_quality"] for subformat in subformats]
@@ -53,10 +55,13 @@ def create_all_missing_subformats(id_type, id_value):
         )
     )
 
-    flow = FlowMetadata.get_by_deposit(dep_uuid)
-    service = FlowService(flow)
-    _run_transcoding_for(str(flow.id), service, transcodables_qualities)
+    flow_metadata = FlowMetadata.get_by_deposit(depid)
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
+        depid
+    )
 
+    if transcodables_qualities:
+        _run_transcoding_for(flow_metadata, transcodables_qualities)
     return transcodables_qualities
 
 
@@ -64,18 +69,17 @@ def create_subformat(id_type, id_value, quality):
     """Recreate a given subformat."""
     _validate(id_type=id_type, quality=quality)
 
-    video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
+    depid, video_deposit = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
 
     subformat = can_be_transcoded(quality, w, h)
     if subformat:
-        flow = FlowMetadata.get_by_deposit(dep_uuid)
-        assert flow, "Cannot find Flow for given deposit id {0}".format(
-            dep_uuid
-        )
+        flow_metadata = FlowMetadata.get_by_deposit(depid)
+        assert (
+            flow_metadata
+        ), "Cannot find Flow for given deposit id {0}".format(depid)
 
-        service = FlowService(flow)
-        _run_transcoding_for(str(flow.id), service, [quality])
+        _run_transcoding_for(flow_metadata, [quality])
 
     return subformat["preset_quality"] if subformat else None
 
@@ -84,7 +88,7 @@ def create_all_subformats(id_type, id_value):
     """Recreate all subformats."""
     _validate(id_type=id_type)
 
-    video_deposit, dep_uuid = _resolve_deposit(id_type, id_value)
+    depid, video_deposit = _resolve_deposit(id_type, id_value)
     master, w, h = _get_master_video(video_deposit)
 
     transcodables_qualities = list(
@@ -94,23 +98,33 @@ def create_all_subformats(id_type, id_value):
         )
     )
 
-    flow = FlowMetadata.get_by_deposit(dep_uuid)
-    service = FlowService(flow)
-    _run_transcoding_for(str(flow.id), service, transcodables_qualities)
+    flow_metadata = FlowMetadata.get_by_deposit(depid)
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
+        depid
+    )
 
+    _run_transcoding_for(flow_metadata, transcodables_qualities)
     return transcodables_qualities
 
 
-def _run_transcoding_for(flow_id, service, qualities):
+def _run_transcoding_for(flow_metadata, qualities=None):
     """Run transcoding for the given qualities."""
-    for quality in qualities:
-        task = TranscodeVideoTask.get_flow_task_by_quality(
-            flow_id, quality
-        )
-        if task:
-            service.restart_task(task, qualities=[quality])
-        else:
-            service.run_celery_task(TranscodeVideoTask(), qualities=[quality])
+    payload = flow_metadata.payload
+    payload = dict(
+        deposit_id=payload["deposit_id"],
+        flow_id=payload["flow_id"],
+        bucket_id=payload["bucket_id"],
+        key=payload["key"],
+        version_id=payload["version_id"],
+    )
+
+    TranscodeVideoTask.create_flow_tasks(payload, qualities=qualities)
+    db.session.commit()
+
+    TranscodeVideoTask().s(**payload).apply_async()
+
+    db.session.commit()
+    index_deposit_project(payload["deposit_id"])
 
 
 def _resolve_deposit(id_type, id_value):
@@ -120,7 +134,7 @@ def _resolve_deposit(id_type, id_value):
         _, record = record_resolver.resolve(id_value)
         depid = record["_deposit"]["id"]
 
-    return deposit_video_resolver(depid), depid
+    return depid, deposit_video_resolver(depid)
 
 
 def _get_master_video(video_deposit):

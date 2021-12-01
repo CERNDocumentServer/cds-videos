@@ -92,7 +92,7 @@ class TitleSchema(StrictKeysSchema):
 
     source = fields.Str()
     subtitle = fields.Str()
-    title = fields.Str(required=True, allow_none=False)
+    title = fields.Str(required=True, allow_none=False, validate=Length(min=1))
 
 
 class AccessSchema(StrictKeysSchema):

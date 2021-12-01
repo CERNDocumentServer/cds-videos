@@ -594,7 +594,13 @@ app.provider('isoLanguages', function () {
 // Directive for bootstrap popover to work inside ng-repeat
 app.directive('popover', function () {
   return function (scope, element, attrs) {
-    element.find('a[rel=popover]').popover();
+    element.find('[rel=popover]').popover();
+  };
+});
+
+app.directive('tooltip', function () {
+  return function (scope, element, attrs) {
+    element.find('[rel=tooltip]').tooltip();
   };
 });
 

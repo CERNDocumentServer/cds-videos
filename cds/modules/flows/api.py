@@ -36,15 +36,9 @@ from sqlalchemy.orm.attributes import flag_modified as db_flag_modified
 from .deposit import index_deposit_project
 from .errors import TaskAlreadyRunningError
 from .files import init_object_version
-from .models import FlowTaskStatus
-from .models import as_task
-from .tasks import (
-    CeleryTask,
-    DownloadTask,
-    ExtractFramesTask,
-    ExtractMetadataTask,
-    TranscodeVideoTask,
-)
+from .models import FlowTaskStatus, as_task
+from .tasks import (CeleryTask, DownloadTask, ExtractFramesTask,
+                    ExtractMetadataTask, TranscodeVideoTask)
 
 logger = logging.getLogger("cds-flow")
 
@@ -56,7 +50,9 @@ def get_tasks_status_grouped_by_task_name(flow):
         results[task.name].append(task.status)
 
     return {
-        k: str(FlowTaskStatus.compute_status(v)) for k, v in results.items() if v
+        k: str(FlowTaskStatus.compute_status(v))
+        for k, v in results.items()
+        if v
     }
 
 
@@ -67,7 +63,10 @@ def merge_tasks_status(statuses_1, statuses_2):
 
     for task in task_names:
         task_statuses_values = [statuses_1.get(task), statuses_2.get(task)]
-        statuses[task] = str(FlowTaskStatus.compute_status(task_statuses_values))
+        statuses[task] = str(
+            FlowTaskStatus.compute_status(task_statuses_values)
+        )
+
     return statuses
 
 
@@ -144,6 +143,7 @@ class FlowService:
     def __init__(self, flow_metadata):
         """Constructor."""
         self.flow_metadata = flow_metadata
+        self.deposit_id = self.flow_metadata.deposit_id
 
     def run(self):
         """Run workflow for video transcoding.
@@ -176,15 +176,12 @@ class FlowService:
         payload = self.flow_metadata.payload
         payload["flow_id"] = flow_id
 
-        deposit_id = self.flow_metadata.deposit_id
-        has_deposit = deposit_id
-
         has_remote_file_to_download = payload.get("uri", False)
         has_user_uploaded_file = payload.get("version_id", False)
         has_file = has_remote_file_to_download or has_user_uploaded_file
         has_filename = payload["key"]
 
-        assert has_deposit
+        assert self.deposit_id
         assert has_file
         assert has_filename
 
@@ -201,7 +198,7 @@ class FlowService:
 
         # Flow and Tasks modifications need to be persisted
         db.session.commit()
-        index_deposit_project(deposit_id)
+        index_deposit_project(self.deposit_id)
 
     def delete(self):
         """Mark the flow as deleted.
@@ -211,28 +208,27 @@ class FlowService:
         """
         self.clean()
         self.flow_metadata.is_last = False
+
         db.session.commit()
+        index_deposit_project(self.deposit_id)
 
-    @staticmethod
-    def delete_task(task_id):
-        """Revoke a specific task."""
-        AsyncResult(task_id).revoke(terminate=True)
-
-    def run_celery_task(self, celery_task, **kwargs):
-        """Run a specific Celery task."""
-        self._start_celery_task(celery_task, **kwargs)
-
-    def restart_task(self, task, **kwargs):
+    def restart_task(self, task):
         """Restart a specific task"""
         task_metadata = as_task(task)
-        if task_metadata.status in [FlowTaskStatus.PENDING, FlowTaskStatus.STARTED]:
+        if task_metadata.status in [
+            FlowTaskStatus.PENDING,
+            FlowTaskStatus.STARTED,
+        ]:
             raise TaskAlreadyRunningError(
                 "Task with id {0} is already running.".format(
                     str(task_metadata.id)
                 )
             )
+        # now set it to PENDING
+        task_metadata.status = FlowTaskStatus.PENDING
+        db.session.commit()
 
-        def find_celery_task_by_name(name):
+        def _find_celery_task_by_name(name):
             for celery_task in [
                 DownloadTask,
                 ExtractMetadataTask,
@@ -243,10 +239,12 @@ class FlowService:
                     return celery_task
             raise
 
-        celery_task_cls = find_celery_task_by_name(task_metadata.name)
+        celery_task_cls = _find_celery_task_by_name(task_metadata.name)
+        self._start_celery_task(celery_task_cls, task_id=str(task_metadata.id))
 
-        kwargs["task_id"] = str(task_metadata.id)
-        self._start_celery_task(celery_task_cls, **kwargs)
+        deposit_id = self.flow_metadata.deposit_id
+        db.session.commit()
+        index_deposit_project(deposit_id)
 
     def _start_celery_task(self, celery_task_cls, **kwargs):
         """Start a specific celery task."""
@@ -259,8 +257,6 @@ class FlowService:
             **kwargs
         )
         celery_task = celery_task_cls()
-        celery_task.create_flow_tasks(payload)
-
         celery_task.s(**payload).apply_async()
 
     def stop(self):
@@ -269,7 +265,10 @@ class FlowService:
             celery_task_id = task.payload["celery_task_id"]
             CeleryTask.stop_task(celery_task_id)
             task.status = FlowTaskStatus.CANCELLED
+
+        deposit_id = self.flow_metadata.deposit_id
         db.session.commit()
+        index_deposit_project(deposit_id)
 
     def clean(self):
         """Delete tasks and everything created by them."""
@@ -277,7 +276,9 @@ class FlowService:
 
         payload = self.flow_metadata.payload
 
-        remote_file_was_downloaded = self.flow_metadata.payload.get("uri", False)
+        remote_file_was_downloaded = self.flow_metadata.payload.get(
+            "uri", False
+        )
         if remote_file_was_downloaded:
             AVCFlowCeleryTasks.clean_task("file_download", **payload)
 
@@ -286,3 +287,7 @@ class FlowService:
         )
         AVCFlowCeleryTasks.clean_task("file_video_extract_frames", **payload)
         AVCFlowCeleryTasks.clean_task("file_transcode", **payload)
+
+        deposit_id = self.flow_metadata.deposit_id
+        db.session.commit()
+        index_deposit_project(deposit_id)

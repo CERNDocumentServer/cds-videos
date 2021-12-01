@@ -66,7 +66,7 @@ def files_permission_factory(obj, action=None):
             elif is_deposit(record):
                 return DepositFilesPermission.create(record, action)
 
-    return Permission(action_admin_access).can()
+    return Permission(action_admin_access)
 
 
 def record_permission_factory(record=None, action=None):
