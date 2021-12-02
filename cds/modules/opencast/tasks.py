@@ -230,9 +230,9 @@ def _get_opencast_subformat_info(subformat, present_quality):
         frame_rate=int(subformat.get("framerate", default_config["frame_rate"])),
         height=int(subformat.get("height", default_config["height"])),
         width=int(subformat.get("width", default_config["width"])),
-        total_bitrate=int(subformat.get(
-            "bitrate",
-            default_config["audio_bitrate"] + default_config["video_bitrate"],
+        video_bitrate=int(subformat.get(
+            "bitrate",  # this is the video bitrate
+            default_config["video_bitrate"],
         )),
     )
     return info
