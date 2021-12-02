@@ -108,12 +108,11 @@ class Smil(object):
             if not tags.get("smil", False):
                 continue
 
-            bitrate = tags.get("total_bitrate", tags.get("video_bitrate", ""))
             yield dict(
                 src=get_relative_path(video["version_id"]),
                 width=tags["width"],
                 height=tags["height"],
-                total_bitrate=bitrate,
+                video_bitrate=tags.get("video_bitrate", ""),
             )
 
 
