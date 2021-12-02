@@ -86,11 +86,14 @@ class OpenCast:
     def _create_media_package(self, session):
         """Creates the media package and returns the event_id."""
         url = self.BASE_URL + "/createMediaPackage"
+        current_app.logger.info(
+            "Opencast request for media package creation: {0}".format(url)
+        )
         try:
             response = session.get(url)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise RequestError(url, e.message)
+            raise RequestError(url, e)
         # get the media package id, which is also the event id
         tree = ElementTree.fromstring(response.content)
         media_package_id = tree.attrib["id"]
@@ -145,11 +148,14 @@ class OpenCast:
         )
 
         url = self.BASE_URL + "/addDCCatalog"
+        current_app.logger.info(
+            "Opencast request for adding metadata: {0}".format(url)
+        )
         try:
             response = session.post(url, data=form_data)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise RequestError(url, e.message)
+            raise RequestError(url, e)
         return response.content
 
     def _add_track(self, session, media_package_xml):
@@ -158,6 +164,9 @@ class OpenCast:
         video_filename = self.object_version.key
 
         url = self.BASE_URL + "/addTrack"
+        current_app.logger.info(
+            "Opencast request for adding track: {0}".format(url)
+        )
         data = MultipartEncoder(
             fields=dict(
                 mediaPackage=media_package_xml,
@@ -177,7 +186,7 @@ class OpenCast:
             )
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise RequestError(url, e.message)
+            raise RequestError(url, e)
         end = time.time()
 
         size = file_size_xrootd(video_filepath)
@@ -196,7 +205,9 @@ class OpenCast:
     def _add_acl(self, session, media_package_xml):
         """Adds required acl file to the media package."""
         url = self.BASE_URL + "/addAttachment"
-
+        current_app.logger.info(
+            "Opencast request for adding acl file: {0}".format(url)
+        )
         form_data = dict(
             mediaPackage=media_package_xml, flavor="security/xacml+episode"
         )
@@ -207,7 +218,7 @@ class OpenCast:
                 response = session.post(url, files=files, data=form_data)
                 response.raise_for_status()
             except requests.exceptions.RequestException as e:
-                raise RequestError(url, e.message)
+                raise RequestError(url, e)
             return response.content
 
     def _ingest(self, session, media_package_xml, qualities):
@@ -219,9 +230,14 @@ class OpenCast:
                 form_data.update({dict_key: "false"})
 
         url = self.BASE_URL + "/ingest/cern-cds-videos"
+        current_app.logger.info(
+            "Opencast request for ingesting (qualities {0}): {1}".format(
+                qualities, url
+            )
+        )
         try:
             response = session.post(url, data=form_data)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            raise RequestError(url, e.message)
+            raise RequestError(url, e)
         return response.content

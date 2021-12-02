@@ -24,25 +24,31 @@
 """Celery tasks for Opencast."""
 
 import os
+import signal
 import time
 from collections import defaultdict
 
 import requests
+from celery import current_app as celery_app
 from celery import shared_task
 from flask import current_app
+from invenio_cache import current_cache
 from invenio_db import db
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
 from invenio_pidstore.errors import PIDDeletedError
 
+from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.flows.deposit import index_deposit_project
-from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
 from cds.modules.flows.models import FlowTaskMetadata
+from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
 from cds.modules.flows.tasks import (TranscodeVideoTask,
                                      sync_records_with_deposit_files)
 from cds.modules.opencast.api import OpenCastRequestSession
-from cds.modules.opencast.error import RequestError, WriteToEOSError
+from cds.modules.opencast.error import (AbruptCeleryStop, RequestError,
+                                        WriteToEOSError)
+from cds.modules.opencast.utils import generate_lock_id, only_one
 from cds.modules.records.utils import to_string
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
@@ -59,7 +65,7 @@ def _get_status_and_subformats(event_id, session):
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise RequestError(url, e.message)
+        raise RequestError(url, e)
 
     json = response.json()
     status = json["processing_state"]
@@ -72,6 +78,26 @@ def _get_status_and_subformats(event_id, session):
         # no `break`
         subformats = []
     return status, subformats
+
+
+def _update_task_on_abrupt_stop(flow_task, opencast_event_id):
+    """Update task on abrupt stop and raise an exception."""
+    # Releasing lock
+    cache = current_cache.cache
+    lock_id = generate_lock_id(str(flow_task.id), opencast_event_id)
+    if cache.has(lock_id):
+        current_app.logger.info(
+            "Releasing lock with id: {0}".format(lock_id)
+        )
+        cache.delete(lock_id)
+
+    # Update tasks status
+    error_message = "Abrupt celery stop"
+    current_app.logger.error(error_message)
+    flow_task.status = FlowTaskStatus.FAILURE
+    flow_task.message = error_message
+    db.session.commit()
+    raise AbruptCeleryStop(task_id=str(flow_task.id))
 
 
 def _group_tasks_by_opencast_event_id(tasks):
@@ -135,9 +161,12 @@ def get_opencast_events(grouped_flow_tasks):
 
 
 @shared_task
+@only_one(
+    key="check_transcoding_status",
+    timeout_config_name="CDS_OPENCAST_STATUS_CHECK_TASK_TIMEOUT"
+)
 def check_transcoding_status():
     """Update all finished transcoding tasks."""
-
     started_transcoding_tasks = FlowTaskMetadata.query.filter_by(
         status=FlowTaskStatus.STARTED, name=TranscodeVideoTask.name
     ).all()
@@ -168,11 +197,11 @@ def check_transcoding_status():
                 if not is_same_preset_quality:
                     continue
 
-                on_transcoding_completed.apply_async(
-                    (
-                        str(started_flow_task.id),
-                        subformat,
-                    ),
+                on_transcoding_completed.s(
+                    flow_task_id=str(started_flow_task.id),
+                    opencast_subformat=subformat,
+                    opencast_event_id=event_id
+                ).apply_async(
                     link_error=on_celery_task_failed.s(
                         data=dict(flow_task_id=str(started_flow_task.id))
                     ),
@@ -187,7 +216,9 @@ def check_transcoding_status():
                         "Opencast event 'processing_state' field has "
                         "value 'FAILED' for event id: {0}.".format(event_id)
                     )
-                    _set_flow_tasks_to_failed([str(started_flow_task.id), msg])
+                    _set_flow_tasks_to_failed(
+                        [(str(started_flow_task.id), msg)]
+                    )
 
 
 def _get_opencast_subformat_info(subformat, present_quality):
@@ -250,18 +281,44 @@ def _write_file_to_eos(url_to_download, obj):
     return int(end - start), size * 0.000001
 
 
+def set_revoke_handler(handler):
+    """Set handler to be executed when the task gets revoked."""
+
+    def _handler(signum, frame):
+        with celery_app.flask_app.app_context():
+            handler()
+
+    signal.signal(signal.SIGTERM, _handler)
+
+
 @shared_task
-def on_transcoding_completed(flow_task_id, opencast_subformat):
-    """Update Task status and files by streaming it to EOS."""
+@only_one(
+    timeout_config_name="CDS_OPENCAST_DOWNLOAD_TASK_TIMEOUT",
+    use_kwargs_as_key=True
+)
+def on_transcoding_completed(
+        flow_task_id=None,
+        opencast_subformat=None,
+        opencast_event_id=None
+):
+    """Update Task status and files by streaming it to EOS.
+
+    :param flow_task_id: Task id.
+    :param opencast_subformat: Subformat dict.
+    :param opencast_event_id: Opencast event ID.
+
+    WARNING: Do not remove opencast_event_id and flow_task_id, needed for
+     @only_one decorator
+    """
     flow_task = FlowTaskMetadata.query.get(flow_task_id)
-    opencast_event_id = flow_task.payload["opencast_event_id"]
+    set_revoke_handler(
+        lambda: _update_task_on_abrupt_stop(flow_task, opencast_event_id)
+    )
     preset_quality = flow_task.payload["preset_quality"]
     master_object_version = as_object_version(
         flow_task.payload["master_id"]
     )
     master_object_version_id = str(master_object_version.version_id)
-
-    from cds.modules.deposit.api import deposit_video_resolver
 
     deposit_id = flow_task.payload["deposit_id"]
     try:
@@ -289,13 +346,19 @@ def on_transcoding_completed(flow_task_id, opencast_subformat):
     except Exception as e:
         error_message = (
             "Failed to write transcoded file to EOS. Request "
-            "failed on: {0}. Error message: {1}"
-        ).format(download_url, e.message)
+            "failed on: {0}. Error: {1}"
+        ).format(download_url, str(e))
         current_app.logger.error(error_message)
         flow_task.status = FlowTaskStatus.FAILURE
         flow_task.message = error_message
         db.session.commit()
-        raise WriteToEOSError(download_url, e.message)
+        raise WriteToEOSError(download_url, str(e))
+
+    # Check if status changed while downloading and if so don't update
+    db.session.refresh(flow_task)
+    status = flow_task.status
+    if status not in [FlowTaskStatus.PENDING, FlowTaskStatus.STARTED]:
+        return
 
     # add various tags to the subformat
     ObjectVersionTag.create(obj, "master", master_object_version_id)

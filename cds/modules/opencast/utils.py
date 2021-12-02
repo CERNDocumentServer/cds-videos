@@ -23,7 +23,11 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Opencast utils."""
+from contextlib import contextmanager
+from functools import wraps
+
 from flask import current_app
+from invenio_cache import current_cache
 
 
 def find_lowest_quality():
@@ -88,3 +92,60 @@ def can_be_transcoded(subformat_desired_quality, video_width, video_height):
         width=qualitiy_config["width"],
         height=qualitiy_config["height"],
     )
+
+
+def generate_lock_id(flow_task_id, opencast_event_id):
+    """Generates a string used to store it in the cache and use it as a lock.
+    """
+    return flow_task_id + "_" + opencast_event_id
+
+
+@contextmanager
+def cache_lock(lock_id, timeout):
+    """Creates the lock using redis cache and releases it when finished.
+
+    :param lock_id: Lock ID.
+    :param timeout: The cache timeout for the key in seconds.
+    """
+    cache = current_cache.cache
+    # if key was already added it will return False
+    status = cache.add(lock_id, True, timeout)
+    try:
+        yield status
+    finally:
+        if status and cache.has(lock_id):
+            current_app.logger.info(
+                "Releasing lock with id: {0}".format(lock_id)
+            )
+            cache.delete(lock_id)
+
+
+def only_one(key="", timeout_config_name=None, use_kwargs_as_key=None):
+    """Decorator to assure that the function is running only once at a time.
+
+    :param key: The key to identify the unique function.
+    :param timeout_config_name: The timeout for releasing the lock.
+    :param use_kwargs_as_key: If True the key will be composed with the kwargs.
+
+    WARNING: If use_kwargs_as_key is True, the function using this decorator
+    must contain the following kwargs: opencast_event_id and flow_task_id
+    """
+    def decorator_builder(f):
+        @wraps(f)
+        def decorate(**kwargs):
+            lock_id = key
+            timeout = current_app.config[timeout_config_name]
+            if use_kwargs_as_key:
+                flow_task_id = kwargs.get('flow_task_id')
+                opencast_event_id = kwargs.get('opencast_event_id')
+                lock_id = generate_lock_id(flow_task_id, opencast_event_id)
+            with cache_lock(lock_id, timeout) as acquired:
+                if acquired:
+                    current_app.logger.info(
+                        "Acquiring lock with id: {0}".format(lock_id)
+                    )
+                    f(**kwargs)
+
+        return decorate
+
+    return decorator_builder

@@ -100,5 +100,17 @@ class WriteToEOSError(OpencastError):
     def __str__(self):
         return (
             "Failed to write transcoded file to EOS Request failed on: "
-            "{1}. Error message: {2}"
+            "{0}. Error message: {1}"
         ).format(self.url, self.message)
+
+
+class AbruptCeleryStop(OpencastError):
+    """Abrupt celery error."""
+
+    def __init__(self, task_id):
+        self.task_id = task_id
+
+    def __str__(self):
+        return (
+            "Abrupt celery stop while processing task with id: {1}"
+        ).format(self.task_id)
