@@ -222,21 +222,15 @@ def delete_video_record(record_uuid, reason=None, hard=False):
     _, deposit = _get_record_and_deposit(record_uuid)
     if deposit:
         # Start deleting the deposit
-        if not deposit.is_published():
-            try:
-                deposit._clean_tasks()
-                report.append(
-                    (
-                        "INFO",
-                        "Cleaned all pending tasks for deposit {}.".format(
-                            deposit.id
-                        ),
-                    )
-                )
-            except Exception as e:
-                report.append(
-                    ("WARN", "Couldn't clean pending tasks. {}".format(e))
-                )
+        deposit._delete_flows(keep_last=False)
+        report.append(
+            (
+                "INFO",
+                "Deleted all flows for deposit {}.".format(
+                    deposit.id
+                ),
+            )
+        )
 
         project = deposit.project
         project_uuid = project.id
