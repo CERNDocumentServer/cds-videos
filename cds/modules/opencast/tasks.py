@@ -40,6 +40,7 @@ from invenio_files_rest.models import (FileInstance, ObjectVersion,
 from invenio_pidstore.errors import PIDDeletedError
 
 from cds.modules.deposit.api import deposit_video_resolver
+from cds.modules.flows.decorators import retry
 from cds.modules.flows.deposit import index_deposit_project
 from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
@@ -47,12 +48,13 @@ from cds.modules.flows.tasks import (TranscodeVideoTask,
                                      sync_records_with_deposit_files)
 from cds.modules.opencast.api import OpenCastRequestSession
 from cds.modules.opencast.error import (AbruptCeleryStop, RequestError,
-                                        WriteToEOSError)
+                                        WriteToEOSError, RequestError404)
 from cds.modules.opencast.utils import generate_lock_id, only_one
 from cds.modules.records.utils import to_string
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
 
+@retry(sleep=2, max_retries=5, exception=RequestError404)
 def _get_status_and_subformats(event_id, session):
     """Retrieves the status and the subformats of an event_id."""
     url = "{endpoint}/{event_id}?withpublications=true".format(
@@ -64,6 +66,9 @@ def _get_status_and_subformats(event_id, session):
             url,
         )
         response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            raise RequestError404(url, e)
     except requests.exceptions.RequestException as e:
         raise RequestError(url, e)
 
@@ -351,13 +356,18 @@ def on_transcoding_completed(
         current_app.logger.error(error_message)
         flow_task.status = FlowTaskStatus.FAILURE
         flow_task.message = error_message
+        db.session.expunge(obj)  # Remove object_version from session
         db.session.commit()
         raise WriteToEOSError(download_url, str(e))
 
     # Check if status changed while downloading and if so don't update
     db.session.refresh(flow_task)
     status = flow_task.status
-    if status not in [FlowTaskStatus.PENDING, FlowTaskStatus.STARTED]:
+    if status != FlowTaskStatus.STARTED:
+        current_app.logger.debug("Task status has changed while the "
+                                 "file was being written to EOS. Aborting task"
+                                 "update. Task ID: {0}".format(flow_task_id))
+        db.session.expunge(obj)  # Remove object_version from session
         return
 
     # add various tags to the subformat
@@ -367,6 +377,9 @@ def on_transcoding_completed(
     ObjectVersionTag.create(obj, "context_type", "subformat")
     ObjectVersionTag.create(obj, "smil", "true")
     ObjectVersionTag.create(obj, "preset_quality", preset_quality)
+    ObjectVersionTag.create(
+        obj, "_opencast_file_download_time_in_seconds", str(download_time)
+    )
     # add tags extracted from the subformat info
     info = _get_opencast_subformat_info(opencast_subformat, preset_quality)
     for key, value in info.items():
@@ -380,7 +393,7 @@ def on_transcoding_completed(
     new_payload.update(
         key=obj.key,
         version_id=str(obj.version_id),
-        file_download_time_in_seconds=str(download_time),
+        opencast_file_download_time_in_seconds=str(download_time),
         file_size_mb=str(file_size),
     )
     flow_task.payload = new_payload

@@ -90,6 +90,10 @@ class RequestError(OpencastError):
         )
 
 
+class RequestError404(RequestError):
+    """404 error while performing a request in Opencast."""
+
+
 class WriteToEOSError(OpencastError):
     """Error while writing transcoded file to EOS."""
 
