@@ -24,11 +24,11 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Useful decorators."""
-
+import time
 from functools import wraps
 
 from celery import shared_task
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from flask_login import current_user
 from flask_restful import abort
 
@@ -128,3 +128,29 @@ def error_handler(f):
             )
 
     return inner
+
+
+def retry(sleep, max_retries, exception):
+    """Decorator to retry on 404.
+
+    :param sleep: Amount of time to sleep before retrying again.
+    :param max_retries: Maximum number of tries.
+    :param exception: Exception that triggers a retry.
+    """
+    def decorator_builder(f):
+        @wraps(f)
+        def decorate(*args, **kwargs):
+            tries = 0
+            while tries < max_retries:
+                tries += 1
+                try:
+                    return f(*args, **kwargs)
+                except exception:
+                    current_app.logger.debug(
+                        "Retry number {0} on {1}".format(tries, f.__name__)
+                    )
+                    time.sleep(sleep)
+            return f(*args, **kwargs)
+        return decorate
+
+    return decorator_builder

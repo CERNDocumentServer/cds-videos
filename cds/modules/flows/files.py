@@ -39,6 +39,15 @@ from invenio_files_rest.models import (
 from ..xrootd.utils import file_opener_xrootd
 
 
+def _rename_key(object_version):
+    """Renames the object_version key to avoid issues with subformats
+    objectVersions key.
+    """
+    prefix = "uploaded_"
+    if not object_version.key.startswith(prefix):
+        object_version.key = prefix + object_version.key
+
+
 def init_object_version(flow):
     """Create, if doesn't exists, the version object for the flow."""
     flow_id = str(flow.id)
@@ -69,6 +78,7 @@ def init_object_version(flow):
         ObjectVersionTag.create_or_update(
             object_version, "context_type", "master"
         )
+        _rename_key(object_version)
     return object_version
 
 
