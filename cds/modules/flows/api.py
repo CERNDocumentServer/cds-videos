@@ -280,13 +280,11 @@ class FlowService:
             "uri", False
         )
         if remote_file_was_downloaded:
-            AVCFlowCeleryTasks.clean_task("file_download", **payload)
+            AVCFlowCeleryTasks.clean_task(DownloadTask, payload=payload)
 
-        AVCFlowCeleryTasks.clean_task(
-            "file_video_metadata_extraction", **payload
-        )
-        AVCFlowCeleryTasks.clean_task("file_video_extract_frames", **payload)
-        AVCFlowCeleryTasks.clean_task("file_transcode", **payload)
+        AVCFlowCeleryTasks.clean_task(ExtractMetadataTask, payload=payload)
+        AVCFlowCeleryTasks.clean_task(ExtractFramesTask, payload=payload)
+        AVCFlowCeleryTasks.clean_task(TranscodeVideoTask, payload=payload)
 
         deposit_id = self.flow_metadata.deposit_id
         db.session.commit()
