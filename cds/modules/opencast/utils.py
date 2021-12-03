@@ -32,11 +32,12 @@ from invenio_cache import current_cache
 
 def find_lowest_quality():
     """Return the lowest quality available."""
-    lowest_height = 100000
+    lowest_height = None
     lowest_quality = None
     for quality, preset_items in current_app.config[
         "CDS_OPENCAST_QUALITIES"
     ].items():
+        lowest_height = lowest_height or preset_items["height"] + 1
         if preset_items["height"] < lowest_height:
             lowest_height = preset_items["height"]
             lowest_quality = quality

@@ -37,7 +37,7 @@ from invenio_db import db
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
                                        ObjectVersionTag, as_object_version)
-from invenio_pidstore.errors import PIDDeletedError
+from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.flows.decorators import retry
@@ -328,7 +328,7 @@ def on_transcoding_completed(
     deposit_id = flow_task.payload["deposit_id"]
     try:
         deposit_video = deposit_video_resolver(deposit_id)
-    except PIDDeletedError:
+    except (PIDDeletedError, PIDDoesNotExistError):
         flow_task = FlowTaskMetadata.query.get(flow_task_id)
         flow_task.status = FlowTaskStatus.CANCELLED
         flow_task.message = "Video was deleted"
