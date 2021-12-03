@@ -64,9 +64,13 @@ def _(x):
     return x
 
 
-# CDS Environments
-CDS_ENV_PROD = False
-CDS_ENV_TEST = False
+def _parse_env_bool(var_name, default=None):
+    if str(os.environ.get(var_name)).lower() == "true":
+        return True
+    elif str(os.environ.get(var_name)).lower() == "false":
+        return False
+    return default
+
 
 #: Email address for admins.
 CDS_ADMIN_EMAIL = "cds-admin@cern.ch"
@@ -198,8 +202,44 @@ DEBUG_TB_ENABLED = True
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 ###############################################################################
+# Sentry
+###############################################################################
+SENTRY_SDK = True
+"""Use of sentry-python SDK, if false raven will be used."""
+LOGGING_SENTRY_LEVEL = "WARNING"
+"""Sentry logging level."""
+LOGGING_SENTRY_PYWARNINGS = False
+"""Enable logging of Python warnings to Sentry."""
+LOGGING_SENTRY_CELERY = False
+"""Configure Celery to send logging to Sentry."""
+SENTRY_DSN = None
+"""Set SENTRY_DSN environment variable."""
+# Sentry uses env var SENTRY_ENVIRONMENT and SENTRY_RELEASE
+
+###############################################################################
 # Search
 ###############################################################################
+ELASTICSEARCH_HOSTS = os.environ.get("ELASTICSEARCH_HOSTS", ["localhost"])
+ELASTICSEARCH_PORT = int(os.environ.get("ELASTICSEARCH_PORT", "9200"))
+ELASTICSEARCH_USER = os.environ.get("ELASTICSEARCH_USER")
+ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
+ELASTICSEARCH_URL_PREFIX = os.environ.get("ELASTICSEARCH_URL_PREFIX", "")
+ELASTICSEARCH_USE_SSL = _parse_env_bool("ELASTICSEARCH_USE_SSL")
+ELASTICSEARCH_VERIFY_CERTS = _parse_env_bool("ELASTICSEARCH_VERIFY_CERTS")
+
+_es_hosts = []
+for host in ELASTICSEARCH_HOSTS:
+    es_host_params = {"host": host, "port": ELASTICSEARCH_PORT}
+    if ELASTICSEARCH_USER and ELASTICSEARCH_PASSWORD:
+        es_host_params["http_auth"] = (ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD)
+    if ELASTICSEARCH_URL_PREFIX:
+        es_host_params["url_prefix"] = ELASTICSEARCH_URL_PREFIX
+    if ELASTICSEARCH_USE_SSL is not None:
+        es_host_params["use_ssl"] = ELASTICSEARCH_USE_SSL
+    if ELASTICSEARCH_VERIFY_CERTS is not None:
+        es_host_params["verify_certs"] = ELASTICSEARCH_VERIFY_CERTS
+
+SEARCH_ELASTIC_HOSTS = [_es_hosts]
 
 # Search API endpoint.
 SEARCH_UI_SEARCH_API = "/api/records/"
@@ -874,8 +914,8 @@ OAUTHCLIENT_REMOTE_APPS = dict(
 )
 #: Credentials for CERN OAuth (must be changed to work).
 CERN_APP_CREDENTIALS = dict(
-    consumer_key="CHANGE_ME",
-    consumer_secret="CHANGE_ME",
+    consumer_key=os.environ.get("OAUTH_CERN_CONSUMER_KEY", "changeme"),
+    consumer_secret=os.environ.get("OAUTH_CERN_CONSUMER_SECRET", "changeme"),
 )
 
 # Set the template
