@@ -136,8 +136,8 @@ def only_one(key="", timeout_config_name=None, use_kwargs_as_key=None):
             lock_id = key
             timeout = current_app.config[timeout_config_name]
             if use_kwargs_as_key:
-                flow_task_id = kwargs.get('flow_task_id')
-                opencast_event_id = kwargs.get('opencast_event_id')
+                flow_task_id = kwargs['flow_task_id']
+                opencast_event_id = kwargs['opencast_event_id']
                 lock_id = generate_lock_id(flow_task_id, opencast_event_id)
             with cache_lock(lock_id, timeout) as acquired:
                 if acquired:
