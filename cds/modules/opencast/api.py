@@ -192,7 +192,7 @@ class OpenCast:
         size = file_size_xrootd(video_filepath)
         ObjectVersionTag.create_or_update(
             self.object_version,
-            "file_upload_time_in_seconds",
+            "_opencast_file_upload_time_in_seconds",
             str(int(end - start)),
         )
         ONE_MB = 0.000001
