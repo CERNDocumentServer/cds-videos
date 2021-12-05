@@ -39,7 +39,6 @@ from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
 from celery.result import AsyncResult
-from celery.states import FAILURE, STARTED, SUCCESS
 from celery.task.control import revoke
 from celery.utils.log import get_task_logger
 from flask import current_app

@@ -26,36 +26,32 @@
 
 from __future__ import absolute_import, print_function
 
+import ast
 import os
 from datetime import timedelta
 
 from celery.schedules import crontab
+from elasticsearch import RequestsHttpConnection
 from flask import current_app, session
 from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
+from invenio_deposit.config import DEPOSIT_REST_FACETS
+from invenio_deposit.scopes import write_scope
+from invenio_deposit.utils import check_oauth2_scope
 from invenio_oauthclient.contrib import cern
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 
-from invenio_deposit.config import DEPOSIT_REST_FACETS
-from invenio_deposit.scopes import write_scope
-from invenio_deposit.utils import check_oauth2_scope
-
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.deposit.indexer import CDSRecordIndexer
-from .modules.records.permissions import (
-    deposit_delete_permission_factory,
-    deposit_read_permission_factory,
-    deposit_update_permission_factory,
-    record_create_permission_factory,
-    record_read_permission_factory,
-    record_update_permission_factory,
-)
-from .modules.records.search import (
-    NotDeletedKeywordSearch,
-    RecordVideosSearch,
-    lowercase_filter,
-)
+from .modules.records.permissions import (deposit_delete_permission_factory,
+                                          deposit_read_permission_factory,
+                                          deposit_update_permission_factory,
+                                          record_create_permission_factory,
+                                          record_read_permission_factory,
+                                          record_update_permission_factory)
+from .modules.records.search import (NotDeletedKeywordSearch,
+                                     RecordVideosSearch, lowercase_filter)
 
 
 # Identity function for string extraction
@@ -95,7 +91,6 @@ BABEL_DEFAULT_TIMEZONE = "Europe/Zurich"
 # Celery
 ###############################################################################
 
-BROKER_URL = "amqp://guest:guest@localhost:5672/"
 #: URL of message broker for Celery (default is RabbitMQ).
 CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672/"
 #: URL of backend for result storage (default is Redis).
@@ -219,7 +214,7 @@ SENTRY_DSN = None
 ###############################################################################
 # Search
 ###############################################################################
-ELASTICSEARCH_HOSTS = os.environ.get("ELASTICSEARCH_HOSTS", ["localhost"])
+ELASTICSEARCH_HOSTS = ast.literal_eval(os.environ.get("ELASTICSEARCH_HOSTS", "['localhost']"))
 ELASTICSEARCH_PORT = int(os.environ.get("ELASTICSEARCH_PORT", "9200"))
 ELASTICSEARCH_USER = os.environ.get("ELASTICSEARCH_USER")
 ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
@@ -227,19 +222,23 @@ ELASTICSEARCH_URL_PREFIX = os.environ.get("ELASTICSEARCH_URL_PREFIX", "")
 ELASTICSEARCH_USE_SSL = _parse_env_bool("ELASTICSEARCH_USE_SSL")
 ELASTICSEARCH_VERIFY_CERTS = _parse_env_bool("ELASTICSEARCH_VERIFY_CERTS")
 
-_es_hosts = []
+es_hosts = []
 for host in ELASTICSEARCH_HOSTS:
-    es_host_params = {"host": host, "port": ELASTICSEARCH_PORT}
+    es_host = {"host": host, "port": ELASTICSEARCH_PORT}
     if ELASTICSEARCH_USER and ELASTICSEARCH_PASSWORD:
-        es_host_params["http_auth"] = (ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD)
+        es_host["http_auth"] = (ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD)
     if ELASTICSEARCH_URL_PREFIX:
-        es_host_params["url_prefix"] = ELASTICSEARCH_URL_PREFIX
+        es_host["url_prefix"] = ELASTICSEARCH_URL_PREFIX
     if ELASTICSEARCH_USE_SSL is not None:
-        es_host_params["use_ssl"] = ELASTICSEARCH_USE_SSL
+        es_host["use_ssl"] = ELASTICSEARCH_USE_SSL
     if ELASTICSEARCH_VERIFY_CERTS is not None:
-        es_host_params["verify_certs"] = ELASTICSEARCH_VERIFY_CERTS
+        es_host["verify_certs"] = ELASTICSEARCH_VERIFY_CERTS
+    es_hosts.append(es_host)
 
-SEARCH_ELASTIC_HOSTS = [_es_hosts]
+SEARCH_ELASTIC_HOSTS = es_hosts
+# needed when verify cert is disabled see:
+# https://github.com/elastic/elasticsearch-py/issues/712
+SEARCH_CLIENT_CONFIG = {"connection_class": RequestsHttpConnection}
 
 # Search API endpoint.
 SEARCH_UI_SEARCH_API = "/api/records/"
@@ -1346,7 +1345,7 @@ CDS_FFMPEG_METADATA_POST_SPLIT = ["streams/0/keywords"]
 LOG_USER_ACTIONS_ENABLED = False
 # endpoints for logging user actions
 LOG_USER_ACTIONS_ENDPOINTS = {
-    'base_url': None,
+    'base_url': os.environ.get("LOG_USER_ACTIONS_BASE_URL", None),
     'media_view': '{base_url}cds_videos_media_view?ext=true&'
                   'recid={recid}&report_number={'
                   'report_number}&format={format}',
