@@ -200,14 +200,18 @@ class FlowService:
         db.session.commit()
         index_deposit_project(self.deposit_id)
 
-    def delete(self):
-        """Mark the flow as deleted.
+    def delete(self, hard=False):
+        """Delete the flow.
 
-        In reality, we just unmark the flow as the last one associated with
-        a specific deposit_id.
+        :param hard: If true delete the Flow and Task objects, if False just
+        unmark the flow as the last one associated with a specific deposit_id.
         """
         self.clean()
-        self.flow_metadata.is_last = False
+        if hard:
+            for task in self.flow_metadata.tasks:
+                db.session.delete(task)
+            db.session.commit()
+            db.session.delete(self.flow_metadata)
 
         db.session.commit()
         index_deposit_project(self.deposit_id)
