@@ -130,12 +130,19 @@ class FlowMetadata(db.Model, Timestamp):
 
     @classmethod
     def get_by_deposit(cls, deposit_id, is_last=True, multiple=False):
-        """Get tasks by deposit id."""
+        """Get flows by deposit id."""
         query = FlowMetadata.query.filter_by(
             deposit_id=str(deposit_id)
         ).filter(cls.is_last.is_(is_last))
 
         return query.all() if multiple else query.one_or_none()
+
+    @classmethod
+    def get_all_by_deposit(cls, deposit_id):
+        """Get all flows by deposit id."""
+        return FlowMetadata.query.filter_by(
+            deposit_id=str(deposit_id)
+        ).all()
 
     def to_dict(self):
         """Flow dictionary representation."""
