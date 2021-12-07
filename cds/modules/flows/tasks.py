@@ -559,6 +559,12 @@ class ExtractFramesTask(AVCTask):
             )
             self.log(meta["message"])
 
+        bucket_was_locked = False
+        if self.object_version.bucket.locked:
+            # If record was published we need to unlock the bucket
+            bucket_was_locked = True
+            self.object_version.bucket.locked = False
+
         try:
             frames = self._create_frames(
                 frames=self._create_tmp_frames(
@@ -583,6 +589,10 @@ class ExtractFramesTask(AVCTask):
             output_dir=output_folder,
             master_id=self.object_version_id,
         )
+
+        if bucket_was_locked:
+            # Lock the bucket again
+            self.object_version.bucket.locked = True
 
         # Cleanup
         shutil.rmtree(output_folder)
