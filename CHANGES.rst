@@ -24,6 +24,9 @@
 
 Changes
 =======
+Version 1.0.25 (2021-12-07)
+
+- change doi format and register url
 
 Version 1.0.24 (2021-11-26)
 
