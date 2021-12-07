@@ -273,7 +273,7 @@ CDS_RECORDS_EXPORTFORMATS = {
     )
 }
 
-CDS_RECORDS_UI_LINKS_FORMAT = "https://cds.cern.ch/record/{recid}"
+CDS_RECORDS_UI_LINKS_FORMAT = "https://videos.cern.ch/record/{recid}"
 
 # Endpoints for records.
 RECORDS_UI_ENDPOINTS = dict(
