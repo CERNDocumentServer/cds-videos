@@ -227,43 +227,6 @@ function cdsUploaderCtrl(
     };
   }
 
-  /*
-   * Prepare http request of Local File restart
-   */
-  function _prepareRestart(flow_id) {
-    return {
-      method: "PUT",
-      url: that.remoteMasterReceiver + flow_id,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-  }
-
-  /*
-   * Restart workflow for the existing master file
-   */
-
-  function restartFlow(flowId) {
-    var args = _prepareRestart(flowId);
-    $http(args).then(
-      function success() {
-        toaster.pop({
-          type: "info",
-          title: "Flow has been restarted!",
-          bodyOutputType: "trustedHtml",
-        });
-      },
-      function error() {
-        toaster.pop({
-          type: "info",
-          title: "Flow cannot be restarted!",
-          bodyOutputType: "trustedHtml",
-        });
-      }
-    );
-  }
-
   // On Component init
   this.$onInit = function () {
     // The Uploader queue
@@ -568,11 +531,6 @@ function cdsUploaderCtrl(
       return file.completed;
     });
   };
-
-  // Restart the whole workflow
-  $scope.$on("cds.deposit.workflow.restart", function(event, flowId) {
-    restartFlow(flowId);
-  });
 
 }
 
