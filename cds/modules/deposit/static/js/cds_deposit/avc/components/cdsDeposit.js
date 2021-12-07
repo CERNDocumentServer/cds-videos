@@ -176,10 +176,31 @@ function cdsDepositCtrl(
       });
     };
 
+    function restartFlow(flowId) {
+       var url = urlBuilder.restartFlow({ flowId: flowId });
+      return cdsAPI.action(url, 'PUT');
+    }
+
     this.triggerRestartFlow = function() {
       var masterFile = that.findMasterFile();
       var flowId = _.get(masterFile, 'tags.flow_id', undefined);
-      $scope.$broadcast('cds.deposit.workflow.restart', flowId);
+      restartFlow(flowId).then(
+          function success() {
+            toaster.pop({
+              type: "info",
+              title: "Flow has been restarted!",
+              bodyOutputType: "trustedHtml",
+            });
+            that.fetchFlowTasksStatuses();
+          },
+          function error() {
+            toaster.pop({
+              type: "error",
+              title: "Flow cannot be restarted!",
+              bodyOutputType: "trustedHtml",
+            });
+          }
+        );
     }
 
     this.triggerRestartFlowTask = function(flowId, taskId) {
@@ -304,7 +325,6 @@ function cdsDepositCtrl(
 
     // Refresh tasks from feedback endpoint
     this.fetchFlowTasksStatuses = function() {
-      if (that.isDraft() ){
         var masterFile = that.findMasterFile();
         var flowId = _.get(masterFile, 'tags.flow_id', undefined);
         if (flowId) {
@@ -328,8 +348,26 @@ function cdsDepositCtrl(
               });
             });
         }
-      }
     };
+
+
+    this.anyTaskIsRunning = function() {
+    // Check if record has some pending task
+      for (const key of Object.keys(that.record._cds.state)) {
+        if (["PENDING", "STARTED"].includes(that.record._cds.state[key])) {
+            return true;
+        }
+      }
+      return false
+    }
+
+
+    this.recurrentFetchFlowTasksStatuses = function() {
+        const anyTaskIsRunning = that.anyTaskIsRunning()
+        if (anyTaskIsRunning){
+            that.fetchFlowTasksStatuses()
+        }
+    }
 
     // Update deposit based on extracted metadata from task
     this.fillMetadata = function(answer) {
@@ -497,7 +535,7 @@ function cdsDepositCtrl(
     that.videoPreviewer();
     // Update subformat statuses
     that.fetchFlowTasksStatuses();
-    that.fetchStatusInterval = $interval(that.fetchFlowTasksStatuses, 5000);
+    that.fetchStatusInterval = $interval(that.recurrentFetchFlowTasksStatuses, 5000);
     // What the order of contributors and check make it dirty, throttle the
     // function for 1sec
     $scope.$watch(
