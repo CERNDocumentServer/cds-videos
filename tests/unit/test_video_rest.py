@@ -95,7 +95,7 @@ def test_video_publish_registering_the_datacite(
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 1
         datacite_mock().doi_post.assert_called_once_with(
-            '10.0000/cds.1', 'https://cds.cern.ch/record/1')
+            '10.0000/videos.1', 'https://videos.cern.ch/record/1')
 
         # [[ UPDATE DATACITE ]]
         datacite_register_after_publish(
@@ -104,7 +104,7 @@ def test_video_publish_registering_the_datacite(
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 2
         datacite_mock().doi_post.assert_called_with(
-            '10.0000/cds.1', 'https://cds.cern.ch/record/1')
+            '10.0000/videos.1', 'https://videos.cern.ch/record/1')
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
@@ -146,7 +146,7 @@ def test_video_publish_registering_the_datacite_if_fail(
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 1
         datacite_mock().doi_post.assert_called_once_with(
-            '10.0000/cds.1', 'https://cds.cern.ch/record/1')
+            '10.0000/videos.1', 'https://videos.cern.ch/record/1')
         assert datacite_mock.call_count == 3
 
 

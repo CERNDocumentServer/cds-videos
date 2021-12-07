@@ -62,7 +62,7 @@ def report_number_minter(record_uuid, data, **kwargs):
 
 def cds_doi_generator(recid, prefix=None):
     """Generate a DOI."""
-    return '{prefix}/cds.{recid}'.format(
+    return '{prefix}/videos.{recid}'.format(
         prefix=prefix or current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'],
         recid=recid
     )
@@ -82,7 +82,7 @@ def doi_minter(record_uuid, data):
     doi = data.get('doi')
     assert 'recid' in data
     assert idutils.is_doi(doi) if doi else True
-    
+
     # Create a DOI if no DOI was found.
     if not doi:
         doi = cds_doi_generator(data['recid'])

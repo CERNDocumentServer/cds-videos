@@ -55,7 +55,7 @@ def test_recid_provider(db):
             object_uuid=uuid, status=PIDStatus.REGISTERED
         )
         pid_create.assert_any_call(
-            'doi', '10.0000/cds.1', object_type='rec',
+            'doi', '10.0000/videos.1', object_type='rec',
             object_uuid=uuid,
             pid_provider='datacite',
             status=PIDStatus.RESERVED)
@@ -64,7 +64,7 @@ def test_recid_provider(db):
 @pytest.mark.parametrize('doi_in, doi_out', [
     # ('10.1234/foo', '10.1234/foo'),
     # ('10.5072/foo', '10.5072/foo'),
-    (None, '10.0000/cds.1'),
+    (None, '10.0000/videos.1'),
 ])
 def test_doi_minting(db, doi_in, doi_out):
     """Test using same integer for dep/rec ids."""
@@ -120,7 +120,7 @@ def test_minting_recid(db):
     assert pid.pid_value == '1'
     assert pid.status == PIDStatus.REGISTERED
     assert pid.object_uuid == rec_uuid
-    assert data['doi'] == '10.0000/cds.1'
+    assert data['doi'] == '10.0000/videos.1'
     with pytest.raises(AssertionError):
         cds_record_minter(rec_uuid, data)
 
