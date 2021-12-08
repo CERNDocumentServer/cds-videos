@@ -67,6 +67,22 @@ class OpenCast:
         module_dir = os.path.dirname(__file__)
         self.acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
 
+    def log(self, url, opt=""):
+        """Log message."""
+        recid = self.video["_deposit"].get("pid")
+        _msg = (
+            "Opencast request to `{url}` - Title: {title} - "
+            "{video} {opt}".format(
+                url=url,
+                title=self.video.get("title", {}).get("title", ""),
+                video="recid: {0}".format(recid)
+                if recid
+                else "depid: {0}".format(self.video["_deposit"]["id"]),
+                opt="- {0}".format(opt) if opt else "",
+            )
+        )
+        current_app.logger.debug(_msg)
+
     def run(self, qualities):
         """Submit workflow to OpenCast."""
         session_context = OpenCastRequestSession(
@@ -86,9 +102,7 @@ class OpenCast:
     def _create_media_package(self, session):
         """Creates the media package and returns the event_id."""
         url = self.BASE_URL + "/createMediaPackage"
-        current_app.logger.info(
-            "Opencast request for media package creation: {0}".format(url)
-        )
+        self.log(url)
         try:
             response = session.get(url)
             response.raise_for_status()
@@ -121,10 +135,12 @@ class OpenCast:
         label_project = "CDS Videos"
         label_title = self.video.get("title", {}).get("title", "")
         record_pid = self.video["_deposit"].get("pid")
-        label_record = "recid: {0}" if record_pid else ""
+        label_record = "recid: {0}".format(record_pid) if record_pid else ""
         label_deposit = "depid: {0}".format(self.video["_deposit"]["id"])
         title = " - ".join(
-            x for x in [label_project, label_title, label_record, label_deposit] if x
+            x
+            for x in [label_project, label_title, label_record, label_deposit]
+            if x
         )
 
         description = """{title} - {deposit} - object version: {object_version} - qualities: {qualities}""".format(
@@ -148,9 +164,7 @@ class OpenCast:
         )
 
         url = self.BASE_URL + "/addDCCatalog"
-        current_app.logger.info(
-            "Opencast request for adding metadata: {0}".format(url)
-        )
+        self.log(url)
         try:
             response = session.post(url, data=form_data)
             response.raise_for_status()
@@ -164,9 +178,7 @@ class OpenCast:
         video_filename = self.object_version.key
 
         url = self.BASE_URL + "/addTrack"
-        current_app.logger.info(
-            "Opencast request for adding track: {0}".format(url)
-        )
+        self.log(url)
         data = MultipartEncoder(
             fields=dict(
                 mediaPackage=media_package_xml,
@@ -205,9 +217,7 @@ class OpenCast:
     def _add_acl(self, session, media_package_xml):
         """Adds required acl file to the media package."""
         url = self.BASE_URL + "/addAttachment"
-        current_app.logger.info(
-            "Opencast request for adding acl file: {0}".format(url)
-        )
+        self.log(url)
         form_data = dict(
             mediaPackage=media_package_xml, flavor="security/xacml+episode"
         )
@@ -230,11 +240,7 @@ class OpenCast:
                 form_data.update({dict_key: "false"})
 
         url = self.BASE_URL + "/ingest/cern-cds-videos"
-        current_app.logger.info(
-            "Opencast request for ingesting (qualities {0}): {1}".format(
-                qualities, url
-            )
-        )
+        self.log(url=url, opt="Qualilties: {0}".format(qualities))
         try:
             response = session.post(url, data=form_data)
             response.raise_for_status()
