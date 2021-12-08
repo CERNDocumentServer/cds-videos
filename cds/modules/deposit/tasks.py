@@ -75,6 +75,12 @@ def datacite_register(
         url = current_app.config["CDS_RECORDS_UI_LINKS_FORMAT"].format(
             recid=pid_value
         )
+
+        # check if language field is one of zh_CN or zh_TW and convert it to zh
+        # this is needed because datacite 3.0 is supporting only ISO_639-1 codes
+        lang = record.get('language')
+        if lang and lang in ['zh_CN', 'zh_TW']:
+            record['language'] = 'zh'
         doc = datacite_v31.serialize(dcp.pid, record)
 
         if dcp.pid.status == PIDStatus.REGISTERED:
