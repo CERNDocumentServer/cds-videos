@@ -270,7 +270,7 @@ def _write_file_to_eos(url_to_download, obj):
             verify=current_app.config["CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT"],
         )
         f = file_opener_xrootd(file_uri, "wb")
-        for ch in r.iter_content(chunk_size=1000000):
+        for ch in r.iter_content(chunk_size=1024*1024):
             if ch:
                 f.write(ch)
         f.close()
