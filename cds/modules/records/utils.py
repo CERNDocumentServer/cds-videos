@@ -222,15 +222,16 @@ def delete_video_record(record_uuid, reason=None, hard=False):
     _, deposit = _get_record_and_deposit(record_uuid)
     if deposit:
         # Start deleting the deposit
-        deposit._delete_flows(hard=hard)
-        report.append(
-            (
-                "INFO",
-                "Deleted all flows for deposit {}.".format(
-                    deposit.id
-                ),
+        if hard:
+            deposit._delete_flows()
+            report.append(
+                (
+                    "INFO",
+                    "Deleted all flows for deposit {}.".format(
+                        deposit.id
+                    ),
+                )
             )
-        )
 
         project = deposit.project
         project_uuid = project.id
