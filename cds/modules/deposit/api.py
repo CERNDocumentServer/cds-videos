@@ -988,29 +988,19 @@ class Video(CDSDeposit):
         assert video_new.report_number
         return video_new
 
-    def _delete_flows(self, hard=False):
-        """Delete the flows.
-
-        :param hard: If True delete all flows, if false keep last one.
-        """
-        if hard:
-            flows = FlowMetadata.get_all_by_deposit(
-                deposit_id=self["_deposit"]["id"]
-            )
-        else:
-            flows = FlowMetadata.get_by_deposit(
-                deposit_id=self["_deposit"]["id"], is_last=False, multiple=True
-            )
+    def _delete_flows(self):
+        """Delete all the flows."""
+        flows = FlowMetadata.get_all_by_deposit(
+            deposit_id=self["_deposit"]["id"]
+        )
         for flow in flows:
-            FlowService(flow).delete(hard=hard)
+            FlowService(flow).delete(hard=True)
 
     @mark_as_action
     def delete(self, force=True, pid=None):
         """Delete a video."""
         ref_old = self.ref
         project = self.project
-        # clean tasks
-        self._delete_flows(hard=False)
         # delete video
         video_deleted = super(Video, self).delete(force=force, pid=pid)
         # update project
