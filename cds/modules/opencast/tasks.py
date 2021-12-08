@@ -36,7 +36,8 @@ from invenio_cache import current_cache
 from invenio_db import db
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
-                                       ObjectVersionTag, as_object_version)
+                                       ObjectVersionTag, as_object_version,
+                                       as_bucket)
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 
 from cds.modules.deposit.api import deposit_video_resolver
@@ -172,6 +173,7 @@ def get_opencast_events(grouped_flow_tasks):
 )
 def check_transcoding_status():
     """Update all finished transcoding tasks."""
+    number_of_transcoding_tasks_started = 0
     started_transcoding_tasks = FlowTaskMetadata.query.filter_by(
         status=FlowTaskStatus.STARTED, name=TranscodeVideoTask.name
     ).all()
@@ -181,10 +183,19 @@ def check_transcoding_status():
 
     if not grouped_flow_tasks:
         # nothing to do
+        current_app.logger.debug(
+            "No started transcoding tasks to check, exiting"
+        )
         return
 
     opencast_events = get_opencast_events(grouped_flow_tasks)
 
+    if started_transcoding_tasks:
+        current_app.logger.debug(
+            "Triggering status check for {0} transcoding task".format(
+                len(started_transcoding_tasks)
+            )
+        )
     for started_flow_tasks in grouped_flow_tasks:
 
         # the opencast event id is the same for all transcoding tasks
@@ -211,6 +222,7 @@ def check_transcoding_status():
                         data=dict(flow_task_id=str(started_flow_task.id))
                     ),
                 )
+                number_of_transcoding_tasks_started += 1
                 # transcoding subformat completed, `break` to go to the next
                 break
             else:
@@ -224,6 +236,16 @@ def check_transcoding_status():
                     _set_flow_tasks_to_failed(
                         [(str(started_flow_task.id), msg)]
                     )
+    if number_of_transcoding_tasks_started:
+        current_app.logger.debug(
+            "Started {0} on_transcoding_completed tasks".format(
+                number_of_transcoding_tasks_started
+            )
+        )
+    else:
+        current_app.logger.debug(
+            "No on_transcoding_completed tasks started"
+        )
 
 
 def _get_opencast_subformat_info(subformat, present_quality):
@@ -316,6 +338,8 @@ def on_transcoding_completed(
      @only_one decorator
     """
     flow_task = FlowTaskMetadata.query.get(flow_task_id)
+    if not flow_task:
+        return
     set_revoke_handler(
         lambda: _update_task_on_abrupt_stop(flow_task, opencast_event_id)
     )
@@ -328,17 +352,24 @@ def on_transcoding_completed(
     deposit_id = flow_task.payload["deposit_id"]
     try:
         deposit_video = deposit_video_resolver(deposit_id)
-    except (PIDDeletedError, PIDDoesNotExistError):
-        flow_task = FlowTaskMetadata.query.get(flow_task_id)
-        flow_task.status = FlowTaskStatus.CANCELLED
-        flow_task.message = "Video was deleted"
-        db.session.commit()
+    except PIDDeletedError:
+        # If the video was soft deleted we still process the tasks
+        # If bucket is locked, we unlock and lock it again before exiting
+        deposit_video = None
+        bucket = as_bucket(flow_task.payload["bucket_id"])
+        bucket_was_locked = bucket.locked
+        if bucket_was_locked:
+            bucket.locked = False
+        pass
+    except PIDDoesNotExistError:
+        # If video was hard deleted just exit
         return
 
-    deposit_video_is_published = deposit_video.is_published()
-    if deposit_video_is_published:
-        assert deposit_video.files.bucket.locked
-        deposit_video.files.bucket.locked = False
+    if deposit_video:
+        deposit_video_is_published = deposit_video.is_published()
+        if deposit_video_is_published:
+            assert deposit_video.files.bucket.locked
+            deposit_video.files.bucket.locked = False
 
     obj = ObjectVersion.create(
         bucket=flow_task.payload["bucket_id"],
@@ -364,7 +395,7 @@ def on_transcoding_completed(
     db.session.refresh(flow_task)
     status = flow_task.status
     if status != FlowTaskStatus.STARTED:
-        current_app.logger.debug("Task status has changed while the "
+        current_app.logger.error("Task status has changed while the "
                                  "file was being written to EOS. Aborting task"
                                  "update. Task ID: {0}".format(flow_task_id))
         db.session.expunge(obj)  # Remove object_version from session
@@ -398,12 +429,16 @@ def on_transcoding_completed(
     )
     flow_task.payload = new_payload
 
-    if deposit_video_is_published:
-        sync_records_with_deposit_files(deposit_id)
-        deposit_video.files.bucket.locked = True
+    if deposit_video:
+        if deposit_video_is_published:
+            sync_records_with_deposit_files(deposit_id)
+            deposit_video.files.bucket.locked = True
+        index_deposit_project(deposit_id)
+    else:
+        if bucket_was_locked:
+            bucket.locked = True
 
     db.session.commit()
-    index_deposit_project(deposit_id)
 
 
 @shared_task
@@ -422,4 +457,7 @@ def _set_flow_tasks_to_failed(flow_tasks_ids_with_error):
         flow_task.message = error
 
         db.session.commit()
-        index_deposit_project(flow_task.payload["deposit_id"])
+        try:
+            index_deposit_project(flow_task.payload["deposit_id"])
+        except PIDDeletedError:
+            pass

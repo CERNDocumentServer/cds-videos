@@ -86,8 +86,12 @@ def dispose_object_version(object_version):
     """Clean up resources related to an ObjectVersion."""
     object_version = as_object_version(object_version)
     # remove the object version
-    object_version.bucket.locked = False
+    bucket_was_locked = object_version.bucket.locked
+    if bucket_was_locked:
+        object_version.bucket.locked = False
     ObjectVersion.delete(bucket=object_version.bucket, key=object_version.key)
+    if bucket_was_locked:
+        object_version.bucket.locked = True
 
 
 @contextmanager
