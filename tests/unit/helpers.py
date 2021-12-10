@@ -458,12 +458,12 @@ def check_deposit_record_files(deposit, deposit_expected, record,
                                record_expected):
     """Check deposit and record files expected."""
     # check deposit
-    deposit_objs = [obj.key for obj in ObjectVersion.query_heads_by_bucket(
+    deposit_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
         deposit.files.bucket).all()]
     assert sorted(deposit_expected) == sorted(deposit_objs)
     assert deposit.files.bucket.locked is False
     # check record
-    record_objs = [obj.key for obj in ObjectVersion.query_heads_by_bucket(
+    record_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
         record.files.bucket).all()]
     assert sorted(record_expected) == sorted(record_objs)
     assert record.files.bucket.locked is True
