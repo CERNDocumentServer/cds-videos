@@ -159,7 +159,7 @@ def fix_bucket_conflict(recid):
             )
 
             for slave in (
-                ObjectVersion.query_heads_by_bucket(bucket=new_bucket)
+                ObjectVersion.get_by_bucket(bucket=new_bucket)
                 .join(ObjectVersion.tags)
                 .filter(
                     ObjectVersion.file_id.isnot(None),
