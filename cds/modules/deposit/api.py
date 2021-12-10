@@ -55,6 +55,8 @@ from jsonschema.exceptions import ValidationError
 from invenio_deposit.api import Deposit, has_status, preserve
 from invenio_deposit.utils import mark_as_action
 
+from invenio_indexer.tasks import index_record
+
 from ..flows.api import (FlowService, get_tasks_status_grouped_by_task_name,
                          merge_tasks_status)
 from ..flows.models import FlowMetadata
@@ -633,7 +635,10 @@ class Project(CDSDeposit):
         self = Project(self.model.json, self.model)
         assert self.report_number
         # publish project
-        return super(Project, self).publish(pid=pid, id_=id_, **kwargs)
+        rec = super(Project, self).publish(pid=pid, id_=id_, **kwargs)
+        # index project
+        index_record.delay(str(rec.id))
+        return rec
 
     @mark_as_action
     def discard(self, pid=None):
@@ -732,7 +737,7 @@ class Project(CDSDeposit):
                 videos.append(deposit_video_resolver(record_unbuild_url(ref)))
             else:
                 videos.append(
-                    record_resolver.resolve(record_unbuild_url(ref))[1]
+                    record_video_resolver(record_unbuild_url(ref))
                 )
         return videos
 
