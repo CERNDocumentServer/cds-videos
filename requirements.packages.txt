@@ -135,7 +135,7 @@ jsonschema==3.0.1         # via datacite, invenio-opendefinition, invenio-record
 jupyter-client==5.2.4     # via nbconvert
 jupyter-core==4.4.0       # via jupyter-client, nbconvert, nbformat
 kombu==3.0.37             # via celery
-lxml==4.6.2               # via datacite, dcxml, dojson, invenio-oaiserver
+lxml==4.6.5               # via datacite, dcxml, dojson, invenio-oaiserver
 mako==1.0.11              # via alembic
 markupsafe==1.1.1         # via jinja2, mako
 marshmallow==2.19.2
