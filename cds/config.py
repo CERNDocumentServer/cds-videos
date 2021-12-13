@@ -1403,6 +1403,10 @@ CDS_OPENCAST_QUALITIES = {
         "frame_rate": 25,
         "smil": True,
         "opencast_publication_tag": "1080p-quality",
+        "tags": {
+            "type": "hd",
+            "download": "true",  # noqa If true subformat is displayed in the download box in the details page, if not it will be displayed as "Other video formats".
+        },
     },
     "2160p": {
         "width": 3840,
@@ -1412,6 +1416,10 @@ CDS_OPENCAST_QUALITIES = {
         "frame_rate": 25,
         "smil": True,
         "opencast_publication_tag": "2160p-quality",
+        "tags": {
+            "type": "ultra hd",
+            "download": "true",
+        },
     },
 }
 """List of qualities available on Opencast server."""
