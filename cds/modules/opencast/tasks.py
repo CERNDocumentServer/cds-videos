@@ -411,6 +411,12 @@ def on_transcoding_completed(
     ObjectVersionTag.create(
         obj, "_opencast_file_download_time_in_seconds", str(download_time)
     )
+    qualitiy_config = current_app.config["CDS_OPENCAST_QUALITIES"][
+        preset_quality
+    ]
+    if "tags" in qualitiy_config:
+        for key, value in qualitiy_config["tags"].items():
+            ObjectVersionTag.create(obj, key, value)
     # add tags extracted from the subformat info
     info = _get_opencast_subformat_info(opencast_subformat, preset_quality)
     for key, value in info.items():
