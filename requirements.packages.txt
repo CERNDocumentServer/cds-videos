@@ -125,7 +125,7 @@ ipython==5.8.0            # via invenio-previewer
 isbnid-fork==0.5.2        # via idutils
 itsdangerous==1.1.0       # via flask, flask-debugtoolbar, flask-kvsession, flask-security
 jinja2-time==0.2.0        # via cookiecutter
-jinja2==2.10.1            # via cookiecutter, flask, flask-babelex, invenio-formatter, jinja2-time, nbconvert
+jinja2==2.11.3            # via cookiecutter, flask, flask-babelex, invenio-formatter, jinja2-time, nbconvert
 jsmin==2.2.2              # via invenio-theme
 jsonpatch==1.23           # via invenio-records
 jsonpointer==2.0          # via jsonpatch
