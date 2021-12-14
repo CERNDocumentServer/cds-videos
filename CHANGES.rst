@@ -24,6 +24,11 @@
 
 Changes
 =======
+
+Version 1.0.26 (2021-12-14)
+
+- Update lxml package due to security issue ( https://github.com/lxml/lxml/security/advisories/GHSA-55x5-fj6c-h6m8)
+
 Version 1.0.25 (2021-12-07)
 
 - change doi format and register url
