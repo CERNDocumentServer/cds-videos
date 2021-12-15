@@ -208,7 +208,7 @@
         <span ng-show="(f.status_completed || f.percentage==100) && !f.status_failure" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
-        <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
+        <a ng-hide="f.percentage < 100 || $ctrl.cdsDepositCtrl.isPublished()" ng-click="$ctrl.remove(f.key)">
           <i class="fa fa-trash-o"></i>
         </a>
       </td>
@@ -257,7 +257,7 @@
         <span ng-show="(f.status_completed || f.percentage==100) && !f.errored" class="text-success">Done</span>
       </td>
       <td ng-show="f" class="text-center">
-        <a ng-hide="f.percentage < 100" ng-click="$ctrl.remove(f.key)">
+        <a ng-hide="f.percentage < 100 || $ctrl.cdsDepositCtrl.isPublished()" ng-click="$ctrl.remove(f.key)">
           <i class="fa fa-trash-o"></i>
         </a>
       </td>
