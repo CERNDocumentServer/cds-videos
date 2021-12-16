@@ -96,6 +96,12 @@ class FlowListResource(MethodView):
         assert data["deposit_id"]
         assert data.get("version_id") or data.get("uri")
         assert data["key"]
+
+        previous_flow = FlowMetadata.get_by_deposit(data["deposit_id"])
+        if previous_flow:
+            # master file was replaced
+            FlowService(previous_flow).clean()
+
         flow = FlowMetadata.create(
             deposit_id=data["deposit_id"],
             user_id=user_id,

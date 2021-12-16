@@ -810,9 +810,23 @@ class TranscodeVideoTask(AVCTask):
 
     def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
-        object_version = as_object_version(version_id)
-        if object_version:
-            dispose_object_version(object_version)
+        tag_alias_1 = aliased(ObjectVersionTag)
+        tag_alias_2 = aliased(ObjectVersionTag)
+        slaves = (
+            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
+            .join(tag_alias_2, ObjectVersion.tags)
+            .filter(
+                tag_alias_1.key == "master", tag_alias_1.value == version_id
+            )
+            .filter(
+                tag_alias_2.key == "context_type",
+                tag_alias_2.value.in_(["subformat"]),
+            )
+            .all()
+        )
+
+        for slave in slaves:
+            dispose_object_version(slave)
 
     def _start_transcodable_flow_tasks_or_cancel(self, wanted_qualities=None):
         """Get transcodable flow tasks or set them to CANCELLED."""
