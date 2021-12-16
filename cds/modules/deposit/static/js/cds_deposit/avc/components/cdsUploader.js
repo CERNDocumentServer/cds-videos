@@ -91,7 +91,7 @@ function cdsUploaderCtrl(
   /*
    * Uploads a local file
    */
-  function _local(upload, replaceMasterFile) {
+  function _local(upload) {
     var promise = $q.defer();
     var args = that.prepareUpload(upload);
     var deposit = that.cdsDepositCtrl;
@@ -112,14 +112,8 @@ function cdsUploaderCtrl(
           upload.key = upload.name;
         }
         if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
-          if (replaceMasterFile){
-            method = "PUT"
-          }
-          else {
-            method = "POST"
-          }
           _subpromise = Upload.http(
-            _startWorkflow(upload, response, method)
+            _startWorkflow(upload, response)
           );
         } else {
           var d = $q.defer();
@@ -217,9 +211,9 @@ function cdsUploaderCtrl(
   /*
    * Prepare http request of Local File Upload with Webhooks
    */
-  function _startWorkflow(file, response, method) {
+  function _startWorkflow(file, response) {
     return {
-      method: method,
+      method: "POST",
       url: that.remoteMasterReceiver,
       headers: {
         "Content-Type": "application/json",
@@ -244,7 +238,7 @@ function cdsUploaderCtrl(
       _.reject(this.files, { completed: true })
     );
 
-    this.addFiles = function (_files, invalidFiles, extraHeaders, replaceMasterFile) {
+    this.addFiles = function (_files, invalidFiles, extraHeaders) {
       // Do nothing if files array is empty
       if (!_files) {
         return;
@@ -327,7 +321,7 @@ function cdsUploaderCtrl(
             // Upload the video file
             var old_flow_id = old_master[0]["tags"]["flow_id"];
             that.cdsDepositCtrl.previewer = null;
-            that.upload(replaceMasterFile);
+            that.upload();
           });
         }
       }
@@ -357,12 +351,12 @@ function cdsUploaderCtrl(
       return args;
     };
 
-    this.uploader = function (replaceMasterFile) {
+    this.uploader = function () {
       var defer = $q.defer();
       var data = [];
       function _chain(upload) {
         // Get the arguments
-        var promise = upload.receiver ? _remote(upload) : _local(upload, replaceMasterFile);
+        var promise = upload.receiver ? _remote(upload) : _local(upload);
         promise.then(
           function success(response) {
             data.push(response);
@@ -382,14 +376,14 @@ function cdsUploaderCtrl(
       return defer.promise;
     };
 
-    this.upload = function (replaceMasterFile) {
+    this.upload = function () {
       if (that.queue.length > 0) {
         // prevent user closes the browser by showing a warning
         window.addEventListener("beforeunload", preventBrowserClose);
         // Loading
         that.loading = true;
         return that
-          .uploader(replaceMasterFile)
+          .uploader()
           .then(
             function success(response) {
               // Success uploading notification

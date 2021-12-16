@@ -111,33 +111,6 @@ class FlowListResource(MethodView):
         db.session.commit()
         return make_response(flow)
 
-    @require_api_auth()
-    @error_handler
-    @pass_user_id
-    @need_permission("create")
-    def put(self, user_id):
-        """Handle PUT request."""
-        data = extract_payload()
-        assert data["bucket_id"]
-        assert data["deposit_id"]
-        assert data.get("version_id") or data.get("uri")
-        assert data["key"]
-        flow = FlowMetadata.create(
-            deposit_id=data["deposit_id"],
-            user_id=user_id,
-            payload=dict(
-                version_id=data.get("version_id"),
-                key=data["key"],
-                bucket_id=data["bucket_id"],
-                uri=data.get("uri"),
-                deposit_id=data["deposit_id"],
-            ),
-        )
-        flow_service = FlowService(flow)
-        flow_service.run(clean_bucket=True)
-        db.session.commit()
-        return make_response(flow)
-
     def options(self, receiver_id, receiver):
         """Handle OPTIONS request."""
         abort(405)

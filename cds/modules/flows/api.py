@@ -29,14 +29,13 @@ import logging
 from collections import defaultdict
 
 from celery import chain as celery_chain
+from celery.result import AsyncResult
 from invenio_db import db
-from invenio_files_rest.models import ObjectVersionTag, ObjectVersion
-from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import flag_modified as db_flag_modified
 
 from .deposit import index_deposit_project
 from .errors import TaskAlreadyRunningError
-from .files import init_object_version, dispose_object_version
+from .files import init_object_version
 from .models import FlowTaskStatus, as_task
 from .tasks import (CeleryTask, DownloadTask, ExtractFramesTask,
                     ExtractMetadataTask, TranscodeVideoTask)
@@ -146,37 +145,9 @@ class FlowService:
         self.flow_metadata = flow_metadata
         self.deposit_id = self.flow_metadata.deposit_id
 
-    def _clean_buckets(self):
-        """Clean the buckets by "deleting" all the ObjectVersions except for
-        the master file.
-        """
-        from cds.modules.deposit.api import deposit_video_resolver
-
-        payload = self.flow_metadata.payload
-        bucket_ids = [payload["bucket_id"]]
-        tag_alias_2 = aliased(ObjectVersionTag)
-        record = deposit_video_resolver(payload["deposit_id"])
-        objs = []
-        if record["_buckets"].get("record"):
-            # If the record was published we clean the published bucket too
-            bucket_ids.append(record["_buckets"].get("record"))
-
-        for bucket_id in bucket_ids:
-            objs.extend(
-                ObjectVersion.query.join(tag_alias_2, ObjectVersion.tags)
-                .filter(ObjectVersion.bucket_id == bucket_id)
-                .filter(
-                    tag_alias_2.key == "context_type",
-                    ~tag_alias_2.value.in_(["master"])
-                ).all())
-        for obj in objs:
-            dispose_object_version(obj)
-
-    def run(self, clean_bucket=False):
+    def run(self):
         """Run workflow for video transcoding.
 
-        :param clean_bucket: If true it will delete all the ObjectVersions
-        containing the frames and the subformats.
         Steps:
           * Download the video file (if not done yet).
           * Extract metadata from the video.
@@ -204,9 +175,6 @@ class FlowService:
         flow_id = str(self.flow_metadata.id)
         payload = self.flow_metadata.payload
         payload["flow_id"] = flow_id
-
-        if clean_bucket:
-            self._clean_buckets()
 
         has_remote_file_to_download = payload.get("uri", False)
         has_user_uploaded_file = payload.get("version_id", False)
