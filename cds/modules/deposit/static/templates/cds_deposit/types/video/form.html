@@ -228,7 +228,8 @@
             ></form>
             <hr class="my-15" />
             <div class="alert alert-info">
-              <h4>Video restrictions</h4>
+              <h4>Published video restrictions</h4>
+              <small>Change if the published video should be public or restricted</small>
               <div ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category">
                 <select
                   ng-model="$ctrl.permissions"
@@ -245,8 +246,9 @@
                 </select>
                 <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read" class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
                   <label class="control-label ng-binding">
-                    Choose who can access the video page and watch it, when published.
+                    Choose who can access the published video and watch it
                   </label>
+                  <div><small>Restrictions are <strong>not</strong> inherited from the project and can be set independently</small></div>
                   <ui-select
                    multiple
                    theme="bootstrap"
