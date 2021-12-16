@@ -266,9 +266,10 @@ class FlowService:
     def stop(self):
         """Stop the flow."""
         for task in self.flow_metadata.tasks:
-            celery_task_id = task.payload["celery_task_id"]
-            CeleryTask.stop_task(celery_task_id)
-            task.status = FlowTaskStatus.CANCELLED
+            if task.status in [FlowTaskStatus.STARTED, FlowTaskStatus.PENDING]:
+                celery_task_id = task.payload["celery_task_id"]
+                CeleryTask.stop_task(celery_task_id)
+                task.status = FlowTaskStatus.CANCELLED
 
         deposit_id = self.flow_metadata.deposit_id
         db.session.commit()

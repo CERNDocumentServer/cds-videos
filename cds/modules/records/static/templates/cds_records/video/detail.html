@@ -1,3 +1,6 @@
+<div ng-if="((record | findMaster).subformat||[]).length < 1" id="announcement" class="alert text-center alert-warning">
+  The video might not be playing correctly at the moment due to video formats not yet created. Please try again later.
+</div>
 <div class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Video Section -->
   <div ng-if="record.metadata.recid && (record | findMaster).key" class="bg-b">

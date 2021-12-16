@@ -107,6 +107,7 @@ def dump_generic_object(obj, data):
             dump_object(slave)
         )
     # Sort slaves by key within their lists
+    data.clear()  # Clear the values as it can contain deleted subformats
     data.update(obj_dump)
 
 
@@ -137,6 +138,7 @@ class CDSFilesIterator(FilesIterator):
         files = []
         for o in sorted_files_from_bucket(bucket or self.bucket, self.keys):
             if "master" in o.get_tags():
+                # If master in tags it means it's a frame or a subformat
                 continue
             dump = self.file_cls(o, self.filesmap.get(o.key, {})).dumps()
             if dump:
