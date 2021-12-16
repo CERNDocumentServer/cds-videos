@@ -152,7 +152,8 @@
                 <div class="col-sm-12">
                   <hr class="my-15" />
                   <div class="alert alert-info">
-                    <h4>Project restrictions</h4>
+                    <h4>Project restrictions when published</h4>
+                    <small>Change if the published project should be public or restricted</small>
                     <div ng-show="$ctrl.cdsDepositCtrl.record.category">
                       <select
                         ng-model="$ctrl.permissions"
@@ -169,7 +170,7 @@
                       </select>
                       <div ng-init="$ctrl.selectedRestricted=$ctrl.cdsDepositCtrl.record._access.read"  class="restricted mt-20"  ng-show="$ctrl.permissions ==='restricted'">
                         <label class="control-label ng-binding">
-                          Choose who can access the project page when published.
+                          Choose who can access the published project
                         </label>
                         <ui-select
                          multiple
@@ -248,7 +249,8 @@
             <div ng-show="active=='access'" role="tabpanel" ng-class="{active: active=='access'}" class="tab-pane">
               <div ng-init="$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update" class="row">
                 <div class="col-sm-12">
-                  <h4>Grant edit access to the project</h4>
+                  <h4>Grant edit access to the project and the videos</h4>
+                  <small>Choose who can access and edit this project and all videos</small>
                   <ui-select
                    multiple
                    on-select="$ctrl.onSelectValue($item, $model, '_access.update');$ctrl.selectedShare=$ctrl.cdsDepositCtrl.record._access.update"
