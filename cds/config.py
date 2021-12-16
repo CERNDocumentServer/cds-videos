@@ -899,8 +899,9 @@ SECURITY_LOGIN_SALT = "CHANGE_ME"
 # See details on
 # http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
 
-APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "localhost.cern.ch"]
+APP_ALLOWED_HOSTS = ["localhost"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
+SITE_URL = "https://localhost:5000"
 
 ###############################################################################
 # User Profiles

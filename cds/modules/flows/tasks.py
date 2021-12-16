@@ -810,17 +810,17 @@ class TranscodeVideoTask(AVCTask):
 
     def clean(self, version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
-        tag_alias_1 = aliased(ObjectVersionTag)
-        tag_alias_2 = aliased(ObjectVersionTag)
+        master_alias = aliased(ObjectVersionTag)
+        context_type_alias = aliased(ObjectVersionTag)
         slaves = (
-            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
-            .join(tag_alias_2, ObjectVersion.tags)
+            ObjectVersion.query.join(master_alias, ObjectVersion.tags)
+            .join(context_type_alias, ObjectVersion.tags)
             .filter(
-                tag_alias_1.key == "master", tag_alias_1.value == version_id
+                master_alias.key == "master", master_alias.value == version_id
             )
             .filter(
-                tag_alias_2.key == "context_type",
-                tag_alias_2.value.in_(["subformat"]),
+                context_type_alias.key == "context_type",
+                context_type_alias.value.in_(["subformat"]),
             )
             .all()
         )

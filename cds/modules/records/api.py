@@ -68,20 +68,16 @@ def _build_file_links(obj):
     """Return a dict with file links."""
     return dict(
         self=(
-            u"{scheme}://{host}/{api}/{bucket}/{key}?versionId={version_id}".format(
-                # TODO: JSONSchema host is not the best solution here.
-                scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
-                host=current_app.config["JSONSCHEMAS_HOST"],
+            u"{host}/{api}/{bucket}/{key}?versionId={version_id}".format(
+                host=current_app.config["SITE_URL"],
                 api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
                 bucket=obj.bucket_id,
                 key=obj.key,
                 version_id=obj.version_id,
             )
         ),
-        deleteFile=u"{scheme}://{host}/{api}/{bucket}/{key}".format(
-            # TODO: JSONSchema host is not the best solution here.
-            scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
-            host=current_app.config["JSONSCHEMAS_HOST"],
+        deleteFile=u"{host}/{api}/{bucket}/{key}".format(
+            host=current_app.config["SITE_URL"],
             api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
             bucket=obj.bucket_id,
             key=obj.key,
@@ -116,9 +112,8 @@ class CDSFileObject(FileObject):
 
     @classmethod
     def _link(cls, bucket_id, key, _external=True):
-        return u"{scheme}://{host}/{api}/{bucket_id}/{key}".format(
-            scheme=current_app.config["JSONSCHEMAS_URL_SCHEME"],
-            host=current_app.config["JSONSCHEMAS_HOST"],
+        return u"{host}/{api}/{bucket_id}/{key}".format(
+            host=current_app.config["SITE_URL"],
             api=current_app.config["DEPOSIT_FILES_API"].lstrip("/"),
             bucket_id=bucket_id,
             key=key,
