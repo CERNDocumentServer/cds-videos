@@ -35,10 +35,10 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from cds.modules.deposit.api import CDSDeposit
 from cds.modules.records.utils import is_project_record
 
-from ..opencast.utils import can_be_transcoded, find_lowest_quality
-from ..records.api import CDSVideosFilesIterator
-from .models import FlowMetadata, FlowTaskMetadata, FlowTaskStatus
-from .tasks import ExtractFramesTask, ExtractMetadataTask, TranscodeVideoTask
+from cds.modules.opencast.utils import can_be_transcoded, find_lowest_quality
+from cds.modules.records.api import CDSVideosFilesIterator
+from cds.modules.flows.models import FlowMetadata, FlowTaskMetadata, FlowTaskStatus
+from cds.modules.flows.tasks import ExtractFramesTask, ExtractMetadataTask, TranscodeVideoTask
 
 
 def migrate_event(deposit):
@@ -136,70 +136,74 @@ def migrate_event(deposit):
     return flow
 
 
-def main():
-    """Migrate old video deposits to the new Flows."""
+"""Migrate old video deposits to the new Flows."""
 
-    def get_all_pids_by(pid_type):
-        """Get all PIDs for the given type.
+def get_all_pids_by(pid_type):
+    """Get all PIDs for the given type.
 
-        :param pid_type: String representing the PID type value, for example 'recid'.
-        """
-        pids = (
-            PersistentIdentifier.query.filter(
-                PersistentIdentifier.pid_type == pid_type
-            )
-            .filter(PersistentIdentifier.status == PIDStatus.REGISTERED)
-            .all()
+    :param pid_type: String representing the PID type value, for example 'recid'.
+    """
+    pids = (
+        PersistentIdentifier.query.filter(
+            PersistentIdentifier.pid_type == pid_type
         )
-        return pids
+        .filter(PersistentIdentifier.status == PIDStatus.REGISTERED)
+        .all()
+    )
+    return pids
 
-    def get(name, filepath):
-        logger = logging.getLogger(name)
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+def get(name, filepath):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 
-        fh = logging.FileHandler(filepath)
-        fh.setFormatter(formatter)
-        fh.setLevel(logging.DEBUG)
-        logger.addHandler(fh)
+    fh = logging.FileHandler(filepath)
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
 
-        sh = logging.StreamHandler()
-        sh.setFormatter(formatter)
-        sh.setLevel(logging.DEBUG)
-        logger.addHandler(sh)
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+    sh.setLevel(logging.DEBUG)
+    logger.addHandler(sh)
 
-        return logger
+    return logger
 
-    filepath = "/tmp/failed_migrated_videos_to_new_flows.log"
-    logger = get("failed_migrated_videos_to_new_flows", filepath)
-    all_deps = get_all_pids_by("depid")
-    video_deps = []
-    failed_deps = []
+failed_filepath = "/tmp/failed_migrated_videos_to_new_flows.log"
+error_logger = get("failed_migrated_videos_to_new_flows", failed_filepath)
+logger = get("migrated_videos_to_new_flows", "/tmp/migrated_videos_to_new_flows.log")
+all_deps = get_all_pids_by("depid")
+video_deps = []
+failed_deps = []
 
-    for dep in all_deps:
-        rec = CDSDeposit.get_record(dep.object_uuid)
-        if not is_project_record(rec):
+for dep in all_deps:
+    rec = CDSDeposit.get_record(dep.object_uuid)
+    if not is_project_record(rec):
+        master_file = CDSVideosFilesIterator.get_master_video_file(rec)
+        cds_state = rec.get('_cds', {}).get('state')
+        # Migrate only videos with master file and _cds.state not empty
+        if master_file and cds_state:
             video_deps.append(rec)
 
-    total = len(video_deps)
-    for index, video in enumerate(video_deps):
-        logger.debug("Migrating deposit ({0}/{1})".format(index, total))
-        try:
-            logger.debug("Migrating deposit ({0})".format(video.pid))
-            migrate_event(video)
-            # we need to commit to re-dump files/tags to the record
-            # and store `flow_id`
-            video._update_tasks_status()
-            video["_files"] = video._get_files_dump()
-            video.commit()
-            db.session.commit()
-            logger.debug(
-                "Migrating deposit ({0}) ended successfully".format(video.pid)
-            )
-        except Exception:
-            logger.debug("Migrating deposit ({0}) failed".format(video.id))
-            failed_deps.append(video)
+total = len(video_deps)
+for index, video in enumerate(video_deps):
+    logger.debug("Migrating deposit ({0}/{1})".format(index, total))
+    try:
+        logger.debug("Migrating deposit ({0})".format(video.pid))
+        migrate_event(video)
+        # we need to commit to re-dump files/tags to the record
+        # and store `flow_id`
+        video._update_tasks_status()
+        video["_files"] = video._get_files_dump()
+        video.commit()
+        db.session.commit()
+        logger.debug(
+            "Migrating deposit ({0}) ended successfully".format(video.pid)
+        )
+    except Exception:
+        logger.debug("Migrating deposit ({0}) failed".format(video.id))
+        failed_deps.append(video)
 
-    if failed_deps:
-        logger.debug("Failed deposits ({0})".format(len(failed_deps)))
-        logger.debug(failed_deps)
+if failed_deps:
+    error_logger.debug("Failed deposits ({0})".format(len(failed_deps)))
+    error_logger.debug(failed_deps)
