@@ -43,8 +43,9 @@ def test_load_jsonschema_category(api_app, json_headers):
         assert res.status_code == 200
 
 
-def test_get_category_from_url(api_app, db, es, indexer, pidstore,
-                               cds_jsonresolver, json_headers, category_1):
+def test_get_category_from_url(
+        api_app, db, es, indexer, pidstore, json_headers, category_1
+):
     """Load jsonschema for category."""
     sleep(3)
 
@@ -61,9 +62,10 @@ def test_get_category_from_url(api_app, db, es, indexer, pidstore,
         assert categ['metadata'] == category_1
 
 
-def test_suggest_category_from_url(api_app, db, es, indexer, pidstore,
-                                   cds_jsonresolver, json_headers, category_1,
-                                   category_2):
+def test_suggest_category_from_url(
+        api_app, db, es, indexer, pidstore, json_headers, category_1,
+        category_2
+):
     """Load jsonschema for category."""
     sleep(3)
 

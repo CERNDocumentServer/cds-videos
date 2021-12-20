@@ -232,6 +232,7 @@ def bucket(db, location):
 def es(app):
     """Provide elasticsearch access."""
     InvenioSearch(app)
+    list(current_search.delete(ignore=[404]))
     try:
         list(current_search.create())
     except RequestError:
@@ -607,8 +608,7 @@ def datacite_headers(app):
 @pytest.fixture()
 def api_project(api_app, es, users, location, db, deposit_metadata):
     """New project with videos."""
-    return new_project(api_app, es, cds_jsonresolver, users,
-                       location, db, deposit_metadata)
+    return new_project(api_app, users, db, deposit_metadata)
 
 
 @pytest.fixture()
@@ -672,7 +672,7 @@ def add(x, y):
 
 
 @pytest.fixture()
-def category_1(api_app, es, indexer, pidstore, cds_jsonresolver):
+def category_1(api_app, es, location, indexer, pidstore):
     """Create a fixture for category."""
     data = {
         'name': 'open',
@@ -683,7 +683,7 @@ def category_1(api_app, es, indexer, pidstore, cds_jsonresolver):
 
 
 @pytest.fixture()
-def category_2(api_app, es, indexer, pidstore, cds_jsonresolver):
+def category_2(api_app, es, indexer, pidstore):
     """Create a fixture for category."""
     data = {
         'name': 'atlas',

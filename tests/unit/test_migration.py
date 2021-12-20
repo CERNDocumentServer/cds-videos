@@ -45,9 +45,7 @@ from invenio_sequencegenerator.models import Counter, TemplateDefinition
 from invenio_accounts.models import User
 from flask_security import login_user
 
-from cds.cli import cli
 # from cds.modules.records.symlinks import SymlinksCreator
-from cds.modules.migrator.records import CDSRecordDump, CDSRecordDumpLoader
 from cds.modules.deposit.api import Project, Video, deposit_video_resolver, \
     deposit_project_resolver
 from cds.modules.records.resolver import record_resolver
@@ -55,9 +53,6 @@ from cds.modules.records.api import dump_object, CDSVideosFilesIterator, \
     CDSRecord
 from cds.modules.flows.tasks import ExtractMetadataTask, \
     ExtractFramesTask, TranscodeVideoTask
-from cds.modules.migrator.cli import \
-    sequence_generator as cli_sequence_generator
-from cds.modules.migrator.utils import cern_movie_to_video_pid_fetcher
 
 from helpers import load_json, get_frames, get_migration_streams
 

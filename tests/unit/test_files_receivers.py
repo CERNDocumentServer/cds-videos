@@ -44,47 +44,51 @@ _PLAYLIST_FILENAME = 'playlist.smil'
 _EXTRA_FILENAME = 'extra.pdf'
 
 
-def _fill_bucket_with_files(bucket):
+def _fill_bucket_with_files(bucket_id):
     """Fill the given bucket with some files and tags."""
     # master, should not be renamed when downloaded
-    master_obj = ObjectVersion.create(bucket=bucket,
+    master_obj = ObjectVersion.create(bucket=bucket_id,
                                       key=_MASTER_FILENAME,
                                       stream=BytesIO(b'content'))
     ObjectVersionTag.create(master_obj, 'context_type', 'master')
 
     # subformat 1
-    subformat1_obj = ObjectVersion.create(bucket=bucket,
+    subformat1_obj = ObjectVersion.create(bucket=bucket_id,
                                           key=_SUBFORMAT1_FILENAME,
                                           stream=BytesIO(b'content'))
     ObjectVersionTag.create(subformat1_obj, 'context_type', 'subformat')
-    ObjectVersionTag.create(subformat1_obj, 'master', master_obj.version_id)
+    ObjectVersionTag.create(
+        subformat1_obj, 'master', str(master_obj.version_id)
+    )
     # subformat 2
-    subformat2_obj = ObjectVersion.create(bucket=bucket,
+    subformat2_obj = ObjectVersion.create(bucket=bucket_id,
                                           key=_SUBFORMAT2_FILENAME,
                                           stream=BytesIO(b'content'))
     ObjectVersionTag.create(subformat2_obj, 'context_type', 'subformat')
-    ObjectVersionTag.create(subformat2_obj, 'master', master_obj.version_id)
+    ObjectVersionTag.create(
+        subformat2_obj, 'master', str(master_obj.version_id)
+    )
     # frame
-    frame1_obj = ObjectVersion.create(bucket=bucket,
+    frame1_obj = ObjectVersion.create(bucket=bucket_id,
                                       key=_FRAME_FILENAME,
                                       stream=BytesIO(b'content'))
     ObjectVersionTag.create(frame1_obj, 'context_type', 'frame')
-    ObjectVersionTag.create(frame1_obj, 'master', master_obj.version_id)
+    ObjectVersionTag.create(frame1_obj, 'master', str(master_obj.version_id))
     # playlist
-    playlist_obj = ObjectVersion.create(bucket=bucket,
+    playlist_obj = ObjectVersion.create(bucket=bucket_id,
                                         key=_PLAYLIST_FILENAME,
                                         stream=BytesIO(b'content'))
     ObjectVersionTag.create(playlist_obj, 'context_type', 'playlist')
-    ObjectVersionTag.create(playlist_obj, 'master', master_obj.version_id)
+    ObjectVersionTag.create(playlist_obj, 'master', str(master_obj.version_id))
 
     # subtitle, should not be renamed when downloaded
-    subtitle_obj = ObjectVersion.create(bucket=bucket,
+    subtitle_obj = ObjectVersion.create(bucket=bucket_id,
                                         key=_SUBTITLE_FILENAME,
                                         stream=BytesIO(b'content'))
     ObjectVersionTag.create(subtitle_obj, 'context_type', 'subtitle')
 
     # additional file, should not be renamed when downloaded
-    additional_obj = ObjectVersion.create(bucket=bucket,
+    additional_obj = ObjectVersion.create(bucket=bucket_id,
                                           key=_EXTRA_FILENAME,
                                           stream=BytesIO(b'content'))
     ObjectVersionTag.create(additional_obj, 'context_type', '')
@@ -95,25 +99,25 @@ def _fill_bucket_with_files(bucket):
 def test_download_filename_should_be_renamed(location):
     """Test files renamed when the file to download is a slave."""
     bucket = Bucket.create(location)
-    _fill_bucket_with_files(bucket)
+    _fill_bucket_with_files(str(bucket.id))
 
     obj = ObjectVersion.get(bucket, _SUBFORMAT1_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == '{}-{}'.format(_MASTER_FILENAME_PREFIX,
                                      _SUBFORMAT1_FILENAME)
 
     obj = ObjectVersion.get(bucket, _SUBFORMAT2_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == '{}-{}'.format(_MASTER_FILENAME_PREFIX,
                                      _SUBFORMAT2_FILENAME)
 
     obj = ObjectVersion.get(bucket, _FRAME_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == '{}-{}'.format(_MASTER_FILENAME_PREFIX,
                                      _FRAME_FILENAME)
 
     obj = ObjectVersion.get(bucket, _PLAYLIST_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == '{}-{}'.format(_MASTER_FILENAME_PREFIX,
                                      _PLAYLIST_FILENAME)
 
@@ -121,25 +125,25 @@ def test_download_filename_should_be_renamed(location):
 def test_download_filename_should_not_be_renamed(location):
     """Test files not renamed when the file to download is not a slave."""
     bucket = Bucket.create(location)
-    _fill_bucket_with_files(bucket)
+    _fill_bucket_with_files(str(bucket.id))
 
     obj = ObjectVersion.get(bucket, _MASTER_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == _MASTER_FILENAME
 
     obj = ObjectVersion.get(bucket, _SUBTITLE_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == _SUBTITLE_FILENAME
 
     obj = ObjectVersion.get(bucket, _EXTRA_FILENAME)
-    on_download_rename_file(None, obj)
+    on_download_rename_file(None, obj=obj)
     assert obj.key == _EXTRA_FILENAME
 
 
 def test_response_headers(api_app, location):
     """Test http response headers when downloading files."""
     bucket = Bucket.create(location)
-    _fill_bucket_with_files(bucket)
+    _fill_bucket_with_files(str(bucket.id))
 
     _URL = '/files/{bucket_id}/{key}?download'
 

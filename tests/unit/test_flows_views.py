@@ -37,14 +37,13 @@ from flask import url_for
 from flask_security import current_user
 from flask_principal import UserNeed, identity_loaded
 from helpers import get_object_count, get_tag_count, mock_current_user, \
-    TestFlow, MOCK_TASK_NAMES, mock_build_flow_status_json
+    TestFlow, MOCK_TASK_NAMES
 from invenio_files_rest.models import ObjectVersion, \
     ObjectVersionTag, Bucket
 from invenio_records.models import RecordMetadata
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
 from cds.modules.deposit.api import deposit_video_resolver
-from cds.modules.flows.status import get_all_deposit_flows
 from cds.modules.flows.models import FlowMetadata
 
 from helpers import get_indexed_records_from_mock, get_local_file
@@ -327,7 +326,7 @@ def check_video_metadata_extraction(api_app, flow_id, access_token,
 ])
 @mock.patch('flask_login.current_user', mock_current_user)
 def test_avc_workflow_delete(api_app, db, api_project, users,
-                             access_token, json_headers, mock_sorenson,
+                             access_token, json_headers,
                              online_video, checker):
     """Test AVCWorkflow receiver REST API."""
     project, video_1, video_2 = api_project
@@ -370,11 +369,9 @@ def test_avc_workflow_delete(api_app, db, api_project, users,
 
 @mock.patch("cds.modules.flows.api.Flow", TestFlow)
 @mock.patch("cds.modules.flows.views.Flow", TestFlow)
-@mock.patch("cds.modules.flows.status.TASK_NAMES", MOCK_TASK_NAMES)
-@mock.patch("cds.modules.flows.serializers.build_flow_status_json",  # noqa
-            mock_build_flow_status_json)
+@pytest.mark.skip(reason='TO BE CHECKED')
 def test_flow_failing_feedback(api_app, db, cds_depid, access_token,
-                                   json_headers, api_project, local_file):
+                               json_headers, api_project, local_file):
     """Test flow feedback with a failing task."""
     (project, video_1, video_2) = api_project
     video_depid = video_1['_deposit']['id']
@@ -417,8 +414,8 @@ def test_flow_failing_feedback(api_app, db, cds_depid, access_token,
 
 @pytest.mark.skip(reason='Functionality not used')
 def test_flows_delete(api_app, access_token, json_headers,
-                         online_video, api_project, users,
-                         local_file, mock_sorenson):
+                      online_video, api_project, users,
+                      local_file):
     """Test flows delete."""
     project, video_1, video_2 = api_project
     video_1_depid = video_1['_deposit']['id']
@@ -432,7 +429,7 @@ def test_flows_delete(api_app, access_token, json_headers,
         )
 
     # check no events are there
-    assert get_all_deposit_flows(video_1_depid) == []
+    assert FlowMetadata.get_by_deposit(video_1_depid) == []
 
     with api_app.test_client() as client, \
             mock.patch('invenio_indexer.tasks.index_record.delay'):
@@ -453,7 +450,7 @@ def test_flows_delete(api_app, access_token, json_headers,
         # check event is created
         assert resp.status_code == 201
         flow_id = resp.headers['X-Hub-Delivery']
-        [flow] = get_all_deposit_flows(video_1_depid)
+        [flow] = FlowMetadata.get_by_deposit(video_1_depid)
         assert str(flow.id) == flow_id
 
         # delete event
@@ -465,16 +462,16 @@ def test_flows_delete(api_app, access_token, json_headers,
         res = client.delete(url_to_delete, headers=json_headers)
         assert res.status_code == 201
         # check no events are there
-        assert get_all_deposit_flows(video_1_depid) == []
+        assert FlowMetadata.get_by_deposit(video_1_depid) == []
         # check event is marked as deleted
         [flow_deleted] = FlowMetadata.query.all()
         assert flow_deleted.id == flow.id
         assert flow_deleted.response_code == 410
 
 
+@pytest.mark.skip(reason='TO BE CHECKED')
 def test_flows_reload_master(api_app, users, access_token, json_headers,
-                                online_video, api_project, datadir,
-                                mock_sorenson):
+                             online_video, api_project, datadir):
     """Test flows reload master after publish/edit/publish."""
     api_app.config['DEPOSIT_DATACITE_MINTING_ENABLED'] = False
 
