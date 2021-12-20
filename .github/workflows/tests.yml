@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         #python-version: [2.7, 3.6]  Currently failing with isort
-        python-version: [2.7]
+        python-version: [3.6]
 
     steps:
       - name: Install FFmpeg
