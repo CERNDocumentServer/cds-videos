@@ -63,7 +63,7 @@ def test_get_keywords_from_api(cern_keywords):
         assert expected == keywords
 
 
-def test_update_existing_keywords(cern_keywords):
+def test_update_existing_keywords(cern_keywords, location):
     """Test update existing keywords on db."""
     keywords = [
         # 1: unchanged
@@ -124,7 +124,7 @@ def test_update_existing_keywords(cern_keywords):
     assert keywords_api == ks
 
 
-def test_delete_not_existing_keywords(cern_keywords):
+def test_delete_not_existing_keywords(cern_keywords, location):
     """Test delete not existing keywords on db."""
     keywords = [
         # 1: unchanged
@@ -160,7 +160,7 @@ def test_delete_not_existing_keywords(cern_keywords):
     assert records[0].json['name'] == '13 TeV'
 
 
-def test_keyword_harvesting_one_time(db, es, cern_keywords):
+def test_keyword_harvesting_one_time(db, cern_keywords, location):
     """Test keyword harvesting."""
     keywords = [
         # 1: unchanged
@@ -219,7 +219,7 @@ def test_keyword_harvesting_one_time(db, es, cern_keywords):
     assert jsons['532']['deleted'] is True
 
 
-def test_keyword_harvesting_deleted_keywords(db, es, cern_keywords):
+def test_keyword_harvesting_deleted_keywords(db, cern_keywords, location):
     """Test keyword harvesting."""
     keywords = [
         # 1: unchanged

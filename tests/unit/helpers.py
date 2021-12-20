@@ -47,7 +47,6 @@ from invenio_records import Record
 from six import BytesIO
 
 from cds.modules.deposit.api import Project, Video
-from cds.modules.flows.serializers import build_task_json_status
 from cds.modules.records.api import Category, Keyword
 from cds.modules.records.minters import catid_minter
 from cds.modules.flows.tasks import (
@@ -240,8 +239,9 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
     ])
 
 
-def new_project(app, es, cds_jsonresolver, users, location, db,
-                deposit_metadata, project_data=None, wait=None):
+def new_project(
+        app, users, db, deposit_metadata, project_data=None, wait=None
+):
     """New project with videos."""
     project_data = project_data or {
         'title': {
@@ -312,7 +312,7 @@ def get_indexed_records_from_mock(mock_indexer):
     return indexed
 
 
-def prepare_videos_for_publish(videos):
+def prepare_videos_for_publish(videos, with_files=False):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(
         bit_rate='679886',
@@ -461,6 +461,21 @@ def check_deposit_record_files(deposit, deposit_expected, record,
     deposit_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
         deposit.files.bucket).all()]
     assert sorted(deposit_expected) == sorted(deposit_objs)
+    assert deposit.files.bucket.locked is True
+    # check record
+    record_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
+        record.files.bucket).all()]
+    assert sorted(record_expected) == sorted(record_objs)
+    assert record.files.bucket.locked is True
+
+
+def check_deposit_record_files_not_publsihed(deposit, deposit_expected, record,
+                                             record_expected):
+    """Check a not published deposit and record files expected."""
+    # check deposit
+    deposit_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
+        deposit.files.bucket).all()]
+    assert sorted(deposit_expected) == sorted(deposit_objs)
     assert deposit.files.bucket.locked is False
     # check record
     record_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
@@ -525,27 +540,6 @@ def mock_compute_status(cls, statuses):
 
 def mock_compute_status(cls, statuses):
     return FlowTaskStatus.FAILURE
-
-
-def mock_build_flow_status_json(flow_json):
-    """Build serialized status object."""
-    status = ([], [])
-    for task in flow_json['tasks']:
-        task_status = build_task_json_status(task)
-
-        # Get the UI name of the task
-        task_name = task_status["name"]
-        assert task_name
-        # Calculate the right position inside the tuple
-        step = (
-            0
-            if task_name in ('sse_simple_add',)
-            else 1
-        )
-
-        status[step].append(task_status)
-
-    return status
 
 
 class TestFlow(FlowService):
