@@ -62,8 +62,9 @@ class OpenCast:
         """Constructor."""
         self.video = video
         self.object_version = object_version
-        self.BASE_URL = current_app.config["CDS_OPENCAST_API_ENDPOINT_INGEST"]
-
+        self.BASE_URL = "{host}/ingest".format(
+            host=current_app.config["CDS_OPENCAST_HOST"]
+        )
         module_dir = os.path.dirname(__file__)
         self.acl_filepath = os.path.join(module_dir, "static/xml/acl.xml")
 
