@@ -59,7 +59,9 @@ from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 def _get_status_and_subformats(event_id, session):
     """Retrieves the status and the subformats of an event_id."""
     url = "{endpoint}/{event_id}?withpublications=true".format(
-        endpoint=current_app.config["CDS_OPENCAST_API_ENDPOINT_EVENTS"],
+        endpoint="{host}/api/events".format(
+            host=current_app.config["CDS_OPENCAST_HOST"]
+        ),
         event_id=event_id,
     )
     try:
