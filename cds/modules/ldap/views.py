@@ -20,8 +20,9 @@
 """CDS LDAP views."""
 
 from __future__ import absolute_import, print_function
+import ldap
 
-from flask import Blueprint, current_app, jsonify, make_response, request, \
+from flask import Blueprint, jsonify, make_response, request, \
     abort
 from cds.modules.ldap.client import LdapClient
 from cds.modules.ldap.decorators import needs_authentication
@@ -39,9 +40,14 @@ blueprint = Blueprint(
 def get_users():
     query = request.args.get('query', '')
     if query:
-        ldap_client = LdapClient()
-        results = ldap_client.search_users_by_name(query)
-        return make_response(jsonify(serialize_ldap_users(results)), 200)
+        try:
+            ldap_client = LdapClient()
+            results = ldap_client.search_users_by_name(query)
+            return make_response(jsonify(serialize_ldap_users(results)), 200)
+        except ldap.FILTER_ERROR:
+            # fallback to empty results when a special character e.g `\`
+            # is passed in the query and ldap throws a `FILTER_ERROR`
+            return make_response(jsonify([]), 200)
     abort(400)
 
 
@@ -50,8 +56,13 @@ def get_users():
 def get_egroups():
     query = request.args.get('query', '')
     if query:
-        ldap_client = LdapClient()
-        results = ldap_client.search_egroup_by_email(query)
-        results += ldap_client.search_user_by_email(query)
-        return make_response(jsonify(serialize_ldap_users(results)), 200)
+        try:
+            ldap_client = LdapClient()
+            results = ldap_client.search_egroup_by_email(query)
+            results += ldap_client.search_user_by_email(query)
+            return make_response(jsonify(serialize_ldap_users(results)), 200)
+        except ldap.FILTER_ERROR:
+            # fallback to empty results when a special character e.g `\`
+            # is passed in the query and ldap throws a `FILTER_ERROR`
+            return make_response(jsonify([]), 200)
     abort(400)
