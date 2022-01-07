@@ -30,12 +30,13 @@ function depositActions() {
           },
           EDIT: {
             method: 'POST',
-            link: 'edit'
+            link: 'edit',
+            preprocess: noPayload
           },
           PUBLISH: {
             method: 'POST',
             link: 'publish',
-            preprocess: sanitizeData
+            preprocess: noPayload
           },
           DELETE: {
             method: 'DELETE',
@@ -58,6 +59,10 @@ function depositActions() {
 function isPopulated(val) {
   return val !== null && val !== undefined && !_.isEqual(val, '')
     && !_.isEqual(val, []) && !(val.constructor === Object && _.isEmpty(val));
+}
+
+function noPayload(payload) {
+    return null;
 }
 
 function sanitizeData(payload) {
