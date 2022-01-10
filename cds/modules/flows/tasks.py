@@ -47,6 +47,7 @@ from invenio_db import db
 from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
                                        as_bucket, as_object_version)
 from invenio_indexer.api import RecordIndexer
+from invenio_pidstore.errors import PIDDeletedError
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from PIL import Image
@@ -163,7 +164,6 @@ class AVCTask(CeleryTask):
         """When an error occurs, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             exception = self._meta_exception_envelope(exc=exc)
-            self._reindex_video_project()
             self.log("Failure: {0}".format(exception))
 
         super(AVCTask, self).on_failure(
@@ -174,7 +174,6 @@ class AVCTask(CeleryTask):
         """When end correctly, attach useful information to the state."""
         with celery_app.flask_app.app_context():
             meta = dict(message=str(exc), payload=self._base_payload)
-            self._reindex_video_project()
             self.log("Success: {0}".format(meta))
 
         super(AVCTask, self).on_success(
@@ -185,7 +184,12 @@ class AVCTask(CeleryTask):
         """Reindex video and project."""
         with celery_app.flask_app.app_context():
             deposit_id = self._base_payload["deposit_id"]
-            index_deposit_project(deposit_id)
+            try:
+                index_deposit_project(deposit_id)
+            except PIDDeletedError:
+                self.log(
+                    "Indexing deposit with id {0} failed. "
+                    "Deposit was deleted.".format(deposit_id))
 
     @staticmethod
     def set_revoke_handler(handler):
