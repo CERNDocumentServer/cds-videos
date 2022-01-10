@@ -31,9 +31,13 @@
     <span ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading">
       <i class="fa fa-spinner fa-spin text-muted fa-fw"></i>
     </span>
+    <!-- Disable the delete button until frames are ready to avoid deleting
+    a video before the exctract frames task finishes. This is needed because
+    the task is trying to resolve the deposit and it fails as it's already deleted
+    -->
     <button
       ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
-      ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      ng-disabled="!$ctrl.cdsDepositCtrl.framesReady || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-default btn-sm" ng-click="form.infoShown = true">
       <i class="fa fa-trash-o"></i>
     </button>
