@@ -108,7 +108,7 @@ install_requires = [
     'SQLAlchemy>=1.0,<1.4.0',
     'urllib3[secure]>=1.24.2,<2.0.0',    # urllib3 doesn't install pyOpenSSl by default and thus the [secure] extra is needed
     'WTForms-Alchemy<0.17.0',
-    "python-ldap>=3.2.0,<3.3.0",
+    "python-ldap>=3.4.0,<3.5.0",
 ]
 
 packages = find_packages()
