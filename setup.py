@@ -86,7 +86,7 @@ install_requires = [
     'invenio-oauth2server==1.0.4',
     # extras
     'arrow>=0.7.0,<1.0.0',
-    'CairoSVG>=1.0.20,<2.0.0',
+    'CairoSVG>=1.0.20,<3.0.0',
     'datacite==1.0.1',
     'dcxml==0.1.1',
     'dictdiffer<0.9.0',
