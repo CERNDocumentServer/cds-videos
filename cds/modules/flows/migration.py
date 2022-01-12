@@ -222,7 +222,7 @@ def main():
     all_deps = get_all_depid_pids()
     video_deps = []
     failed_deps = dict(
-        no_record_found=[]
+        no_record_found=[],
         master_not_found=[],
         empty_cds_state=[],
         other_exceptions=[]
