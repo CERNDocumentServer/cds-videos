@@ -164,16 +164,33 @@ def migrate_event(deposit, logger):
 
     return flow
 
-def get_all_pids_by(pid_type):
+def get_all_depid_pids():
     """Get all PIDs for the given type.
 
     :param pid_type: String representing the PID type value, for example 'recid'.
     """
     pids = (
         PersistentIdentifier.query.filter(
-            PersistentIdentifier.pid_type == pid_type
+            PersistentIdentifier.pid_type == 'depid'
         )
         .filter(PersistentIdentifier.status == PIDStatus.REGISTERED)
+        .order_by(PersistentIdentifier.updated.desc())
+        .all()
+    )
+    return pids
+
+def get_all_depid_pids_since(since_last_updated):
+    """Get all PIDs for the given type.
+
+    :param pid_type: String representing the PID type value, for example 'recid'.
+    """
+    pids = (
+        PersistentIdentifier.query.filter(
+            PersistentIdentifier.pid_type == 'depid'
+        )
+        .filter(PersistentIdentifier.status == PIDStatus.REGISTERED)
+        .filter(PersistentIdentifier.updated >= since_last_updated)
+
         .all()
     )
     return pids
@@ -202,21 +219,29 @@ def main():
     failed_filepath = "/tmp/failed_migrated_videos_to_new_flows.log"
     error_logger = get("failed_migrated_videos_to_new_flows", failed_filepath)
     logger = get("migrated_videos_to_new_flows", "/tmp/migrated_videos_to_new_flows.log")
-    all_deps = get_all_pids_by("depid")
+    all_deps = get_all_depid_pids()
     video_deps = []
-    failed_deps = []
+    failed_deps = dict(
+        no_record_found=[]
+        master_not_found=[],
+        empty_cds_state=[],
+        other_exceptions=[]
+    )
 
     for dep in all_deps:
-        rec = CDSDeposit.get_record(dep.object_uuid)
-        if not is_project_record(rec):
-            video_deps.append(rec)
+        try:
+            rec = CDSDeposit.get_record(dep.object_uuid)
+            if not is_project_record(rec):
+                video_deps.append(rec)
+        except Exception:
+            failed_deps["no_record_found"].append(dep.object_uuid)
 
     total = len(video_deps)
     for index, video in enumerate(video_deps):
         logger.debug("Migrating deposit {0}/{1}".format(index, total))
         try:
             logger.debug("Migrating deposit {0}".format(video.pid))
-            migrate_event(video, )
+            migrate_event(video, logger)
             # we need to commit to re-dump files/tags to the record
             # and store `flow_id`
             logger.debug("Updating task status for deposit {0}".format(video.pid))
@@ -235,13 +260,13 @@ def main():
             )
         except MasterFileNotFoundError:
             logger.debug("Migrating deposit {0} failed. No master file found.".format(video.pid))
-            failed_deps.append(video.pid)
+            failed_deps["master_not_found"].append(video.pid)
         except EmptyCDSStateError:
             logger.debug("Migrating deposit {0} failed. Empty `_cds.state` found.".format(video.pid))
-            failed_deps.append(video.pid)
+            failed_deps["empty_cds_state"].append(video.pid)
         except Exception:
             logger.debug("Migrating deposit {0} failed".format(video.pid))
-            failed_deps.append(video.pid)
+            failed_deps["other_exceptions"].append(video.pid)
 
     if failed_deps:
         error_logger.debug("Failed deposits {0}".format(len(failed_deps)))
