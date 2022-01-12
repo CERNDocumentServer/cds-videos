@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.27 (2022-01-12)
+
+- Migration to new Opencast infrastructure
+- Integration of new video uploading workflow
+- Gereral impovements in the UI
+
 Version 1.0.26 (2021-12-14)
 
 - Update lxml package due to security issue ( https://github.com/lxml/lxml/security/advisories/GHSA-55x5-fj6c-h6m8)
