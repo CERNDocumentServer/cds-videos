@@ -900,7 +900,29 @@ SECURITY_LOGIN_SALT = "CHANGE_ME"
 # http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
 
 APP_ALLOWED_HOSTS = ["localhost"]
-APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
+APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
+    "default-src": ["'self'"],
+    "script-src": ["'self'"],
+    "style-src": ["'self'"],
+    "img-src": ["'self'"],
+    "connect-src": ["'self'"],
+    "object-src": ["'self'"],
+    "media-src": ["'self'"],
+    "frame-src": ["'self'"],
+    "child-src": ["'self'"],
+    "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
+    "base-uri": ["'self'"],
+    "worker-src": ["'none'"],
+    "manifest-src": ["'none'"],
+    "prefetch-src": ["'none'"],
+    "font-src": [
+        "'self'",
+        "data:",
+        "https://fonts.gstatic.com",
+        "https://fonts.googleapis.com",
+    ],
+}
 SITE_URL = "https://localhost:5000"
 
 ###############################################################################

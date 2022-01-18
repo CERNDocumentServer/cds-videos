@@ -22,6 +22,7 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, abort, current_app, request
+from flask_talisman import ALLOW_FROM
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_previewer.api import PreviewFile
 from invenio_previewer.proxies import current_previewer
@@ -50,6 +51,14 @@ def preview_depid(pid, record, template=None, **kwargs):
 
 def preview_recid_embed(pid, record, template=None, **kwargs):
     """Return embedded player for video file."""
+    invenio_app = current_app.extensions['invenio-app']
+    if invenio_app:
+        # Needed to allow embedding in different sites
+        invenio_app.talisman.frame_options = ALLOW_FROM
+        invenio_app.talisman.frame_options_allow_from = '*'
+        invenio_app.talisman.content_security_policy = {
+            'frame-ancestors': ['*']
+        }
     return preview(pid, record, preview_file_class=CDSPreviewRecordFile,
                    previewer='cds_embed_video')
 
