@@ -134,18 +134,16 @@ class OpenCast:
         </dublincore>
         """
         label_project = "CDS Videos"
-        label_title = self.video.get("title", {}).get("title", "")
         record_pid = self.video["_deposit"].get("pid")
         label_record = "recid: {0}".format(record_pid) if record_pid else ""
         label_deposit = "depid: {0}".format(self.video["_deposit"]["id"])
         title = " - ".join(
             x
-            for x in [label_project, label_title, label_record, label_deposit]
+            for x in [label_project, label_record, label_deposit]
             if x
         )
 
-        description = """{title} - {deposit} - object version: {object_version} - qualities: {qualities}""".format(
-            title=label_title,
+        description = """{deposit} - object version: {object_version} - qualities: {qualities}""".format(
             deposit=label_deposit,
             object_version=self.object_version.version_id,
             qualities=" - ".join(qualities),

@@ -80,13 +80,19 @@ class TooHighResolutionError(OpencastError):
 class RequestError(OpencastError):
     """Error while performing ingest request in Opencast."""
 
-    def __init__(self, url, message):
+    def __init__(self, url, exception):
         self.url = url
-        self.message = message
+        self.exception = exception
 
     def __str__(self):
-        return "Failed to perform {0}. Error message: {1}".format(
-            self.url, self.message
+        request = self.exception.request
+        req = "URL <{0}>\nBody {1}".format(request.url, request.body)
+        response = self.exception.response
+        resp = "Code <{0}>\nBody {1}".format(
+            response.status_code, response.text
+        )
+        return "Failed request to {0}.\nRequest: {1}\nResponse: {2}".format(
+            self.url, req, resp
         )
 
 

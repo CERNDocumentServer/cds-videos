@@ -947,9 +947,8 @@ class TranscodeVideoTask(AVCTask):
             flow_task_status = FlowTaskStatus.FAILURE
             flow_task_message = (
                 "Failed to start Opencast transcoding workflow "
-                "for flow with id: {0}. Request failed on: {1}."
-                " Error message: {2}"
-            ).format(self.flow_id, e.url, e.message)
+                "for flow with id: {0}.\n{1}"
+            ).format(self.flow_id, str(e))
             self.log(flow_task_message)
 
         self._update_flow_tasks(

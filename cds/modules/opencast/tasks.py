@@ -72,6 +72,7 @@ def _get_status_and_subformats(event_id, session):
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             raise RequestError404(url, e)
+        raise RequestError(url, e)
     except requests.exceptions.RequestException as e:
         raise RequestError(url, e)
 
@@ -150,12 +151,7 @@ def get_opencast_events(grouped_flow_tasks):
             except RequestError as e:
                 msg = (
                     "Failed to fetch status and subformats from Opencast "
-                    "event id: {0}. Request failed on: {1}. "
-                    "Error message: {2}".format(
-                        event_id,
-                        e.url,
-                        e.message,
-                    )
+                    "event id: {0}.\n{1}".format(event_id, str(e))
                 )
                 flow_task_ids_with_error = [
                     (str(flow_task.id), msg)
@@ -339,6 +335,10 @@ def on_transcoding_completed(
     WARNING: Do not remove opencast_event_id and flow_task_id, needed for
      @only_one decorator
     """
+    deposit_video_is_published = False
+    bucket = None
+    bucket_was_locked = False
+
     flow_task = FlowTaskMetadata.query.get(flow_task_id)
     if not flow_task:
         return
