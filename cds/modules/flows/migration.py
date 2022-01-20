@@ -32,7 +32,7 @@ from invenio_db import db
 from invenio_files_rest.models import ObjectVersionTag, as_object_version
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
-from cds.modules.deposit.api import CDSDeposit
+from cds.modules.deposit.api import Video
 from cds.modules.records.utils import is_project_record
 
 from cds.modules.opencast.utils import can_be_transcoded, find_lowest_quality
@@ -78,8 +78,8 @@ def migrate_event(deposit, logger):
 
     # Create the object tag for flow_id
     object_version = as_object_version(original_file["version_id"])
-    logger.debug("Creating ObjectVersionTag for object version {0} with flow id {1}:".format(
-        object_version.id, str(flow.id)))
+    logger.debug("Creating ObjectVersionTag for object version bucket_id {0} with flow id {1}:".format(
+        object_version.bucket_id, str(flow.id)))
     ObjectVersionTag.create_or_update(object_version, "flow_id", str(flow.id))
     logger.debug("ObjectVersionTag created successfully for flow {0}".format(str(flow.id)))
 
@@ -230,7 +230,7 @@ def main():
 
     for dep in all_deps:
         try:
-            rec = CDSDeposit.get_record(dep.object_uuid)
+            rec = Video.get_record(dep.object_uuid)
             if not is_project_record(rec):
                 video_deps.append(rec)
         except Exception:
