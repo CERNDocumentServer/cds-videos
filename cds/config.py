@@ -902,18 +902,29 @@ SECURITY_LOGIN_SALT = "CHANGE_ME"
 APP_ALLOWED_HOSTS = ["localhost"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
     "default-src": ["'self'"],
-    "script-src": ["'self'"],
-    "style-src": ["'self'"],
-    "img-src": ["'self'"],
-    "connect-src": ["'self'"],
+    "script-src": [
+        "'self'",
+        "https://*.theoplayer.com",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "https://www.dropbox.com"
+    ],
+    "style-src": [
+        "'self'",
+        "https://*.theoplayer.com",
+        "https://*.cern.ch/",
+        "'unsafe-inline'"
+    ],
+    "img-src": ["'self'", "https://*.theoplayer.com", "data:"],
+    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch"],
     "object-src": ["'self'"],
-    "media-src": ["'self'"],
-    "frame-src": ["'self'"],
+    "media-src": ["'self'", "blob:"],
+    "frame-src": ["'self'", "https://*.theoplayer.com"],
     "child-src": ["'self'"],
     "form-action": ["'self'"],
-    "frame-ancestors": ["'none'"],
+    "frame-ancestors": ["'self'"],
     "base-uri": ["'self'"],
-    "worker-src": ["'none'"],
+    "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'none'"],
     "prefetch-src": ["'none'"],
     "font-src": [
@@ -921,6 +932,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "data:",
         "https://fonts.gstatic.com",
         "https://fonts.googleapis.com",
+        "https://*.cern.ch/",
     ],
 }
 SITE_URL = "https://localhost:5000"
