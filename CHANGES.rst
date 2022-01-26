@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.28 (2022-01-26)
+
+- Fixed banner display in video details page
+- Added default CSP headers and customized them for the embedded videos
+- Improved error reporting on Opencast exceptions
+
 Version 1.0.27 (2022-01-12)
 
 - Migration to new Opencast infrastructure
