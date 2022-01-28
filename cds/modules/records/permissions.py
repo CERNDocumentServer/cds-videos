@@ -291,6 +291,9 @@ def has_read_files_permission(user, record):
     # Same permissions as for record itself
 
     # Allow everyone for public records
+    print("---**** Is public record: ", is_public(record, "read"))
+    print("-----**** Record class: ", record.__class__)
+    print("-----**** Record: ", record)
     if is_public(record, "read"):
         return True
 
