@@ -82,5 +82,18 @@
     "_access": {
       "read": ["ippog-cds-contributors@cern.ch"]
     }
+  },
+  {
+    "name": "ALICE",
+    "types": ["FOOTAGE", "VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": [],
+      "responsible": ["alice-secretariat@cern.ch"]
+    },
+    "_record_type": ["PROJECT"],
+    "_access": {
+      "read": ["alice-secretariat@cern.ch"]
+    }
   }
 ]
