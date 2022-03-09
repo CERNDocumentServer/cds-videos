@@ -25,6 +25,13 @@
 Changes
 =======
 
+Version 1.0.29 (2022-03-09)
+
+- add ALICE to video categories
+- pin bootstrap-sass
+- upgrade invenio-previewer
+
+
 Version 1.0.28 (2022-01-26)
 
 - Fixed banner display in video details page
