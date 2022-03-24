@@ -604,22 +604,22 @@ class Project(CDSDeposit):
 
         return videos_published
 
-    def _publish_new(self, id_=None):
-        """Publish new project and update all the video pointers."""
-        record = super(Project, self)._publish_new(id_=id_)
-        patch = [
-            {
-                "op": "replace",
-                "path": "/_project_id",
-                "value": str(record["recid"]),
-            }
-        ]
-        for video_id in self.video_ids:
-            video = CDSRecord.get_record(
-                record_resolver.resolve(video_id)[0].object_uuid
-            )
-            video.patch(patch).commit()
-        return record
+    # def _publish_new(self, id_=None):
+    #     """Publish new project and update all the video pointers."""
+    #     record = super(Project, self)._publish_new(id_=id_)
+    #     patch = [
+    #         {
+    #             "op": "replace",
+    #             "path": "/_project_id",
+    #             "value": str(record["recid"]),
+    #         }
+    #     ]
+    #     for video_id in self.video_ids:
+    #         video = CDSRecord.get_record(
+    #             record_resolver.resolve(video_id)[0].object_uuid
+    #         )
+    #         video.patch(patch).commit()
+    #     return record
 
     @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
@@ -806,7 +806,7 @@ class Video(CDSDeposit):
         Adds bucket creation immediately on deposit creation.
         """
         kwargs.setdefault("bucket_location", "videos")
-        project_id = data.get("_project_id")
+        project_id = data["_project_id"]
         data["$schema"] = current_jsonschemas.path_to_url(cls._schema)
         # set default copyright
         data.setdefault(
@@ -950,15 +950,6 @@ class Video(CDSDeposit):
         self.generate_duration()
         # generate extra tags for files
         self._create_tags()
-
-        previous_record = None
-        if "pid" in self["_deposit"]:
-            try:
-                _, previous_record = self.fetch_published()
-                previous_record = deepcopy(previous_record)
-            except ResolverError:
-                # video not yet published
-                pass
 
         # publish the video
         video_published = super(Video, self).publish(

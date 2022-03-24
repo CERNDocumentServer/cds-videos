@@ -27,7 +27,8 @@
 from __future__ import absolute_import, print_function
 
 import json
-from time import sleep
+
+from invenio_search import current_search_client
 
 from cds.modules.records.search import RecordVideosSearch
 from flask import g, url_for
@@ -62,7 +63,7 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
     """Test deposit filters and access rights."""
     RecordIndexer().bulk_index([r.id for r in api_project])
     RecordIndexer().process_bulk_queue()
-    sleep(2)
+    current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
@@ -94,7 +95,7 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
             User.query.get(users[1]).email.capitalize()]}
         proj.commit()
         RecordIndexer().index(proj)
-        sleep(2)
+        current_search_client.indices.refresh()
 
         res = client.get(url, headers=json_headers)
 

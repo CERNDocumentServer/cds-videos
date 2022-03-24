@@ -28,9 +28,9 @@ from __future__ import absolute_import, print_function
 
 import json
 
-import pytest
 from flask import url_for
-from time import sleep
+
+from invenio_search import current_search_client
 
 
 def test_load_jsonschema_category(api_app, json_headers):
@@ -44,13 +44,11 @@ def test_load_jsonschema_category(api_app, json_headers):
         assert res.status_code == 200
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_get_keyword_from_url(api_app, db, es, indexer, pidstore,
                               json_headers, keyword_1,
                               keyword_3_deleted):
     """Load jsonschema for keyword."""
-    sleep(3)
-
+    current_search_client.indices.refresh()
     with api_app.test_request_context():
         url = url_for('invenio_records_rest.kwid_list')
 
@@ -64,13 +62,11 @@ def test_get_keyword_from_url(api_app, db, es, indexer, pidstore,
         assert keyw['metadata'] == keyword_1
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_suggest_keyword_from_url(api_app, db, es, indexer, pidstore,
                                   json_headers, keyword_1,
                                   keyword_2, keyword_3_deleted):
     """Load jsonschema for keyword."""
-    sleep(3)
-
+    current_search_client.indices.refresh()
     with api_app.test_request_context():
         url = url_for('invenio_records_rest.kwid_suggest')
 
