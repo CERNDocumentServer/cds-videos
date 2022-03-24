@@ -26,15 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
-from shutil import copyfile
-
 import mock
 import pytest
 import json
 
 from celery import states
 from elasticsearch_dsl.query import Q
-from flask import url_for, current_app
+from flask import url_for
 from flask_security import login_user
 from invenio_accounts.models import User
 from invenio_db import db
@@ -43,12 +41,10 @@ from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
-from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records.models import RecordMetadata
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
 from six import BytesIO
-from time import sleep
 
 from cds.modules.deposit.api import (record_build_url, video_build_url,
                                      video_resolver, Video,
@@ -82,11 +78,11 @@ def test_video_publish_and_edit(api_project, users):
     video_path_2 = project['videos'][1]['$ref']
 
     deposit_project_schema = (
-        'https://cdslabs.cern.ch/schemas/'
+        'https://cds.cern.ch/schemas/'
         'deposits/records/videos/project/project-v1.0.0.json')
-    deposit_video_schema = ('https://cdslabs.cern.ch/schemas/'
+    deposit_video_schema = ('https://cds.cern.ch/schemas/'
                             'deposits/records/videos/video/video-v1.0.0.json')
-    record_video_schema = ('https://cdslabs.cern.ch/schemas/'
+    record_video_schema = ('https://cds.cern.ch/schemas/'
                            'records/videos/video/video-v1.0.0.json')
 
     # check video1 is not published
@@ -352,7 +348,7 @@ def test_video_flows_on_workflow(api_app, db, es, api_project, bucket,
         ]
         RecordIndexer().bulk_index(iter(obj_ids))
         RecordIndexer().process_bulk_queue()
-        sleep(2)
+        current_search_client.indices.refresh()
         # check elasticsearch video_1 state
         resp = client.get(url_for('invenio_deposit_rest.video_list',
                                   q='_deposit.id:{0}'.format(video_1_depid),
@@ -444,7 +440,7 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     video_1.commit()
     db.session.commit()
     CDSRecordIndexer().index(video_1)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     # check elasticsearch
     result = DepositSearch().filter(
@@ -464,7 +460,7 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     video_1.commit()
     db.session.commit()
     CDSRecordIndexer().index(video_1)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     # check elasticsearch
     result = DepositSearch().filter(

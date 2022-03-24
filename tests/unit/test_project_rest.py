@@ -29,10 +29,9 @@ from __future__ import absolute_import, print_function
 import json
 import mock
 
-from time import sleep
 from copy import deepcopy
 
-import pytest
+from invenio_search import current_search_client
 
 from cds.modules.deposit.resolver import get_video_pid, \
     get_project_pid
@@ -49,7 +48,6 @@ from helpers import prepare_videos_for_publish, new_project
 from cds.modules.deposit.indexer import CDSRecordIndexer
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_simple_workflow(
         api_app, db, es, users, location,
         data_file_1, data_file_2,
@@ -62,9 +60,9 @@ def test_simple_workflow(
                    for video in videos)
         assert len(videos) == len(project['videos'])
 
-    project_schema = ('https://cdslabs.cern.ch/schemas/'
+    project_schema = ('https://cds.cern.ch/schemas/'
                       'deposits/records/videos/project/project-v1.0.0.json')
-    video_schema = ('https://cdslabs.cern.ch/schemas/'
+    video_schema = ('https://cds.cern.ch/schemas/'
                     'deposits/records/videos/video/video-v1.0.0.json')
 
     with api_app.test_client() as client:
@@ -104,7 +102,7 @@ def test_simple_workflow(
         # check returned value
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode('utf-8'))
-        assert video_1_dict['metadata']['_project_id'] == project_id
+        assert video_1_dict['metadata']['_project_id'] == str(project_id)
         assert all(link.startswith('http://localhost/deposits/video')
                    for (key, link) in video_1_dict['links'].items()
                    if key not in ['html', 'bucket'])
@@ -142,7 +140,7 @@ def test_simple_workflow(
         # check returned value
         assert res.status_code == 201
         video_2_dict = json.loads(res.data.decode('utf-8'))
-        assert video_2_dict['metadata']['_project_id'] == project_id
+        assert video_2_dict['metadata']['_project_id'] == str(project_id)
         assert all(link.startswith('http://localhost/deposits/video')
                    for (key, link) in video_2_dict['links'].items()
                    if key not in ['html', 'bucket'])
@@ -195,7 +193,7 @@ def test_simple_workflow(
         assert len(video_1_dict['metadata']['_files']) == 1
         myfile = video_1_dict['metadata']['_files'][0]
         assert myfile['links']['self'].startswith(
-            'https://cdslabs.cern.ch/api/files/')
+            'https://localhost:5000/api/files/')
         assert myfile['checksum'] == 'md5:eb88ae1e3666e6fe96a33ea72aab630e'
         assert myfile['completed'] is True
         assert 'version_id' in myfile
@@ -217,7 +215,7 @@ def test_simple_workflow(
         video_1_dict = json.loads(res.data.decode('utf-8'))
         assert video_1_dict['metadata']['_deposit']['status'] == 'published'
         assert video_1_dict['metadata']['recid'] == 1
-        assert video_1_dict['metadata']['_project_id'] == project_id
+        assert video_1_dict['metadata']['_project_id'] == str(project_id)
         # check database: connection project <---> videos
         video_ids = [
             video_1_dict['metadata']['_deposit']['id'],
@@ -282,16 +280,17 @@ def test_simple_workflow(
             project_resolver.resolve(
                 project_dict['metadata']['_deposit']['id'])[1]
         )
+        for video in record_videos:
+            assert video["_project_id"] == "3"
 
         # check indexed record
         RecordIndexer().process_bulk_queue()
-        sleep(2)
+        current_search_client.indices.refresh()
         res = client.get(url_for('invenio_records_rest.recid_list',
                                  headers=json_headers))
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
-        for hit in data['hits']['hits']:
-            assert isinstance(hit['id'], int)
+        assert len(data['hits']['hits']) > 0
 
         # [[ EDIT THE PROJECT ]]
         res = client.post(
@@ -461,7 +460,6 @@ def test_publish_project_check_indexed(
             assert str(project_record.id) in ids
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_boolean_fields_are_indexed(api_app, es, api_project, users,
                                     json_headers):
     """Test boolean fields (i.e. featured and vr) are indexed."""
@@ -477,7 +475,7 @@ def test_boolean_fields_are_indexed(api_app, es, api_project, users,
             headers=json_headers)
 
         RecordIndexer().process_bulk_queue()
-        sleep(2)
+        current_search_client.indices.refresh()
 
         video_1_record = deposit_video_resolver(video_1['_deposit']['id'])
         video_2_record = deposit_video_resolver(video_2['_deposit']['id'])
@@ -488,7 +486,7 @@ def test_boolean_fields_are_indexed(api_app, es, api_project, users,
             assert res.status_code == 200
             data = json.loads(res.data.decode('utf-8'))
             assert len(data['hits']['hits']) == 1
-            assert data['hits']['hits'][0]['id'] == video_record['recid']
+            assert data['hits']['hits'][0]['id'] == str(video_record['recid'])
 
         # Featured
         assert_get_video('featured:true', video_1_record)
@@ -655,7 +653,7 @@ def test_deleted(api_app, es, db, location, api_project, users, json_headers):
         assert len(vids) == 1
 
         # check elasticsearch is up-to-date
-        sleep(2)
+        current_search_client.indices.refresh()
         res = client.get(
             url_for('invenio_deposit_rest.project_list',
                     q='_deposit.id:{0}'.format(pid)),
@@ -683,7 +681,7 @@ def test_deleted(api_app, es, db, location, api_project, users, json_headers):
 
         # check elasticsearch is up-to-date
         CDSRecordIndexer().process_bulk_queue()
-        sleep(2)
+        current_search_client.indices.refresh()
         res = client.get(url_for('invenio_deposit_rest.project_list', q='_deposit.id:{0}'.format(pid)), headers=json_headers)
         assert res.status_code == 200
         data = json.loads(res.data.decode('utf-8'))
@@ -704,28 +702,28 @@ def test_default_order(api_app, es, users,
     (project_1, _, _) = new_project(api_app, users, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'project 1'}
-                                    }, wait=False)
+                                    })
     project_1.commit()
     db.session.commit()
     (project_2, _, _) = new_project(api_app, users, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'alpha'}
-                                    }, wait=False)
+                                    })
     project_2.commit()
     db.session.commit()
     (project_3, _, _) = new_project(api_app, users, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'zeta'}
-                                    }, wait=False)
+                                    })
     project_3.commit()
     db.session.commit()
     (project_4, _, _) = new_project(api_app, users, db, deposit_metadata,
                                     project_data={
                                         'title': {'title': 'project 2'}
-                                    }, wait=False)
+                                    })
     project_4.commit()
     db.session.commit()
-    sleep(2)
+    current_search_client.indices.refresh()
 
     def check_order(data, orders):
         hits = [hit['metadata']['title']['title']
@@ -805,7 +803,7 @@ def test_search_excluded_fields(api_app, es, users, api_project,
         video = project.videos[0]
         indexer = RecordIndexer()
         indexer.index(video)
-        sleep(2)
+        current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
         # check record is indexed
@@ -840,7 +838,7 @@ def test_aggregations(api_app, es, users,
         project_data={
             'title': {'title': 'project 1'},
             'category': 'CERN',
-        }, wait=False)
+        })
     project_1.commit()
     db.session.commit()
     indexer.index(project_1)
@@ -853,7 +851,7 @@ def test_aggregations(api_app, es, users,
             'description': 'fuu',
             'category': 'CERN',
             'type': 'FOOTER',
-        }, wait=False)
+        })
     prepare_videos_for_publish([video_1, video_2])
     login_user(User.query.get(users[0]))
     project_2 = project_2.publish()
@@ -865,7 +863,7 @@ def test_aggregations(api_app, es, users,
         api_app, users, db, deposit_metadata,
         project_data={
             'title': {'title': 'zeta'},
-        }, wait=False)
+        })
     project_3['category'] = 'LHC'
     project_3.commit()
     db.session.commit()
@@ -875,12 +873,12 @@ def test_aggregations(api_app, es, users,
         api_app, users, db, deposit_metadata,
         project_data={
             'title': {'title': 'project 2'},
-        }, wait=False)
+        })
     project_4['category'] = 'ATLAS'
     project_4.commit()
     db.session.commit()
     indexer.index(project_4)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     def check_agg(agg, key, doc_count):
         [res] = list(filter(lambda x: x['key'] == key, agg['buckets']))
@@ -933,7 +931,6 @@ def test_aggregations(api_app, es, users,
         assert len(agg['project_status']['buckets']) == 1
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_sync_access_rights(
         api_app, api_project, es, users,
         location, db, deposit_metadata, json_headers, video_deposit_metadata,
@@ -941,6 +938,7 @@ def test_sync_access_rights(
     """Test default project order."""
     (project, video_1, video_2) = api_project
     video_1_depid = video_1['_deposit']['id']
+    video_2_depid = video_2['_deposit']['id']
     project_depid = project['_deposit']['id']
     # set access rights
     access_rights = {'update': ['my@email.it']}
@@ -1026,6 +1024,9 @@ def test_sync_access_rights(
         assert res.status_code == 200
 
         check_record_access_rights(recid)
+        check_video_access_rights(video_1_depid)
+        check_video_access_rights(video_2_depid)
+        check_video_access_rights(video_3_depid)
         check_project_access_rights(project_depid)
 
     with api_app.test_client() as client:
@@ -1068,7 +1069,7 @@ def test_sync_owners(api_app, es, users,
         project_data={
             'title': {'title': 'project 1'},
             'category': 'CERN',
-        }, wait=False)
+        })
     assert project['_deposit']['owners'] == [users[0]]
     project_depid = project['_deposit']['id']
 
@@ -1154,7 +1155,8 @@ def test_project_edit_links(api_app, app, project_published, json_headers,
     # check project links
     with app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
-        res = client.get(project_link_1, headers=json_headers)
+        res = client.get(
+            project_link_1, headers=json_headers, follow_redirects=True)
         assert res.status_code == 200
 
 

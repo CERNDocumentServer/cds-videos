@@ -37,7 +37,7 @@
     -->
     <button
       ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.record._deposit.pid'
-      ng-disabled="!$ctrl.cdsDepositCtrl.framesReady || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      ng-disabled="(!$ctrl.cdsDepositCtrl.framesReady || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading) && !$ctrl.cdsDepositCtrl.currentMasterFile.size === undefined"
       class="btn btn-default btn-sm" ng-click="form.infoShown = true">
       <i class="fa fa-trash-o"></i>
     </button>

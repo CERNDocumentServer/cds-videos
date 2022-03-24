@@ -29,7 +29,8 @@ from __future__ import absolute_import, print_function
 import json
 
 from flask import url_for
-from time import sleep
+
+from invenio_search import current_search_client
 
 
 def test_load_jsonschema_category(api_app, json_headers):
@@ -47,8 +48,7 @@ def test_get_category_from_url(
         api_app, db, es, indexer, pidstore, json_headers, category_1
 ):
     """Load jsonschema for category."""
-    sleep(3)
-
+    current_search_client.indices.refresh()
     with api_app.test_request_context():
         url = url_for('invenio_records_rest.catid_list')
 
@@ -67,8 +67,7 @@ def test_suggest_category_from_url(
         category_2
 ):
     """Load jsonschema for category."""
-    sleep(3)
-
+    current_search_client.indices.refresh()
     with api_app.test_request_context():
         url = url_for('invenio_records_rest.catid_suggest')
 

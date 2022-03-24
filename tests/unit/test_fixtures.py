@@ -27,9 +27,9 @@
 from __future__ import absolute_import, print_function
 
 import json
+import pytest
 
 import mock
-import pytest
 from cds.modules.fixtures.cli import categories as cli_categories
 from cds.modules.fixtures.cli import keywords as cli_keywords
 from cds.modules.fixtures.cli import licenses as cli_licenses
@@ -43,9 +43,6 @@ from invenio_records.models import RecordMetadata
 from invenio_sequencegenerator.models import TemplateDefinition
 
 
-@pytest.mark.skip(
-    reason='TO BE CHECKED, causes other tests (test_previewer) to fail'
-)
 def test_fixture_licenses(app, script_info, db, es, licenses):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
@@ -70,9 +67,7 @@ def test_fixture_licenses(app, script_info, db, es, licenses):
     assert 'CERN' in ids
 
 
-# TODO: CHECK
-@pytest.mark.skip(reason='TO BE CHECKED')
-def test_fixture_keywords(app, script_info, db, es, cern_keywords):
+def test_fixture_keywords(app, script_info, db, es, location, cern_keywords):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()
@@ -93,23 +88,18 @@ def test_fixture_keywords(app, script_info, db, es, cern_keywords):
         assert 'key_id' in keyword.json
 
 
-# TODO: CHECK
-@pytest.mark.skip(reason='TO BE CHECKED')
-def test_fixture_categories(app, script_info, db, es):
+def test_fixture_categories(app, script_info, db, es, location):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()
     res = runner.invoke(cli_categories, [], obj=script_info)
     assert res.exit_code == 0
     categories = RecordMetadata.query.all()
-    assert len(categories) == 6
+    assert len(categories) == 7
     for category in categories:
         assert 'VIDEO' in category.json['types']
 
 
-@pytest.mark.skip(
-    reason='TO BE CHECKED, causes other tests (test_previewer) to fail'
-)
 def test_fixture_sequence_generator(app, script_info, db):
     """Test load sequence generator fixtures."""
     TemplateDefinition.query.delete()
@@ -121,27 +111,23 @@ def test_fixture_sequence_generator(app, script_info, db):
     assert len(templates) == 2
 
 
-# TODO: CHECK client
-@pytest.mark.skip(
-    reason='TO BE CHECKED, causes other tests (test_previewer) to fail'
-)
-def test_fixture_pages(app, script_info, db, client):
+def test_fixture_pages(app, script_info, db, location, client):
     """Test load pages fixtures."""
     InvenioPages(app)
     Page.query.delete()
     assert len(Page.query.all()) == 0
-    # about_response = client.get('/about')
-    # assert about_response.status_code == 404
+    about_response = client.get('/about', follow_redirects=True)
+    assert about_response.status_code == 404
     runner = CliRunner()
     res = runner.invoke(cli_pages, [], obj=script_info)
     assert res.exit_code == 0
     pages = Page.query.all()
     assert len(pages) == 5
-    # about_response = client.get('/about')
-    # assert about_response.status_code == 200
+    about_response = client.get('/about', follow_redirects=True)
+    assert about_response.status_code == 200
 
 
-@pytest.mark.skip(reason='To long due to file download from cernbox')
+@pytest.mark.skip(reason='TO BE CHECKED if we want to keep it.')
 def test_fixture_records(app, script_info, location, es):
     """Test load demo records."""
     # TODO: once we have a nice subset of test finish the test with more checks

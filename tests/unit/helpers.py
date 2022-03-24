@@ -29,10 +29,8 @@ from __future__ import absolute_import, print_function
 import copy
 import json
 import os
-from time import sleep
 from os.path import join
 
-import mock
 import pkg_resources
 import six
 from celery import shared_task, states
@@ -42,8 +40,8 @@ from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
-from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_records import Record
+from invenio_search import current_search_client
 from six import BytesIO
 
 from cds.modules.deposit.api import Project, Video
@@ -57,7 +55,6 @@ from cds.modules.flows.models import FlowTaskStatus
 
 import random
 import uuid
-from shutil import copyfile
 
 from flask import current_app
 
@@ -239,9 +236,7 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
     ])
 
 
-def new_project(
-        app, users, db, deposit_metadata, project_data=None, wait=None
-):
+def new_project(app, users, db, deposit_metadata, project_data=None):
     """New project with videos."""
     project_data = project_data or {
         'title': {
@@ -295,8 +290,7 @@ def new_project(
     indexer.index(project)
     indexer.index(video_1)
     indexer.index(video_2)
-    if wait is not False:
-        sleep(2)
+    current_search_client.indices.refresh()
     return project, video_1, video_2
 
 

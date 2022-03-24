@@ -25,28 +25,21 @@
 """Test Deposit video REST."""
 
 from __future__ import absolute_import, print_function
+from time import sleep
 
-import random
-import string
 
 import mock
 import copy
 import json
 
-import os
 import pytest
 
-from time import sleep
-
-import arrow
 from flask_principal import RoleNeed, identity_loaded
-from flask_security import login_user
 from invenio_db import db
 from celery.exceptions import Retry
 from flask import url_for
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, \
-    FileInstance
-from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_search import current_search_client
+
 from helpers import prepare_videos_for_publish
 from invenio_accounts.testutils import login_user_via_session
 from invenio_accounts.models import User
@@ -55,7 +48,6 @@ from cds.modules.deposit.api import deposit_video_resolver, \
     deposit_project_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
-from six import BytesIO
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
@@ -108,7 +100,6 @@ def test_video_publish_registering_the_datacite(
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_video_publish_registering_the_datacite_if_fail(
         datacite_mock, api_app, users, location,
         json_headers, json_partial_project_headers, json_partial_video_headers,
@@ -140,9 +131,8 @@ def test_video_publish_registering_the_datacite_if_fail(
         with mock.patch(
                 'invenio_records.api.Record.get_record',
                 side_effect=[Exception, video_1], return_value=video_1):
-            with pytest.raises(Retry):
-                datacite_register.s(
-                    pid_value='1', record_uuid=str(video_1.id)).apply()
+            datacite_register.s(
+                pid_value='1', record_uuid=str(video_1.id)).apply()
 
         assert datacite_mock.called is True
         assert datacite_mock().metadata_post.call_count == 1
@@ -152,7 +142,6 @@ def test_video_publish_registering_the_datacite_if_fail(
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_video_publish_registering_the_datacite_not_local(
         datacite_mock, api_app, users, location,
         json_headers, json_partial_project_headers, json_partial_video_headers,
@@ -210,7 +199,6 @@ def test_video_publish_registering_the_datacite_not_local(
         assert datacite_mock.called is False
 
 
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_video_keywords_serializer(api_app, es, api_project, keyword_1,
                                    keyword_2, users, json_headers):
     """Tet video keywords serializer."""
@@ -325,7 +313,6 @@ def test_video_access_rights_based_admin(
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_video_publish_edit_publish_again(
         datacite_mock, es, api_app, users, location,
         json_headers, json_partial_project_headers, json_partial_video_headers,
@@ -412,17 +399,16 @@ def test_video_publish_edit_publish_again(
 
             # check indexed record
             RecordIndexer().process_bulk_queue()
-            sleep(2)
+            current_search_client.indices.refresh()
             res = client.get(url_for('invenio_records_rest.recid_list',
                                      headers=json_headers))
             assert res.status_code == 200
             data = json.loads(res.data.decode('utf-8'))
             for hit in data['hits']['hits']:
-                assert isinstance(hit['id'], int)
+                assert isinstance(int(hit['id']), int)
 
 
 @mock.patch('invenio_pidstore.providers.datacite.DataCiteMDSClient')
-@pytest.mark.skip(reason='TO BE CHECKED')
 def test_record_video_links(datacite_mock, api_app, es, api_project, users,
                             json_headers):
     """Test record video links."""
@@ -477,82 +463,6 @@ def test_record_video_links(datacite_mock, api_app, es, api_project, users,
             'project_html': url_prj,
             'project_edit': url_prj_edit,
         }
-
-
-@pytest.mark.skip(reason='Review when EOS FUSE is stable enough')
-def test_video_publish_symlinks(location, api_project, api_app, users):
-    """Test video publish creates symlinks."""
-    def _random_string():
-        return ''.join(random.choice(string.ascii_uppercase)
-                       for _ in range(10))
-
-    def _get_symlink_path(record, filename):
-        year = str(arrow.get(record['date']).year)
-
-        base_no_last, _ = os.path.split(location.uri)
-        links_location = os.path.join(base_no_last, 'links')
-
-        return os.path.join(links_location, record['type'],
-                            record['category'], year,
-                            record['report_number'][0],
-                            filename)
-
-    def _upload_video_and_publish(video):
-        bucket_id = video['_buckets']['deposit']
-
-        random_file_content = 'fake video file ' + _random_string()
-        random_bytes = random_file_content.encode('utf-8')
-        video_file = ObjectVersion.create(bucket=bucket_id, key='master.mp4',
-                                          stream=BytesIO(random_bytes))
-        ObjectVersionTag.create(video_file, 'context_type', 'master')
-
-        prepare_videos_for_publish([video])
-        published_video = video.publish()
-        (_, record_published_video) = published_video.fetch_published()
-        return published_video, record_published_video
-
-    def _get_master_file(record):
-        master_file = None
-        for _file in record.get('_files', []):
-            if _file['context_type'] == 'master':
-                master_file = _file
-        return master_file
-
-    def _verify_file_and_symlink(record, file_id, filename):
-        # verify uploaded file exists
-        uploaded_file = FileInstance.get(file_id)
-        uploaded_file_path = uploaded_file.uri
-        assert os.path.exists(uploaded_file_path)
-
-        # verify symlink exists
-        symlink_path = _get_symlink_path(record, filename)
-        assert os.path.exists(symlink_path)
-
-        # verify symlink points to the correct file
-        assert os.path.realpath(symlink_path) == os.path.realpath(
-            uploaded_file_path)
-
-    with api_app.test_request_context():
-        login_user(User.query.get(users[0]))
-
-        (project, video_1, _) = api_project
-        published_video, record = _upload_video_and_publish(video_1)
-        assert len(record['_files']) == 1
-
-        master_file = _get_master_file(record)
-
-        _verify_file_and_symlink(record, master_file['file_id'],
-                                 master_file['key'])
-
-        # edit published video by uploading a new file and re-publishing
-        deposit_video = published_video.edit()
-        published_video, record = _upload_video_and_publish(deposit_video)
-        assert len(record['_files']) == 1
-
-        master_file = _get_master_file(record)
-
-        _verify_file_and_symlink(record, master_file['file_id'],
-                                 master_file['key'])
 
 
 def _deposit_edit(client, json_headers, id):

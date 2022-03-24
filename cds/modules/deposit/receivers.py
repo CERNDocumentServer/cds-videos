@@ -27,10 +27,15 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
+from invenio_db import db
+from invenio_jsonschemas import current_jsonschemas
 
+from cds.modules.deposit.api import record_unbuild_url
 from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
                                      ExtractMetadataTask, TranscodeVideoTask)
+from cds.modules.records.resolver import record_resolver
 
+from .api import Project
 from .indexer import CDSRecordIndexer
 from .tasks import datacite_register
 
@@ -38,6 +43,27 @@ from .tasks import datacite_register
 def index_deposit_after_action(sender, action=None, pid=None, deposit=None):
     """Index the record after publishing."""
     CDSRecordIndexer().index(deposit, action)
+
+
+def update_project_id_after_publish(sender, action=None, pid=None,
+                                    deposit=None):
+    """Update the project id for each video on publish."""
+    if action != "publish":
+        return
+
+    project_schema = current_jsonschemas.path_to_url(Project._schema)
+    is_project = deposit.get("$schema") == project_schema
+    if not is_project:
+        return
+
+    # project is published after any other video
+    for video_ref in deposit._video_refs:
+        pid, video = record_resolver.resolve(record_unbuild_url(video_ref))
+        if video["_project_id"] != str(deposit["recid"]):
+            video["_project_id"] = str(deposit["recid"])
+            video.commit()
+
+    db.session.commit()
 
 
 def datacite_register_after_publish(
