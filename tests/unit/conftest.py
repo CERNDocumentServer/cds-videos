@@ -36,15 +36,17 @@ from os.path import dirname, join
 from time import sleep
 from uuid import uuid4
 
-import jsonresolver
-import mock
 import pytest
 import requests
-from celery import chain, group, shared_task
+from celery import shared_task
 from celery.messaging import establish_connection
 from elasticsearch import RequestError
 from flask.cli import ScriptInfo
 from flask_security import login_user
+from helpers import (create_category, create_keyword, create_record,
+                     endpoint_get_schema, new_project,
+                     prepare_videos_for_publish, rand_md5, rand_version_id,
+                     sse_failing_task, sse_simple_add, sse_success_task)
 from invenio_access.models import ActionRoles
 from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
@@ -58,25 +60,18 @@ from invenio_indexer.api import RecordIndexer
 from invenio_oauth2server.models import Token
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier
-from invenio_pidstore.providers.recordid import RecordIdProvider
 from invenio_previewer import InvenioPreviewer
 from invenio_search import InvenioSearch, current_search, current_search_client
 from invenio_sequencegenerator.api import Template
 from six import BytesIO
-from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.functions import create_database, database_exists
-from werkzeug.routing import Rule
 
 from cds.modules.deposit.api import Project, Video
 from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
-from helpers import (create_category, create_keyword, create_record,
-                     endpoint_get_schema, new_project,
-                     prepare_videos_for_publish, rand_md5, rand_version_id,
-                     sse_failing_task, sse_simple_add, sse_success_task)
 
 
-@pytest.yield_fixture(scope='session', autouse=True)
+@pytest.yield_fixture(scope='module', autouse=True)
 def app():
     """Flask application fixture."""
     instance_path = tempfile.mkdtemp()
@@ -89,15 +84,15 @@ def app():
     app = create_app(
         DEBUG_TB_ENABLED=False,
         TESTING=True,
-        CELERY_ALWAYS_EAGER=True,
+        CELERY_TASK_ALWAYS_EAGER=True,
         CELERY_RESULT_BACKEND='cache',
         CELERY_CACHE_BACKEND='memory',
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_TASK_TRACK_STARTED=True,
-        JSONSCHEMAS_HOST='cdslabs.cern.ch',
+        SITE_URL="https://localhost:5000",
+        JSONSCHEMAS_HOST='cds.cern.ch',
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
-        # FIXME
         ACCOUNTS_JWT_ENABLE=False,
         THEOPLAYER_LICENCE_KEY='CHANGE_ME',
         PRESERVE_CONTEXT_ON_EXCEPTION=False
@@ -115,8 +110,8 @@ def app():
 def previewer_deposit(app):
     """."""
     # FIXME workaround for previewer tests because they require app and api_app
-    from invenio_records_rest import InvenioRecordsREST
     from invenio_deposit import InvenioDepositREST
+    from invenio_records_rest import InvenioRecordsREST
     from invenio_records_rest.utils import PIDConverter
     backup = app.debug
     app.debug = False
@@ -694,7 +689,7 @@ def category_2(api_app, es, indexer, pidstore):
 
 
 @pytest.fixture()
-def keyword_1(api_app, es, indexer, pidstore):
+def keyword_1(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '1',
@@ -704,7 +699,7 @@ def keyword_1(api_app, es, indexer, pidstore):
 
 
 @pytest.fixture()
-def keyword_2(api_app, es, indexer, pidstore):
+def keyword_2(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '2',
@@ -714,7 +709,7 @@ def keyword_2(api_app, es, indexer, pidstore):
 
 
 @pytest.fixture()
-def keyword_3_deleted(api_app, es, indexer, pidstore):
+def keyword_3_deleted(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
         'key_id': '3',
@@ -781,7 +776,7 @@ def indexed_videos(es, indexer, test_video_records):
     """Get a function to wait for records to be flushed to index."""
     RecordIndexer().bulk_index([record.id for _, record in test_video_records])
     RecordIndexer().process_bulk_queue()
-    sleep(2)
+    current_search_client.indices.refresh()
     yield test_video_records
 
 

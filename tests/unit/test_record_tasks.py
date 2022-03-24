@@ -31,6 +31,8 @@ import json
 
 from time import sleep
 from invenio_records.models import RecordMetadata
+from invenio_search import current_search_client
+
 from cds.modules.records.tasks import _get_keywords_from_api, \
     _update_existing_keywords, _delete_not_existing_keywords, \
     keywords_harvesting
@@ -190,7 +192,7 @@ def test_keyword_harvesting_one_time(db, cern_keywords, location):
     for keyword in keywords:
         keywords_db.append(create_keyword(data=keyword))
     assert RecordMetadata.query.count() == 5
-    sleep(2)
+    current_search_client.indices.refresh()
     return_value = type('test', (object, ), {
         'text': json.dumps(cern_keywords)}
     )
@@ -247,7 +249,7 @@ def test_keyword_harvesting_deleted_keywords(db, cern_keywords, location):
     for keyword in keywords:
         keywords_db.append(create_keyword(data=keyword))
     assert RecordMetadata.query.count() == 5
-    sleep(2)
+    current_search_client.indices.refresh()
     return_value = type('test', (object, ), {
         'text': json.dumps(cern_keywords)}
     )
@@ -264,7 +266,7 @@ def test_keyword_harvesting_deleted_keywords(db, cern_keywords, location):
         #  deleted = RecordMetadata.query.filter_by(id=ids[0]).first()
 
     RecordIndexer().index(deleted)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     # restore a key
     cern_keywords['tags'].append({

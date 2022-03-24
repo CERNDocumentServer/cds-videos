@@ -22,4 +22,4 @@
 pydocstyle --match-dir='[^\.|(cds\/modules\/record_split)].*' cds && \
 isort -rc -c -df **/*.py && \
 check-manifest --ignore ".ci-*,package-lock.json" && \
-py.test tests/unit/
+py.test tests/unit

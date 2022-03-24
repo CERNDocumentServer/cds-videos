@@ -30,14 +30,11 @@ from invenio_base.signals import app_loaded
 from invenio_deposit.signals import post_action
 from invenio_indexer.signals import before_record_index
 
-from .receivers import index_deposit_after_action, \
-    datacite_register_after_publish, register_celery_class_based_tasks
 from .indexer import cdsdeposit_indexer_receiver
-from .receivers import (
-    datacite_register_after_publish,
-    index_deposit_after_action,
-    register_celery_class_based_tasks
-)
+from .receivers import (datacite_register_after_publish,
+                        index_deposit_after_action,
+                        register_celery_class_based_tasks,
+                        update_project_id_after_publish)
 
 
 class CDSDepositApp(object):
@@ -59,6 +56,8 @@ class CDSDepositApp(object):
         # index records after published
         # note: if publish a project -> index also videos
         post_action.connect(index_deposit_after_action,
+                            sender=app, weak=False)
+        post_action.connect(update_project_id_after_publish,
                             sender=app, weak=False)
         # if it's a project/video, expands information before index
         before_record_index.connect(

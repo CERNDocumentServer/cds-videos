@@ -35,6 +35,8 @@ import datetime
 from invenio_db import db
 from copy import deepcopy
 from flask_security import login_user
+from invenio_search import current_search_client
+
 from cds.modules.records.permissions import has_update_permission
 from cds.modules.deposit.api import (record_build_url, Project, Video,
                                      video_build_url,
@@ -48,7 +50,6 @@ from invenio_pidstore.errors import PIDInvalidAction
 from jsonschema.exceptions import ValidationError
 from cds.modules.deposit.errors import DiscardConflict
 from invenio_records.models import RecordMetadata
-from time import sleep
 from invenio_deposit.search import DepositSearch
 from elasticsearch_dsl.query import Q
 
@@ -561,7 +562,7 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     project.commit()
     db.session.commit()
     CDSRecordIndexer().index(project)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     # check elasticsearch
     result = DepositSearch().filter(
@@ -578,7 +579,7 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     project.commit()
     db.session.commit()
     CDSRecordIndexer().index(project)
-    sleep(2)
+    current_search_client.indices.refresh()
 
     # check elasticsearch
     result = DepositSearch().filter(

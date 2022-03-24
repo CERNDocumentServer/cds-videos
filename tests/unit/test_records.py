@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import json
 import re
 from functools import partial
-from time import sleep
 
 import mock
 from flask import url_for
@@ -37,7 +36,7 @@ from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_db import db
 from invenio_indexer.api import RecordIndexer
-from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_search import current_search_client
 
 from helpers import assert_hits_len, get_files_metadata
 
@@ -84,8 +83,8 @@ def test_records_ui_export(app, project_published, video_record_metadata):
         return data[data_start:data_end]
 
     def check_url(partial_url, status_code):
-        res = client.get(partial_url())
-        res_raw = client.get(partial_url(raw=True))
+        res = client.get(partial_url(), follow_redirects=True)
+        res_raw = client.get(partial_url(raw=True), follow_redirects=True)
         assert res.status_code == status_code
         assert res_raw.status_code == status_code
         return res.data
@@ -131,7 +130,7 @@ def test_records_rest(api_app, users, es, api_project_published, vtt_headers,
     record_video.update(extra_metadata)
     record_video.commit()
     indexer.index(record_video)
-    sleep(1)
+    current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)

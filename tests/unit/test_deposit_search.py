@@ -24,12 +24,12 @@
 """Deposit search tests."""
 
 import json
-from time import sleep
 
 from flask import url_for
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
+from invenio_search import current_search_client
 
 from helpers import new_project
 
@@ -43,7 +43,7 @@ def test_aggregations(api_app, es, users, location,
 
     RecordIndexer().bulk_index([project_1.id, project_2.id])
     RecordIndexer().process_bulk_queue()
-    sleep(2)
+    current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
         login_user_via_session(client, email=User.query.get(users[0]).email)
