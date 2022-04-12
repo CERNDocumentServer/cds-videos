@@ -25,6 +25,13 @@
 Changes
 =======
 
+Version 1.0.30 (2022-04-12)
+
+- fix bug with delete button when upload failed
+- fix bucket assignment when videos were published from project
+- resume necessary tests
+
+
 Version 1.0.29 (2022-03-09)
 
 - add ALICE to video categories
