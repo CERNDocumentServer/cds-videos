@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.31 (2022-04-27)
+
+- update sequence_number from video schema to be a list
+
 Version 1.0.30 (2022-04-12)
 
 - fix bug with delete button when upload failed
