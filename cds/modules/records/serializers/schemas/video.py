@@ -94,7 +94,7 @@ class PhysicalMediumSchema(StrictKeysSchema):
     location = fields.Str()
     medium_standard = fields.Str()
     note = fields.Str()
-    sequence_number = fields.Str()
+    sequence_number = fields.List(fields.Str, many=True)
     shelf = fields.Str()
 
 
