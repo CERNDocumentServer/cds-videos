@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015, 2018 CERN.
+# Copyright (C) 2014-2022 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,4 +24,4 @@
 
 """CDS version."""
 
-__version__ = "1.0.31"
+__version__ = "1.0.32"

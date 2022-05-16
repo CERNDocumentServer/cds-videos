@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.32 (2022-05-16)
+
+- change the preview HTML title tag with the current video title
+- add an extra check to the transcoding task to avoid to download
+  the same transcoded video files multiple times.
+
 Version 1.0.31 (2022-04-27)
 
 - update sequence_number from video schema to be a list
