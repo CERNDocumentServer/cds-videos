@@ -49,6 +49,7 @@ class VideoExtension(object):
         """Render appropriate template with embed flag."""
         record = getattr(file, 'record')
         filename = getattr(file, 'filename', '')
+        title = record["title"]["title"]
         file_extension = filename.split('.')[-1] \
             if filename and '.' in filename else ''
         report_number = record['report_number'][0] \
@@ -64,6 +65,7 @@ class VideoExtension(object):
             report_number=report_number,
             record=record,
             embed_config=embed_config,
+            title=title,
         )
 
 

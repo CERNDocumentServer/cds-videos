@@ -345,6 +345,13 @@ def on_transcoding_completed(
     set_revoke_handler(
         lambda: _update_task_on_abrupt_stop(flow_task, opencast_event_id)
     )
+    # This check is needed to avoid a potential race condition caused when
+    # many files are being checked at the same time in opencast, it might
+    # occur that while checking the status, this task finished but the task
+    # was fetched by check_transcoding_status and might trigger this
+    # celery task again
+    if flow_task.status != FlowTaskStatus.STARTED:
+        return
     preset_quality = flow_task.payload["preset_quality"]
     master_object_version = as_object_version(
         flow_task.payload["master_id"]
