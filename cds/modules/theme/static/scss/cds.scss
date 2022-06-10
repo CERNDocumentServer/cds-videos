@@ -755,6 +755,18 @@ a.cds-anchor:hover{
   }
 }
 
+// ensure that portrait images are sized correctly
+div[cds-search-results] {
+  .cds-video-title {
+    img {
+      width: 100%;
+      height: 13em;
+      object-fit: contain;
+      background-color: black;
+    }
+  }
+}
+
 .cds-video-title-with-play-button {
   position: relative;
   width: 100%;
@@ -858,9 +870,6 @@ a.cds-anchor:hover{
 }
 
 // Brief
-.cds-video-title {
-  position: relative;
-}
 
 .cds-video-duration {
   position: absolute;

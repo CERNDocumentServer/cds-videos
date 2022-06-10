@@ -22,8 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from __future__ import absolute_import
-
 import os
 import shutil
 import tempfile
@@ -37,6 +35,9 @@ from invenio_files_rest.models import (
 )
 
 from ..xrootd.utils import file_opener_xrootd
+
+
+VIDEOS_FILES_TMP_FOLDER = os.path.join(tempfile.gettempdir(), "videos")
 
 
 def _rename_key(object_version):
@@ -104,27 +105,21 @@ def move_file_into_local(obj, delete=True):
     if os.path.exists(obj.file.uri):
         yield obj.file.uri
     else:
-        temp_location = obj.get_tags().get("temp_location", None)
-        if not temp_location:
-            temp_folder = tempfile.mkdtemp()
-            temp_location = os.path.join(temp_folder, "data")
+        tmp_path = os.path.join(VIDEOS_FILES_TMP_FOLDER, str(obj.file_id))
+        if not os.path.exists(tmp_path):
+            os.makedirs(tmp_path)
 
-            with open(temp_location, "wb") as dst:
+        filepath = os.path.join(tmp_path, "data")
+        if not os.path.exists(filepath):
+            # copy the file locally
+            with open(filepath, "wb") as dst:
                 shutil.copyfileobj(file_opener_xrootd(obj.file.uri, "rb"), dst)
 
-            ObjectVersionTag.create(obj, "temp_location", temp_location)
-            db.session.commit()
-        else:
-            temp_folder = os.path.dirname(temp_location)
         try:
-            yield temp_location
+            yield filepath
         except:
-            shutil.rmtree(temp_folder)
-            ObjectVersionTag.delete(obj, "temp_location")
-            db.session.commit()
+            shutil.rmtree(tmp_path)
             raise
         else:
             if delete:
-                shutil.rmtree(temp_folder)
-                ObjectVersionTag.delete(obj, "temp_location")
-                db.session.commit()
+                shutil.rmtree(tmp_path)

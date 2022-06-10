@@ -223,6 +223,7 @@ setup(
             'cds_deposit_tasks = cds.modules.deposit',
             'cds_opencast_tasks = cds.modules.opencast.tasks',
             'cds_records_tasks = cds.modules.records',
+            'cds_maintenance = cds.modules.maintenance.tasks',
         ],
         'invenio_previewer.previewers': [
             'cds_video = cds.modules.previewer.extensions.video:video',

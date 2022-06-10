@@ -29,7 +29,6 @@ import logging
 from collections import defaultdict
 
 from celery import chain as celery_chain
-from celery.result import AsyncResult
 from invenio_db import db
 from sqlalchemy.orm.attributes import flag_modified as db_flag_modified
 
@@ -111,7 +110,8 @@ class AVCFlowCeleryTasks:
             file_download_task = cls.create_task(DownloadTask, payload)
             celery_tasks.append(file_download_task)
 
-        metadata_extract_task = cls.create_task(ExtractMetadataTask, payload)
+        metadata_extract_task = cls.create_task(ExtractMetadataTask, payload,
+                                                delete_copied=False)
         celery_tasks.append(metadata_extract_task)
 
         frames_extract_task = cls.create_task(ExtractFramesTask, payload)
@@ -267,8 +267,9 @@ class FlowService:
         """Stop the flow."""
         for task in self.flow_metadata.tasks:
             if task.status in [FlowTaskStatus.STARTED, FlowTaskStatus.PENDING]:
-                celery_task_id = task.payload["celery_task_id"]
-                CeleryTask.stop_task(celery_task_id)
+                celery_task_id = task.payload.get("celery_task_id")
+                if celery_task_id:
+                    CeleryTask.stop_task(celery_task_id)
                 task.status = FlowTaskStatus.CANCELLED
 
         deposit_id = self.flow_metadata.deposit_id

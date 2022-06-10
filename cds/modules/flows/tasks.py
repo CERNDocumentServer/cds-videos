@@ -26,12 +26,10 @@
 from __future__ import absolute_import
 
 import json
-import logging
 import os
 import shutil
 import signal
 import tempfile
-import time
 
 import jsonpatch
 import requests
@@ -390,20 +388,19 @@ class ExtractMetadataTask(AVCTask):
 
         # Delete tmp file if any
         obj = as_object_version(version_id)
-        temp_location = obj.get_tags().get("temp_location", None)
-        if temp_location:
-            shutil.rmtree(temp_location)
-            ObjectVersionTag.delete(obj, "temp_location")
-            db.session.commit()
+        tmp_path = os.path.join(tempfile.gettempdir(), obj.file_id)
+        if os.path.exists(tmp_path):
+            shutil.rmtree(tmp_path)
 
     @classmethod
-    def get_metadata_from_video_file(cls, object_=None, uri=None):
+    def get_metadata_from_video_file(cls, object_=None, uri=None,
+                                     delete_copied=True):
         """Get metadata from video file."""
         # Extract video's metadata using `ff_probe`
         if uri:
             metadata = ff_probe_all(uri)
         else:
-            with move_file_into_local(object_) as url:
+            with move_file_into_local(object_, delete=delete_copied) as url:
                 metadata = ff_probe_all(url)
         return dict(metadata["format"], **metadata["streams"][0])
 
@@ -428,6 +425,11 @@ class ExtractMetadataTask(AVCTask):
 
         :param self: reference to instance of task base class
         """
+        # delete copied video file after metadata extraction.
+        # when chained with the extract frames, it should be False to speed
+        # up the process
+        delete_copied = kwargs.pop("delete_copied", True)
+
         pid = PersistentIdentifier.get("depid", self.deposit_id)
         recid = str(pid.object_uuid)
 
@@ -444,7 +446,8 @@ class ExtractMetadataTask(AVCTask):
         self.log("Started task {0}".format(kwargs["task_id"]))
 
         metadata = self.get_metadata_from_video_file(
-            object_=self.object_version, uri=uri
+            object_=self.object_version, uri=uri,
+            delete_copied=delete_copied
         )
         try:
             extracted_dict = self.create_metadata_tags(
@@ -639,7 +642,7 @@ class ExtractFramesTask(AVCTask):
     ):
         """Create frames in temporary files."""
         # Generate frames
-        with move_file_into_local(object_) as url:
+        with move_file_into_local(object_, delete=True) as url:
             ff_frames(
                 input_file=url,
                 start=start_time,

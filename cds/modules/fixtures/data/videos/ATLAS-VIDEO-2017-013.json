@@ -1,14 +1,12 @@
 {
-  "$schema": "https://cds.cern.ch/schemas/records/videos/project/project-v1.0.0.json",
+  "$schema": "https://localhost:5000/schemas/records/videos/project/project-v1.0.0.json",
   "_access": {
     "update": []
   },
   "category": "ATLAS",
   "contributors": [
     {
-      "affiliations": [
-        "Universita degli Studi di Udine (IT)"
-      ],
+      "affiliations": ["Universita degli Studi di Udine (IT)"],
       "email": "emma.ward@cern.ch",
       "ids": [
         {
@@ -27,7 +25,6 @@
       "name": "ATLAS Collaboration",
       "role": "Producer"
     }
-
   ],
   "date": "2017-05-19",
   "description": "Tales of the tile calorimeter.",
@@ -63,9 +60,7 @@
   ],
   "publication_date": "2017-06-02",
   "recid": 1,
-  "report_number": [
-    "ATLAS-VIDEO-2017-013"
-  ],
+  "report_number": ["ATLAS-VIDEO-2017-013"],
   "title": {
     "title": "Tales of the tile calorimeter"
   },
@@ -73,13 +68,11 @@
   "type": "VIDEO",
   "videos": [
     {
-      "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+      "$schema": "https://localhost:5000/schemas/records/videos/video/video-v1.0.0.json",
       "category": "ATLAS",
       "contributors": [
         {
-          "affiliations": [
-            "Universita degli Studi di Udine (IT)"
-          ],
+          "affiliations": ["Universita degli Studi di Udine (IT)"],
           "email": "emma.ward@cern.ch",
           "ids": [
             {
@@ -143,9 +136,7 @@
       "publication_date": "2017-06-02",
       "recid": 2,
       "related_links": [],
-      "report_number": [
-        "ATLAS-VIDEO-2017-013-001"
-      ],
+      "report_number": ["ATLAS-VIDEO-2017-013-001"],
       "title": {
         "title": "Tales of the Tile Calorimeter"
       },
@@ -345,7 +336,6 @@
           }
         ]
       }
-
     }
   ]
 }
