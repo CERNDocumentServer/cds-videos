@@ -146,6 +146,10 @@ CELERY_BEAT_SCHEDULE = {
         # Every 12 minutes, not to be at the same time as the others
         "schedule": timedelta(minutes=12),
     },
+    "clean-tmp-videos": {
+        "task": "cds.modules.maintenance.tasks.clean_tmp_videos",
+        "schedule": crontab(minute=0, hour=3),  # at 3 am
+    },
     # 'file-integrity-report': {
     #     'task': 'cds.modules.records.tasks.file_integrity_report',
     #     'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
@@ -183,8 +187,8 @@ CACHE_IS_AUTHENTICATED_CALLBACK = (
 # IIIF
 ###############################################################################
 
-IIIF_CACHE_REDIS_URL = "redis://localhost:6379/0"
-IIIF_CACHE_TIME = "604800"  # 7 days
+IIIF_CACHE_REDIS_URL = "redis://localhost:16379/0"
+IIIF_CACHE_TIME = "36000"  # 10 hours
 IIIF_CACHE_HANDLER = "flask_iiif.cache.redis:ImageRedisCache"
 
 ###############################################################################

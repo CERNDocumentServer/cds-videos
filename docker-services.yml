@@ -61,11 +61,18 @@ services:
       - "80"
       - "443"
   cache:
-    image: redis
+    image: redis:6
     restart: "always"
     read_only: true
     ports:
       - "6379:6379"
+  cache-iiif:
+    image: redis:6
+    restart: "always"
+    read_only: true
+    ports:
+      - "16379:6379"
+    command: redis-server --save ""
   db:
     image: postgres:12.5
     restart: "always"
