@@ -25,6 +25,14 @@
 Changes
 =======
 
+Version 1.0.33 (2022-06-14)
+
+- copy video file to process in a temporary folder and use it for
+  extract metadata and frames to avoid to copy it multiple times
+- fix a layout issue of thumbnails for portrait videos
+- fix an exception happening when an old video do not have the
+  celery_task_id field in the metadata
+
 Version 1.0.32 (2022-05-16)
 
 - change the preview HTML title tag with the current video title
@@ -41,13 +49,11 @@ Version 1.0.30 (2022-04-12)
 - fix bucket assignment when videos were published from project
 - resume necessary tests
 
-
 Version 1.0.29 (2022-03-09)
 
 - add ALICE to video categories
 - pin bootstrap-sass
 - upgrade invenio-previewer
-
 
 Version 1.0.28 (2022-01-26)
 
