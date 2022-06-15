@@ -386,12 +386,6 @@ class ExtractMetadataTask(AVCTask):
                 "Failed to apply JSON Patch to deposit %s: %s", recid, c
             )
 
-        # Delete tmp file if any
-        obj = as_object_version(version_id)
-        tmp_path = os.path.join(tempfile.gettempdir(), obj.file_id)
-        if os.path.exists(tmp_path):
-            shutil.rmtree(tmp_path)
-
     @classmethod
     def get_metadata_from_video_file(cls, object_=None, uri=None,
                                      delete_copied=True):
