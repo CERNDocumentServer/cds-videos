@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.34 (2022-06-15)
+
+- removes file deletion when cleaning extract metadata task
+
 Version 1.0.33 (2022-06-14)
 
 - copy video file to process in a temporary folder and use it for
