@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.35 (2022-07-05)
+
+- fixes display of the e-groups in the search of the form
+
 Version 1.0.34 (2022-06-15)
 
 - removes file deletion when cleaning extract metadata task
