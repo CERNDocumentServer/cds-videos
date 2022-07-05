@@ -212,28 +212,35 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators) {
     // Response handler
     function (data, query) {
       var userInput = authorFromUser(query);
-      var suggestions = data.data.map(function (author) {
+      var suggestions = data.data.map(function (hit) {
         var valueObj = {};
-        valueObj.name = author.sn + ", " + author.givenName;
-        if (author.cernInstituteName) {
-          valueObj.affiliations = [author.cernInstituteName];
+        // Data structure depends on the type of the object
+        if (hit.cernAccountType) {
+          // If is a person
+          valueObj.name = hit.sn + ", " + hit.givenName;
+          // rename employeeID
+          valueObj.ids = _.reduce(
+            {
+              employeeID: "cern",
+            },
+            function (acc, newName, oldName) {
+              if (hit.hasOwnProperty(oldName)) {
+                acc.push({ value: hit[oldName], source: newName });
+              }
+              return acc;
+            },
+            []
+          );
+        } else {
+          // If is an e-group
+          valueObj.name = hit.displayName;
         }
-        if (author.mail) {
-          valueObj.email = author.mail;
+        if (hit.cernInstituteName) {
+          valueObj.affiliations = [hit.cernInstituteName];
         }
-        // rename employeeID
-        valueObj.ids = _.reduce(
-          {
-            employeeID: "cern",
-          },
-          function (acc, newName, oldName) {
-            if (author.hasOwnProperty(oldName)) {
-              acc.push({ value: author[oldName], source: newName });
-            }
-            return acc;
-          },
-          []
-        );
+        if (hit.mail) {
+          valueObj.email = hit.mail;
+        }
         return formAuthor(valueObj);
       });
 
