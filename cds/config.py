@@ -1463,7 +1463,7 @@ CDS_OPENCAST_QUALITIES = {
 }
 """List of qualities available on Opencast server."""
 
-CDS_OPENCAST_HOST = "https://ocweb01-test2.cern.ch"
+CDS_OPENCAST_HOST = "https://changeme"
 CDS_OPENCAST_API_USERNAME = "changeme"
 CDS_OPENCAST_API_PASSWORD = "changeme"
 CDS_OPENCAST_SERIES_ID = "changeme"
