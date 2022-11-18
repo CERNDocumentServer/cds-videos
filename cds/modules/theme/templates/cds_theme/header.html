@@ -75,7 +75,7 @@
                   <li><a href=" {{url_for_security('login', next=request.path)}}"><strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong></a></li>
                 {%- else %}
                   <li>
-                    <a href="{{url_for('invenio_oauthclient.login', remote_app='cern', next=request.path)}}">
+                    <a href="{{url_for('invenio_oauthclient.login', remote_app='cern_openid', next=request.path)}}">
                        <strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong>
                     </a>
                   </li>
@@ -93,7 +93,7 @@
                     </ul>
                   </li>
                   {%- else %}
-                  <li><a href=" {{url_for_security('logout')}}" class="btn btn-default"><i class="fa fa-sign-out"></i> {{_('Log out')}}</a></li>
+                  <li><a href="{{url_for_security('logout')}}" class="btn btn-default"><i class="fa fa-sign-out"></i> {{_('Log out')}}</a></li>
                 {%- endif %}
               {%- endif %}
             {%- endif %}
