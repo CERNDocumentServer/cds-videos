@@ -38,12 +38,12 @@ from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_deposit.config import DEPOSIT_REST_FACETS
 from invenio_deposit.scopes import write_scope
 from invenio_deposit.utils import check_oauth2_scope
-from invenio_oauthclient.contrib import cern
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.deposit.indexer import CDSRecordIndexer
+from .modules.oauthclient.cern_openid import REMOTE_APP
 from .modules.records.permissions import (deposit_delete_permission_factory,
                                           deposit_read_permission_factory,
                                           deposit_update_permission_factory,
@@ -903,7 +903,7 @@ SECURITY_LOGIN_SALT = "CHANGE_ME"
 # See details on
 # http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
 
-APP_ALLOWED_HOSTS = ["localhost"]
+APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
     "default-src": ["'self'"],
     "script-src": [
@@ -955,14 +955,23 @@ SETTINGS_TEMPLATE = "invenio_theme/page_settings.html"
 # OAuth
 ###############################################################################
 
-OAUTHCLIENT_REMOTE_APPS = dict(
-    cern=cern.REMOTE_APP,
+OAUTHCLIENT_CERN_OPENID_USERINFO_URL = (
+    "https://auth.cern.ch/auth/realms/cern/"
+    "protocol/openid-connect/userinfo"
 )
+OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user"]
+
 #: Credentials for CERN OAuth (must be changed to work).
-CERN_APP_CREDENTIALS = dict(
+CERN_APP_OPENID_CREDENTIALS = dict(
     consumer_key=os.environ.get("OAUTH_CERN_CONSUMER_KEY", "changeme"),
     consumer_secret=os.environ.get("OAUTH_CERN_CONSUMER_SECRET", "changeme"),
 )
+OAUTHCLIENT_REMOTE_APPS = dict(
+    cern_openid=REMOTE_APP
+)
+
+## Needed for populating the user profiles when users login via CERN Openid
+USERPROFILES_EXTEND_SECURITY_FORMS=True
 
 # Set the template
 OAUTH2SERVER_SETTINGS_TEMPLATE = "cds_theme/settings.html"

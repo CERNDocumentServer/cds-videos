@@ -74,8 +74,6 @@ extras_require['xrootd'] = [
 setup_requires = [
     'Babel>=2.4.0',
     'Flask-BabelEx>=0.9.3',
-    'setuptools>=20.6.7',
-    'pytest-runner>=2.7.0',
 ]
 
 install_requires = [
@@ -187,7 +185,7 @@ setup(
             'cds_search_ui = cds.modules.search_ui.views:blueprint',
             'cds_theme = cds.modules.theme.views:blueprint',
             'cds_redirector = cds.modules.redirector.views:blueprint',
-            'cern_oauth = invenio_oauthclient.contrib.cern:cern_oauth_blueprint',
+            'cern_oauth = cds.modules.oauthclient.cern_openid:cern_openid_blueprint',
         ],
         'invenio_config.module': [
             'cds = cds.config',
