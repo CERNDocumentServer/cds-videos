@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 1.0.37 (2022-12-06)
+
+- Integrate cern openid
+- Add fix for user groups
+
 Version 1.0.35 (2022-07-05)
 
 - fixes display of the e-groups in the search of the form
