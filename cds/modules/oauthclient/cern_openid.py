@@ -217,12 +217,15 @@ def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
     account.extra_data.update(roles=roles, updated=updated.isoformat(), **extra_data)
 
     # return roles and user's groups
-    return roles + extra_data["groups"]
+    return (roles, extra_data["groups"])
 
 
-def extend_identity(identity, roles):
+def extend_identity(identity, roles, groups):
     """Extend identity with roles based on CERN groups."""
-    provides = set([UserNeed(current_user.email)] + [RoleNeed(name) for name in roles])
+    provides = set(
+        [UserNeed(current_user.email)] + [RoleNeed(name) for name in roles] +
+        [RoleNeed("{0}@cern.ch".format(group)) for group in groups]
+    )
     identity.provides |= provides
     key = current_app.config.get(
         "OAUTHCLIENT_CERN_OPENID_SESSION_KEY",
@@ -354,9 +357,9 @@ def account_setup(remote, token, resp):
 
         # Set CERN person ID in extra_data.
         token.remote_account.extra_data = {"external_id": external_id}
-        roles = account_roles_and_extra_data(token.remote_account, resource)
+        (roles, groups) = account_roles_and_extra_data(token.remote_account, resource)
         assert not isinstance(g.identity, AnonymousIdentity)
-        extend_identity(g.identity, roles)
+        extend_identity(g.identity, roles, groups)
 
         user = token.remote_account.user
 
@@ -388,6 +391,7 @@ def on_identity_changed(sender, identity):
         user_id=current_user.get_id(), client_id=client_id
     )
     roles = []
+    groups = []
 
     if remote_account and not logged_in_via_token:
         refresh = current_app.config.get(
@@ -396,19 +400,19 @@ def on_identity_changed(sender, identity):
         )
         if refresh:
             resource = get_resource(remote)
-            roles.extend(
-                account_roles_and_extra_data(
-                    remote_account, resource, refresh_timedelta=refresh
-                )
+            (roles, groups) =  account_roles_and_extra_data(
+                remote_account, resource, refresh_timedelta=refresh
             )
+            roles.extend(roles)
+            groups.extend(groups)
         else:
             roles.extend(remote_account.extra_data["roles"])
-            roles.extend(remote_account.extra_data["groups"])
+            groups.extend(remote_account.extra_data["groups"])
     elif remote_account and logged_in_via_token:
         roles.extend(remote_account.extra_data["roles"])
-        roles.extend(remote_account.extra_data["groups"])
+        groups.extend(remote_account.extra_data["groups"])
 
-    extend_identity(identity, roles)
+    extend_identity(identity, roles, groups)
 
 
 @identity_loaded.connect
