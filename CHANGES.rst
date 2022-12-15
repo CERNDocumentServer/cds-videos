@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.38 (2022-12-15)
+
+- Fix on identity refresh roles assignment
+
 Version 1.0.37 (2022-12-06)
 
 - Integrate cern openid
