@@ -207,7 +207,7 @@ def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
     last_update = account.extra_data.get("updated", modified_since)
 
     if last_update > modified_since:
-        return account.extra_data.get("roles", [])
+        return account.extra_data.get("roles", []), account.extra_data.get("groups", [])
 
     roles = resource["cern_roles"]
     extra_data = current_app.config.get(
@@ -400,11 +400,11 @@ def on_identity_changed(sender, identity):
         )
         if refresh:
             resource = get_resource(remote)
-            (roles, groups) =  account_roles_and_extra_data(
+            (_roles, _groups) =  account_roles_and_extra_data(
                 remote_account, resource, refresh_timedelta=refresh
             )
-            roles.extend(roles)
-            groups.extend(groups)
+            roles.extend(_roles)
+            groups.extend(_groups)
         else:
             roles.extend(remote_account.extra_data["roles"])
             groups.extend(remote_account.extra_data["groups"])
