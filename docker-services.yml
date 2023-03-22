@@ -89,7 +89,9 @@ services:
       - "15672:15672"
       - "5672:5672"
   es:
-    build: ./docker/es/
+    build:
+      context: ./docker/es/
+      dockerfile: Dockerfile
     restart: "always"
     environment:
       - bootstrap.memory_lock=true

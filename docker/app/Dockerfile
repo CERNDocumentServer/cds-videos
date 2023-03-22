@@ -8,10 +8,10 @@
 FROM python:3.6
 
 RUN apt-get update && apt-get upgrade -y && apt-get install apt-file -y && apt-file update
-RUN cd /tmp && curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh && bash nodesource_setup.sh
+RUN cd /tmp && curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh && bash nodesource_setup.sh
 
-RUN apt-get install -y nodejs git curl vim ffmpeg
-RUN pip install --upgrade "setuptools<58" wheel pip uwsgi uwsgitop uwsgi-tools
+RUN apt-get install -y nodejs git curl vim ffmpeg libsasl2-dev libldap2-dev libssl-dev
+RUN pip install --upgrade "setuptools<58" wheel "pip>=20,<21" "uwsgi-tools==1.1.1" "uwsgitop==0.11"
 
 RUN python -m site
 RUN python -m site --user-site
@@ -34,8 +34,7 @@ RUN mkdir -p ${INVENIO_STATIC_FOLDER}
 # Create files folder
 RUN mkdir -p ${INVENIO_INSTANCE_PATH}/files
 
-# needed to build node-gyp, required from node-sass, as root
-RUN npm config set user 0
+
 RUN ./scripts/bootstrap
 
 # Set folder permissions

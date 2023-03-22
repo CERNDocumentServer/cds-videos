@@ -34,9 +34,10 @@ pip install -e .[all]
 
 npm update
 npm install -g \
-    node-sass@4.14.0 \
+    sass@1.50.1 \
     clean-css@3.4.24 \
-    uglify-js requirejs
+    uglify-js \
+    requirejs
 
 # Setup and build assets
 cds npm

@@ -37,7 +37,7 @@ stats_css = Bundle(
     Bundle(
         "node_modules/invenio-charts-js/src/styles/styles.scss",
         "scss/stats.scss",
-        filters="node-scss,cleancssurl",
+        filters="scss,cleancssurl",
     ),
     output="gen/cds.stats.%(version)s.css",
 )
