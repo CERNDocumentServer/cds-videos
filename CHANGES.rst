@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 1.0.39 (2023-03-22)
+
+- Fix transcoding integration: process only one completed transcoding
+  task at the same time.
+
 Version 1.0.38 (2022-12-15)
 
 - Fix on identity refresh roles assignment

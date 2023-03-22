@@ -24,4 +24,4 @@
 
 """CDS version."""
 
-__version__ = "1.0.38"
+__version__ = "1.0.39"
