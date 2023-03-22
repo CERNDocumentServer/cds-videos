@@ -43,7 +43,7 @@ css = Bundle(
     NpmBundle(
         'scss/cds.scss',
         depends=('scss/*.scss', ),
-        filters='node-scss,cleancssurl',
+        filters='scss,cleancssurl',
         npm={
             'bootstrap-sass': '<3.4.2',
             'font-awesome': '~4.7.0',

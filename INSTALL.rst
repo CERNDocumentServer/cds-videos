@@ -81,9 +81,6 @@ Run celery:
 
     (cds3)$ ./script/celery
 
-If you are running MacOS Big Sur and you have an error with dynamic linker, check this link:
-https://stackoverflow.com/questions/65130080/attributeerror-running-django-site-on-mac-11-0-1
-
 Now you can visit http://localhost:5000/ :)
 
 In order to test the video previewer:
@@ -95,3 +92,32 @@ In order to test the video previewer:
         $ 127.0.0.1  localhost.cern.ch
 
 Now you can visit http://localhost.cern.ch:5000/ :)
+
+Installation errors
+-------------------
+
+On MacOS, if you have the error ``pg_config executable not found.``, then you need to install `postgresql` and symlink it:
+
+.. code-block:: console
+
+    $ brew install postgresql@13
+    $ export PATH=$PATH:/opt/homebrew/opt/postgresql\@13/bin
+
+
+On MacOS, if you have the error ``Cairo (pycairo) not found``, then you need to ``python -m pip install pycairo``.
+
+
+On MacOS, if you have errors with ``cryptography`` and ``openssl``, make sure that you have OpenSSL v1.1:
+
+.. code-block:: console
+
+    $ brew install openssl@1.1
+    $ LDFLAGS="-L/opt/homebrew/Cellar/openssl@1.1/1.1.1t/lib" CPPFLAGS="-I/opt/homebrew/Cellar/openssl@1.1/1.1.1t/include" pip install "cryptography==3.3.2"
+
+On MacOS, if you have an error with dynamic linker, check this link:
+https://stackoverflow.com/questions/65130080/attributeerror-running-django-site-on-mac-11-0-1
+
+Elasticsearch on ARM-based CPUs
+-------------------------------
+
+If you need to run Elasticsearch in ARM-based CPUs, use the `docker/es/Dockerfile.arm64` image instead.
