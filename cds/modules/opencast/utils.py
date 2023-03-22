@@ -95,12 +95,6 @@ def can_be_transcoded(subformat_desired_quality, video_width, video_height):
     )
 
 
-def generate_lock_id(flow_task_id, opencast_event_id):
-    """Generates a string used to store it in the cache and use it as a lock.
-    """
-    return flow_task_id + "_" + opencast_event_id
-
-
 @contextmanager
 def cache_lock(lock_id, timeout):
     """Creates the lock using redis cache and releases it when finished.
@@ -121,32 +115,59 @@ def cache_lock(lock_id, timeout):
             cache.delete(lock_id)
 
 
-def only_one(key="", timeout_config_name=None, use_kwargs_as_key=None):
-    """Decorator to assure that the function is running only once at a time.
+def generate_downloader_lock_id(opencast_event_id):
+    """Generates a string used to store it in the cache and use it as a lock."""
+    return "downloader_" + opencast_event_id
+
+
+def _lock_and_run(lock_id, timeout, f, **kwargs):
+    """Acquire lock and run passed func."""
+    with cache_lock(lock_id, timeout) as acquired:
+        if acquired:
+            current_app.logger.debug(
+                "Acquiring lock with id {0}".format(lock_id)
+            )
+            f(**kwargs)
+        else:
+            current_app.logger.debug(
+                "Task with lock {0} already running".format(lock_id)
+            )
+
+
+def only_one(key=None, timeout_config_name=None):
+    """Decorator to ensure that the function runs only once at a time.
 
     :param key: The key to identify the unique function.
     :param timeout_config_name: The timeout for releasing the lock.
-    :param use_kwargs_as_key: If True the key will be composed with the kwargs.
-
-    WARNING: If use_kwargs_as_key is True, the function using this decorator
-    must contain the following kwargs: opencast_event_id and flow_task_id
     """
     def decorator_builder(f):
         @wraps(f)
         def decorate(**kwargs):
             lock_id = key
+            assert lock_id
             timeout = current_app.config[timeout_config_name]
-            if use_kwargs_as_key:
-                flow_task_id = kwargs['flow_task_id']
-                opencast_event_id = kwargs['opencast_event_id']
-                lock_id = generate_lock_id(flow_task_id, opencast_event_id)
-            with cache_lock(lock_id, timeout) as acquired:
-                if acquired:
-                    current_app.logger.info(
-                        "Acquiring lock with id: {0}".format(lock_id)
-                    )
-                    f(**kwargs)
+            _lock_and_run(lock_id, timeout, f, **kwargs)
 
         return decorate
 
     return decorator_builder
+
+
+def only_one_downloader(timeout_config_name=None):
+    """Decorator to ensure that the downloader runs only once at a time.
+
+    :param timeout_config_name: The timeout for releasing the lock.
+    """
+    def decorator_builder(f):
+        @wraps(f)
+        def decorate(**kwargs):
+            opencast_event_id = kwargs["opencast_event_id"]
+            lock_id = generate_downloader_lock_id(opencast_event_id)
+            assert lock_id
+            timeout = current_app.config[timeout_config_name]
+            _lock_and_run(lock_id, timeout, f, **kwargs)
+
+        return decorate
+
+    return decorator_builder
+

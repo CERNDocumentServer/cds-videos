@@ -31,9 +31,6 @@ from datetime import datetime, timedelta
 
 import requests
 import sqlalchemy as sa
-from cds.modules.ffmpeg import ff_probe_all
-from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.records.utils import format_pid_link, is_deposit, is_record
 from celery import shared_task
 from flask import current_app
 from flask_mail import Message
@@ -41,11 +38,16 @@ from invenio_cache import current_cache
 from invenio_db import db
 from invenio_files_rest.models import Bucket, FileInstance, as_object_version
 from invenio_indexer.api import RecordIndexer
+from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records.models import RecordMetadata
 from invenio_records_files.api import ObjectVersion
 from invenio_records_files.models import RecordsBuckets
 from requests.exceptions import RequestException
+
+from cds.modules.ffmpeg import ff_probe_all
+from cds.modules.records.api import CDSVideosFilesIterator
+from cds.modules.records.utils import format_pid_link, is_deposit, is_record
 
 from ..opencast.utils import can_be_transcoded
 from .api import CDSRecord, Keyword
@@ -73,7 +75,7 @@ def _update_existing_keywords(indexer, keywords_api, keywords_db):
     def _keyword_data(values):
         """Prepare the keyword data."""
         return dict(
-            name=values.get("name"),
+            name=values["name"],
             provenance=values.get("provenance", ""),
             deleted=values.get("deleted", False),
         )
@@ -102,6 +104,8 @@ def _update_existing_keywords(indexer, keywords_api, keywords_db):
             keyword = keywords_saved[key_id]
 
         if keyword:
+            # fix schema from old domain to new domain
+            keyword["$schema"] = current_jsonschemas.path_to_url(Keyword._schema)
             to_db.append(keyword)
 
     for keyword in to_db:
@@ -121,6 +125,8 @@ def _delete_not_existing_keywords(indexer, keywords_api, keywords_db):
             keyword["deleted"] is False
             and keyword["key_id"] not in keys_loaded
         ):
+            # fix schema from old domain to new domain
+            keyword["$schema"] = current_jsonschemas.path_to_url(Keyword._schema)
             # soft delete the key_id
             keyword["deleted"] = True
             keyword.commit()

@@ -36,8 +36,8 @@ from invenio_cache import current_cache
 from invenio_db import db
 from invenio_files_rest.helpers import compute_md5_checksum
 from invenio_files_rest.models import (FileInstance, ObjectVersion,
-                                       ObjectVersionTag, as_object_version,
-                                       as_bucket)
+                                       ObjectVersionTag, as_bucket,
+                                       as_object_version)
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 
 from cds.modules.deposit.api import deposit_video_resolver
@@ -49,8 +49,9 @@ from cds.modules.flows.tasks import (TranscodeVideoTask,
                                      sync_records_with_deposit_files)
 from cds.modules.opencast.api import OpenCastRequestSession
 from cds.modules.opencast.error import (AbruptCeleryStop, RequestError,
-                                        WriteToEOSError, RequestError404)
-from cds.modules.opencast.utils import generate_lock_id, only_one
+                                        RequestError404, WriteToEOSError)
+from cds.modules.opencast.utils import (generate_downloader_lock_id, only_one,
+                                        only_one_downloader)
 from cds.modules.records.utils import to_string
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
@@ -77,7 +78,7 @@ def _get_status_and_subformats(event_id, session):
         raise RequestError(url, e)
 
     json = response.json()
-    status = json["processing_state"]
+    processing_state = json["processing_state"]
     publications = json.get("publications", [])
     for publication in publications:
         if publication["channel"] == "api":
@@ -86,14 +87,14 @@ def _get_status_and_subformats(event_id, session):
     else:
         # no `break`
         subformats = []
-    return status, subformats
+    return processing_state, subformats
 
 
 def _update_task_on_abrupt_stop(flow_task, opencast_event_id):
     """Update task on abrupt stop and raise an exception."""
     # Releasing lock
     cache = current_cache.cache
-    lock_id = generate_lock_id(str(flow_task.id), opencast_event_id)
+    lock_id = generate_downloader_lock_id(opencast_event_id)
     if cache.has(lock_id):
         current_app.logger.info(
             "Releasing lock with id: {0}".format(lock_id)
@@ -140,12 +141,12 @@ def get_opencast_events(grouped_flow_tasks):
             event_id = started_flow_tasks[0].payload["opencast_event_id"]
             try:
                 (
-                    opencast_workflow_status,
+                    opencast_workflow_processing_state,
                     opencast_published_subformats,
                 ) = _get_status_and_subformats(event_id, session)
 
                 opencast_events[event_id] = dict(
-                    status=opencast_workflow_status,
+                    processing_state=opencast_workflow_processing_state,
                     subformats=opencast_published_subformats,
                 )
             except RequestError as e:
@@ -164,6 +165,25 @@ def get_opencast_events(grouped_flow_tasks):
     return opencast_events
 
 
+def get_opencast_processed_subformats(started_flow_tasks, opencast_subformats):
+    """Return a tuple with (flow-task, subformat) for the processed subformats.
+
+    Parses the opencast `subformats` event payload. The presence of a subformat in the
+    list means that it has been processed (it does not have a dedicated status field).
+    """
+    processed = []
+    for started_flow_task in started_flow_tasks:
+        for opencast_subformat in opencast_subformats:
+            is_same_preset_quality = (
+                started_flow_task.payload["opencast_publication_tag"]
+                in opencast_subformat["tags"]
+            )
+            if is_same_preset_quality:
+                processed.append((started_flow_task, opencast_subformat))
+
+    return processed
+
+
 @shared_task
 @only_one(
     key="check_transcoding_status",
@@ -171,7 +191,6 @@ def get_opencast_events(grouped_flow_tasks):
 )
 def check_transcoding_status():
     """Update all finished transcoding tasks."""
-    number_of_transcoding_tasks_started = 0
     started_transcoding_tasks = FlowTaskMetadata.query.filter_by(
         status=FlowTaskStatus.STARTED, name=TranscodeVideoTask.name
     ).all()
@@ -195,55 +214,52 @@ def check_transcoding_status():
             )
         )
     for started_flow_tasks in grouped_flow_tasks:
-
         # the opencast event id is the same for all transcoding tasks
         event_id = started_flow_tasks[0].payload["opencast_event_id"]
         opencast_event = opencast_events.get(event_id)
         if not opencast_event:
             continue
 
-        for started_flow_task in started_flow_tasks:
-            for subformat in opencast_event["subformats"]:
-                is_same_preset_quality = (
-                    started_flow_task.payload["opencast_publication_tag"]
-                    in subformat["tags"]
-                )
-                if not is_same_preset_quality:
-                    continue
+        processed = get_opencast_processed_subformats(
+            started_flow_tasks,
+            opencast_event["subformats"]
+        )
+        if processed:
+            # We run only one subformat download at the same time.
+            # The `on_transcoding_completed` is locking on the `opencast event id`.
 
-                on_transcoding_completed.s(
-                    flow_task_id=str(started_flow_task.id),
-                    opencast_subformat=subformat,
-                    opencast_event_id=event_id
-                ).apply_async(
-                    link_error=on_celery_task_failed.s(
-                        data=dict(flow_task_id=str(started_flow_task.id))
-                    ),
+            # This is to avoid that concurrent celery tasks will update the same deposit
+            # at the same time, creating revision id conflicts when publishing.
+
+            # This means that each subformat will be published every run of this task.
+
+            started_flow_task, opencast_subformat = processed[0]
+            on_transcoding_completed.s(
+                flow_task_id=str(started_flow_task.id),
+                opencast_subformat=opencast_subformat,
+                opencast_event_id=event_id
+            ).apply_async(
+                link_error=on_celery_task_failed.s(
+                    data=dict(flow_task_id=str(started_flow_task.id))
+                ),
+            )
+        else:
+            # nothing processed yet.
+
+            # If processing_state is FAILED, something went really wrong:
+            # some tasks are still waiting for subformats (STARTED), but OpenCast
+            # failed
+            is_failed = opencast_event["processing_state"] == "FAILED"
+            if is_failed:
+                msg = (
+                    "Opencast event 'processing_state' field has "
+                    "value 'FAILED' for event id: {0}.".format(event_id)
                 )
-                number_of_transcoding_tasks_started += 1
-                # transcoding subformat completed, `break` to go to the next
-                break
-            else:
-                # no `break`, the transcoded subformat might not yet
-                # ready, or if workflow failed, this subformat failed
-                if opencast_event["status"] == "FAILED":
-                    msg = (
-                        "Opencast event 'processing_state' field has "
-                        "value 'FAILED' for event id: {0}.".format(event_id)
-                    )
+                for started_flow_task in started_flow_tasks:
                     _set_flow_tasks_to_failed(
                         [(str(started_flow_task.id), msg)]
                     )
-    if number_of_transcoding_tasks_started:
-        current_app.logger.debug(
-            "Started {0} on_transcoding_completed tasks".format(
-                number_of_transcoding_tasks_started
-            )
-        )
-    else:
-        current_app.logger.debug(
-            "No on_transcoding_completed tasks started"
-        )
+                continue
 
 
 def _get_opencast_subformat_info(subformat, present_quality):
@@ -317,9 +333,8 @@ def set_revoke_handler(handler):
 
 
 @shared_task
-@only_one(
+@only_one_downloader(
     timeout_config_name="CDS_OPENCAST_DOWNLOAD_TASK_TIMEOUT",
-    use_kwargs_as_key=True
 )
 def on_transcoding_completed(
         flow_task_id=None,
