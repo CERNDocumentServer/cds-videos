@@ -43,7 +43,6 @@ from invenio_records_rest.facets import range_filter, terms_filter
 
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.deposit.indexer import CDSRecordIndexer
-from .modules.oauthclient.cern_openid import REMOTE_APP
 from .modules.records.permissions import (deposit_delete_permission_factory,
                                           deposit_read_permission_factory,
                                           deposit_update_permission_factory,
@@ -955,19 +954,62 @@ SETTINGS_TEMPLATE = "invenio_theme/page_settings.html"
 # OAuth
 ###############################################################################
 
-OAUTHCLIENT_CERN_OPENID_USERINFO_URL = (
-    "https://auth.cern.ch/auth/realms/cern/"
-    "protocol/openid-connect/userinfo"
-)
+OAUTHCLIENT_CERN_OPENID_USERINFO_URL = os.environ.get("OAUTHCLIENT_CERN_OPENID_USERINFO_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo")
+
 OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user"]
+
+OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA = timedelta(minutes=-5)
+"""Default interval for refreshing CERN extra data (e.g. groups).
+
+False value disabled the refresh.
+"""
+
+OAUTHCLIENT_CERN_OPENID_SESSION_KEY = "identity.cdsvideos_openid_provides"
+"""Name of session key where CERN roles are stored."""
+
+REMOTE_APP_NAME = "cern_openid"
+
+REMOTE_APP = dict(
+    title="CERN",
+    description="Connecting to CERN Organization.",
+    icon="",
+    logout_url=os.environ.get("OAUTH_CERN_OPENID_LOGOUT_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout"),
+    params=dict(
+        base_url=os.environ.get("OAUTH_CERN_OPENID_BASE_URL", "https://auth.cern.ch/auth/realms/cern"),
+        request_token_url=None,
+        access_token_url=os.environ.get("OAUTH_CERN_OPENID_ACCESS_TOKEN_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token"),
+        access_token_method="POST",
+        authorize_url=os.environ.get("OAUTH_CERN_OPENID_AUTHORIZE_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth"),
+        app_key="CERN_APP_OPENID_CREDENTIALS",
+        content_type="application/json",
+    ),
+    authorized_handler="invenio_oauthclient.handlers:authorized_signup_handler",
+    disconnect_handler="cds.modules.oauthclient.cern_openid:disconnect_handler",
+    signup_handler=dict(
+        info="cds.modules.oauthclient.cern_openid:account_info",
+        setup="cds.modules.oauthclient.cern_openid:account_setup",
+        view="invenio_oauthclient.handlers:signup_handler",
+    ),
+)
+
+OAUTHCLIENT_REMOTE_APPS = dict(
+    cern_openid=REMOTE_APP
+)
+"""CERN Openid Remote Application."""
+
+
+OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS = dict(
+    options=dict(
+        verify_signature=False,
+        verify_aud=False,
+    ),
+    algorithms=["HS256", "RS256"],
+)
 
 #: Credentials for CERN OAuth (must be changed to work).
 CERN_APP_OPENID_CREDENTIALS = dict(
     consumer_key=os.environ.get("OAUTH_CERN_CONSUMER_KEY", "changeme"),
     consumer_secret=os.environ.get("OAUTH_CERN_CONSUMER_SECRET", "changeme"),
-)
-OAUTHCLIENT_REMOTE_APPS = dict(
-    cern_openid=REMOTE_APP
 )
 
 ## Needed for populating the user profiles when users login via CERN Openid
