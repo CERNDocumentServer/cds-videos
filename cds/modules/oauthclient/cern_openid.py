@@ -101,64 +101,6 @@ from invenio_oauthclient.proxies import current_oauthclient
 from invenio_oauthclient.utils import oauth_link_external_id, oauth_unlink_external_id
 
 
-OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA = timedelta(minutes=-5)
-"""Default interval for refreshing CERN extra data (e.g. groups).
-
-False value disabled the refresh.
-"""
-
-OAUTHCLIENT_CERN_OPENID_SESSION_KEY = "identity.cdsvideos_openid_provides"
-"""Name of session key where CERN roles are stored."""
-
-OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = []
-"""CERN OAuth application role values that are allowed to be used."""
-
-BASE_APP = dict(
-    title="CERN",
-    description="Connecting to CERN Organization.",
-    icon="",
-    logout_url="https://auth.cern.ch/auth/realms/cern/protocol/"
-    "openid-connect/logout",
-    params=dict(
-        base_url="https://auth.cern.ch/auth/realms/cern",
-        request_token_url=None,
-        access_token_url="https://auth.cern.ch/auth/realms/cern/protocol/"
-        "openid-connect/token",
-        access_token_method="POST",
-        authorize_url="https://auth.cern.ch/auth/realms/cern/protocol/"
-        "openid-connect/auth",
-        app_key="CERN_APP_OPENID_CREDENTIALS",
-        content_type="application/json",
-    ),
-)
-
-REMOTE_APP_NAME = "cern_openid"
-REMOTE_APP = dict(BASE_APP)
-REMOTE_APP.update(
-    dict(
-        authorized_handler="invenio_oauthclient.handlers:authorized_signup_handler",
-        disconnect_handler="cds.modules.oauthclient.cern_openid:disconnect_handler",
-        signup_handler=dict(
-            info="cds.modules.oauthclient.cern_openid:account_info",
-            setup="cds.modules.oauthclient.cern_openid:account_setup",
-            view="invenio_oauthclient.handlers:signup_handler",
-        ),
-    )
-)
-"""CERN Openid Remote Application."""
-
-OAUTHCLIENT_CERN_OPENID_USERINFO_URL = (
-    "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo"
-)
-
-OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS = dict(
-    options=dict(
-        verify_signature=False,
-        verify_aud=False,
-    ),
-    algorithms=["HS256", "RS256"],
-)
-
 cern_openid_blueprint = Blueprint("cern_openid_oauth", __name__)
 
 @cern_openid_blueprint.route("/cern/logout")
@@ -169,13 +111,13 @@ def logout():
     """
     logout_url = (
         current_app.config["OAUTHCLIENT_REMOTE_APPS"]
-        .get(REMOTE_APP_NAME, {})
+        .get(current_app.config["REMOTE_APP_NAME"], {})
         .get("logout_url")
     )
 
     if not logout_url:
         raise OAuthError(
-            "Invalid `logout_url` for OAuth app {}".format(REMOTE_APP_NAME)
+            "Invalid `logout_url` for OAuth app {}".format(current_app.config["REMOTE_APP_NAME"])
         )
 
     # add redirect to SITE_URL
@@ -227,20 +169,14 @@ def extend_identity(identity, roles, groups):
         [RoleNeed("{0}@cern.ch".format(group)) for group in groups]
     )
     identity.provides |= provides
-    key = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_SESSION_KEY",
-        OAUTHCLIENT_CERN_OPENID_SESSION_KEY,
-    )
+    key = current_app.config["OAUTHCLIENT_CERN_OPENID_SESSION_KEY"]
     session[key] = provides
 
 
 def disconnect_identity(identity):
     """Disconnect identity from CERN groups."""
     session.pop("cern_resource", None)
-    key = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_SESSION_KEY",
-        OAUTHCLIENT_CERN_OPENID_SESSION_KEY,
-    )
+    key = current_app.config["OAUTHCLIENT_CERN_OPENID_SESSION_KEY"]
     provides = session.pop(key, set())
     identity.provides -= provides
 
@@ -266,17 +202,11 @@ def get_resource(remote, token_response=None):
     if cached_resource:
         return cached_resource
 
-    url = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_USERINFO_URL",
-        OAUTHCLIENT_CERN_OPENID_USERINFO_URL,
-    )
+    url = current_app.config["OAUTHCLIENT_CERN_OPENID_USERINFO_URL"]
     response = remote.get(url)
     dict_response = get_dict_from_response(response)
     if token_response:
-        decoding_params = current_app.config.get(
-            "OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS",
-            OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS,
-        )
+        decoding_params = current_app.config["OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS"]
         token_data = decode(token_response["access_token"], **decoding_params)
         dict_response.update(token_data)
     session["cern_resource"] = dict_response
@@ -288,10 +218,7 @@ def _account_info(remote, resp):
     g.oauth_logged_in_with_remote = remote
     resource = get_resource(remote, resp)
 
-    valid_roles = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES",
-        OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES,
-    )
+    valid_roles = current_app.config["OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES"]
     cern_roles = resource.get("cern_roles")
     if cern_roles is None or not set(cern_roles).issubset(valid_roles):
         raise OAuthCERNRejectedAccountError(
@@ -394,10 +321,7 @@ def on_identity_changed(sender, identity):
     groups = []
 
     if remote_account and not logged_in_via_token:
-        refresh = current_app.config.get(
-            "OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA",
-            OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA,
-        )
+        refresh = current_app.config["OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA"]
         if refresh:
             resource = get_resource(remote)
             (_roles, _groups) =  account_roles_and_extra_data(
@@ -418,8 +342,5 @@ def on_identity_changed(sender, identity):
 @identity_loaded.connect
 def on_identity_loaded(sender, identity):
     """Store roles in session whenever identity is loaded."""
-    key = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_SESSION_KEY",
-        OAUTHCLIENT_CERN_OPENID_SESSION_KEY,
-    )
+    key = current_app.config["OAUTHCLIENT_CERN_OPENID_SESSION_KEY"]
     identity.provides.update(session.get(key, []))
