@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.40 (2023-05-04)
+
+- Fix wrong token scope for CERN SSO.
+
 Version 1.0.39 (2023-03-22)
 
 - Fix transcoding integration: process only one completed transcoding
