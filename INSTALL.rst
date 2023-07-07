@@ -38,43 +38,34 @@ If you get an empty output from the previous command, run:
 
     (cds3)$ ./scripts/setup-npm.sh
 
-.. note::
-
-    (Deprecated) Before starting the installation you can verify you have installed all the
-    system requirements using the `Invenio scripts <https://github.com/inveniosoftware/invenio/tree/master/scripts>`_
-
-
-6. Downgrade ``setuptools``, install some important libraries and then install production like setup:
+6. If you are using linux, downgrade ``setuptools`` and install some important libraries:
 
 .. code-block:: console
 
     (cds3)$ pip install "setuptools<58.0"
     (cds3)$ sudo apt install libsasl2-dev libldap2-dev libssl-dev curl
-    (cds3)$ pip install -r requirements.pinned.txt
-    (cds3)$ pip install -e .
 
-Or just install the libraries and latest released versions of all the dependencies:
+7. Install production like setup:
 
 .. code-block:: console
 
-    (cds3)$ sudo apt-get install libsasl2-dev libldap2-dev libssl-dev curl
+    (cds3)$ pip install -r requirements.pinned.txt
     (cds3)$ pip install -e .
 
-7. Build the assets:
+Or just install  latest released versions of all the dependencies:
+
+.. code-block:: console
+
+    (cds3)$ pip install -e .
+
+8. Build the assets:
 
 .. code-block:: console
 
     (cds3)$ python -O -m compileall .
     (cds3)$ ./scripts/setup-assets.sh
 
-8. (Deprecated) Make sure that ``elasticsearch`` server is running:
-
-.. code-block:: console
-
-    $ elasticsearch
-    ... version[2.0.0] ...
-
-9. Install ``docker`` and ``docker-compose`` then set up some user configurations:
+9. Install ``docker`` and ``docker-compose`` - `Docker installation doc <https://docs.docker.com/get-docker/>`
 
 .. code-block:: console
 
