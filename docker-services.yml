@@ -74,7 +74,7 @@ services:
       - "16379:6379"
     command: redis-server --save ""
   db:
-    image: postgres:12.5
+    image: postgres:14
     restart: "always"
     environment:
       - "POSTGRES_USER=cds-videos"
