@@ -609,6 +609,12 @@ a.cds-anchor:hover{
   color: $gray;
 }
 
+[popover] {
+  position: inherit;
+  border: none;
+  margin: inherit;
+}
+
 .download-list-container {
   display: flex;
   flex-direction: column;
