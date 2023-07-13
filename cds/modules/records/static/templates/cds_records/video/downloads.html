@@ -17,7 +17,7 @@
         <div class="download-list-container">
           <p class="mt-10 tw-b text-uppercase text-muted">{{ type }}</p>
           <div class="download-list-group">
-            <div class="download-list-item" ng-repeat="file in subs" popover>
+            <div class="download-list-item" ng-repeat="file in subs" ng-popover>
               <span>{{ file.tags.preset_quality }} <span class="download-list-fade">|</span> {{ file.size | bytesToHumanReadable }}</span>
               <div class="download-list-item-container">
                 <a class="download-list-item-checksum" rel="popover" title="md5 checksum" data-placement="bottom" data-content="{{file.checksum}}">checksum</a>
@@ -31,7 +31,7 @@
   </div>
   <!-- Master file -->
   <div class="download-list-container">
-    <div class="download-list-header" popover>
+    <div class="download-list-header" ng-popover>
       <p class="mt-10 tw-b text-uppercase text-muted">for broadcasters</p>
       <a ng-show="(record | findMaster).size > 10e8" class="download-list-header-warning" rel="popover" data-placement="bottom" data-html="true" data-content="<strong>Warning: Big file!</strong><br>As no network or browser is 100% stable, we <em>strongly</em> recommend using a download manager.">
         <i class="fa fa-info-circle"></i>
@@ -40,7 +40,7 @@
     <div class="download-list-group">
       <div class="download-list-item">
         <span>{{ (record | findMaster) | findResolution }} <span class="download-list-fade">|</span> {{ (record | findMaster).size | bytesToHumanReadable}}</span>
-        <div class="download-list-item-container" popover>
+        <div class="download-list-item-container" ng-popover>
           <a class="download-list-item-checksum" rel="popover" title="md5 checksum" data-placement="bottom" data-content="{{(record | findMaster).checksum}}">checksum</a>
           <a class="btn btn-default download-list-item-button" ng-href="{{ (record | findMaster).links.self | download }}" ng-click="logMediaDownload(record | findMaster);" target="_blank">Download</a>
         </div>
@@ -74,7 +74,7 @@
   </div>
   <div ng-show="(((record | findMaster).subformat | groupDownloadable).additional||[]).length > 0 && showAllOtherFiles" class="cds-detail-download-box cds-detail-video-download-box mt-5">
     <div>
-      <div class="download-list-item" ng-repeat="file in (((record | findMaster).subformat | groupDownloadable).additional | sortVideosDescending)" popover>
+      <div class="download-list-item" ng-repeat="file in (((record | findMaster).subformat | groupDownloadable).additional | sortVideosDescending)" ng-popover>
         <span>{{ file.tags.preset_quality }} <span class="download-list-fade">|</span> {{ file.size | bytesToHumanReadable }}</span>
         <div class="download-list-item-container">
           <a class="download-list-item-checksum" rel="popover" title="md5 checksum" data-placement="bottom" data-content="{{file.checksum}}">checksum</a>
