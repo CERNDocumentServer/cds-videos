@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.41 (2023-06-13)
+
+- Fix incompatibility with Chrome popover APIs
+- Conditionally show file size warning when downloading
+- Improve installation documentation
+
 Version 1.0.40 (2023-05-04)
 
 - Fix wrong token scope for CERN SSO.
