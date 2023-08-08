@@ -100,12 +100,11 @@ class AVCFlowCeleryTasks:
         return signature
 
     @classmethod
-    def _build_chain(cls, payload):
+    def _build_chain(cls, payload, has_user_uploaded_file):
         """Build flow's tasks."""
         celery_tasks = []
 
         has_remote_file_to_download = payload.get("uri")
-        has_user_uploaded_file = payload.get("version_id")
         if not has_user_uploaded_file and has_remote_file_to_download:
             file_download_task = cls.create_task(DownloadTask, payload)
             celery_tasks.append(file_download_task)
@@ -123,9 +122,9 @@ class AVCFlowCeleryTasks:
         return celery_tasks
 
     @classmethod
-    def build_workflow(cls, payload):
+    def build_workflow(cls, payload, has_user_uploaded_file):
         """Build the Celery tasks sequence for the workflow."""
-        celery_tasks = cls._build_chain(payload)
+        celery_tasks = cls._build_chain(payload, has_user_uploaded_file)
 
         celery_tasks_signatures = []
         for celery_task_tuple in celery_tasks:
@@ -192,8 +191,14 @@ class FlowService:
         db_flag_modified(self.flow_metadata, "payload")
         db.session.commit()
 
+        # saves the initial conditon of files in payload even after creating version_id when necessary
+        if has_user_uploaded_file is None:
+            has_user_uploaded_file = False
+        else:
+            has_user_uploaded_file = True
+
         # start the celery tasks for the flow
-        celery_tasks = AVCFlowCeleryTasks.build_workflow(payload)
+        celery_tasks = AVCFlowCeleryTasks.build_workflow(payload, has_user_uploaded_file)
         celery_tasks.apply_async()
 
         # Flow and Tasks modifications need to be persisted
