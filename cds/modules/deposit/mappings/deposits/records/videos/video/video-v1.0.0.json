@@ -77,6 +77,134 @@
             }
           }
         },
+        "_digitization": {
+          "type": "object",
+          "properties": {
+            "CERN_ID": {
+              "type": "string"
+            },
+            "res_ar_fps": {
+              "type": "string"
+            },
+            "FPS": {
+              "type": "string"
+            },
+            "resolution": {
+              "type": "string"
+            },
+            "aspect_ratio": {
+              "type": "string"
+            },
+            "curated": {
+              "type": "string"
+            },
+            "curator_name": {
+              "type": "string"
+            },
+            "curator_title": {
+              "type": "string"
+            },
+            "curation_date": {
+              "type": "string"
+            },
+            "curation_time": {
+              "type": "string"
+            },
+            "curation_quality_control": {
+              "type": "string"
+            },
+            "curator_category": {
+              "type": "string"
+            },
+            "curator_split_comment": {
+              "type": "string"
+            },
+            "curator_split_time": {
+              "type": "string"
+            },
+            "media_type": {
+              "type": "string"
+            },
+            "director_info": {
+              "type": "string"
+            },
+            "picturae_media_quality": {
+              "type": "string"
+            },
+            "copyright": {
+              "type": "string"
+            },
+            "quality_control_info": {
+              "type": "object"
+            },
+            "internal_note": {
+              "type": "string"
+            },
+            "internal_note_datetime": {
+              "type": "string"
+            },
+            "epfl_category": {
+              "type": "string"
+            },
+            "collection": {
+              "type": "string"
+            },
+            "host_item_entry": {
+              "type": "string"
+            },
+            "library_report_number": {
+              "type": "string"
+            },
+            "related_links_info": {
+              "type": "object"
+            },
+            "physical_media_type": {
+              "type": "string"
+            },
+            "has_copy": {
+              "type": "string"
+            },
+            "has_subtitles": {
+              "type": "string"
+            },
+            "storage_service": {
+              "type": "string"
+            },
+            "file_size": {
+              "type": "string"
+            },
+            "record_control_number": {
+              "type": "string"
+            },
+            "record_id": {
+              "type": "string"
+            },
+            "format_resolution": {
+              "type": "string"
+            },
+            "subtitle_extension": {
+              "type": "string"
+            },
+            "subtitle_path": {
+              "type": "string"
+            },
+            "subtitle_language": {
+              "type": "string"
+            },
+            "subtitle_note": {
+              "type": "string"
+            },
+            "conference_cds_recid": {
+              "type": "string"
+            },
+            "conference_cds_id": {
+              "type": "string"
+            },
+            "deleted_cds_records": {
+              "type": "string"
+            }
+          }
+        },
         "_project_id":{
               "type": "string"
         },
