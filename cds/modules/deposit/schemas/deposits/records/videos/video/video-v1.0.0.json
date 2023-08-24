@@ -743,10 +743,7 @@
             "type": "string"
           },
           "quality_control_info": {
-            "items": {
-              "type": "object"
-            },
-            "type": "array"
+            "type": "string"
           },
           "internal_note": {
             "type": "string"
@@ -767,10 +764,7 @@
             "type": "string"
           },
           "related_links_info": {
-            "items": {
-              "type": "object"
-            },
-            "type": "array"
+            "type": "string"
           },
           "physical_media_type": {
             "type": "string"
@@ -815,6 +809,9 @@
             "type": "string"
           },
           "deleted_cds_records": {
+            "type": "string"
+          },
+          "additional_files": {
             "type": "string"
           }
         }

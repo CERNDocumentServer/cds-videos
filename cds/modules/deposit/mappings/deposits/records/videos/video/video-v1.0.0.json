@@ -135,7 +135,7 @@
               "type": "string"
             },
             "quality_control_info": {
-              "type": "object"
+              "type": "string"
             },
             "internal_note": {
               "type": "string"
@@ -156,7 +156,7 @@
               "type": "string"
             },
             "related_links_info": {
-              "type": "object"
+              "type": "string"
             },
             "physical_media_type": {
               "type": "string"
@@ -201,6 +201,9 @@
               "type": "string"
             },
             "deleted_cds_records": {
+              "type": "string"
+            },
+            "additional_files": {
               "type": "string"
             }
           }
