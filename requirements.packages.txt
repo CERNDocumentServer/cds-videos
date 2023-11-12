@@ -138,7 +138,7 @@ markupsafe==1.1.1       # via jinja2, mako
 marshmallow==2.21.0
 maxminddb-geolite2==2018.703  # via invenio-accounts
 maxminddb==1.5.4        # via maxminddb-geolite2
-mistune==0.8.4          # via invenio-previewer, nbconvert
+mistune==2.0.3          # via invenio-previewer, nbconvert
 msgpack==1.0.2          # via invenio-celery
 nbconvert[execute]==5.6.1   # via invenio-previewer
 nbformat==4.4.0         # via invenio-previewer, nbconvert
