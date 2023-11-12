@@ -32,7 +32,7 @@ chardet==4.0.0
 click==7.1.2
 configparser==4.0.2
 contextlib2==0.6.0.post1
-cryptography==3.3.2
+cryptography==39.0.1
 datacite==1.0.1
 dcxml==0.1.1
 decorator==4.4.2
