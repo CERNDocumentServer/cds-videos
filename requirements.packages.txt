@@ -133,7 +133,7 @@ jupyter-core==4.6.3     # via jupyter-client, nbconvert, nbformat
 kombu==4.6.11           # via celery
 lxml==4.6.5             # via datacite, dcxml, dojson, invenio-oaiserver
 limits==1.5.1
-mako==1.1.5             # via alembic
+mako==1.2.2             # via alembic
 markupsafe==1.1.1       # via jinja2, mako
 marshmallow==2.21.0
 maxminddb-geolite2==2018.703  # via invenio-accounts
