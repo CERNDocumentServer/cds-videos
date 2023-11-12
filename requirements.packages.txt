@@ -129,7 +129,7 @@ jsonref==0.2
 jsonresolver==0.2.1
 jsonschema==3.2.0       # via datacite, invenio-opendefinition, invenio-records, nbformat
 jupyter-client==5.3.5   # via nbconvert
-jupyter-core==4.6.3     # via jupyter-client, nbconvert, nbformat
+jupyter-core==4.11.2     # via jupyter-client, nbconvert, nbformat
 kombu==4.6.11           # via celery
 lxml==4.6.5             # via datacite, dcxml, dojson, invenio-oaiserver
 limits==1.5.1
