@@ -33,8 +33,8 @@
 
 {%- block css %}
   {{ super() }}
-  {% if config.THEOPLAYER_LICENCE_KEY %}
-    <link rel="stylesheet" href="{{ config.THEOPLAYER_BASE_URL}}{{ config.THEOPLAYER_LICENCE_KEY }}/ui.css">
+  {% if config.THEOPLAYER_LIBRARY_LOCATION %}
+    <link rel="stylesheet" href="{{ config.THEOPLAYER_LIBRARY_LOCATION }}/ui.css">
   {% endif %}
   {% assets "cds_previewer_video_css" %}
     <link href="{{ ASSET_URL }}" rel="stylesheet">
@@ -42,7 +42,7 @@
 {%- endblock css %}
 
 {%- block page_body %}
-  {% if not config.THEOPLAYER_LICENCE_KEY %}
+  {% if not config.THEOPLAYER_LIBRARY_LOCATION %}
     <video poster="{{ file.poster_uri }}" controls>
       <source src="{{ file.uri }}" type="video/mp4">
       {{ _('Your browser does not support the video tag.') }}
