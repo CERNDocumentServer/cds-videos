@@ -94,7 +94,7 @@ def app():
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
         ACCOUNTS_JWT_ENABLE=False,
-        THEOPLAYER_LICENCE_KEY='CHANGE_ME',
+        THEOPLAYER_LICENSE='CHANGE_ME',
         PRESERVE_CONTEXT_ON_EXCEPTION=False
     )
     app.register_blueprint(files_rest_blueprint)
