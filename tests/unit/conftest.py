@@ -94,6 +94,7 @@ def app():
         DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
         PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
         ACCOUNTS_JWT_ENABLE=False,
+        THEOPLAYER_LIBRARY_LOCATION='https://localhost-theoplayer.com',
         THEOPLAYER_LICENSE='CHANGE_ME',
         PRESERVE_CONTEXT_ON_EXCEPTION=False
     )
@@ -289,7 +290,7 @@ def video_with_small(request, datadir):
 @pytest.fixture()
 def online_video():
     """Get online test video file."""
-    return 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+    return 'https://cds-resources.web.cern.ch/cds-resources/cds-videos/big_buck_bunny.mp4'
 
 
 @pytest.fixture()
