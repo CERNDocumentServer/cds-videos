@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.42 (2024-01-15)
+
+- Migrate license of THEOPlayer from SDK to key
+- Show video file size warning when more than 100 Mb
+- Fix failing tests
+
 Version 1.0.41 (2023-06-13)
 
 - Fix incompatibility with Chrome popover APIs
