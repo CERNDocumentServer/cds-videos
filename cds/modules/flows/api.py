@@ -36,8 +36,13 @@ from .deposit import index_deposit_project
 from .errors import TaskAlreadyRunningError
 from .files import init_object_version
 from .models import FlowTaskStatus, as_task
-from .tasks import (CeleryTask, DownloadTask, ExtractFramesTask,
-                    ExtractMetadataTask, TranscodeVideoTask)
+from .tasks import (
+    CeleryTask,
+    DownloadTask,
+    ExtractFramesTask,
+    ExtractMetadataTask,
+    TranscodeVideoTask,
+)
 
 logger = logging.getLogger("cds-flow")
 
@@ -48,11 +53,7 @@ def get_tasks_status_grouped_by_task_name(flow):
     for task in flow.tasks:
         results[task.name].append(task.status)
 
-    return {
-        k: str(FlowTaskStatus.compute_status(v))
-        for k, v in results.items()
-        if v
-    }
+    return {k: str(FlowTaskStatus.compute_status(v)) for k, v in results.items() if v}
 
 
 def merge_tasks_status(statuses_1, statuses_2):
@@ -62,9 +63,7 @@ def merge_tasks_status(statuses_1, statuses_2):
 
     for task in task_names:
         task_statuses_values = [statuses_1.get(task), statuses_2.get(task)]
-        statuses[task] = str(
-            FlowTaskStatus.compute_status(task_statuses_values)
-        )
+        statuses[task] = str(FlowTaskStatus.compute_status(task_statuses_values))
 
     return statuses
 
@@ -108,8 +107,14 @@ class AVCFlowCeleryTasks:
             file_download_task = cls.create_task(DownloadTask, payload)
             celery_tasks.append(file_download_task)
 
-        metadata_extract_task = cls.create_task(ExtractMetadataTask, payload,
-                                                delete_copied=False)
+        metadata_extract_task = cls.create_task(
+            ExtractMetadataTask,
+            payload,
+            delete_copied=False,
+            # force uri to None if we have a remote file so it can be populated with the
+            # destination file uri once the Download task finishes
+            uri=None if has_remote_file_to_download else payload.get("uri"),
+        )
         celery_tasks.append(metadata_extract_task)
 
         frames_extract_task = cls.create_task(ExtractFramesTask, payload)
@@ -191,7 +196,9 @@ class FlowService:
         db.session.commit()
 
         # start the celery tasks for the flow
-        celery_tasks = AVCFlowCeleryTasks.build_workflow(payload, has_remote_file_to_download)
+        celery_tasks = AVCFlowCeleryTasks.build_workflow(
+            payload, has_remote_file_to_download
+        )
         celery_tasks.apply_async()
 
         # Flow and Tasks modifications need to be persisted
@@ -222,9 +229,7 @@ class FlowService:
             FlowTaskStatus.STARTED,
         ]:
             raise TaskAlreadyRunningError(
-                "Task with id {0} is already running.".format(
-                    str(task_metadata.id)
-                )
+                "Task with id {0} is already running.".format(str(task_metadata.id))
             )
         # now set it to PENDING
         task_metadata.status = FlowTaskStatus.PENDING
@@ -280,9 +285,7 @@ class FlowService:
 
         payload = self.flow_metadata.payload
 
-        remote_file_was_downloaded = self.flow_metadata.payload.get(
-            "uri", False
-        )
+        remote_file_was_downloaded = self.flow_metadata.payload.get("uri", False)
         if remote_file_was_downloaded:
             AVCFlowCeleryTasks.clean_task(DownloadTask, payload=payload)
 

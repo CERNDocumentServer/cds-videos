@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from flask_babelex import lazy_gettext as _
+from invenio_i18n import lazy_gettext as _
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, SelectField, StringField, SubmitField,
                      TextAreaField)

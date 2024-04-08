@@ -19,13 +19,13 @@
 
 """JS/CSS bundles for CDS Previewer."""
 
-from __future__ import absolute_import, print_function
+# from __future__ import absolute_import, print_function
 
-from flask_assets import Bundle
-from invenio_assets import NpmBundle
+# from flask_assets import Bundle
+# from invenio_assets import NpmBundle
 
-video_css = Bundle(
-    'css/cds_previewer/video.css',
-    filters='cleancssurl',
-    output='gen/cds.previewer.%(version)s.css',
-)
+# video_css = Bundle(
+#     'css/cds_previewer/video.css',
+#     filters='cleancssurl',
+#     output='gen/cds.previewer.%(version)s.css',
+# )

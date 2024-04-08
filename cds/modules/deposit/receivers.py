@@ -87,7 +87,7 @@ def register_celery_class_based_tasks(sender, app=None):
     register them explicitly.
     """
     celery = app.extensions["invenio-celery"].celery
-    celery.tasks.register(ExtractMetadataTask())
-    celery.tasks.register(DownloadTask())
-    celery.tasks.register(ExtractFramesTask())
-    celery.tasks.register(TranscodeVideoTask())
+    celery.register_task(ExtractMetadataTask())
+    celery.register_task(DownloadTask())
+    celery.register_task(ExtractFramesTask())
+    celery.register_task(TranscodeVideoTask())

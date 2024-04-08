@@ -24,6 +24,7 @@ from __future__ import absolute_import
 import json
 
 from flask import current_app, has_request_context, request
+from marshmallow import ValidationError
 from invenio_rest.errors import RESTValidationError
 
 
@@ -33,38 +34,42 @@ def _doi_context():
     context = dict(replace_refs=has_request_context())
 
     # DOI validation context
-    if request and request.view_args and request.view_args.get('pid_value'):
-        managed_prefix = current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']
+    if request and request.view_args and request.view_args.get("pid_value"):
+        managed_prefix = current_app.config["PIDSTORE_DATACITE_DOI_PREFIX"]
 
-        _, record = request.view_args.get('pid_value').data
+        _, record = request.view_args.get("pid_value").data
         #  context['recid'] = record['recid']
         if record.has_minted_doi():
-            context['required_doi'] = record['doi']
+            context["required_doi"] = record["doi"]
         #  elif not record.is_published():
         #      context['allowed_dois'] = [doi_generator(record['recid'])]
         elif record.is_published():
             # Ensure we cannot change to e.g. empty string.
-            context['doi_required'] = True
+            context["doi_required"] = True
 
-        context['managed_prefixes'] = [managed_prefix]
-        context['banned_prefixes'] = \
-            ['10.5072'] if managed_prefix != '10.5072' else []
+        context["managed_prefixes"] = [managed_prefix]
+        context["banned_prefixes"] = ["10.5072"] if managed_prefix != "10.5072" else []
 
     return context
 
 
 def marshmallow_loader(schema_class, partial=False):
     """Marshmallow loader."""
+
     def schema_loader():
         request_json = request.get_json()
-
         context = _doi_context()
+        try:
+            request_json = request.get_json()
+            context = _doi_context()
+            valid_data = schema_class(context=context, partial=partial).load(
+                request_json
+            )
+        except ValidationError as e:
+            raise MarshmallowErrors(e)
 
-        result = schema_class(context=context,
-                              partial=partial).load(request_json)
-        if result.errors:
-            raise MarshmallowErrors(result.errors)
-        return result.data
+        return valid_data
+
     return schema_loader
 
 
@@ -79,26 +84,28 @@ class MarshmallowErrors(RESTValidationError):
     def __str__(self):
         """Print exception with errors."""
         return "{base}. Encountered errors: {errors}".format(
-            base=super(RESTValidationError, self).__str__(),
-            errors=self.errors)
+            base=super(RESTValidationError, self).__str__(), errors=self.errors
+        )
 
-    def iter_errors(self, errors, prefix=''):
+    def iter_errors(self, errors, prefix=""):
         """Iterator over marshmallow errors."""
         res = []
-        for field, error in errors.items():
+        _errors = errors.messages if hasattr(errors, "messages") else errors
+        for field, error in _errors.items():
             if isinstance(error, list):
-                res.append(dict(
-                    field='{0}{1}'.format(prefix, field),
-                    message=' '.join([str(x) for x in error])
-                ))
+                res.append(
+                    dict(
+                        field="{0}{1}".format(prefix, field),
+                        message=" ".join([str(x) for x in error]),
+                    )
+                )
             elif isinstance(error, dict):
-                res.extend(self.iter_errors(
-                    error,
-                    prefix='{0}{1}.'.format(prefix, field)
-                ))
+                res.extend(
+                    self.iter_errors(error, prefix="{0}{1}.".format(prefix, field))
+                )
         return res
 
-    def get_body(self, environ=None):
+    def get_body(self, *args, environ=None):
         """Get the request body."""
         body = dict(
             status=self.code,
@@ -106,6 +113,6 @@ class MarshmallowErrors(RESTValidationError):
         )
 
         if self.errors:
-            body['errors'] = self.iter_errors(self.errors)
+            body["errors"] = self.iter_errors(self.errors)
 
         return json.dumps(body)

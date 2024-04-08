@@ -27,7 +27,7 @@ from __future__ import absolute_import, print_function
 from flask import current_app
 from flask_security import current_user
 from invenio_access import Permission
-from invenio_deposit.permissions import action_admin_access
+from ..invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
@@ -296,9 +296,7 @@ def has_read_files_permission(user, record):
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = [
-        lowercase_value(value) for value in record["_access"]["read"]
-    ]
+    read_access_groups = [lowercase_value(value) for value in record["_access"]["read"]]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -314,9 +312,7 @@ def has_read_record_permission(user, record):
 
     # Allow e-group members
     user_provides = get_user_provides()
-    read_access_groups = [
-        lowercase_value(value) for value in record["_access"]["read"]
-    ]
+    read_access_groups = [lowercase_value(value) for value in record["_access"]["read"]]
 
     if not set(user_provides).isdisjoint(set(read_access_groups)):
         return True
@@ -348,8 +344,7 @@ def has_update_permission(user, record):
     user_provides = get_user_provides()
     # set.isdisjoint() is faster than set.intersection()
     allowed_users = [
-        lowercase_value(value)
-        for value in record.get("_access", {}).get("update", [])
+        lowercase_value(value) for value in record.get("_access", {}).get("update", [])
     ]
     if allowed_users and not set(user_provides).isdisjoint(set(allowed_users)):
         return True

@@ -3,13 +3,15 @@
 {%- set title_prefix = _('Search') -%}
 {%- block css %}
     {{ super() }}
-    {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+    {{webpack['search_ui_theme.css']}}
 {%- endblock css %}
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_search_ui_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {{webpack['cds_search_ui_app.js']}}
 {%- endblock javascript %}
+
+tetetetetete
 
 {%- block body_inner %}
 <div id="invenio-search">

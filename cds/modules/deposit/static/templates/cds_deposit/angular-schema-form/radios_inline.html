@@ -20,9 +20,9 @@
           class="{{ form.fieldHtmlClass }}"
           name="{{ form.key.join('.') }}"
           type="radio"
+          ng-model="$$value$$"
           sf-changed="form"
           ng-disabled="evalExpr(form.readonly)"
-          ng-model="$$value$$"
           ng-value="item.value">
       </label>
     </li>

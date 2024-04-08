@@ -24,10 +24,19 @@ from invenio_jsonschemas import current_jsonschemas
 from marshmallow import Schema, fields, post_load
 
 from ....deposit.api import Project, deposit_video_resolver
-from .common import (AccessSchema, BucketSchema, ContributorSchema,
-                     DepositSchema, ExternalSystemIdentifiersField,
-                     KeywordsSchema, LicenseSchema, OaiSchema,
-                     StrictKeysSchema, TitleSchema, TranslationsSchema)
+from .common import (
+    AccessSchema,
+    BucketSchema,
+    ContributorSchema,
+    DepositSchema,
+    ExternalSystemIdentifiersField,
+    KeywordsSchema,
+    LicenseSchema,
+    OaiSchema,
+    StrictKeysSchema,
+    TitleSchema,
+    TranslationsSchema,
+)
 from .doi import DOI
 
 
@@ -77,23 +86,24 @@ class ProjectSchema(StrictKeysSchema):
     doi = DOI()
     keywords = fields.Nested(KeywordsSchema, many=True)
     license = fields.Nested(LicenseSchema, many=True)
-    schema = fields.Str(attribute='$schema', dump_to='$schema')
-    videos = fields.Method(deserialize='get_videos_refs')
+    schema = fields.Str(attribute="$schema", data_key="$schema")
+    videos = fields.Method(deserialize="get_videos_refs")
     translations = fields.Nested(TranslationsSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     publication_date = fields.Str()
     external_system_identifiers = fields.Nested(
-        ExternalSystemIdentifiersField, many=True)
-
+        ExternalSystemIdentifiersField, many=True
+    )
 
     @post_load(pass_many=False)
-    def post_load(self, data):
+    def post_load(self, data, **kwargs):
         """Post load."""
-        data['$schema'] = current_jsonschemas.path_to_url(Project._schema)
+        data["$schema"] = current_jsonschemas.path_to_url(Project._schema)
         return data
 
     def get_videos_refs(self, obj):
         """Get videos references."""
-        return [Project.build_video_ref(
-            deposit_video_resolver(o['_deposit']['id'])
-        ) for o in obj]
+        return [
+            Project.build_video_ref(deposit_video_resolver(o["_deposit"]["id"]))
+            for o in obj
+        ]

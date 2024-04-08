@@ -1,0 +1,18 @@
+{
+  "mappings": {
+    "properties": {
+      "key_id": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "provenance": {
+        "type": "text"
+      },
+      "suggest_name": {
+        "type": "completion"
+      }
+    }
+  }
+}

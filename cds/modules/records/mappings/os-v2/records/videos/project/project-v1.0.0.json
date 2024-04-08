@@ -1,0 +1,293 @@
+{
+  "mappings": {
+    "properties": {
+      "_created": {
+        "type": "date"
+      },
+      "_updated": {
+        "type": "date"
+      },
+      "keywords": {
+        "properties": {
+          "value": {
+            "type": "text"
+          },
+          "source": {
+            "type": "text"
+          }
+        }
+      },
+      "license": {
+        "properties": {
+          "license": {
+            "type": "text",
+            "fields": {
+              "untouched": {
+                "type": "keyword"
+              }
+            }
+          },
+          "material": {
+            "type": "text"
+          },
+          "credit": {
+            "type": "text"
+          },
+          "url": {
+            "type": "text"
+          }
+        }
+      },
+      "date": {
+        "type": "date",
+        "format": "date||date_time_no_millis"
+      },
+      "videos": {
+        "properties": {
+          "$schema": {
+            "type": "text"
+          },
+          "_project_id": {
+            "type": "text"
+          },
+          "physical_medium": {
+            "properties": {
+              "shelf": {
+                "type": "keyword"
+              },
+              "copy_number": {
+                "type": "keyword"
+              },
+              "arrangement": {
+                "type": "keyword"
+              },
+              "note": {
+                "type": "keyword"
+              },
+              "camera": {
+                "type": "keyword"
+              },
+              "location": {
+                "type": "keyword"
+              },
+              "bar_code": {
+                "type": "keyword"
+              },
+              "medium_standard": {
+                "type": "keyword"
+              },
+              "sequence_number": {
+                "type": "keyword"
+              },
+              "internal_note": {
+                "type": "keyword"
+              }
+            }
+          },
+          "contributors": {
+            "properties": {
+              "affiliations": {
+                "type": "text"
+              },
+              "email": {
+                "type": "text"
+              },
+              "ids": {
+                "properties": {
+                  "source": {
+                    "type": "text"
+                  },
+                  "value": {
+                    "type": "text"
+                  }
+                }
+              },
+              "name": {
+                "type": "text"
+              },
+              "role": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "$schema": {
+        "type": "text"
+      },
+      "contributors": {
+        "properties": {
+          "email": {
+            "type": "text"
+          },
+          "role": {
+            "type": "text"
+          },
+          "name": {
+            "type": "text"
+          },
+          "contribution": {
+            "type": "text"
+          },
+          "ids": {
+            "properties": {
+              "value": {
+                "type": "text"
+              },
+              "source": {
+                "type": "text"
+              }
+            }
+          },
+          "affiliations": {
+            "type": "text"
+          }
+        }
+      },
+      "_deposit": {
+        "properties": {
+          "id": {
+            "type": "text"
+          },
+          "owners": {
+            "type": "integer"
+          },
+          "created_by": {
+            "type": "integer"
+          }
+        }
+      },
+      "_cds": {
+        "properties": {
+          "extracted_metadata": {
+            "type": "object"
+          },
+          "state": {
+            "type": "object"
+          },
+          "modified_by": {
+            "type": "integer"
+          }
+        }
+      },
+      "title": {
+        "properties": {
+          "title": {
+            "type": "text"
+          },
+          "source": {
+            "type": "text"
+          },
+          "subtitle": {
+            "type": "text"
+          }
+        }
+      },
+      "recid": {
+        "type": "double"
+      },
+      "doi": {
+        "type": "text"
+      },
+      "_access": {
+        "properties": {
+          "read": {
+            "type": "keyword"
+          },
+          "update": {
+            "type": "keyword"
+          }
+        }
+      },
+      "category": {
+        "type": "text",
+        "fields": {
+          "untouched": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "text",
+        "fields": {
+          "untouched": {
+            "type": "keyword"
+          }
+        }
+      },
+      "report_number": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "_oai": {
+        "properties": {
+          "updated": {
+            "type": "text"
+          },
+          "sets": {
+            "type": "text"
+          },
+          "id": {
+            "type": "text"
+          }
+        }
+      },
+      "translations": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "language": {
+            "type": "text"
+          },
+          "title": {
+            "properties": {
+              "source": {
+                "type": "text"
+              },
+              "subtitle": {
+                "type": "text"
+              },
+              "title": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "_files": {
+        "properties": {
+          "checksum": {
+            "type": "text"
+          },
+          "type": {
+            "type": "text"
+          },
+          "key": {
+            "type": "text"
+          },
+          "bucket": {
+            "type": "text"
+          },
+          "size": {
+            "type": "long"
+          },
+          "version_id": {
+            "type": "text"
+          },
+          "category": {
+            "type": "text"
+          }
+        }
+      },
+      "note": {
+        "type": "text"
+      },
+      "publication_date": {
+        "type": "text"
+      }
+    }
+  }
+}

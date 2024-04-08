@@ -28,12 +28,18 @@ from __future__ import absolute_import, print_function
 
 from jsonschema.validators import Draft4Validator, extend
 
+
+def no_validation(v, r, i, s):
+    """Dummy method to omit jsonschema validation."""
+    return None
+
+
 PartialDraft4Validator = extend(
     Draft4Validator,
-    {
-        "required": None,
-        "minItems": None,
-        "maxItems": None,
-        "uniqueItems": None,
-    },
+    validators=dict(
+        required=no_validation,
+        minItems=no_validation,
+        maxItems=no_validation,
+        uniqueItems=no_validation,
+    ),
 )

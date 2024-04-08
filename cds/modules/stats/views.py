@@ -22,7 +22,7 @@
 from __future__ import absolute_import, print_function
 
 from cds.modules.records.permissions import record_read_permission_factory
-from elasticsearch import Elasticsearch
+from opensearchpy import OpenSearch
 from flask import Blueprint, current_app, jsonify, make_response
 from flask.views import MethodView
 from invenio_records_rest.views import need_record_permission, pass_record
@@ -46,7 +46,7 @@ class StatsResource(MethodView):
 
     @staticmethod
     def _build_subquery(report_number):
-        """Elasticsearch subquery for download statistics.
+        """OpenSearch subquery for download statistics.
         Because the report number was changed for consistency reasons,
         we had to build a workaround so that we can target old videos
         by report number.
@@ -89,7 +89,7 @@ class StatsResource(MethodView):
     @need_record_permission('read_permission_factory')
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
-        es = Elasticsearch([{
+        es = OpenSearch([{
             'host': current_app.config['LEGACY_STATS_ELASTIC_HOST'],
             'port': current_app.config['LEGACY_STATS_ELASTIC_PORT'],
         }])

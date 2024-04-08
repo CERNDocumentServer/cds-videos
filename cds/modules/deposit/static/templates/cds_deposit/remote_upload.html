@@ -1,21 +1,16 @@
-<div class="text-center form-inline">
-  <textarea
-      msd-elastic
-      placeholder="Input the URLs to upload here, i.e. https://example.com/video.mov, one per line"
-      cols="60"
-      rows="5"
-      class="form-control cds-urls-textarea"
-      type="text"
-      ng-model="uploadUrl"
-  ></textarea>
-  <div style="padding-bottom: 10px;">
-    <a class="btn btn-default"
-            ng-click="startUrlUploads(uploadUrl); uploadUrl='';">Upload URLs
-    </a>
-  </div>
+<div class="text-center">
   <p class="text-center py-20 f5 text-muted">
     <strong>— OR —</strong>
   </p>
-  <div ng-show="dropboxError" ng-bind="dropboxError"></div>
-  <div class="dropbox-upload"></div>
+  <div class="input-group">
+    <input
+      msd-elastic
+      placeholder="Input the URL to upload here, i.e. https://example.com/video.mov"
+      class="form-control"
+      ng-model="uploadUrl"
+  />
+    <span class="input-group-btn">
+      <a class="btn btn-default" type="button" ng-click="startUrlUploads(uploadUrl); uploadUrl='';">Upload from URL</a>
+    </span>
+  </div>
 </div>

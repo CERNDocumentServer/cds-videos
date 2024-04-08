@@ -74,3 +74,6 @@ node_modules
 
 # celery beat
 celerybeat*
+
+# ignore local tmp
+tmp

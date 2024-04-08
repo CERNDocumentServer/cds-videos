@@ -20,12 +20,38 @@
               "entities": false,
               "height": 200,
               "toolbar": [
-                ["PasteText", "PasteFromWord"],
-                ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
-                ["NumberedList", "BulletedList", "Blockquote"],
-                ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-                ["Source"],
-                ["Maximize"]
+                [
+                  "PasteText",
+                  "PasteFromWord"
+                ],
+                [
+                  "Bold",
+                  "Italic",
+                  "Strike",
+                  "-",
+                  "Subscript",
+                  "Superscript"
+                ],
+                [
+                  "NumberedList",
+                  "BulletedList",
+                  "Blockquote"
+                ],
+                [
+                  "Undo",
+                  "Redo",
+                  "-",
+                  "Find",
+                  "Replace",
+                  "-",
+                  "RemoveFormat"
+                ],
+                [
+                  "Source"
+                ],
+                [
+                  "Maximize"
+                ]
               ],
               "disableNativeSpellChecker": false,
               "removePlugins": "elementspath",
@@ -79,7 +105,9 @@
         "onChange": "$ctrl.updateType(modelValue, form)",
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
-          "filterTriggers": ["model.category"],
+          "filterTriggers": [
+            "model.category"
+          ],
           "filter": "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
         }
@@ -216,7 +244,9 @@
         "onChange": "$ctrl.updateType(modelValue, form)",
         "readonly": "$ctrl.cdsDepositCtrl.hasCategory() || $ctrl.isAnyVideoAlreadyPublished()",
         "options": {
-          "filterTriggers": ["model.category"],
+          "filterTriggers": [
+            "model.category"
+          ],
           "filter": "item.category == model.category",
           "asyncCallback": "$ctrl.autocompleteType"
         },

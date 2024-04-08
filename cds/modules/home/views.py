@@ -22,7 +22,7 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, render_template
-from flask_babelex import lazy_gettext as _
+from invenio_i18n import lazy_gettext as _
 from flask_menu import current_menu
 from invenio_cache.decorators import cached_unless_authenticated
 
@@ -32,18 +32,6 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
-
-
-@blueprint.before_app_first_request
-def init_menu():
-    """Initialize menu before first request."""
-    item = current_menu.submenu('main.deposit')
-    item.register(
-        'invenio_deposit_ui.index',
-        _('Upload'),
-        order=2,
-    )
-
 
 @blueprint.route('/')
 @cached_unless_authenticated(timeout=600, key_prefix='homepage')
@@ -58,3 +46,18 @@ def index():
 def ping():
     """Ping blueprint used by loadbalancer."""
     return 'You Know, the CERN Document Server'
+
+
+def finalize_app(app):
+    """Finalize app."""
+    init_menu(app)
+
+
+def init_menu(app):
+    """Initialize menu before first request."""
+    item = current_menu.submenu('main.deposit')
+    item.register(
+        'invenio_deposit_ui.index',
+        _('Upload'),
+        order=2,
+    )

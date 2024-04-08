@@ -25,11 +25,20 @@ from marshmallow import Schema, fields, post_load
 
 from ....deposit.api import Video
 from ..fields.datetime import DateString
-from .common import (AccessSchema, BucketSchema, ContributorSchema,
-                     DepositSchema, ExternalSystemIdentifiersField,
-                     KeywordsSchema, LicenseSchema, OaiSchema,
-                     RelatedLinksSchema, StrictKeysSchema, TitleSchema,
-                     TranslationsSchema)
+from .common import (
+    AccessSchema,
+    BucketSchema,
+    ContributorSchema,
+    DepositSchema,
+    ExternalSystemIdentifiersField,
+    KeywordsSchema,
+    LicenseSchema,
+    OaiSchema,
+    RelatedLinksSchema,
+    StrictKeysSchema,
+    TitleSchema,
+    TranslationsSchema,
+)
 from .doi import DOI
 
 
@@ -117,7 +126,8 @@ class VideoSchema(StrictKeysSchema):
     doi = DOI()
     duration = fields.Str()
     external_system_identifiers = fields.Nested(
-        ExternalSystemIdentifiersField, many=True)
+        ExternalSystemIdentifiersField, many=True
+    )
     featured = fields.Boolean()
     internal_note = fields.Str()
     internal_categories = fields.Raw()
@@ -130,7 +140,7 @@ class VideoSchema(StrictKeysSchema):
     recid = fields.Number()
     related_links = fields.Nested(RelatedLinksSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
-    schema = fields.Str(attribute="$schema", dump_to='$schema')
+    schema = fields.Str(attribute="$schema", data_key="$schema")
     title = fields.Nested(TitleSchema, required=True)
     translations = fields.Nested(TranslationsSchema, many=True)
     type = fields.Str()
@@ -142,7 +152,7 @@ class VideoSchema(StrictKeysSchema):
     physical_medium = fields.Nested(PhysicalMediumSchema, many=True)
 
     @post_load(pass_many=False)
-    def post_load(self, data):
+    def post_load(self, data, **kwargs):
         """Post load."""
-        data['$schema'] = current_jsonschemas.path_to_url(Video._schema)
+        data["$schema"] = current_jsonschemas.path_to_url(Video._schema)
         return data

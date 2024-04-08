@@ -74,7 +74,7 @@ class CDSJSONSerializer(JSONSerializer):
         return result
 
     def preprocess_search_hit(self, pid, record_hit, links_factory=None):
-        """Prepare a record hit from Elasticsearch for serialization."""
+        """Prepare a record hit from opensearch for serialization."""
         # do not pass links_factory when fetching data from ES, otherwise it
         # will load the record from db for each search result
         # see: cds.modules.records.links.record_link_factory

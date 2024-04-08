@@ -1,7 +1,12 @@
 {
   "description": "Describe information needed for deposit module.",
   "title": "CDS Project Deposit Schema",
-  "required": ["_deposit", "title", "category", "type"],
+  "required": [
+    "_deposit",
+    "title",
+    "category",
+    "type"
+  ],
   "additionalProperties": false,
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
@@ -96,7 +101,9 @@
       "minItems": 1,
       "items": {
         "additionalProperties": false,
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "type": "object",
         "description": "An entity responsible for making contributions to the resource. Examples of a Contributor include a person, an organization, or a service. Typically, the name of a Contributor should be used to indicate the entity.",
         "properties": {
@@ -165,7 +172,9 @@
     },
     "title": {
       "additionalProperties": false,
-      "required": ["title"],
+      "required": [
+        "title"
+      ],
       "type": "object",
       "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
       "properties": {
@@ -221,11 +230,16 @@
     "_deposit": {
       "description": "Internal deposit metadata.",
       "title": "Deposit",
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "type": "object",
       "properties": {
         "status": {
-          "enum": ["draft", "published"],
+          "enum": [
+            "draft",
+            "published"
+          ],
           "type": "string",
           "description": "Status of the deposit, either 'draft' or 'published'.",
           "name": "status",
@@ -376,7 +390,9 @@
           },
           "title": {
             "additionalProperties": false,
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "type": "object",
             "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
             "properties": {

@@ -1,0 +1,89 @@
+# Notes
+
+- index: not_analyzed
+- type: completion for suggestions
+-[x] ffmpeg: gif method was removed
+- admin panel shows Banners
+- test statistics, should we install raven?
+- missing os-v2 invenio_opendefinition.mappings
+- existing kw need updating, remove payload as it is not supported
+- project deletion from the UI fails to index the project as it tries to index it by id which results to a PIDDeletedError
+
+# DB update
+
+- if local users then we need to re-encrypt the passwords
+  - NOT needed if set SECURITY_PASSWORD_SINGLE_HASH = True
+- invenio alembic upgrade
+- Remove keywords.suggest_name.payload
+```
+from sqlalchemy.orm.exc import NoResultFound
+
+from cds.modules.records.api import Keyword
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
+from invenio_db import db
+
+
+def get_all_pids_by(pid_type):
+    """Get all PIDs for the given type.
+
+    :param pid_type: String representing the PID type value, for example 'recid'.
+    """
+    pids = PersistentIdentifier.query.filter(PersistentIdentifier.pid_type == pid_type).filter(
+        PersistentIdentifier.status == PIDStatus.REGISTERED).yield_per(100)
+    return pids
+
+
+def get_record_by_pid(pid):
+    """Fetch and return the published record given its PID.
+
+    :param pid: String representing the PID value.
+    """
+    try:
+        return Keyword.get_record(pid.object_uuid)
+    except NoResultFound:
+        return None
+
+
+kwds = get_all_pids_by("kwid")
+
+for pid in kwds:
+    rec = get_record_by_pid(pid)
+    if rec is not None:
+        rec["suggest_name"].pop("payload", None)
+        rec.commit()
+db.session.commit()
+```
+
+# Search reindex
+
+```bash
+
+cds index reindex -t recid
+cds index reindex -t depid
+cds index reindex -t catid
+cds index reindex -t kwid
+cds index run
+
+```
+
+## Local setup
+
+- Node v18
+- Python 3.9
+
+```bash
+
+# setup
+./scripts/bootstrap_upgrade
+./scripts/setup-instance.sh
+
+# web server
+./scripts/server
+
+# celery
+./scripts/celery
+
+# assets watch
+./scripts/assets-watch
+
+```

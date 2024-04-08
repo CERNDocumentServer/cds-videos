@@ -19,49 +19,49 @@
 
 """JS/CSS bundles for Records."""
 
-from __future__ import absolute_import, print_function
+# from __future__ import absolute_import, print_function
 
-from flask_assets import Bundle
-from invenio_assets import NpmBundle
+# from flask_assets import Bundle
+# from invenio_assets import NpmBundle
 
-stats_js = NpmBundle(
-    "node_modules/invenio-charts-js/dist/lib.bundle.js",
-    "js/cds_records/stats.js",
-    output="gen/cds.records.stats.%(version)s.js",
-    npm={
-        "invenio-charts-js": "^0.2.2",
-    },
-)
+# stats_js = NpmBundle(
+#     "node_modules/invenio-charts-js/dist/lib.bundle.js",
+#     "js/cds_records/stats.js",
+#     output="gen/cds.records.stats.%(version)s.js",
+#     npm={
+#         "invenio-charts-js": "^0.2.2",
+#     },
+# )
 
-stats_css = Bundle(
-    Bundle(
-        "node_modules/invenio-charts-js/src/styles/styles.scss",
-        "scss/stats.scss",
-        filters="scss,cleancssurl",
-    ),
-    output="gen/cds.stats.%(version)s.css",
-)
+# stats_css = Bundle(
+#     Bundle(
+#         "node_modules/invenio-charts-js/src/styles/styles.scss",
+#         "scss/stats.scss",
+#         filters="scss,cleancssurl",
+#     ),
+#     output="gen/cds.stats.%(version)s.css",
+# )
 
-js = NpmBundle(
-    Bundle(
-        "node_modules/cds/dist/cds.js",
-        "node_modules/angular-sanitize/angular-sanitize.js",
-        "node_modules/angular-strap/dist/angular-strap.js",
-        "node_modules/invenio-files-js/dist/invenio-files-js.js",
-        "node_modules/ngmodal/dist/ng-modal.js",
-        "js/cds_records/main.js",
-        "js/cds_records/user_actions_logger.js",
-        filters="jsmin",
-    ),
-    depends=("node_modules/cds/dist/*.js",),
-    filters="jsmin",
-    output="gen/cds.record.%(version)s.js",
-    npm={
-        "angular": "~1.4.10",
-        "angular-sanitize": "~1.4.10",
-        "angular-loading-bar": "~0.9.0",
-        "cds": "~0.2.0",
-        "ng-dialog": "~0.6.0",
-        "ngmodal": "~2.0.1",
-    },
-)
+# js = NpmBundle(
+#     Bundle(
+#         "node_modules/cds/dist/cds.js",
+#         "node_modules/angular-sanitize/angular-sanitize.js",
+#         "node_modules/angular-strap/dist/angular-strap.js",
+#         "node_modules/invenio-files-js/dist/invenio-files-js.js",
+#         "node_modules/ngmodal/dist/ng-modal.js",
+#         "js/cds_records/main.js",
+#         "js/cds_records/user_actions_logger.js",
+#         filters="jsmin",
+#     ),
+#     depends=("node_modules/cds/dist/*.js",),
+#     filters="jsmin",
+#     output="gen/cds.record.%(version)s.js",
+#     npm={
+#         "angular": "~1.4.10",
+#         "angular-sanitize": "~1.4.10",
+#         "angular-loading-bar": "~0.9.0",
+#         "cds": "~0.2.0",
+#         "ng-dialog": "~0.6.0",
+#         "ngmodal": "~2.0.1",
+#     },
+# )

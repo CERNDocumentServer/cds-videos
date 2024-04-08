@@ -3,7 +3,7 @@
 {%- set container_class = '{{container_class}} cds-max-fluid-width' -%}
 
 {%- block css %}
-    {% assets "invenio_deposit_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+    {# {% assets "invenio_deposit_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %} #}
     {{ super() }}
     <style>
       body {
@@ -13,16 +13,17 @@
 {%- endblock css %}
 
 {%- block javascript %}
-  {{ super() }}
-  <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js"></script>
-  <script type="text/javascript">
-    // CKEDITOR static location
-    window.CKEDITOR_BASEPATH = '{{url_for("static", filename="node_modules/ckeditor/", _external=True)}}';
-  </script>
-  {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-  {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+{{ super() }}
+<script type="text/javascript">
+  // CKEDITOR static location
+  window.CKEDITOR_BASEPATH = 'https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js';
+</script>
+  <!-- <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js"></script> -->
+  {# {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %} #}
 
-  <script type="text/javascript">
+  {{ webpack["cds_deposit_app.js"] }}
+  {#  <script type="text/javascript">
     angular.element(document).ready(function() {
       angular.bootstrap(
         document.getElementById('cds-deposit'), ['cds', 'cdsDeposit', 'ngModal']
@@ -31,7 +32,7 @@
   $(document).ready(function() {
     $('.dropdown-toggle').dropdown();
   });
-  </script>
+  </script> #}
 {%- endblock javascript %}
 
 {%- block page_header %}
@@ -61,7 +62,6 @@
       is-super-admin="{{ record | check_if_super_admin | lower }}"
   >
   </cds-deposits>
-  {{ jwt() }}
   <input type="hidden" id="max-n-videos-per-project" value="{{ config.DEPOSIT_PROJECT_MAX_N_VIDEOS }}" />
 </div>
 {%- endblock %}

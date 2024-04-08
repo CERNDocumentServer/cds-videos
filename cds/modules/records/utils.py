@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 
 import six
-from elasticsearch.exceptions import NotFoundError
+from opensearchpy.exceptions import NotFoundError
 from flask import current_app, g, request
 from flask_security import current_user
 from invenio_db import db
@@ -44,9 +44,9 @@ from invenio_records.api import Record
 from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_search import current_search
-from invenio_search.utils import schema_to_index
+from invenio_indexer.utils import schema_to_index
 from six.moves.html_parser import HTMLParser
-from six.moves.urllib.parse import urlparse
+from urllib import parse
 from sqlalchemy_continuum import version_class
 
 from ..deposit.fetcher import deposit_fetcher
@@ -57,7 +57,7 @@ def schema_prefix(schema):
     """Get index prefix for a given schema."""
     if not schema:
         return None
-    index, doctype = schema_to_index(
+    index = schema_to_index(
         schema, index_names=current_search.mappings.keys()
     )
     return index.split("-")[0]
@@ -113,7 +113,7 @@ def format_pid_link(url_template, pid_value):
             host=request.host, scheme=request.scheme, pid_value=pid_value
         )
     else:
-        r = urlparse(current_app.config["THEME_SITEURL"])
+        r = parse(current_app.config["THEME_SITEURL"])
         return url_template.format(
             host=r.netloc, scheme=r.scheme, pid_value=pid_value
         )

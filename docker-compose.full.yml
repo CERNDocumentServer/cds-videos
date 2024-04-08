@@ -54,7 +54,7 @@ services:
       - files_data:/opt/cds_videos/var/instance/files
     links:
       - cache
-      - es
+      - search
       - mq
       - db
   # Worker
@@ -69,7 +69,7 @@ services:
       - files_data:/opt/cds_videos/var/instance/files
     links:
       - cache
-      - es
+      - search
       - mq
       - db
   # Monitoring
@@ -92,10 +92,14 @@ services:
     extends:
       file: docker-services.yml
       service: mq
-  es:
+  search:
     extends:
       file: docker-services.yml
-      service: es
+      service: search
+  opensearch-dashboards:
+    extends:
+      file: docker-services.yml
+      service: opensearch-dashboards
 volumes:
   static_data:
   files_data:

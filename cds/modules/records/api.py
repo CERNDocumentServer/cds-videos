@@ -68,7 +68,7 @@ def _build_file_links(obj):
     """Return a dict with file links."""
     return dict(
         self=(
-            u"{host}/{api}/{bucket}/{key}?versionId={version_id}".format(
+            "{host}/{api}/{bucket}/{key}?versionId={version_id}".format(
                 host=current_app.config["SITE_URL"],
                 api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
                 bucket=obj.bucket_id,
@@ -76,7 +76,7 @@ def _build_file_links(obj):
                 version_id=obj.version_id,
             )
         ),
-        deleteFile=u"{host}/{api}/{bucket}/{key}".format(
+        deleteFile="{host}/{api}/{bucket}/{key}".format(
             host=current_app.config["SITE_URL"],
             api=current_app.config["DEPOSIT_FILES_API"].strip("/"),
             bucket=obj.bucket_id,
@@ -112,7 +112,7 @@ class CDSFileObject(FileObject):
 
     @classmethod
     def _link(cls, bucket_id, key, _external=True):
-        return u"{host}/{api}/{bucket_id}/{key}".format(
+        return "{host}/{api}/{bucket_id}/{key}".format(
             host=current_app.config["SITE_URL"],
             api=current_app.config["DEPOSIT_FILES_API"].lstrip("/"),
             bucket_id=bucket_id,
@@ -162,8 +162,7 @@ class CDSVideosFilesIterator(CDSFilesIterator):
         return [
             video
             for video in master_file.get("subformat", [])
-            if video["media_type"] == "video"
-            and video["context_type"] == "subformat"
+            if video["media_type"] == "video" and video["context_type"] == "subformat"
         ]
 
     @staticmethod
@@ -188,10 +187,7 @@ class CDSVideosFilesIterator(CDSFilesIterator):
         """Get the video poster frame."""
         # First check if we have a custom thumbnail for this video
         for f in record.get("_files"):
-            if (
-                f.get("context_type") == "poster"
-                and f.get("media_type") == "image"
-            ):
+            if f.get("context_type") == "poster" and f.get("media_type") == "image":
                 return f
 
         # If not return the first frame from the list
@@ -266,7 +262,7 @@ class Keyword(Record):
 
         data["suggest_name"] = {
             "input": name,
-            "payload": {"key_id": key_id, "name": name},
+            # "payload": {"key_id": key_id, "name": name},
         }
         return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
 
@@ -298,6 +294,6 @@ class Category(Record):
 
         data["suggest_name"] = {
             "input": data.get("name", None),
-            "payload": {"types": data.get("types", [])},
+            # "payload": {"types": data.get("types", [])},
         }
         return super(Category, cls).create(data=data, id_=id_, **kwargs)

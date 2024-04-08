@@ -37,13 +37,19 @@ from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
 from celery.result import AsyncResult
-from celery.task.control import revoke
+from celery.worker.control import revoke
 from celery.utils.log import get_task_logger
 from flask import current_app
-from flask_iiif.utils import create_gif_from_frames
+from PIL import Image, ImageSequence
+
+# from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
-from invenio_files_rest.models import (ObjectVersion, ObjectVersionTag,
-                                       as_bucket, as_object_version)
+from invenio_files_rest.models import (
+    ObjectVersion,
+    ObjectVersionTag,
+    as_bucket,
+    as_object_version,
+)
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDDeletedError
 from invenio_pidstore.models import PersistentIdentifier
@@ -68,6 +74,52 @@ from .files import dispose_object_version, move_file_into_local
 logger = get_task_logger(__name__)
 
 
+# *****************************************************************************
+# Moved here from flask-iif as it was removed due to breaking the IIIF worfklow
+# *****************************************************************************
+def create_gif_from_frames(frames, duration=500, loop=0):
+    """Create a GIF image.
+    :param frames: the sequence of frames that resulting GIF should contain
+    :param duration: the duration of each frame (in milliseconds)
+    :param loop: the number of iterations of the frames (0 for infinity)
+    :returns: GIF image
+    :rtype: PIL.Image
+    .. note:: Uses ``tempfile``, as PIL allows GIF creation only on ``save``.
+    """
+    # Save GIF to temporary file
+    tmp = tempfile.mkdtemp(dir=current_app.config["IIIF_GIF_TEMP_FOLDER_PATH"])
+    tmp_file = os.path.join(tmp, "temp.gif")
+
+    head, tail = frames[0], frames[1:]
+    head.save(
+        tmp_file, "GIF", save_all=True, append_images=tail, duration=duration, loop=loop
+    )
+
+    gif_image = Image.open(tmp_file)
+    assert gif_image.is_animated
+
+    # Cleanup temporary file
+    shutil.rmtree(tmp)
+
+    return gif_image
+
+
+def resize_gif(image, size, resample):
+    """Resize a GIF image.
+    :param image: the original GIF image
+    :param size: the dimensions to resize to
+    :param resample: the method of resampling
+    :returns: resized GIF image
+    :rtype: PIL.Image
+    """
+    return create_gif_from_frames(
+        [
+            frame.resize(size, resample=resample)
+            for frame in ImageSequence.Iterator(image)
+        ]
+    )
+
+
 class CeleryTask(_Task):
     """The task class which is used as the minimal unit of work.
 
@@ -77,9 +129,7 @@ class CeleryTask(_Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Update task status on database."""
         with celery_app.flask_app.app_context():
-            for (
-                flow_task_metadata
-            ) in FlowTaskMetadata.get_all_by_flow_task_name(
+            for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
                 self.flow_id, self.name
             ):
                 flow_task_metadata.status = FlowTaskStatus.FAILURE
@@ -93,9 +143,7 @@ class CeleryTask(_Task):
     def on_success(self, retval, task_id, args, kwargs):
         """Update tasks status on database."""
         with celery_app.flask_app.app_context():
-            for (
-                flow_task_metadata
-            ) in FlowTaskMetadata.get_all_by_flow_task_name(
+            for flow_task_metadata in FlowTaskMetadata.get_all_by_flow_task_name(
                 self.flow_id, self.name
             ):
                 flow_task_metadata.status = FlowTaskStatus.SUCCESS
@@ -134,9 +182,7 @@ class AVCTask(CeleryTask):
             if kwargs.get("_clean", False):
                 self.clean(*args, **kwargs)
 
-            self.object_version = as_object_version(
-                kwargs.pop("version_id", None)
-            )
+            self.object_version = as_object_version(kwargs.pop("version_id", None))
             self.object_version_id = str(self.object_version.version_id)
             self.set_base_payload()
 
@@ -187,7 +233,8 @@ class AVCTask(CeleryTask):
             except PIDDeletedError:
                 self.log(
                     "Indexing deposit with id {0} failed. "
-                    "Deposit was deleted.".format(deposit_id))
+                    "Deposit was deleted.".format(deposit_id)
+                )
 
     @staticmethod
     def set_revoke_handler(handler):
@@ -254,9 +301,7 @@ class AVCTask(CeleryTask):
         )
         if not flow_tasks_metadata:
             flow_tasks_metadata = [
-                FlowTaskMetadata.create(
-                    flow_id=payload["flow_id"], name=cls.name
-                )
+                FlowTaskMetadata.create(flow_id=payload["flow_id"], name=cls.name)
             ]
 
         ts = []
@@ -271,9 +316,7 @@ class AVCTask(CeleryTask):
             self.flow_id, self.name
         )
         if not flow_tasks_metadata:
-            flow_task_metadata = FlowTaskMetadata.create(
-                self.flow_id, self.name
-            )
+            flow_task_metadata = FlowTaskMetadata.create(self.flow_id, self.name)
         else:
             assert len(flow_tasks_metadata) == 1
             flow_task_metadata = flow_tasks_metadata[0]
@@ -327,14 +370,6 @@ class DownloadTask(AVCTask):
                 flow_task_metadata.message = err
                 db.session.commit()
                 raise RuntimeError(err)
-            # meta = dict(
-            #     payload=dict(
-            #         size=size,
-            #         total=total,
-            #         percentage=total * 100 / size,
-            #     ),
-            #     message="Downloading {0} of {1}".format(total, size),
-            # )
 
         self.object_version.set_contents(
             response.raw, progress_callback=progress_updater, size=headers_size
@@ -382,13 +417,10 @@ class ExtractMetadataTask(AVCTask):
         try:
             patch_record(recid=recid, patch=patch, validator=validator)
         except jsonpatch.JsonPatchConflict as c:
-            logger.warning(
-                "Failed to apply JSON Patch to deposit %s: %s", recid, c
-            )
+            logger.warning("Failed to apply JSON Patch to deposit %s: %s", recid, c)
 
     @classmethod
-    def get_metadata_from_video_file(cls, object_=None, uri=None,
-                                     delete_copied=True):
+    def get_metadata_from_video_file(cls, object_=None, uri=None, delete_copied=True):
         """Get metadata from video file."""
         # Extract video's metadata using `ff_probe`
         if uri:
@@ -440,8 +472,7 @@ class ExtractMetadataTask(AVCTask):
         self.log("Started task {0}".format(kwargs["task_id"]))
 
         metadata = self.get_metadata_from_video_file(
-            object_=self.object_version, uri=uri,
-            delete_copied=delete_copied
+            object_=self.object_version, uri=uri, delete_copied=delete_copied
         )
         try:
             extracted_dict = self.create_metadata_tags(
@@ -496,9 +527,7 @@ class ExtractFramesTask(AVCTask):
         slaves = (
             ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
             .join(tag_alias_2, ObjectVersion.tags)
-            .filter(
-                tag_alias_1.key == "master", tag_alias_1.value == version_id
-            )
+            .filter(tag_alias_1.key == "master", tag_alias_1.value == version_id)
             .filter(
                 tag_alias_2.key == "context_type",
                 tag_alias_2.value.in_(["frame", "frames-preview"]),
@@ -509,9 +538,7 @@ class ExtractFramesTask(AVCTask):
         for slave in slaves:
             dispose_object_version(slave)
 
-    def run(
-        self, frames_start=5, frames_end=95, frames_gap=10, *args, **kwargs
-    ):
+    def run(self, frames_start=5, frames_end=95, frames_gap=10, *args, **kwargs):
         """Extract images from some frames of the video.
 
         Each of the frame images generates an ``ObjectVersion`` tagged as
@@ -603,9 +630,7 @@ class ExtractFramesTask(AVCTask):
         return "Created {0} frames.".format(len(frames))
 
     @classmethod
-    def _time_position(
-        cls, duration, frames_start=5, frames_end=95, frames_gap=10
-    ):
+    def _time_position(cls, duration, frames_start=5, frames_end=95, frames_gap=10):
         """Calculate time positions."""
         duration = float(duration)
         time_step = duration * frames_gap / 100
@@ -684,9 +709,7 @@ class ExtractFramesTask(AVCTask):
         for f in frames:
             image = Image.open(file_opener_xrootd(f, "rb"))
             # Convert image for better quality
-            im = image.convert("RGB").convert(
-                "P", palette=Image.ADAPTIVE, colors=255
-            )
+            im = image.convert("RGB").convert("P", palette=Image.ADAPTIVE, colors=255)
             images.append(im)
         gif_image = create_gif_from_frames(images)
         gif_fullpath = os.path.join(output_dir, gif_filename)
@@ -703,20 +726,10 @@ class ExtractFramesTask(AVCTask):
 
     @classmethod
     def _create_object(
-        cls,
-        bucket,
-        key,
-        stream,
-        size,
-        media_type,
-        context_type,
-        master_id,
-        **tags
+        cls, bucket, key, stream, size, media_type, context_type, master_id, **tags
     ):
         """Create object versions with given type and tags."""
-        obj = ObjectVersion.create(
-            bucket=bucket, key=key, stream=stream, size=size
-        )
+        obj = ObjectVersion.create(bucket=bucket, key=key, stream=stream, size=size)
         ObjectVersionTag.create(obj, "master", str(master_id))
         ObjectVersionTag.create(obj, "media_type", media_type)
         ObjectVersionTag.create(obj, "context_type", context_type)
@@ -749,9 +762,7 @@ class TranscodeVideoTask(AVCTask):
     def _get_flow_task_by_quality(cls, flow_tasks, quality):
         """Get flow task by checking the preset quality field."""
         flow_task_metadata = [
-            task
-            for task in flow_tasks
-            if task.payload["preset_quality"] == quality
+            task for task in flow_tasks if task.payload["preset_quality"] == quality
         ]
         return flow_task_metadata[0] if len(flow_task_metadata) == 1 else None
 
@@ -764,23 +775,16 @@ class TranscodeVideoTask(AVCTask):
             t = cls._init_flow_task(t, payload)
             return [t]
 
-        ts = FlowTaskMetadata.get_all_by_flow_task_name(
-            payload["flow_id"], cls.name
-        )
+        ts = FlowTaskMetadata.get_all_by_flow_task_name(payload["flow_id"], cls.name)
 
         flow_tasks = []
         # create tasks only for given qualities (or all if None passed)
         wanted_qualities = kwargs.get("qualities", [])
-        qs = (
-            wanted_qualities
-            or current_app.config["CDS_OPENCAST_QUALITIES"].keys()
-        )
+        qs = wanted_qualities or current_app.config["CDS_OPENCAST_QUALITIES"].keys()
         for q in qs:
             t = cls._get_flow_task_by_quality(ts, q) if ts else None
             if not t:
-                t = FlowTaskMetadata.create(
-                    flow_id=payload["flow_id"], name=cls.name
-                )
+                t = FlowTaskMetadata.create(flow_id=payload["flow_id"], name=cls.name)
             t = cls._init_flow_task(t, payload, q)
             flow_tasks.append(t)
         return flow_tasks
@@ -795,9 +799,9 @@ class TranscodeVideoTask(AVCTask):
 
             new_payload = dict(flow_task_metadata.payload)
             new_payload.update(
-                opencast_publication_tag=current_app.config[
-                    "CDS_OPENCAST_QUALITIES"
-                ][quality]["opencast_publication_tag"],
+                opencast_publication_tag=current_app.config["CDS_OPENCAST_QUALITIES"][
+                    quality
+                ]["opencast_publication_tag"],
                 **kwargs  # may contain `opencast_event_id`
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
@@ -816,9 +820,7 @@ class TranscodeVideoTask(AVCTask):
         slaves = (
             ObjectVersion.query.join(master_alias, ObjectVersion.tags)
             .join(context_type_alias, ObjectVersion.tags)
-            .filter(
-                master_alias.key == "master", master_alias.value == version_id
-            )
+            .filter(master_alias.key == "master", master_alias.value == version_id)
             .filter(
                 context_type_alias.key == "context_type",
                 context_type_alias.value.in_(["subformat"]),
@@ -837,9 +839,7 @@ class TranscodeVideoTask(AVCTask):
         height = int(tags["height"]) if "height" in tags else None
 
         # make sure that requested qualities, if any, are transcodable
-        transcodable_qualities = get_qualities(
-            video_height=height, video_width=width
-        )
+        transcodable_qualities = get_qualities(video_height=height, video_width=width)
         wanted_qualities = wanted_qualities or transcodable_qualities
         # exclude wanted qualities that are not transcodable
         qualities = list(
@@ -847,9 +847,7 @@ class TranscodeVideoTask(AVCTask):
         )
 
         # start only PENDING tasks
-        ts = FlowTaskMetadata.get_all_by_flow_task_name(
-            self.flow_id, self.name
-        )
+        ts = FlowTaskMetadata.get_all_by_flow_task_name(self.flow_id, self.name)
         ts = [t for t in ts if t.status == FlowTaskStatus.PENDING]
 
         flow_tasks = []
@@ -904,9 +902,7 @@ class TranscodeVideoTask(AVCTask):
         :param self: reference to instance of task base class
         """
         wanted_qualities = kwargs.get("qualities", [])
-        flow_tasks = self._start_transcodable_flow_tasks_or_cancel(
-            wanted_qualities
-        )
+        flow_tasks = self._start_transcodable_flow_tasks_or_cancel(wanted_qualities)
 
         self.set_revoke_handler(
             lambda: self._update_flow_tasks(
@@ -924,9 +920,7 @@ class TranscodeVideoTask(AVCTask):
         try:
             self.log("Starting video upload to OpenCast")
             opencast = OpenCast(deposit_video, self.object_version)
-            qualities_to_transcode = [
-                t.payload["preset_quality"] for t in flow_tasks
-            ]
+            qualities_to_transcode = [t.payload["preset_quality"] for t in flow_tasks]
             opencast_event_id = opencast.run(qualities_to_transcode)
 
             # store the OpenCast event id in the tags
@@ -937,8 +931,7 @@ class TranscodeVideoTask(AVCTask):
             flow_task_status = FlowTaskStatus.STARTED
             flow_task_message = "Video uploaded and OpenCast workflow started."
             self.log(
-                flow_task_message
-                + " OpenCast event id: {0}".format(opencast_event_id)
+                flow_task_message + " OpenCast event id: {0}".format(opencast_event_id)
             )
         except RequestError as e:
             flow_task_status = FlowTaskStatus.FAILURE
@@ -970,9 +963,7 @@ def patch_record(recid, patch, validator=None):
 
 
 @shared_task(bind=True)
-def sync_records_with_deposit_files(
-    self, deposit_id, max_retries=5, countdown=5
-):
+def sync_records_with_deposit_files(self, deposit_id, max_retries=5, countdown=5):
     """Low level files synchronize."""
     from cds.modules.deposit.api import deposit_video_resolver
 
@@ -989,9 +980,7 @@ def sync_records_with_deposit_files(
             db.session.commit()
         except Exception as exc:
             db.session.rollback()
-            raise self.retry(
-                max_retries=max_retries, countdown=countdown, exc=exc
-            )
+            raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
         # index the record again
         _, record_video = deposit_video.fetch_published()
         RecordIndexer().index(record_video)
@@ -1001,9 +990,7 @@ def sync_records_with_deposit_files(
 # Patch record
 #
 @shared_task(bind=True)
-def update_record(
-    self, recid, patch, validator=None, max_retries=5, countdown=5
-):
+def update_record(self, recid, patch, validator=None, max_retries=5, countdown=5):
     """Update a given record with a patch.
 
     Retries ``max_retries`` after ``countdown`` seconds.
@@ -1021,9 +1008,7 @@ def update_record(
             return recid
         except ConcurrentModificationError as exc:
             db.session.rollback()
-            raise self.retry(
-                max_retries=max_retries, countdown=countdown, exc=exc
-            )
+            raise self.retry(max_retries=max_retries, countdown=countdown, exc=exc)
 
 
 def get_patch_tasks_status(deposit):

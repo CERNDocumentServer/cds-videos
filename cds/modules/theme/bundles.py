@@ -24,80 +24,80 @@
 
 """JS/CSS bundles for CDS Theme."""
 
-from __future__ import absolute_import, print_function
+# from __future__ import absolute_import, print_function
 
-from flask_assets import Bundle
-from invenio_assets import NpmBundle
+# from flask_assets import Bundle
+# from invenio_assets import NpmBundle
 
-css = Bundle(
-    Bundle(
-        'node_modules/ng-dialog/css/ngDialog.css',
-        'node_modules/ng-dialog/css/ngDialog-theme-default.css',
-        'node_modules/ngmodal/dist/ng-modal.css',
-        'node_modules/ui-select/dist/select.css',
-        'node_modules/angular-loading-bar/build/loading-bar.css',
-        'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
-        'node_modules/angularjs-toaster/toaster.css',
-        filters='cleancssurl',
-    ),
-    NpmBundle(
-        'scss/cds.scss',
-        depends=('scss/*.scss', ),
-        filters='scss,cleancssurl',
-        npm={
-            'bootstrap-sass': '<3.4.2',
-            'font-awesome': '~4.7.0',
-            'ngmodal': '~2.0.1'
-        }
-    ),
-    output='gen/cds.%(version)s.css',
-)
+# css = Bundle(
+#     Bundle(
+#         'node_modules/ng-dialog/css/ngDialog.css',
+#         'node_modules/ng-dialog/css/ngDialog-theme-default.css',
+#         'node_modules/ngmodal/dist/ng-modal.css',
+#         'node_modules/ui-select/dist/select.css',
+#         'node_modules/angular-loading-bar/build/loading-bar.css',
+#         'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
+#         'node_modules/angularjs-toaster/toaster.css',
+#         filters='cleancssurl',
+#     ),
+#     NpmBundle(
+#         'scss/cds.scss',
+#         depends=('scss/*.scss', ),
+#         filters='scss,cleancssurl',
+#         npm={
+#             'bootstrap-sass': '<3.4.2',
+#             'font-awesome': '~4.7.0',
+#             'ngmodal': '~2.0.1'
+#         }
+#     ),
+#     output='gen/cds.%(version)s.css',
+# )
 
 """Default CSS bundle."""
 
-js = NpmBundle(
-    Bundle(
-        'node_modules/jquery/dist/jquery.js',
-        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
-        'node_modules/angular/angular.js',
-        'node_modules/ng-dialog/js/ngDialog.js',
-        'node_modules/clipboard/dist/clipboard.js',
-        'node_modules/ngclipboard/dist/ngclipboard.js',
-        'node_modules/lodash/lodash.js',
-        'node_modules/d3/d3.js',
-        'node_modules/angular-loading-bar/build/loading-bar.js',
-        'node_modules/invenio-search-js/dist/invenio-search-js.js',
-        'node_modules/angular-sanitize/angular-sanitize.js',
-        'node_modules/angular-mass-autocomplete/massautocomplete.js',
-        'node_modules/angular-local-storage/dist/angular-local-storage.js',
-        'node_modules/angularjs-toaster/toaster.js',
-        'node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js',
-        'node_modules/mousetrap/mousetrap.js',
-        'js/cds/module.js',
-        'js/cds/suggestions.js',
-        'js/main.js',
-        filters='jsmin',
-    ),
-    depends=(
-        'js/cds_deposit/avc/filters/progressClass.js',
-        'js/cds_deposit/avc/filters/progressIcon.js',
-        'js/*.js',
-        'js/cds/*.js',
-        'node_modules/invenio-search-js/dist/*.js',
-    ),
-    filters='jsmin',
-    output='gen/cds.%(version)s.js',
-    npm={
-        'angular': '~1.4.7',
-        'ng-dialog': '~0.6.0',
-        'clipboard': '~1.5.16',
-        'ngclipboard': '~1.1.1',
-        'lodash': '~4.17.4',
-        'angular-mass-autocomplete': '~0.5.0',
-        'angular-local-storage': '~0.5.2',
-        'angularjs-toaster': '~2.1.0',
-        'angular-ui-bootstrap': '~2.5.0',
-        'mousetrap': '~1.6.1',
-    }
-)
-"""Default JavaScript bundle."""
+# js = NpmBundle(
+#     Bundle(
+#         'node_modules/jquery/dist/jquery.js',
+#         'node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
+#         'node_modules/angular/angular.js',
+#         'node_modules/ng-dialog/js/ngDialog.js',
+#         'node_modules/clipboard/dist/clipboard.js',
+#         'node_modules/ngclipboard/dist/ngclipboard.js',
+#         'node_modules/lodash/lodash.js',
+#         'node_modules/d3/d3.js',
+#         'node_modules/angular-loading-bar/build/loading-bar.js',
+#         'node_modules/invenio-search-js/dist/invenio-search-js.js',
+#         'node_modules/angular-sanitize/angular-sanitize.js',
+#         'node_modules/angular-mass-autocomplete/massautocomplete.js',
+#         'node_modules/angular-local-storage/dist/angular-local-storage.js',
+#         'node_modules/angularjs-toaster/toaster.js',
+#         'node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js',
+#         'node_modules/mousetrap/mousetrap.js',
+#         'js/cds/module.js',
+#         'js/cds/suggestions.js',
+#         'js/main.js',
+#         filters='jsmin',
+#     ),
+#     depends=(
+#         'js/cds_deposit/avc/filters/progressClass.js',
+#         'js/cds_deposit/avc/filters/progressIcon.js',
+#         'js/*.js',
+#         'js/cds/*.js',
+#         'node_modules/invenio-search-js/dist/*.js',
+#     ),
+#     filters='jsmin',
+#     output='gen/cds.%(version)s.js',
+#     npm={
+#         'angular': '~1.4.7',
+#         'ng-dialog': '~0.6.0',
+#         'clipboard': '~1.5.16',
+#         'ngclipboard': '~1.1.1',
+#         'lodash': '~4.17.4',
+#         'angular-mass-autocomplete': '~0.5.0',
+#         'angular-local-storage': '~0.5.2',
+#         'angularjs-toaster': '~2.1.0',
+#         'angular-ui-bootstrap': '~2.5.0',
+#         'mousetrap': '~1.6.1',
+#     }
+# )
+# """Default JavaScript bundle."""

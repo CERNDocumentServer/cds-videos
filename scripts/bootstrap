@@ -30,17 +30,17 @@ CWD=`pwd`
 requirements_file=${1:-'requirements.pinned.txt'}
 
 pip install -r $requirements_file
-pip install -e .[all]
+pip install -e .
 
-npm update
-npm install -g \
-    sass@1.50.1 \
-    clean-css@3.4.24 \
-    uglify-js \
-    requirejs
+# npm update
+# npm install -g \
+#     sass@1.50.1 \
+#     clean-css@3.4.24 \
+#     uglify-js \
+#     requirejs
 
 # Setup and build assets
-cds npm
+#cds npm
 cd ${VIRTUAL_ENV}/var/instance/static
 npm install
 cd ${CWD}
