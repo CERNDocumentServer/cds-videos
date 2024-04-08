@@ -27,7 +27,7 @@
 from __future__ import absolute_import
 
 import json
-from fractions import gcd
+from math import gcd
 from itertools import count, takewhile
 from subprocess import STDOUT, CalledProcessError, check_output
 

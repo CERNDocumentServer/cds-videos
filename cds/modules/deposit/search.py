@@ -25,7 +25,7 @@
 
 from __future__ import absolute_import, print_function
 
-from elasticsearch_dsl.query import Q
+from opensearch_dsl.query import Q
 from flask import current_app, g, request
 from flask_login import current_user
 from invenio_access.permissions import Permission, superuser_access
@@ -37,7 +37,7 @@ from ..records.utils import get_user_provides
 from .facets import deposit_facets_factory
 
 
-def deposit_search_factory(self, search):
+def deposit_search_factory(self, search, search_query_parser):
     """Replace default search factory to use custom facet factory."""
     from invenio_records_rest.sorter import default_sorter_factory
     query_string = request.values.get('q', '')
@@ -52,7 +52,7 @@ def deposit_search_factory(self, search):
             exc_info=True)
         raise InvalidQueryRESTError()
 
-    search_index = search._index[0]
+    search_index = getattr(search, "_original_index", search._index)[0]
     search, urlkwargs = deposit_facets_factory(search, search_index)
     search, sortkwargs = default_sorter_factory(search, search_index)
     for key, value in sortkwargs.items():

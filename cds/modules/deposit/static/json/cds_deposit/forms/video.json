@@ -19,12 +19,38 @@
             "entities": false,
             "height": 200,
             "toolbar": [
-              ["PasteText", "PasteFromWord"],
-              ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
-              ["NumberedList", "BulletedList", "Blockquote"],
-              ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-              ["Source"],
-              ["Maximize"]
+              [
+                "PasteText",
+                "PasteFromWord"
+              ],
+              [
+                "Bold",
+                "Italic",
+                "Strike",
+                "-",
+                "Subscript",
+                "Superscript"
+              ],
+              [
+                "NumberedList",
+                "BulletedList",
+                "Blockquote"
+              ],
+              [
+                "Undo",
+                "Redo",
+                "-",
+                "Find",
+                "Replace",
+                "-",
+                "RemoveFormat"
+              ],
+              [
+                "Source"
+              ],
+              [
+                "Maximize"
+              ]
             ],
             "disableNativeSpellChecker": false,
             "removePlugins": "elementspath",

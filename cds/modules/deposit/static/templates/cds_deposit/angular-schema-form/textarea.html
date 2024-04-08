@@ -12,9 +12,9 @@
       name="{{ form.key.slice(-1)[0] }}"
       placeholder="{{ ::form.placeholder }}"
       ng-if="!form.fieldAddonLeft && !form.fieldAddonRight"
+      ng-model="$$value$$"
       sf-changed="form"
       ng-disabled="evalExpr(form.readonly)"
-      ng-model="$$value$$"
       ng-model-options="form.ngModelOptions"
       schema-validate="form"></textarea>
     <div
@@ -27,10 +27,10 @@
       <textarea
         class="form-control {{ form.fieldHtmlClass }}"
         id="{{ form.key.slice(-1)[0] }}"
+        ng-model="$$value$$"
         sf-changed="form"
         placeholder="{{ ::form.placeholder }}"
         ng-disabled="evalExpr(form.readonly)"
-        ng-model="$$value$$"
         ng-model-options="form.ngModelOptions"
         schema-validate="form"
         name="{{ form.key.slice(-1)[0] }}"></textarea>

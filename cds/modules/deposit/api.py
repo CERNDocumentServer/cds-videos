@@ -40,11 +40,18 @@ from celery import states
 from flask import current_app
 from flask_security import current_user
 from invenio_db import db
-from invenio_files_rest.models import (MultipartObject, ObjectVersion,
-                                       ObjectVersionTag, as_object_version)
+from invenio_files_rest.models import (
+    MultipartObject,
+    ObjectVersion,
+    ObjectVersionTag,
+    as_object_version,
+)
 from invenio_jsonschemas import current_jsonschemas
-from invenio_pidstore.errors import (PIDDoesNotExistError, PIDInvalidAction,
-                                     ResolverError)
+from invenio_pidstore.errors import (
+    PIDDoesNotExistError,
+    PIDInvalidAction,
+    ResolverError,
+)
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
 from invenio_records_files.models import RecordsBuckets
@@ -52,16 +59,23 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from invenio_deposit.api import Deposit, has_status, preserve
-from invenio_deposit.utils import mark_as_action
+from ..invenio_deposit.api import Deposit, has_status, preserve
+from ..invenio_deposit.utils import mark_as_action
 
 from invenio_indexer.tasks import index_record
 
-from ..flows.api import (FlowService, get_tasks_status_grouped_by_task_name,
-                         merge_tasks_status)
+from ..flows.api import (
+    FlowService,
+    get_tasks_status_grouped_by_task_name,
+    merge_tasks_status,
+)
 from ..flows.models import FlowMetadata
-from ..records.api import (CDSFileObject, CDSFilesIterator, CDSRecord,
-                           CDSVideosFilesIterator)
+from ..records.api import (
+    CDSFileObject,
+    CDSFilesIterator,
+    CDSRecord,
+    CDSVideosFilesIterator,
+)
 from ..records.minters import doi_minter, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.utils import is_record, lowercase_value
@@ -141,9 +155,7 @@ class CDSDeposit(Deposit):
     @classmethod
     def get_record(cls, id_, with_deleted=False):
         """Get record instance."""
-        deposit = super(CDSDeposit, cls).get_record(
-            id_=id_, with_deleted=with_deleted
-        )
+        deposit = super(CDSDeposit, cls).get_record(id_=id_, with_deleted=with_deleted)
         return deposit
 
     @classmethod
@@ -210,9 +222,7 @@ class CDSDeposit(Deposit):
         """Update only drafts."""
         # use always lower case in the access rights to prevent problems
         if "_access" in self:
-            self["_access"]["read"] = lowercase_value(
-                self["_access"].get("read", [])
-            )
+            self["_access"]["read"] = lowercase_value(self["_access"].get("read", []))
             self["_access"]["update"] = lowercase_value(
                 self["_access"].get("update", [])
             )
@@ -312,9 +322,7 @@ class CDSDeposit(Deposit):
 
             yield data
 
-            db.session.add(
-                RecordsBuckets(record_id=record_id, bucket_id=snapshot.id)
-            )
+            db.session.add(RecordsBuckets(record_id=record_id, bucket_id=snapshot.id))
         else:
             yield
 
@@ -325,8 +333,7 @@ class CDSDeposit(Deposit):
             self["_cds"]["modified_by"] = int(current_user.get_id())
         except AttributeError:
             current_app.logger.warning(
-                "No current user found, keeping previous value for"
-                " _cds.modified_by"
+                "No current user found, keeping previous value for" " _cds.modified_by"
             )
         if "publication_date" not in self:
             now = datetime.datetime.utcnow().date().isoformat()
@@ -346,9 +353,7 @@ class CDSDeposit(Deposit):
     def remove_keyword(self, keyword):
         """Remove a keyword."""
         ref = keyword.ref
-        self["keywords"] = list(
-            filter(lambda x: x["$ref"] != ref, self["keywords"])
-        )
+        self["keywords"] = list(filter(lambda x: x["$ref"] != ref, self["keywords"]))
 
     def has_record(self):
         """Check if deposit is published at least one time."""
@@ -404,10 +409,7 @@ class CDSDeposit(Deposit):
         }
         # list of tags with 'master' key
         slave_tags = [
-            tag
-            for obj in snapshot_obj_list
-            for tag in obj.tags
-            if tag.key == "master"
+            tag for obj in snapshot_obj_list for tag in obj.tags if tag.key == "master"
         ]
         # change master of slave videos to new master object versions
         for tag in slave_tags:
@@ -500,7 +502,8 @@ class Project(CDSDeposit):
         # Add the current user to the ``_access.update`` list
         try:
             data["_access"]["update"] = [current_user.email]
-            data["_cds"]["current_user_mail"] = current_user.email
+            # this is not needed as it is used only for _access.update
+            # data["_cds"]["current_user_mail"] = current_user.email
         except AttributeError:
             current_app.logger.warning(
                 "No current user found, _access.update will stay empty."
@@ -547,7 +550,7 @@ class Project(CDSDeposit):
     def _find_refs(self, refs):
         """Find index of references."""
         result = {}
-        for (key, value) in enumerate(self._video_refs):
+        for key, value in enumerate(self._video_refs):
             try:
                 refs.index(value)
                 result[key] = value
@@ -561,7 +564,7 @@ class Project(CDSDeposit):
         :param old_refs: List contains the video references to substitute.
         :param new_refs: List contains the new video references
         """
-        for (key, value) in enumerate(self._video_refs):
+        for key, value in enumerate(self._video_refs):
             try:
                 index = old_refs.index(value)
                 self["videos"][key] = {"$ref": new_refs[index]}
@@ -580,9 +583,7 @@ class Project(CDSDeposit):
         """Publish all videos that are still deposits."""
         # get reference of all video deposits still not published
         refs_old = [
-            video_ref
-            for video_ref in self._video_refs
-            if is_deposit(video_ref)
+            video_ref for video_ref in self._video_refs if is_deposit(video_ref)
         ]
 
         # extract the PIDs from the video deposits
@@ -590,20 +591,16 @@ class Project(CDSDeposit):
 
         # publish them and get the new PID
         videos_published = [
-            video.publish().commit()
-            for video in deposit_videos_resolver(ids_old)
+            video.publish().commit() for video in deposit_videos_resolver(ids_old)
         ]
 
         # get new video references
-        refs_new = [
-            record_build_url(video["recid"]) for video in videos_published
-        ]
+        refs_new = [record_build_url(video["recid"]) for video in videos_published]
 
         # update project video references
         self._update_videos(refs_old, refs_new)
 
         return videos_published
-
 
     @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
@@ -720,9 +717,7 @@ class Project(CDSDeposit):
             if is_deposit(ref):
                 videos.append(deposit_video_resolver(record_unbuild_url(ref)))
             else:
-                videos.append(
-                    record_video_resolver(record_unbuild_url(ref))
-                )
+                videos.append(record_video_resolver(record_unbuild_url(ref)))
         return videos
 
     def update(self, *args, **kwargs):
@@ -751,10 +746,7 @@ class Project(CDSDeposit):
         project_access = self.get("_access", {}).get("update")
         project_created_by = self["_deposit"].get("created_by")
 
-        if (
-            video.get("_access", {}).get("update") != project_access
-            and project_access
-        ):
+        if video.get("_access", {}).get("update") != project_access and project_access:
             changed = True
             # sync access rights
             if "_access" in video:
@@ -926,9 +918,7 @@ class Video(CDSDeposit):
             )
         if "_access" not in self:
             self["_access"] = {}
-        self["_access"]["update"] = self.project.get("_access", {}).get(
-            "update", []
-        )
+        self["_access"]["update"] = self.project.get("_access", {}).get("update", [])
         self.project._sync_fields(self)
         # generate human-readable duration
         self.generate_duration()
@@ -936,9 +926,7 @@ class Video(CDSDeposit):
         self._create_tags()
 
         # publish the video
-        video_published = super(Video, self).publish(
-            pid=pid, id_=id_, **kwargs
-        )
+        video_published = super(Video, self).publish(pid=pid, id_=id_, **kwargs)
         _, record_new = self.fetch_published()
 
         # update associated project
@@ -970,9 +958,7 @@ class Video(CDSDeposit):
 
     def _delete_flows(self):
         """Delete all the flows."""
-        flows = FlowMetadata.get_all_by_deposit(
-            deposit_id=self["_deposit"]["id"]
-        )
+        flows = FlowMetadata.get_all_by_deposit(deposit_id=self["_deposit"]["id"])
         for flow in flows:
             FlowService(flow).delete(hard=True)
 
@@ -993,9 +979,7 @@ class Video(CDSDeposit):
         """Discard a video."""
         video_old_ref = self.ref
         video_discarded = super(Video, self).discard(pid=pid)
-        video_discarded.project._update_videos(
-            [video_old_ref], [video_discarded.ref]
-        )
+        video_discarded.project._update_videos([video_old_ref], [video_discarded.ref])
         return video_discarded
 
     def assign_report_number(self, report_number):
@@ -1065,9 +1049,7 @@ class Video(CDSDeposit):
         # Subtitle file
         pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
         objs = [
-            o
-            for o in sorted_files_from_bucket(self._bucket)
-            if pattern.match(o.key)
+            o for o in sorted_files_from_bucket(self._bucket) if pattern.match(o.key)
         ]
         with db.session.begin_nested():
             for obj in objs:
@@ -1081,12 +1063,8 @@ class Video(CDSDeposit):
                     ObjectVersionTag.delete(obj, "language")
                 # other tags
                 ObjectVersionTag.create_or_update(obj, "content_type", "vtt")
-                ObjectVersionTag.create_or_update(
-                    obj, "context_type", "subtitle"
-                )
-                ObjectVersionTag.create_or_update(
-                    obj, "media_type", "subtitle"
-                )
+                ObjectVersionTag.create_or_update(obj, "context_type", "subtitle")
+                ObjectVersionTag.create_or_update(obj, "media_type", "subtitle")
                 # refresh object
                 db.session.refresh(obj)
 

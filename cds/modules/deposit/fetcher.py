@@ -20,15 +20,15 @@
 """Deposit fetchers."""
 from __future__ import absolute_import, print_function
 
-from invenio_deposit.providers import DepositProvider
+from ..invenio_deposit.providers import DepositProvider
 from invenio_pidstore.fetchers import FetchedPID
 
 
 def deposit_fetcher(record_uuid, data):
     """Fetch PID from deposit."""
-    pid_value = data.get('_deposit', {}).get('id')
-    return FetchedPID(
-        provider=DepositProvider,
-        pid_type='depid',
-        pid_value=pid_value
-    ) if pid_value else None
+    pid_value = data.get("_deposit", {}).get("id")
+    return (
+        FetchedPID(provider=DepositProvider, pid_type="depid", pid_value=pid_value)
+        if pid_value
+        else None
+    )

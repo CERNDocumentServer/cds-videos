@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from elasticsearch_dsl.query import Q
+from opensearch_dsl.query import Q
 from flask import g
 from flask_login import current_user
 from invenio_access.permissions import Permission, superuser_access
@@ -59,7 +59,7 @@ def cern_filter():
     provides = get_user_provides()
 
     # Filter for public records
-    public = Q("missing", field="_access.read")
+    public = ~Q("exists", field="_access.read")
     # Filter for restricted records, that the user has access to
     read_restricted = Q("terms", **{"_access.read": provides})
     write_restricted = Q("terms", **{"_access.update": provides})
@@ -80,7 +80,7 @@ class RecordVideosSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = "records-videos-video"
+        index = "records-videos-video-video-v1.0.0"
         doc_types = None
         fields = ("*",)
         default_filter = DefaultFilter(cern_filter)

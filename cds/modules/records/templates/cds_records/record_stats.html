@@ -4,22 +4,28 @@
 
 {%- block css %}
   {{ super() }}
-  {% assets "cds_record_stats_css" %}
+  {#  {% assets "cds_record_stats_css" %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
-  {% endassets %}
+  {% endassets %} #}
+  {{webpack['cds_records_stats_theme.css']}}
 {%- endblock css %}
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_record_stats_js" %}
+  {#  {% assets "cds_record_stats_js" %}
     <script src="{{ ASSET_URL }}"></script>
     <script>
       $(document).ready(function() {
         getStats({{ record | tojson }})
       });
     </script>
-  {% endassets %}
-
+  {% endassets %} #}
+  {{webpack['cds_records_stats.js']}}
+  <script>
+    $(document).ready(function() {
+      getStats({{ record | tojson }})
+    });
+  </script>
 {%- endblock javascript %}
 
 {%- block page_header %}

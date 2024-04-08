@@ -21,10 +21,11 @@
 
 from __future__ import absolute_import
 
-from marshmallow import Schema, ValidationError, fields, validates_schema
+from marshmallow import Schema, fields, RAISE, validates_schema, ValidationError
 from marshmallow.validate import Length
 
 from ...api import Keyword
+from ...resolver import keyword_resolver
 
 
 class LicenseSchema(Schema):
@@ -39,29 +40,35 @@ class LicenseSchema(Schema):
 class StrictKeysSchema(Schema):
     """Ensure only valid keys exists."""
 
-    @validates_schema(pass_original=True)
-    def check_unknown_fields(self, data, original_data):
-        """Check for unknown keys."""
-        if isinstance(original_data, list):
-            for elem in original_data:
-                self.check_unknown_fields(data, elem)
-        else:
-            for key in original_data:
-                if key not in [self.fields[field].attribute or field for field
-                               in self.fields]:
-                    raise ValidationError('Unknown field name {}'.format(key),
-                                          field_names=[key])
+    class Meta:
+        unknown = RAISE
 
 
 class KeywordsSchema(Schema):
     """Keywords schema."""
 
     name = fields.Str()
-    key_id = fields.Method(deserialize='get_keywords_refs', attribute='$ref')
+    value = fields.Dict()
 
-    def get_keywords_refs(self, obj):
-        """Get keywords references."""
-        return Keyword.get_ref(id_=obj)
+    @validates_schema
+    def validate_keyword_schema(self, data, **kwargs):
+        """Validates that either id either the free text field are present."""
+        key_id = data.get("value", {}).get("key_id")
+        free_text = data.get("name")
+
+        # remove value
+        data.pop("value", None)
+
+        if key_id:
+            try:
+                keyword_resolver.resolve(key_id)
+            except:
+                raise ValidationError("One or more keywords not resolvable.")
+
+        if not key_id and not free_text:
+            raise ValidationError(
+                "An existing key_id or a free text name must be present."
+            )
 
 
 class OaiSchema(StrictKeysSchema):

@@ -2,15 +2,17 @@
 {%- set title_prefix = _('Deposits') -%}
 {%- block css %}
   {{ super() }}
-  {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+  {{webpack['search_ui_theme.css']}}
+  {# {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %} #}
 {%- endblock css %}
 
 {%- block javascript %}
   {{ super() }}
-  {% assets "cds_theme_js", "cds_search_ui_js", "cds_deposit_js" %}
+  {# {% assets "cds_theme_js", "cds_search_ui_js", "cds_deposit_js" %}
     <script src="{{ ASSET_URL }}"></script>
-  {% endassets %}
-  <script>
+  {% endassets %} #}
+  {{webpack['cds_search_ui_app.js']}}
+  {#  <script>
     angular.element(document).ready(function() {
       angular.bootstrap(
         document.getElementById("cds-deposit-index"), [
@@ -25,7 +27,7 @@
     $(document).ready(function() {
       $('.dropdown-toggle').dropdown();
     })
-  </script>
+  </script> #}
 {%- endblock javascript %}
 
 {%- block body_inner %}

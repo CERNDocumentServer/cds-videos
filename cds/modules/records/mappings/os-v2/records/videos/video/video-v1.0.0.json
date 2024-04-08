@@ -1,0 +1,326 @@
+{
+  "mappings": {
+    "properties": {
+      "accelerator_experiment": {
+        "properties": {
+          "project": {
+            "type": "text"
+          },
+          "study": {
+            "type": "text"
+          },
+          "experiment": {
+            "type": "text"
+          },
+          "accelerator": {
+            "type": "text"
+          },
+          "facility": {
+            "type": "text"
+          }
+        }
+      },
+      "_created": {
+        "type": "date"
+      },
+      "_updated": {
+        "type": "date"
+      },
+      "_project_id": {
+        "type": "text"
+      },
+      "vr": {
+        "type": "boolean"
+      },
+      "duration": {
+        "type": "text"
+      },
+      "featured": {
+        "type": "boolean"
+      },
+      "copyright": {
+        "properties": {
+          "holder": {
+            "type": "text"
+          },
+          "year": {
+            "type": "text"
+          },
+          "url": {
+            "type": "text"
+          }
+        }
+      },
+      "contributors": {
+        "properties": {
+          "ids": {
+            "properties": {
+              "source": {
+                "type": "text"
+              },
+              "value": {
+                "type": "text"
+              }
+            }
+          },
+          "affiliations": {
+            "type": "text"
+          },
+          "role": {
+            "type": "text"
+          },
+          "email": {
+            "type": "text"
+          },
+          "contribution": {
+            "type": "text"
+          },
+          "name": {
+            "type": "text"
+          }
+        }
+      },
+      "license": {
+        "properties": {
+          "license": {
+            "type": "text",
+            "fields": {
+              "untouched": {
+                "type": "keyword"
+              }
+            }
+          },
+          "material": {
+            "type": "text"
+          },
+          "credit": {
+            "type": "text"
+          },
+          "url": {
+            "type": "text"
+          }
+        }
+      },
+      "keywords": {
+        "properties": {
+          "source": {
+            "type": "text"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      },
+      "description": {
+        "type": "text"
+      },
+      "translations": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "language": {
+            "type": "text"
+          },
+          "title": {
+            "properties": {
+              "source": {
+                "type": "text"
+              },
+              "subtitle": {
+                "type": "text"
+              },
+              "title": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "related_links": {
+        "properties": {
+          "name": {
+            "type": "text"
+          },
+          "url": {
+            "type": "text"
+          }
+        }
+      },
+      "_files": {
+        "properties": {
+          "thumbnail": {
+            "type": "text"
+          },
+          "width": {
+            "type": "text"
+          },
+          "height": {
+            "type": "text"
+          },
+          "checksum": {
+            "type": "text"
+          },
+          "category": {
+            "type": "text"
+          },
+          "quality": {
+            "type": "text"
+          },
+          "size": {
+            "type": "long"
+          },
+          "type": {
+            "type": "text"
+          },
+          "key": {
+            "type": "text"
+          },
+          "version_id": {
+            "type": "text"
+          },
+          "bitrate": {
+            "type": "text"
+          },
+          "bucket": {
+            "type": "text"
+          }
+        }
+      },
+      "_oai": {
+        "properties": {
+          "sets": {
+            "type": "text"
+          },
+          "updated": {
+            "type": "text"
+          },
+          "id": {
+            "type": "text"
+          }
+        }
+      },
+      "_deposit": {
+        "properties": {
+          "owners": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "text"
+          },
+          "created_by": {
+            "type": "integer"
+          }
+        }
+      },
+      "_cds": {
+        "properties": {
+          "extracted_metadata": {
+            "type": "object"
+          },
+          "state": {
+            "type": "object"
+          },
+          "modified_by": {
+            "type": "integer"
+          }
+        }
+      },
+      "date": {
+        "type": "date",
+        "format": "date||date_time_no_millis"
+      },
+      "recid": {
+        "type": "double"
+      },
+      "doi": {
+        "type": "text"
+      },
+      "title": {
+        "properties": {
+          "source": {
+            "type": "text"
+          },
+          "subtitle": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          }
+        }
+      },
+      "$schema": {
+        "type": "text"
+      },
+      "_access": {
+        "properties": {
+          "read": {
+            "type": "keyword"
+          },
+          "update": {
+            "type": "keyword"
+          }
+        }
+      },
+      "category": {
+        "type": "text",
+        "fields": {
+          "untouched": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "text",
+        "fields": {
+          "untouched": {
+            "type": "keyword"
+          }
+        }
+      },
+      "report_number": {
+        "type": "text"
+      },
+      "physical_medium": {
+        "properties": {
+          "shelf": {
+            "type": "keyword"
+          },
+          "copy_number": {
+            "type": "keyword"
+          },
+          "arrangement": {
+            "type": "keyword"
+          },
+          "note": {
+            "type": "keyword"
+          },
+          "camera": {
+            "type": "keyword"
+          },
+          "location": {
+            "type": "keyword"
+          },
+          "bar_code": {
+            "type": "keyword"
+          },
+          "medium_standard": {
+            "type": "keyword"
+          },
+          "sequence_number": {
+            "type": "keyword"
+          },
+          "internal_note": {
+            "type": "keyword"
+          }
+        }
+      },
+      "language": {
+        "type": "text"
+      },
+      "publication_date": {
+        "type": "text"
+      }
+    }
+  }
+}

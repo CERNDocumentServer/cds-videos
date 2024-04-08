@@ -27,14 +27,16 @@
 from __future__ import absolute_import, print_function
 
 from invenio_base.signals import app_loaded
-from invenio_deposit.signals import post_action
+from ..invenio_deposit.signals import post_action
 from invenio_indexer.signals import before_record_index
 
 from .indexer import cdsdeposit_indexer_receiver
-from .receivers import (datacite_register_after_publish,
-                        index_deposit_after_action,
-                        register_celery_class_based_tasks,
-                        update_project_id_after_publish)
+from .receivers import (
+    datacite_register_after_publish,
+    index_deposit_after_action,
+    register_celery_class_based_tasks,
+    update_project_id_after_publish,
+)
 
 
 class CDSDepositApp(object):
@@ -47,7 +49,7 @@ class CDSDepositApp(object):
 
     def init_app(self, app):
         """Flask application initialization."""
-        app.extensions['cds-deposit'] = self
+        app.extensions["cds-deposit"] = self
         self.register_signals(app)
 
     @staticmethod
@@ -55,16 +57,12 @@ class CDSDepositApp(object):
         """Register CDS Deposit signals."""
         # index records after published
         # note: if publish a project -> index also videos
-        post_action.connect(index_deposit_after_action,
-                            sender=app, weak=False)
-        post_action.connect(update_project_id_after_publish,
-                            sender=app, weak=False)
+        post_action.connect(index_deposit_after_action, sender=app, weak=False)
+        post_action.connect(update_project_id_after_publish, sender=app, weak=False)
         # if it's a project/video, expands information before index
-        before_record_index.connect(
-            cdsdeposit_indexer_receiver, sender=app, weak=False)
+        before_record_index.connect(cdsdeposit_indexer_receiver, sender=app, weak=False)
         # register Datacite after publish record
-        post_action.connect(
-            datacite_register_after_publish, sender=app, weak=False)
+        post_action.connect(datacite_register_after_publish, sender=app, weak=False)
 
         # register class based celery tasks
         app_loaded.connect(register_celery_class_based_tasks)

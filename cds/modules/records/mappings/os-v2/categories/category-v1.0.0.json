@@ -1,0 +1,37 @@
+{
+  "mappings": {
+    "properties": {
+      "types": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "_access": {
+        "type": "object",
+        "properties": {
+          "read": {
+            "type": "keyword"
+          }
+        }
+      },
+      "access": {
+        "type": "object",
+        "properties": {
+          "public": {
+            "type": "boolean"
+          },
+          "restricted": {
+            "type": "text"
+          }
+        }
+      },
+      "_record_type": {
+        "type": "text"
+      },
+      "suggest_name": {
+        "type": "completion"
+      }
+    }
+  }
+}

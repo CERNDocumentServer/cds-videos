@@ -29,29 +29,29 @@ from __future__ import absolute_import, print_function
 from flask_assets import Bundle
 from invenio_assets import NpmBundle
 
-css = Bundle(
-    'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
-)
+# css = Bundle(
+#     'node_modules/angular-mass-autocomplete/massautocomplete.theme.css',
+# )
 
-js = NpmBundle(
-    'node_modules/d3/d3.js',
-    'node_modules/angular-loading-bar/build/loading-bar.js',
-    'node_modules/angular-mass-autocomplete/massautocomplete.js',
-    'node_modules/invenio-search-js/dist/invenio-search-js.js',
-    'js/invenio_search_bar_suggestions.js',
-    'js/cds/suggestions.js',
-    filters='jsmin',
-    depends=(
-        'node_modules/invenio-search-js/dist/*.js',
-        'node_modules/d3/*',
-    ),
-    output='gen/cds.search.%(version)s.js',
-    npm={
-        'angular-mass-autocomplete': '~0.5.0',
-        'angular-loading-bar': '~0.9.0',
-        'd3': '^3.5.17',
-        'invenio-search-js': '^1.5.4',
-    },
-)
+# js = NpmBundle(
+#     'node_modules/d3/d3.js',
+#     'node_modules/angular-loading-bar/build/loading-bar.js',
+#     'node_modules/angular-mass-autocomplete/massautocomplete.js',
+#     'node_modules/invenio-search-js/dist/invenio-search-js.js',
+#     'js/invenio_search_bar_suggestions.js',
+#     'js/cds/suggestions.js',
+#     filters='jsmin',
+#     depends=(
+#         'node_modules/invenio-search-js/dist/*.js',
+#         'node_modules/d3/*',
+#     ),
+#     output='gen/cds.search.%(version)s.js',
+#     npm={
+#         'angular-mass-autocomplete': '~0.5.0',
+#         'angular-loading-bar': '~0.9.0',
+#         'd3': '^3.5.17',
+#         'invenio-search-js': '^1.5.4',
+#     },
+# )
 
-"""Default JavaScript bundle."""
+# """Default JavaScript bundle."""

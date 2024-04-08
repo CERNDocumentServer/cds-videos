@@ -26,8 +26,8 @@
 
 
 import arrow
-from flask_babelex import gettext as _
-from flask_wtf import Form
+from invenio_i18n import lazy_gettext as _
+from flask_wtf import FlaskForm as Form
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_sequencegenerator.api import Template

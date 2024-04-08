@@ -59,7 +59,7 @@
         {%- endblock navbar_nav %}
         {%- block navbar_right %}
           <ul class="cds-navbar-nav nav navbar-nav">
-            {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}
+           {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}
             {%- if item.children %}
             <li class="dropdown{{ ' active' if item.active else ''}}">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" href="{{ item.url }}">{{ item.text|safe }} <b class="caret"></b></a>
@@ -110,6 +110,3 @@
   {%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}
   {{ flashed_messages() }}
 {%- endblock %}
-{%- block breadcrumbs %}
-  {%- include "invenio_theme/breadcrumbs.html" %}
-{%- endblock breadcrumbs %}

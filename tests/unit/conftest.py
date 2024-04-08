@@ -40,19 +40,28 @@ import pytest
 import requests
 from celery import shared_task
 from celery.messaging import establish_connection
-from elasticsearch import RequestError
+from opensearchpy import RequestError
 from flask.cli import ScriptInfo
 from flask_security import login_user
-from helpers import (create_category, create_keyword, create_record,
-                     endpoint_get_schema, new_project,
-                     prepare_videos_for_publish, rand_md5, rand_version_id,
-                     sse_failing_task, sse_simple_add, sse_success_task)
+from helpers import (
+    create_category,
+    create_keyword,
+    create_record,
+    endpoint_get_schema,
+    new_project,
+    prepare_videos_for_publish,
+    rand_md5,
+    rand_version_id,
+    sse_failing_task,
+    sse_simple_add,
+    sse_success_task,
+)
 from invenio_access.models import ActionRoles
 from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
 from invenio_app.factory import create_app
 from invenio_db import db as db_
-from invenio_deposit.permissions import action_admin_access
+from ..invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, Location, ObjectVersion
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
@@ -71,32 +80,31 @@ from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
 
 
-@pytest.yield_fixture(scope='module', autouse=True)
+@pytest.yield_fixture(scope="module", autouse=True)
 def app():
     """Flask application fixture."""
     instance_path = tempfile.mkdtemp()
 
     os.environ.update(
-        APP_INSTANCE_PATH=os.environ.get(
-            'INSTANCE_PATH', instance_path),
+        APP_INSTANCE_PATH=os.environ.get("INSTANCE_PATH", instance_path),
     )
 
     app = create_app(
         DEBUG_TB_ENABLED=False,
         TESTING=True,
         CELERY_TASK_ALWAYS_EAGER=True,
-        CELERY_RESULT_BACKEND='cache',
-        CELERY_CACHE_BACKEND='memory',
+        CELERY_RESULT_BACKEND="cache",
+        CELERY_CACHE_BACKEND="memory",
         CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_TASK_TRACK_STARTED=True,
         SITE_URL="https://localhost:5000",
-        JSONSCHEMAS_HOST='cds.cern.ch',
-        DEPOSIT_UI_ENDPOINT='{scheme}://{host}/deposit/{pid_value}',
-        PIDSTORE_DATACITE_DOI_PREFIX='10.0000',
+        JSONSCHEMAS_HOST="cds.cern.ch",
+        DEPOSIT_UI_ENDPOINT="{scheme}://{host}/deposit/{pid_value}",
+        PIDSTORE_DATACITE_DOI_PREFIX="10.0000",
         ACCOUNTS_JWT_ENABLE=False,
-        THEOPLAYER_LIBRARY_LOCATION='https://localhost-theoplayer.com',
-        THEOPLAYER_LICENSE='CHANGE_ME',
-        PRESERVE_CONTEXT_ON_EXCEPTION=False
+        THEOPLAYER_LIBRARY_LOCATION="https://localhost-theoplayer.com",
+        THEOPLAYER_LICENSE="CHANGE_ME",
+        PRESERVE_CONTEXT_ON_EXCEPTION=False,
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
@@ -111,16 +119,17 @@ def app():
 def previewer_deposit(app):
     """."""
     # FIXME workaround for previewer tests because they require app and api_app
-    from invenio_deposit import InvenioDepositREST
+    from ..invenio_deposit import InvenioDepositREST
     from invenio_records_rest import InvenioRecordsREST
     from invenio_records_rest.utils import PIDConverter
+
     backup = app.debug
     app.debug = False
-    if 'invenio-records-rest' not in app.extensions:
+    if "invenio-records-rest" not in app.extensions:
         InvenioRecordsREST(app)
-    if 'invenio-deposit-rest' not in app.extensions:
+    if "invenio-deposit-rest" not in app.extensions:
         InvenioDepositREST(app)
-        app.url_map.converters['pid'] = PIDConverter
+        app.url_map.converters["pid"] = PIDConverter
     app.debug = backup
     return app
 
@@ -128,7 +137,7 @@ def previewer_deposit(app):
 @pytest.yield_fixture()
 def api_app(app):
     """Flask API application fixture."""
-    api_app = app.wsgi_app.mounts['/api']
+    api_app = app.wsgi_app.mounts["/api"]
     #  with app.app_context():
     with api_app.test_request_context():
         yield api_app
@@ -150,11 +159,7 @@ def location(db):
     """File system location."""
     tmppath = tempfile.mkdtemp()
 
-    loc = Location(
-        name='videos',
-        uri=tmppath,
-        default=True
-    )
+    loc = Location(name="videos", uri=tmppath, default=True)
     db.session.add(loc)
     db.session.commit()
 
@@ -167,26 +172,26 @@ def location(db):
 def users(app, db):
     """Create users."""
     with db.session.begin_nested():
-        datastore = app.extensions['security'].datastore
-        user1 = datastore.create_user(email='info@inveniosoftware.org',
-                                      password='tester', active=True)
-        user2 = datastore.create_user(email='test@inveniosoftware.org',
-                                      password='tester2', active=True)
+        datastore = app.extensions["security"].datastore
+        user1 = datastore.create_user(
+            email="info@inveniosoftware.org", password="tester", active=True
+        )
+        user2 = datastore.create_user(
+            email="test@inveniosoftware.org", password="tester2", active=True
+        )
         admin = datastore.create_user(
-            email='admin@inveniosoftware.org',
-            password='tester3', active=True)
+            email="admin@inveniosoftware.org", password="tester3", active=True
+        )
         superadmin = datastore.create_user(
-            email='superadmin@inveniosoftware.org',
-            password='tester4', active=True)
+            email="superadmin@inveniosoftware.org", password="tester4", active=True
+        )
         # Give a admin role to admin
-        admin_role = Role(name='admin')
-        db.session.add(ActionRoles(
-            action=action_admin_access.value, role=admin_role))
+        admin_role = Role(name="admin")
+        db.session.add(ActionRoles(action=action_admin_access.value, role=admin_role))
         datastore.add_role_to_user(admin, admin_role)
         # Give a superadmin role to superadmin
-        superadmin_role = Role(name='superadmin')
-        db.session.add(ActionRoles(
-            action=superuser_access.value, role=superadmin_role))
+        superadmin_role = Role(name="superadmin")
+        db.session.add(ActionRoles(action=superuser_access.value, role=superadmin_role))
         datastore.add_role_to_user(superadmin, superadmin_role)
     db.session.commit()
     id_1 = user1.id
@@ -205,15 +210,15 @@ def u_email(db, users):
 @pytest.fixture()
 def cds_depid(api_app, users, db, bucket, deposit_metadata):
     """New deposit with files."""
-    record = {'title': {'title': 'fuu'}}
+    record = {"title": {"title": "fuu"}}
     record.update(deposit_metadata)
     with api_app.test_request_context():
         login_user(User.query.get(users[0]))
         deposit = Project.create(record)
-        deposit['_access'] = {'update': ['test-egroup@cern.ch']}
+        deposit["_access"] = {"update": ["test-egroup@cern.ch"]}
         deposit.commit()
         db.session.commit()
-    return deposit['_deposit']['id']
+    return deposit["_deposit"]["id"]
 
 
 @pytest.fixture()
@@ -235,7 +240,7 @@ def es(app):
         list(current_search.delete(ignore=[404]))
         list(current_search.create(ignore=[400]))
     current_search_client.indices.refresh()
-    queue = app.config['INDEXER_MQ_QUEUE']
+    queue = app.config["INDEXER_MQ_QUEUE"]
     with establish_connection() as c:
         q = queue(c)
         q.declare()
@@ -258,7 +263,7 @@ def indexer(app):
 @pytest.fixture()
 def previewer_app(app, previewer_deposit):
     """Init deposit REST API."""
-    if 'invenio-previewer' not in app.extensions:
+    if "invenio-previewer" not in app.extensions:
         InvenioPreviewer(app)
     return app
 
@@ -266,7 +271,7 @@ def previewer_app(app, previewer_deposit):
 @pytest.fixture()
 def datadir():
     """Get data directory."""
-    return join(dirname(__file__), '..', 'data')
+    return join(dirname(__file__), "..", "data")
 
 
 @pytest.fixture
@@ -275,13 +280,13 @@ def script_info(app):
     return ScriptInfo(create_app=lambda info: app)
 
 
-@pytest.fixture(params=['test.mp4', 'test.mov'])
+@pytest.fixture(params=["test.mp4", "test.mov"])
 def video(request, datadir):
     """Get test video file."""
     return join(datadir, request.param)
 
 
-@pytest.fixture(params=['test.mp4', 'test_small.mp4', 'test.mov'])
+@pytest.fixture(params=["test.mp4", "test_small.mp4", "test.mov"])
 def video_with_small(request, datadir):
     """Get test video file (including small one)."""
     return join(datadir, request.param)
@@ -290,36 +295,30 @@ def video_with_small(request, datadir):
 @pytest.fixture()
 def online_video():
     """Get online test video file."""
-    return 'https://cds-resources.web.cern.ch/cds-resources/cds-videos/big_buck_bunny.mp4'
+    return (
+        "https://cds-resources.web.cern.ch/cds-resources/cds-videos/big_buck_bunny.mp4"
+    )
 
 
 @pytest.fixture()
 def deposit_metadata():
     """General deposit metadata."""
     return {
-        'category': 'CERN',
-        'type': 'MOVIE',
+        "category": "CERN",
+        "type": "MOVIE",
         "contributors": [
             {
-                "affiliations": [
-                    "University of FuuBar"
-                ],
+                "affiliations": ["University of FuuBar"],
                 "email": "test_foo@cern.ch",
                 "ids": [
-                    {
-                        "source": "cern",
-                        "value": "12345"
-                    },
-                    {
-                        "source": "cds",
-                        "value": "67890"
-                    }
+                    {"source": "cern", "value": "12345"},
+                    {"source": "cds", "value": "67890"},
                 ],
                 "name": "Do, John",
-                "role": "Camera Operator"
+                "role": "Camera Operator",
             }
         ],
-        '_cds': {}
+        "_cds": {},
     }
 
 
@@ -327,29 +326,20 @@ def deposit_metadata():
 def project_deposit_metadata(deposit_metadata):
     """Project deposit metadata."""
     metadata = {
-        'title': {
-            'title': 'my project',
-            'subtitle': 'tempor quis elit mollit',
+        "title": {
+            "title": "my project",
+            "subtitle": "tempor quis elit mollit",
         },
-        'description': 'in tempor reprehenderit enim eiusmod',
-        'contributors': [
+        "description": "in tempor reprehenderit enim eiusmod",
+        "contributors": [
+            {"name": "amet", "role": "Editor"},
             {
-                'name': 'amet',
-                'role': 'Editor'
+                "name": "in tempor reprehenderit enim eiusmod",
+                "role": "Camera Operator",
+                "email": "1bABAg03RaVG3@JTHWJUUBLgqpgfaagop.wsx",
             },
-            {
-                'name': 'in tempor reprehenderit enim eiusmod',
-                'role': 'Camera Operator',
-                'email': '1bABAg03RaVG3@JTHWJUUBLgqpgfaagop.wsx',
-            },
-            {
-                'name': 'adipisicing nulla ipsum voluptate',
-                'role': 'Director'
-            },
-            {
-                'name': 'commodo veniam dolore',
-                'role': 'Editor'
-            }
+            {"name": "adipisicing nulla ipsum voluptate", "role": "Director"},
+            {"name": "commodo veniam dolore", "role": "Editor"},
         ],
     }
     metadata.update(deposit_metadata)
@@ -360,11 +350,13 @@ def project_deposit_metadata(deposit_metadata):
 def video_deposit_metadata(deposit_metadata):
     """Video deposit metadata."""
     metadata = dict(
-        title=dict(title='test video',),
-        description='in tempor reprehenderit enim eiusmod',
+        title=dict(
+            title="test video",
+        ),
+        description="in tempor reprehenderit enim eiusmod",
         featured=True,
-        language='en',
-        date='2016-12-03T00:00:00Z',
+        language="en",
+        date="2016-12-03T00:00:00Z",
     )
     metadata.update(deposit_metadata)
     return metadata
@@ -374,28 +366,30 @@ def video_deposit_metadata(deposit_metadata):
 def video_record_metadata(db, project_published, extra_metadata):
     """Video record metadata."""
     video = project_published[1]
-    bucket_id = video['_buckets']['deposit']
+    bucket_id = video["_buckets"]["deposit"]
     # Create video objects in bucket
-    master = 'test.mp4'
-    qualities = ['240', '360', '480', '720']
+    master = "test.mp4"
+    qualities = ["240", "360", "480", "720"]
     filesize = 123456
-    slaves = ['test[{}p]'.format(quality) for quality in qualities]
-    test_stream = BytesIO(b'\x00' * filesize)
+    slaves = ["test[{}p]".format(quality) for quality in qualities]
+    test_stream = BytesIO(b"\x00" * filesize)
     with db.session.begin_nested():
-        master_id = str(ObjectVersion.create(bucket_id, master,
-                                             stream=test_stream).version_id)
-        slave_ids = [str(ObjectVersion.create(bucket_id, slave,
-                                              stream=test_stream).version_id)
-                     for slave in slaves]
+        master_id = str(
+            ObjectVersion.create(bucket_id, master, stream=test_stream).version_id
+        )
+        slave_ids = [
+            str(ObjectVersion.create(bucket_id, slave, stream=test_stream).version_id)
+            for slave in slaves
+        ]
     db.session.commit()
 
     metadata = {
-        '_files': [
+        "_files": [
             dict(
                 bucket_id=bucket_id,
-                context_type='master',
-                media_type='video',
-                content_type='mp4',
+                context_type="master",
+                media_type="video",
+                content_type="mp4",
                 checksum=rand_md5(),
                 completed=True,
                 key=master,
@@ -404,69 +398,72 @@ def video_record_metadata(db, project_published, extra_metadata):
                         bucket_id=bucket_id,
                         checksum=rand_md5(),
                         completed=True,
-                        key='frame-{}.jpg'.format(i),
-                        links=dict(self='/api/files/...'),
+                        key="frame-{}.jpg".format(i),
+                        links=dict(self="/api/files/..."),
                         progress=100,
                         size=filesize,
                         tags=dict(
                             master=master_id,
-                            type='frame',
-                            timestamp=(float(i) / 11) * 60.095
+                            type="frame",
+                            timestamp=(float(i) / 11) * 60.095,
                         ),
-                        version_id=rand_version_id())
+                        version_id=rand_version_id(),
+                    )
                     for i in range(1, 11)
                 ],
                 tags=dict(
-                    bit_rate='11915822',
-                    width='4096',
-                    height='2160',
-                    uri_origin='https://test_domain.ch/test.mp4',
-                    duration='60.095',),
+                    bit_rate="11915822",
+                    width="4096",
+                    height="2160",
+                    uri_origin="https://test_domain.ch/test.mp4",
+                    duration="60.095",
+                ),
                 subformat=[
                     dict(
                         bucket_id=bucket_id,
-                        context_type='subformat',
-                        media_type='video',
-                        content_type='mp4',
+                        context_type="subformat",
+                        media_type="video",
+                        content_type="mp4",
                         checksum=rand_md5(),
                         completed=True,
                         key=slaves[i],
-                        links=dict(self='/api/files/...'),
+                        links=dict(self="/api/files/..."),
                         progress=100,
                         size=filesize,
                         tags=dict(
                             _sorenson_job_id=rand_version_id(),
                             master=master_id,
-                            preset_quality='{}p'.format(qualities[i]),
+                            preset_quality="{}p".format(qualities[i]),
                             width=1000,
                             height=qualities[i],
                             smil=True,
-                            video_bitrate=123456, ),
-                        version_id=slave_id,)
+                            video_bitrate=123456,
+                        ),
+                        version_id=slave_id,
+                    )
                     for i, slave_id in enumerate(slave_ids)
                 ],
                 playlist=[
                     dict(
                         bucket_id=bucket_id,
-                        context_type='playlist',
-                        media_type='text',
-                        content_type='smil',
+                        context_type="playlist",
+                        media_type="text",
+                        content_type="smil",
                         checksum=rand_md5(),
                         completed=True,
-                        key='test.smil',
-                        links=dict(
-                            self='/api/files/...'),
+                        key="test.smil",
+                        links=dict(self="/api/files/..."),
                         progress=100,
                         size=12355,
                         tags=dict(master=master_id),
-                        version_id=rand_version_id(),)
+                        version_id=rand_version_id(),
+                    )
                 ],
             )
         ],
     }
     metadata.update(extra_metadata)
-    metadata.update({k: video[k] for k in video.keys()
-                     if k not in metadata.keys()})
+    metadata.update({k: video[k] for k in video.keys() if k not in metadata.keys()})
     return metadata
 
 
@@ -474,13 +471,13 @@ def video_record_metadata(db, project_published, extra_metadata):
 def _deposit_metadata():
     """Extra metadata for record['_deposit']."""
     return {
-        'extracted_metadata': {
-            'tags': {
-                'compatible_brands': 'qt  ',
-                'creation_time': '1970-01-01T00:00:00.000000Z',
-                'encoder': 'Lavf52.93.0',
-                'major_brand': 'qt  ',
-                'minor_version': '512',
+        "extracted_metadata": {
+            "tags": {
+                "compatible_brands": "qt  ",
+                "creation_time": "1970-01-01T00:00:00.000000Z",
+                "encoder": "Lavf52.93.0",
+                "major_brand": "qt  ",
+                "minor_version": "512",
             },
         }
     }
@@ -490,115 +487,116 @@ def _deposit_metadata():
 def extra_metadata():
     """Extra metadata."""
     return {
-        'contributors': [
-            {'name': 'paperone', 'role': 'Director'},
-            {'name': 'topolino', 'role': 'Music by'},
-            {'name': 'nonna papera', 'role': 'Producer'},
-            {'name': 'pluto', 'role': 'Director'},
-            {'name': 'zio paperino', 'role': 'Producer'}
+        "contributors": [
+            {"name": "paperone", "role": "Director"},
+            {"name": "topolino", "role": "Music by"},
+            {"name": "nonna papera", "role": "Producer"},
+            {"name": "pluto", "role": "Director"},
+            {"name": "zio paperino", "role": "Producer"},
         ],
-        'license': [{
-            'license': 'GPLv2',
-            'url': 'http://license.cern.ch',
-        }],
-        'keywords': [
+        "license": [
             {
-                'source': 'source1',
-                'name': 'keyword1',
+                "license": "GPLv2",
+                "url": "http://license.cern.ch",
+            }
+        ],
+        "keywords": [
+            {
+                "source": "source1",
+                "name": "keyword1",
             },
             {
-                'source': 'source2',
-                'name': 'keyword2',
-            }
+                "source": "source2",
+                "name": "keyword2",
+            },
         ],
-        'copyright': {
-            'holder': 'CERN',
-            'url': 'http://cern.ch',
-            'year': '2017'
-        },
-        'title': {
-            'title': 'My <b>english</b> title'
-        },
-        'title_translations': [
+        "copyright": {"holder": "CERN", "url": "http://cern.ch", "year": "2017"},
+        "title": {"title": "My <b>english</b> title"},
+        "title_translations": [
             {
-                'language': 'fr',
-                'title': 'My french title',
+                "language": "fr",
+                "title": "My french title",
             }
         ],
-        'description_translations': [
+        "description_translations": [
             {
-                'language': 'fr',
-                'value': 'france caption',
+                "language": "fr",
+                "value": "france caption",
             }
         ],
-        'language': 'en',
-        'publication_date': '2017-03-02',
+        "language": "en",
+        "publication_date": "2017-03-02",
     }
 
 
 @pytest.fixture()
 def data_file_1():
     """Data for file 1."""
-    filename = 'test.json'
-    file_to_upload = (BytesIO(b'### Testing textfile ###'), filename)
-    return {'file': file_to_upload, 'name': filename}
+    filename = "test.json"
+    file_to_upload = (BytesIO(b"### Testing textfile ###"), filename)
+    return {"file": file_to_upload, "name": filename}
 
 
 @pytest.fixture()
 def data_file_2():
     """Data for file 2."""
-    filename = 'test2.json'
-    file_to_upload = (BytesIO(b'### Testing textfile 2 ###'), filename)
-    return {'file': file_to_upload, 'name': filename}
+    filename = "test2.json"
+    file_to_upload = (BytesIO(b"### Testing textfile 2 ###"), filename)
+    return {"file": file_to_upload, "name": filename}
 
 
 @pytest.fixture()
 def json_headers(app):
     """JSON headers."""
-    return [('Content-Type', 'application/json'),
-            ('Accept', 'application/json')]
+    return [("Content-Type", "application/json"), ("Accept", "application/json")]
 
 
 @pytest.fixture()
 def json_partial_project_headers(app):
     """JSON headers for partial project deposits."""
-    return [('Content-Type', 'application/vnd.project.partial+json'),
-            ('Accept', 'application/json')]
+    return [
+        ("Content-Type", "application/vnd.project.partial+json"),
+        ("Accept", "application/json"),
+    ]
 
 
 @pytest.fixture()
 def json_partial_video_headers(app):
     """JSON headers for partial video deposits."""
-    return [('Content-Type', 'application/vnd.video.partial+json'),
-            ('Accept', 'application/json')]
+    return [
+        ("Content-Type", "application/vnd.video.partial+json"),
+        ("Accept", "application/json"),
+    ]
 
 
 @pytest.fixture()
 def smil_headers(app):
     """SMIL headers."""
-    return [('Content-Type', 'application/smil'),
-            ('Accept', 'application/smil')]
+    return [("Content-Type", "application/smil"), ("Accept", "application/smil")]
 
 
 @pytest.fixture()
 def drupal_headers(app):
     """SMIL headers."""
-    return [('Content-Type', 'x-application/drupal'),
-            ('Accept', 'x-application/drupal')]
+    return [
+        ("Content-Type", "x-application/drupal"),
+        ("Accept", "x-application/drupal"),
+    ]
 
 
 @pytest.fixture()
 def vtt_headers(app):
     """VTT headers."""
-    return [('Content-Type', 'text/vtt'),
-            ('Accept', 'text/vtt')]
+    return [("Content-Type", "text/vtt"), ("Accept", "text/vtt")]
 
 
 @pytest.fixture()
 def datacite_headers(app):
     """Datacite headers."""
-    return [('Content-Type', 'application/x-datacite+xml'),
-            ('Accept', 'application/x-datacite+xml')]
+    return [
+        ("Content-Type", "application/x-datacite+xml"),
+        ("Accept", "application/x-datacite+xml"),
+    ]
 
 
 @pytest.fixture()
@@ -616,12 +614,13 @@ def project_published(api_app, api_project, users):
         login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
-        new_videos = [record_resolver.resolve(id_)[1]
-                      for id_ in new_project.video_ids]
+        new_videos = [record_resolver.resolve(id_)[1] for id_ in new_project.video_ids]
         assert len(new_videos) == 2
-    return (new_project,
-            Video.get_record(new_videos[0].id),
-            Video.get_record(new_videos[1].id))
+    return (
+        new_project,
+        Video.get_record(new_videos[0].id),
+        Video.get_record(new_videos[1].id),
+    )
 
 
 @pytest.fixture()
@@ -632,12 +631,13 @@ def api_project_published(api_app, api_project, users):
         login_user(User.query.get(users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
-        new_videos = [record_resolver.resolve(id_)[1]
-                      for id_ in new_project.video_ids]
+        new_videos = [record_resolver.resolve(id_)[1] for id_ in new_project.video_ids]
         assert len(new_videos) == 2
-    return (new_project,
-            Video.get_record(new_videos[0].id),
-            Video.get_record(new_videos[1].id))
+    return (
+        new_project,
+        Video.get_record(new_videos[0].id),
+        Video.get_record(new_videos[1].id),
+    )
 
 
 @pytest.fixture()
@@ -652,9 +652,9 @@ def access_token(api_app, db, users):
     with db.session.begin_nested():
         tester_id = User.query.get(users[0]).id
         token = Token.create_personal(
-            'test-personal-{0}'.format(tester_id),
+            "test-personal-{0}".format(tester_id),
             tester_id,
-            scopes=['flows:flow'],
+            scopes=["flows:flow"],
             is_internal=True,
         ).access_token
     db.session.commit()
@@ -671,9 +671,9 @@ def add(x, y):
 def category_1(api_app, es, location, indexer, pidstore):
     """Create a fixture for category."""
     data = {
-        'name': 'open',
-        'types': ['video', 'footage'],
-        '_record_type': ['video', 'project'],
+        "name": "open",
+        "types": ["video", "footage"],
+        "_record_type": ["video", "project"],
     }
     return create_category(api_app=api_app, db=db_, data=data)
 
@@ -682,9 +682,9 @@ def category_1(api_app, es, location, indexer, pidstore):
 def category_2(api_app, es, indexer, pidstore):
     """Create a fixture for category."""
     data = {
-        'name': 'atlas',
-        'types': ['video'],
-        '_record_type': ['video'],
+        "name": "atlas",
+        "types": ["video"],
+        "_record_type": ["video"],
     }
     return create_category(api_app=api_app, db=db_, data=data)
 
@@ -693,8 +693,8 @@ def category_2(api_app, es, indexer, pidstore):
 def keyword_1(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
-        'key_id': '1',
-        'name': '13 TeV',
+        "key_id": "1",
+        "name": "13 TeV",
     }
     return create_keyword(data=data)
 
@@ -703,8 +703,8 @@ def keyword_1(api_app, location, es, indexer, pidstore):
 def keyword_2(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
     data = {
-        'key_id': '2',
-        'name': 'Accelerating News',
+        "key_id": "2",
+        "name": "Accelerating News",
     }
     return create_keyword(data=data)
 
@@ -712,23 +712,21 @@ def keyword_2(api_app, location, es, indexer, pidstore):
 @pytest.fixture()
 def keyword_3_deleted(api_app, location, es, indexer, pidstore):
     """Create a fixture for keyword."""
-    data = {
-        'key_id': '3',
-        'name': 'Deleted Keyword',
-        'deleted': True
-    }
+    data = {"key_id": "3", "name": "Deleted Keyword", "deleted": True}
     return create_keyword(data=data)
 
 
 @pytest.fixture(autouse=True)
 def templates(app, db):
     """Register CDS templates for sequence generation."""
-    Template.create(name='project-v1_0_0',
-                    meta_template='{category}-{type}-{year}-{counter}',
-                    start=1)
-    Template.create(name='video-v1_0_0',
-                    meta_template='{project-v1_0_0}-{counter}',
-                    start=1)
+    Template.create(
+        name="project-v1_0_0",
+        meta_template="{category}-{type}-{year}-{counter}",
+        start=1,
+    )
+    Template.create(
+        name="video-v1_0_0", meta_template="{project-v1_0_0}-{counter}", start=1
+    )
     db.session.commit()
 
 
@@ -738,8 +736,7 @@ def local_file(db, bucket, location, online_video):
     # FIXME check where it's used, and substitute with get_local_file
     # if is involved a video!
     response = requests.get(online_video, stream=True)
-    object_version = ObjectVersion.create(
-        bucket, "test.mp4", stream=response.raw)
+    object_version = ObjectVersion.create(bucket, "test.mp4", stream=response.raw)
     version_id = object_version.version_id
     db.session.commit()
     return version_id
@@ -749,15 +746,18 @@ def local_file(db, bucket, location, online_video):
 def recid_pid():
     """PID for minimal record."""
     return PersistentIdentifier(
-        pid_type='recid', pid_value='123', status='R', object_type='rec',
-        object_uuid=uuid4())
+        pid_type="recid",
+        pid_value="123",
+        status="R",
+        object_type="rec",
+        object_uuid=uuid4(),
+    )
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture(scope="session")
 def test_videos_project():
     """Load test JSON records containing videos and a project."""
-    with open(join(dirname(__file__),
-                   '../data/test_videos_projects.json')) as fp:
+    with open(join(dirname(__file__), "../data/test_videos_projects.json")) as fp:
         records = json.load(fp)
     yield records
 
@@ -786,14 +786,10 @@ def cern_keywords():
     """Cern fixtures."""
     return {
         "tags": [
-            {"id": "751",
-             "name": "13 TeV"},
-            {"id": "856",
-             "name": "Accelerating News"},
-            {"id": "97",
-             "name": "accelerator"},
-            {"id": "14",
-             "name": "AEGIS"},
+            {"id": "751", "name": "13 TeV"},
+            {"id": "856", "name": "Accelerating News"},
+            {"id": "97", "name": "accelerator"},
+            {"id": "14", "name": "AEGIS"},
         ]
     }
 
@@ -813,7 +809,7 @@ def licenses():
             "osd_conformance": "approved",
             "status": "active",
             "title": "Attribution Assurance Licenses",
-            "url": "http://www.opensource.org/licenses/AAL"
+            "url": "http://www.opensource.org/licenses/AAL",
         },
         "AFL-3.0": {
             "domain_content": True,
@@ -826,7 +822,7 @@ def licenses():
             "osd_conformance": "approved",
             "status": "active",
             "title": "Academic Free License 3.0",
-            "url": "http://www.opensource.org/licenses/AFL-3.0"
+            "url": "http://www.opensource.org/licenses/AFL-3.0",
         },
         "AGPL-3.0": {
             "domain_content": False,
@@ -839,16 +835,18 @@ def licenses():
             "osd_conformance": "approved",
             "status": "active",
             "title": "GNU Affero General Public License v3",
-            "url": "http://www.opensource.org/licenses/AGPL-3.0"
-        }
+            "url": "http://www.opensource.org/licenses/AGPL-3.0",
+        },
     }
 
 
 @pytest.fixture()
 def demo_ffmpeg_metadata():
     """Demo metadata extracted from ffmpeg."""
-    keywords = ("21-07-16,cds,timelapseSM18,magnet on SM18,2 mqxfs quadrupole "
-                "coils: winding completed and waiting for heat treatment")
+    keywords = (
+        "21-07-16,cds,timelapseSM18,magnet on SM18,2 mqxfs quadrupole "
+        "coils: winding completed and waiting for heat treatment"
+    )
     return {
         "streams": [
             {
@@ -895,15 +893,15 @@ def demo_ffmpeg_metadata():
                     "visual_impaired": 0,
                     "clean_effects": 0,
                     "attached_pic": 0,
-                    "timed_thumbnails": 0
+                    "timed_thumbnails": 0,
                 },
                 "tags": {
                     "creation_time": "2017-03-23T13:25:03.000000Z",
                     "language": "und",
                     "handler_name": "Core Media Data Handler",
                     "encoder": "Apple ProRes 422 HQ",
-                    "timecode": "00:00:00:00"
-                }
+                    "timecode": "00:00:00:00",
+                },
             }
         ],
         "format": {
@@ -923,13 +921,12 @@ def demo_ffmpeg_metadata():
                 "compatible_brands": "qt  ",
                 "creation_time": "2017-03-23T13:25:02.000000Z",
                 "com.apple.quicktime.keywords": keywords,
-                "com.apple.quicktime.description":
-                "This video is about Quadrupole",
+                "com.apple.quicktime.description": "This video is about Quadrupole",
                 "com.apple.quicktime.author": "MACVMO04",
                 "com.apple.quicktime.displayname": "Quadrupole",
-                "com.apple.quicktime.title": "Quadrupole"
-            }
-        }
+                "com.apple.quicktime.title": "Quadrupole",
+            },
+        },
     }
 
 

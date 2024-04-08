@@ -31,26 +31,31 @@ import os
 from datetime import timedelta
 
 from celery.schedules import crontab
-from elasticsearch import RequestsHttpConnection
+from opensearchpy import RequestsHttpConnection
 from flask import current_app, session
 from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
-from invenio_deposit.config import DEPOSIT_REST_FACETS
-from invenio_deposit.scopes import write_scope
-from invenio_deposit.utils import check_oauth2_scope
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 
+from .modules.invenio_deposit.config import DEPOSIT_REST_FACETS
+from .modules.invenio_deposit.scopes import write_scope
+from .modules.invenio_deposit.utils import check_oauth2_scope
 from .modules.deposit.facets import created_by_me_aggs
 from .modules.deposit.indexer import CDSRecordIndexer
-from .modules.records.permissions import (deposit_delete_permission_factory,
-                                          deposit_read_permission_factory,
-                                          deposit_update_permission_factory,
-                                          record_create_permission_factory,
-                                          record_read_permission_factory,
-                                          record_update_permission_factory)
-from .modules.records.search import (NotDeletedKeywordSearch,
-                                     RecordVideosSearch, lowercase_filter)
+from .modules.records.permissions import (
+    deposit_delete_permission_factory,
+    deposit_read_permission_factory,
+    deposit_update_permission_factory,
+    record_create_permission_factory,
+    record_read_permission_factory,
+    record_update_permission_factory,
+)
+from .modules.records.search import (
+    NotDeletedKeywordSearch,
+    RecordVideosSearch,
+    lowercase_filter,
+)
 
 
 # Identity function for string extraction
@@ -97,7 +102,7 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
 # Celery monitoring.
 CELERY_TASK_TRACK_STARTED = True
 # Celery accepted content types.
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+CELERY_ACCEPT_CONTENT = ["json", "msgpack", "yaml"]
 """A whitelist of content-types/serializers."""
 
 # Celery Beat schedule
@@ -177,9 +182,7 @@ CACHE_TYPE = "redis"
 # variable from invenio_cache module to define our caching conditions.
 # See <https://github.com/inveniosoftware/invenio-cache/blob/master/invenio_cache/decorators.py#L41>
 CACHE_IS_AUTHENTICATED_CALLBACK = (
-    lambda: "_flashes" in session
-    or current_user.is_authenticated
-    or current_app.debug
+    lambda: "_flashes" in session or current_user.is_authenticated or current_app.debug
 )
 
 ###############################################################################
@@ -225,7 +228,9 @@ SENTRY_DSN = None
 ###############################################################################
 # Search
 ###############################################################################
-ELASTICSEARCH_HOSTS = ast.literal_eval(os.environ.get("ELASTICSEARCH_HOSTS", "['localhost']"))
+ELASTICSEARCH_HOSTS = ast.literal_eval(
+    os.environ.get("ELASTICSEARCH_HOSTS", "['localhost']")
+)
 ELASTICSEARCH_PORT = int(os.environ.get("ELASTICSEARCH_PORT", "9200"))
 ELASTICSEARCH_USER = os.environ.get("ELASTICSEARCH_USER")
 ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
@@ -246,7 +251,7 @@ for host in ELASTICSEARCH_HOSTS:
         es_host["verify_certs"] = ELASTICSEARCH_VERIFY_CERTS
     es_hosts.append(es_host)
 
-SEARCH_ELASTIC_HOSTS = es_hosts
+SEARCH_HOSTS = es_hosts
 # needed when verify cert is disabled see:
 # https://github.com/elastic/elasticsearch-py/issues/712
 SEARCH_CLIENT_CONFIG = {"connection_class": RequestsHttpConnection}
@@ -426,16 +431,11 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_minter="cds_recid",
         pid_fetcher="cds_recid",
         indexer_class=CDSRecordIndexer,
-        search_type=None,
         search_class=RecordVideosSearch,
         search_factory_imp="invenio_records_rest.query.es_search_factory",
         record_serializers={
-            "application/json": (
-                "cds.modules.records.serializers" ":json_v1_response"
-            ),
-            "application/smil": (
-                "cds.modules.records.serializers" ":smil_v1_response"
-            ),
+            "application/json": ("cds.modules.records.serializers" ":json_v1_response"),
+            "application/smil": ("cds.modules.records.serializers" ":smil_v1_response"),
             "text/vtt": ("cds.modules.records.serializers" ":vtt_v1_response"),
             "x-application/drupal": (
                 "cds.modules.records.serializers" ":drupal_v1_response"
@@ -452,9 +452,7 @@ RECORDS_REST_ENDPOINTS = dict(
             "dcite": "application/x-datacite+xml",
         },
         search_serializers={
-            "application/json": (
-                "cds.modules.records.serializers" ":json_v1_search"
-            ),
+            "application/json": ("cds.modules.records.serializers" ":json_v1_search"),
         },
         list_route="/records/",
         item_route="/record/<{0}:pid_value>".format(_Record_PID),
@@ -470,7 +468,6 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher="cds_catid",
         indexer_class=CDSRecordIndexer,
         search_index="categories",
-        search_type=None,
         search_class=RecordVideosSearch,
         search_factory_imp="invenio_records_rest.query.es_search_factory",
         record_serializers={
@@ -479,9 +476,7 @@ RECORDS_REST_ENDPOINTS = dict(
             ),
         },
         search_serializers={
-            "application/json": (
-                "invenio_records_rest.serializers" ":json_v1_search"
-            ),
+            "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
         list_route="/categories/",
         item_route="/categories/<{0}:pid_value>".format(_Category_PID),
@@ -503,7 +498,6 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher="cds_kwid",
         indexer_class=CDSRecordIndexer,
         search_index="keywords",
-        search_type=None,
         search_class=NotDeletedKeywordSearch,
         search_factory_imp="invenio_records_rest.query.es_search_factory",
         record_serializers={
@@ -512,9 +506,7 @@ RECORDS_REST_ENDPOINTS = dict(
             ),
         },
         search_serializers={
-            "application/json": (
-                "invenio_records_rest.serializers" ":json_v1_search"
-            ),
+            "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
         list_route="/keywords/",
         item_route="/keywords/<{0}:pid_value>".format(_Keyword_PID),
@@ -590,12 +582,10 @@ RECORDS_REST_FACETS = dict()
 # From 2.2 this is not needed.
 RECORDS_REST_ELASTICSEARCH_ERROR_HANDLERS = {
     "query_parsing_exception": (
-        "invenio_records_rest.views"
-        ":elasticsearch_query_parsing_exception_handler"
+        "invenio_records_rest.views" ":elasticsearch_query_parsing_exception_handler"
     ),
     "token_mgr_error": (
-        "invenio_records_rest.views"
-        ":elasticsearch_query_parsing_exception_handler"
+        "invenio_records_rest.views" ":elasticsearch_query_parsing_exception_handler"
     ),
 }
 
@@ -612,19 +602,19 @@ DEPOSIT_PROJECT_FACETS = {
                 "terms": {"field": "category.untouched"},
             },
             "task_transcode": {
-                "terms": {"field": "_cds.state.file_transcode"},
+                "terms": {"field": "_cds.state.file_transcode.keyword"},
             },
             "task_extract_frames": {
-                "terms": {"field": "_cds.state.file_video_extract_frames"},
+                "terms": {"field": "_cds.state.file_video_extract_frames.keyword"},
             },
             "created_by": created_by_me_aggs,
         },
         "filters": {
             "project_status": terms_filter("_deposit.status"),
             "category": terms_filter("category.untouched"),
-            "task_transcode": terms_filter("_cds.state.file_transcode"),
+            "task_transcode": terms_filter("_cds.state.file_transcode.keyword"),
             "task_extract_frames": terms_filter(
-                "_cds.state.file_video_extract_frames"
+                "_cds.state.file_video_extract_frames.keyword"
             ),
             "created_by": terms_filter("_deposit.created_by"),
         },
@@ -772,9 +762,7 @@ FORMATTER_BADGES_ENABLE = True
 # Display a homepage.
 FRONTPAGE_ENDPOINT = "cds_home.index"
 # Featured query
-FRONTPAGE_FEATURED_QUERY = (
-    "/api/records/?q=featured:true&size=1&sort=mostrecent"
-)
+FRONTPAGE_FEATURED_QUERY = "/api/records/?q=featured:true&size=1&sort=mostrecent"
 # Recent videos query
 FRONTPAGE_RECENT_QUERY = "/api/records/?size=3&sort=mostrecent&type=VIDEO"
 # Queries for the boxes
@@ -897,6 +885,9 @@ SECURITY_LOGIN_USER_TEMPLATE = "cds_theme/login_user.html"
 # Security login salt.
 SECURITY_LOGIN_SALT = "CHANGE_ME"
 
+# Force single hash
+SECURITY_PASSWORD_SINGLE_HASH = True
+
 # Flask configuration
 # ===================
 # See details on
@@ -910,13 +901,13 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "https://*.theoplayer.com",
         "'unsafe-inline'",
         "'unsafe-eval'",
-        "https://www.dropbox.com"
+        "https://www.dropbox.com",
     ],
     "style-src": [
         "'self'",
         "https://*.theoplayer.com",
         "https://*.cern.ch/",
-        "'unsafe-inline'"
+        "'unsafe-inline'",
     ],
     "img-src": ["'self'", "https://*.theoplayer.com", "data:"],
     "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch"],
@@ -954,7 +945,10 @@ SETTINGS_TEMPLATE = "invenio_theme/page_settings.html"
 # OAuth
 ###############################################################################
 
-OAUTHCLIENT_CERN_OPENID_USERINFO_URL = os.environ.get("OAUTHCLIENT_CERN_OPENID_USERINFO_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo")
+OAUTHCLIENT_CERN_OPENID_USERINFO_URL = os.environ.get(
+    "OAUTHCLIENT_CERN_OPENID_USERINFO_URL",
+    "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo",
+)
 
 OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user"]
 
@@ -973,13 +967,24 @@ REMOTE_APP = dict(
     title="CERN",
     description="Connecting to CERN Organization.",
     icon="",
-    logout_url=os.environ.get("OAUTH_CERN_OPENID_LOGOUT_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout"),
+    logout_url=os.environ.get(
+        "OAUTH_CERN_OPENID_LOGOUT_URL",
+        "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout",
+    ),
     params=dict(
-        base_url=os.environ.get("OAUTH_CERN_OPENID_BASE_URL", "https://auth.cern.ch/auth/realms/cern"),
+        base_url=os.environ.get(
+            "OAUTH_CERN_OPENID_BASE_URL", "https://auth.cern.ch/auth/realms/cern"
+        ),
         request_token_params={"scope": "openid"},
-        access_token_url=os.environ.get("OAUTH_CERN_OPENID_ACCESS_TOKEN_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token"),
+        access_token_url=os.environ.get(
+            "OAUTH_CERN_OPENID_ACCESS_TOKEN_URL",
+            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token",
+        ),
         access_token_method="POST",
-        authorize_url=os.environ.get("OAUTH_CERN_OPENID_AUTHORIZE_URL", "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth"),
+        authorize_url=os.environ.get(
+            "OAUTH_CERN_OPENID_AUTHORIZE_URL",
+            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth",
+        ),
         app_key="CERN_APP_OPENID_CREDENTIALS",
         content_type="application/json",
     ),
@@ -992,9 +997,7 @@ REMOTE_APP = dict(
     ),
 )
 
-OAUTHCLIENT_REMOTE_APPS = dict(
-    cern_openid=REMOTE_APP
-)
+OAUTHCLIENT_REMOTE_APPS = dict(cern_openid=REMOTE_APP)
 """CERN Openid Remote Application."""
 
 
@@ -1013,7 +1016,7 @@ CERN_APP_OPENID_CREDENTIALS = dict(
 )
 
 ## Needed for populating the user profiles when users login via CERN Openid
-USERPROFILES_EXTEND_SECURITY_FORMS=True
+USERPROFILES_EXTEND_SECURITY_FORMS = True
 
 # Set the template
 OAUTH2SERVER_SETTINGS_TEMPLATE = "cds_theme/settings.html"
@@ -1023,10 +1026,9 @@ OAUTH2SERVER_SETTINGS_TEMPLATE = "cds_theme/settings.html"
 ###############################################################################
 
 # The site name
-THEME_SITENAME = _(u"CDS Videos · CERN")
+THEME_SITENAME = _("CDS Videos · CERN")
 THEME_SITEDESCRIPTION = _(
-    "CDS Videos is the CERN official repository to "
-    "archive and disseminate videos."
+    "CDS Videos is the CERN official repository to " "archive and disseminate videos."
 )
 # Default site URL (used only when not in a context - e.g. like celery tasks).
 THEME_SITEURL = "http://localhost:5000"
@@ -1136,9 +1138,7 @@ DEPOSIT_UI_NEW_TEMPLATE = "cds_deposit/edit.html"
 # The schema form deposit
 DEPOSIT_DEFAULT_SCHEMAFORM = "json/cds_deposit/forms/project.json"
 # Default schema for the deposit
-DEPOSIT_DEFAULT_JSONSCHEMA = (
-    "deposits/records/videos/project/project-v1.0.0.json"
-)
+DEPOSIT_DEFAULT_JSONSCHEMA = "deposits/records/videos/project/project-v1.0.0.json"
 # Deposit schemas
 DEPOSIT_JSONSCHEMA = {
     "project": "deposits/records/videos/project/project-v1.0.0.json",
@@ -1148,17 +1148,14 @@ DEPOSIT_JSONSCHEMA = {
 DEPOSIT_UI_JSTEMPLATE_FORM = "templates/cds_deposit/form.html"
 DEPOSIT_UI_JSTEMPLATE_ACTIONS = "templates/cds_deposit/actions.html"
 DEPOSIT_SEARCH_API = "/api/deposits/project/"
-_CDSDeposit_PID = (
-    'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
-)
+_CDSDeposit_PID = 'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
 _Project_PID = 'pid(depid,record_class="cds.modules.deposit.api:Project")'
 _Video_PID = 'pid(depid,record_class="cds.modules.deposit.api:Video")'
 DEPOSIT_UI_ENDPOINT_DEFAULT = "{scheme}://{host}/deposit/{pid_value}"
 DEPOSIT_UI_ENDPOINT = "{scheme}://{host}/deposit/{type}/{pid_value}"
 DEPOSIT_RECORDS_API_DEFAULT = "/api/deposits/{pid_value}"
 DEPOSIT_RECORDS_API = "/api/deposits/{type}/{pid_value}"
-# use a custom function to catch record publish signals
-DEPOSIT_REGISTER_SIGNALS = False
+
 # Deposit rest endpoints
 DEPOSIT_REST_ENDPOINTS = dict(
     depid=dict(
@@ -1169,7 +1166,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         record_class="cds.modules.deposit.api:CDSDeposit",
         files_serializers={
             "application/json": (
-                "invenio_deposit.serializers" ":json_v1_files_response"
+                "cds.modules.invenio_deposit.serializers" ":json_v1_files_response"
             ),
         },
         record_serializers={
@@ -1177,40 +1174,30 @@ DEPOSIT_REST_ENDPOINTS = dict(
                 "invenio_records_rest.serializers" ":json_v1_response"
             ),
         },
-        search_class="invenio_deposit.search:DepositSearch",
+        search_class="cds.modules.invenio_deposit.search:DepositSearch",
         search_serializers={
-            "application/json": (
-                "invenio_records_rest.serializers" ":json_v1_search"
-            ),
+            "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
         list_route="/deposits/",
         indexer_class=CDSRecordIndexer,
         item_route="/deposits/<{0}:pid_value>".format(_CDSDeposit_PID),
-        file_list_route="/deposits/<{0}:pid_value>/files".format(
-            _CDSDeposit_PID
-        ),
+        file_list_route="/deposits/<{0}:pid_value>/files".format(_CDSDeposit_PID),
         file_item_route="/deposits/<{0}:pid_value>/files/<path:key>".format(
             _CDSDeposit_PID
         ),
         default_media_type="application/json",
         links_factory_imp="cds.modules.deposit.links:deposit_links_factory",
         create_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_create_permission_factory(
-                record=record
-            ).can(),
+            lambda record: record_create_permission_factory(record=record).can(),
             write_scope.id,
         ),
         read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_update_permission_factory(
-                record=record
-            ).can(),
+            lambda record: record_update_permission_factory(record=record).can(),
             write_scope.id,
         ),
         delete_permission_factory_imp=check_oauth2_scope(
-            lambda record: deposit_delete_permission_factory(
-                record=record
-            ).can(),
+            lambda record: deposit_delete_permission_factory(record=record).can(),
             write_scope.id,
         ),
         max_result_window=10000,
@@ -1228,53 +1215,41 @@ DEPOSIT_REST_ENDPOINTS = dict(
         },
         files_serializers={
             "application/json": (
-                "invenio_deposit.serializers" ":json_v1_files_response"
+                "cds.modules.invenio_deposit.serializers" ":json_v1_files_response"
             ),
         },
         record_serializers={
             "application/json": (
-                "cds.modules.records.serializers"
-                ":cdsdeposit_json_v1_response"
+                "cds.modules.records.serializers" ":cdsdeposit_json_v1_response"
             ),
             "application/vnd.project.partial+json": (
-                "cds.modules.records.serializers"
-                ":cdsdeposit_json_v1_response"
+                "cds.modules.records.serializers" ":cdsdeposit_json_v1_response"
             ),
         },
         search_class="cds.modules.deposit.search:DepositVideosSearch",
         search_serializers={
-            "application/json": (
-                "invenio_records_rest.serializers" ":json_v1_search"
-            ),
+            "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
         list_route="/deposits/project/",
         indexer_class=CDSRecordIndexer,
         item_route="/deposits/project/<{0}:pid_value>".format(_Project_PID),
-        file_list_route="/deposits/project/<{0}:pid_value>/files".format(
-            _Project_PID
-        ),
+        file_list_route="/deposits/project/<{0}:pid_value>/files".format(_Project_PID),
         file_item_route="/deposits/project/<{0}:pid_value>/files/<path:key>".format(
             _Project_PID
         ),
         default_media_type="application/json",
         links_factory_imp="cds.modules.deposit.links:project_links_factory",
         create_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_create_permission_factory(
-                record=record
-            ).can(),
+            lambda record: record_create_permission_factory(record=record).can(),
             write_scope.id,
         ),
         read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            lambda record: deposit_update_permission_factory(
-                record=record
-            ).can(),
+            lambda record: deposit_update_permission_factory(record=record).can(),
             write_scope.id,
         ),
         delete_permission_factory_imp=check_oauth2_scope(
-            lambda record: deposit_delete_permission_factory(
-                record=record
-            ).can(),
+            lambda record: deposit_delete_permission_factory(record=record).can(),
             write_scope.id,
         ),
         max_result_window=10000,
@@ -1291,53 +1266,41 @@ DEPOSIT_REST_ENDPOINTS = dict(
         },
         files_serializers={
             "application/json": (
-                "invenio_deposit.serializers" ":json_v1_files_response"
+                "cds.modules.invenio_deposit.serializers" ":json_v1_files_response"
             ),
         },
         record_serializers={
             "application/json": (
-                "cds.modules.records.serializers"
-                ":cdsdeposit_json_v1_response"
+                "cds.modules.records.serializers" ":cdsdeposit_json_v1_response"
             ),
             "application/vnd.video.partial+json": (
-                "cds.modules.records.serializers"
-                ":cdsdeposit_json_v1_response"
+                "cds.modules.records.serializers" ":cdsdeposit_json_v1_response"
             ),
         },
-        search_class="invenio_deposit.search:DepositSearch",
+        search_class="cds.modules.invenio_deposit.search:DepositSearch",
         search_serializers={
-            "application/json": (
-                "invenio_records_rest.serializers" ":json_v1_search"
-            ),
+            "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
         list_route="/deposits/video/",
         indexer_class=CDSRecordIndexer,
         item_route="/deposits/video/<{0}:pid_value>".format(_Video_PID),
-        file_list_route="/deposits/video/<{0}:pid_value>/files".format(
-            _Video_PID
-        ),
+        file_list_route="/deposits/video/<{0}:pid_value>/files".format(_Video_PID),
         file_item_route="/deposits/video/<{0}:pid_value>/files/<path:key>".format(
             _Video_PID
         ),
         default_media_type="application/json",
         links_factory_imp="cds.modules.deposit.links:video_links_factory",
         create_permission_factory_imp=check_oauth2_scope(
-            lambda record: record_create_permission_factory(
-                record=record
-            ).can(),
+            lambda record: record_create_permission_factory(record=record).can(),
             write_scope.id,
         ),
         read_permission_factory_imp=deposit_read_permission_factory,
         update_permission_factory_imp=check_oauth2_scope(
-            lambda record: deposit_update_permission_factory(
-                record=record
-            ).can(),
+            lambda record: deposit_update_permission_factory(record=record).can(),
             write_scope.id,
         ),
         delete_permission_factory_imp=check_oauth2_scope(
-            lambda record: deposit_delete_permission_factory(
-                record=record
-            ).can(),
+            lambda record: deposit_delete_permission_factory(record=record).can(),
             write_scope.id,
         ),
         max_result_window=10000,
@@ -1379,9 +1342,9 @@ DEPOSIT_RESPONSE_MESSAGES = dict(
 
 DEPOSIT_FORM_TEMPLATES_BASE = "templates/cds_deposit/angular-schema-form"
 DEPOSIT_FORM_TEMPLATES = {
-    "default": "default.html",
+    # "default": "default.html",
     "fieldset": "fieldset.html",
-    "ckeditor": "ckeditor.html",
+    "ckeditor": "textarea.html",
     "uiselect": "uiselect.html",
     "array": "array.html",
     "radios_inline": "radios_inline.html",
@@ -1443,14 +1406,14 @@ CDS_FFMPEG_METADATA_POST_SPLIT = ["streams/0/keywords"]
 LOG_USER_ACTIONS_ENABLED = False
 # endpoints for logging user actions
 LOG_USER_ACTIONS_ENDPOINTS = {
-    'base_url': os.environ.get("LOG_USER_ACTIONS_BASE_URL", None),
-    'media_view': '{base_url}cds_videos_media_view?ext=true&'
-                  'recid={recid}&report_number={'
-                  'report_number}&format={format}',
-    'media_download': '{base_url}cds_videos_media_download?recid={recid}&'
-                      'report_number={report_number}&'
-                      'format={format}&quality={quality}',
-    'page_view': '{base_url}cds_videos_page_view?recid={recid}&userid={userid}'
+    "base_url": os.environ.get("LOG_USER_ACTIONS_BASE_URL", None),
+    "media_view": "{base_url}cds_videos_media_view?ext=true&"
+    "recid={recid}&report_number={"
+    "report_number}&format={format}",
+    "media_download": "{base_url}cds_videos_media_download?recid={recid}&"
+    "report_number={report_number}&"
+    "format={format}&quality={quality}",
+    "page_view": "{base_url}cds_videos_page_view?recid={recid}&userid={userid}",
 }
 
 ###############################################################################
@@ -1519,10 +1482,23 @@ CDS_OPENCAST_API_USERNAME = "changeme"
 CDS_OPENCAST_API_PASSWORD = "changeme"
 CDS_OPENCAST_SERIES_ID = "changeme"
 CDS_OPENCAST_API_ENDPOINT_VERIFY_CERT = False
-CDS_OPENCAST_STATUS_CHECK_TASK_TIMEOUT = 5*60  # 5 minutes
-CDS_OPENCAST_DOWNLOAD_TASK_TIMEOUT = 30*60  # 30 minutes
+CDS_OPENCAST_STATUS_CHECK_TASK_TIMEOUT = 5 * 60  # 5 minutes
+CDS_OPENCAST_DOWNLOAD_TASK_TIMEOUT = 30 * 60  # 30 minutes
 
 CDS_LDAP_URL = "ldap://xldap.cern.ch"
 
 # Sets the location to share the video files among the different tasks
 CDS_FILES_TMP_FOLDER = "/tmp/videos"
+
+# Invenio APP
+APP_THEME = ["bootstrap3"]
+
+# Invenio-Search
+# ==============
+SEARCH_INDEX_PREFIX = "cds-videos-prod-"
+
+REST_CSRF_ENABLED = True
+
+ACCOUNTS_JWT_ENABLE = False
+
+CELERY_TASK_ALWAYS_EAGER = False
