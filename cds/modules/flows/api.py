@@ -104,16 +104,18 @@ class AVCFlowCeleryTasks:
         celery_tasks = []
 
         if has_remote_file_to_download:
-            file_download_task = cls.create_task(DownloadTask, payload)
+            file_download_task = cls.create_task(
+                DownloadTask, {**payload, "uri": has_remote_file_to_download}
+            )
             celery_tasks.append(file_download_task)
 
         metadata_extract_task = cls.create_task(
             ExtractMetadataTask,
             payload,
             delete_copied=False,
-            # force uri to None if we have a remote file so it can be populated with the
-            # destination file uri once the Download task finishes
-            uri=None if has_remote_file_to_download else payload.get("uri"),
+            # # force uri to None if we have a remote file so it can be populated with the
+            # # destination file uri once the Download task finishes
+            # uri=None if has_remote_file_to_download else payload.get("uri"),
         )
         celery_tasks.append(metadata_extract_task)
 
@@ -179,7 +181,7 @@ class FlowService:
         payload = self.flow_metadata.payload
         payload["flow_id"] = flow_id
 
-        has_remote_file_to_download = payload.get("uri", False)
+        has_remote_file_to_download = payload.pop("uri", None)
         has_user_uploaded_file = payload.get("version_id", False)
         has_file = has_remote_file_to_download or has_user_uploaded_file
         has_filename = payload["key"]
@@ -189,7 +191,9 @@ class FlowService:
         assert has_filename
 
         # create the object version if doesn't exist
-        object_version = init_object_version(self.flow_metadata)
+        object_version = init_object_version(
+            self.flow_metadata, has_remote_file_to_download=has_remote_file_to_download
+        )
         version_id = str(object_version.version_id)
         payload["version_id"] = version_id
         db_flag_modified(self.flow_metadata, "payload")

@@ -42,7 +42,7 @@ DEPOSIT_FILES_API = "/api/files"
 # DEPOSIT_PID_MINTER = "recid"
 # """PID minter used for record submissions."""
 
-# DEPOSIT_JSONSCHEMAS_PREFIX = "deposits/"
+DEPOSIT_JSONSCHEMAS_PREFIX = "deposits/"
 # """Prefix for all deposit JSON schemas."""
 
 # DEPOSIT_DEFAULT_JSONSCHEMA = "deposits/deposit-v1.0.0.json"

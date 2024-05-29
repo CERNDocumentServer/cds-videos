@@ -32,6 +32,7 @@ import six
 from opensearchpy.exceptions import NotFoundError
 from flask import current_app, g, request
 from flask_security import current_user
+from html import unescape
 from invenio_db import db
 from invenio_files_rest.models import as_bucket
 from invenio_files_rest.tasks import remove_file_data
@@ -57,9 +58,7 @@ def schema_prefix(schema):
     """Get index prefix for a given schema."""
     if not schema:
         return None
-    index = schema_to_index(
-        schema, index_names=current_search.mappings.keys()
-    )
+    index = schema_to_index(schema, index_names=current_search.mappings.keys())
     return index.split("-")[0]
 
 
@@ -114,9 +113,7 @@ def format_pid_link(url_template, pid_value):
         )
     else:
         r = parse(current_app.config["THEME_SITEURL"])
-        return url_template.format(
-            host=r.netloc, scheme=r.scheme, pid_value=pid_value
-        )
+        return url_template.format(host=r.netloc, scheme=r.scheme, pid_value=pid_value)
 
 
 class HTMLTagRemover(HTMLParser):
@@ -136,6 +133,10 @@ class HTMLTagRemover(HTMLParser):
     def get_data(self):
         """Return only values."""
         return "".join(self.values)
+
+    def unescape(self, value):
+        """HTMLParser removes `unescape` method. Use directly `html.unescape()`."""
+        return unescape(value)
 
 
 def _get_record_and_deposit(record_uuid):
@@ -197,9 +198,7 @@ def delete_project_record(record_uuid, reason=None, hard=False):
                     object_type="rec",
                     getter=Video.get_record,
                 ).resolve(depid.pid_value)
-            report.extend(
-                delete_video_record(video_pid.object_uuid, reason, hard)
-            )
+            report.extend(delete_video_record(video_pid.object_uuid, reason, hard))
         # Save all changes made so far
         db.session.commit()
 
@@ -227,9 +226,7 @@ def delete_video_record(record_uuid, reason=None, hard=False):
             report.append(
                 (
                     "INFO",
-                    "Deleted all flows for deposit {}.".format(
-                        deposit.id
-                    ),
+                    "Deleted all flows for deposit {}.".format(deposit.id),
                 )
             )
 
@@ -331,9 +328,7 @@ def wipe_record(record_uuid):
             ).delete()
             report.append(("INFO", "Deleted PIDs from record."))
         except Exception as e:
-            report.append(
-                ("ERROR", "Couldn't delete PIDs from record - {}.".format(e))
-            )
+            report.append(("ERROR", "Couldn't delete PIDs from record - {}.".format(e)))
 
         report.append(_delete_doi(record))
 
@@ -342,9 +337,7 @@ def wipe_record(record_uuid):
             RecordsBuckets.record_id == uuid
         ).one_or_none()
         try:
-            RecordsBuckets.query.filter(
-                RecordsBuckets.record_id == uuid
-            ).delete()
+            RecordsBuckets.query.filter(RecordsBuckets.record_id == uuid).delete()
             report.append(("INFO", "Deleted RecordBucket from record."))
         except Exception as e:
             report.append(
@@ -363,9 +356,7 @@ def wipe_record(record_uuid):
             RecordMetadata.query.filter(RecordMetadata.id == uuid).delete()
             report.append(("INFO", "Deleted record metadata and versions."))
         except Exception as e:
-            report.append(
-                ("ERROR", "Couldn't delete record metadata - {}.".format(e))
-            )
+            report.append(("ERROR", "Couldn't delete record metadata - {}.".format(e)))
 
         # Delete Files
         file_ids = []
@@ -384,9 +375,7 @@ def wipe_record(record_uuid):
                 bucket.remove()
                 report.append(("INFO", "Deleted bucket."))
             except Exception as e:
-                report.append(
-                    ("ERROR", "Couldn't delete bucket- {}.".format(e))
-                )
+                report.append(("ERROR", "Couldn't delete bucket- {}.".format(e)))
 
     db.session.commit()
 
@@ -397,15 +386,11 @@ def wipe_record(record_uuid):
             report.append(
                 (
                     "INFO",
-                    "File {0} deleted from disk by task {1}.".format(
-                        uuid, task.id
-                    ),
+                    "File {0} deleted from disk by task {1}.".format(uuid, task.id),
                 )
             )
         except Exception as e:
-            report.append(
-                ("ERROR", "Couldn't delete file from disk - {}.".format(e))
-            )
+            report.append(("ERROR", "Couldn't delete file from disk - {}.".format(e)))
 
     return report
 
@@ -414,9 +399,7 @@ def delete_record(record_uuid, reason):
     """Delete record and store the deleting reason within the JSON."""
     from invenio_indexer.api import RecordIndexer
 
-    report = [
-        ("INFO", "Deleting record {0} - {1}".format(record_uuid, reason))
-    ]
+    report = [("INFO", "Deleting record {0} - {1}".format(record_uuid, reason))]
     for record in _get_record_and_deposit(record_uuid):
         if record is None:
             continue
@@ -445,9 +428,7 @@ def delete_record(record_uuid, reason):
             RecordsBuckets.record_id == uuid
         ).one_or_none()
         try:
-            RecordsBuckets.query.filter(
-                RecordsBuckets.record_id == uuid
-            ).delete()
+            RecordsBuckets.query.filter(RecordsBuckets.record_id == uuid).delete()
             report.append(("INFO", "Deleted RecordBucket from record."))
         except Exception as e:
             report.append(
@@ -463,9 +444,7 @@ def delete_record(record_uuid, reason):
                 bucket.remove()
                 report.append(("INFO", "Deleted bucket."))
             except Exception as e:
-                report.append(
-                    ("ERROR", "Couldn't delete bucket- {}.".format(e))
-                )
+                report.append(("ERROR", "Couldn't delete bucket- {}.".format(e)))
 
         if is_record(record):
             # Clear the record and put the deletion information
@@ -481,13 +460,9 @@ def delete_record(record_uuid, reason):
                     }
                 )
                 record.commit()
-                report.append(
-                    ("INFO", "Update record content with {}".format(reason))
-                )
+                report.append(("INFO", "Update record content with {}".format(reason)))
             except Exception as e:
-                report.append(
-                    ("ERROR", "Couldn't update record content {}".format(e))
-                )
+                report.append(("ERROR", "Couldn't update record content {}".format(e)))
         else:
             # Completely delete the deposit
             try:
@@ -495,9 +470,7 @@ def delete_record(record_uuid, reason):
                 db.session.merge(record.model)
                 report.append(("INFO", "Delete deposit content."))
             except Exception as e:
-                report.append(
-                    ("ERROR", "Couldn't delete deposit content {}".format(e))
-                )
+                report.append(("ERROR", "Couldn't delete deposit content {}".format(e)))
 
     db.session.commit()
 
