@@ -2,12 +2,14 @@
 
 - index: not_analyzed
 - type: completion for suggestions
--[x] ffmpeg: gif method was removed
+-[x] ffmpeg: gif method was moved in module
 - admin panel shows Banners
 - test statistics, should we install raven?
 - missing os-v2 invenio_opendefinition.mappings
 - existing kw need updating, remove payload as it is not supported
 - project deletion from the UI fails to index the project as it tries to index it by id which results to a PIDDeletedError
+- cds-js module to be archived
+- integrate invenio-stats and adapt code accordingly
 
 # DB update
 
@@ -86,4 +88,132 @@ cds index run
 # assets watch
 ./scripts/assets-watch
 
+```
+
+## REST API upload
+
+### Upload a remote file
+
+```invenio shell
+
+import requests
+
+# Create a personal access token in /account/settings/applications/tokens/new
+# ticking all scopes
+# AUTH_TOKEN = "4s9XMJcFsGiKH9GSwU004kHb68W7tlyLnsweZ970TBsceQCALwWLwRxR4ujf"
+# SERVER_HOST = "https://127.0.0.1:5000"
+AUTH_TOKEN = "HqYxoeCJfJ0Zc2Puyn6YYNYUBuMaGQ0nXZxRaX9OCEjFkodMGEvQ0xZ7mkpJ"
+SERVER_HOST = "https://127.0.0.1:5000"
+video_url = "https://cernbox.cern.ch/remote.php/dav/public-files/tt6kuZcrloXWhVs/20170205%20-%20FOSDEM%202017%20-%20Magnum%20at%20CERN.mp4"
+
+def upload_video(file_path, auth_token):
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    headers["content-type"] = "application/vnd.project.partial+json"
+    body = {
+        "$schema": f"{SERVER_HOST}/schemas/deposits/records/videos/project/project-v1.0.0.json",
+    }
+    res_project = requests.post(
+        f"{SERVER_HOST}/api/deposits/project/",
+        json=body,
+        headers=headers,
+        verify=False if "127.0.0.1" in SERVER_HOST else True,
+    )
+
+    res_project = requests.put(
+        f"{SERVER_HOST}/api/deposits/project/{res_project.json()['id']}",
+        json={
+            "_access": {"update": ["Tim.Bell@cern.ch"]},
+            "category": "CERN",
+            "type": "VIDEO"
+        },
+        headers=headers,
+        verify=False if "127.0.0.1" in SERVER_HOST else True,
+    )
+
+    # Video
+    headers["content-type"] = "application/vnd.video.partial+json"
+    body = {
+        "$schema": f"{SERVER_HOST}/schemas/deposits/records/videos/video/video-v1.0.0.json",
+    }
+    body["_project_id"] = res_project.json()["id"]
+
+    res_video = requests.post(
+        f"{SERVER_HOST}/api/deposits/video/",
+        json=body,
+        headers=headers,
+        verify=False if "127.0.0.1" in SERVER_HOST else True,
+    )
+
+    res_video = requests.put(
+        f"{SERVER_HOST}/api/deposits/video/{res_video.json()['id']}",
+        json={
+            "_access": {"update": ["Tim.Bell@cern.ch"]},
+            "title": {"title": file_path.split("/")[-1].split(".")[0]},
+            "contributors": [
+                {
+                    "email": "gabrielle.de.bonnerive@cern.ch",
+                    "ids": [{"source": "cern", "value": "832317"}],
+                    "name": "Pepin Fontaine De Bonnerive, Gabrielle",
+                    "role": "Editor",
+                },
+                {
+                    "affiliations": ["CERN"],
+                    "email": "Paola.Catapano@cern.ch",
+                    "ids": [
+                        {"source": "cern", "value": "380837"},
+                        {"source": "cds", "value": "2050975"},
+                    ],
+                    "name": "Catapano, Paola",
+                    "role": "Screenwriter",
+                },
+            ],
+            "copyright": {
+                "holder": "CERN",
+                "url": "http://copyright.web.cern.ch",
+                "year": "2024",
+            },
+            "date": "2024-05-17",
+            "description": "Visual curriculum vitae of Fabiola Gianotti at CERN, from her participation in the UA2 experiment to the election for her second mandate as CERN Director General.",
+            "doi": "10.17181/videos.2300133",
+            "duration": "00:01:49",
+            "featured": False,
+            "keywords": [
+                {"name": "Fabiola"},
+                {"name": "Gianotti"},
+                {"name": "Director"},
+                {"name": "General"},
+                {"name": "biography"},
+                {"name": "slideshow"},
+            ],
+            "language": "en",
+            "license": [{"license": "CERN", "url": "http://copyright.web.cern.ch"}],
+            "publication_date": "2024-05-22",
+            "title": {"title": "Fabiola Gianotti Short Visual CV 2024"},
+            "type": "VIDEO",
+            "vr": False,
+        },
+        headers=headers,
+        verify=False if "127.0.0.1" in SERVER_HOST else True,
+    )
+    # File upload
+    headers["content-type"] = "application/json"
+    body = {
+        "uri": file_path,
+        "key": file_path.split("/")[-1],
+        "bucket_id": res_video.json()["metadata"]["_buckets"]["deposit"],
+        "deposit_id": res_video.json()["metadata"]["_deposit"]["id"],
+    }
+    res_flow = requests.post(
+        f"{SERVER_HOST}/api/flows/",
+        json=body,
+        headers=headers,
+        verify=False if "127.0.0.1" in SERVER_HOST else True,
+    ).json()
+    flow_id = res_flow["tags"]["flow_id"]
+
+    video_link = res_project.json()["links"]["html"]
+    print(f"Uploaded video: {file_path}. Link: {video_link}")
+    return video_link, flow_id
+
+upload_video(video_url, AUTH_TOKEN)
 ```

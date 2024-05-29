@@ -34,7 +34,16 @@
     {% else %}
     {% set user_action_page_view_url = '' %}
     {% endif %}
-    userActionsLogger.pageView('{{ user_action_page_view_url }}');
+     // Page view logging
+     if ('{{user_action_page_view_url}}') {
+      try {
+        var r = new XMLHttpRequest();
+        r.open("GET", '{{user_action_page_view_url}}', true);
+        r.send();
+      } catch (e) {
+        console.error(e);
+      }
+    }
   </script>
 {%- endblock javascript %}
 

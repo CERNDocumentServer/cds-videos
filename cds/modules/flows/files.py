@@ -47,7 +47,7 @@ def _rename_key(object_version):
         object_version.key = prefix + object_version.key
 
 
-def init_object_version(flow):
+def init_object_version(flow, has_remote_file_to_download):
     """Create, if doesn't exists, the version object for the flow."""
     flow_id = str(flow.id)
     has_user_uploaded_file = flow.payload.get("version_id")
@@ -63,7 +63,7 @@ def init_object_version(flow):
                 bucket=bucket_id, key=flow.payload["key"]
             )
             ObjectVersionTag.create(
-                object_version, "uri_origin", flow.payload["uri"]
+                object_version, "uri_origin", has_remote_file_to_download
             )
 
         # add tag with corresponding event
@@ -71,12 +71,8 @@ def init_object_version(flow):
         # add tag for preview
         ObjectVersionTag.create_or_update(object_version, "preview", "true")
         # add tags for file type
-        ObjectVersionTag.create_or_update(
-            object_version, "media_type", "video"
-        )
-        ObjectVersionTag.create_or_update(
-            object_version, "context_type", "master"
-        )
+        ObjectVersionTag.create_or_update(object_version, "media_type", "video")
+        ObjectVersionTag.create_or_update(object_version, "context_type", "master")
         _rename_key(object_version)
     return object_version
 

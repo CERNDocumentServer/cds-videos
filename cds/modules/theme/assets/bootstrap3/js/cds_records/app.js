@@ -24,7 +24,9 @@
 import angular from "angular";
 import "angular-sanitize";
 import "ngmodal";
+import "invenio-records-js/dist/invenio-records-js";
 import "./user_actions_logger";
+import "./cdsRecord";
 
 // Bootstrap modules
 angular.element(document).ready(function () {

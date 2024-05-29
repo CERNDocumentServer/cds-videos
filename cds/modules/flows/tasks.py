@@ -420,14 +420,11 @@ class ExtractMetadataTask(AVCTask):
             logger.warning("Failed to apply JSON Patch to deposit %s: %s", recid, c)
 
     @classmethod
-    def get_metadata_from_video_file(cls, object_=None, uri=None, delete_copied=True):
+    def get_metadata_from_video_file(cls, object_=None, delete_copied=True):
         """Get metadata from video file."""
         # Extract video's metadata using `ff_probe`
-        if uri:
-            metadata = ff_probe_all(uri)
-        else:
-            with move_file_into_local(object_, delete=delete_copied) as url:
-                metadata = ff_probe_all(url)
+        with move_file_into_local(object_, delete=delete_copied) as url:
+            metadata = ff_probe_all(url)
         return dict(metadata["format"], **metadata["streams"][0])
 
     @classmethod
@@ -442,7 +439,7 @@ class ExtractMetadataTask(AVCTask):
         db.session.refresh(object_)
         return metadata
 
-    def run(self, uri=None, *args, **kwargs):
+    def run(self, *args, **kwargs):
         """Extract metadata from given video file.
 
         All technical metadata, i.e. bitrate, will be translated into
@@ -459,8 +456,6 @@ class ExtractMetadataTask(AVCTask):
         pid = PersistentIdentifier.get("depid", self.deposit_id)
         recid = str(pid.object_uuid)
 
-        self._base_payload.update(uri=uri)
-
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
         kwargs["task_id"] = str(flow_task_metadata.id)
@@ -472,7 +467,7 @@ class ExtractMetadataTask(AVCTask):
         self.log("Started task {0}".format(kwargs["task_id"]))
 
         metadata = self.get_metadata_from_video_file(
-            object_=self.object_version, uri=uri, delete_copied=delete_copied
+            object_=self.object_version, delete_copied=delete_copied
         )
         try:
             extracted_dict = self.create_metadata_tags(
