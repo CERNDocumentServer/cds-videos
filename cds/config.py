@@ -929,7 +929,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "https://*.cern.ch/",
     ],
 }
-SITE_URL = "https://localhost:5000"
+SITE_URL = "https://127.0.0.1:5000"
 
 ###############################################################################
 # User Profiles
@@ -1031,7 +1031,7 @@ THEME_SITEDESCRIPTION = _(
     "CDS Videos is the CERN official repository to " "archive and disseminate videos."
 )
 # Default site URL (used only when not in a context - e.g. like celery tasks).
-THEME_SITEURL = "http://localhost:5000"
+THEME_SITEURL = "http://127.0.0.1:5000"
 # The theme logo.
 THEME_LOGO = False
 # The base template.
@@ -1058,9 +1058,9 @@ THEME_PIWIK_ID = None
 ###############################################################################
 
 # Base CSS bundle to include in all previewers
-PREVIEWER_BASE_CSS_BUNDLES = ["cds_theme_css"]
+PREVIEWER_BASE_CSS_BUNDLES = ["cds_main_theme"]
 # Base JS bundle to include in all previewers
-PREVIEWER_BASE_JS_BUNDLES = ["cds_theme_js"]
+PREVIEWER_BASE_JS_BUNDLES = ["cds_main_app"]
 # Decides which previewers are available and their priority.
 PREVIEWER_PREFERENCE = [
     "csv_dthreejs",
@@ -1107,7 +1107,7 @@ the users that are part of the e-groups in VIDEOS_EOS_PATH_EGROUPS and admins.
 ###############################################################################
 
 JSONSCHEMAS_ENDPOINT = "/schemas"
-JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "localhost:5000")
+JSONSCHEMAS_HOST = os.environ.get("JSONSCHEMAS_HOST", "127.0.0.1:5000")
 JSONSCHEMAS_URL_SCHEME = "https"
 
 ###############################################################################

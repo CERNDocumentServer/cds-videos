@@ -44,9 +44,7 @@
     {%- endblock %}
     {%- block css %}
       {%- for bdl in css_bundles %}
-        {%- assets bdl %}
-      <link href="{{ ASSET_URL }}" rel="stylesheet">
-        {%- endassets %}
+      {{ webpack[bdl + ".css"] }}
       {%- endfor %}
     {%- endblock %}
   </head>
@@ -56,9 +54,7 @@
     {%- block page_body %}{% endblock %}
     {%- block javascript %}
       {%- for bdl in js_bundles %}
-        {%- assets bdl %}
-      <script src="{{ ASSET_URL }}"></script>
-        {%- endassets %}
+      {{ webpack[bdl + '.js'] }}
       {%- endfor %}
       {% include config.THEME_TRACKINGCODE_TEMPLATE %}
     {%- endblock %}
