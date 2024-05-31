@@ -88,6 +88,7 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+
   # es:
   #   build:
   #     context: ./docker/es/
@@ -136,8 +137,3 @@ services:
       # settings only for development. DO NOT use in production!
       - 'OPENSEARCH_HOSTS=["http://search:9200"]'
       - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
-  flower:
-    image: mher/flower:0.9.7
-    command: --broker=amqp://guest:guest@mq:5672/ --broker_api=http://guest:guest@mq:15672/api/
-    ports:
-      - "5555:5555"

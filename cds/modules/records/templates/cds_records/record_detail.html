@@ -29,17 +29,38 @@
     {% if config.LOG_USER_ACTIONS_ENABLED %}
     {% set user_action_page_view_url = (config.LOG_USER_ACTIONS_ENDPOINTS['page_view'] or '')
                                         .format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '',
-                                                recid=record['recid'],
-                                                userid=current_user.id or 0)|safe %}
+                                                recid=record['recid']|safe) %}
     {% else %}
     {% set user_action_page_view_url = '' %}
     {% endif %}
      // Page view logging
      if ('{{user_action_page_view_url}}') {
       try {
+         // function from https://www.w3schools.com/js/js_cookies.asp
+        function getCookie(cname) {
+          let name = cname + "=";
+          let decodedCookie = decodeURIComponent(document.cookie);
+          let ca = decodedCookie.split(";");
+          for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == " ") {
+              c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+              return c.substring(name.length, c.length);
+            }
+          }
+          return "";
+        }
         var r = new XMLHttpRequest();
-        r.open("GET", '{{user_action_page_view_url}}', true);
-        r.send();
+        r.open("POST", '{{user_action_page_view_url}}', true);
+        r.setRequestHeader('Content-Type', 'application/json');
+        r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
+        var data = JSON.stringify({
+            event: 'record-view'
+        });
+
+        r.send(data);
       } catch (e) {
         console.error(e);
       }
@@ -77,7 +98,7 @@
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
-        record-views='/api/stats/{{record.recid}}/views'
+        record-views='/api/stats/{{record.recid}}'
         media-download-event-url="{{ user_action_media_download_url }}"
     ></cds-record-view>
   </div>

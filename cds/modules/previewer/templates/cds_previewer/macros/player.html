@@ -5,6 +5,22 @@
   {% if config.THEOPLAYER_LIBRARY_LOCATION %}
     <script type='text/javascript' src='{{ config.THEOPLAYER_LIBRARY_LOCATION }}/THEOplayer.js'></script>
     <script type="text/javascript">
+      // function from https://www.w3schools.com/js/js_cookies.asp
+      function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == " ") {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
 
       var element = document.createElement('div');
       element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
@@ -122,13 +138,19 @@
           var url = '{{ log_media_views_url | safe }}';
           function onPlay() {
             var r = new XMLHttpRequest();
-            r.open('GET', url, true);
+            r.open('POST', url, true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
+            var data = JSON.stringify({
+                key: obj.key,
+                event: 'media-record-view'
+            });
             r.onload = function() {
               if (r.status >= 200 && r.status < 400) {
                 player.removeEventListener('play', onPlay);
               }
             };
-            r.send();
+            r.send(data);
           }
           if (url) {
             player.addEventListener('play', onPlay);

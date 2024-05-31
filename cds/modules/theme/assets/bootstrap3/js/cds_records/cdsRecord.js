@@ -55,6 +55,28 @@ function cdsRecordController($scope, $sce, $http) {
 
   // Functions
 
+  // function from https://www.w3schools.com/js/js_cookies.asp
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == " ") {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  const REQUEST_HEADERS = {
+    "Content-Type": "application/json",
+    "X-CSRFToken": getCookie("csrftoken"),
+  };
+
   /**
    * Trust iframe url
    * @memberof cdsRecordController
@@ -132,49 +154,29 @@ function cdsRecordController($scope, $sce, $http) {
       return;
     }
 
-    var quality =
-        fileObj.context_type === "master"
-          ? "master"
-          : fileObj.tags.preset_quality,
-      replacedUrl = replaceMediaDownloadUrlParams(
-        $scope.mediaDownloadEventUrl,
-        $scope.record.metadata,
-        fileObj.key,
-        quality
-      );
+    var replacedUrl = replaceMediaDownloadUrlParams(
+      $scope.mediaDownloadEventUrl,
+      $scope.record.metadata
+    );
 
     $http
-      .get(replacedUrl)
+      .post(
+        replacedUrl,
+        {
+          key: fileObj.key,
+          event: "media-file-download",
+        },
+        { headers: REQUEST_HEADERS }
+      )
       .then(function (response) {})
       .then(function (error) {});
   };
 
-  function replaceMediaDownloadUrlParams(
-    url,
-    recordMetadata,
-    filename,
-    quality
-  ) {
-    var reportNumber =
-        recordMetadata.hasOwnProperty("report_number") &&
-        recordMetadata.report_number instanceof Array &&
-        recordMetadata.report_number.length > 0
-          ? recordMetadata.report_number[0]
-          : "",
-      filenameParts = filename.split("."),
-      filenamePartsCount = filenameParts.length,
-      fileFormat =
-        filenamePartsCount > 1 ? filenameParts[filenamePartsCount - 1] : "";
-
-    return url
-      .replace("{recid}", recordMetadata.recid)
-      .replace("{report_number}", reportNumber)
-      .replace("{format}", fileFormat)
-      .replace("{quality}", quality);
+  function replaceMediaDownloadUrlParams(url, recordMetadata) {
+    return url.replace("{recid}", recordMetadata.recid);
   }
 
   ////////////
-
   // Assignements
 
   // Iframe src
@@ -244,7 +246,7 @@ function cdsRecordView($http) {
     // Get the number of views for the record and make it available to the scope
     $http.get(attrs.recordViews).then(
       function (response) {
-        scope.recordViews = response.data;
+        scope.recordViews = response.data.views;
       },
       function (error) {
         scope.$broadcast("cds.record.error", error);

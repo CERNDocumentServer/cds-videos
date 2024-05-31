@@ -1,6 +1,6 @@
 import angular from "angular";
 import $ from "jquery";
-import "d3";
+import * as d3 from "d3";
 import "angular-loading-bar";
 import "angular-mass-autocomplete";
 import "ng-dialog";
