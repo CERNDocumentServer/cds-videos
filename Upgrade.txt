@@ -102,7 +102,7 @@ import requests
 # ticking all scopes
 # AUTH_TOKEN = "4s9XMJcFsGiKH9GSwU004kHb68W7tlyLnsweZ970TBsceQCALwWLwRxR4ujf"
 # SERVER_HOST = "https://127.0.0.1:5000"
-AUTH_TOKEN = "HqYxoeCJfJ0Zc2Puyn6YYNYUBuMaGQ0nXZxRaX9OCEjFkodMGEvQ0xZ7mkpJ"
+AUTH_TOKEN = "W1qHZgMPPtZLFLfvB0R5Lmxqxp952UIyWeeEjkG06whBGZF4AEgWdw8DV4RH"
 SERVER_HOST = "https://127.0.0.1:5000"
 video_url = "https://cernbox.cern.ch/remote.php/dav/public-files/tt6kuZcrloXWhVs/20170205%20-%20FOSDEM%202017%20-%20Magnum%20at%20CERN.mp4"
 

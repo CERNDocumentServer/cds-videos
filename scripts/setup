@@ -29,9 +29,12 @@ set -e
 # cds shell --no-term-title -c "import redis; redis.StrictRedis.from_url(app.config['CACHE_REDIS_URL']).flushall(); print('Cache cleared')"
 cds db destroy --yes-i-know
 cds db init create
+curl -XDELETE localhost:9200/*
 cds index destroy --force --yes-i-know
 cds index init --force
 cds index queue init purge
+# declare stat queues
+cds queues declare
 
 # Create a test user
 cds users create test@test.ch -a --password=123456

@@ -21,7 +21,7 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-// import d3 from "d3";
+import d3 from "d3";
 import angular from "angular";
 import "angular-loading-bar";
 import "ngclipboard";

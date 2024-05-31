@@ -37,6 +37,10 @@ from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
+from invenio_stats.aggregations import StatAggregator
+from invenio_stats.tasks import StatsAggregationTask, StatsEventTask
+from invenio_stats.processors import EventsIndexer, anonymize_user, flag_robots
+from invenio_stats.queries import DateHistogramQuery, TermsQuery
 
 from .modules.invenio_deposit.config import DEPOSIT_REST_FACETS
 from .modules.invenio_deposit.scopes import write_scope
@@ -154,6 +158,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "cds.modules.maintenance.tasks.clean_tmp_videos",
         "schedule": crontab(minute=0, hour=3),  # at 3 am
     },
+    # indexing of statistics events & aggregations
+    "stats-process-events": {
+        **StatsEventTask,
+        "schedule": timedelta(seconds=10),  # Every hour at minute 25 and 55
+    },
+    "stats-aggregate-events": {
+        **StatsAggregationTask,
+        "schedule": timedelta(seconds=10),  # Every hour at minute 0
+    },
     # 'file-integrity-report': {
     #     'task': 'cds.modules.records.tasks.file_integrity_report',
     #     'schedule': crontab(minute=0, hour=7),  # Every day at 07:00 UTC
@@ -269,12 +282,6 @@ SEARCH_UI_SEARCH_EXTRA_PARAMS = {"size": 21}  # page size
 # Default Elasticsearch document type.
 SEARCH_DOC_TYPE_DEFAULT = None
 
-# Legacy host Elasticsearch
-LEGACY_STATS_ELASTIC_HOST = "127.0.0.1"
-# Legacy port Elasticsearch
-LEGACY_STATS_ELASTIC_PORT = 9199
-# Default port Elasticsearch
-
 # Do not map any keywords.
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
 # SEARCH UI JS TEMPLATES
@@ -287,6 +294,191 @@ SEARCH_UI_VIDEO_FEATURED = "templates/cds/video/featured.html"
 SEARCH_UI_VIDEO_MEDIUM = "templates/cds/video/featured-medium.html"
 # Angular template for small size (used for search results)
 SEARCH_UI_VIDEO_SMALL = "templates/cds/video/small.html"
+
+# Invenio-Stats
+# =============
+# See https://invenio-stats.readthedocs.io/en/latest/configuration.html
+
+from .modules.stats.event_builders import (
+    build_file_unique_id,
+    build_record_unique_id,
+    drop_undesired_fields,
+)
+
+STATS_EVENTS = {
+    "file-download": {
+        "templates": "cds.modules.stats.templates.events.file_download",
+        "signal": "cds.modules.stats.views.cds_record_media_downloaded",
+        "event_builders": [
+            "cds.modules.stats.event_builders.file_download_event_builder"
+        ],
+        "cls": EventsIndexer,
+        "params": {
+            "preprocessors": [
+                anonymize_user,
+                drop_undesired_fields,
+                build_file_unique_id,
+            ]
+        },
+    },
+    "media-record-view": {
+        "templates": "cds.modules.stats.templates.events.media_record_view",
+        "signal": "cds.modules.stats.views.cds_record_media_viewed",
+        "event_builders": [
+            "cds.modules.stats.event_builders.file_download_event_builder"
+        ],
+        "cls": EventsIndexer,
+        "params": {
+            "preprocessors": [flag_robots, anonymize_user, build_record_unique_id]
+        },
+    },
+    "record-view": {
+        "templates": "cds.modules.stats.templates.events.record_view",
+        "signal": "cds.modules.stats.views.cds_record_viewed",
+        "event_builders": [
+            "cds.modules.stats.event_builders.record_view_event_builder"
+        ],
+        "cls": EventsIndexer,
+        "params": {
+            "preprocessors": [
+                flag_robots,
+                anonymize_user,
+                drop_undesired_fields,
+                build_record_unique_id,
+            ]
+        },
+    },
+}
+
+STATS_AGGREGATIONS = {
+    "file-download-agg": {
+        "templates": "cds.modules.stats.templates.aggregations.aggr_file_download",
+        "cls": StatAggregator,
+        "params": {
+            "event": "file-download",
+            "field": "unique_id",
+            "interval": "day",
+            "index_interval": "month",
+            "copy_fields": {"file": "file"},
+            "metric_fields": {
+                "unique_count": (
+                    "cardinality",
+                    "unique_session_id",
+                    {"precision_threshold": 1000},
+                ),
+            },
+        },
+    },
+    "media-record-view-agg": {
+        "templates": "cds.modules.stats.templates.aggregations.aggr_media_record_view",
+        "cls": StatAggregator,
+        "params": {
+            "event": "media-record-view",
+            "field": "unique_id",
+            "interval": "day",
+            "index_interval": "month",
+            "copy_fields": {"file": "file"},
+            "metric_fields": {
+                "unique_count": (
+                    "cardinality",
+                    "unique_session_id",
+                    {"precision_threshold": 1000},
+                ),
+            },
+        },
+    },
+    "record-view-agg": {
+        "templates": "cds.modules.stats.templates.aggregations.aggr_record_view",
+        "cls": StatAggregator,
+        "params": {
+            "event": "record-view",
+            "field": "unique_id",
+            "interval": "day",
+            "index_interval": "month",
+            "copy_fields": {
+                "record_id": "record_id",
+                "pid_type": "pid_type",
+                "pid_value": "pid_value",
+            },
+            "metric_fields": {
+                "unique_count": (
+                    "cardinality",
+                    "unique_session_id",
+                    {"precision_threshold": 1000},
+                ),
+            },
+        },
+    },
+}
+
+
+STATS_QUERIES = {
+    # "bucket-file-download-histogram": {
+    #     "cls": DateHistogramQuery,
+    #     "params": {
+    #         "index": "stats-file-download",
+    #         "copy_fields": {
+    #             "bucket_id": "bucket_id",
+    #             "file_key": "file_key",
+    #         },
+    #         "required_filters": {
+    #             "bucket_id": "bucket_id",
+    #             "file_key": "file_key",
+    #         },
+    #     },
+    # },
+    # "bucket-file-download-total": {
+    #     "cls": TermsQuery,
+    #     "params": {
+    #         "index": "stats-file-download",
+    #         "required_filters": {
+    #             "bucket_id": "bucket_id",
+    #         },
+    #         "aggregated_fields": ["file_key"],
+    #     },
+    # },
+    "record-view-total": {
+        "cls": TermsQuery,
+        "params": {
+            "index": "stats-record-view",
+            "required_filters": {
+                "recid": "pid_value",
+            },
+            "aggregated_fields": ["pid_value"],
+            "metric_fields": {
+                "views": ("sum", "count", {}),
+                "unique_views": ("sum", "unique_count", {}),
+            },
+        },
+    },
+}
+
+# STATS_PERMISSION_FACTORY = TODO
+
+# Legacy host Elasticsearch
+LEGACY_STATS_ELASTIC_HOST = "127.0.0.1"
+# Legacy port Elasticsearch
+LEGACY_STATS_ELASTIC_PORT = 9199
+# Default port Elasticsearch
+
+###############################################################################
+# LOG USER ACTIVITY
+###############################################################################
+
+# flag to enable or disable user actions logging
+LOG_USER_ACTIONS_ENABLED = True
+# endpoints for logging user actions
+LOG_USER_ACTIONS_ENDPOINTS = {
+    "base_url": os.environ.get(
+        "LOG_USER_ACTIONS_BASE_URL", "https://127.0.0.1:5000/api/stats/"
+    ),
+    "page_view": "{base_url}{recid}",
+    "media_view": "{base_url}{recid}",
+    # "media_view": "{base_url}cds_videos_media_view?ext=true&"
+    # "recid={recid}&report_number={"
+    # "report_number}&format={format}",
+    "media_download": "{base_url}{recid}",
+}
 
 ###############################################################################
 # Accounts
@@ -920,7 +1112,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
     "base-uri": ["'self'"],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'none'"],
-    "prefetch-src": ["'none'"],
+    # "prefetch-src": ["'none'"],
     "font-src": [
         "'self'",
         "data:",
@@ -1078,8 +1270,10 @@ PREVIEWER_PREFERENCE = [
 # Previewer base template
 PREVIEWER_BASE_TEMPLATE = "cds_previewer/base.html"
 # Licence key and base URL for THEO player
-THEOPLAYER_LIBRARY_LOCATION = None
-THEOPLAYER_LICENSE = None
+THEOPLAYER_LIBRARY_LOCATION = (
+    "https://cdn.myth.theoplayer.com/87a9224b-0ca6-4afd-b4cc-3a391349be97"
+)
+THEOPLAYER_LICENSE = "sZP7IYe6T6fz0L1K0ubt0Zzr0leLFSxlCle-TSBZIOklTDPl3lx1IDhz0K06FOPlUY3zWokgbgjNIOf9flCoISUl3DaZFD0_0la-3u0r0Zz_3SbtFSx1Tueo3SxlIS0iCmfVfK4_bQgZCYxNWoryIQXzImf90Sbz0uer3l5i0u5i0Oi6Io4pIYP1UQgqWgjeCYxgflEc3L5ZTuRz3LBLTSacFOPeWok1dDrLYtA1Ioh6TgV6Co4ZW6fVfK3gbK_pCoR6FOPVWo31WQ1qbta6FOPzdQ4qbQc1sD4ZFK3qWmPUFOPeWok1dDrLYt3qUYPlImf9DZPlIYPpf6i6Co4ZW6rldOfVfKcqCoXVdQjLUOfVfGxEIDjiWQXrIYfpCoj-fgzVfG3edt06TgV6dwx-Wuh6Ymi6bo4pIXjNWYAZIY3LdDjpflNzbG4gFOPKIDXzUYPgbZf9Dkkj"
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = (
     "https://wowza.cern.ch/cds/_definist_/smil:" "{filepath}/playlist.m3u8"
@@ -1398,23 +1592,6 @@ CDS_FFMPEG_METADATA_ALIASES = {
 }
 CDS_FFMPEG_METADATA_POST_SPLIT = ["streams/0/keywords"]
 
-###############################################################################
-# LOG USER ACTIVITY
-###############################################################################
-
-# flag to enable or disable user actions logging
-LOG_USER_ACTIONS_ENABLED = False
-# endpoints for logging user actions
-LOG_USER_ACTIONS_ENDPOINTS = {
-    "base_url": os.environ.get("LOG_USER_ACTIONS_BASE_URL", None),
-    "media_view": "{base_url}cds_videos_media_view?ext=true&"
-    "recid={recid}&report_number={"
-    "report_number}&format={format}",
-    "media_download": "{base_url}cds_videos_media_download?recid={recid}&"
-    "report_number={report_number}&"
-    "format={format}&quality={quality}",
-    "page_view": "{base_url}cds_videos_page_view?recid={recid}&userid={userid}",
-}
 
 ###############################################################################
 # OPENCAST
