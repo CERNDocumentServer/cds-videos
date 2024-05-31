@@ -33,9 +33,17 @@ class VideoExtension(object):
     """Previewer extension for videos."""
 
     previewable_extensions = [
-        'avi', 'flv', 'm4v', 'mkv', 'mov', 'mp4', 'mpg', 'ts', 'webm'
+        "avi",
+        "flv",
+        "m4v",
+        "mkv",
+        "mov",
+        "mp4",
+        "mpg",
+        "ts",
+        "webm",
     ]
-    _file_exts = ['.{0}'.format(ext) for ext in previewable_extensions]
+    _file_exts = [".{0}".format(ext) for ext in previewable_extensions]
 
     def __init__(self, template=None):
         """Init video previewer."""
@@ -47,21 +55,22 @@ class VideoExtension(object):
 
     def preview(self, file, embed_config=None):
         """Render appropriate template with embed flag."""
-        record = getattr(file, 'record')
-        filename = getattr(file, 'filename', '')
+        record = getattr(file, "record")
+        filename = getattr(file, "filename", "")
         title = record["title"]["title"]
-        file_extension = filename.split('.')[-1] \
-            if filename and '.' in filename else ''
-        report_number = record['report_number'][0] \
-            if 'report_number' in record and len(record['report_number']) \
-            else ''
+        file_extension = filename.split(".")[-1] if filename and "." in filename else ""
+        report_number = (
+            record["report_number"][0]
+            if "report_number" in record and len(record["report_number"])
+            else ""
+        )
 
         return render_template(
             self.template,
             file=file,
-            css_bundles=['cds_previewer_video_css'],
+            css_bundles=["cds_previewer_theme"],
             file_extension=file_extension,
-            recid=record.get('recid', ''),
+            recid=record.get("recid", ""),
             report_number=report_number,
             record=record,
             embed_config=embed_config,
@@ -69,6 +78,6 @@ class VideoExtension(object):
         )
 
 
-video = VideoExtension('cds_previewer/video/internal.html')
-embed_video = VideoExtension('cds_previewer/video/embed.html')
-deposit_video = VideoExtension('cds_previewer/video/deposit.html')
+video = VideoExtension("cds_previewer/video/internal.html")
+embed_video = VideoExtension("cds_previewer/video/embed.html")
+deposit_video = VideoExtension("cds_previewer/video/deposit.html")

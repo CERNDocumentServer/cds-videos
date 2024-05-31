@@ -73,6 +73,7 @@
     {% else %}
     {% set user_action_media_download_url = '' %}
     {% endif %}
+    {# TODO: remove and replace with jinja ? #}
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
