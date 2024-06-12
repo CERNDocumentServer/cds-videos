@@ -60,6 +60,12 @@ from .modules.records.search import (
     RecordVideosSearch,
     lowercase_filter,
 )
+from .modules.stats.event_builders import (
+    build_file_unique_id,
+    build_record_unique_id,
+    drop_undesired_fields,
+    filter_by_reportnumber,
+)
 
 
 # Identity function for string extraction
@@ -162,10 +168,18 @@ CELERY_BEAT_SCHEDULE = {
     "stats-process-events": {
         **StatsEventTask,
         "schedule": timedelta(seconds=10),  # Every hour at minute 25 and 55
+        "args": [("record-view", "file-download", "media-record-view")],
     },
     "stats-aggregate-events": {
         **StatsAggregationTask,
         "schedule": timedelta(seconds=10),  # Every hour at minute 0
+        "args": [
+            (
+                "record-view-agg",
+                "media-record-view-agg",
+                "file-download-agg",
+            )
+        ],
     },
     # 'file-integrity-report': {
     #     'task': 'cds.modules.records.tasks.file_integrity_report',
@@ -299,12 +313,6 @@ SEARCH_UI_VIDEO_SMALL = "templates/cds/video/small.html"
 # =============
 # See https://invenio-stats.readthedocs.io/en/latest/configuration.html
 
-from .modules.stats.event_builders import (
-    build_file_unique_id,
-    build_record_unique_id,
-    drop_undesired_fields,
-)
-
 STATS_EVENTS = {
     "file-download": {
         "templates": "cds.modules.stats.templates.events.file_download",
@@ -325,11 +333,15 @@ STATS_EVENTS = {
         "templates": "cds.modules.stats.templates.events.media_record_view",
         "signal": "cds.modules.stats.views.cds_record_media_viewed",
         "event_builders": [
-            "cds.modules.stats.event_builders.file_download_event_builder"
+            "cds.modules.stats.event_builders.media_record_view_event_builder"
         ],
         "cls": EventsIndexer,
         "params": {
-            "preprocessors": [flag_robots, anonymize_user, build_record_unique_id]
+            "preprocessors": [
+                anonymize_user,
+                drop_undesired_fields,
+                build_file_unique_id,
+            ]
         },
     },
     "record-view": {
@@ -360,6 +372,7 @@ STATS_AGGREGATIONS = {
             "interval": "day",
             "index_interval": "month",
             "copy_fields": {"file": "file"},
+            "query_modifiers": [],
             "metric_fields": {
                 "unique_count": (
                     "cardinality",
@@ -377,7 +390,8 @@ STATS_AGGREGATIONS = {
             "field": "unique_id",
             "interval": "day",
             "index_interval": "month",
-            "copy_fields": {"file": "file"},
+            "copy_fields": {"file": "file", "recid": "recid"},
+            "query_modifiers": [],
             "metric_fields": {
                 "unique_count": (
                     "cardinality",
@@ -413,20 +427,17 @@ STATS_AGGREGATIONS = {
 
 
 STATS_QUERIES = {
-    # "bucket-file-download-histogram": {
-    #     "cls": DateHistogramQuery,
-    #     "params": {
-    #         "index": "stats-file-download",
-    #         "copy_fields": {
-    #             "bucket_id": "bucket_id",
-    #             "file_key": "file_key",
-    #         },
-    #         "required_filters": {
-    #             "bucket_id": "bucket_id",
-    #             "file_key": "file_key",
-    #         },
-    #     },
-    # },
+    "bucket-file-download-histogram": {
+        "cls": DateHistogramQuery,
+        "params": {
+            "index": "stats-file-download",
+            "copy_fields": {"file": "file"},
+            "query_modifiers": [filter_by_reportnumber],
+            "required_filters": {
+                "file": "file",
+            },
+        },
+    },
     # "bucket-file-download-total": {
     #     "cls": TermsQuery,
     #     "params": {
@@ -469,14 +480,9 @@ LEGACY_STATS_ELASTIC_PORT = 9199
 LOG_USER_ACTIONS_ENABLED = True
 # endpoints for logging user actions
 LOG_USER_ACTIONS_ENDPOINTS = {
-    "base_url": os.environ.get(
-        "LOG_USER_ACTIONS_BASE_URL", "https://127.0.0.1:5000/api/stats/"
-    ),
+    "base_url": "/api/stats/",
     "page_view": "{base_url}{recid}",
     "media_view": "{base_url}{recid}",
-    # "media_view": "{base_url}cds_videos_media_view?ext=true&"
-    # "recid={recid}&report_number={"
-    # "report_number}&format={format}",
     "media_download": "{base_url}{recid}",
 }
 
@@ -823,7 +829,7 @@ RECORD_VIDEOS_FACETS = {
                 "terms": {"field": "type.untouched"},
             },
             "language": {
-                "terms": {"field": "language"},
+                "terms": {"field": "language.untouched"},
             },
             "years": {
                 "date_histogram": {
@@ -1270,10 +1276,8 @@ PREVIEWER_PREFERENCE = [
 # Previewer base template
 PREVIEWER_BASE_TEMPLATE = "cds_previewer/base.html"
 # Licence key and base URL for THEO player
-THEOPLAYER_LIBRARY_LOCATION = (
-    "https://cdn.myth.theoplayer.com/87a9224b-0ca6-4afd-b4cc-3a391349be97"
-)
-THEOPLAYER_LICENSE = "sZP7IYe6T6fz0L1K0ubt0Zzr0leLFSxlCle-TSBZIOklTDPl3lx1IDhz0K06FOPlUY3zWokgbgjNIOf9flCoISUl3DaZFD0_0la-3u0r0Zz_3SbtFSx1Tueo3SxlIS0iCmfVfK4_bQgZCYxNWoryIQXzImf90Sbz0uer3l5i0u5i0Oi6Io4pIYP1UQgqWgjeCYxgflEc3L5ZTuRz3LBLTSacFOPeWok1dDrLYtA1Ioh6TgV6Co4ZW6fVfK3gbK_pCoR6FOPVWo31WQ1qbta6FOPzdQ4qbQc1sD4ZFK3qWmPUFOPeWok1dDrLYt3qUYPlImf9DZPlIYPpf6i6Co4ZW6rldOfVfKcqCoXVdQjLUOfVfGxEIDjiWQXrIYfpCoj-fgzVfG3edt06TgV6dwx-Wuh6Ymi6bo4pIXjNWYAZIY3LdDjpflNzbG4gFOPKIDXzUYPgbZf9Dkkj"
+THEOPLAYER_LIBRARY_LOCATION = None
+THEOPLAYER_LICENSE = None
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = (
     "https://wowza.cern.ch/cds/_definist_/smil:" "{filepath}/playlist.m3u8"
