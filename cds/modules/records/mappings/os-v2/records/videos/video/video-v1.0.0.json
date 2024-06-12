@@ -316,7 +316,12 @@
         }
       },
       "language": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "untouched": {
+            "type": "keyword"
+          }
+        }
       },
       "publication_date": {
         "type": "text"

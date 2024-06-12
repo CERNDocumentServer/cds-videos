@@ -64,9 +64,7 @@ def cern_filter():
     read_restricted = Q("terms", **{"_access.read": provides})
     write_restricted = Q("terms", **{"_access.update": provides})
     # Filter records where the user is owner
-    owner = Q(
-        "match", **{"_deposit.created_by": getattr(current_user, "id", 0)}
-    )
+    owner = Q("match", **{"_deposit.created_by": getattr(current_user, "id", 0)})
 
     # OR all the filters
     combined_filter = public | read_restricted | write_restricted | owner
@@ -80,7 +78,7 @@ class RecordVideosSearch(RecordsSearch):
     class Meta:
         """Configuration for CERN search."""
 
-        index = "records-videos-video-video-v1.0.0"
+        index = "records-videos-video"
         doc_types = None
         fields = ("*",)
         default_filter = DefaultFilter(cern_filter)
@@ -112,9 +110,7 @@ class NotDeletedKeywordSearch(RecordsSearch):
         index = "keywords-keyword-v1.0.0"
         doc_types = None
         fields = ("*",)
-        default_filter = DefaultFilter(
-            Q("bool", filter=[Q("match", deleted=False)])
-        )
+        default_filter = DefaultFilter(Q("bool", filter=[Q("match", deleted=False)]))
 
 
 def query_to_objects(query, cls):
