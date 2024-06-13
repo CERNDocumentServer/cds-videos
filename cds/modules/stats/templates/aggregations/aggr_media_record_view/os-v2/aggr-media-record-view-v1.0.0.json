@@ -37,6 +37,6 @@
     }
   },
   "aliases": {
-    "__SEARCH_INDEX_PREFIX__events-stats-record-view": {}
+    "__SEARCH_INDEX_PREFIX__events-stats-media-record-view": {}
   }
 }

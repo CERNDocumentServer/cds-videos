@@ -42,3 +42,23 @@ class Statistics:
             "unique_views": views["unique_views"],
         }
         return stats
+
+    @classmethod
+    def get_file_download_stats(cls, file):
+        """Fetch the statistics for the given record."""
+        try:
+            views = cls._get_query("bucket-file-download-histogram").run(file=file)
+        except Exception as e:
+            breakpoint()
+            # e.g. opensearchpy.exceptions.NotFoundError
+            # when the aggregation search index hasn't been created yet
+            current_app.logger.warning(e)
+
+            fallback_result = {"views": 0}
+            views = fallback_result
+
+        # stats = {
+        #     "views": views["views"],
+        #     "unique_views": views["unique_views"],
+        # }
+        return views

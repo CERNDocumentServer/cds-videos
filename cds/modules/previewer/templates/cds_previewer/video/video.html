@@ -29,6 +29,54 @@
 
 {%- block javascript %}
   {{ super() }}
+  {% if not config.THEOPLAYER_LIBRARY_LOCATION %}
+    {%- set log_media_views_url = config.LOG_USER_ACTIONS_ENDPOINTS.get('media_view', '').format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS.get('base_url', '') , recid=recid) -%}
+    {%- set file_key = file.key -%}
+
+    <script>
+       // function from https://www.w3schools.com/js/js_cookies.asp
+       function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == " ") {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+      var player = document.getElementById("local-player");
+      {% if log_media_views_url and config.LOG_USER_ACTIONS_ENABLED %}
+        (function(player) {
+          var url = '{{ log_media_views_url | safe }}';
+          function onPlay() {
+            var r = new XMLHttpRequest();
+            r.open('POST', url, true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
+            var data = JSON.stringify({
+                key: "{{file.file.key}}",
+                event: 'media-record-view'
+            });
+            r.onload = function() {
+              if (r.status >= 200 && r.status < 400) {
+                player.removeEventListener('play', onPlay);
+              }
+            };
+            r.send(data);
+          }
+          if (url) {
+            player.addEventListener('play', onPlay);
+          }
+        })(player);
+      {% endif %}
+    </script>
+  {% endif %}
 {%- endblock javascript %}
 
 {%- block css %}
@@ -44,7 +92,7 @@
 
 {%- block page_body %}
   {% if not config.THEOPLAYER_LIBRARY_LOCATION %}
-    <video poster="{{ file.poster_uri }}" controls>
+    <video poster="{{ file.poster_uri }}" controls id="local-player">
       <source src="{{ file.uri }}" type="video/mp4">
       {{ _('Your browser does not support the video tag.') }}
     </video>
