@@ -219,7 +219,8 @@ class StatsResource(MethodView):
 
         from .api import Statistics
 
-        stats = Statistics.get_record_stats(recid=pid.pid_value)
+        # stats = Statistics.get_record_stats(recid=pid.pid_value)
+        stats = Statistics.get_file_download_stats(file=record.get("report_number")[0])
 
         return make_response(jsonify(stats), 200)
 

@@ -16,12 +16,6 @@
         "type": "date",
         "format": "strict_date_hour_minute_second"
       },
-      "record_id": {
-        "type": "keyword"
-      },
-      "pid_type": {
-        "type": "keyword"
-      },
       "recid": {
         "type": "keyword"
       },
@@ -37,9 +31,6 @@
       "type": {
         "type": "keyword"
       },
-      "external": {
-        "type": "boolean"
-      },
       "unique_id": {
         "type": "keyword"
       },
@@ -52,6 +43,6 @@
     }
   },
   "aliases": {
-    "__SEARCH_INDEX_PREFIX__events-stats-record-view": {}
+    "__SEARCH_INDEX_PREFIX__events-stats-media-record-view": {}
   }
 }
