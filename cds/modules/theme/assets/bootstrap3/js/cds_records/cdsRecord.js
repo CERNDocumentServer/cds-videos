@@ -164,7 +164,6 @@ function cdsRecordController($scope, $sce, $http) {
         replacedUrl,
         {
           key: fileObj.key,
-          event: "media-file-download",
         },
         { headers: REQUEST_HEADERS }
       )

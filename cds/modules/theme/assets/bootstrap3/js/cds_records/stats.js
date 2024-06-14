@@ -19,7 +19,7 @@ async function fetchRecordData(recordId, category, defaultConfig) {
   try {
     var resp = await $.ajax({
       type: "GET",
-      url: "/api/stats/" + recordId,
+      url: "/api/stats/" + recordId + "pageview",
       headers: {
         "Content-Type": "application/json",
       },

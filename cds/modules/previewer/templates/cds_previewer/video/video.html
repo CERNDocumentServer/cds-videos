@@ -60,8 +60,7 @@
             r.setRequestHeader('Content-Type', 'application/json');
             r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
             var data = JSON.stringify({
-                key: "{{file.file.key}}",
-                event: 'media-record-view'
+                key: "{{file.file.key}}"
             });
             r.onload = function() {
               if (r.status >= 200 && r.status < 400) {

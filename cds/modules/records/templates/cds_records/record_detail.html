@@ -56,11 +56,7 @@
         r.open("POST", '{{user_action_page_view_url}}', true);
         r.setRequestHeader('Content-Type', 'application/json');
         r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
-        var data = JSON.stringify({
-            event: 'record-view'
-        });
-
-        r.send(data);
+        r.send(JSON.stringify({}));
       } catch (e) {
         console.error(e);
       }
@@ -91,6 +87,9 @@
     {% if config.LOG_USER_ACTIONS_ENABLED %}
     {% set user_action_media_download_url = (config.LOG_USER_ACTIONS_ENDPOINTS['media_download'] or '')
                                     .replace('{base_url}', config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '')|safe %}
+    {% set record_view_url = (config.LOG_USER_ACTIONS_ENDPOINTS['page_view'] or '')
+                                    .replace('{base_url}', config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '')
+                                    .replace('{recid}', record.recid|string or '')|safe %}
     {% else %}
     {% set user_action_media_download_url = '' %}
     {% endif %}
@@ -98,7 +97,7 @@
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
-        record-views='/api/stats/{{record.recid}}'
+        record-views="{{ record_view_url }}"
         media-download-event-url="{{ user_action_media_download_url }}"
     ></cds-record-view>
   </div>
