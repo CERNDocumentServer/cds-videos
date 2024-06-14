@@ -315,7 +315,7 @@ SEARCH_UI_VIDEO_SMALL = "templates/cds/video/small.html"
 
 STATS_EVENTS = {
     "file-download": {
-        "templates": "cds.modules.stats.templates.events.file_download",
+        "templates": "cds.modules.stats.index_templates.events.file_download",
         "signal": "cds.modules.stats.views.cds_record_media_downloaded",
         "event_builders": [
             "cds.modules.stats.event_builders.file_download_event_builder"
@@ -330,7 +330,7 @@ STATS_EVENTS = {
         },
     },
     "media-record-view": {
-        "templates": "cds.modules.stats.templates.events.media_record_view",
+        "templates": "cds.modules.stats.index_templates.events.media_record_view",
         "signal": "cds.modules.stats.views.cds_record_media_viewed",
         "event_builders": [
             "cds.modules.stats.event_builders.media_record_view_event_builder"
@@ -345,7 +345,7 @@ STATS_EVENTS = {
         },
     },
     "record-view": {
-        "templates": "cds.modules.stats.templates.events.record_view",
+        "templates": "cds.modules.stats.index_templates.events.record_view",
         "signal": "cds.modules.stats.views.cds_record_viewed",
         "event_builders": [
             "cds.modules.stats.event_builders.record_view_event_builder"
@@ -364,7 +364,7 @@ STATS_EVENTS = {
 
 STATS_AGGREGATIONS = {
     "file-download-agg": {
-        "templates": "cds.modules.stats.templates.aggregations.aggr_file_download",
+        "templates": "cds.modules.stats.index_templates.aggregations.aggr_file_download",
         "cls": StatAggregator,
         "params": {
             "event": "file-download",
@@ -383,7 +383,7 @@ STATS_AGGREGATIONS = {
         },
     },
     "media-record-view-agg": {
-        "templates": "cds.modules.stats.templates.aggregations.aggr_media_record_view",
+        "templates": "cds.modules.stats.index_templates.aggregations.aggr_media_record_view",
         "cls": StatAggregator,
         "params": {
             "event": "media-record-view",
@@ -402,7 +402,7 @@ STATS_AGGREGATIONS = {
         },
     },
     "record-view-agg": {
-        "templates": "cds.modules.stats.templates.aggregations.aggr_record_view",
+        "templates": "cds.modules.stats.index_templates.aggregations.aggr_record_view",
         "cls": StatAggregator,
         "params": {
             "event": "record-view",
@@ -466,6 +466,8 @@ STATS_QUERIES = {
 
 # STATS_PERMISSION_FACTORY = TODO
 
+STATS_REGISTER_INDEX_TEMPLATES = True
+
 # Legacy host Elasticsearch
 LEGACY_STATS_ELASTIC_HOST = "127.0.0.1"
 # Legacy port Elasticsearch
@@ -481,9 +483,9 @@ LOG_USER_ACTIONS_ENABLED = True
 # endpoints for logging user actions
 LOG_USER_ACTIONS_ENDPOINTS = {
     "base_url": "/api/stats/",
-    "page_view": "{base_url}{recid}",
-    "media_view": "{base_url}{recid}",
-    "media_download": "{base_url}{recid}",
+    "page_view": "{base_url}{recid}/pageview",
+    "media_view": "{base_url}{recid}/media-record-view",
+    "media_download": "{base_url}{recid}/media-file-download",
 }
 
 ###############################################################################
@@ -1682,4 +1684,4 @@ REST_CSRF_ENABLED = True
 
 ACCOUNTS_JWT_ENABLE = False
 
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False

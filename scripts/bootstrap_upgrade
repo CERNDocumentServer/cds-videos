@@ -32,6 +32,7 @@ script_path=$(dirname "$0")
 pip install -e $script_path/.. --upgrade
 pip install -e git+https://github.com/zzacharo/invenio-admin.git@videos-upgrade#egg=invenio-admin
 pip install -e git+https://github.com/zzacharo/invenio-sequencegenerator.git@videos-upgrade#egg=invenio-sequencegenerator
+pip install -e git+https://github.com/zzacharo/invenio-stats.git@index-templates#egg=invenio-stats
 
 
 # Build assets
