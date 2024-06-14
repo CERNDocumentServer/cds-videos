@@ -2,58 +2,60 @@
   "index_patterns": [
     "__SEARCH_INDEX_PREFIX__events-stats-file-download-*"
   ],
-  "settings": {
-    "index": {
-      "refresh_interval": "5s"
-    }
-  },
-  "mappings": {
-    "dynamic_templates": [
-      {
-        "date_fields": {
-          "match_mapping_type": "date",
-          "mapping": {
-            "type": "date",
-            "format": "strict_date_hour_minute_second"
+  "template": {
+    "settings": {
+      "index": {
+        "refresh_interval": "5s"
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "date_fields": {
+            "match_mapping_type": "date",
+            "mapping": {
+              "type": "date",
+              "format": "strict_date_hour_minute_second"
+            }
           }
         }
+      ],
+      "date_detection": false,
+      "dynamic": "strict",
+      "numeric_detection": false,
+      "properties": {
+        "timestamp": {
+          "type": "date",
+          "format": "strict_date_hour_minute_second"
+        },
+        "visitor_id": {
+          "type": "keyword"
+        },
+        "format": {
+          "type": "keyword"
+        },
+        "file": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "quality": {
+          "type": "keyword"
+        },
+        "unique_id": {
+          "type": "keyword"
+        },
+        "unique_session_id": {
+          "type": "keyword"
+        },
+        "updated_timestamp": {
+          "type": "date"
+        }
       }
-    ],
-    "date_detection": false,
-    "dynamic": "strict",
-    "numeric_detection": false,
-    "properties": {
-      "timestamp": {
-        "type": "date",
-        "format": "strict_date_hour_minute_second"
-      },
-      "visitor_id": {
-        "type": "keyword"
-      },
-      "format": {
-        "type": "keyword"
-      },
-      "file": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "quality": {
-        "type": "keyword"
-      },
-      "unique_id": {
-        "type": "keyword"
-      },
-      "unique_session_id": {
-        "type": "keyword"
-      },
-      "updated_timestamp": {
-        "type": "date"
-      }
+    },
+    "aliases": {
+      "__SEARCH_INDEX_PREFIX__events-stats-file-download": {}
     }
-  },
-  "aliases": {
-    "__SEARCH_INDEX_PREFIX__events-stats-file-download": {}
   }
 }
