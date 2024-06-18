@@ -1,14 +1,6 @@
 import angular from "angular";
 import _ from "lodash";
 import ObjectPath from "objectpath";
-import "angular-strap";
-import "angular-ui-sortable";
-import "invenio-records-js/dist/invenio-records-js";
-import "ui-select";
-import "angular-schema-form";
-import "angular-schema-form-ckeditor/bootstrap-ckeditor";
-import "ckeditor/ckeditor";
-import "rr-ng-ckeditor/ng-ckeditor";
 
 function cdsDepositCtrl(
   $scope,
@@ -581,11 +573,11 @@ function cdsDepositCtrl(
               instance.setReadOnly(instance.element.$.disabled);
             } catch (error) {
               // Do nothing probably not initialized yet
-              console.log("ERRRRRRRRORRRRR");
+              console.log(error);
             }
           });
         }, 10000);
-        console.log($window.CKEDITOR.instances);
+        console.debug($window.CKEDITOR.instances);
       }
     });
 

@@ -58,11 +58,11 @@
             <invenio-records-actions
               template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_ACTIONS) }}">
             </invenio-records-actions>
-            <invenio-records-form
+            <!-- <invenio-records-form
               form-templates='{{ config.DEPOSIT_FORM_TEMPLATES | tojson }}'
               form-templates-base="{{ url_for('static', filename=config.DEPOSIT_FORM_TEMPLATES_BASE) }}"
               template="{{ url_for('static', filename=config.DEPOSIT_UI_JSTEMPLATE_FORM) }}">
-            </invenio-records-form>
+            </invenio-records-form> -->
           </invenio-records>
           <invenio-files-uploader
             method="PUT"

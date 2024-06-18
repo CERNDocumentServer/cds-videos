@@ -27,7 +27,7 @@ async function fetchRecordData(recordId, category, defaultConfig) {
     $("#" + category + "-loading-spinner").hide();
     new inveniographs.LineGraph(resp.data, category, defaultConfig).render();
   } catch (error) {
-    console.log(error);
+    console.error(error);
     $("#" + category + "-loading-spinner").hide();
     $("#" + category + "-error-message").show();
   }
