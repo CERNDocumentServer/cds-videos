@@ -77,3 +77,6 @@ celerybeat*
 
 # ignore local tmp
 tmp
+
+# local python version/venv
+.python-version

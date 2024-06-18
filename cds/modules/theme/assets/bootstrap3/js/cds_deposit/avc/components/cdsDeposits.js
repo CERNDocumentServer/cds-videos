@@ -425,9 +425,6 @@ function cdsDeposits() {
       videoInit: "@",
       videoForm: "@",
       videoSchema: "@",
-      // general template base
-      formTemplatesBase: "@?",
-      formTemplates: "=?",
       // Dropbox related
       dropboxAppKey: "@",
       // Accepted video file extensions

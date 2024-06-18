@@ -8,8 +8,8 @@ import "objectpath";
 import "angular-sanitize";
 import "angular-schema-form";
 import "angular-schema-form-bootstrap";
-import "ui-select";
 import "angular-schema-form-dynamic-select";
+import "ui-select";
 
 function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
   var that = this;
@@ -47,24 +47,6 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
         }
       }
     };
-
-    // Add custom templates
-    var formTemplates = this.cdsDepositCtrl.cdsDepositsCtrl.formTemplates;
-    var formTemplatesBase =
-      this.cdsDepositCtrl.cdsDepositsCtrl.formTemplatesBase;
-    if (formTemplates && formTemplatesBase) {
-      if (formTemplatesBase.substr(formTemplatesBase.length - 1) !== "/") {
-        formTemplatesBase = formTemplatesBase + "/";
-      }
-
-      console.log("Videos*****************", {
-        decorator: schemaFormDecorators.decorator(),
-      });
-      angular.forEach(formTemplates, async function (value, key) {
-        schemaFormDecorators.decorator()[key.replace("_", "-")].template =
-          formTemplatesBase + value;
-      });
-    }
 
     this.cdsDepositCtrl.cdsDepositsCtrl.categoriesPromise.then(function (hits) {
       that._categories = hits;
@@ -152,10 +134,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
   function selectMultiple(name, key_id) {
     var value = { name: name };
     if (key_id) {
-      console.log({ key_id });
+      console.debug({ key_id });
       value.key_id = key_id;
     } else {
-      console.log({ name });
+      console.debug({ name });
     }
     return {
       name: name,
@@ -170,12 +152,12 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
     },
     // Response handler
     function (data, query) {
-      console.log({ query });
+      console.debug({ query });
       var userInput = selectMultiple(query);
       var suggestions = data.data["suggest-name"][0]["options"]
         .concat(that.cdsDepositCtrl.record.keywords || [])
         .map(function (keyword) {
-          console.log({ keyword });
+          console.debug({ keyword });
           return selectMultiple(
             keyword._source ? keyword._source.name : keyword.name,
             keyword._source ? keyword._source?.key_id : null
