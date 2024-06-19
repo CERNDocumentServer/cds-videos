@@ -43,27 +43,18 @@ def handle_retries(scroll_id, scroll_time):
     raise Exception("Failed to fetch data after multiple retries.")
 
 
-# def handle_bulk_retries(url, bulk_data, headers):
-#     max_retries = (60/1) * 12  # Total retries for 12 hours every 1 minute
-#     retry_interval = 60  # 1 minute in seconds
-
-#     for _ in range(max_retries):
-#         print(bcolors.ERROR + "Failed to bulk upload data. Sleeping for %s before re-trying." % retry_interval + bcolors.ENDC)
-#         sleep(retry_interval)
-#         try:
-#             response = requests.post(url, auth=new_es_auth, data=bulk_data, headers=headers, verify=cacert_path)
-#             return response
-#         except Exception as e:
-#             continue
-#     raise Exception("Failed to bulk upload data after multiple retries.")
-
-
 def fetch_and_process_data_per_type(year, type):
     index = "cds-%s" % year
-    print(bcolors.WARNING + "Processing data from %s" % index + bcolors.ENDC)
+    print(
+        bcolors.WARNING
+        + "Processing data from %s" % index
+        + " for event type %s" % type
+        + bcolors.ENDC
+    )
     new_index = "cds-%s" % year  # TODO: change this accordingly
     size = 1000
     batch = 0
+    processed = 0
     scroll_time = "1h"
     try:
         page = es_client.search(
@@ -96,7 +87,6 @@ def fetch_and_process_data_per_type(year, type):
         + bcolors.ENDC
     )
 
-    processed = 0
     while True:
         try:
             page = es_client.scroll(scroll_id=scroll_id, scroll=scroll_time)
@@ -105,13 +95,23 @@ def fetch_and_process_data_per_type(year, type):
         scroll_id = page["_scroll_id"]
         hits = page["hits"]["hits"]
         if not hits:
+            print("Last result found: ", page)
+            print(bcolors.SUCCESS + " Finished processing %s" % str(size * batch))
+            if size * batch < total:
+                print(
+                    bcolors.ERROR + "Missed documents %s" % str(total - (size * batch))
+                )
+                with open("/tmp/es/failed_indices.txt", "a") as file:
+                    file.write("Failed index %s" % index + " and type %s" % type)
             break
         process_batch(new_index, type, hits)
+
         batch += 1
         if size * batch < total:
             processed = size * batch
         else:
             processed = total
+
         print(
             bcolors.WARNING
             + "[%s] Processed %s/%s" % (index, processed, total)
@@ -186,27 +186,21 @@ def process_batch(index, type, batch):
     # headers = {"Content-Type": "application/json"}
     actions = []
 
-    for doc in batch:
-        action = {"index": {"_id": doc["_id"]}}
-        transformed_doc = transform_data(doc, index)
-        actions.append(json.dumps(action))
-        actions.append(json.dumps(transformed_doc))
-
-    bulk_data = "\n".join(actions) + "\n"
     try:
-        # response = requests.post(url, auth=new_es_auth, data=bulk_data, headers=headers, verify=cacert_path)
+        for doc in batch:
+            action = {"index": {"_id": doc["_id"]}}
+            try:
+                transformed_doc = transform_data(doc, index)
+                actions.append(json.dumps(action))
+                actions.append(json.dumps(transformed_doc))
+            except:
+                print(bcolors.ERROR + "Failed to transform doc %s" % doc)
+
+        bulk_data = "\n".join(actions) + "\n"
         with open("/tmp/es/%s_log_%s.txt" % (type, index), "a") as file:
             file.write(bulk_data)
     except Exception as e:
         pass
-        # response = handle_bulk_retries(url, bulk_data, headers)
-    # if (200 <= response.status_code < 300 and response.json()["errors"]) or response.status_code >= 300:
-    #     for item in response.json()['items']:
-    #         if item['index']['status'] >= 300:
-    #             with open("/tmp/es/error_log_%s.txt" % index, "a") as file:
-    #                 file.write("\n%s" % item['index']["_id"].encode('utf-8'))
-    #             with open("/tmp/es/full_error_log%s.txt" % index, "a") as file:
-    #                 file.write("\n%s" % encode_dict(item))
 
 
 years = [

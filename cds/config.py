@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import copy
 import ast
 import os
 from datetime import timedelta
@@ -35,6 +36,7 @@ from opensearchpy import RequestsHttpConnection
 from flask import current_app, session
 from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
+from invenio_oauthclient.contrib import cern_openid
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 from invenio_stats.aggregations import StatAggregator
@@ -255,6 +257,7 @@ SENTRY_DSN = None
 ###############################################################################
 # Search
 ###############################################################################
+
 ELASTICSEARCH_HOSTS = ast.literal_eval(
     os.environ.get("ELASTICSEARCH_HOSTS", "['localhost']")
 )
@@ -279,6 +282,9 @@ for host in ELASTICSEARCH_HOSTS:
     es_hosts.append(es_host)
 
 SEARCH_HOSTS = es_hosts
+
+SEARCH_INDEX_PREFIX = "cds-videos-sandbox-"
+
 # needed when verify cert is disabled see:
 # https://github.com/elastic/elasticsearch-py/issues/712
 SEARCH_CLIENT_CONFIG = {"connection_class": RequestsHttpConnection}
@@ -495,12 +501,15 @@ LOG_USER_ACTIONS_ENDPOINTS = {
 #: Redis session storage URL.
 ACCOUNTS_SESSION_REDIS_URL = "redis://localhost:6379/1"
 
+ACCOUNTS_JWT_ENABLE = False
+
 ###############################################################################
 # REST API
 ###############################################################################
 
-# FIXME: Enable CORS for now.
 REST_ENABLE_CORS = True
+
+REST_CSRF_ENABLED = True
 
 ###############################################################################
 # Records
@@ -777,17 +786,6 @@ RECORDS_REST_DEFAULT_SORT = {
 
 # Defined facets for records REST API.
 RECORDS_REST_FACETS = dict()
-
-# This is required because of elasticsearch 2.1 error response.
-# From 2.2 this is not needed.
-RECORDS_REST_ELASTICSEARCH_ERROR_HANDLERS = {
-    "query_parsing_exception": (
-        "invenio_records_rest.views" ":elasticsearch_query_parsing_exception_handler"
-    ),
-    "token_mgr_error": (
-        "invenio_records_rest.views" ":elasticsearch_query_parsing_exception_handler"
-    ),
-}
 
 RECORD_UI_ENDPOINT = "{scheme}://{host}/record/{pid_value}"
 
@@ -1131,6 +1129,8 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
 }
 SITE_URL = "https://127.0.0.1:5000"
 
+APP_THEME = ["bootstrap3"]
+
 ###############################################################################
 # User Profiles
 ###############################################################################
@@ -1163,43 +1163,45 @@ OAUTHCLIENT_CERN_OPENID_SESSION_KEY = "identity.cdsvideos_openid_provides"
 
 REMOTE_APP_NAME = "cern_openid"
 
-REMOTE_APP = dict(
-    title="CERN",
-    description="Connecting to CERN Organization.",
-    icon="",
-    logout_url=os.environ.get(
-        "OAUTH_CERN_OPENID_LOGOUT_URL",
-        "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout",
-    ),
-    params=dict(
-        base_url=os.environ.get(
-            "OAUTH_CERN_OPENID_BASE_URL", "https://auth.cern.ch/auth/realms/cern"
-        ),
-        request_token_params={"scope": "openid"},
-        access_token_url=os.environ.get(
-            "OAUTH_CERN_OPENID_ACCESS_TOKEN_URL",
-            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token",
-        ),
-        access_token_method="POST",
-        authorize_url=os.environ.get(
-            "OAUTH_CERN_OPENID_AUTHORIZE_URL",
-            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth",
-        ),
-        app_key="CERN_APP_OPENID_CREDENTIALS",
-        content_type="application/json",
-    ),
-    authorized_handler="invenio_oauthclient.handlers:authorized_signup_handler",
-    disconnect_handler="cds.modules.oauthclient.cern_openid:disconnect_handler",
-    signup_handler=dict(
-        info="cds.modules.oauthclient.cern_openid:account_info",
-        setup="cds.modules.oauthclient.cern_openid:account_setup",
-        view="invenio_oauthclient.handlers:signup_handler",
-    ),
+OAUTHCLIENT_CERN_OPENID_USERINFO_URL = (
+    "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/userinfo"
 )
 
-OAUTHCLIENT_REMOTE_APPS = dict(cern_openid=REMOTE_APP)
-"""CERN Openid Remote Application."""
+OAUTH_REMOTE_APP = copy.deepcopy(cern_openid.REMOTE_APP)
+OAUTH_REMOTE_APP["params"].update(
+    dict(
+        request_token_params={"scope": "openid"},
+        base_url=os.environ.get(
+            "OAUTH_CERN_OPENID_BASE_URL",
+            "https://auth.cern.ch/auth/realms/cern",
+        ),
+        access_token_url=os.environ.get(
+            "OAUTH_CERN_OPENID_ACCESS_TOKEN_URL",
+            "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/token",
+        ),
+        authorize_url=os.environ.get(
+            "OAUTH_CERN_OPENID_AUTHORIZE_URL",
+            "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/auth",
+        ),
+    )
+)
+OAUTH_REMOTE_APP["authorized_handler"] = (
+    "invenio_oauthclient.handlers:authorized_signup_handler"
+)
+OAUTH_REMOTE_APP["disconnect_handler"] = (
+    "cds.modules.oauthclient.cern_openid:disconnect_handler"
+)
+OAUTH_REMOTE_APP["signup_handler"] = dict(
+    info="cds.modules.oauthclient.cern_openid:account_info",
+    setup="cds.modules.oauthclient.cern_openid:account_setup",
+    view="invenio_oauthclient.handlers:signup_handler",
+)
 
+#: Credentials for CERN OAuth (must be changed to work).
+CERN_APP_OPENID_CREDENTIALS = dict(
+    consumer_key=os.environ.get("OAUTH_CERN_CONSUMER_KEY", "changeme"),
+    consumer_secret=os.environ.get("OAUTH_CERN_CONSUMER_SECRET", "changeme"),
+)
 
 OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS = dict(
     options=dict(
@@ -1209,11 +1211,8 @@ OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS = dict(
     algorithms=["HS256", "RS256"],
 )
 
-#: Credentials for CERN OAuth (must be changed to work).
-CERN_APP_OPENID_CREDENTIALS = dict(
-    consumer_key=os.environ.get("OAUTH_CERN_CONSUMER_KEY", "changeme"),
-    consumer_secret=os.environ.get("OAUTH_CERN_CONSUMER_SECRET", "changeme"),
-)
+OAUTHCLIENT_REMOTE_APPS = dict(cern_openid=OAUTH_REMOTE_APP)
+"""CERN Openid Remote Application."""
 
 ## Needed for populating the user profiles when users login via CERN Openid
 USERPROFILES_EXTEND_SECURITY_FORMS = True
