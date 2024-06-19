@@ -103,6 +103,7 @@ from invenio_oauthclient.oauth import oauth_link_external_id, oauth_unlink_exter
 
 cern_openid_blueprint = Blueprint("cern_openid_oauth", __name__)
 
+
 @cern_openid_blueprint.route("/cern/logout")
 def logout():
     """CERN logout view.
@@ -117,12 +118,15 @@ def logout():
 
     if not logout_url:
         raise OAuthError(
-            "Invalid `logout_url` for OAuth app {}".format(current_app.config["REMOTE_APP_NAME"])
+            "Invalid `logout_url` for OAuth app {}".format(
+                current_app.config["REMOTE_APP_NAME"]
+            )
         )
 
     # add redirect to SITE_URL
     redirect_url = "{}?redirect_uri={}".format(
-        logout_url, quote(current_app.config["SITE_URL"]))
+        logout_url, quote(current_app.config["SITE_URL"])
+    )
     return redirect(redirect_url, code=302)
 
 
@@ -165,8 +169,9 @@ def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
 def extend_identity(identity, roles, groups):
     """Extend identity with roles based on CERN groups."""
     provides = set(
-        [UserNeed(current_user.email)] + [RoleNeed(name) for name in roles] +
-        [RoleNeed("{0}@cern.ch".format(group)) for group in groups]
+        [UserNeed(current_user.email)]
+        + [RoleNeed(name) for name in roles]
+        + [RoleNeed("{0}@cern.ch".format(group)) for group in groups]
     )
     identity.provides |= provides
     key = current_app.config["OAUTHCLIENT_CERN_OPENID_SESSION_KEY"]
@@ -206,7 +211,9 @@ def get_resource(remote, token_response=None):
     response = remote.get(url)
     dict_response = get_dict_from_response(response)
     if token_response:
-        decoding_params = current_app.config["OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS"]
+        decoding_params = current_app.config[
+            "OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS"
+        ]
         token_data = decode(token_response["access_token"], **decoding_params)
         dict_response.update(token_data)
     session["cern_resource"] = dict_response
@@ -324,7 +331,7 @@ def on_identity_changed(sender, identity):
         refresh = current_app.config["OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA"]
         if refresh:
             resource = get_resource(remote)
-            (_roles, _groups) =  account_roles_and_extra_data(
+            (_roles, _groups) = account_roles_and_extra_data(
                 remote_account, resource, refresh_timedelta=refresh
             )
             roles.extend(_roles)

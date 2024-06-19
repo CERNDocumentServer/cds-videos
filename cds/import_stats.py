@@ -5,13 +5,22 @@ from opensearchpy import OpenSearch, helpers
 from time import sleep
 
 # OpenSearch server URL
-OS_URL = "http://127.0.0.1:9200"
+# OS_URL = "http://127.0.0.1:9200"
+# auth = ("user", "password")
 
 # Initialize the OpenSearch client
+# os_client = OpenSearch(
+#     OS_URL,
+#     http_auth=auth,
+#     use_ssl=True,  # set to True if your cluster is using HTTPS
+#     verify_certs=False,  # set to False if you do not want to verify SSL certificates
+#     ssl_show_warn=False,  # set to False to suppress SSL warnings)
+# )
+OS_URL = "http://127.0.0.1:9200"
 os_client = OpenSearch(OS_URL)
 
 # Input and output files
-input_file_path = "./cds/es"
+input_file_path = "./tmp/es/script_indices"
 
 output_index = "cds-videos-prod-events-stats"
 
@@ -201,6 +210,12 @@ def main():
     import os
 
     failed = []
+    succeeded = []
+
+    with open(f"./tmp/es/completed_to_index.txt", "r") as success_log:
+        lines = success_log.readlines()
+        for line in lines:
+            succeeded.append(line.split("\n")[0])
 
     def is_file_empty(file_path):
         with open(file_path, "r") as file:
@@ -213,11 +228,15 @@ def main():
 
         for file in files:
             file_path = os.path.join(root, file)
-            # if "2022" not in file_path and "2023" not in file_path:
-            #     continue
-            if is_file_empty(file_path):
-                print(f"File {file_path} is empty. Continuing....")
-                continue
+            try:
+                if is_file_empty(file_path):
+                    print(f"File {file_path} is empty. Continuing....")
+                    continue
+                if file_path in succeeded:
+                    print(f"File {file_path} has already been indexed. Continuing....")
+                    continue
+            except:
+                print("Failed to process ", file_path)
             print("Processing.....", file_path)
             with open(file_path, "r") as file:
                 lines = file.readlines()
@@ -241,7 +260,11 @@ def main():
             except Exception as e:
                 handle_bulk_retries(os_client, actions)
 
-        with open(f"{input_file_path}/failed_to_index.txt", "w+") as error_log:
+            with open(f"./tmp/es/completed_to_index.txt", "a+") as success_log:
+                success_log.write(file_path)
+                success_log.write("\n")
+
+        with open(f"./tmp/es/failed_to_index.txt", "w+") as error_log:
             for item in failed:
                 json.dump(item, error_log)
                 error_log.write("\n")
