@@ -1523,3 +1523,6 @@ CDS_OPENCAST_STATUS_CHECK_TASK_TIMEOUT = 5*60  # 5 minutes
 CDS_OPENCAST_DOWNLOAD_TASK_TIMEOUT = 30*60  # 30 minutes
 
 CDS_LDAP_URL = "ldap://xldap.cern.ch"
+
+# Sets the location to share the video files among the different tasks
+CDS_FILES_TMP_FOLDER = "/tmp/videos"
