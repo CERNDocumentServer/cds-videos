@@ -24,8 +24,8 @@
 
 import os
 import shutil
-import tempfile
 from contextlib import contextmanager
+from flask import current_app
 
 from invenio_db import db
 from invenio_files_rest.models import (
@@ -36,8 +36,6 @@ from invenio_files_rest.models import (
 
 from ..xrootd.utils import file_opener_xrootd
 
-
-VIDEOS_FILES_TMP_FOLDER = os.path.join(tempfile.gettempdir(), "videos")
 
 
 def _rename_key(object_version):
@@ -105,7 +103,7 @@ def move_file_into_local(obj, delete=True):
     if os.path.exists(obj.file.uri):
         yield obj.file.uri
     else:
-        tmp_path = os.path.join(VIDEOS_FILES_TMP_FOLDER, str(obj.file_id))
+        tmp_path = os.path.join(current_app.config["CDS_FILES_TMP_FOLDER"], str(obj.file_id))
         if not os.path.exists(tmp_path):
             os.makedirs(tmp_path)
 

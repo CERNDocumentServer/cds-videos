@@ -23,9 +23,9 @@ import os
 import shutil
 import time
 
-from celery import shared_task
+from celery import current_app, shared_task
 
-from cds.modules.flows.files import VIDEOS_FILES_TMP_FOLDER
+from cds.modules.flows.files import CDS_FILES_TMP_FOLDER
 
 
 @shared_task(ignore_result=True)
@@ -34,11 +34,11 @@ def clean_tmp_videos():
     now = time.time()
     SEVEN_DAYS_AGO = now - 7 * 60 * 60 * 24
 
-    if not os.path.exists(VIDEOS_FILES_TMP_FOLDER):
+    if not os.path.exists(current_app.config["CDS_FILES_TMP_FOLDER"]):
         return
 
-    for folder in os.listdir(VIDEOS_FILES_TMP_FOLDER):
-        path = os.path.join(VIDEOS_FILES_TMP_FOLDER, folder)
+    for folder in os.listdir(current_app.config["CDS_FILES_TMP_FOLDER"]):
+        path = os.path.join(current_app.config["CDS_FILES_TMP_FOLDER"], folder)
         if not os.path.isdir(path):
             continue
 
