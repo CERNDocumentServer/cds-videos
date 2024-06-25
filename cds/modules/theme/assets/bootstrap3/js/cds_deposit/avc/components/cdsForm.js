@@ -6,9 +6,6 @@ import "angular-ui-sortable/dist/sortable";
 import "tv4";
 import "objectpath";
 import "angular-sanitize";
-import "angular-schema-form";
-import "angular-schema-form-bootstrap";
-import "angular-schema-form-dynamic-select";
 import "ui-select";
 
 function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {

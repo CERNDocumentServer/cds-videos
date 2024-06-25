@@ -13,15 +13,16 @@
 {%- endblock css %}
 
 {%- block javascript %}
-{{ super() }}
-<!-- <script type="text/javascript">
+  <script type="text/javascript">
   // CKEDITOR static location
-  window.CKEDITOR_BASEPATH = '{{url_for("static", filename="node_modules/ckeditor/", _external=True)}}';
-</script> -->
-  <!-- <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js"></script> -->
-  {# {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-  {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %} #}
+  window.CKEDITOR_BASEPATH = '{{url_for("static", filename="ckeditor/", _external=True)}}';
+  </script>
+  {#
+    {% assets "cds_deposit_jquery_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+    {% assets "cds_deposit_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+  #}
 
+  {{ super() }}
   {{ webpack["cds_deposit_app.js"] }}
   {#  <script type="text/javascript">
     angular.element(document).ready(function() {

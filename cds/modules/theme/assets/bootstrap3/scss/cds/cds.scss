@@ -25,14 +25,11 @@
 @import "variables";
 
 @import "colors";
-@import "spacing";
-@import "social";
 @import "decorators";
 @import "mixins";
-
-// import theme dependecies
+@import "social";
+@import "spacing";
 @import "theme";
-
 
 
 html, body {

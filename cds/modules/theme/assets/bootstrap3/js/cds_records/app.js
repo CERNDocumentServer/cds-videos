@@ -22,11 +22,12 @@
 */
 
 import angular from "angular";
-import "angular-sanitize";
-import "ngmodal";
-import "invenio-records-js/dist/invenio-records-js";
-import "./user_actions_logger";
 import "./cdsRecord";
+import "angular-sanitize";
+import "angular-strap";
+import "invenio-files-js/dist/invenio-files-js";
+import "ngmodal";
+import "./user_actions_logger";
 
 // Bootstrap modules
 angular.element(document).ready(function () {

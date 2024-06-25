@@ -68,7 +68,7 @@ class VideoExtension(object):
         return render_template(
             self.template,
             file=file,
-            css_bundles=["cds_previewer_theme"],
+            css_bundles=["cds_previewer_styles"],
             file_extension=file_extension,
             recid=record.get("recid", ""),
             report_number=report_number,
