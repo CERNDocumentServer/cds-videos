@@ -577,7 +577,6 @@ function cdsDepositCtrl(
             }
           });
         }, 10000);
-        console.debug($window.CKEDITOR.instances);
       }
     });
 

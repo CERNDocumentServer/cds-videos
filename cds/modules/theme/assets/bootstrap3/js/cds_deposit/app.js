@@ -1,6 +1,6 @@
+// Main deps
 import angular from "angular";
 import $ from "jquery";
-import "angular-sanitize";
 
 // avc module
 import "./avc/avc.module";
@@ -53,6 +53,8 @@ $(document).ready(function () {
       (typeof $.browser !== "undefined" && $.browser.msie == 1)
     );
   }
+
+  $('.dropdown-toggle').dropdown();
 });
 
 angular.element(document).ready(function () {

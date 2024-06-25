@@ -4,7 +4,6 @@
  *
  * Invenio is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
  * Invenio is distributed in the hope that it will be useful, but
@@ -21,26 +20,24 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
-import d3 from "d3";
-import angular from "angular";
-import "angular-loading-bar";
-import "ngclipboard";
-import "angular-ui-bootstrap";
-import "angular-schema-form";
-import "angular-schema-form-bootstrap";
-import "angular-schema-form-dynamic-select";
-import "ng-dialog";
-import "angular-mass-autocomplete";
-import "invenio-search-js/dist/invenio-search-js";
-import "@js/cds/module";
-import "@js/cds_deposit/avc/avc.module";
-import "@js/cds_deposit/avc/filters/progressClass.js";
-import "@js/cds_deposit/avc/filters/progressIcon.js";
-import "@js/cds_deposit/avc/filters/progressIcon.js";
-
-import "@js/cds/suggestions";
-
 import $ from "jquery";
+import "bootstrap-sass";
+import angular from "angular";
+import "ng-dialog";
+import "clipboard";
+import "ngclipboard";
+import d3 from "d3";
+import "angular-loading-bar";
+import "invenio-search-js/dist/invenio-search-js";
+import "angular-sanitize";
+import "angular-mass-autocomplete";
+import "angular-local-storage";
+import "angularjs-toaster";
+import "angular-ui-bootstrap";
+
+import "./module";
+import "./suggestions";
+
 
 function mainCtrl(
   $scope,

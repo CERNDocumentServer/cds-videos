@@ -11,7 +11,9 @@
   {# {% assets "cds_theme_js", "cds_search_ui_js", "cds_deposit_js" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %} #}
-  {{webpack['cds_search_ui_app.js']}}
+  {{ webpack['cds_theme_app.js'] }}
+  {{ webpack['cds_search_ui_app.js'] }}
+  {{ webpack["cds_deposit_app.js"] }}
   {#  <script>
     angular.element(document).ready(function() {
       angular.bootstrap(

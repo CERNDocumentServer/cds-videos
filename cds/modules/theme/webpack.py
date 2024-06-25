@@ -44,13 +44,13 @@ theme = WebpackThemeBundle(
     themes={
         "bootstrap3": dict(
             entry={
-                "cds_main_app": "./js/cds/app.js",
-                "cds_main_theme": "./scss/cds/cds.scss",
+                "cds_theme_app": "./js/cds/app.js",
+                "cds_theme_styles": "./scss/cds/cds.scss",
                 "cds_deposit_app": "./js/cds_deposit/app.js",
-                "cds_previewer_theme": "./scss/cds_previewer/video.scss",
+                "cds_previewer_styles": "./scss/cds_previewer/video.scss",
                 "cds_records_app": "./js/cds_records/app.js",
-                "cds_records_stats": "./js/cds_records/stats.js",
-                "cds_records_stats_theme": "./scss/cds_records/stats.scss",
+                "cds_records_stats_app": "./js/cds_records/stats.js",
+                "cds_records_stats_styles": "./scss/cds_records/stats.scss",
                 "cds_search_ui_app": "./js/cds_search_ui/app.js",
             },
             dependencies={
@@ -70,7 +70,6 @@ theme = WebpackThemeBundle(
                 "angular-local-storage": "~0.5.2",
                 "angularjs-toaster": "~2.1.0",
                 "angular-ui-bootstrap": "~2.5.0",
-                "angular-animate": "~1.4.8",
                 "angular-strap": "~2.3.9",
                 "angular-translate": "~2.11.0",
                 "angular-underscore": "~0.0.3",
@@ -99,7 +98,11 @@ theme = WebpackThemeBundle(
                 "ckeditor": "4.12.1",
                 "rr-ng-ckeditor": "~0.2.1",
             },
-            aliases={"@js/cds": "js/cds", "@js/cds_deposit": "js/cds_deposit"},
+            aliases={
+                "@js/cds": "js/cds",
+                "@js/cds_deposit": "js/cds_deposit",
+                "@js/cds_search_ui": "js/cds_search_ui",
+            },
         ),
     },
 )
