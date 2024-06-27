@@ -22,8 +22,15 @@
 from __future__ import absolute_import, print_function
 
 import six
-from flask import (Blueprint, abort, current_app, flash, make_response,
-                   render_template, request)
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    make_response,
+    render_template,
+    request,
+)
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
@@ -32,8 +39,7 @@ from werkzeug.utils import import_string
 from ..deposit.api import Project, Video
 from ..deposit.fetcher import deposit_fetcher
 from .forms import RecordDeleteForm
-from .utils import (delete_project_record, delete_video_record,
-                    is_project_record)
+from .utils import delete_project_record, delete_video_record, is_project_record
 
 blueprint = Blueprint(
     "cds_records",
@@ -51,9 +57,10 @@ def pidstatus_title(pid):
     return None
 
 
-def stats_recid(pid, record, template=None, **kwargs):
-    """Preview file for given record."""
-    return render_template("cds_records/record_stats.html", record=record)
+# NOTE: Disable record statistics page
+# def stats_recid(pid, record, template=None, **kwargs):
+#     """Preview file for given record."""
+#     return render_template("cds_records/record_stats.html", record=record)
 
 
 def records_ui_export(pid, record, template=None, **kwargs):
@@ -127,9 +134,7 @@ def records_ui_delete(pid, record, template=None, **kwargs):
     if form.validate_on_submit():
         if form.confirm.data != str(pid.object_uuid):
             flash(
-                "Incorrect record identifier (UUID): {}".format(
-                    form.confirm.data
-                ),
+                "Incorrect record identifier (UUID): {}".format(form.confirm.data),
                 category="error",
             )
         elif (
@@ -150,12 +155,8 @@ def records_ui_delete(pid, record, template=None, **kwargs):
                 ]
             )
             pid_value = pid.pid_value
-            delete_func = (
-                delete_project_record if is_project else delete_video_record
-            )
-            report = delete_func(
-                record.id, reason=reason, hard=form.hard_delete.data
-            )
+            delete_func = delete_project_record if is_project else delete_video_record
+            report = delete_func(record.id, reason=reason, hard=form.hard_delete.data)
             flash(
                 "Record {} and linked objects successfully deleted. "
                 "See report for details.".format(pid_value),

@@ -433,27 +433,37 @@ STATS_AGGREGATIONS = {
 
 
 STATS_QUERIES = {
-    "bucket-file-download-histogram": {
-        "cls": DateHistogramQuery,
-        "params": {
-            "index": "stats-file-download",
-            "copy_fields": {"file": "file"},
-            "query_modifiers": [filter_by_reportnumber],
-            "required_filters": {
-                "file": "file",
-            },
-        },
-    },
-    # "bucket-file-download-total": {
-    #     "cls": TermsQuery,
+    # NOTE: Disable record file downloads histogram statistics query
+    # "bucket-file-download-histogram": {
+    #     "cls": DateHistogramQuery,
     #     "params": {
     #         "index": "stats-file-download",
     #         "required_filters": {
-    #             "bucket_id": "bucket_id",
+    #             "file": "file",
     #         },
-    #         "aggregated_fields": ["file_key"],
+    #         "query_modifiers": [filter_by_reportnumber],
+    #         "aggregated_fields": ["file"],
+    #         "metric_fields": {
+    #             "views": ("sum", "count", {}),
+    #             "unique_views": ("sum", "unique_count", {}),
+    #         },
     #     },
     # },
+    "file-download-total": {
+        "cls": TermsQuery,
+        "params": {
+            "index": "stats-file-download",
+            "required_filters": {
+                "file": "file",
+            },
+            "query_modifiers": [filter_by_reportnumber],
+            "aggregated_fields": ["file"],
+            "metric_fields": {
+                "views": ("sum", "count", {}),
+                "unique_views": ("sum", "unique_count", {}),
+            },
+        },
+    },
     "record-view-total": {
         "cls": TermsQuery,
         "params": {
@@ -554,13 +564,14 @@ RECORDS_UI_ENDPOINTS = dict(
         template="cds_records/record_detail.html",
         record_class="cds.modules.records.api:CDSRecord",
     ),
-    recid_stats=dict(
-        pid_type="recid",
-        route="/record/<pid_value>/stats",
-        template="cds_records/record_stats.html",
-        view_imp="cds.modules.records.views.stats_recid",
-        record_class="cds.modules.records.api:CDSRecord",
-    ),
+    # NOTE: Disable record statistics page
+    # recid_stats=dict(
+    #     pid_type="recid",
+    #     route="/record/<pid_value>/stats",
+    #     template="cds_records/record_stats.html",
+    #     view_imp="cds.modules.records.views.stats_recid",
+    #     record_class="cds.modules.records.api:CDSRecord",
+    # ),
     recid_preview=dict(
         pid_type="recid",
         route="/record/<pid_value>/preview/<filename>",

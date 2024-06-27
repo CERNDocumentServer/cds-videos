@@ -90,6 +90,9 @@
     {% set record_view_url = (config.LOG_USER_ACTIONS_ENDPOINTS['page_view'] or '')
                                     .replace('{base_url}', config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '')
                                     .replace('{recid}', record.recid|string or '')|safe %}
+    {% set record_download_url = (config.LOG_USER_ACTIONS_ENDPOINTS['media_download'] or '')
+          .replace('{base_url}', config.LOG_USER_ACTIONS_ENDPOINTS['base_url'] or '')
+          .replace('{recid}', record.recid|string or '')|safe %}
     {% else %}
     {% set user_action_media_download_url = '' %}
     {% endif %}
@@ -98,6 +101,7 @@
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
         record-views="{{ record_view_url }}"
+        record-downloads="{{ record_download_url }}"
         media-download-event-url="{{ user_action_media_download_url }}"
     ></cds-record-view>
   </div>

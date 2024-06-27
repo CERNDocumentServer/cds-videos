@@ -22,7 +22,7 @@ os_client = OpenSearch(OS_URL)
 # Input and output files
 input_file_path = "./tmp/es/script_indices"
 
-output_index = "cds-videos-prod-events-stats"
+output_index = "cds-videos-sandbox-events-stats"
 
 LEGACY_TO_INDEX_MAPPING = {
     "events.cds_videos_media_view": "media-record-view",
