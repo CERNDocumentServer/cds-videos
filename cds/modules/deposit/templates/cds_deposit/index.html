@@ -14,7 +14,7 @@
   {{ webpack['cds_theme_app.js'] }}
   {{ webpack['cds_search_ui_app.js'] }}
   {{ webpack["cds_deposit_app.js"] }}
-  {#  <script>
+  {<script>
     angular.element(document).ready(function() {
       angular.bootstrap(
         document.getElementById("cds-deposit-index"), [
@@ -29,7 +29,7 @@
     $(document).ready(function() {
       $('.dropdown-toggle').dropdown();
     })
-  </script> #}
+  </script>
 {%- endblock javascript %}
 
 {%- block body_inner %}
