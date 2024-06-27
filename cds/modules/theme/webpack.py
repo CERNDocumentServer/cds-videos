@@ -76,7 +76,7 @@ theme = WebpackThemeBundle(
                 "angular-ui-sortable": "~0.14.3",
                 "d3": "^3.5.17",
                 "invenio-search-js": "^1.5.4",
-                "invenio-charts-js": "^0.2.2",
+                "invenio-charts-js": "^0.2.7",
                 "invenio-records-js": "~0.0.8",
                 "invenio-files-js": "~0.0.2",
                 "ng-file-upload": "~12.0.4",

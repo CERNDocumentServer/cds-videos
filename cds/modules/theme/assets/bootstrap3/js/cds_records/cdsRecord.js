@@ -251,6 +251,15 @@ function cdsRecordView($http) {
         scope.$broadcast("cds.record.error", error);
       }
     );
+    // Get the number of downloads for the record and make it available to the scope
+    $http.get(attrs.recordDownloads).then(
+      function (response) {
+        scope.recordDownloads = response.data.views;
+      },
+      function (error) {
+        scope.$broadcast("cds.record.error", error);
+      }
+    );
   }
 
   /**

@@ -34,7 +34,7 @@ class Statistics:
             # when the aggregation search index hasn't been created yet
             current_app.logger.warning(e)
 
-            fallback_result = {"views": 0}
+            fallback_result = {"views": 0, "unique_views": 0}
             views = fallback_result
 
         stats = {
@@ -47,18 +47,17 @@ class Statistics:
     def get_file_download_stats(cls, file):
         """Fetch the statistics for the given record."""
         try:
-            views = cls._get_query("bucket-file-download-histogram").run(file=file)
+            views = cls._get_query("file-download-total").run(file=file)
         except Exception as e:
-            breakpoint()
             # e.g. opensearchpy.exceptions.NotFoundError
             # when the aggregation search index hasn't been created yet
             current_app.logger.warning(e)
 
-            fallback_result = {"views": 0}
+            fallback_result = {"views": 0, "unique_views": 0}
             views = fallback_result
 
-        # stats = {
-        #     "views": views["views"],
-        #     "unique_views": views["unique_views"],
-        # }
-        return views
+        stats = {
+            "views": views["views"],
+            "unique_views": views["unique_views"],
+        }
+        return stats

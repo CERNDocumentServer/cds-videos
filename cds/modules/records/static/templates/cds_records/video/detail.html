@@ -121,8 +121,12 @@
                 <i class="fa fa-clock-o text-muted"></i> {{ ::record.metadata.duration | replace:'.000':'' }}
               </li>
               <li class="pull-right">
+                {{ recordDownloads|| 0 }} Downloads
+              </li>
+              <li class="pull-right">
                 {{ recordViews || 0 }} Views
               </li>
+
             </ul>
           </div>
           <hr />
