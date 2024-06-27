@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 1.0.43 (2024-06-27)
+
+- Update FAQ
+- Add config variable for shared video files
+- Fix failing tests
+
 Version 1.0.42 (2024-01-15)
 
 - Migrate license of THEOPlayer from SDK to key
