@@ -23,9 +23,8 @@ import os
 import shutil
 import time
 
-from celery import current_app, shared_task
-
-from cds.modules.flows.files import CDS_FILES_TMP_FOLDER
+from celery import shared_task
+from flask import current_app
 
 
 @shared_task(ignore_result=True)
