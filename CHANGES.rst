@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 1.0.44 (2024-06-28)
+
+- Fix celery task
+
 Version 1.0.43 (2024-06-27)
 
 - Update FAQ
