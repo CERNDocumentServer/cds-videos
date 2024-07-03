@@ -27,7 +27,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
   };
 
   this.$onInit = function () {
-    // Show resticted fields
+    // Show restricted fields
     that.showRestricted =
       that.cdsDepositCtrl.cdsDepositsCtrl.showAvcRestrictedFields;
 
