@@ -573,7 +573,7 @@ function cdsDepositCtrl(
               instance.setReadOnly(instance.element.$.disabled);
             } catch (error) {
               // Do nothing probably not initialized yet
-              console.log(error);
+              console.error(error);
             }
           });
         }, 10000);
