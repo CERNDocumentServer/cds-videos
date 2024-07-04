@@ -131,10 +131,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
   function selectMultiple(name, key_id) {
     var value = { name: name };
     if (key_id) {
-      console.debug({ key_id });
       value.key_id = key_id;
-    } else {
-      console.debug({ name });
     }
     return {
       name: name,
@@ -149,12 +146,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
     },
     // Response handler
     function (data, query) {
-      console.debug({ query });
       var userInput = selectMultiple(query);
       var suggestions = data.data["suggest-name"][0]["options"]
         .concat(that.cdsDepositCtrl.record.keywords || [])
         .map(function (keyword) {
-          console.debug({ keyword });
           return selectMultiple(
             keyword._source ? keyword._source.name : keyword.name,
             keyword._source ? keyword._source?.key_id : null

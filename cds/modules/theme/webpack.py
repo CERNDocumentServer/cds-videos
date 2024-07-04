@@ -62,7 +62,6 @@ theme = WebpackThemeBundle(
                 "angular-scroll": "~1.0.2",
                 "angular-sticky-plugin": "~0.4.1",
                 "angular-schema-form": "~0.8.13",
-                "angular-schema-form-bootstrap": "~0.2.0",
                 "angular-lazy-image": "~0.3.2",
                 "angular-local-storage": "~0.5.2",
                 "angular-schema-form-dynamic-select": "~0.13.1",

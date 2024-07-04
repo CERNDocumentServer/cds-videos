@@ -20,7 +20,7 @@ import "angular-translate";
 import "tv4";
 import "objectpath";
 import "angular-schema-form";
-import "angular-schema-form-bootstrap";
+import "./bootstrap-decorator";
 import "angular-schema-form-dynamic-select";
 
 // UI sortable
@@ -266,25 +266,23 @@ angular.module("schemaForm").controller("invenioDynamicSelectController", [
   },
 ]);
 
-
-// update angular-schema-form-bootstrap config by re-defining some of the templates
+// update angular-schema-form, bootstrap-decorator.js, config by re-defining some of the templates
 angular.module('schemaForm').config(['schemaFormDecoratorsProvider', function(decoratorsProvider) {
   const base = '/static/templates/cds_deposit/angular-schema-form/';
   const decorator = decoratorsProvider.decorator();
-  // the `replace: false` is important, if set to true templates will not be fetched
-  Object.assign(decorator["array"], {replace: false, template: base + "array.html"});
-  Object.assign(decorator["button"], {replace: false, template: base + "button.html"});
-  Object.assign(decorator["checkbox"], {replace: false, template: base + "checkbox.html"});
-  Object.assign(decorator["ckeditor"], {replace: false, template: base + "ckeditor.html"});
-  Object.assign(decorator["default"], {replace: false, template: base + "default.html"});
-  Object.assign(decorator["fieldset"], {replace: false, template: base + "fieldset.html"});
-  Object.assign(decorator["radios-inline"], {replace: false, template: base + "radios_inline.html"});
-  Object.assign(decorator["radios"], {replace: false, template: base + "radios.html"});
-  Object.assign(decorator["select"], {replace: false, template: base + "select.html"});
-  Object.assign(decorator["strapselect"], {replace: false, template: base + "strapselect.html"});
-  Object.assign(decorator["textarea"], {replace: false, template: base + "textarea.html"});
-  Object.assign(decorator["uiselect"], {replace: false, template: base + "uiselect.html"});
-  Object.assign(decorator["uiselectmultiple"], {replace: false, template: base + "uiselectmultiple.html"});
+  decorator["array"].template = base + "array.html";
+  decorator["button"].template = base + "button.html";
+  decorator["checkbox"].template = base + "checkbox.html";
+  decorator["ckeditor"].template = base + "ckeditor.html";
+  decorator["default"].template = base + "default.html";
+  decorator["fieldset"].template = base + "fieldset.html";
+  decorator["radios-inline"].template = base + "radios_inline.html";
+  decorator["radios"].template = base + "radios.html";
+  decorator["select"].template = base + "select.html";
+  decorator["strapselect"].template = base + "strapselect.html";
+  decorator["textarea"].template = base + "textarea.html";
+  decorator["uiselect"].template = base + "uiselect.html";
+  decorator["uiselectmultiple"].template = base + "uiselectmultiple.html";
 }]);
 
 // Initialize the module
