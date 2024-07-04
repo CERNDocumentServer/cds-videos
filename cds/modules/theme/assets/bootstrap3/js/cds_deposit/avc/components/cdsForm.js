@@ -116,7 +116,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
     // Response handler
     function (data) {
       return data.data["text"][0]["options"].map(function (license) {
-        var value = license["payload"].id;
+        var value = license["_source"].id;
         return {
           text: value,
           value: value,
