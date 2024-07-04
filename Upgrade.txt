@@ -66,6 +66,7 @@ cds index reindex -t recid
 cds index reindex -t depid
 cds index reindex -t catid
 cds index reindex -t kwid
+cds index reindex -t od_lic
 cds index run
 
 ```
