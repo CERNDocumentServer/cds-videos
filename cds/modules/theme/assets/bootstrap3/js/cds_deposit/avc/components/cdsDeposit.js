@@ -564,20 +564,14 @@ function cdsDepositCtrl(
       true
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
-      if ($window.CKEDITOR) {
-        setTimeout(function () {
-          Object.values($window.CKEDITOR.instances).forEach(function (
-            instance
-          ) {
-            try {
-              instance.setReadOnly(instance.element.$.disabled);
-            } catch (error) {
-              // Do nothing probably not initialized yet
-              console.error(error);
-            }
-          });
-        }, 10000);
-      }
+      Object.values($window.CKEDITOR.instances).forEach(function (instance) {
+        try {
+          instance.setReadOnly(instance.element.$.disabled);
+        } catch (error) {
+          // Do nothing probably not initialized yet
+          console.log(error);
+        }
+      });
     });
 
     // Listen for task status changes
