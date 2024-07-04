@@ -59,6 +59,7 @@
       template="{{ url_for('static', filename='templates/cds_deposit/deposits.html') }}"
       show-avc-restricted-fields="{{ record | check_avc_permissions | lower }}"
       is-super-admin="{{ record | check_if_super_admin | lower }}"
+      current-user-email="'{{ current_user_email | lower}}'"
   >
   </cds-deposits>
   <input type="hidden" id="max-n-videos-per-project" value="{{ config.DEPOSIT_PROJECT_MAX_N_VIDEOS }}" />

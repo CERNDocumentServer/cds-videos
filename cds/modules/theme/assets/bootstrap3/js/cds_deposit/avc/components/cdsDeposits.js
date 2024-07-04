@@ -432,6 +432,7 @@ function cdsDeposits() {
       // Show restricted fields
       showAvcRestrictedFields: "=?",
       isSuperAdmin: "=?",
+      currentUserEmail: "=?",
     },
     controller: cdsDepositsCtrl,
     templateUrl: function ($element, $attrs) {
