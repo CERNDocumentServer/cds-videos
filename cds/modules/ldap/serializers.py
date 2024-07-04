@@ -25,6 +25,10 @@ def serialize_ldap_users(data):
     for user in data:
         for key in user.keys():
             # remove the redundant list
-            user[key] = user[key][0]
+            first = user[key][0]
+            # decode byte strings when necessary
+            if isinstance(first, bytes):
+                first = first.decode("utf-8")
+            user[key] = first
     return data
 
