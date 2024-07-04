@@ -21,6 +21,14 @@
 * as an Intergovernmental Organization or submit itself to any jurisdiction.
 */
 
+@import '~ng-dialog/css/ngDialog.css';
+@import '~ng-dialog/css/ngDialog-theme-default.css';
+@import '~ngmodal/dist/ng-modal.css';
+@import '~ui-select/dist/select.css';
+@import '~angular-loading-bar/build/loading-bar.css';
+@import '~angular-mass-autocomplete/massautocomplete.theme.css';
+@import '~angularjs-toaster/toaster.css';
+
 // any variable we need to override
 @import "variables";
 
@@ -29,7 +37,9 @@
 @import "mixins";
 @import "social";
 @import "spacing";
-@import "theme";
+
+@import "~bootstrap-sass/assets/stylesheets/_bootstrap";
+@import "~font-awesome/scss/font-awesome";
 
 
 html, body {
