@@ -455,9 +455,10 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
       that.cdsDepositCtrl.cdsDepositsCtrl.accessRights.metadata.access
         .responsible
     );
-    // that.cdsDepositCtrl.record._access.update = [
-    //   that.cdsDepositCtrl.record._cds.current_user_mail,
-    // ];
+    debugger;
+    that.cdsDepositCtrl.record._access.update = [
+      that.cdsDepositCtrl.cdsDepositsCtrl.currentUserEmail,
+    ];
 
     if (responsible) {
       that.cdsDepositCtrl.record._access.update =
