@@ -8,8 +8,7 @@
 
 {%- block javascript %}
   {{ super() }}
-  {# {% assets "cds_search_ui_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %} #}
-  {{webpack['cds_search_ui_app.js']}}
+  {{ webpack['cds_search_ui_app.js'] }}
 {%- endblock javascript %}
 
 {%- block body_inner %}

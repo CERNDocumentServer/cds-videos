@@ -83,9 +83,6 @@
   {% if config.THEOPLAYER_LIBRARY_LOCATION %}
     <link rel="stylesheet" href="{{ config.THEOPLAYER_LIBRARY_LOCATION }}/ui.css">
   {% endif %}
-  {#  {% assets "cds_previewer_video_css" %}
-    <link href="{{ ASSET_URL }}" rel="stylesheet">
-  {% endassets %} #}
   {{ webpack['cds_previewer_styles.css'] }}
 {%- endblock css %}
 
