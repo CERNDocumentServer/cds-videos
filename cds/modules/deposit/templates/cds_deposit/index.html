@@ -3,14 +3,10 @@
 {%- block css %}
   {{ super() }}
   {{webpack['search_ui_theme.css']}}
-  {# {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %} #}
 {%- endblock css %}
 
 {%- block javascript %}
   {{ super() }}
-  {# {% assets "cds_theme_js", "cds_search_ui_js", "cds_deposit_js" %}
-    <script src="{{ ASSET_URL }}"></script>
-  {% endassets %} #}
   {{ webpack['cds_theme_app.js'] }}
   {{ webpack['cds_search_ui_app.js'] }}
   {{ webpack["cds_deposit_app.js"] }}

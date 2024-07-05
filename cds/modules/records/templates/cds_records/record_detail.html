@@ -22,7 +22,6 @@
 {%- endblock head_meta %}
 {%- block javascript %}
   {{ super() }}
-  {#  {% assets "cds_record_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %} #}
   {{ webpack["cds_records_app.js"] }}
 
   <script type="text/javascript">

@@ -23,16 +23,6 @@
 
 {%- extends config.DEPOSIT_BASE_TEMPLATE %}
 
-{%- block css %}
-    {{ super() }}
-    {% assets "invenio_search_ui_search_css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{%- endblock css %}
-
-{%- block javascript %}
-  {{ super() }}
-  {% assets "invenio_search_ui_search_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-{%- endblock javascript %}
-
 {%- block body_inner %}
 <div id="invenio-search">
   <invenio-search
