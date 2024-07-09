@@ -23,7 +23,7 @@
       angular.bootstrap(
         document.getElementById('cds-deposit'), ['cds', 'cdsDeposit', 'ngModal']
       );
-    });
+    }, {strictDi: true});
   $(document).ready(function() {
     $('.dropdown-toggle').dropdown();
   });

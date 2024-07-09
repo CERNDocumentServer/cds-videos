@@ -33,18 +33,13 @@ import "angular-mass-autocomplete";
 import "angular-local-storage";
 import "angularjs-toaster";
 import "angular-ui-bootstrap";
+// needed for webpack to include it in the bundle and be used from invenio-search-js
+import * as d3 from "d3";
 
 import "./module";
 import "./suggestions";
 
-function mainCtrl(
-  $scope,
-  $sce,
-  $q,
-  $http,
-  localStorageService,
-  searchSuggestions
-) {
+function mainCtrl($scope, searchSuggestions) {
   $scope.dirty = {};
 
   $scope.updateHistory = function () {
@@ -80,7 +75,7 @@ function mainCtrl(
 
 angular
   .module("cdsSuggest", ["MassAutoComplete", "cdsSharedServices"])
-  .controller("mainCtrl", mainCtrl);
+  .controller("mainCtrl", ["$scope", "searchSuggestions", mainCtrl]);
 
 /**
  * Additional fun features
@@ -121,18 +116,19 @@ $(document).ready(function () {
 
 // Bootstrap modules
 angular.element(document).ready(function () {
-  angular.bootstrap(document.getElementById("invenio-search"), [
-    "cds",
-    "angular-loading-bar",
-    "ngDialog",
-    "invenioSearch",
-  ]);
-  angular.bootstrap(document.getElementById("cds-featured-video"), [
-    "cds",
-    "invenioSearch",
-  ]);
-  angular.bootstrap(document.getElementById("cds-recent-videos"), [
-    "cds",
-    "invenioSearch",
-  ]);
+  angular.bootstrap(
+    document.getElementById("invenio-search"),
+    ["cds", "angular-loading-bar", "ngDialog", "invenioSearch"],
+    { strictDi: true }
+  );
+  angular.bootstrap(
+    document.getElementById("cds-featured-video"),
+    ["cds", "invenioSearch"],
+    { strictDi: true }
+  );
+  angular.bootstrap(
+    document.getElementById("cds-recent-videos"),
+    ["cds", "invenioSearch"],
+    { strictDi: true }
+  );
 });

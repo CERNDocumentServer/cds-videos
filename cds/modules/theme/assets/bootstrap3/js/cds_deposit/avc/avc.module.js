@@ -203,13 +203,15 @@ angular
   ])
   .config(cdsDepositsConfig);
 
-angular
-  .module("cdsDeposit.filters")
-  .filter("taskRepr", function (taskRepresentations) {
-    return function (input) {
-      return taskRepresentations[input] || input;
-    };
-  });
+function taskRepr(taskRepresentations) {
+  return function (input) {
+    return taskRepresentations[input] || input;
+  };
+}
+
+taskRepr.$inject = ["taskRepresentations"];
+
+angular.module("cdsDeposit.filters").filter("taskRepr", taskRepr);
 
 angular.module("schemaForm").controller("invenioDynamicSelectController", [
   "$scope",

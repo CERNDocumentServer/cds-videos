@@ -31,14 +31,18 @@ import "./user_actions_logger";
 
 // Bootstrap modules
 angular.element(document).ready(function () {
-  angular.bootstrap(document.getElementById("cds-record"), [
-    "angular-loading-bar",
-    "cdsRecord",
-    "ngDialog",
-    "cds",
-    "ngModal",
-    "ngclipboard",
-    "invenioFiles.filters",
-    "ngSanitize",
-  ]);
+  angular.bootstrap(
+    document.getElementById("cds-record"),
+    [
+      "angular-loading-bar",
+      "cdsRecord",
+      "ngDialog",
+      "cds",
+      "ngModal",
+      "ngclipboard",
+      "invenioFiles.filters",
+      "ngSanitize",
+    ],
+    { strictDi: true }
+  );
 });

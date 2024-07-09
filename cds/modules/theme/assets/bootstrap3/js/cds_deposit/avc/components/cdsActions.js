@@ -166,8 +166,8 @@ function cdsActions() {
     bindings: {},
     require: { cdsDepositCtrl: "^cdsDeposit" },
     controller: cdsActionsCtrl,
-    templateUrl: function ($element, $attrs) {
-      return $attrs.template;
+    templateUrl: function (element, attrs) {
+      return attrs.template;
     },
   };
 }

@@ -1,6 +1,6 @@
 import angular from "angular";
 
-function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
+function cdsRemoteUploadCtrl($scope, $http, $q) {
   var that = this;
   this.$onInit = function () {
     $scope.startUrlUploads = function (urls) {
@@ -46,7 +46,7 @@ function cdsRemoteUploadCtrl($scope, $http, $element, $q) {
   };
 }
 
-cdsRemoteUploadCtrl.$inject = ["$scope", "$http", "$element", "$q"];
+cdsRemoteUploadCtrl.$inject = ["$scope", "$http", "$q"];
 
 function cdsRemoteUploader() {
   return {
@@ -59,8 +59,8 @@ function cdsRemoteUploader() {
       remoteChildrenReceiver: "@",
     },
     controller: cdsRemoteUploadCtrl,
-    templateUrl: function ($element, $attrs) {
-      return $attrs.template;
+    templateUrl: function (element, attrs) {
+      return attrs.template;
     },
   };
 }

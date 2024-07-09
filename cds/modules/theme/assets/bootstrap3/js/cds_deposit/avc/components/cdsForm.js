@@ -532,8 +532,8 @@ function cdsForm() {
       cdsDepositCtrl: "^cdsDeposit",
     },
     controller: cdsFormCtrl,
-    templateUrl: function ($element, $attrs) {
-      return $attrs.template;
+    templateUrl: function (element, attrs) {
+      return attrs.template;
     },
   };
 }
