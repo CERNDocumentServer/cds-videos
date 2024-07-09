@@ -13,5 +13,6 @@ function orderTasks(depositStates) {
     return ordered;
   };
 }
+orderTasks.$inject = ["depositStates"];
 
 angular.module("cdsDeposit.filters").filter("orderTasks", orderTasks);

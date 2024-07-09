@@ -1,5 +1,7 @@
 import angular from "angular";
 import _ from "lodash";
+import "angularjs-toaster";
+import "angular-local-storage";
 
 function cdsDepositsCtrl(
   $http,
@@ -8,8 +10,6 @@ function cdsDepositsCtrl(
   $window,
   $location,
   $element,
-  $interval,
-  depositStates,
   cdsAPI,
   urlBuilder,
   localStorageService,
@@ -404,8 +404,6 @@ cdsDepositsCtrl.$inject = [
   "$window",
   "$location",
   "$element",
-  "$interval",
-  "depositStates",
   "cdsAPI",
   "urlBuilder",
   "localStorageService",
@@ -435,8 +433,8 @@ function cdsDeposits() {
       currentUserEmail: "=?",
     },
     controller: cdsDepositsCtrl,
-    templateUrl: function ($element, $attrs) {
-      return $attrs.template;
+    templateUrl: function ($element, attrs) {
+      return attrs.template;
     },
   };
 }

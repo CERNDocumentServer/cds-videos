@@ -94,32 +94,35 @@ app.directive("cdsSearchResults", [
   },
 ]);
 
-app.run(function ($templateCache) {
-  // Template Cache for bootstrap tooltip
-  $templateCache.put(
-    "uib/template/tooltip/tooltip-html-popup.html",
-    '<div class="tooltip-arrow"></div>' +
-      '<div class="tooltip-inner" ng-bind-html="contentExp()"></div>'
-  );
-  // Template Cache for bootstrap popover
-  $templateCache.put(
-    "uib/template/popover/popover-html.html",
-    '<div class="arrow"></div>' +
-      '<div class="popover-inner">' +
-      '<h3 class="popover-title" ng-bind="uibTitle" ng-if="uibTitle"></h3>' +
-      '<div class="popover-content" ng-bind-html="contentExp()"></div>' +
-      "</div>"
-  );
-  // Template Cache for bootstrap alert
-  $templateCache.put(
-    "uib/template/alert/alert.html",
-    '<button ng-show="closeable" type="button" class="close" ng-click="close({$event: $event})">' +
-      '<span aria-hidden="true">&times;</span>' +
-      '<span class="sr-only">Close</span>' +
-      "</button>" +
-      "<div ng-transclude></div>"
-  );
-});
+app.run([
+  "$templateCache",
+  function ($templateCache) {
+    // Template Cache for bootstrap tooltip
+    $templateCache.put(
+      "uib/template/tooltip/tooltip-html-popup.html",
+      '<div class="tooltip-arrow"></div>' +
+        '<div class="tooltip-inner" ng-bind-html="contentExp()"></div>'
+    );
+    // Template Cache for bootstrap popover
+    $templateCache.put(
+      "uib/template/popover/popover-html.html",
+      '<div class="arrow"></div>' +
+        '<div class="popover-inner">' +
+        '<h3 class="popover-title" ng-bind="uibTitle" ng-if="uibTitle"></h3>' +
+        '<div class="popover-content" ng-bind-html="contentExp()"></div>' +
+        "</div>"
+    );
+    // Template Cache for bootstrap alert
+    $templateCache.put(
+      "uib/template/alert/alert.html",
+      '<button ng-show="closeable" type="button" class="close" ng-click="close({$event: $event})">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '<span class="sr-only">Close</span>' +
+        "</button>" +
+        "<div ng-transclude></div>"
+    );
+  },
+]);
 
 app.filter("previewIframe", [
   "$sce",

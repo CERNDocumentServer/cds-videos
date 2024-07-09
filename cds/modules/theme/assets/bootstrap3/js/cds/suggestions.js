@@ -7,8 +7,8 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
     var deferred = $q.defer();
 
     $http({
-      method: 'GET',
-      url: '/api/records/',
+      method: "GET",
+      url: "/api/records/",
       params: {
         q: term,
       },
@@ -24,7 +24,9 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
         });
       }
 
-      results = results.concat(localStorageService.get('cds.search.history') || []);
+      results = results.concat(
+        localStorageService.get("cds.search.history") || []
+      );
       deferred.resolve(results);
     });
 
@@ -34,7 +36,7 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
   function onSelect(selected, preventFormSubmit) {
     if (selected && !_.isEmpty(selected.value)) {
       try {
-        var searches = localStorageService.get('cds.search.history') || [];
+        var searches = localStorageService.get("cds.search.history") || [];
         var exists = _.find(searches, { value: selected.value });
 
         if (exists === undefined) {
@@ -42,9 +44,10 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
             searches.pop();
           }
 
-          selected.label = '<i class="fa fa-history text-primary pr-5"></i> ' + selected.label;
+          selected.label =
+            '<i class="fa fa-history text-primary pr-5"></i> ' + selected.label;
           searches.push(selected);
-          localStorageService.set('cds.search.history', searches);
+          localStorageService.set("cds.search.history", searches);
         }
 
         // submit form to trigger search
@@ -56,12 +59,11 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
            * running a $digest cycle. The error probably is comming from
            * massautocomplete.js that we use for autocompletion
            */
-          setTimeout(function() {
-            $('#cdsSearchFormSuggest').submit();
+          setTimeout(function () {
+            $("#cdsSearchFormSuggest").submit();
           });
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     }
   }
 
@@ -71,5 +73,8 @@ function searchSuggestions($sce, $q, $http, localStorageService) {
   };
 }
 
-angular.module('cdsSharedServices', ['ngSanitize', 'LocalStorageModule'])
-  .factory('searchSuggestions', searchSuggestions);
+searchSuggestions.$inject = ["$sce", "$q", "$http", "localStorageService"];
+
+angular
+  .module("cdsSharedServices", ["ngSanitize", "LocalStorageModule"])
+  .factory("searchSuggestions", searchSuggestions);
