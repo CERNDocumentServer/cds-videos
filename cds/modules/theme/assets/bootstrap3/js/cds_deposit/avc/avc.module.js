@@ -47,7 +47,8 @@ function cdsDepositsConfig(
   typeReducerProvider,
   localStorageServiceProvider,
   sfErrorMessageProvider,
-  $httpProvider
+  $httpProvider,
+  $compileProvider
 ) {
   $locationProvider.html5Mode({
     enabled: true,
@@ -157,29 +158,8 @@ function cdsDepositsConfig(
     },
   });
 
-  // // JWT Token
-  // // Search DOM if exists
-  // var authorized_token = document.getElementsByName("authorized_token");
-  // if (authorized_token.length > 0) {
-  //   var token = authorized_token[0].value;
-  //   // No cache on API requests
-  //   var headers = {
-  //     Authorization: "Bearer " + token,
-  //     "Content-Type": "application/json",
-  //   };
-  //   // Add no cache on all ``GET`` requests
-  //   var _get = _.merge(headers, {
-  //     "Cache-Control": "no-cache, no-store, must-revalidate",
-  //     Pragma: "no-cache",
-  //     Expires: 0,
-  //   });
-  //   $httpProvider.defaults.headers["delete"] = headers;
-  //   $httpProvider.defaults.headers["post"] = headers;
-  //   $httpProvider.defaults.headers["put"] = headers;
-  // }
-
   // Optimize Angular on production
-  // $compileProvider.debugInfoEnabled(false);
+  $compileProvider.debugInfoEnabled(false);
   var headers = {
     "Content-Type": "application/json",
   };
@@ -267,23 +247,26 @@ angular.module("schemaForm").controller("invenioDynamicSelectController", [
 ]);
 
 // update angular-schema-form, bootstrap-decorator.js, config by re-defining some of the templates
-angular.module('schemaForm').config(['schemaFormDecoratorsProvider', function(decoratorsProvider) {
-  const base = '/static/templates/cds_deposit/angular-schema-form/';
-  const decorator = decoratorsProvider.decorator();
-  decorator["array"].template = base + "array.html";
-  decorator["button"].template = base + "button.html";
-  decorator["checkbox"].template = base + "checkbox.html";
-  decorator["ckeditor"].template = base + "ckeditor.html";
-  decorator["default"].template = base + "default.html";
-  decorator["fieldset"].template = base + "fieldset.html";
-  decorator["radios-inline"].template = base + "radios_inline.html";
-  decorator["radios"].template = base + "radios.html";
-  decorator["select"].template = base + "select.html";
-  decorator["strapselect"].template = base + "strapselect.html";
-  decorator["textarea"].template = base + "textarea.html";
-  decorator["uiselect"].template = base + "uiselect.html";
-  decorator["uiselectmultiple"].template = base + "uiselectmultiple.html";
-}]);
+angular.module("schemaForm").config([
+  "schemaFormDecoratorsProvider",
+  function (decoratorsProvider) {
+    const base = "/static/templates/cds_deposit/angular-schema-form/";
+    const decorator = decoratorsProvider.decorator();
+    decorator["array"].template = base + "array.html";
+    decorator["button"].template = base + "button.html";
+    decorator["checkbox"].template = base + "checkbox.html";
+    decorator["ckeditor"].template = base + "ckeditor.html";
+    decorator["default"].template = base + "default.html";
+    decorator["fieldset"].template = base + "fieldset.html";
+    decorator["radios-inline"].template = base + "radios_inline.html";
+    decorator["radios"].template = base + "radios.html";
+    decorator["select"].template = base + "select.html";
+    decorator["strapselect"].template = base + "strapselect.html";
+    decorator["textarea"].template = base + "textarea.html";
+    decorator["uiselect"].template = base + "uiselect.html";
+    decorator["uiselectmultiple"].template = base + "uiselectmultiple.html";
+  },
+]);
 
 // Initialize the module
 angular.module("cdsDeposit", [

@@ -1,6 +1,8 @@
 import angular from "angular";
 
-import { getCookie } from "../providers/depositActions";
+import { getCookie } from "../../../getCookie";
+
+import "../providers/depositActions";
 function cdsAPI($q, $http, depositActions, urlBuilder) {
   function action(url, method, payload, headers) {
     var requestConfig = {

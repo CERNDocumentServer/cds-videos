@@ -27,6 +27,8 @@
 
 import angular from "angular";
 
+import { getCookie } from "../getCookie";
+
 // Controllers
 
 /**
@@ -50,27 +52,6 @@ function cdsRecordController($scope, $sce, $http) {
 
   // Record Warn - if the cdsRecord has any warning
   vm.cdsRecordWarning = null;
-
-  ////////////
-
-  // Functions
-
-  // function from https://www.w3schools.com/js/js_cookies.asp
-  function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(";");
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == " ") {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return "";
-  }
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",

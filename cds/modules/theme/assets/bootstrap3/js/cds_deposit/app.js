@@ -54,14 +54,13 @@ $(document).ready(function () {
     );
   }
 
-  $('.dropdown-toggle').dropdown();
+  $(".dropdown-toggle").dropdown();
 });
 
 angular.element(document).ready(function () {
-  angular.bootstrap(document.getElementById("cds-deposit"), [
-    "cds",
-    "cdsDeposit",
-    "ngModal",
-    "ngSanitize",
-  ]);
+  angular.bootstrap(
+    document.getElementById("cds-deposit"),
+    ["cds", "cdsDeposit", "ngModal", "ngSanitize"],
+    { strictDi: true }
+  );
 });
