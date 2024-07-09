@@ -26,7 +26,6 @@ import angular from "angular";
 import "ng-dialog";
 import "clipboard";
 import "ngclipboard";
-import d3 from "d3";
 import "angular-loading-bar";
 import "invenio-search-js/dist/invenio-search-js";
 import "angular-sanitize";
@@ -37,7 +36,6 @@ import "angular-ui-bootstrap";
 
 import "./module";
 import "./suggestions";
-
 
 function mainCtrl(
   $scope,

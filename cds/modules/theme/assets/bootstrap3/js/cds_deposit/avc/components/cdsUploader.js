@@ -1,7 +1,7 @@
 import angular from "angular";
 import _ from "lodash";
 
-import { getCookie } from "../providers/depositActions";
+import { getCookie } from "../../../getCookie";
 
 function cdsUploaderCtrl(
   $scope,
