@@ -8,7 +8,7 @@ import "objectpath";
 import "angular-sanitize";
 import "ui-select";
 
-function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
+function cdsFormCtrl($scope, $http, $q) {
   var that = this;
 
   // Default options for schema forms
@@ -514,13 +514,7 @@ function cdsFormCtrl($scope, $http, $q, schemaFormDecorators, $templateCache) {
   };
 }
 
-cdsFormCtrl.$inject = [
-  "$scope",
-  "$http",
-  "$q",
-  "schemaFormDecorators",
-  "$templateCache",
-];
+cdsFormCtrl.$inject = ["$scope", "$http", "$q"];
 
 function cdsForm() {
   return {
