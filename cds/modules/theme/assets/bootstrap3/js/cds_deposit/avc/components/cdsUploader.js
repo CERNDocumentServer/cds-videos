@@ -585,7 +585,6 @@ function cdsUploader() {
     templateUrl: [
       "$element",
       "$attrs",
-      ,
       function ($element, $attrs) {
         return $attrs.template;
       },

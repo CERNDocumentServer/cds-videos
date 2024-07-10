@@ -55,3 +55,7 @@ cds fixtures pages
 cds fixtures keywords
 cds fixtures licenses
 # cds fixtures records
+
+# Reindex opendefinition licenses
+cds index reindex -t od_lic --yes-i-know
+cds index run

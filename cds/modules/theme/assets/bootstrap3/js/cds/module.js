@@ -222,71 +222,80 @@ app.filter("findContextType", function () {
 });
 
 // Find master video file in record's files
-app.filter("findMaster", function ($filter) {
-  return function (record) {
-    return $filter("findContextType")(record, "master");
-  };
-});
+app.filter("findMaster", [
+  "$filter",
+  function ($filter) {
+    return function (record) {
+      return $filter("findContextType")(record, "master");
+    };
+  },
+]);
 
 // Find closest video resolution
-app.filter("findResolution", function ($filter) {
-  return function (record) {
-    var height = parseInt(record["tags"]["height"], 10);
-    var width = parseInt(record["tags"]["width"], 10);
+app.filter("findResolution", [
+  "$filter",
+  function ($filter) {
+    return function (record) {
+      var height = parseInt(record["tags"]["height"], 10);
+      var width = parseInt(record["tags"]["width"], 10);
 
-    var selectedResolution = height.toString().concat("p");
+      var selectedResolution = height.toString().concat("p");
 
-    var heightsToQualities = {
-      240: "240p",
-      360: "360p",
-      480: "480p",
-      720: "720p",
-      1024: "1024p",
-      1080: "TBD",
-      2160: "4K",
-      4320: "8K",
-    };
-
-    Object.keys(heightsToQualities).forEach(function (resolution) {
-      if (height >= resolution) {
-        selectedResolution = heightsToQualities[resolution];
-      }
-    });
-
-    if (selectedResolution === "TBD") {
-      var widthToQualities = {
-        1920: "1080p",
-        2048: "2K",
+      var heightsToQualities = {
+        240: "240p",
+        360: "360p",
+        480: "480p",
+        720: "720p",
+        1024: "1024p",
+        1080: "TBD",
+        2160: "4K",
+        4320: "8K",
       };
 
-      // default case with first value
-      selectedResolution = widthToQualities[1920];
-
-      Object.keys(widthToQualities).forEach(function (resolution) {
-        if (width >= resolution) {
-          selectedResolution = widthToQualities[resolution];
+      Object.keys(heightsToQualities).forEach(function (resolution) {
+        if (height >= resolution) {
+          selectedResolution = heightsToQualities[resolution];
         }
       });
-    }
 
-    return selectedResolution;
-  };
-});
+      if (selectedResolution === "TBD") {
+        var widthToQualities = {
+          1920: "1080p",
+          2048: "2K",
+        };
+
+        // default case with first value
+        selectedResolution = widthToQualities[1920];
+
+        Object.keys(widthToQualities).forEach(function (resolution) {
+          if (width >= resolution) {
+            selectedResolution = widthToQualities[resolution];
+          }
+        });
+      }
+
+      return selectedResolution;
+    };
+  },
+]);
 
 // Find first frame of master video file
-app.filter("findPoster", function ($filter) {
-  return function (record) {
-    var poster = $filter("findContextType")(record, "poster");
-    if (poster) {
-      return poster;
-    } else {
-      var masterFile = $filter("findMaster")(record);
-      return _.find(masterFile["frame"], function (frame) {
-        return frame.key === "frame-1.jpg";
-      });
-    }
-  };
-});
+app.filter("findPoster", [
+  "$filter",
+  function ($filter) {
+    return function (record) {
+      var poster = $filter("findContextType")(record, "poster");
+      if (poster) {
+        return poster;
+      } else {
+        var masterFile = $filter("findMaster")(record);
+        return _.find(masterFile["frame"], function (frame) {
+          return frame.key === "frame-1.jpg";
+        });
+      }
+    };
+  },
+]);
 
 // Find gif animation of master video file's frames
 app.filter("findGif", function () {
@@ -298,27 +307,30 @@ app.filter("findGif", function () {
 });
 
 // Get FlaskIIIF resize link
-app.filter("iiif", function ($filter) {
-  return function (record, showGif, size) {
-    try {
-      var masterFile = $filter("findMaster")(record);
-      var filterFun = showGif ? "findGif" : "findPoster";
-      var filterArg = showGif ? masterFile : record;
-      var objectVersion = $filter(filterFun)(filterArg);
-      return _.template(
-        "/api/iiif/v2/<%=bucket%>:<%=version_id%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
-      )({
-        bucket: objectVersion.bucket_id,
-        key: objectVersion.key,
-        version_id: objectVersion.version_id,
-        size: size.join(","),
-        ext: showGif ? "gif" : "png",
-      });
-    } catch (error) {
-      return "/static/img/not_found.png";
-    }
-  };
-});
+app.filter("iiif", [
+  "$filter",
+  function ($filter) {
+    return function (record, showGif, size) {
+      try {
+        var masterFile = $filter("findMaster")(record);
+        var filterFun = showGif ? "findGif" : "findPoster";
+        var filterArg = showGif ? masterFile : record;
+        var objectVersion = $filter(filterFun)(filterArg);
+        return _.template(
+          "/api/iiif/v2/<%=bucket%>:<%=version_id%>:<%=key%>/full/!<%=size%>/0/default.<%=ext%>"
+        )({
+          bucket: objectVersion.bucket_id,
+          key: objectVersion.key,
+          version_id: objectVersion.version_id,
+          size: size.join(","),
+          ext: showGif ? "gif" : "png",
+        });
+      } catch (error) {
+        return "/static/img/not_found.png";
+      }
+    };
+  },
+]);
 
 app.filter("ellipsis", function () {
   return function (text, length) {
