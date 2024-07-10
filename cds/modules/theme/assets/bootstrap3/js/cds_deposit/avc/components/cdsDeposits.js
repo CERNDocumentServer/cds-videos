@@ -9,7 +9,6 @@ function cdsDepositsCtrl(
   $scope,
   $window,
   $location,
-  $element,
   cdsAPI,
   urlBuilder,
   localStorageService,
@@ -403,7 +402,6 @@ cdsDepositsCtrl.$inject = [
   "$scope",
   "$window",
   "$location",
-  "$element",
   "cdsAPI",
   "urlBuilder",
   "localStorageService",
@@ -433,9 +431,13 @@ function cdsDeposits() {
       currentUserEmail: "=?",
     },
     controller: cdsDepositsCtrl,
-    templateUrl: function ($element, attrs) {
-      return attrs.template;
-    },
+    templateUrl: [
+      "$element",
+      "$attrs",
+      function ($element, $attrs) {
+        return $attrs.template;
+      },
+    ],
   };
 }
 
