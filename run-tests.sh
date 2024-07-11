@@ -19,7 +19,19 @@
 # along with CDS; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-pydocstyle --match-dir='[^\.|(cds\/modules\/record_split)].*' cds && \
-isort -rc -c -df **/*.py && \
-check-manifest --ignore ".ci-*,package-lock.json" && \
-py.test tests/unit
+# Quit on errors
+set -o errexit
+
+# Quit on unbound symbols
+set -o nounset
+
+# Always bring down docker services
+function cleanup() {
+  eval "$(docker-services-cli down --env)"
+}
+trap cleanup EXIT
+python -m check_manifest
+eval "$(docker-services-cli up --db ${DB:-postgresql} --search ${SEARCH:-opensearch2} --cache ${CACHE:-redis} --env)"
+python -m pytest
+tests_exit_code=$?
+exit "$tests_exit_code"
