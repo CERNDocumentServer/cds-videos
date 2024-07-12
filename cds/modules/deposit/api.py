@@ -388,11 +388,10 @@ class CDSDeposit(Deposit):
             self.files.bucket.sync(bucket=bucket, delete_extras=True)
             self._fix_tags_refs_to_master(bucket=bucket)
             # dump after fixing references
-            record["_files"] = self.files.dumps(bucket=bucket.id)
-
+            record["_files"] = record.files.dumps()
             record = self._generate_smil_file(record.id, record, bucket)
             # dump after smil generation
-            record["_files"] = self.files.dumps(bucket=bucket.id)
+            record["_files"] = record.files.dumps()
             bucket.locked = True
 
         return record
