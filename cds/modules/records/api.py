@@ -262,7 +262,6 @@ class Keyword(Record):
 
         data["suggest_name"] = {
             "input": name,
-            # "payload": {"key_id": key_id, "name": name},
         }
         return super(Keyword, cls).create(data=data, id_=id_, **kwargs)
 
@@ -294,6 +293,5 @@ class Category(Record):
 
         data["suggest_name"] = {
             "input": data.get("name", None),
-            # "payload": {"types": data.get("types", [])},
         }
         return super(Category, cls).create(data=data, id_=id_, **kwargs)
