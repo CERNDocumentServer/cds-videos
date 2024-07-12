@@ -1075,16 +1075,15 @@ class Video(CDSDeposit):
                     for o in sorted_files_from_bucket(self._bucket)
                     if pattern.match(o.key)
                 ][0]
+                ext = pattern.findall(poster.key)[0]
+                # frame tags
+                ObjectVersionTag.create_or_update(poster, "content_type", ext)
+                ObjectVersionTag.create_or_update(poster, "context_type", "poster")
+                ObjectVersionTag.create_or_update(poster, "media_type", "image")
+                # refresh object
+                db.session.refresh(poster)
             except IndexError:
                 return
-
-            ext = pattern.findall(poster.key)[0]
-            # frame tags
-            ObjectVersionTag.create_or_update(poster, "content_type", ext)
-            ObjectVersionTag.create_or_update(poster, "context_type", "poster")
-            ObjectVersionTag.create_or_update(poster, "media_type", "image")
-            # refresh object
-            db.session.refresh(poster)
 
 
 project_resolver = Resolver(
