@@ -46,7 +46,6 @@
       video-extensions=".mp4,.mkv,.mov,.m4v"
       project-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_JSONSCHEMA.project, _external=True) }}"
       project-form="{{ url_for('static', filename=config.DEPOSIT_DEFAULT_SCHEMAFORM) }}"
-      dropbox-app-key="{{ config.DEPOSIT_DROPBOX_APP_KEY }}"
       video-init="/api/deposits/video/"
       video-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_JSONSCHEMA.video, _external=True) }}"
       video-form="{{ url_for('static', filename='json/cds_deposit/forms/video.json') }}"
