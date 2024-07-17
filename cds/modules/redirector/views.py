@@ -33,35 +33,34 @@ from six.moves.urllib.parse import urlencode, urlparse
 from sqlalchemy.orm.exc import NoResultFound
 
 blueprint = Blueprint(
-    'cds_redirector',
+    "cds_redirector",
     __name__,
-    template_folder='templates',
-    static_folder='static',
+    template_folder="templates",
+    static_folder="static",
 )
 
 api_blueprint = Blueprint(
-    'cds_api_redirector',
+    "cds_api_redirector",
     __name__,
 )
 
 
 def recid_from_rn(report_number):
     """Retrieve a report number's corresponding record ID."""
-    object_uuid = PersistentIdentifier.query.filter_by(
-        pid_type='rn',
-        pid_value=report_number
-    ).one().object_uuid
+    object_uuid = (
+        PersistentIdentifier.query.filter_by(pid_type="rn", pid_value=report_number)
+        .one()
+        .object_uuid
+    )
 
     record = Record.get_record(object_uuid).replace_refs()
-    videos = record.get('videos')
+    videos = record.get("videos")
     if videos:
-        return videos[0]['recid']
-    return record.get('recid')
+        return videos[0]["recid"]
+    return record.get("recid")
 
 
-# /record/<pid_value>/embed/<filename>
-# /video/<report_number>
-@blueprint.route('/video/<report_number>', strict_slashes=False)
+@blueprint.route("/video/<report_number>", strict_slashes=False)
 def video_embed_alias(report_number):
     """Redirect from the old video embed URL to the new one."""
     try:
@@ -69,30 +68,31 @@ def video_embed_alias(report_number):
     except NoResultFound:
         abort(404)
 
-    return redirect(url_for(
-        'invenio_records_ui.recid_embed_default', pid_value=recid,
-        **request.args), code=301)
+    return redirect(
+        url_for(
+            "invenio_records_ui.recid_embed_default", pid_value=recid, **request.args
+        ),
+        code=301,
+    )
 
 
-# /record/<:id:>/export/drupal
-# /api/mediaexport?id=<report_number>
-@api_blueprint.route('/mediaexport', strict_slashes=False)
+@api_blueprint.route("/mediaexport", strict_slashes=False)
 def drupal_export_alias():
     """Redirect from the old drupal export URL to the new one."""
-    rn = request.args.get('id', '')
+    rn = request.args.get("id", "")
 
     try:
         recid = recid_from_rn(rn)
     except NoResultFound:
         abort(404)
 
-    api_url = url_for('invenio_records_rest.recid_item', pid_value=recid,
-                      _external=True)
+    api_url = url_for(
+        "invenio_records_rest.recid_item", pid_value=recid, _external=True
+    )
 
-    arg_name = current_app.config['REST_MIMETYPE_QUERY_ARG_NAME']
-    format_param = {arg_name: 'drupal'}
+    arg_name = current_app.config["REST_MIMETYPE_QUERY_ARG_NAME"]
+    format_param = {arg_name: "drupal"}
 
-    api_url += ('&' if urlparse(api_url).query else '?') + urlencode(
-        format_param)
+    api_url += ("&" if urlparse(api_url).query else "?") + urlencode(format_param)
 
     return redirect(api_url, code=301)

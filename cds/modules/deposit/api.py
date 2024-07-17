@@ -392,6 +392,7 @@ class CDSDeposit(Deposit):
             record = self._generate_smil_file(record.id, record, bucket)
             # dump after smil generation
             record["_files"] = record.files.dumps()
+            print(self.files.dumps())
             bucket.locked = True
 
         return record
@@ -501,8 +502,6 @@ class Project(CDSDeposit):
         # Add the current user to the ``_access.update`` list
         try:
             data["_access"]["update"] = [current_user.email]
-            # this is not needed as it is used only for _access.update
-            # data["_cds"]["current_user_mail"] = current_user.email
         except AttributeError:
             current_app.logger.warning(
                 "No current user found, _access.update will stay empty."
