@@ -20,14 +20,12 @@
 """CDS Stats."""
 
 from __future__ import absolute_import, print_function
-from webargs.flaskparser import use_kwargs
-from webargs import fields
-
-from cds.modules.records.permissions import record_read_permission_factory
-from flask import Blueprint, current_app, jsonify, make_response
+from flask import Blueprint, current_app, jsonify, make_response, request, abort
 from flask.views import MethodView
+from invenio_files_rest.models import ObjectVersion
 from invenio_records_rest.views import need_record_permission, pass_record
 
+from cds.modules.records.permissions import record_read_permission_factory
 from cds.modules.stats.event_builders import file_download_event_builder
 
 from .api import Statistics
@@ -63,9 +61,6 @@ class StatsResource(MethodView):
     @need_record_permission("read_permission_factory")
     def get(self, pid, stat, record, **kwargs):
         """Handle GET request."""
-
-        from .api import Statistics
-
         if stat == "pageview":
             stats = Statistics.get_record_stats(recid=pid.pid_value)
         elif stat == "media-record-view":
@@ -85,9 +80,6 @@ class StatsResource(MethodView):
     @need_record_permission("read_permission_factory")
     def post(self, pid, stat, record, **kwargs):
         """."""
-        from flask import request, abort
-        from invenio_files_rest.models import ObjectVersion
-
         data = request.get_json()
         bucket_id = record.get("_buckets", {}).get("record")
 
