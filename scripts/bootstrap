@@ -30,7 +30,7 @@ script_path=$(dirname "$0")
 requirements_file=${1:-'requirements.pinned.txt'}
 
 pip install -r $requirements_file
-pip install -e .
+pip install -e . --upgrade
 
 pip install -e git+https://github.com/zzacharo/invenio-stats.git@index-templates#egg=invenio-stats
 
