@@ -88,24 +88,6 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
-
-  # es:
-  #   build:
-  #     context: ./docker/es/
-  #     dockerfile: Dockerfile.arm64
-  #   restart: "always"
-  #   environment:
-  #     - bootstrap.memory_lock=true
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #   platform: linux/amd64
-  #   ulimits:
-  #     memlock:
-  #       soft: -1
-  #       hard: -1
-  #   mem_limit: 1g
-  #   ports:
-  #     - "9200:9200"
-  #     - "9300:9300"
   search:
     image: opensearchproject/opensearch:2
     restart: "unless-stopped"
