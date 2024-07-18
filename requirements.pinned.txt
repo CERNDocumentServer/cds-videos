@@ -22,8 +22,5 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-# CDS branches
--r requirements.topical.branches.txt
-
 # Pinned base requirements
 -r requirements.packages.txt
