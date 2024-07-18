@@ -23,11 +23,5 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-CWD=`pwd`
-cds npm
-cd ${VIRTUAL_ENV}/var/instance/static
-npm install
-cd ${CWD}
 cds collect -v
-cds assets build
 cds webpack buildall

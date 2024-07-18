@@ -11,7 +11,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install apt-file -y && apt-f
 RUN cd /tmp && curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh && bash nodesource_setup.sh
 
 RUN apt-get install -y nodejs git curl vim ffmpeg libsasl2-dev libldap2-dev libssl-dev
-RUN pip install --upgrade "setuptools<58" wheel "pip>=20,<21" "uwsgi-tools==1.1.1" "uwsgitop==0.11"
+RUN pip install --upgrade "uwsgi-tools==1.1.1" "uwsgitop==0.12"
 
 RUN python -m site
 RUN python -m site --user-site
