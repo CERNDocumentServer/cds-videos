@@ -76,7 +76,7 @@ def convert_file(input_filename, output_filename):
 
 
 if __name__ == "__main__":
-    input_filename = "/Users/zzacharo/projects/cds-videos/tmp/es/script_indices/esdump_events.cds_videos_media_view-2023.txt"  # Replace with your input file path
+    input_filename = "/Users/zzacharo/projects/cds-videos/tmp/es/script_indices/esdump_events.cds_videos_media_view-2023.txt"  # Replace with your input file path
     output_filename = (
         "tmp/es/script_indices/events.cds_videos_media_view_log_cds-2023.txt"  #
     )

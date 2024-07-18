@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of CERN Document Server.
-# Copyright (C) 2019 CERN.
+# Copyright (C) 2019-2024 CERN.
 #
 # CERN Document Server is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -25,25 +25,21 @@
 
 set -e
 
-CWD=`pwd`
+script_path=$(dirname "$0")
 
 requirements_file=${1:-'requirements.pinned.txt'}
 
 pip install -r $requirements_file
 pip install -e .
 
-# npm update
-# npm install -g \
-#     sass@1.50.1 \
-#     clean-css@3.4.24 \
-#     uglify-js \
-#     requirejs
+# Install application code and entrypoints from 'setup.py'
+pip install -e $script_path/.. --upgrade
+pip install -e git+https://github.com/zzacharo/invenio-admin.git@videos-upgrade#egg=invenio-admin
+pip install -e git+https://github.com/zzacharo/invenio-sequencegenerator.git@videos-upgrade#egg=invenio-sequencegenerator
+pip install -e git+https://github.com/zzacharo/invenio-stats.git@index-templates#egg=invenio-stats
+pip install -e git+https://github.com/inveniosoftware/invenio-opendefinition.git@master#egg=invenio-opendefinition
 
-# Setup and build assets
-#cds npm
-cd ${VIRTUAL_ENV}/var/instance/static
-npm install
-cd ${CWD}
-cds collect -v
-cds assets build
-cds webpack buildall
+
+# Build assets
+invenio collect -v
+invenio webpack buildall
