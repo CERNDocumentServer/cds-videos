@@ -258,30 +258,12 @@ SENTRY_DSN = None
 # Search
 ###############################################################################
 
-ELASTICSEARCH_HOSTS = ast.literal_eval(
-    os.environ.get("ELASTICSEARCH_HOSTS", "['localhost']")
+SEARCH_HOSTS = ast.literal_eval(
+    os.environ.get(
+        "SEARCH_HOSTS",
+        "[{'host': 'localhost', 'url_prefix': '', 'timeout': 30, 'port': 9200, 'use_ssl': False, 'verify_certs': False}]",
+    )
 )
-ELASTICSEARCH_PORT = int(os.environ.get("ELASTICSEARCH_PORT", "9200"))
-ELASTICSEARCH_USER = os.environ.get("ELASTICSEARCH_USER")
-ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
-ELASTICSEARCH_URL_PREFIX = os.environ.get("ELASTICSEARCH_URL_PREFIX", "")
-ELASTICSEARCH_USE_SSL = _parse_env_bool("ELASTICSEARCH_USE_SSL")
-ELASTICSEARCH_VERIFY_CERTS = _parse_env_bool("ELASTICSEARCH_VERIFY_CERTS")
-
-es_hosts = []
-for host in ELASTICSEARCH_HOSTS:
-    es_host = {"host": host, "port": ELASTICSEARCH_PORT}
-    if ELASTICSEARCH_USER and ELASTICSEARCH_PASSWORD:
-        es_host["http_auth"] = (ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD)
-    if ELASTICSEARCH_URL_PREFIX:
-        es_host["url_prefix"] = ELASTICSEARCH_URL_PREFIX
-    if ELASTICSEARCH_USE_SSL is not None:
-        es_host["use_ssl"] = ELASTICSEARCH_USE_SSL
-    if ELASTICSEARCH_VERIFY_CERTS is not None:
-        es_host["verify_certs"] = ELASTICSEARCH_VERIFY_CERTS
-    es_hosts.append(es_host)
-
-SEARCH_HOSTS = es_hosts
 
 SEARCH_INDEX_PREFIX = "cds-videos-sandbox-"
 
