@@ -1550,23 +1550,6 @@ DEPOSIT_RESPONSE_MESSAGES = dict(
     edit=dict(message="Edited succesfully."),
 )
 
-# DEPOSIT_FORM_TEMPLATES_BASE = "templates/cds_deposit/angular-schema-form"
-# DEPOSIT_FORM_TEMPLATES = {
-#     # "array": "array.html",
-#     # "button": "button.html",
-#     # "checkbox": "checkbox.html",
-#     "default": "default.html",
-#     # "fieldset": "fieldset.html",
-#     # "radios_inline": "radios_inline.html",
-#     # "radios": "radios.html",
-#     # "ckeditor": "textarea.html",
-#     # "select": "select.html",
-#     # "strapselect": "strapselect.html",
-#     # "textarea": "textarea.html",
-#     "uiselect": "uiselect.html",
-#     "uiselectmultiple": "uiselectmultiple.html",
-# }
-
 # App key for uploading files from dropbox
 DEPOSIT_DROPBOX_APP_KEY = "CHANGE_ME"
 
