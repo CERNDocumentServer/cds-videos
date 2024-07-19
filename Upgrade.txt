@@ -1,16 +1,15 @@
 # Notes
 
-- index: not_analyzed
-- type: completion for suggestions
--[x] ffmpeg: gif method was moved in module
-- admin panel shows Banners
-- test statistics, should we install raven?
-- missing os-v2 invenio_opendefinition.mappings
-- existing kw need updating, remove payload as it is not supported
+- [x] type: completion for suggestions
+- [x] ffmpeg: gif method was moved in module
+- [x] admin panel shows Banners
+- [x] test statistics, should we install raven?
+- [x] missing os-v2 invenio_opendefinition.mappings
+- [x] existing kw need updating, remove payload as it is not supported
 - project deletion from the UI fails to index the project as it tries to index it by id which results to a PIDDeletedError
 - cds-js module to be archived
-- integrate invenio-stats and adapt code accordingly
-- check https://cern.service-now.com/service-portal?id=outage&n=OTG0150438
+- [x] integrate invenio-stats and adapt code accordingly
+- [x] check https://cern.service-now.com/service-portal?id=outage&n=OTG0150438
   - check krb ticket by running 'klist -e -c /var/run/krb5-tokens/token.krb5'
 
 # DB update
