@@ -1682,16 +1682,3 @@ CDS_LDAP_URL = "ldap://xldap.cern.ch"
 
 # Sets the location to share the video files among the different tasks
 CDS_FILES_TMP_FOLDER = "/tmp/videos"
-
-# Invenio APP
-APP_THEME = ["bootstrap3"]
-
-# Invenio-Search
-# ==============
-SEARCH_INDEX_PREFIX = "cds-videos-prod-"
-
-REST_CSRF_ENABLED = True
-
-ACCOUNTS_JWT_ENABLE = False
-
-CELERY_TASK_ALWAYS_EAGER = False
