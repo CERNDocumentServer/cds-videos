@@ -267,10 +267,6 @@ SEARCH_HOSTS = ast.literal_eval(
 
 SEARCH_INDEX_PREFIX = "cds-videos-sandbox-"
 
-# needed when verify cert is disabled see:
-# https://github.com/elastic/elasticsearch-py/issues/712
-SEARCH_CLIENT_CONFIG = {"connection_class": RequestsHttpConnection}
-
 # Search API endpoint.
 SEARCH_UI_SEARCH_API = "/api/records/"
 # Name of the search index used.
