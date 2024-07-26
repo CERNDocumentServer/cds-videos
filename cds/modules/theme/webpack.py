@@ -93,7 +93,7 @@ theme = WebpackThemeBundle(
                 "font-awesome": "~4.5.0",
                 "ngmodal": "~2.0.1",
                 "cds": "~0.2.0",
-                "angular-schema-form-ckeditor": "git+https://github.com/webcanvas/angular-schema-form-ckeditor.git#b213fa934759a18b1436e23bfcbd9f0f730f1296",
+                "angular-schema-form-ckeditor": "git+https://github.com/CERNDocumentServer/cds-videos-angular-schema-ckeditor",
                 "ckeditor": "4.12.1",
                 "rr-ng-ckeditor": "~0.2.1",
             },
