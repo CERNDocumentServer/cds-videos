@@ -15,7 +15,6 @@ blinker==1.8.2
 cachelib==0.9.0
 cairocffi==1.7.1
 CairoSVG==1.0.22
--e git+https://github.com/zzacharo/cds-videos.git@0413cd1a384e8e9aa0e42f546015f744a20fe528#egg=CDS
 celery==5.2.7
 certifi==2024.7.4
 cffi==1.16.0
