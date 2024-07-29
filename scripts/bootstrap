@@ -35,6 +35,6 @@ pip install -e . --upgrade
 pip install -e git+https://github.com/zzacharo/invenio-stats.git@index-templates#egg=invenio-stats
 pip install -e git+https://github.com/ntarocco/invenio-search.git@fix-db-session#egg=invenio-search
 
-# Build assets
+# # Build assets
 invenio collect -v
 invenio webpack buildall
