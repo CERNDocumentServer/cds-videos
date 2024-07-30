@@ -142,7 +142,7 @@
             r.setRequestHeader('Content-Type', 'application/json');
             r.setRequestHeader( "X-CSRFToken", getCookie("csrftoken"));
             var data = JSON.stringify({
-                key: "{{obj.key}}"
+                key: "{{obj.file.key}}"
             });
             r.onload = function() {
               if (r.status >= 200 && r.status < 400) {
