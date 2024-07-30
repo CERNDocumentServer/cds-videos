@@ -84,7 +84,7 @@ services:
       - "5432:5432"
   mq:
     image: rabbitmq:3-management
-    restart: "always"
+    restart: "unless-stopped"
     ports:
       - "15672:15672"
       - "5672:5672"
