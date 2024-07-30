@@ -52,7 +52,10 @@ def file_download_event_builder(event, sender_app, obj=None, record=None, **kwar
 
 
 def media_record_view_event_builder(event, sender_app, obj=None, record=None, **kwargs):
-    """Build a file-download event."""
+    """Build a media record view event.
+
+    This is the event tracking users clicking the play button on videos.
+    """
     tags = obj.get_tags()
     # File information
     content_type = splitext(obj.key)[1][1:].lower()
