@@ -35,14 +35,13 @@ include .jshintrc
 include COPYING
 include Dockerfile
 include Dockerfile.base
-include babel.cfg
+include babel.ini
 include pytest.ini
+include scripts/assets-watch
 include scripts/bootstrap
 include scripts/celery
-include scripts/console
 include scripts/server
 include scripts/setup
-include scripts/update
 recursive-include .github *
 recursive-include benchmarks *.py
 recursive-include cds *.css
