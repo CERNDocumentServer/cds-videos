@@ -27,12 +27,15 @@
 from __future__ import absolute_import, print_function
 
 from flask_security import login_user
-from invenio_accounts.models import User
-from cds.modules.deposit.api import \
-    Project, deposit_videos_resolver, record_video_resolver, \
-    record_project_resolver
-
 from helpers import prepare_videos_for_publish
+from invenio_accounts.models import User
+
+from cds.modules.deposit.api import (
+    Project,
+    deposit_videos_resolver,
+    record_project_resolver,
+    record_video_resolver,
+)
 
 
 def video_resolver_sorted(ids):

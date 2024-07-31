@@ -29,12 +29,15 @@ from __future__ import absolute_import, print_function
 import uuid
 
 import pytest
-from cds.modules.records.permissions import (has_admin_permission,
-                                             record_permission_factory)
 from flask_principal import RoleNeed, identity_loaded
 from flask_security import login_user
 from invenio_accounts.models import User
 from invenio_records.api import Record
+
+from cds.modules.records.permissions import (
+    has_admin_permission,
+    record_permission_factory,
+)
 
 
 @pytest.mark.parametrize('access,action,is_allowed', [

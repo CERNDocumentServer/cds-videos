@@ -28,14 +28,14 @@ from __future__ import absolute_import, print_function
 
 import json
 
-from invenio_search import current_search_client
-
-from cds.modules.records.search import RecordVideosSearch
 from flask import g, url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
+from invenio_search import current_search_client
+
+from cds.modules.records.search import RecordVideosSearch
 
 
 def mock_provides(needs):

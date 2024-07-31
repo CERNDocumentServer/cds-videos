@@ -29,12 +29,15 @@ from __future__ import absolute_import, print_function
 import copy
 import json
 import os
+import random
+import uuid
 from os.path import join
 
 import pkg_resources
 import six
 from celery import shared_task, states
-from flask_security import login_user, current_user
+from flask import current_app
+from flask_security import current_user, login_user
 from invenio_accounts.models import User
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
@@ -45,18 +48,16 @@ from invenio_search import current_search_client
 from six import BytesIO
 
 from cds.modules.deposit.api import Project, Video
-from cds.modules.records.api import Category, Keyword
-from cds.modules.records.minters import catid_minter
-from cds.modules.flows.tasks import (
-    AVCTask, TranscodeVideoTask, ExtractMetadataTask, update_record
-)
 from cds.modules.flows.api import FlowService
 from cds.modules.flows.models import FlowTaskStatus
-
-import random
-import uuid
-
-from flask import current_app
+from cds.modules.flows.tasks import (
+    AVCTask,
+    ExtractMetadataTask,
+    TranscodeVideoTask,
+    update_record,
+)
+from cds.modules.records.api import Category, Keyword
+from cds.modules.records.minters import catid_minter
 
 
 @shared_task(bind=True)

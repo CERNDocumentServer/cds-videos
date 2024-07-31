@@ -32,11 +32,14 @@ from os import listdir
 from os.path import dirname, isfile, join
 
 import pytest
+
 from cds.modules.ffmpeg import ff_frames, ff_probe, ff_probe_all
+from cds.modules.ffmpeg.errors import (
+    FrameExtractionExecutionError,
+    FrameExtractionInvalidArguments,
+    MetadataExtractionExecutionError,
+)
 from cds.modules.ffmpeg.ffmpeg import _refactoring_metadata
-from cds.modules.ffmpeg.errors import (FrameExtractionExecutionError,
-                                       FrameExtractionInvalidArguments,
-                                       MetadataExtractionExecutionError)
 
 
 def test_error_report(datadir):

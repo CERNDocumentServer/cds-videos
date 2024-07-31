@@ -28,7 +28,6 @@ from datetime import datetime, timedelta
 
 from cds.modules.announcements.models import Announcement as Ann
 
-
 announcements = {
     'everywhere': {
         'message': 'everywhere',

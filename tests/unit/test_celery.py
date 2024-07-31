@@ -27,7 +27,6 @@
 from __future__ import absolute_import, print_function
 
 import pytest
-
 from celery.schedules import crontab
 
 

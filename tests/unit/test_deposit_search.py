@@ -26,12 +26,11 @@
 import json
 
 from flask import url_for
+from helpers import new_project
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
-
-from helpers import new_project
 
 
 def test_aggregations(api_app, es, users, location,

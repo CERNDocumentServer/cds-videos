@@ -31,16 +31,18 @@ import json
 import mock
 from flask import current_app, request, url_for
 from flask_security import login_user
+from helpers import check_deposit_record_files, check_deposit_record_files_not_publsihed
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
-from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
-                                       ObjectVersionTag)
+from invenio_files_rest.models import (
+    Bucket,
+    FileInstance,
+    ObjectVersion,
+    ObjectVersionTag,
+)
 
 from cds.modules.deposit.api import CDSDeposit, Project
 from cds.modules.deposit.views import to_links_js
-
-from helpers import check_deposit_record_files, \
-    check_deposit_record_files_not_publsihed
 
 
 def test_deposit_link_factory_has_bucket(

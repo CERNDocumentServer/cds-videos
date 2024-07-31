@@ -26,17 +26,21 @@
 
 from __future__ import absolute_import, print_function
 
-import mock
-import pytest
 import json
 
+import mock
+import pytest
 from celery import states
-from opensearch_dsl.query import Q
 from flask import url_for
 from flask_security import login_user
+from helpers import (
+    MOCK_TASK_NAMES,
+    TestFlow,
+    mock_current_user,
+    prepare_videos_for_publish,
+)
 from invenio_accounts.models import User
 from invenio_db import db
-from ..invenio_deposit.search import DepositSearch
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
@@ -44,27 +48,22 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records.models import RecordMetadata
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
+from opensearch_dsl.query import Q
 from six import BytesIO
 
 from cds.modules.deposit.api import (
+    Video,
+    deposit_video_resolver,
     record_build_url,
+    record_video_resolver,
     video_build_url,
     video_resolver,
-    Video,
-    record_video_resolver,
-    deposit_video_resolver,
 )
 from cds.modules.deposit.indexer import CDSRecordIndexer
-from cds.modules.flows.api import FlowService
-from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.fixtures.video_utils import add_master_to_video
-
-from helpers import (
-    mock_current_user,
-    prepare_videos_for_publish,
-    TestFlow,
-    MOCK_TASK_NAMES,
-)
+from cds.modules.flows.api import FlowService
+from cds.modules.invenio_deposit.search import DepositSearch
+from cds.modules.records.api import CDSVideosFilesIterator
 
 
 def test_video_resolver(api_project):

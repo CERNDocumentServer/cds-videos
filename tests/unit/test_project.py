@@ -26,44 +26,43 @@
 
 from __future__ import absolute_import, print_function
 
+import datetime
+import json
+import uuid
+from copy import deepcopy
+
 import mock
 import pytest
-import uuid
-import json
-import datetime
-
-from invenio_db import db
-from copy import deepcopy
 from flask_security import login_user
-from invenio_search import current_search_client
-
-from cds.modules.records.permissions import has_update_permission
-from cds.modules.deposit.api import (
-    record_build_url,
-    Project,
-    Video,
-    video_build_url,
-    is_deposit,
-    record_unbuild_url,
-    record_video_resolver,
-    deposit_project_resolver,
-    deposit_video_resolver,
-)
-from cds.modules.deposit.indexer import CDSRecordIndexer
-from invenio_accounts.models import User
-from invenio_pidstore.errors import PIDInvalidAction
-from jsonschema.exceptions import ValidationError
-from cds.modules.deposit.errors import DiscardConflict
-from invenio_records.models import RecordMetadata
-from ..invenio_deposit.search import DepositSearch
-from opensearch_dsl.query import Q
-
 from helpers import (
+    MOCK_TASK_NAMES,
     TestFlow,
     get_indexed_records_from_mock,
     prepare_videos_for_publish,
-    MOCK_TASK_NAMES,
 )
+from invenio_accounts.models import User
+from invenio_db import db
+from invenio_pidstore.errors import PIDInvalidAction
+from invenio_records.models import RecordMetadata
+from invenio_search import current_search_client
+from jsonschema.exceptions import ValidationError
+from opensearch_dsl.query import Q
+
+from cds.modules.deposit.api import (
+    Project,
+    Video,
+    deposit_project_resolver,
+    deposit_video_resolver,
+    is_deposit,
+    record_build_url,
+    record_unbuild_url,
+    record_video_resolver,
+    video_build_url,
+)
+from cds.modules.deposit.errors import DiscardConflict
+from cds.modules.deposit.indexer import CDSRecordIndexer
+from cds.modules.invenio_deposit.search import DepositSearch
+from cds.modules.records.permissions import has_update_permission
 
 
 def test_is_deposit():

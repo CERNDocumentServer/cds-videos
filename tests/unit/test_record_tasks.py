@@ -26,22 +26,24 @@
 
 from __future__ import absolute_import, print_function
 
-import mock
 import json
-
 from time import sleep
+
+import mock
+from helpers import create_keyword, get_indexed_records_from_mock
+from invenio_indexer.api import RecordIndexer
+from invenio_records.api import Record
 from invenio_records.models import RecordMetadata
 from invenio_search import current_search_client
 
-from cds.modules.records.tasks import _get_keywords_from_api, \
-    _update_existing_keywords, _delete_not_existing_keywords, \
-    keywords_harvesting
-from cds.modules.records.search import KeywordSearch, query_to_objects
 from cds.modules.records.api import Keyword
-from invenio_indexer.api import RecordIndexer
-from invenio_records.api import Record
-
-from helpers import create_keyword, get_indexed_records_from_mock
+from cds.modules.records.search import KeywordSearch, query_to_objects
+from cds.modules.records.tasks import (
+    _delete_not_existing_keywords,
+    _get_keywords_from_api,
+    _update_existing_keywords,
+    keywords_harvesting,
+)
 
 
 def test_get_keywords_from_api(cern_keywords):

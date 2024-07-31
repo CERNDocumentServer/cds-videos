@@ -27,25 +27,29 @@
 from __future__ import absolute_import, print_function
 
 import json
-import mock
-
 from copy import deepcopy
 
-from invenio_search import current_search_client
-
-from cds.modules.deposit.resolver import get_video_pid, \
-    get_project_pid
-from cds.modules.deposit.api import project_resolver, deposit_video_resolver, \
-    deposit_videos_resolver, Project, Video, deposit_project_resolver
-from flask_security import current_user, login_user
+import mock
 from flask import url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
-from invenio_db import db
-from invenio_accounts.testutils import login_user_via_session
+from flask_security import current_user, login_user
+from helpers import new_project, prepare_videos_for_publish
 from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
+from invenio_db import db
 from invenio_indexer.api import RecordIndexer
-from helpers import prepare_videos_for_publish, new_project
+from invenio_search import current_search_client
+
+from cds.modules.deposit.api import (
+    Project,
+    Video,
+    deposit_project_resolver,
+    deposit_video_resolver,
+    deposit_videos_resolver,
+    project_resolver,
+)
 from cds.modules.deposit.indexer import CDSRecordIndexer
+from cds.modules.deposit.resolver import get_project_pid, get_video_pid
 
 
 def test_simple_workflow(

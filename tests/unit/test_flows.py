@@ -34,22 +34,23 @@ from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
 from flask_security import current_user
+from helpers import (
+    get_indexed_records_from_mock,
+    get_object_count,
+    get_presets_applied,
+    get_tag_count,
+    mock_current_user,
+)
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
 
-from cds.modules.deposit.api import (deposit_project_resolver,
-                                     deposit_video_resolver)
-from cds.modules.flows.api import FlowService, \
-    get_tasks_status_grouped_by_task_name
+from cds.modules.deposit.api import deposit_project_resolver, deposit_video_resolver
+from cds.modules.flows.api import FlowService, get_tasks_status_grouped_by_task_name
 from cds.modules.flows.models import FlowMetadata
-
-
-from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
-from helpers import mock_current_user, get_presets_applied, get_object_count, \
-    get_tag_count, get_indexed_records_from_mock
 
 
 # TODO: CHECK

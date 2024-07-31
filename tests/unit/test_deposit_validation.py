@@ -27,12 +27,16 @@
 from __future__ import absolute_import, print_function
 
 import json
-import pytest
 
+import pytest
 from flask import current_app
 
-from cds.modules.deposit.loaders import partial_project_loader, \
-    partial_video_loader, project_loader, video_loader
+from cds.modules.deposit.loaders import (
+    partial_project_loader,
+    partial_video_loader,
+    project_loader,
+    video_loader,
+)
 from cds.modules.deposit.loaders.loader import MarshmallowErrors
 
 
