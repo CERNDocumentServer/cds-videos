@@ -56,7 +56,7 @@ bower.json
 dump.rdb
 
 # Mac DS_Store
-.DS_Store
+**.DS_Store
 
 # OAuth
 *.crt

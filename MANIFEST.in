@@ -44,6 +44,7 @@ include scripts/server
 include scripts/setup
 recursive-include .github *
 recursive-include benchmarks *.py
+recursive-include cds *.md
 recursive-include cds *.css
 recursive-include cds *.eot
 recursive-include cds *.gif
