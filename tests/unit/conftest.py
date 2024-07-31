@@ -40,7 +40,6 @@ import pytest
 import requests
 from celery import shared_task
 from celery.messaging import establish_connection
-from opensearchpy import RequestError
 from flask.cli import ScriptInfo
 from flask_security import login_user
 from helpers import (
@@ -61,7 +60,6 @@ from invenio_access.permissions import superuser_access
 from invenio_accounts.models import Role, User
 from invenio_app.factory import create_app
 from invenio_db import db as db_
-from ..invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, Location, ObjectVersion
 from invenio_files_rest.views import blueprint as files_rest_blueprint
 from invenio_indexer import InvenioIndexer
@@ -72,10 +70,12 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_previewer import InvenioPreviewer
 from invenio_search import InvenioSearch, current_search, current_search_client
 from invenio_sequencegenerator.api import Template
+from opensearchpy import RequestError
 from six import BytesIO
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from cds.modules.deposit.api import Project, Video
+from cds.modules.invenio_deposit.permissions import action_admin_access
 from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
 
@@ -119,9 +119,10 @@ def app():
 def previewer_deposit(app):
     """."""
     # FIXME workaround for previewer tests because they require app and api_app
-    from ..invenio_deposit import InvenioDepositREST
     from invenio_records_rest import InvenioRecordsREST
     from invenio_records_rest.utils import PIDConverter
+
+    from cds.modules.invenio_deposit import InvenioDepositREST
 
     backup = app.debug
     app.debug = False

@@ -33,7 +33,20 @@ import pytest
 from celery import states
 from celery.exceptions import Retry
 from flask_security import login_user
+from helpers import (
+    add_video_tags,
+    check_deposit_record_files,
+    get_object_count,
+    prepare_videos_for_publish,
+    transcode_task,
+)
 from invenio_accounts.models import User
+from invenio_files_rest.models import (
+    Bucket,
+    FileInstance,
+    ObjectVersion,
+    ObjectVersionTag,
+)
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
@@ -42,19 +55,21 @@ from six import BytesIO
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
-from cds.modules.deposit.api import (Project, Video, deposit_project_resolver,
-                                     deposit_video_resolver)
+from cds.modules.deposit.api import (
+    Project,
+    Video,
+    deposit_project_resolver,
+    deposit_video_resolver,
+)
 from cds.modules.flows.models import FlowMetadata, FlowTaskMetadata
-from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
-                                     ExtractMetadataTask,
-                                     TranscodeVideoTask,
-                                     sync_records_with_deposit_files,
-                                     update_record)
-from helpers import (add_video_tags, check_deposit_record_files,
-                     get_object_count, prepare_videos_for_publish,
-                     transcode_task)
-from invenio_files_rest.models import (Bucket, FileInstance, ObjectVersion,
-                                       ObjectVersionTag)
+from cds.modules.flows.tasks import (
+    DownloadTask,
+    ExtractFramesTask,
+    ExtractMetadataTask,
+    TranscodeVideoTask,
+    sync_records_with_deposit_files,
+    update_record,
+)
 
 
 # TODO: CHECK

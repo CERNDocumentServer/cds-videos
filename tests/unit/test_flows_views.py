@@ -28,25 +28,29 @@ from __future__ import absolute_import, print_function
 
 import json
 
-import pytest
-
 import mock
-from celery.result import AsyncResult
+import pytest
 from celery import states
+from celery.result import AsyncResult
 from flask import url_for
-from flask_security import current_user
 from flask_principal import UserNeed, identity_loaded
-from helpers import get_object_count, get_tag_count, mock_current_user, \
-    TestFlow, MOCK_TASK_NAMES
-from invenio_files_rest.models import ObjectVersion, \
-    ObjectVersionTag, Bucket
-from invenio_records.models import RecordMetadata
-from invenio_accounts.testutils import login_user_via_session
+from flask_security import current_user
+from helpers import (
+    MOCK_TASK_NAMES,
+    TestFlow,
+    get_indexed_records_from_mock,
+    get_local_file,
+    get_object_count,
+    get_tag_count,
+    mock_current_user,
+)
 from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
+from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
+from invenio_records.models import RecordMetadata
+
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.flows.models import FlowMetadata
-
-from helpers import get_indexed_records_from_mock, get_local_file
 
 
 def check_restart_avc_workflow(api_app, flow_id, access_token,

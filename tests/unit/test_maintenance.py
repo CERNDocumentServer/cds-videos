@@ -27,13 +27,13 @@
 from __future__ import absolute_import, print_function
 
 import pytest
+from mock import patch
 
 from cds.modules.maintenance.subformats import (
     create_all_missing_subformats,
     create_all_subformats,
     create_subformat,
 )
-from mock import patch
 
 
 def _fill_video_subformats(qualities):

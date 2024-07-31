@@ -30,10 +30,9 @@ from uuid import uuid4
 
 import mock
 import pytest
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 from cds.modules.records.minters import cds_record_minter, is_local_doi
-
-from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 
 def test_recid_provider(db):

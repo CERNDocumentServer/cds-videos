@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import json
 
 from flask import url_for
-
 from invenio_search import current_search_client
 
 

@@ -25,27 +25,24 @@
 """Test Deposit video REST."""
 
 from __future__ import absolute_import, print_function
-from time import sleep
 
-
-import mock
 import copy
 import json
+from time import sleep
 
+import mock
 import pytest
-
-from flask_principal import RoleNeed, identity_loaded
-from invenio_db import db
 from celery.exceptions import Retry
 from flask import url_for
+from flask_principal import RoleNeed, identity_loaded
+from helpers import prepare_videos_for_publish
+from invenio_accounts.models import User
+from invenio_accounts.testutils import login_user_via_session
+from invenio_db import db
+from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
-from helpers import prepare_videos_for_publish
-from invenio_accounts.testutils import login_user_via_session
-from invenio_accounts.models import User
-from invenio_indexer.api import RecordIndexer
-from cds.modules.deposit.api import deposit_video_resolver, \
-    deposit_project_resolver
+from cds.modules.deposit.api import deposit_project_resolver, deposit_video_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
 

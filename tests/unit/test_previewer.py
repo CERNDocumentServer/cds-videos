@@ -27,21 +27,17 @@
 from __future__ import absolute_import, print_function
 
 import pytest
-from cds.modules.previewer.api import get_relative_path
-
 from flask import url_for
 from flask_security import login_user
+from helpers import new_project, prepare_videos_for_publish
 from invenio_accounts.models import User
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
-from helpers import prepare_videos_for_publish
-
 from werkzeug.exceptions import NotFound
-
-from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
-
 from werkzeug.utils import import_string
-from helpers import new_project
+
+from cds.modules.previewer.api import get_relative_path
 
 
 @pytest.mark.parametrize(
