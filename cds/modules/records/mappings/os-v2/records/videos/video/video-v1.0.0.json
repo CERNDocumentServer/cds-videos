@@ -54,6 +54,7 @@
       "contributors": {
         "properties": {
           "ids": {
+            "type": "object",
             "properties": {
               "source": {
                 "type": "text"
