@@ -47,7 +47,7 @@ from invenio_records import Record
 from invenio_search import current_search_client
 from six import BytesIO
 
-from cds.modules.deposit.api import Project, Video
+from cds.modules.deposit.api import Project, Video, deposit_project_resolver
 from cds.modules.flows.api import FlowService
 from cds.modules.flows.models import FlowTaskStatus
 from cds.modules.flows.tasks import (
@@ -77,7 +77,7 @@ class sse_failing_task(AVCTask):
 
     def __init__(self):
         """init."""
-        self._type = 'simple_failure'
+        self._type = "simple_failure"
         self._base_payload = {}
 
     def run(self, *args, **kwargs):
@@ -86,13 +86,13 @@ class sse_failing_task(AVCTask):
 
     def on_success(self, exc, task_id, *args, **kwargs):
         """Set Fail."""
-        self.on_failure(exc, task_id, args, kwargs, '')
+        self.on_failure(exc, task_id, args, kwargs, "")
 
 
 class sse_success_task(AVCTask):
 
     def __init__(self):
-        self._type = 'simple_failure'
+        self._type = "simple_failure"
         self._base_payload = {}
 
     def run(self, *args, **kwargs):
@@ -108,19 +108,19 @@ def simple_add(x, y):
 
 class sse_simple_add(AVCTask):
     def __init__(self):
-        self._type = 'simple_add'
+        self._type = "simple_add"
         self._base_payload = {}
 
     def run(self, x, y, **kwargs):
         """Simple shared task."""
-        self._base_payload = {"deposit_id": kwargs.get('deposit_id')}
+        self._base_payload = {"deposit_id": kwargs.get("deposit_id")}
         return x + y
 
 
 MOCK_TASK_NAMES = {
-    'helpers.sse_simple_add': 'sse_simple_add',
-    'helpers.sse_success_task': 'sse_success_task',
-    'helpers.sse_failing_task': 'sse_failing_task',
+    "helpers.sse_simple_add": "sse_simple_add",
+    "helpers.sse_success_task": "sse_success_task",
+    "helpers.sse_failing_task": "sse_failing_task",
 }
 
 
@@ -157,7 +157,7 @@ def create_record(data):
     with db.session.begin_nested():
         data = copy.deepcopy(data)
         rec_uuid = uuid.uuid4()
-        pid = current_pidstore.minters['cds_recid'](rec_uuid, data)
+        pid = current_pidstore.minters["cds_recid"](rec_uuid, data)
         record = Record.create(data, id_=rec_uuid)
     return pid, record
 
@@ -170,7 +170,7 @@ def get_json(response):
 def assert_hits_len(res, hit_length):
     """Assert number of hits."""
     assert res.status_code == 200
-    assert len(get_json(res)['hits']['hits']) == hit_length
+    assert len(get_json(res)["hits"]["hits"]) == hit_length
 
 
 def mock_current_user(*args2, **kwargs2):
@@ -180,39 +180,43 @@ def mock_current_user(*args2, **kwargs2):
 
 def transcode_task(bucket, filesize, filename, preset_qualities):
     """Get a transcode task."""
-    obj = ObjectVersion.create(bucket, key=filename,
-                               stream=BytesIO(b'\x00' * filesize))
-    ObjectVersionTag.create(obj, 'display_aspect_ratio', '16:9')
+    obj = ObjectVersion.create(bucket, key=filename, stream=BytesIO(b"\x00" * filesize))
+    ObjectVersionTag.create(obj, "display_aspect_ratio", "16:9")
     obj_id = str(obj.version_id)
     db.session.commit()
 
-    return (obj_id, [
-        TranscodeVideoTask().s(version_id=obj_id)
-        for preset_quality in preset_qualities
-    ])
+    return (
+        obj_id,
+        [
+            TranscodeVideoTask().s(version_id=obj_id)
+            for preset_quality in preset_qualities
+        ],
+    )
 
 
 def get_presets_applied():
     """Return list of preset applied."""
-    presets = current_app.config['CDS_OPENCAST_QUALITIES']
-    return {key: preset for (key, preset) in presets.items()
-            if preset['width'] <= 640}
+    presets = current_app.config["CDS_OPENCAST_QUALITIES"]
+    return {key: preset for (key, preset) in presets.items() if preset["width"] <= 640}
 
 
 def get_object_count(download=True, frames=True, transcode=True):
     """Get number of ObjectVersions, based on executed tasks."""
-    return sum([
-        # Master file
-        1 if download else 0,
-        # 10 frames + 1 GIF
-        11 if frames else 0,
-        # count the presets with width x height < 640x320 (video resolution)
-        (len(get_presets_applied())) if transcode else 0,
-    ])
+    return sum(
+        [
+            # Master file
+            1 if download else 0,
+            # 10 frames + 1 GIF
+            11 if frames else 0,
+            # count the presets with width x height < 640x320 (video resolution)
+            (len(get_presets_applied())) if transcode else 0,
+        ]
+    )
 
 
-def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
-                  is_local=False):
+def get_tag_count(
+    download=True, metadata=True, frames=True, transcode=True, is_local=False
+):
     """Get number of ObjectVersionTags, based on executed tasks."""
     # download: _flow_id, uri_origin, context_type, media_type, preview
     tags_download = 5
@@ -221,52 +225,55 @@ def get_tag_count(download=True, metadata=True, frames=True, transcode=True,
         tags_download = tags_download - 1
 
     # metadata
-    tags_extract_metadata = len(ExtractMetadataTask.format_keys) + \
-        len(ExtractMetadataTask.stream_keys)
+    tags_extract_metadata = len(ExtractMetadataTask.format_keys) + len(
+        ExtractMetadataTask.stream_keys
+    )
 
     # transcode
     # number of keys inside object `tags` (basically, the number of tags)
     tags_keys = 14
 
-    return sum([
-        tags_download if download else 0,
-        tags_extract_metadata if download and metadata else 0,
-        ((10 * 4) + 3) if frames else 0,
-        # count the presets with width x height < 640x320 (video resolution)
-        (len(get_presets_applied())) * tags_keys if transcode else 0,
-    ])
+    return sum(
+        [
+            tags_download if download else 0,
+            tags_extract_metadata if download and metadata else 0,
+            ((10 * 4) + 3) if frames else 0,
+            # count the presets with width x height < 640x320 (video resolution)
+            (len(get_presets_applied())) * tags_keys if transcode else 0,
+        ]
+    )
 
 
 def new_project(app, users, db, deposit_metadata, project_data=None):
     """New project with videos."""
     project_data = project_data or {
-        'title': {
-            'title': 'my project',
+        "title": {
+            "title": "my project",
         },
-        'description': 'in tempor reprehenderit enim eiusmod',
+        "description": "in tempor reprehenderit enim eiusmod",
     }
     project_data.update(deposit_metadata)
     project_video_1 = {
-        'title': {
-            'title': '&lt;b&gt;<i>video 1</i>&lt;/b&gt;',
+        "title": {
+            "title": "&lt;b&gt;<i>video 1</i>&lt;/b&gt;",
         },
-        'description': 'in tempor reprehenderit enim eiusmod &lt;b&gt;<i>html'
-                       '</i>&lt;/b&gt;',
-        'featured': True,
-        'vr': True,
-        'language': 'en',
-        'date': '2017-09-25',
+        "description": "in tempor reprehenderit enim eiusmod &lt;b&gt;<i>html"
+        "</i>&lt;/b&gt;",
+        "featured": True,
+        "vr": True,
+        "language": "en",
+        "date": "2017-09-25",
     }
     project_video_1.update(deposit_metadata)
     project_video_2 = {
-        'title': {
-            'title': 'video 2',
+        "title": {
+            "title": "video 2",
         },
-        'description': 'in tempor reprehenderit enim eiusmod',
-        'featured': False,
-        'vr': False,
-        'language': 'en',
-        'date': '2017-09-25',
+        "description": "in tempor reprehenderit enim eiusmod",
+        "featured": False,
+        "vr": False,
+        "language": "en",
+        "date": "2017-09-25",
     }
     project_video_2.update(deposit_metadata)
     indexer = RecordIndexer()
@@ -277,17 +284,16 @@ def new_project(app, users, db, deposit_metadata, project_data=None):
         project = Project.create(project_data).commit()
 
         # create videos
-        project_video_1['_project_id'] = project['_deposit']['id']
-        project_video_2['_project_id'] = project['_deposit']['id']
+        project_video_1["_project_id"] = project["_deposit"]["id"]
+        project_video_2["_project_id"] = project["_deposit"]["id"]
         video_1 = Video.create(project_video_1)
         video_2 = Video.create(project_video_2)
-
         # save project and video
-        project.commit()
         video_1.commit()
         video_2.commit()
 
     db.session.commit()
+    project = deposit_project_resolver(project["_deposit"]["id"])
     indexer.index(project)
     indexer.index(video_1)
     indexer.index(video_2)
@@ -310,114 +316,122 @@ def get_indexed_records_from_mock(mock_indexer):
 def prepare_videos_for_publish(videos, with_files=False):
     """Prepare video for publishing (i.e. fill extracted metadata)."""
     metadata_dict = dict(
-        bit_rate='679886',
-        duration='60.140000',
-        size='5111048',
-        avg_frame_rate='288000/12019',
-        codec_name='h264',
-        codec_long_name='H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10',
-        width='640',
-        height='360',
-        nb_frames='1440',
-        display_aspect_ratio='16:9',
-        color_range='tv',
+        bit_rate="679886",
+        duration="60.140000",
+        size="5111048",
+        avg_frame_rate="288000/12019",
+        codec_name="h264",
+        codec_long_name="H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        width="640",
+        height="360",
+        nb_frames="1440",
+        display_aspect_ratio="16:9",
+        color_range="tv",
     )
     for video in videos:
         # Inline update
-        if '_cds' not in video:
-            video['_cds'] = {}
-        video['_cds']['extracted_metadata'] = metadata_dict
+        if "_cds" not in video:
+            video["_cds"] = {}
+        video["_cds"]["extracted_metadata"] = metadata_dict
         if with_files:
-            video['_files'] = get_files_metadata(video.files.bucket.id)
+            video["_files"] = get_files_metadata(video.files.bucket.id)
 
         # DB update
         update_record(
             recid=video.id,
-            patch=[{
-                'op': 'add',
-                'path': '/_cds/extracted_metadata',
-                'value': metadata_dict,
-            }],
-            validator='cds.modules.records.validators.PartialDraft4Validator'
+            patch=[
+                {
+                    "op": "add",
+                    "path": "/_cds/extracted_metadata",
+                    "value": metadata_dict,
+                }
+            ],
+            validator="cds.modules.records.validators.PartialDraft4Validator",
         )
+        db.session.commit()
 
 
 def get_files_metadata(bucket_id):
     """Return _files data filled with a valid version id."""
     bucket_id = str(bucket_id)
-    object_version = ObjectVersion.create(bucket_id, 'test_object_version',
-                                          stream=BytesIO(b'\x00' * 200))
+    object_version = ObjectVersion.create(
+        bucket_id, "test_object_version", stream=BytesIO(b"\x00" * 200)
+    )
     object_version_id = str(object_version.version_id)
     db.session.commit()
     return [
         dict(
             bucket_id=bucket_id,
-            context_type='master',
-            media_type='video',
-            content_type='mp4',
+            context_type="master",
+            media_type="video",
+            content_type="mp4",
             checksum=rand_md5(),
             completed=True,
-            key='test.mp4',
+            key="test.mp4",
             frame=[
                 dict(
                     bucket_id=bucket_id,
                     checksum=rand_md5(),
                     completed=True,
-                    key='frame-{}.jpg'.format(i),
-                    links=dict(self='/api/files/...'),
+                    key="frame-{}.jpg".format(i),
+                    links=dict(self="/api/files/..."),
                     progress=100,
                     size=123456,
                     tags=dict(
                         master=object_version_id,
-                        type='frame',
-                        timestamp=(float(i) / 10) * 60.095
+                        type="frame",
+                        timestamp=(float(i) / 10) * 60.095,
                     ),
-                    version_id=object_version_id)
+                    version_id=object_version_id,
+                )
                 for i in range(11)
             ],
             tags=dict(
-                bit_rate='11915822',
-                width='4096',
-                height='2160',
-                uri_origin='https://test_domain.ch/test.mp4',
-                duration='60.095', ),
+                bit_rate="11915822",
+                width="4096",
+                height="2160",
+                uri_origin="https://test_domain.ch/test.mp4",
+                duration="60.095",
+            ),
             subformat=[
                 dict(
                     bucket_id=bucket_id,
-                    context_type='subformat',
-                    media_type='video',
-                    content_type='mp4',
+                    context_type="subformat",
+                    media_type="video",
+                    content_type="mp4",
                     checksum=rand_md5(),
                     completed=True,
-                    key='test_{}'.format(i),
-                    links=dict(self='/api/files/...'),
+                    key="test_{}".format(i),
+                    links=dict(self="/api/files/..."),
                     progress=100,
                     size=123456,
                     tags=dict(
                         _sorenson_job_id=rand_version_id(),
                         master=object_version_id,
-                        preset_quality='240p',
+                        preset_quality="240p",
                         width=1000,
                         height=1000,
-                        video_bitrate=123456, ),
-                    version_id=object_version_id, )
+                        video_bitrate=123456,
+                    ),
+                    version_id=object_version_id,
+                )
                 for i in range(5)
             ],
             playlist=[
                 dict(
                     bucket_id=bucket_id,
-                    context_type='playlist',
-                    media_type='text',
-                    content_type='smil',
+                    context_type="playlist",
+                    media_type="text",
+                    content_type="smil",
                     checksum=rand_md5(),
                     completed=True,
-                    key='test.smil',
-                    links=dict(
-                        self='/api/files/...'),
+                    key="test.smil",
+                    links=dict(self="/api/files/..."),
                     progress=100,
                     size=123456,
                     tags=dict(master=object_version_id),
-                    version_id=object_version_id, )
+                    version_id=object_version_id,
+                )
             ],
         )
     ]
@@ -425,17 +439,17 @@ def get_files_metadata(bucket_id):
 
 def add_video_tags(video_object):
     """Add standard technical metadata tags to a video."""
-    ObjectVersionTag.create(video_object, 'duration', '60.095000')
-    ObjectVersionTag.create(video_object, 'width', '640')
-    ObjectVersionTag.create(video_object, 'height', '360')
-    ObjectVersionTag.create(video_object, 'display_aspect_ratio', '16:9')
+    ObjectVersionTag.create(video_object, "duration", "60.095000")
+    ObjectVersionTag.create(video_object, "width", "640")
+    ObjectVersionTag.create(video_object, "height", "360")
+    ObjectVersionTag.create(video_object, "display_aspect_ratio", "16:9")
 
 
 #
 # Random generation
 #
 def rand_md5():
-    return 'md5:{:032d}'.format(random.randint(1, 1000000))
+    return "md5:{:032d}".format(random.randint(1, 1000000))
 
 
 def rand_version_id():
@@ -444,37 +458,40 @@ def rand_version_id():
 
 def endpoint_get_schema(path):
     """Get schema for jsonschemas."""
-    with open(pkg_resources.resource_filename(
-            'cds_dojson.schemas', path), 'r') as f:
+    with open(pkg_resources.resource_filename("cds_dojson.schemas", path), "r") as f:
         return json.load(f)
 
 
-def check_deposit_record_files(deposit, deposit_expected, record,
-                               record_expected):
+def check_deposit_record_files(deposit, deposit_expected, record, record_expected):
     """Check deposit and record files expected."""
     # check deposit
-    deposit_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
-        deposit.files.bucket).all()]
+    deposit_objs = [
+        obj.key for obj in ObjectVersion.get_by_bucket(deposit.files.bucket).all()
+    ]
     assert sorted(deposit_expected) == sorted(deposit_objs)
     assert deposit.files.bucket.locked is True
     # check record
-    record_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
-        record.files.bucket).all()]
+    record_objs = [
+        obj.key for obj in ObjectVersion.get_by_bucket(record.files.bucket).all()
+    ]
     assert sorted(record_expected) == sorted(record_objs)
     assert record.files.bucket.locked is True
 
 
-def check_deposit_record_files_not_publsihed(deposit, deposit_expected, record,
-                                             record_expected):
+def check_deposit_record_files_not_publsihed(
+    deposit, deposit_expected, record, record_expected
+):
     """Check a not published deposit and record files expected."""
     # check deposit
-    deposit_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
-        deposit.files.bucket).all()]
+    deposit_objs = [
+        obj.key for obj in ObjectVersion.get_by_bucket(deposit.files.bucket).all()
+    ]
     assert sorted(deposit_expected) == sorted(deposit_objs)
     assert deposit.files.bucket.locked is False
     # check record
-    record_objs = [obj.key for obj in ObjectVersion.get_by_bucket(
-        record.files.bucket).all()]
+    record_objs = [
+        obj.key for obj in ObjectVersion.get_by_bucket(record.files.bucket).all()
+    ]
     assert sorted(record_expected) == sorted(record_objs)
     assert record.files.bucket.locked is True
 
@@ -483,22 +500,21 @@ def load_json(datadir, filename):
     """Load file in json format."""
     filepath = join(datadir, filename)
     data = None
-    with open(filepath, 'r') as file_:
+    with open(filepath, "r") as file_:
         data = json.load(file_)
     return data
 
 
 def reset_oauth2():
     """After a OAuth2 request, reset user."""
-    if hasattr(current_user, 'login_via_oauth2'):
+    if hasattr(current_user, "login_via_oauth2"):
         del current_user.login_via_oauth2
 
 
 def get_local_file(bucket, datadir, filename):
     """Create local file as objectversion."""
-    stream = open(join(datadir, filename), 'rb')
-    object_version = ObjectVersion.create(
-        bucket, "test.mp4", stream=stream)
+    stream = open(join(datadir, filename), "rb")
+    object_version = ObjectVersion.create(bucket, "test.mp4", stream=stream)
     version_id = object_version.version_id
     db.session.commit()
     return version_id
@@ -506,25 +522,33 @@ def get_local_file(bucket, datadir, filename):
 
 def get_frames(*args, **kwargs):
     """list of frames of a master video."""
-    return [{'key': 'frame-{0}.jpg'.format(index),
-             'tags': {'context_type': 'frame', 'content_type': 'jpg',
-                      'media_type': 'image'},
-             'tags_to_transform': {'timestamp': (index * 10) - 5},
-             'filepath': '/path/to/file'} for index in range(1, 11)]
+    return [
+        {
+            "key": "frame-{0}.jpg".format(index),
+            "tags": {
+                "context_type": "frame",
+                "content_type": "jpg",
+                "media_type": "image",
+            },
+            "tags_to_transform": {"timestamp": (index * 10) - 5},
+            "filepath": "/path/to/file",
+        }
+        for index in range(1, 11)
+    ]
 
 
 def get_migration_streams(datadir):
     """Get migration files streams."""
 
     def migration_streams(*args, **kwargs):
-        if kwargs['file_']['tags']['media_type'] == 'video':
-            path = join(datadir, 'test.mp4')
-        elif kwargs['file_']['tags']['media_type'] == 'image':
-            if kwargs['file_']['tags']['context_type'] == 'frame':
-                path = join(datadir, kwargs['file_']['key'])
+        if kwargs["file_"]["tags"]["media_type"] == "video":
+            path = join(datadir, "test.mp4")
+        elif kwargs["file_"]["tags"]["media_type"] == "image":
+            if kwargs["file_"]["tags"]["context_type"] == "frame":
+                path = join(datadir, kwargs["file_"]["key"])
             else:
-                path = join(datadir, 'frame-1.jpg')
-        return open(path, 'rb'), os.path.getsize(path)
+                path = join(datadir, "frame-1.jpg")
+        return open(path, "rb"), os.path.getsize(path)
 
     return migration_streams
 
@@ -540,6 +564,5 @@ def mock_compute_status(cls, statuses):
 class TestFlow(FlowService):
 
     def build_steps(self):
-        self._tasks.append((sse_simple_add(), {'x': 1, 'y': 2}))
-        self._tasks.append([
-            (sse_failing_task(), {}), (sse_failing_task(), {})])
+        self._tasks.append((sse_simple_add(), {"x": 1, "y": 2}))
+        self._tasks.append([(sse_failing_task(), {}), (sse_failing_task(), {})])

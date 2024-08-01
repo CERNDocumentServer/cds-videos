@@ -33,7 +33,7 @@ import pytest
 from celery import states
 from flask import url_for
 from flask_principal import UserNeed, identity_loaded
-from flask_security import current_user
+from flask_security import current_user, login_user
 from helpers import (
     get_indexed_records_from_mock,
     get_object_count,
@@ -42,7 +42,6 @@ from helpers import (
     mock_current_user,
 )
 from invenio_accounts.models import User
-from invenio_accounts.testutils import login_user_via_session
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
@@ -177,7 +176,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
                       flow_id=flow_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[0]).email)
+        login_user(User.query.get(users[0]))
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
     # check feedback from another user without access
@@ -186,7 +185,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
                       flow_id=flow_id,
                       receiver_id='avc')
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[1]).email)
+        login_user(User.query.get(users[1]))
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 403
     # check feedback from another user with access
@@ -207,7 +206,7 @@ def test_avc_workflow_pass(api_app, db, api_project, access_token,
             if current_user.get_id() == user_2_id:
                 identity.provides.update([UserNeed(user_2_email)])
 
-        login_user_via_session(client, email=user_2_email)
+        login_user(user_2)
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
 

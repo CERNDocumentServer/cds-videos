@@ -26,15 +26,14 @@
 import json
 
 from flask import url_for
+from flask_security import login_user
 from helpers import new_project
 from invenio_accounts.models import User
-from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
 
-def test_aggregations(api_app, es, users, location,
-                      db, deposit_metadata, json_headers):
+def test_aggregations(api_app, es, users, location, db, deposit_metadata, json_headers):
     """Test deposit search aggregations."""
     project_1, _, _ = new_project(api_app, users, db, deposit_metadata)
     _users = [users[1]]
@@ -45,18 +44,16 @@ def test_aggregations(api_app, es, users, location,
     current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[0]).email)
-        url = url_for('invenio_deposit_rest.project_list', q='')
+        login_user(User.query.get(users[0]))
+        url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 
         assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['aggregations']['created_by']['buckets']) == 1
-        assert data['aggregations']['created_by']['buckets'][0][
-            'key'] == users[0]
+        data = json.loads(res.data.decode("utf-8"))
+        assert len(data["aggregations"]["created_by"]["buckets"]) == 1
+        assert data["aggregations"]["created_by"]["buckets"][0]["key"] == users[0]
 
         # Invalid query syntax (Invalid ES syntax)
-        url = url_for('invenio_deposit_rest.project_list')
-        res = client.get(
-            url, headers=json_headers, query_string=dict(q='title/back'))
+        url = url_for("invenio_deposit_rest.project_list")
+        res = client.get(url, headers=json_headers, query_string=dict(q="title/back"))
         assert res.status_code == 400
