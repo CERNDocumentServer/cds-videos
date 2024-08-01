@@ -40,16 +40,17 @@ from .facets import deposit_facets_factory
 def deposit_search_factory(self, search, search_query_parser):
     """Replace default search factory to use custom facet factory."""
     from invenio_records_rest.sorter import default_sorter_factory
-    query_string = request.values.get('q', '')
-    query_parser = Q('query_string',
-                     query=query_string) if query_string else Q()
+
+    query_string = request.values.get("q", "")
+    query_parser = Q("query_string", query=query_string) if query_string else Q()
 
     try:
         search = search.query(query_parser)
     except SyntaxError:
         current_app.logger.debug(
-            "Failed parsing query: {0}".format(request.values.get('q', '')),
-            exc_info=True)
+            "Failed parsing query: {0}".format(request.values.get("q", "")),
+            exc_info=True,
+        )
         raise InvalidQueryRESTError()
 
     search_index = getattr(search, "_original_index", search._index)[0]
@@ -58,7 +59,7 @@ def deposit_search_factory(self, search, search_query_parser):
     for key, value in sortkwargs.items():
         urlkwargs.add(key, value)
 
-    urlkwargs.add('q', query_string)
+    urlkwargs.add("q", query_string)
     return search, urlkwargs
 
 
@@ -72,15 +73,14 @@ def cern_filter():
     provides = get_user_provides()
 
     # Filter for restricted records, that the user has access to
-    write_restricted = Q('terms', **{'_access.update': provides})
+    write_restricted = Q("terms", **{"_access.update": provides})
     # Filter records where the user is owner
-    owner = Q('match', **
-              {'_deposit.created_by': getattr(current_user, 'id', -1)})
+    owner = Q("match", **{"_deposit.created_by": getattr(current_user, "id", -1)})
 
     # OR all the filters
     combined_filter = write_restricted | owner
 
-    return Q('bool', filter=[combined_filter])
+    return Q("bool", filter=[combined_filter])
 
 
 class DepositVideosSearch(RecordsSearch):
@@ -89,7 +89,7 @@ class DepositVideosSearch(RecordsSearch):
     class Meta:
         """Configuration for deposit search."""
 
-        index = 'deposits-records-videos-project'
+        index = "deposits-records-videos-project"
         doc_types = None
-        fields = ('*', )
+        fields = ("*",)
         default_filter = DefaultFilter(cern_filter)
