@@ -30,6 +30,7 @@ from __future__ import absolute_import, print_function
 import json
 import os
 import shutil
+import sys
 import tempfile
 from datetime import datetime
 from os.path import dirname, join
@@ -86,18 +87,23 @@ def app():
     instance_path = tempfile.mkdtemp()
 
     os.environ.update(
-        APP_INSTANCE_PATH=os.environ.get("INSTANCE_PATH", instance_path),
+        INVENIO_INSTANCE_PATH=os.environ.get("INSTANCE_PATH", instance_path),
+        INVENIO_STATIC_FOLDER=os.path.join(sys.prefix, "var/instance/static"),
     )
 
     app = create_app(
         DEBUG_TB_ENABLED=False,
         TESTING=True,
         CELERY_TASK_ALWAYS_EAGER=True,
+        SQLALCHEMY_DATABASE_URI=(
+            "postgresql+psycopg2://invenio:invenio@localhost/invenio"
+        ),
         CELERY_RESULT_BACKEND="cache",
         CELERY_CACHE_BACKEND="memory",
         CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_TASK_TRACK_STARTED=True,
         SITE_URL="https://localhost:5000",
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
         JSONSCHEMAS_HOST="cds.cern.ch",
         DEPOSIT_UI_ENDPOINT="{scheme}://{host}/deposit/{pid_value}",
         PIDSTORE_DATACITE_DOI_PREFIX="10.0000",
@@ -105,6 +111,7 @@ def app():
         THEOPLAYER_LIBRARY_LOCATION="https://localhost-theoplayer.com",
         THEOPLAYER_LICENSE="CHANGE_ME",
         PRESERVE_CONTEXT_ON_EXCEPTION=False,
+        REST_CSRF_ENABLED=False,
     )
     app.register_blueprint(files_rest_blueprint)
     app.register_blueprint(cds_api_blueprint)
@@ -112,6 +119,8 @@ def app():
     with app.app_context():
         yield app
 
+    os.environ.pop("INVENIO_INSTANCE_PATH", None)
+    os.environ.pop("INVENIO_STATIC_FOLDER", None)
     shutil.rmtree(instance_path)
 
 
@@ -357,7 +366,7 @@ def video_deposit_metadata(deposit_metadata):
         description="in tempor reprehenderit enim eiusmod",
         featured=True,
         language="en",
-        date="2016-12-03T00:00:00Z",
+        date="2016-12-03",
     )
     metadata.update(deposit_metadata)
     return metadata

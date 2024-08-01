@@ -86,15 +86,13 @@ def test_video_publish_and_edit(api_project, users):
     video_path_1 = project["videos"][0]["$ref"]
     video_path_2 = project["videos"][1]["$ref"]
 
-    deposit_project_schema = (
-        "https://cds.cern.ch/schemas/"
-        "deposits/records/videos/project/project-v1.0.0.json"
-    )
+    deposit_project_schema = "https://cds.cern.ch/schemas/deposits/records/videos/project/project-v1.0.0.json"
     deposit_video_schema = (
-        "https://cds.cern.ch/schemas/" "deposits/records/videos/video/video-v1.0.0.json"
+        "https://cds.cern.ch/schemas/deposits/records/videos/video/video-v1.0.0.json"
     )
+
     record_video_schema = (
-        "https://cds.cern.ch/schemas/" "records/videos/video/video-v1.0.0.json"
+        "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json"
     )
 
     # check video1 is not published
@@ -154,6 +152,8 @@ def test_video_publish_and_edit(api_project, users):
     assert video_1_v2["$schema"] == deposit_video_schema
     assert video_2["$schema"] == deposit_video_schema
     assert project["$schema"] == deposit_project_schema
+    project = video_1_v2.project
+
     # check video1 v1 recid is NOT inside the list
     assert (
         any(video_ref["$ref"] == record_path_1 for video_ref in project["videos"])

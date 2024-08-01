@@ -55,6 +55,7 @@ from cds.modules.deposit.api import (
     deposit_video_resolver,
     is_deposit,
     record_build_url,
+    record_project_resolver,
     record_unbuild_url,
     record_video_resolver,
     video_build_url,
@@ -201,6 +202,7 @@ def test_add_video(
     project_video_1["title"]["title"] = "video 1"
     project_video_1["_project_id"] = project["_deposit"]["id"]
     video_1 = Video.create(project_video_1)
+    project = video_1.project
 
     # check default video license
     assert video_1["license"] == [
@@ -240,7 +242,8 @@ def test_project_discard(app, project_published, video_deposit_metadata):
     # try to fail because a video added
     project = project.edit()
     video_deposit_metadata["_project_id"] = project["_deposit"]["id"]
-    Video.create(video_deposit_metadata)
+    video = Video.create(video_deposit_metadata)
+    project = video.project
     with pytest.raises(DiscardConflict):
         project.discard()
 
@@ -256,7 +259,8 @@ def test_project_edit(app, project_published, users):
     # Edit project (change project title)
     new_project = project.edit()
     assert new_project.status == "draft"
-    new_project.update(title={"title": "My project"})
+    new_project = new_project.update(title={"title": "My project"})
+    new_project.commit()
 
     # Edit videos inside project (change video titles)
     videos = [
@@ -266,7 +270,6 @@ def test_project_edit(app, project_published, users):
     login_user(User.query.get(users[0]))
     assert len(videos) == 2
     for i, video in enumerate(videos):
-        #  video = Video.get_record(video.id)
         assert video["_deposit"]["status"] == "published"
         new_video = video.edit()
         assert new_video["_deposit"]["status"] == "draft"
@@ -274,15 +277,15 @@ def test_project_edit(app, project_published, users):
         new_video.publish()
 
     # Publish all changes
-    new_project.publish()
-
+    new_project = new_project.publish()
+    published_project = record_project_resolver(new_project["_deposit"]["pid"]["value"])
     # Check that everything is published
-    videos = [record_video_resolver(id_) for id_ in new_project.video_ids]
-    assert new_project["_deposit"]["status"] == "published"
+    videos = [record_video_resolver(id_) for id_ in published_project.video_ids]
+    assert published_project["_deposit"]["status"] == "published"
     assert all(video["_deposit"]["status"] == "published" for video in videos)
 
     # Check that all titles where properly changed
-    assert new_project["title"]["title"] == "My project"
+    assert published_project["title"]["title"] == "My project"
     assert videos[0]["title"]["title"] in ["Video 1", "Video 2"]
     assert videos[1]["title"]["title"] in ["Video 1", "Video 2"]
     assert videos[0]["title"]["title"] != videos[1]["title"]["title"]
@@ -387,12 +390,6 @@ def test_project_delete_one_video_published(api_app, api_project, force, users):
         project.delete(force=force)
 
     check_project(2, "published", video_1_ref, video_2_ref, project_id)
-
-    # TODO delete video_2
-    #  video_2.delete(force=force)
-    #  project_id = video_1.project.id
-
-    #  project.delete(force=force)
 
 
 def test_inheritance(api_app, api_project, users):

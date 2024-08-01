@@ -30,8 +30,8 @@ import json
 
 from flask import g, url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
+from flask_security import login_user
 from invenio_accounts.models import User
-from invenio_accounts.testutils import login_user_via_session
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
@@ -46,16 +46,34 @@ def mock_provides(needs):
 
 def test_es_filter(es, users):
     """Test query filter based on CERN groups."""
-    mock_provides([UserNeed('test@test.ch'), RoleNeed('groupx')])
-    assert RecordVideosSearch().to_dict()['query']['bool']['filter'] == [
-        {'bool': {'filter': [{'bool': {
-            'should': [
-                {'missing': {'field': '_access.read'}},
-                {'terms': {'_access.read': ['test@test.ch', 'groupx']}},
-                {'terms': {'_access.update': ['test@test.ch', 'groupx']}},
-                {'match': {'_deposit.created_by': 0}}
-            ]
-        }}]}}
+    mock_provides([UserNeed("test@test.ch"), RoleNeed("groupx")])
+    assert RecordVideosSearch().to_dict()["query"]["bool"]["filter"] == [
+        {
+            "bool": {
+                "filter": [
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "bool": {
+                                        "must_not": [
+                                            {"exists": {"field": "_access.read"}}
+                                        ]
+                                    }
+                                },
+                                {"terms": {"_access.read": ["test@test.ch", "groupx"]}},
+                                {
+                                    "terms": {
+                                        "_access.update": ["test@test.ch", "groupx"]
+                                    }
+                                },
+                                {"match": {"_deposit.created_by": 0}},
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
     ]
 
 
@@ -66,13 +84,13 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
     current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[0]).email)
-        url = url_for('invenio_deposit_rest.project_list', q='')
+        login_user(User.query.get(users[0]))
+        url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 
         assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 1
+        data = json.loads(res.data.decode("utf-8"))
+        assert len(data["hits"]["hits"]) == 1
 
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
@@ -80,19 +98,18 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
         identity.provides |= set([RoleNeed(User.query.get(users[1]).email)])
 
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[1]).email)
-        url = url_for('invenio_deposit_rest.project_list', q='')
+        login_user(User.query.get(users[1]))
+        url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 
         assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 0
+        data = json.loads(res.data.decode("utf-8"))
+        assert len(data["hits"]["hits"]) == 0
 
         # Add user1 as editor for this deposit
         # Check that user1 email is case insensitive
         proj = api_project[0]
-        proj['_access'] = {'update': [
-            User.query.get(users[1]).email.capitalize()]}
+        proj["_access"] = {"update": [User.query.get(users[1]).email.capitalize()]}
         proj.commit()
         RecordIndexer().index(proj)
         current_search_client.indices.refresh()
@@ -100,19 +117,19 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
         res = client.get(url, headers=json_headers)
 
         assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 1
+        data = json.loads(res.data.decode("utf-8"))
+        assert len(data["hits"]["hits"]) == 1
 
     # Admin always has access
     @identity_loaded.connect
     def mock_identity_provides_superadmin(sender, identity):
         """Add additional group to the user."""
-        identity.provides |= set([RoleNeed('superuser')])
+        identity.provides |= set([RoleNeed("superuser")])
 
     with api_app.test_client() as client:
-        login_user_via_session(client, email=User.query.get(users[2]).email)
-        url = url_for('invenio_deposit_rest.project_list', q='')
+        login_user(User.query.get(users[2]))
+        url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
         assert res.status_code == 200
-        data = json.loads(res.data.decode('utf-8'))
-        assert len(data['hits']['hits']) == 1
+        data = json.loads(res.data.decode("utf-8"))
+        assert len(data["hits"]["hits"]) == 1
