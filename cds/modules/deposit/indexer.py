@@ -35,26 +35,27 @@ from .api import Project, Video
 
 
 def cdsdeposit_indexer_receiver(
-        sender, json=None, record=None, index=None, **dummy_kwargs):
+    sender, json=None, record=None, index=None, **dummy_kwargs
+):
     """Inject task status information before index."""
     video_schema = current_jsonschemas.path_to_url(Video._schema)
     project_schema = current_jsonschemas.path_to_url(Project._schema)
-    if record['$schema'] == project_schema:
+    if record["$schema"] == project_schema:
         deposit = Project.get_record(record.id)
-    if record['$schema'] == video_schema:
+    if record["$schema"] == video_schema:
         deposit = Video.get_record(record.id)
-    if record['$schema'] in [project_schema, video_schema]:
-        json['_cds']['state'] = deposit['_cds']['state']
-        json['_files'] = deposit['_files']
-        if json.get('_access'):
-            if json['_access'].get('read'):
-                json['_access']['read'] = [
-                    lowercase_value(value) for value in json['_access'][
-                        'read']]
-            if json['_access'].get('update'):
-                json['_access']['update'] = [
-                    lowercase_value(value) for value in json['_access'][
-                        'update']]
+    if record["$schema"] in [project_schema, video_schema]:
+        json["_cds"]["state"] = deposit["_cds"]["state"]
+        json["_files"] = deposit["_files"]
+        if json.get("_access"):
+            if json["_access"].get("read"):
+                json["_access"]["read"] = [
+                    lowercase_value(value) for value in json["_access"]["read"]
+                ]
+            if json["_access"].get("update"):
+                json["_access"]["update"] = [
+                    lowercase_value(value) for value in json["_access"]["update"]
+                ]
 
 
 class CDSRecordIndexer(RecordIndexer):
@@ -64,8 +65,10 @@ class CDSRecordIndexer(RecordIndexer):
         # index videos (records)
         pid_values = Project(data=deposit).video_ids
         ids = [
-            str(p.object_uuid) for p in PersistentIdentifier.query.filter(
-                PersistentIdentifier.pid_value.in_(pid_values)).all()
+            str(p.object_uuid)
+            for p in PersistentIdentifier.query.filter(
+                PersistentIdentifier.pid_value.in_(pid_values)
+            ).all()
         ]
         # index project (record)
         _, record = deposit.fetch_published()
@@ -74,29 +77,30 @@ class CDSRecordIndexer(RecordIndexer):
         ids.append(str(deposit.id))
         super(CDSRecordIndexer, self).bulk_index(iter(ids))
 
-    def index(self, deposit, action='commit'):
+    def index(self, deposit, action="commit"):
         video_schema = current_jsonschemas.path_to_url(Video._schema)
         project_schema = current_jsonschemas.path_to_url(Project._schema)
-        if action == 'publish':
-            if deposit['$schema'] == project_schema:
+        if action == "publish":
+            if deposit["$schema"] == project_schema:
                 self._index_project_after_publish(deposit)
-            elif deposit['$schema'] == video_schema:
+            elif deposit["$schema"] == video_schema:
                 _, record = deposit.fetch_published()
                 super(CDSRecordIndexer, self).index(record)
-        elif action in ('edit', 'discard', 'commit'):
+        elif action in ("edit", "discard", "commit"):
             super(CDSRecordIndexer, self).index(deposit)
-        elif action == 'delete':
+        elif action == "delete":
             self.delete(deposit)
 
     def delete(self, record):
         video_schema = current_jsonschemas.path_to_url(Video._schema)
         project_schema = current_jsonschemas.path_to_url(Project._schema)
-        if record['$schema'] == video_schema:
+
+        if record["$schema"] == video_schema:
             project = record.project
             super(CDSRecordIndexer, self).delete(record)
             # If is a Video index also the project
             super(CDSRecordIndexer, self).index(project)
-        elif record['$schema'] == project_schema:
+        elif record["$schema"] == project_schema:
             ids = [str(video.id) for video in record.videos]
             if ids:
                 index, doc_type = self.record_to_index(record.videos[0])
@@ -106,4 +110,4 @@ class CDSRecordIndexer(RecordIndexer):
     def bulk_delete(self, record_iterator, **kwargs):
         """Overrides to `RecordIndexer.buld_delete` to pass the index of the
         records. Can be used to delete only records of the same index."""
-        self._bulk_op(record_iterator, 'delete', **kwargs)
+        self._bulk_op(record_iterator, "delete", **kwargs)

@@ -309,14 +309,20 @@ class CDSDeposit(Deposit):
             snapshot = self.files.bucket.snapshot()
             self._fix_tags_refs_to_master(bucket=snapshot)
             # dump after fixing references
-            data["_files"] = self.files.dumps(bucket=snapshot.id)
-            snapshot.locked = False
+            self.files.bucket.locked = False
+            snapshot.sync(bucket=self.files.bucket, delete_extras=True)
+            self.files.bucket.locked = True
+            data["_files"] = self.files.dumps()
 
             data = self._generate_smil_file(record_id, data, snapshot)
             # dump after smil generation
-            data["_files"] = self.files.dumps(bucket=snapshot.id)
+            self.files.bucket.locked = False
+            snapshot.sync(bucket=self.files.bucket, delete_extras=True)
+            data["_files"] = self.files.dumps()
+            self.files.bucket.locked = True
             # dump the snapshot id to the record bucket
             # we need this to avoid creatng a new bucket on `Record.create(...)`
+            snapshot.locked = False
             data["_buckets"]["record"] = str(snapshot.id)
             snapshot.locked = True
 
@@ -653,6 +659,10 @@ class Project(CDSDeposit):
             pid = get_video_pid(pid_value=video["_deposit"]["id"])
             if not pid.is_deleted():
                 pid.delete()
+            # ensure video is deleted from index
+            self.indexer.delete(video)
+
+        self._delete_videos([video.ref for video in videos])
         return super(Project, self).delete(force=force, pid=pid)
 
     @has_status(status="draft")
@@ -978,6 +988,7 @@ class Video(CDSDeposit):
         video_old_ref = self.ref
         video_discarded = super(Video, self).discard(pid=pid)
         video_discarded.project._update_videos([video_old_ref], [video_discarded.ref])
+        video_discarded.project.commit()
         return video_discarded
 
     def assign_report_number(self, report_number):
