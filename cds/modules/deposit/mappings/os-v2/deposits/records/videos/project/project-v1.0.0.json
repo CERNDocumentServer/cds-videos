@@ -262,8 +262,7 @@
             "type": "text",
             "fields": {
               "raw": {
-                "type": "text",
-                "analyzer": "case_insensitive_sort"
+                "type": "keyword"
               }
             }
           }
@@ -285,18 +284,6 @@
           "deposit": {
             "type": "text"
           }
-        }
-      }
-    }
-  },
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "case_insensitive_sort": {
-          "tokenizer": "keyword",
-          "filter": [
-            "lowercase"
-          ]
         }
       }
     }
