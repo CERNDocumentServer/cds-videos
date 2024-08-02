@@ -58,7 +58,6 @@ def test_error_report(datadir):
 
     with pytest.raises(FrameExtractionExecutionError) as e:
         ff_frames("invalid_filename", 10, 20, 2, 100, "")
-    not_found = "Error opening input file invalid_filename.\nError opening input files: No such file or directory"
     assert not_found in repr(e.value)
     assert not_found in e.value.error_message
 
