@@ -19,8 +19,6 @@
 
 """Deposit loaders."""
 
-from __future__ import absolute_import
-
 from cds.modules.deposit.loaders.loader import marshmallow_loader
 from cds.modules.records.serializers.schemas.project import ProjectSchema
 from cds.modules.records.serializers.schemas.video import VideoSchema

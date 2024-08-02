@@ -46,7 +46,7 @@ from invenio_pidstore.errors import PIDInvalidAction
 from invenio_records.models import RecordMetadata
 from invenio_search import current_search_client
 from jsonschema.exceptions import ValidationError
-from opensearch_dsl.query import Q
+from invenio_search.engine import dsl
 
 from cds.modules.deposit.api import (
     Project,
@@ -576,7 +576,7 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     # check elasticsearch
     result = (
         DepositSearch()
-        .filter(Q("match", **{"_deposit.id": project["_deposit"]["id"]}))
+        .filter(dsl.Q("match", **{"_deposit.id": project["_deposit"]["id"]}))
         .params(version=True)
         .execute()
         .to_dict()["hits"]["hits"][0]
@@ -597,7 +597,7 @@ def test_project_keywords(es, api_project, keyword_1, keyword_2, users):
     # check elasticsearch
     result = (
         DepositSearch()
-        .filter(Q("match", **{"_deposit.id": project["_deposit"]["id"]}))
+        .filter(dsl.Q("match", **{"_deposit.id": project["_deposit"]["id"]}))
         .params(version=True)
         .execute()
         .to_dict()["hits"]["hits"][0]

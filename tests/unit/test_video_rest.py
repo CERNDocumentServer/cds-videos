@@ -34,8 +34,9 @@ import mock
 import pytest
 from celery.exceptions import Retry
 from flask import url_for
+from flask_login import current_user
 from flask_principal import RoleNeed, identity_loaded
-from flask_security import login_user
+from flask_security import login_user, logout_user
 from helpers import prepare_videos_for_publish
 from invenio_accounts.models import User
 from invenio_db import db
@@ -45,6 +46,7 @@ from invenio_search import current_search_client
 from cds.modules.deposit.api import deposit_project_resolver, deposit_video_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
 from cds.modules.deposit.tasks import datacite_register
+from cds.modules.records.serializers.schemas.common import KeywordsSchema
 
 
 @mock.patch("invenio_pidstore.providers.datacite.DataCiteMDSClient")
@@ -180,26 +182,37 @@ def test_video_publish_registering_the_datacite_not_local(
     with api_app.test_client() as client:
         login_user(User.query.get(users[0]))
 
-        project_deposit_metadata["keywords"] = [copy.deepcopy(keyword_2)]
+        project_deposit_metadata["keywords"] = [
+            {
+                "name": keyword_2["name"],
+                "value": {"name": keyword_2["name"], "key_id": keyword_2["key_id"]},
+            }
+        ]
 
         # [[ CREATE NEW PROJECT ]]
         project_dict = _create_new_project(
             client, json_partial_project_headers, project_deposit_metadata
         )
 
-        assert project_dict["metadata"]["keywords"][0] == keyword_2
+        assert project_dict["metadata"]["keywords"][0] == KeywordsSchema().dump(
+            keyword_2
+        )
         project_depid = project_dict["metadata"]["_deposit"]["id"]
         project = deposit_project_resolver(project_depid)
         assert project["keywords"] == [
             {
-                "$ref": keyword_2.ref,
                 "name": keyword_2["name"],
             }
         ]
 
         # [[ ADD A NEW VIDEO_1 ]]
         video_metadata = copy.deepcopy(video_deposit_metadata)
-        video_metadata["keywords"] = [copy.deepcopy(keyword_1)]
+        video_metadata["keywords"] = [
+            {
+                "name": keyword_1["name"],
+                "value": {"name": keyword_1["name"], "key_id": keyword_1["key_id"]},
+            }
+        ]
         video_metadata.update(_project_id=project_dict["metadata"]["_deposit"]["id"])
         res = client.post(
             url_for("invenio_deposit_rest.video_list"),
@@ -209,12 +222,13 @@ def test_video_publish_registering_the_datacite_not_local(
 
         assert res.status_code == 201
         video_1_dict = json.loads(res.data.decode("utf-8"))
-        assert video_1_dict["metadata"]["keywords"][0] == keyword_1
+        assert video_1_dict["metadata"]["keywords"][0] == KeywordsSchema().dump(
+            keyword_1
+        )
         video_1_depid = video_1_dict["metadata"]["_deposit"]["id"]
         video_1 = deposit_video_resolver(video_1_depid)
         assert video_1["keywords"] == [
             {
-                "$ref": keyword_1.ref,
                 "name": keyword_1["name"],
             }
         ]
@@ -276,6 +290,8 @@ def test_video_access_rights_based_on_user_id(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
         )
         # check anonymous don't have access
+        if current_user:
+            logout_user()
         assert client.get(deposit_url).status_code == 401
         assert client.post(publish_url).status_code == 401
         # User is the creator of the deposit, so everything is fine
@@ -315,7 +331,7 @@ def test_video_access_rights_based_on_egroup(
         video_1["_access"] = {"update": ["test-egroup@cern.ch"]}
         video_1.commit()
         db.session.commit()
-        login_user(email=User.query.get(users[1]).email)
+        login_user(User.query.get(users[1]))
         deposit_url = url_for("invenio_deposit_rest.video_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
@@ -331,7 +347,7 @@ def test_video_access_rights_based_admin(mock_datacite, api_app, users, api_proj
     cds_depid = video_1["_deposit"]["id"]
     with api_app.test_client() as client:
         prepare_videos_for_publish([video_1, video_2])
-        login_user(email=User.query.get(users[2]).email)
+        login_user(User.query.get(users[2]))
         deposit_url = url_for("invenio_deposit_rest.video_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
@@ -361,7 +377,7 @@ def test_video_publish_edit_publish_again(
 
     with api_app.test_request_context():
         with api_app.test_client() as client:
-            login_user(email=User.query.get(users[0]).email)
+            login_user(User.query.get(users[0]))
 
             # [[ CREATE A NEW PROJECT ]]
             project_dict = _create_new_project(
@@ -388,7 +404,7 @@ def test_video_publish_edit_publish_again(
             # [[ MODIFY DOI -> SAVE ]]
             video_1 = deposit_video_resolver(video_1_depid)
             video_1_dict = copy.deepcopy(video_1)
-            #  old_doi = video_1_dict['doi']
+            old_doi = video_1_dict["doi"]
             video_1_dict["doi"] = "10.1123/doi"
             del video_1_dict["_files"]
             res = client.put(
@@ -400,11 +416,10 @@ def test_video_publish_edit_publish_again(
                 headers=json_headers,
             )
             # check returned value
-            assert res.status_code == 400
+            assert res.status_code == 200
             data = json.loads(res.data.decode("utf-8"))
-            assert data["errors"] == [
-                {"field": "doi", "message": "The DOI cannot be changed."}
-            ]
+            # Ensure that doi once minted cannot be changed to another value
+            assert data["metadata"]["doi"] == old_doi
 
             video_1 = deposit_video_resolver(video_1_depid)
             #  video_1['doi'] = old_doi

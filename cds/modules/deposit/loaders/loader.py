@@ -19,8 +19,6 @@
 
 """Marshmallow loaders."""
 
-from __future__ import absolute_import
-
 import json
 
 from flask import current_app, has_request_context, request

@@ -23,8 +23,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Celery tasks for Webhook Receivers."""
 
-from __future__ import absolute_import
-
 import json
 import os
 import shutil

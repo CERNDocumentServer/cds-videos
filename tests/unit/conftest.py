@@ -71,8 +71,8 @@ from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_previewer import InvenioPreviewer
 from invenio_search import InvenioSearch, current_search, current_search_client
+from invenio_search.engine import search
 from invenio_sequencegenerator.api import Template
-from opensearchpy import RequestError
 from six import BytesIO
 from sqlalchemy_utils.functions import create_database, database_exists
 
@@ -257,7 +257,7 @@ def es(app):
     list(current_search.delete(ignore=[404]))
     try:
         list(current_search.create())
-    except RequestError:
+    except search.RequestError:
         list(current_search.delete(ignore=[404]))
         list(current_search.create(ignore=[400]))
     current_search_client.indices.refresh()

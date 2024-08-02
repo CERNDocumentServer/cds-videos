@@ -24,8 +24,6 @@
 
 """Persistent identifier fetchers."""
 
-from __future__ import absolute_import
-
 from invenio_pidstore.fetchers import FetchedPID
 
 from .providers import DepositProvider
@@ -42,5 +40,5 @@ def deposit_fetcher(record_uuid, data):
     return FetchedPID(
         provider=DepositProvider,
         pid_type=DepositProvider.pid_type,
-        pid_value=str(data['_deposit']['id']),
+        pid_value=str(data["_deposit"]["id"]),
     )

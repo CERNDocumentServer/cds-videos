@@ -31,7 +31,6 @@ from functools import partial, wraps
 
 from dictdiffer import patch
 from dictdiffer.merge import Merger, UnresolvedConflictsException
-from opensearchpy.exceptions import RequestError
 from flask import current_app
 from flask_login import current_user
 from invenio_db import db
@@ -44,6 +43,7 @@ from invenio_pidstore.resolver import Resolver
 from invenio_records.signals import after_record_update, before_record_update
 from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
+from invenio_search.engine import search
 from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.local import LocalProxy
 
@@ -73,7 +73,7 @@ def index(method=None, delete=False):
                 self_or_cls.indexer.delete(result)
             else:
                 self_or_cls.indexer.index(result)
-        except RequestError:
+        except search.RequestError:
             current_app.logger.exception("Could not index {0}.".format(result))
         return result
 

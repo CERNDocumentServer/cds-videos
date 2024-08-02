@@ -18,8 +18,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 """Project JSON schema."""
 
-from __future__ import absolute_import
-
 from invenio_jsonschemas import current_jsonschemas
 from marshmallow import Schema, fields, post_load
 

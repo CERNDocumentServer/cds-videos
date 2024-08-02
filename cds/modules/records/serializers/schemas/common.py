@@ -19,8 +19,6 @@
 
 """Common JSON schemas."""
 
-from __future__ import absolute_import
-
 from marshmallow import Schema, fields, RAISE, validates_schema, ValidationError
 from marshmallow.validate import Length
 
