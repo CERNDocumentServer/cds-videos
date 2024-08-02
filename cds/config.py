@@ -458,8 +458,6 @@ STATS_QUERIES = {
     },
 }
 
-# STATS_PERMISSION_FACTORY = TODO
-
 STATS_REGISTER_INDEX_TEMPLATES = True
 
 # Legacy host Elasticsearch
@@ -508,7 +506,7 @@ CDS_RECORDS_EXPORTFORMATS = {
     "json": dict(
         title="JSON",
         mimetype="application/json",
-        serializer="invenio_records_rest.serializers:json_v1",
+        serializer="cds.modules.records.serializers:json_v1",
     ),
     "smil": dict(
         title="SMIL",
