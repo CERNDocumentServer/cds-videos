@@ -24,8 +24,6 @@
 
 """Python FFmpeg wrapper errors."""
 
-from __future__ import absolute_import
-
 
 class FFmpegError(Exception):
     """General FFmpeg error class."""
@@ -36,15 +34,14 @@ class FFmpegExecutionError(Exception):
 
     def __init__(self, process_error):
         self.internal_error = process_error
-        self.cmd = ' '.join(process_error.cmd)
+        self.cmd = " ".join(process_error.cmd)
         self.error_code = process_error.returncode
-        self.error_message = process_error.output.decode('utf-8')
+        self.error_message = process_error.output.decode("utf-8")
 
     def __repr__(self):
-        return ('COMMAND: {0}\n'
-                'ERROR_CODE: {1}\n'
-                'OUTPUT: {2}'
-                ).format(self.cmd, self.error_code, self.error_message)
+        return ("COMMAND: {0}\n" "ERROR_CODE: {1}\n" "OUTPUT: {2}").format(
+            self.cmd, self.error_code, self.error_message
+        )
 
     def __str__(self):
         return self.__repr__()

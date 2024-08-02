@@ -24,8 +24,6 @@
 
 """CDS files receivers tests."""
 
-from __future__ import absolute_import
-
 from invenio_db import db
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from mock import mock

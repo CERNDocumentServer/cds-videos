@@ -24,7 +24,6 @@
 
 """Persistent identifier minters."""
 
-from __future__ import absolute_import
 
 import uuid
 
@@ -59,12 +58,12 @@ def deposit_minter(record_uuid, data):
     :returns: A :class:`invenio_pidstore.models.PersistentIdentifier` object.
     """
     provider = DepositProvider.create(
-        object_type='rec',
+        object_type="rec",
         object_uuid=record_uuid,
         pid_value=uuid.uuid4().hex,
     )
-    data['_deposit'] = {
-        'id': provider.pid.pid_value,
-        'status': 'draft',
+    data["_deposit"] = {
+        "id": provider.pid.pid_value,
+        "status": "draft",
     }
     return provider.pid

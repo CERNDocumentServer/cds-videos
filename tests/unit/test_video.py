@@ -48,7 +48,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records.models import RecordMetadata
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
-from opensearch_dsl.query import Q
+from invenio_search.engine import dsl
 from six import BytesIO
 
 from cds.modules.deposit.api import (
@@ -482,7 +482,7 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     # check elasticsearch
     result = (
         DepositSearch()
-        .filter(Q("match", **{"_deposit.id": video_1["_deposit"]["id"]}))
+        .filter(dsl.Q("match", **{"_deposit.id": video_1["_deposit"]["id"]}))
         .params(version=True)
         .execute()
         .to_dict()["hits"]["hits"][0]
@@ -504,7 +504,7 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
     # check elasticsearch
     result = (
         DepositSearch()
-        .filter(Q("match", **{"_deposit.id": video_1["_deposit"]["id"]}))
+        .filter(dsl.Q("match", **{"_deposit.id": video_1["_deposit"]["id"]}))
         .params(version=True)
         .execute()
         .to_dict()["hits"]["hits"][0]

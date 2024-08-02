@@ -25,7 +25,7 @@
 
 from __future__ import absolute_import, print_function
 
-from opensearch_dsl.query import Q
+from invenio_search.engine import dsl
 from flask import current_app, g, request
 from flask_login import current_user
 from invenio_access.permissions import Permission, superuser_access
@@ -42,7 +42,9 @@ def deposit_search_factory(self, search, search_query_parser):
     from invenio_records_rest.sorter import default_sorter_factory
 
     query_string = request.values.get("q", "")
-    query_parser = Q("query_string", query=query_string) if query_string else Q()
+    query_parser = (
+        dsl.Q("query_string", query=query_string) if query_string else dsl.Q()
+    )
 
     try:
         search = search.query(query_parser)
@@ -67,20 +69,20 @@ def cern_filter():
     """Filter list of results."""
     # Send empty query for admins
     if Permission(superuser_access).allows(g.identity):
-        return Q()
+        return dsl.Q()
 
     # Get CERN user's provides
     provides = get_user_provides()
 
     # Filter for restricted records, that the user has access to
-    write_restricted = Q("terms", **{"_access.update": provides})
+    write_restricted = dsl.Q("terms", **{"_access.update": provides})
     # Filter records where the user is owner
-    owner = Q("match", **{"_deposit.created_by": getattr(current_user, "id", -1)})
+    owner = dsl.Q("match", **{"_deposit.created_by": getattr(current_user, "id", -1)})
 
     # OR all the filters
     combined_filter = write_restricted | owner
 
-    return Q("bool", filter=[combined_filter])
+    return dsl.Q("bool", filter=[combined_filter])
 
 
 class DepositVideosSearch(RecordsSearch):

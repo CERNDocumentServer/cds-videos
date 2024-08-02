@@ -150,9 +150,9 @@ def filter_by_reportnumber(query, **kwargs):
         q = dsl.query.Bool(
             "should",
             should=[
-                dsl.Q("term", **{"file": report_number}),
-                dsl.Q("term", **{"file": report_number_movie}),
-                dsl.Q("term", **{"file": report_number_videoclip}),
+                dsl.dsl.Q("term", **{"file": report_number}),
+                dsl.dsl.Q("term", **{"file": report_number_movie}),
+                dsl.dsl.Q("term", **{"file": report_number_videoclip}),
             ],
             minimum_should_match=1,
         )
@@ -162,8 +162,8 @@ def filter_by_reportnumber(query, **kwargs):
         q = dsl.query.Bool(
             "should",
             should=[
-                dsl.Q("term", **{"file": report_number}),
-                dsl.Q("term", **{"file": report_number_videorush}),
+                dsl.dsl.Q("term", **{"file": report_number}),
+                dsl.dsl.Q("term", **{"file": report_number_videorush}),
             ],
             minimum_should_match=1,
         )

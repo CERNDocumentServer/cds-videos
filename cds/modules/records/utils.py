@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import json
 
 import six
-from opensearchpy.exceptions import NotFoundError
 from flask import current_app, g, request
 from flask_security import current_user
 from html import unescape
@@ -45,6 +44,7 @@ from invenio_records.api import Record
 from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_search import current_search
+from invenio_search.engine import search
 from invenio_indexer.utils import schema_to_index
 from six.moves.html_parser import HTMLParser
 from urllib import parse
@@ -317,7 +317,7 @@ def wipe_record(record_uuid):
         try:
             RecordIndexer().delete(record)
             report.append(("INFO", "Deleted record from index."))
-        except NotFoundError:
+        except search.NotFoundError:
             report.append(("WARN", "Couldn't delete record from index."))
 
         # Delete PIDs
@@ -421,7 +421,7 @@ def delete_record(record_uuid, reason):
         try:
             RecordIndexer().delete(record)
             report.append(("INFO", "Deleted record from index."))
-        except NotFoundError:
+        except search.NotFoundError:
             report.append(("WARN", "Couldn't delete record from index."))
 
         record_bucket = RecordsBuckets.query.filter(

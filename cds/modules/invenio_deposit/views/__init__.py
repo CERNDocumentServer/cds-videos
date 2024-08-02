@@ -23,5 +23,3 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Module for depositing record metadata and uploading files."""
-
-from __future__ import absolute_import

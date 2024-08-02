@@ -67,7 +67,7 @@ class DOI(fields.String):
         if value == "" and not (self.required or self.context.get("doi_required")):
             return value
         if not idutils.is_doi(value):
-            self.fail("invalid_doi")
+            self.make_error("invalid_doi")
         return idutils.normalize_doi(value)
 
     def _validate(self, value):
@@ -83,7 +83,7 @@ class DOI(fields.String):
         if required_doi:
             if value == required_doi:
                 return
-            self.fail("required_doi")
+            self.make_error("required_doi")
         # Check if DOI is in allowed list.
         if allowed_dois:
             if value in allowed_dois:
@@ -92,10 +92,10 @@ class DOI(fields.String):
         prefix = value.split("/")[0]
         # Check for managed prefix
         if managed_prefixes and prefix in managed_prefixes:
-            self.fail("managed_prefix", prefix=prefix)
+            self.make_error("managed_prefix", prefix=prefix)
         # Check for banned prefixes
         if banned_prefixes and prefix in banned_prefixes:
-            self.fail(
+            self.make_error(
                 "test_prefix" if prefix == "10.5072" else "banned_prefix", prefix=prefix
             )
 

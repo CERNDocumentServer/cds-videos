@@ -46,9 +46,9 @@ def deposits_filter():
     Otherwise, it filters out any deposit where user is not the owner.
     """
     if not has_request_context() or admin_permission_factory().can():
-        return Q()
+        return dsl.Q()
     else:
-        return Q("match", **{"_deposit.owners": getattr(current_user, "id", 0)})
+        return dsl.Q("match", **{"_deposit.owners": getattr(current_user, "id", 0)})
 
 
 class DepositSearch(RecordsSearch):

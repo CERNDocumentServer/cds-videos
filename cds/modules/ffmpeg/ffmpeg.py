@@ -24,8 +24,6 @@
 
 """Python wrappers for the ffmpeg command-line utility."""
 
-from __future__ import absolute_import
-
 import json
 from math import gcd
 from itertools import count, takewhile
