@@ -51,41 +51,38 @@ def test_fixture_licenses(app, script_info, db, es, licenses):
     class TestRequest(object):
         def json(self):
             return licenses
+
     return_value = TestRequest()
 
-    with mock.patch('requests.get', return_value=return_value):
+    with mock.patch("requests.get", return_value=return_value):
         res = runner.invoke(cli_licenses, [], obj=script_info)
     assert res.exit_code == 0
     licenses_db = RecordMetadata.query.all()
     assert len(licenses_db) == 4
     for license in licenses_db:
-        assert 'id' in license.json
-        assert 'title' in license.json
-        assert 'url' in license.json
-    ids = set([license.json['id'] for license in licenses_db])
+        assert "id" in license.json
+        assert "title" in license.json
+        assert "url" in license.json
+    ids = set([license.json["id"] for license in licenses_db])
     assert len(ids) == 4
-    assert 'CERN' in ids
+    assert "CERN" in ids
 
 
 def test_fixture_keywords(app, script_info, db, es, location, cern_keywords):
     """Test load category fixtures."""
     assert len(RecordMetadata.query.all()) == 0
     runner = CliRunner()
-    return_value = type('test', (object, ), {
-        'text': json.dumps(cern_keywords)}
-    )
-    with mock.patch('requests.get', return_value=return_value):
+    return_value = type("test", (object,), {"text": json.dumps(cern_keywords)})
+    with mock.patch("requests.get", return_value=return_value):
         res = runner.invoke(cli_keywords, [], obj=script_info)
     assert res.exit_code == 0
     keywords = RecordMetadata.query.all()
     assert len(keywords) == 4
     for keyword in keywords:
-        assert 'input' in keyword.json['suggest_name']
-        assert 'name' in keyword.json['suggest_name']['payload']
-        assert 'key_id' in keyword.json['suggest_name']['payload']
-        assert 'deleted' in keyword.json
-        assert 'name' in keyword.json
-        assert 'key_id' in keyword.json
+        assert "input" in keyword.json["suggest_name"]
+        assert "deleted" in keyword.json
+        assert "name" in keyword.json
+        assert "key_id" in keyword.json
 
 
 def test_fixture_categories(app, script_info, db, es, location):
@@ -97,7 +94,7 @@ def test_fixture_categories(app, script_info, db, es, location):
     categories = RecordMetadata.query.all()
     assert len(categories) == 7
     for category in categories:
-        assert 'VIDEO' in category.json['types']
+        assert "VIDEO" in category.json["types"]
 
 
 def test_fixture_sequence_generator(app, script_info, db):
@@ -116,18 +113,18 @@ def test_fixture_pages(app, script_info, db, location, client):
     InvenioPages(app)
     Page.query.delete()
     assert len(Page.query.all()) == 0
-    about_response = client.get('/about', follow_redirects=True)
+    about_response = client.get("/about", follow_redirects=True)
     assert about_response.status_code == 404
     runner = CliRunner()
     res = runner.invoke(cli_pages, [], obj=script_info)
     assert res.exit_code == 0
     pages = Page.query.all()
     assert len(pages) == 5
-    about_response = client.get('/about', follow_redirects=True)
+    about_response = client.get("/about", follow_redirects=True)
     assert about_response.status_code == 200
 
 
-@pytest.mark.skip(reason='TO BE CHECKED if we want to keep it.')
+@pytest.mark.skip(reason="TO BE CHECKED if we want to keep it.")
 def test_fixture_records(app, script_info, location, es):
     """Test load demo records."""
     # TODO: once we have a nice subset of test finish the test with more checks

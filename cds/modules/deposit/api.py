@@ -314,7 +314,9 @@ class CDSDeposit(Deposit):
             self.files.bucket.locked = True
             data["_files"] = self.files.dumps()
 
+            snapshot.locked = False
             data = self._generate_smil_file(record_id, data, snapshot)
+            snapshot.locked = True
             # dump after smil generation
             self.files.bucket.locked = False
             snapshot.sync(bucket=self.files.bucket, delete_extras=True)
@@ -662,7 +664,7 @@ class Project(CDSDeposit):
             # ensure video is deleted from index
             self.indexer.delete(video)
 
-        self._delete_videos([video.ref for video in videos])
+            self._delete_videos([video.ref])
         return super(Project, self).delete(force=force, pid=pid)
 
     @has_status(status="draft")

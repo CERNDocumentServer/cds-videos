@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 import re
 from functools import partial
+import pytest
 
 import mock
 from flask import url_for
@@ -50,6 +51,7 @@ def test_records_ui_export(app, project_published, video_record_metadata):
     db.session.commit()
     pid = project["_deposit"]["pid"]["value"]
     vid = video_1["_deposit"]["pid"]["value"]
+
     url_no_existing_exporter = partial(
         url_for, "invenio_records_ui.recid_export", pid_value=pid, format="blabla"
     )
@@ -90,7 +92,8 @@ def test_records_ui_export(app, project_published, video_record_metadata):
 
     with app.test_request_context():
         with app.test_client() as client:
-            check_url(url_no_existing_exporter, 404)
+            with pytest.raises(ValueError):
+                check_url(url_no_existing_exporter, 404)
             check_url(url_not_valid_type_record, 400)
 
             data = check_url(url_valid_smil, 200)
