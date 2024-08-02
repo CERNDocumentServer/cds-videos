@@ -19,7 +19,7 @@
 
 """Common JSON schemas."""
 
-from marshmallow import Schema, fields, RAISE, validates_schema, ValidationError
+from marshmallow import RAISE, Schema, ValidationError, fields, validates_schema
 from marshmallow.validate import Length
 
 from ...api import Keyword

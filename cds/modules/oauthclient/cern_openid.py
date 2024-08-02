@@ -81,9 +81,9 @@ In templates you can add a sign in/up link:
 """
 
 from datetime import datetime, timedelta
+from urllib.parse import quote
 
 from flask import Blueprint, current_app, flash, g, redirect, session, url_for
-from invenio_i18n import lazy_gettext as _
 from flask_login import current_user
 from flask_principal import (
     AnonymousIdentity,
@@ -92,14 +92,13 @@ from flask_principal import (
     identity_changed,
     identity_loaded,
 )
-from jwt import decode
-from urllib.parse import quote
 from invenio_db import db
+from invenio_i18n import lazy_gettext as _
 from invenio_oauthclient.errors import OAuthCERNRejectedAccountError, OAuthError
 from invenio_oauthclient.models import RemoteAccount
-from invenio_oauthclient.proxies import current_oauthclient
 from invenio_oauthclient.oauth import oauth_link_external_id, oauth_unlink_external_id
-
+from invenio_oauthclient.proxies import current_oauthclient
+from jwt import decode
 
 cern_openid_blueprint = Blueprint("cern_openid_oauth", __name__)
 

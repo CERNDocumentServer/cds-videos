@@ -26,10 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_i18n import lazy_gettext as _
 from flask_wtf import FlaskForm
-from wtforms import (BooleanField, SelectField, StringField, SubmitField,
-                     TextAreaField)
+from invenio_i18n import lazy_gettext as _
+from wtforms import BooleanField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired
 
 

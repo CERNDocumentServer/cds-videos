@@ -28,7 +28,7 @@ import time
 from functools import wraps
 
 from celery import shared_task
-from flask import jsonify, request, current_app
+from flask import current_app, jsonify, request
 from flask_login import current_user
 from flask_restful import abort
 

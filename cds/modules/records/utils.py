@@ -27,14 +27,16 @@
 from __future__ import absolute_import, print_function
 
 import json
+from html import unescape
+from urllib import parse
 
 import six
 from flask import current_app, g, request
 from flask_security import current_user
-from html import unescape
 from invenio_db import db
 from invenio_files_rest.models import as_bucket
 from invenio_files_rest.tasks import remove_file_data
+from invenio_indexer.utils import schema_to_index
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import PersistentIdentifierError
 from invenio_pidstore.models import PersistentIdentifier
@@ -45,9 +47,7 @@ from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_search import current_search
 from invenio_search.engine import search
-from invenio_indexer.utils import schema_to_index
 from six.moves.html_parser import HTMLParser
-from urllib import parse
 from sqlalchemy_continuum import version_class
 
 from ..deposit.fetcher import deposit_fetcher

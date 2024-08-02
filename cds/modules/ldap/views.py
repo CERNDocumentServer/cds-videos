@@ -20,10 +20,10 @@
 """CDS LDAP views."""
 
 from __future__ import absolute_import, print_function
-import ldap
 
-from flask import Blueprint, jsonify, make_response, request, \
-    abort
+import ldap
+from flask import Blueprint, abort, jsonify, make_response, request
+
 from cds.modules.ldap.client import LdapClient
 from cds.modules.ldap.decorators import needs_authentication
 from cds.modules.ldap.serializers import serialize_ldap_users

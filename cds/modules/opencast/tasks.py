@@ -35,9 +35,13 @@ from flask import current_app
 from invenio_cache import current_cache
 from invenio_db import db
 from invenio_files_rest.helpers import compute_md5_checksum
-from invenio_files_rest.models import (FileInstance, ObjectVersion,
-                                       ObjectVersionTag, as_bucket,
-                                       as_object_version)
+from invenio_files_rest.models import (
+    FileInstance,
+    ObjectVersion,
+    ObjectVersionTag,
+    as_bucket,
+    as_object_version,
+)
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 
 from cds.modules.deposit.api import deposit_video_resolver
@@ -45,13 +49,19 @@ from cds.modules.flows.decorators import retry
 from cds.modules.flows.deposit import index_deposit_project
 from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
-from cds.modules.flows.tasks import (TranscodeVideoTask,
-                                     sync_records_with_deposit_files)
+from cds.modules.flows.tasks import TranscodeVideoTask, sync_records_with_deposit_files
 from cds.modules.opencast.api import OpenCastRequestSession
-from cds.modules.opencast.error import (AbruptCeleryStop, RequestError,
-                                        RequestError404, WriteToEOSError)
-from cds.modules.opencast.utils import (generate_downloader_lock_id, only_one,
-                                        only_one_downloader)
+from cds.modules.opencast.error import (
+    AbruptCeleryStop,
+    RequestError,
+    RequestError404,
+    WriteToEOSError,
+)
+from cds.modules.opencast.utils import (
+    generate_downloader_lock_id,
+    only_one,
+    only_one_downloader,
+)
 from cds.modules.records.utils import to_string
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 

@@ -46,6 +46,7 @@ from invenio_files_rest.models import (
     ObjectVersionTag,
     as_object_version,
 )
+from invenio_indexer.tasks import index_record
 from invenio_jsonschemas import current_jsonschemas
 from invenio_pidstore.errors import (
     PIDDoesNotExistError,
@@ -59,17 +60,14 @@ from invenio_records_files.utils import sorted_files_from_bucket
 from invenio_sequencegenerator.api import Sequence
 from jsonschema.exceptions import ValidationError
 
-from ..invenio_deposit.api import Deposit, has_status, preserve
-from ..invenio_deposit.utils import mark_as_action
-
-from invenio_indexer.tasks import index_record
-
 from ..flows.api import (
     FlowService,
     get_tasks_status_grouped_by_task_name,
     merge_tasks_status,
 )
 from ..flows.models import FlowMetadata
+from ..invenio_deposit.api import Deposit, has_status, preserve
+from ..invenio_deposit.utils import mark_as_action
 from ..records.api import (
     CDSFileObject,
     CDSFilesIterator,

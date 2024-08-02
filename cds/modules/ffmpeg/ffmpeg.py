@@ -25,15 +25,18 @@
 """Python wrappers for the ffmpeg command-line utility."""
 
 import json
-from math import gcd
 from itertools import count, takewhile
+from math import gcd
 from subprocess import STDOUT, CalledProcessError, check_output
 
 from flask import current_app as app
 
-from .errors import (FFmpegExecutionError, FrameExtractionExecutionError,
-                     FrameExtractionInvalidArguments,
-                     MetadataExtractionExecutionError)
+from .errors import (
+    FFmpegExecutionError,
+    FrameExtractionExecutionError,
+    FrameExtractionInvalidArguments,
+    MetadataExtractionExecutionError,
+)
 
 
 def ff_probe(input_filename, field):

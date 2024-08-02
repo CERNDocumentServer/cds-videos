@@ -26,8 +26,8 @@
 
 from __future__ import absolute_import, print_function
 
-import copy
 import ast
+import copy
 import os
 from datetime import timedelta
 
@@ -39,15 +39,15 @@ from invenio_oauthclient.contrib import cern_openid
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 from invenio_stats.aggregations import StatAggregator
-from invenio_stats.tasks import StatsAggregationTask, StatsEventTask
 from invenio_stats.processors import EventsIndexer, anonymize_user, flag_robots
 from invenio_stats.queries import DateHistogramQuery, TermsQuery
+from invenio_stats.tasks import StatsAggregationTask, StatsEventTask
 
+from .modules.deposit.facets import created_by_me_aggs
+from .modules.deposit.indexer import CDSRecordIndexer
 from .modules.invenio_deposit.config import DEPOSIT_REST_FACETS
 from .modules.invenio_deposit.scopes import write_scope
 from .modules.invenio_deposit.utils import check_oauth2_scope
-from .modules.deposit.facets import created_by_me_aggs
-from .modules.deposit.indexer import CDSRecordIndexer
 from .modules.records.permissions import (
     deposit_delete_permission_factory,
     deposit_read_permission_factory,

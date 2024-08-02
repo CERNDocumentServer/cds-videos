@@ -27,10 +27,10 @@
 from __future__ import absolute_import, print_function
 
 import json
-import pytest
 from copy import deepcopy
 
 import mock
+import pytest
 from flask import url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
 from flask_security import current_user, login_user, logout_user

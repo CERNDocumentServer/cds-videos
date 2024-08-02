@@ -35,10 +35,9 @@ from celery import Task as _Task
 from celery import current_app as celery_app
 from celery import shared_task
 from celery.result import AsyncResult
-from celery.worker.control import revoke
 from celery.utils.log import get_task_logger
+from celery.worker.control import revoke
 from flask import current_app
-from PIL import Image, ImageSequence
 
 # from flask_iiif.utils import create_gif_from_frames
 from invenio_db import db
@@ -52,7 +51,7 @@ from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDDeletedError
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
-from PIL import Image
+from PIL import Image, ImageSequence
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string

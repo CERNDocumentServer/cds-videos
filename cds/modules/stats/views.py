@@ -20,7 +20,8 @@
 """CDS Stats."""
 
 from __future__ import absolute_import, print_function
-from flask import Blueprint, current_app, jsonify, make_response, request, abort
+
+from flask import Blueprint, abort, current_app, jsonify, make_response, request
 from flask.views import MethodView
 from invenio_files_rest.models import ObjectVersion
 from invenio_records_rest.views import need_record_permission, pass_record

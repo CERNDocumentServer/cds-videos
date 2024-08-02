@@ -25,11 +25,7 @@ from __future__ import absolute_import, print_function
 
 from flask import render_template
 from invenio_db import db
-from invenio_files_rest.models import (
-    ObjectVersion,
-    ObjectVersionTag,
-    as_object_version,
-)
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, as_object_version
 from invenio_rest.errors import FieldError, RESTValidationError
 from six import BytesIO
 

@@ -45,8 +45,8 @@ from invenio_db import db
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_records.models import RecordMetadata
 from invenio_search import current_search_client
-from jsonschema.exceptions import ValidationError
 from invenio_search.engine import dsl
+from jsonschema.exceptions import ValidationError
 
 from cds.modules.deposit.api import (
     Project,

@@ -29,9 +29,9 @@ from __future__ import absolute_import, print_function
 import json
 import re
 from functools import partial
-import pytest
 
 import mock
+import pytest
 from flask import url_for
 from flask_security import login_user
 from helpers import assert_hits_len, get_files_metadata

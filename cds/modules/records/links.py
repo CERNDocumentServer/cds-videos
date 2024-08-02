@@ -26,12 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.deposit.api import is_project_record, project_resolver
-from cds.modules.records.permissions import deposit_update_permission_factory
-from cds.modules.records.resolver import record_resolver
 from flask import current_app, request, url_for
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_rest.links import default_links_factory
+
+from cds.modules.deposit.api import is_project_record, project_resolver
+from cds.modules.records.permissions import deposit_update_permission_factory
+from cds.modules.records.resolver import record_resolver
 
 
 def _build_record_project_links(project_pid):

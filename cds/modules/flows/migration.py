@@ -33,12 +33,15 @@ from invenio_files_rest.models import ObjectVersionTag, as_object_version
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 from cds.modules.deposit.api import Video
-from cds.modules.records.utils import is_project_record
-
+from cds.modules.flows.models import FlowMetadata, FlowTaskMetadata, FlowTaskStatus
+from cds.modules.flows.tasks import (
+    ExtractFramesTask,
+    ExtractMetadataTask,
+    TranscodeVideoTask,
+)
 from cds.modules.opencast.utils import can_be_transcoded, find_lowest_quality
 from cds.modules.records.api import CDSVideosFilesIterator
-from cds.modules.flows.models import FlowMetadata, FlowTaskMetadata, FlowTaskStatus
-from cds.modules.flows.tasks import ExtractFramesTask, ExtractMetadataTask, TranscodeVideoTask
+from cds.modules.records.utils import is_project_record
 
 
 class MasterFileNotFoundError(Exception):

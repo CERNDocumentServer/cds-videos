@@ -8,8 +8,8 @@
 """Custom event builders for the CDS Videos statistics."""
 
 import datetime
-
 from os.path import splitext
+
 from invenio_search.engine import dsl
 from invenio_stats.utils import get_user
 

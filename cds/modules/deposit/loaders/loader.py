@@ -22,8 +22,8 @@
 import json
 
 from flask import current_app, has_request_context, request
-from marshmallow import ValidationError
 from invenio_rest.errors import RESTValidationError
+from marshmallow import ValidationError
 
 
 def _doi_context():
