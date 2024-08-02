@@ -145,7 +145,6 @@ def test_preview_video(
 )
 def test_preview_video_html5(
     previewer_app,
-    app_with_assets,
     es,
     db,
     users,
@@ -222,7 +221,7 @@ def test_preview_video_html5(
     assert_preview(expected=success_list)
 
 
-def test_legacy_embed(previewer_app, app_with_assets, db, api_project, video, users):
+def test_legacy_embed(previewer_app, db, api_project, video, users):
     """Test backwards-compatibility with legacy embed URL for videos."""
     project, video_1, _ = api_project
     filename = "test.mp4"
@@ -243,7 +242,7 @@ def test_legacy_embed(previewer_app, app_with_assets, db, api_project, video, us
         )
 
 
-def test_smil_generation(previewer_app, app_with_assets, db, api_project, video, users):
+def test_smil_generation(previewer_app, db, api_project, video, users):
     """Test SMIL file export from video."""
 
     def create_slave(key):
@@ -334,9 +333,7 @@ def test_smil_generation(previewer_app, app_with_assets, db, api_project, video,
         # assert 'audio-bitrate="32)"' in contents
 
 
-def test_vtt_export(
-    previewer_app, app_with_assets, db, project_published, video_record_metadata
-):
+def test_vtt_export(previewer_app, db, project_published, video_record_metadata):
     """Test VTT export endpoint."""
     (project, video_1, video_2) = project_published
     # index a (update) video

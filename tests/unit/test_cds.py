@@ -28,24 +28,24 @@ import pytest
 from flask import url_for
 
 
-def test_version(app_with_assets):
+def test_version(app):
     """Test version import."""
     from cds import __version__
 
     assert __version__
 
 
-def test_home(app_with_assets):
+def test_home(app):
     """Test homepage."""
-    with app_with_assets.test_client() as client:
+    with app.test_client() as client:
         res = client.get(url_for("cds_home.index"))
 
         assert res.status_code == 200
 
 
-def test_ping(app_with_assets):
+def test_ping(app):
     """Test homepage."""
-    with app_with_assets.test_client() as client:
+    with app.test_client() as client:
         res = client.get(url_for("cds_home.ping"))
 
         assert res.status_code == 200

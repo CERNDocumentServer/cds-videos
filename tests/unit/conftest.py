@@ -125,16 +125,6 @@ def app():
     shutil.rmtree(instance_path)
 
 
-@pytest.yield_fixture(scope="module")
-def app_with_assets(app):
-    """Flask application fixture with assets."""
-    initial_dir = os.getcwd()
-    os.chdir(app.instance_path)
-    current_webpack.project.buildall()
-    yield app
-    os.chdir(initial_dir)
-
-
 @pytest.fixture()
 def previewer_deposit(app):
     """."""
