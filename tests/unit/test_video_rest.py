@@ -455,7 +455,7 @@ def test_video_publish_edit_publish_again(
             RecordIndexer().process_bulk_queue()
             current_search_client.indices.refresh()
             res = client.get(
-                url_for("invenio_records_rest.recid_list", headers=json_headers)
+                url_for("invenio_records_rest.recid_list"), headers=json_headers
             )
             assert res.status_code == 200
             data = json.loads(res.data.decode("utf-8"))
