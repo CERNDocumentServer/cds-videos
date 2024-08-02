@@ -29,7 +29,7 @@ If you get an empty output from the previous command, run:
 
 .. code-block:: console
 
-    (cds3)$ mkdir src ; cd srcbt
+    (cds3)$ mkdir src ; cd src
     (cds3)$ git clone https://github.com/CERNDocumentServer/cds-videos.git
 
 5. Run a script to set up some npm configurations and install some packages:

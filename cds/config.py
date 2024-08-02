@@ -1105,7 +1105,6 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
     "base-uri": ["'self'"],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'none'"],
-    # "prefetch-src": ["'none'"],
     "font-src": [
         "'self'",
         "data:",

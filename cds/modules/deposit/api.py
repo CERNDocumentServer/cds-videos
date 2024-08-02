@@ -400,7 +400,6 @@ class CDSDeposit(Deposit):
             record = self._generate_smil_file(record.id, record, bucket)
             # dump after smil generation
             record["_files"] = record.files.dumps()
-            print(self.files.dumps())
             bucket.locked = True
 
         return record

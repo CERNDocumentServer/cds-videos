@@ -74,11 +74,6 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('.pypi-${{ matrix.python-version }}-requirements.txt') }}
 
-      # - name: Use Node.js ${{ matrix.node-version }}
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-
       - name: Install dependencies
         run: |
           pip install -r .pypi-${{ matrix.python-version }}-requirements.txt
