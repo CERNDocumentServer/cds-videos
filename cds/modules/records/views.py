@@ -67,7 +67,6 @@ def records_ui_export(pid, record, template=None, **kwargs):
     """Export a record."""
     formats = current_app.config.get("CDS_RECORDS_EXPORTFORMATS")
     fmt = request.view_args.get("format")
-
     if formats.get(fmt) is None:
         return (
             render_template("cds_records/records_export_unsupported.html"),

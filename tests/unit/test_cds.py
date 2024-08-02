@@ -28,27 +28,24 @@ import pytest
 from flask import url_for
 
 
-@pytest.mark.skip(reason="Check how to discover static assets to render the page.")
-def test_version():
+def test_version(app_with_assets):
     """Test version import."""
     from cds import __version__
 
     assert __version__
 
 
-@pytest.mark.skip(reason="Check how to discover static assets to render the page.")
-def test_home(app):
+def test_home(app_with_assets):
     """Test homepage."""
-    with app.test_client() as client:
+    with app_with_assets.test_client() as client:
         res = client.get(url_for("cds_home.index"))
 
         assert res.status_code == 200
 
 
-@pytest.mark.skip(reason="Check how to discover static assets to render the page.")
-def test_ping(app):
+def test_ping(app_with_assets):
     """Test homepage."""
-    with app.test_client() as client:
+    with app_with_assets.test_client() as client:
         res = client.get(url_for("cds_home.ping"))
 
         assert res.status_code == 200

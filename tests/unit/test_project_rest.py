@@ -1248,7 +1248,9 @@ def test_sync_owners(
         assert res.status_code == 200
 
 
-def test_project_edit_links(api_app, app, project_published, json_headers, users):
+def test_project_edit_links(
+    api_app, app_with_assets, project_published, json_headers, users
+):
     """Check project edit links."""
     (project, video_1, video_2) = project_published
 
@@ -1259,6 +1261,9 @@ def test_project_edit_links(api_app, app, project_published, json_headers, users
         assert ("project_edit" in data["links"]) is result
         if result:
             return data["links"]["project_edit"]
+
+    if current_user:
+        logout_user()
 
     #  check anonymous user can't see links
     with api_app.test_client() as client:
@@ -1284,7 +1289,7 @@ def test_project_edit_links(api_app, app, project_published, json_headers, users
         project_link_2 = check_links(url_project, True)
         assert project_link_1 == project_link_2
     # check project links
-    with app.test_client() as client:
+    with app_with_assets.test_client() as client:
         login_user(User.query.get(users[0]))
         res = client.get(project_link_1, headers=json_headers, follow_redirects=True)
         assert res.status_code == 200

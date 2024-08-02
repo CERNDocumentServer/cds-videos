@@ -33,45 +33,34 @@ from cds.modules.records.serializers import datacite_v31
 
 def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
     """Test video metadata transformation."""
-    video_record_metadata['doi'] = '10.1234/foo'
-    obj = datacite_v31.transform_record(
-        recid_pid, Record(video_record_metadata))
+    video_record_metadata["doi"] = "10.1234/foo"
+    obj = datacite_v31.transform_record(recid_pid, Record(video_record_metadata))
 
     expected = {
-        'creators': [
-            {'creatorName': 'paperone'},
-            {'creatorName': 'topolino'},
-            {'creatorName': 'nonna papera'},
-            {'creatorName': 'pluto'},
-            {'creatorName': 'zio paperino'}
+        "creators": [
+            {"creatorName": "paperone"},
+            {"creatorName": "topolino"},
+            {"creatorName": "nonna papera"},
+            {"creatorName": "pluto"},
+            {"creatorName": "zio paperino"},
         ],
-        'dates': [{u'date': u'2017-03-02', u'dateType': u'Issued'}],
-        'descriptions': [
+        "dates": [{"date": "2017-03-02", "dateType": "Issued"}],
+        "descriptions": [
             {
-                'description': 'in tempor reprehenderit enim eiusmod &lt;b&gt;'
-                               '<i>html</i>&lt;/b&gt;',
-                'descriptionType': 'Abstract',
+                "description": "in tempor reprehenderit enim eiusmod &lt;b&gt;"
+                "<i>html</i>&lt;/b&gt;",
+                "descriptionType": "Abstract",
             }
         ],
-        'identifier': {
-            u'identifier': '10.1234/foo', u'identifierType': 'DOI'
-        },
-        'language': 'en',
-        'publisher': 'CERN',
-        'publicationYear': '2017',
-        'resourceType': {
-            'resourceTypeGeneral': 'Audiovisual', 'resourceType': None
-        },
-        'subjects': [
-            {'subject': 'keyword1'},
-            {'subject': 'keyword2'}
-        ],
-        'titles': [
-            {u'title': u'My <b>english</b> title'}
-        ],
+        "identifier": {"identifier": "10.1234/foo", "identifierType": "DOI"},
+        "language": "en",
+        "publisher": "CERN",
+        "publicationYear": "2017",
+        "resourceType": {"resourceTypeGeneral": "Audiovisual", "resourceType": None},
+        "subjects": [{"subject": "keyword1"}, {"subject": "keyword2"}],
+        "titles": [{"title": "My <b>english</b> title"}],
     }
     assert expected == obj
 
-    result = datacite_v31.serialize(
-        pid=recid_pid, record=Record(video_record_metadata))
-    assert '<?xml version' in result
+    result = datacite_v31.serialize(pid=recid_pid, record=Record(video_record_metadata))
+    assert "<?xml version" in result

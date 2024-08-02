@@ -28,8 +28,10 @@ from flask_security import current_user
 from invenio_records_rest.serializers.json import JSONSerializer
 
 from ..api import CDSRecord
-from ..permissions import (has_read_record_eos_path_permission,
-                           has_read_record_permission)
+from ..permissions import (
+    has_read_record_eos_path_permission,
+    has_read_record_permission,
+)
 from ..utils import HTMLTagRemover, remove_html_tags
 
 
@@ -38,7 +40,12 @@ class CDSJSONSerializer(JSONSerializer):
 
     Adds or removes fields  depending on access rights.
     """
+
     html_tag_remover = HTMLTagRemover()
+
+    def dump(self, obj, context=None):
+        """Serialize object with schema."""
+        return self.schema_class(context=context).dump(obj)
 
     def preprocess_record(self, pid, record, links_factory=None):
         """Include ``_eos_library_path`` for single record retrievals."""
@@ -47,24 +54,29 @@ class CDSJSONSerializer(JSONSerializer):
         )
         # Add/remove files depending on access right.
         if isinstance(record, CDSRecord):
-            metadata = result['metadata']
-            if '_eos_library_path' in record and (not has_request_context() or
-                not has_read_record_eos_path_permission(current_user, record)):
-                metadata.pop('_eos_library_path')
+            metadata = result["metadata"]
+            if "_eos_library_path" in record and (
+                not has_request_context()
+                or not has_read_record_eos_path_permission(current_user, record)
+            ):
+                metadata.pop("_eos_library_path")
 
             # sanitize title by unescaping and stripping html tags
             try:
-                title = metadata['title']['title']
+                title = metadata["title"]["title"]
                 title = self.html_tag_remover.unescape(title)
-                metadata['title']['title'] = remove_html_tags(
-                    self.html_tag_remover, title)
+                metadata["title"]["title"] = remove_html_tags(
+                    self.html_tag_remover, title
+                )
 
                 # decode html entities
-                metadata['description'] = self.html_tag_remover.unescape(
-                    metadata['description'])
+                metadata["description"] = self.html_tag_remover.unescape(
+                    metadata["description"]
+                )
                 if has_request_context():
-                    metadata['videos'] = [
-                        video for video in metadata['videos']
+                    metadata["videos"] = [
+                        video
+                        for video in metadata["videos"]
                         if has_read_record_permission(current_user, video)
                     ]
             except KeyError:
@@ -78,20 +90,21 @@ class CDSJSONSerializer(JSONSerializer):
         # do not pass links_factory when fetching data from ES, otherwise it
         # will load the record from db for each search result
         # see: cds.modules.records.links.record_link_factory
-        result = super(CDSJSONSerializer, self).preprocess_search_hit(
-            pid, record_hit)
+        result = super(CDSJSONSerializer, self).preprocess_search_hit(pid, record_hit)
 
-        if 'metadata' in result:
-            metadata = result['metadata']
+        if "metadata" in result:
+            metadata = result["metadata"]
 
             try:
-                title = metadata['title']['title']
+                title = metadata["title"]["title"]
                 title = self.html_tag_remover.unescape(title)
-                metadata['title']['title'] = remove_html_tags(
-                    self.html_tag_remover, title)
+                metadata["title"]["title"] = remove_html_tags(
+                    self.html_tag_remover, title
+                )
 
-                metadata['description'] = self.html_tag_remover.unescape(
-                    metadata['description'])
+                metadata["description"] = self.html_tag_remover.unescape(
+                    metadata["description"]
+                )
             except KeyError:
                 # ignore error if keys are missing in the metadata
                 pass

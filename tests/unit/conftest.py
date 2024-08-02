@@ -43,6 +43,7 @@ from celery import shared_task
 from celery.messaging import establish_connection
 from flask.cli import ScriptInfo
 from flask_security import login_user
+from flask_webpackext import current_webpack
 from helpers import (
     create_category,
     create_keyword,
@@ -122,6 +123,16 @@ def app():
     os.environ.pop("INVENIO_INSTANCE_PATH", None)
     os.environ.pop("INVENIO_STATIC_FOLDER", None)
     shutil.rmtree(instance_path)
+
+
+@pytest.yield_fixture(scope="module")
+def app_with_assets(app):
+    """Flask application fixture with assets."""
+    initial_dir = os.getcwd()
+    os.chdir(app.instance_path)
+    current_webpack.project.buildall()
+    yield app
+    os.chdir(initial_dir)
 
 
 @pytest.fixture()
