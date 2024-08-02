@@ -38,7 +38,6 @@ from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_oauthclient.contrib import cern_openid
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
-from invenio
 from invenio_stats.aggregations import StatAggregator
 from invenio_stats.tasks import StatsAggregationTask, StatsEventTask
 from invenio_stats.processors import EventsIndexer, anonymize_user, flag_robots
