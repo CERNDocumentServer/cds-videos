@@ -26,12 +26,12 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_search.engine import dsl
 from flask import g
 from flask_login import current_user
 from invenio_access.permissions import Permission, superuser_access
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
+from invenio_search.engine import dsl
 
 from .utils import get_user_provides
 

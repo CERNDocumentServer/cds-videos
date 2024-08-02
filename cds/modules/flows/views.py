@@ -32,8 +32,12 @@ from invenio_oauth2server import require_api_auth, require_oauth_scopes
 from invenio_pidstore.errors import PIDDoesNotExistError
 
 from cds.modules.flows.api import FlowService
-from cds.modules.flows.decorators import (error_handler, need_permission,
-                                          pass_flow, pass_user_id)
+from cds.modules.flows.decorators import (
+    error_handler,
+    need_permission,
+    pass_flow,
+    pass_user_id,
+)
 from cds.modules.flows.loaders import extract_payload
 from cds.modules.flows.models import FlowMetadata
 from cds.modules.flows.serializers import make_response, serialize_flow

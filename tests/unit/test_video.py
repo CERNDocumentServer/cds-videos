@@ -46,9 +46,9 @@ from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.errors import PIDInvalidAction
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records.models import RecordMetadata
+from invenio_search.engine import dsl
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
-from invenio_search.engine import dsl
 from six import BytesIO
 
 from cds.modules.deposit.api import (

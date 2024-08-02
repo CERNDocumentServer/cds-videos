@@ -25,17 +25,12 @@
 import os
 import shutil
 from contextlib import contextmanager
-from flask import current_app
 
+from flask import current_app
 from invenio_db import db
-from invenio_files_rest.models import (
-    ObjectVersion,
-    ObjectVersionTag,
-    as_object_version,
-)
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, as_object_version
 
 from ..xrootd.utils import file_opener_xrootd
-
 
 
 def _rename_key(object_version):

@@ -22,8 +22,9 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from cds.modules.flows.errors import InvalidPayload
 from flask import request
+
+from cds.modules.flows.errors import InvalidPayload
 
 
 def extract_payload():

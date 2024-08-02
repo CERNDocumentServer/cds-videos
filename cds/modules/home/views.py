@@ -22,9 +22,9 @@
 from __future__ import absolute_import, print_function
 
 from flask import Blueprint, render_template
-from invenio_i18n import lazy_gettext as _
 from flask_menu import current_menu
 from invenio_cache.decorators import cached_unless_authenticated
+from invenio_i18n import lazy_gettext as _
 
 blueprint = Blueprint(
     'cds_home',

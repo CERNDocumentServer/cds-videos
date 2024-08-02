@@ -35,8 +35,7 @@ import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from invenio_db import db
-from invenio_files_rest.models import (Bucket, Location, ObjectVersion,
-                                       ObjectVersionTag)
+from invenio_files_rest.models import Bucket, Location, ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_opendefinition.cli import loadlicenses
 from invenio_pages import Page

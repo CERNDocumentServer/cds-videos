@@ -26,8 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.announcements.models import Announcement
 from flask import Blueprint, jsonify, request
+
+from cds.modules.announcements.models import Announcement
 
 api_blueprint = Blueprint(
     'cds_api_announcements',

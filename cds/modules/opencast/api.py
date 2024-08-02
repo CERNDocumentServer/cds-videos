@@ -30,11 +30,12 @@ from datetime import datetime
 from xml.etree import ElementTree
 
 import requests
-from cds.modules.opencast.error import RequestError
-from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 from flask import current_app
 from invenio_files_rest.models import ObjectVersionTag
 from requests_toolbelt import MultipartEncoder
+
+from cds.modules.opencast.error import RequestError
+from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
 
 class OpenCastRequestSession:

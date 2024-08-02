@@ -27,11 +27,11 @@ from __future__ import absolute_import, print_function
 from flask import current_app
 from flask_security import current_user
 from invenio_access import Permission
-from ..invenio_deposit.permissions import action_admin_access
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
 
+from ..invenio_deposit.permissions import action_admin_access
 from .api import CDSRecord as Record
 from .utils import get_user_provides, is_deposit, is_record, lowercase_value
 

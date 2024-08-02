@@ -26,11 +26,12 @@
 
 from __future__ import absolute_import, print_function
 
-from cds.modules.records.api import Record
 from flask import Blueprint, abort, current_app, redirect, request, url_for
 from invenio_pidstore.models import PersistentIdentifier
 from six.moves.urllib.parse import urlencode, urlparse
 from sqlalchemy.orm.exc import NoResultFound
+
+from cds.modules.records.api import Record
 
 blueprint = Blueprint(
     "cds_redirector",

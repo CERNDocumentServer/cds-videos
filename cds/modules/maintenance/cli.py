@@ -33,9 +33,11 @@ from cds.modules.deposit.api import Video
 from cds.modules.flows.deposit import index_deposit_project
 from cds.modules.flows.models import FlowMetadata
 from cds.modules.flows.tasks import ExtractFramesTask
-from cds.modules.maintenance.subformats import (create_all_missing_subformats,
-                                                create_all_subformats,
-                                                create_subformat)
+from cds.modules.maintenance.subformats import (
+    create_all_missing_subformats,
+    create_all_subformats,
+    create_subformat,
+)
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.resolver import record_resolver
 

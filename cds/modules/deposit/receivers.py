@@ -31,8 +31,12 @@ from invenio_db import db
 from invenio_jsonschemas import current_jsonschemas
 
 from cds.modules.deposit.api import record_unbuild_url
-from cds.modules.flows.tasks import (DownloadTask, ExtractFramesTask,
-                                     ExtractMetadataTask, TranscodeVideoTask)
+from cds.modules.flows.tasks import (
+    DownloadTask,
+    ExtractFramesTask,
+    ExtractMetadataTask,
+    TranscodeVideoTask,
+)
 from cds.modules.records.resolver import record_resolver
 
 from .api import Project
