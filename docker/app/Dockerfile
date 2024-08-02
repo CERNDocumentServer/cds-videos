@@ -5,16 +5,27 @@
 # invenio-app-ils is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-FROM python:3.9
+FROM registry.cern.ch/inveniosoftware/almalinux:1
 
-RUN apt-get update && apt-get upgrade -y && apt-get install apt-file -y && apt-file update
-RUN cd /tmp && curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh && bash nodesource_setup.sh
+RUN dnf install -y epel-release
+RUN dnf update -y
 
-RUN apt-get install -y nodejs git curl vim ffmpeg libsasl2-dev libldap2-dev libssl-dev
-RUN pip install --upgrade "uwsgi-tools==1.1.1" "uwsgitop==0.12"
+RUN cd /tmp && curl -sL  https://rpm.nodesource.com/setup_16.x  -o nodesource_setup.sh && bash nodesource_setup.sh
+RUN dnf install -y nodejs git vim
 
-RUN python -m site
-RUN python -m site --user-site
+# OpenLDAP
+RUN dnf install -y openldap-devel
+
+# FFMPEG
+RUN yum install -y wget
+RUN mkdir /usr/local/bin/ffmpeg && \
+    wget -O - https://cds-resources.web.cern.ch/cds-resources/cds-videos/ffmpeg/5.0/ffmpeg-release-amd64-static.tar.xz | tar -xJ --strip-components=1 --directory=/usr/local/bin/ffmpeg/ && \
+    ln -s /usr/local/bin/ffmpeg/ffmpeg /usr/bin/ffmpeg && \
+    ln -s /usr/local/bin/ffmpeg/ffprobe /usr/bin/ffprobe
+
+RUN yum clean -y all
+
+RUN pip install "uWSGI==2.0.23" "uwsgi-tools==1.1.1" "uwsgitop==0.11"
 
 # Install Invenio
 ENV WORKING_DIR=/opt/cds_videos
