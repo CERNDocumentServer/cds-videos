@@ -38,6 +38,8 @@ Version 2.0.0 (2024-06-28)
 - Bump invenio-xrootd version
 - Allow searching of contributors roles and ids in non specifying field queries
 - Use files sync in both publish new and edit videos.
+- Re-enable remote upload of videos by providing a downloadable link
+- Remove dropbox integration from codebase
 
 Version 1.0.44 (2024-06-28)
 

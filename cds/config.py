@@ -740,13 +740,13 @@ RECORDS_REST_SORT_OPTIONS = {
         },
         "title_asc": {
             "title": "Title [Asc]",
-            "fields": ["title.title"],
+            "fields": ["title.title.raw"],
             "default_order": "asc",
             "order": 4,
         },
         "title_desc": {
             "title": "Title [Desc]",
-            "fields": ["title.title"],
+            "fields": ["title.title.raw"],
             "default_order": "desc",
             "order": 5,
         },
