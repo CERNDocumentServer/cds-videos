@@ -25,6 +25,20 @@
 Changes
 =======
 
+Version 2.0.0 (2024-06-28)
+
+- Move docker image to alma
+- Bump python version to 3.9
+- Migrate to Opensearch v2
+- Migrate to webpack theme building
+- Remove dependency to invenio-deposit. The necessary files have been move on its own folder
+- Copy ckeditor files inside modules
+- Copy bootstrap-decorator file inside modules
+- Integrate invenio-stats
+- Bump invenio-xrootd version
+- Allow searching of contributors roles and ids in non specifying field queries
+- Use files sync in both publish new and edit videos.
+
 Version 1.0.44 (2024-06-28)
 
 - Fix celery task
