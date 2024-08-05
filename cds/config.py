@@ -459,11 +459,6 @@ STATS_QUERIES = {
 
 STATS_REGISTER_INDEX_TEMPLATES = True
 
-# Legacy host Elasticsearch
-LEGACY_STATS_ELASTIC_HOST = "127.0.0.1"
-# Legacy port Elasticsearch
-LEGACY_STATS_ELASTIC_PORT = 9199
-# Default port Elasticsearch
 
 ###############################################################################
 # LOG USER ACTIVITY
