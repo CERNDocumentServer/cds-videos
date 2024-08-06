@@ -105,9 +105,9 @@ invenio-queues==1.0.1
 invenio-records==2.3.0
 invenio-records-files==1.2.1
 invenio-records-rest==2.4.1
-invenio-records-ui==1.2.0
+invenio-records-ui==1.2.1
 invenio-rest==1.3.1
--e git+https://github.com/ntarocco/invenio-search.git@8f0be564eaa32a8220d36b22a6933f0835ada905#egg=invenio_search
+invenio-search==2.4.1
 invenio-search-ui==2.8.7
 invenio-sequencegenerator==1.0.0a3
 -e git+https://github.com/zzacharo/invenio-stats.git@943202726ebcaea51d6a1636134ab37240f0c437#egg=invenio_stats
