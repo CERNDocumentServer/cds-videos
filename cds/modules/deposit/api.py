@@ -1063,6 +1063,7 @@ class Video(CDSDeposit):
             for obj in objs:
                 # language tag
                 found = pattern.findall(obj.key)
+                breakpoint()
                 if len(found) == 1:
                     lang = found[0]
                     ObjectVersionTag.create_or_update(obj, "language", lang)
