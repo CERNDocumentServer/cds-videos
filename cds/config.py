@@ -1237,9 +1237,9 @@ THEME_PIWIK_ID = None
 ###############################################################################
 
 # Base CSS bundle to include in all previewers
-PREVIEWER_BASE_CSS_BUNDLES = ["cds_main_theme"]
+PREVIEWER_BASE_CSS_BUNDLES = ["cds_theme_styles"]
 # Base JS bundle to include in all previewers
-PREVIEWER_BASE_JS_BUNDLES = ["cds_main_app"]
+PREVIEWER_BASE_JS_BUNDLES = ["cds_theme_app"]
 # Decides which previewers are available and their priority.
 PREVIEWER_PREFERENCE = [
     "csv_dthreejs",
