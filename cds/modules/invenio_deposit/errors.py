@@ -24,7 +24,6 @@
 
 """Errors."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_rest.errors import RESTException
 
@@ -33,18 +32,18 @@ class FileAlreadyExists(RESTException):
     """Error file already exists."""
 
     code = 400
-    description = 'Filename already exists.'
+    description = "Filename already exists."
 
 
 class WrongFile(RESTException):
     """Error wrong file."""
 
     code = 400
-    description = 'Wrong file on input.'
+    description = "Wrong file on input."
 
 
 class MergeConflict(RESTException):
     """Error on merging a deposit."""
 
     code = 409
-    description = 'Deposit merge conflicts.'
+    description = "Deposit merge conflicts."

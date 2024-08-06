@@ -19,8 +19,7 @@
 
 """CDS Modules."""
 
-from __future__ import absolute_import, print_function
 
 from .ext import CDSFixtures
 
-__all__ = ('CDSFixtures', )
+__all__ = ("CDSFixtures",)

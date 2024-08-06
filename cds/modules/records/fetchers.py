@@ -24,7 +24,6 @@
 
 """Persistent identifier fetcher."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_pidstore.fetchers import FetchedPID
 
@@ -51,20 +50,14 @@ def report_number_fetcher(record_uuid, data):
 
 def doi_fetcher(record_uuid, data):
     """Fetch DOI."""
-    return FetchedPID(
-        provider=None, pid_type="doi", pid_value=str(data["doi"])
-    )
+    return FetchedPID(provider=None, pid_type="doi", pid_value=str(data["doi"]))
 
 
 def kwid_fetcher(record_uuid, data):
     """Fetch PID from keyword record."""
-    return FetchedPID(
-        provider=None, pid_type="kwid", pid_value=str(data["key_id"])
-    )
+    return FetchedPID(provider=None, pid_type="kwid", pid_value=str(data["key_id"]))
 
 
 def catid_fetcher(record_uuid, data):
     """Fetch PID from category record."""
-    return FetchedPID(
-        provider=None, pid_type="catid", pid_value=str(data["name"])
-    )
+    return FetchedPID(provider=None, pid_type="catid", pid_value=str(data["name"]))

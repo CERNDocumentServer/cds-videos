@@ -27,11 +27,12 @@
 import re
 
 from invenio_base.signals import app_loaded
-from invenio_indexer.signals import before_record_index
+from invenio_db import db
 from invenio_files_rest.models import ObjectVersionTag
 from invenio_files_rest.signals import file_uploaded
+from invenio_indexer.signals import before_record_index
 from invenio_records_files.utils import sorted_files_from_bucket
-from invenio_db import db
+
 from ..invenio_deposit.signals import post_action
 from .indexer import cdsdeposit_indexer_receiver
 from .receivers import (

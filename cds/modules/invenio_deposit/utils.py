@@ -24,7 +24,6 @@
 
 """Implementention of various utility functions."""
 
-from __future__ import absolute_import, print_function
 
 from flask import request
 from invenio_oauth2server import require_api_auth, require_oauth_scopes

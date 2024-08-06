@@ -24,7 +24,6 @@
 
 """CDS Deposit receivers."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app
 from invenio_db import db
@@ -49,8 +48,7 @@ def index_deposit_after_action(sender, action=None, pid=None, deposit=None):
     CDSRecordIndexer().index(deposit, action)
 
 
-def update_project_id_after_publish(sender, action=None, pid=None,
-                                    deposit=None):
+def update_project_id_after_publish(sender, action=None, pid=None, deposit=None):
     """Update the project id for each video on publish."""
     if action != "publish":
         return
@@ -70,14 +68,9 @@ def update_project_id_after_publish(sender, action=None, pid=None,
     db.session.commit()
 
 
-def datacite_register_after_publish(
-    sender, action=None, pid=None, deposit=None
-):
+def datacite_register_after_publish(sender, action=None, pid=None, deposit=None):
     """Mind DOI with DataCite after the deposit has been published."""
-    if (
-        action == "publish"
-        and current_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"]
-    ):
+    if action == "publish" and current_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"]:
         recid_pid, record = deposit.fetch_published()
 
         if record.get("doi"):

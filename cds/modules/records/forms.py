@@ -24,7 +24,6 @@
 
 """Forms for record module."""
 
-from __future__ import absolute_import, print_function
 
 from flask_wtf import FlaskForm
 from invenio_i18n import lazy_gettext as _
@@ -57,9 +56,7 @@ class RecordDeleteForm(FlaskForm):
     delete_videos = BooleanField(
         _("Delete videos recursively?"),
         default=False,
-        description=_(
-            "All videos attached to this project will be deleted too."
-        ),
+        description=_("All videos attached to this project will be deleted too."),
     )
 
     hard_delete = BooleanField(

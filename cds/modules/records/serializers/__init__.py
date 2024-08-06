@@ -24,7 +24,6 @@
 
 """Record serialization."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_records_rest.schemas import RecordSchemaJSONV1
 from invenio_records_rest.serializers.response import (

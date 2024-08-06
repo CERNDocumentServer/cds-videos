@@ -24,20 +24,19 @@
 
 """Record resolver."""
 
-from __future__ import absolute_import, print_function
 
 import jsonresolver
 
 from .api import deposit_project_resolver, deposit_video_resolver
 
 
-@jsonresolver.route('/api/deposits/project/<path:path>', host='cds.cern.ch')
+@jsonresolver.route("/api/deposits/project/<path:path>", host="cds.cern.ch")
 def deposit_project_jsonresolver(path):
     """Create a nested JSON."""
     return deposit_project_resolver(path)
 
 
-@jsonresolver.route('/api/deposits/video/<path:path>', host='cds.cern.ch')
+@jsonresolver.route("/api/deposits/video/<path:path>", host="cds.cern.ch")
 def deposit_video_jsonresolver(path):
     """Create a nested JSON."""
     return deposit_video_resolver(path)

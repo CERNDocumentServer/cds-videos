@@ -19,7 +19,6 @@
 
 """CDS Stats."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint, abort, current_app, jsonify, make_response, request
 from flask.views import MethodView

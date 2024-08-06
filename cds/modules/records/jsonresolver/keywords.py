@@ -24,14 +24,13 @@
 
 """Record resolver."""
 
-from __future__ import absolute_import, print_function
 
 import jsonresolver
 
 from ..resolver import keyword_resolver
 
 
-@jsonresolver.route('/api/keywords/<path:path>', host='cds.cern.ch')
+@jsonresolver.route("/api/keywords/<path:path>", host="cds.cern.ch")
 def keyword_jsonresolver(path):
     """Create a nested JSON."""
     _, kw = keyword_resolver.resolve(path)

@@ -24,13 +24,9 @@
 
 """CDS interface."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint
 
 blueprint = Blueprint(
-    'cds',
-    __name__,
-    template_folder='templates',
-    static_folder='static'
+    "cds", __name__, template_folder="templates", static_folder="static"
 )

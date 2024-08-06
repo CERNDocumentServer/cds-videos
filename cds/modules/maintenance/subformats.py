@@ -19,7 +19,6 @@
 
 """A module for common maintenance scripts."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app
 from invenio_db import db
@@ -45,9 +44,7 @@ def create_all_missing_subformats(id_type, id_value):
     master, w, h = _get_master_video(video_deposit)
     subformats = CDSVideosFilesIterator.get_video_subformats(master)
     dones = [subformat["tags"]["preset_quality"] for subformat in subformats]
-    missing = set(current_app.config["CDS_OPENCAST_QUALITIES"].keys()) - set(
-        dones
-    )
+    missing = set(current_app.config["CDS_OPENCAST_QUALITIES"].keys()) - set(dones)
     transcodables_qualities = list(
         filter(
             lambda q: can_be_transcoded(q, w, h),
@@ -56,9 +53,7 @@ def create_all_missing_subformats(id_type, id_value):
     )
 
     flow_metadata = FlowMetadata.get_by_deposit(depid)
-    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
-        depid
-    )
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(depid)
 
     if transcodables_qualities:
         _run_transcoding_for(flow_metadata, transcodables_qualities)
@@ -75,9 +70,7 @@ def create_subformat(id_type, id_value, quality):
     subformat = can_be_transcoded(quality, w, h)
     if subformat:
         flow_metadata = FlowMetadata.get_by_deposit(depid)
-        assert (
-            flow_metadata
-        ), "Cannot find Flow for given deposit id {0}".format(depid)
+        assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(depid)
 
         _run_transcoding_for(flow_metadata, [quality])
 
@@ -99,9 +92,7 @@ def create_all_subformats(id_type, id_value):
     )
 
     flow_metadata = FlowMetadata.get_by_deposit(depid)
-    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
-        depid
-    )
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(depid)
 
     _run_transcoding_for(flow_metadata, transcodables_qualities)
     return transcodables_qualities
@@ -155,9 +146,7 @@ def _validate(id_type=None, quality=None):
     if id_type not in id_types:
         raise Exception("`id_type` param must be one of {0}".format(id_types))
 
-    all_possible_qualities = current_app.config[
-        "CDS_OPENCAST_QUALITIES"
-    ].keys()
+    all_possible_qualities = current_app.config["CDS_OPENCAST_QUALITIES"].keys()
     if quality and quality not in all_possible_qualities:
         raise Exception(
             "`quality` param must be one of {0}".format(all_possible_qualities)

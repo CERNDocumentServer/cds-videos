@@ -88,7 +88,6 @@
 
 {%- block page_body %}
   {% if not config.THEOPLAYER_LIBRARY_LOCATION %}
-    {{file.subtitles}}
     <video poster="{{ file.poster_uri }}" controls id="local-player">
       <source src="{{ file.uri }}" type="video/mp4">
       {{ _('Your browser does not support the video tag.') }}

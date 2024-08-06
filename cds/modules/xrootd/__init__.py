@@ -24,8 +24,7 @@
 
 """XRootD extension."""
 
-from __future__ import absolute_import, print_function
 
 from .ext import CDSXRootD
 
-__all__ = ('CDSXRootD', )
+__all__ = ("CDSXRootD",)

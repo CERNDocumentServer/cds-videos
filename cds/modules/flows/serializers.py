@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, print_function
 
 import json
 
@@ -126,9 +125,7 @@ def get_flow_tasks_statuses(flow_dict):
 
         group.append(task_status)
 
-    second_group = sorted(
-        second_group, key=lambda s: s["info"]["payload"]["order"]
-    )
+    second_group = sorted(second_group, key=lambda s: s["info"]["payload"]["order"])
     return first_group, second_group
 
 

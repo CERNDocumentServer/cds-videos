@@ -24,7 +24,6 @@
 
 """CDS Celery tests."""
 
-from __future__ import absolute_import, print_function
 
 import pytest
 from celery.schedules import crontab
@@ -32,9 +31,11 @@ from celery.schedules import crontab
 
 def test_celery_beat(app):
     """Test celery beat."""
-    beats = [task['schedule']
-             for task in app.config['CELERY_BEAT_SCHEDULE'].values()
-             if isinstance(task['schedule'], crontab)]
+    beats = [
+        task["schedule"]
+        for task in app.config["CELERY_BEAT_SCHEDULE"].values()
+        if isinstance(task["schedule"], crontab)
+    ]
     assert len(beats) == 3
     for beat in beats:
         [hour] = beat.hour

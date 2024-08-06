@@ -22,7 +22,6 @@
 
 """Access control for CDS."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app
 from flask_security import current_user

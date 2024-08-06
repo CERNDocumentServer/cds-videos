@@ -24,8 +24,6 @@
 
 """Errors for Opencast."""
 
-from __future__ import absolute_import, print_function
-
 
 class OpencastError(Exception):
     """Base class for exceptions in this module."""
@@ -88,9 +86,7 @@ class RequestError(OpencastError):
         request = self.exception.request
         req = "URL <{0}>\nBody {1}".format(request.url, request.body)
         response = self.exception.response
-        resp = "Code <{0}>\nBody {1}".format(
-            response.status_code, response.text
-        )
+        resp = "Code <{0}>\nBody {1}".format(response.status_code, response.text)
         return "Failed request to {0}.\nRequest: {1}\nResponse: {2}".format(
             self.url, req, resp
         )
@@ -121,6 +117,6 @@ class AbruptCeleryStop(OpencastError):
         self.task_id = task_id
 
     def __str__(self):
-        return (
-            "Abrupt celery stop while processing task with id: {1}"
-        ).format(self.task_id)
+        return ("Abrupt celery stop while processing task with id: {1}").format(
+            self.task_id
+        )

@@ -19,13 +19,12 @@
 
 """CDS Search UI."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint
 
 blueprint = Blueprint(
-    'cds_search_ui',
+    "cds_search_ui",
     __name__,
-    template_folder='templates',
-    static_folder='static',
+    template_folder="templates",
+    static_folder="static",
 )

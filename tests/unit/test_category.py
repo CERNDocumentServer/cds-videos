@@ -24,7 +24,6 @@
 
 """Test cds category."""
 
-from __future__ import absolute_import, print_function
 
 import json
 

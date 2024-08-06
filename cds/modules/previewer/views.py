@@ -19,7 +19,6 @@
 
 """CDS Previewer."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint, abort, current_app, request
 from flask_talisman import ALLOW_FROM
@@ -31,10 +30,10 @@ from .api import CDSPreviewDepositFile, CDSPreviewRecordFile
 from .extensions import default
 
 blueprint = Blueprint(
-    'cds_previewer',
+    "cds_previewer",
     __name__,
-    template_folder='templates',
-    static_folder='static',
+    template_folder="templates",
+    static_folder="static",
 )
 
 
@@ -45,38 +44,44 @@ def preview_recid(pid, record, template=None, **kwargs):
 
 def preview_depid(pid, record, template=None, **kwargs):
     """Preview file for given deposit."""
-    return preview(pid, record, preview_file_class=CDSPreviewDepositFile,
-                   previewer='cds_deposit_video')
+    return preview(
+        pid,
+        record,
+        preview_file_class=CDSPreviewDepositFile,
+        previewer="cds_deposit_video",
+    )
 
 
 def preview_recid_embed(pid, record, template=None, **kwargs):
     """Return embedded player for video file."""
-    invenio_app = current_app.extensions['invenio-app']
+    invenio_app = current_app.extensions["invenio-app"]
     if invenio_app:
         # Needed to allow embedding in different sites
         invenio_app.talisman.frame_options = ALLOW_FROM
-        invenio_app.talisman.frame_options_allow_from = '*'
-        invenio_app.talisman.content_security_policy = {
-            'frame-ancestors': ['*']
-        }
-    return preview(pid, record, preview_file_class=CDSPreviewRecordFile,
-                   previewer='cds_embed_video')
+        invenio_app.talisman.frame_options_allow_from = "*"
+        invenio_app.talisman.content_security_policy = {"frame-ancestors": ["*"]}
+    return preview(
+        pid,
+        record,
+        preview_file_class=CDSPreviewRecordFile,
+        previewer="cds_embed_video",
+    )
 
 
 def preview(pid, record, **kwargs):
     """Preview file."""
     # Get filename from request parameters
-    filename = request.view_args.get(
-        'filename', request.args.get('filename', type=str))
+    filename = request.view_args.get("filename", request.args.get("filename", type=str))
 
     if not filename:
         # Get filename from 'preview' tag
-        bucket_id = record['_buckets']['deposit']
-        obj = ObjectVersion.get_by_bucket(
-            bucket_id
-        ).join(ObjectVersion.tags).filter(
-            ObjectVersionTag.key == 'preview'
-        ).one_or_none()
+        bucket_id = record["_buckets"]["deposit"]
+        obj = (
+            ObjectVersion.get_by_bucket(bucket_id)
+            .join(ObjectVersion.tags)
+            .filter(ObjectVersionTag.key == "preview")
+            .one_or_none()
+        )
 
         if obj is None:
             abort(404)
@@ -86,8 +91,9 @@ def preview(pid, record, **kwargs):
     return _try_previewers(pid, record, filename, **kwargs)
 
 
-def _try_previewers(pid, record, filename, preview_file_class=PreviewFile,
-                    previewer=None, **kwargs):
+def _try_previewers(
+    pid, record, filename, preview_file_class=PreviewFile, previewer=None, **kwargs
+):
     """Try previewing file with all available previewers."""
     # Get file from record
     fileobj = current_previewer.record_file_factory(pid, record, filename)
@@ -96,21 +102,26 @@ def _try_previewers(pid, record, filename, preview_file_class=PreviewFile,
         abort(404)
 
     # Try to see if specific previewer is requested?
-    file_previewer = previewer or fileobj.get('previewer')
+    file_previewer = previewer or fileobj.get("previewer")
 
     fileobj = preview_file_class(pid, record, fileobj)
 
     # Try out available previewers
     for plugin in current_previewer.iter_previewers(
-            previewers=[file_previewer] if file_previewer else None):
+        previewers=[file_previewer] if file_previewer else None
+    ):
         if plugin.can_preview(fileobj):
             try:
                 return plugin.preview(fileobj, embed_config=request.args)
             except Exception:
                 current_app.logger.warning(
-                    ('Preview failed for {key}, in {pid_type}:{pid_value}'
-                     .format(key=fileobj.file.key,
-                             pid_type=fileobj.pid.pid_type,
-                             pid_value=fileobj.pid.pid_value)),
-                    exc_info=True)
+                    (
+                        "Preview failed for {key}, in {pid_type}:{pid_value}".format(
+                            key=fileobj.file.key,
+                            pid_type=fileobj.pid.pid_type,
+                            pid_value=fileobj.pid.pid_value,
+                        )
+                    ),
+                    exc_info=True,
+                )
     return default.preview(fileobj)

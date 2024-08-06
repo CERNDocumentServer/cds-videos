@@ -24,7 +24,6 @@
 
 """CDS tests for Webhook receivers."""
 
-from __future__ import absolute_import, print_function
 
 import json
 
@@ -50,33 +49,31 @@ from cds.modules.flows.models import FlowMetadata
 
 
 # TODO: CHECK
-@pytest.mark.skip(reason='TO BE CHECKED')
-@mock.patch('flask_login.current_user', mock_current_user)
+@pytest.mark.skip(reason="TO BE CHECKED")
+@mock.patch("flask_login.current_user", mock_current_user)
 def test_avc_workflow_receiver_local_file_pass(
-        api_app, api_project, access_token, json_headers,
-        db, local_file):
+    api_app, api_project, access_token, json_headers, db, local_file
+):
     """Test AVCWorkflow receiver."""
     project, video_1, video_2 = api_project
-    video_1_depid = video_1['_deposit']['id']
+    video_1_depid = video_1["_deposit"]["id"]
     video_1_id = str(video_1.id)
     project_id = str(project.id)
 
-    bucket_id = ObjectVersion.query.filter_by(
-        version_id=local_file).one().bucket_id
+    bucket_id = ObjectVersion.query.filter_by(version_id=local_file).one().bucket_id
     video_size = 5510872
-    master_key = 'test.mp4'
-    slave_keys = ['{0}.mp4'.format(quality)
-                  for quality in get_presets_applied().keys()
-                  if quality != '1024p']
+    master_key = "test.mp4"
+    slave_keys = [
+        "{0}.mp4".format(quality)
+        for quality in get_presets_applied().keys()
+        if quality != "1024p"
+    ]
     with api_app.test_request_context():
-        url = url_for(
-            'cds_flows.flow_list',
-            access_token=access_token
-        )
+        url = url_for("cds_flows.flow_list", access_token=access_token)
 
-    with api_app.test_client() as client, \
-            mock.patch('invenio_indexer.tasks.index_record.delay') \
-            as mock_indexer:
+    with api_app.test_client() as client, mock.patch(
+        "invenio_indexer.tasks.index_record.delay"
+    ) as mock_indexer:
         payload = dict(
             deposit_id=video_1_depid,
             key=master_key,
@@ -87,62 +84,72 @@ def test_avc_workflow_receiver_local_file_pass(
         # [[ RUN WORKFLOW ]]
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
         assert resp.status_code == 200
-        data = json.loads(resp.data.decode('utf-8'))
-        assert '_tasks' in data
-        assert data['key'] == master_key
-        assert 'version_id' in data
-        assert data.get('presets') == api_app.config[
-            'CDS_OPENCAST_QUALITIES'].keys()
-        assert 'links' in data  # TODO decide with links are needed
+        data = json.loads(resp.data.decode("utf-8"))
+        assert "_tasks" in data
+        assert data["key"] == master_key
+        assert "version_id" in data
+        assert data.get("presets") == api_app.config["CDS_OPENCAST_QUALITIES"].keys()
+        assert "links" in data  # TODO decide with links are needed
 
         assert ObjectVersion.query.count() == get_object_count()
 
         # Master file
         master = ObjectVersion.get(bucket_id, master_key)
         tags = master.get_tags()
-        assert tags['_flow_id'] == data['tags']['_flow_id']
+        assert tags["_flow_id"] == data["tags"]["_flow_id"]
         assert master.key == master_key
-        assert str(master.version_id) == data['version_id']
+        assert str(master.version_id) == data["version_id"]
         assert master.file
         assert master.file.size == video_size
 
         # Check metadata tags
-        metadata_keys = ['duration', 'bit_rate', 'size', 'avg_frame_rate',
-                         'codec_name', 'codec_long_name', 'width', 'height',
-                         'nb_frames', 'display_aspect_ratio', 'color_range']
+        metadata_keys = [
+            "duration",
+            "bit_rate",
+            "size",
+            "avg_frame_rate",
+            "codec_name",
+            "codec_long_name",
+            "width",
+            "height",
+            "nb_frames",
+            "display_aspect_ratio",
+            "color_range",
+        ]
         assert all([key in tags for key in metadata_keys])
         assert ObjectVersion.query.count() == get_object_count()
         assert ObjectVersionTag.query.count() == get_tag_count(is_local=True)
 
         # Check metadata patch
-        recid = PersistentIdentifier.get('depid', video_1_depid).object_uuid
+        recid = PersistentIdentifier.get("depid", video_1_depid).object_uuid
         record = Record.get_record(recid)
-        assert 'extracted_metadata' in record['_cds']
-        assert all([key in str(record['_cds']['extracted_metadata'])
-                    for key in metadata_keys])
+        assert "extracted_metadata" in record["_cds"]
+        assert all(
+            [key in str(record["_cds"]["extracted_metadata"]) for key in metadata_keys]
+        )
 
         # Check slaves
         for slave_key in slave_keys:
             slave = ObjectVersion.get(bucket_id, slave_key)
             tags = slave.get_tags()
             assert slave.key == slave_key
-            assert '_sorenson_job_id' in tags
-            assert tags['_sorenson_job_id'] == '1234'
-            assert 'master' in tags
-            assert tags['master'] == str(master.version_id)
+            assert "_sorenson_job_id" in tags
+            assert tags["_sorenson_job_id"] == "1234"
+            assert "master" in tags
+            assert tags["master"] == str(master.version_id)
             assert master.file
             assert master.file.size == video_size
 
         video = deposit_video_resolver(video_1_depid)
         # TODO: CHECK
-        flows = FlowMetadata.get_by_deposit(video['_deposit']['id'])
+        flows = FlowMetadata.get_by_deposit(video["_deposit"]["id"])
 
         # check deposit tasks status
         tasks_status = get_tasks_status_grouped_by_task_name(flows)
         assert len(tasks_status) == 3
-        assert 'file_transcode' in tasks_status
-        assert 'file_video_extract_frames' in tasks_status
-        assert 'file_video_metadata_extraction' in tasks_status
+        assert "file_transcode" in tasks_status
+        assert "file_video_extract_frames" in tasks_status
+        assert "file_video_metadata_extraction" in tasks_status
 
         # check tags (exclude 'uri-origin')
         assert ObjectVersionTag.query.count() == (get_tag_count() - 1)
@@ -153,17 +160,18 @@ def test_avc_workflow_receiver_local_file_pass(
         ids = set(get_indexed_records_from_mock(mock_indexer))
         assert video_1_id in ids
         assert project_id in ids
-        assert deposit['_cds']['state'] == {
-            'file_video_metadata_extraction': states.SUCCESS,
-            'file_video_extract_frames': states.SUCCESS,
-            'file_transcode': states.SUCCESS,
+        assert deposit["_cds"]["state"] == {
+            "file_video_metadata_extraction": states.SUCCESS,
+            "file_video_extract_frames": states.SUCCESS,
+            "file_transcode": states.SUCCESS,
         }
 
     # Test cleaning!
-    url = '{0}?access_token={1}'.format(data['links']['cancel'], access_token)
+    url = "{0}?access_token={1}".format(data["links"]["cancel"], access_token)
 
-    with mock.patch('invenio_indexer.tasks.index_record.delay') as mock_indexer, \
-            api_app.test_client() as client:
+    with mock.patch(
+        "invenio_indexer.tasks.index_record.delay"
+    ) as mock_indexer, api_app.test_client() as client:
         # [[ DELETE WORKFLOW ]]
         resp = client.delete(url, headers=json_headers)
 
@@ -185,12 +193,18 @@ def test_avc_workflow_receiver_local_file_pass(
         record = RecordMetadata.query.filter_by(id=video_1_id).one()
 
         # check metadata patch are deleted
-        assert 'extracted_metadata' not in record.json['_cds']
+        assert "extracted_metadata" not in record.json["_cds"]
         # check the corresponding Event persisted after cleaning
         # TODO: CHECK
-        assert len(FlowMetadata.get_by_deposit(record.json['_deposit']['id'])) == 0
-        assert len(FlowMetadata.get_by_deposit(record.json['_deposit']['id'],
-                                               _deleted=True)) == 1
+        assert len(FlowMetadata.get_by_deposit(record.json["_deposit"]["id"])) == 0
+        assert (
+            len(
+                FlowMetadata.get_by_deposit(
+                    record.json["_deposit"]["id"], _deleted=True
+                )
+            )
+            == 1
+        )
 
         # check no reindexing is fired
         assert mock_indexer.called is False

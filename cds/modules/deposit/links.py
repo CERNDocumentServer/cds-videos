@@ -24,7 +24,6 @@
 
 """Links for record serialization."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app, request, url_for
 from invenio_records_files.links import default_bucket_link_factory
@@ -37,37 +36,37 @@ def deposit_links_factory(pid, deposit_type=None):
 
     def _url(name, **kwargs):
         """URL builder."""
-        endpoint = '.{0}_{1}'.format(deposit_type, name)
-        return url_for(endpoint, pid_value=pid.pid_value, _external=True,
-                       **kwargs)
+        endpoint = ".{0}_{1}".format(deposit_type, name)
+        return url_for(endpoint, pid_value=pid.pid_value, _external=True, **kwargs)
+
     links = {}
     bucket_link = default_bucket_link_factory(pid)
     if bucket_link is not None:
-        links['bucket'] = bucket_link
-    links['self'] = _url('item')
-    links['files'] = _url('files')
+        links["bucket"] = bucket_link
+    links["self"] = _url("item")
+    links["files"] = _url("files")
     ui_endpoint = current_app.config.get(
-        'DEPOSIT_UI_ENDPOINT' if type_exists else 'DEPOSIT_UI_ENDPOINT_DEFAULT'
+        "DEPOSIT_UI_ENDPOINT" if type_exists else "DEPOSIT_UI_ENDPOINT_DEFAULT"
     )
     if ui_endpoint is not None:
-        links['html'] = ui_endpoint.format(
+        links["html"] = ui_endpoint.format(
             host=request.host,
             scheme=request.scheme,
             type=deposit_type,
             pid_value=pid.pid_value,
         )
-    for action in ('publish', 'edit', 'discard'):
-        links[action] = _url('actions', action=action)
+    for action in ("publish", "edit", "discard"):
+        links[action] = _url("actions", action=action)
     return links
 
 
 def project_links_factory(pid):
     """Project factory for links generation."""
     # cannot use partial func because of invenio-records-rest#183
-    return deposit_links_factory(pid, deposit_type='project')
+    return deposit_links_factory(pid, deposit_type="project")
 
 
 def video_links_factory(pid):
     """Video factory for links generation."""
     # cannot use partial func because of invenio-records-rest#183
-    return deposit_links_factory(pid, deposit_type='video')
+    return deposit_links_factory(pid, deposit_type="video")

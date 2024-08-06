@@ -24,7 +24,6 @@
 
 """Test Deposit Project REST."""
 
-from __future__ import absolute_import, print_function
 
 import json
 from copy import deepcopy
@@ -1248,9 +1247,7 @@ def test_sync_owners(
         assert res.status_code == 200
 
 
-def test_project_edit_links(
-    api_app, app, project_published, json_headers, users
-):
+def test_project_edit_links(api_app, app, project_published, json_headers, users):
     """Check project edit links."""
     (project, video_1, video_2) = project_published
 

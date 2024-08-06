@@ -21,7 +21,6 @@
 # or submit itself to any jurisdiction.
 """Drupal serializer for records."""
 
-from __future__ import absolute_import, print_function
 
 import arrow
 from arrow.parser import ParserError

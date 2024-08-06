@@ -23,7 +23,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Configuration for deposit search."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app, g, request
 from flask_login import current_user
