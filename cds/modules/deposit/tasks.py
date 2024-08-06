@@ -24,7 +24,6 @@
 
 """Deposit tasks."""
 
-from __future__ import absolute_import, print_function
 
 from datetime import datetime, timedelta
 
@@ -50,9 +49,7 @@ from .api import Project
     rate_limit="100/m",
     default_retry_delay=10 * 60,
 )
-def datacite_register(
-    self, pid_value, record_uuid, max_retries=5, countdown=5
-):
+def datacite_register(self, pid_value, record_uuid, max_retries=5, countdown=5):
     """Mint the DOI with DataCite.
 
     :param pid_value: Value of record PID, with pid_type='recid'.
@@ -72,15 +69,13 @@ def datacite_register(
 
         dcp = DataCiteProvider.get(record["doi"])
 
-        url = current_app.config["CDS_RECORDS_UI_LINKS_FORMAT"].format(
-            recid=pid_value
-        )
+        url = current_app.config["CDS_RECORDS_UI_LINKS_FORMAT"].format(recid=pid_value)
 
         # check if language field is one of zh_CN or zh_TW and convert it to zh
         # this is needed because datacite 3.0 is supporting only ISO_639-1 codes
-        lang = record.get('language')
-        if lang and lang in ['zh_CN', 'zh_TW']:
-            record['language'] = 'zh'
+        lang = record.get("language")
+        if lang and lang in ["zh_CN", "zh_TW"]:
+            record["language"] = "zh"
         doc = datacite_v31.serialize(dcp.pid, record)
 
         if dcp.pid.status == PIDStatus.REGISTERED:

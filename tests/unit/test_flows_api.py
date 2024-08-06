@@ -25,7 +25,6 @@
 
 """Python basic API tests."""
 
-from __future__ import absolute_import, print_function
 
 import mock
 import pytest
@@ -37,7 +36,7 @@ from cds.modules.flows.tasks import CeleryTask
 
 
 # TODO: CHECK
-@pytest.mark.skip(reason='TO BE CHECKED')
+@pytest.mark.skip(reason="TO BE CHECKED")
 def test_basic_flow_api_usage(db, users):
     """Test basic flow creation."""
 
@@ -46,55 +45,57 @@ def test_basic_flow_api_usage(db, users):
         """Task with an important mission."""
         # if common == 'common-arg':
         #     raise Exception()
-        print('Run t1', common, kwargs)
+        print("Run t1", common, kwargs)
 
     @task
     def t2(p, **kwargs):
         """Task with an even more important mission."""
-        if p == 't2_1':
+        if p == "t2_1":
             # This one doesn't actually run anything, we just return
-            return 'No need to run for {}'.format(p)
+            return "No need to run for {}".format(p)
 
         # Do important stuff when required
-        print('Run t2', p, kwargs)
+        print("Run t2", p, kwargs)
 
     @task
     def t3(**kwargs):
         """Task with a secret mission."""
-        print('Run t3', kwargs)
+        print("Run t3", kwargs)
 
     @task(bind=True, max_retries=None)
     def t4(self, times, **kwargs):
         """Run this one n times."""
-        print('Run t4: ', times, kwargs)
+        print("Run t4: ", times, kwargs)
         if times > 0:
             self.commit_status(
-                kwargs['task_id'], message='Running for {}'.format(times)
+                kwargs["task_id"], message="Running for {}".format(times)
             )
             # Testing message updates
-            t = FlowTaskMetadata.get(kwargs['task_id'])
-            assert t.status.value == 'PENDING'
-            assert t.message == 'Running for {}'.format(times)
-            f = FlowService.get_flow(kwargs['flow_id'])
-            assert str(f.status) == 'PENDING'
+            t = FlowTaskMetadata.get(kwargs["task_id"])
+            assert t.status.value == "PENDING"
+            assert t.message == "Running for {}".format(times)
+            f = FlowService.get_flow(kwargs["flow_id"])
+            assert str(f.status) == "PENDING"
 
             # Reschedule the task to mimic breaking long standing tasks
             times = times - 1
             self.retry(args=(times,), kwargs=kwargs)
 
-    flow = FlowService.create('test',
-                              payload=dict(common='common-arg', common2='common2'),
-                              user_id="1", deposit_id="test",
-                              )
+    flow = FlowService.create(
+        "test",
+        payload=dict(common="common-arg", common2="common2"),
+        user_id="1",
+        deposit_id="test",
+    )
     flow_id = flow.id
-    assert str(flow.status) == 'PENDING'
+    assert str(flow.status) == "PENDING"
 
     # build the workflow
     def build(self):
         self._tasks.append((t1, {}))
-        self._tasks.append((t2, {'p': 't2_1'}))
-        self._tasks.append((t3, {'p': 't3'}))
-        self._tasks.append((t4, {'times': 10}))
+        self._tasks.append((t2, {"p": "t2_1"}))
+        self._tasks.append((t3, {"p": "t3"}))
+        self._tasks.append((t4, {"times": 10}))
 
     # patch the flow build
     with mock.patch("cds.modules.flows.api.Flow.build_steps", build):
@@ -103,33 +104,35 @@ def test_basic_flow_api_usage(db, users):
         # Save tasks and flow before running
         db.session.commit()
 
-        assert str(flow.status) == 'PENDING'
+        assert str(flow.status) == "PENDING"
 
         flow.start()
 
         flow = FlowService.get_flow(flow_id)
-        assert str(flow.status) == 'SUCCESS'
+        assert str(flow.status) == "SUCCESS"
 
-        task_status = flow.json['tasks'][0]
-        assert task_status['status'] == 'SUCCESS'
-        flow_task_status = CeleryTask.get_status(task_status['id'])
-        assert flow_task_status['status'] == 'SUCCESS'
+        task_status = flow.json["tasks"][0]
+        assert task_status["status"] == "SUCCESS"
+        flow_task_status = CeleryTask.get_status(task_status["id"])
+        assert flow_task_status["status"] == "SUCCESS"
 
         # Create a new instance of the same flow (restart)
         # old_flow_id = flow_id
         flow = flow.create(
-            flow.name, payload={'common': 'test 2'}, user_id="1",
+            flow.name,
+            payload={"common": "test 2"},
+            user_id="1",
             deposit_id="test",
         )
         flow_id = flow.id
-        assert str(flow.status) == 'PENDING'
+        assert str(flow.status) == "PENDING"
         flow = FlowService.get_flow(flow_id)
         flow.assemble()
 
         # Save tasks and flow before running
         db.session.commit()
 
-        assert str(flow.status) == 'PENDING'
+        assert str(flow.status) == "PENDING"
 
         flow.start()
 
@@ -138,6 +141,6 @@ def test_basic_flow_api_usage(db, users):
         flow = FlowService.get_flow(flow_id)
 
         # Restart task
-        flow.restart_task(task_status['id'])
-        flow_task_status = CeleryTask.get_status(task_status['id'])
-        assert flow_task_status['status'] == 'SUCCESS'
+        flow.restart_task(task_status["id"])
+        flow_task_status = CeleryTask.get_status(task_status["id"])
+        assert flow_task_status["status"] == "SUCCESS"

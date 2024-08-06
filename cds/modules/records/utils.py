@@ -24,7 +24,6 @@
 
 """Helper methods for CDS records."""
 
-from __future__ import absolute_import, print_function
 
 import json
 from html import unescape

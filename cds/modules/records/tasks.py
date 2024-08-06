@@ -23,7 +23,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Records tasks."""
 
-from __future__ import absolute_import, print_function
 
 import json
 import os.path
@@ -58,9 +57,7 @@ def _get_keywords_from_api(url):
     """Get keywords list from API."""
     request = requests.get(
         url,
-        headers={
-            "User-Agent": current_app.config.get("RECORDS_ID_PROVIDER_AGENT")
-        },
+        headers={"User-Agent": current_app.config.get("RECORDS_ID_PROVIDER_AGENT")},
     ).text
 
     keywords = {}
@@ -121,10 +118,7 @@ def _delete_not_existing_keywords(indexer, keywords_api, keywords_db):
     keys_loaded = keywords_api.keys()
     # check if some keywords is deleted
     for keyword in keywords_db:
-        if (
-            keyword["deleted"] is False
-            and keyword["key_id"] not in keys_loaded
-        ):
+        if keyword["deleted"] is False and keyword["key_id"] not in keys_loaded:
             # fix schema from old domain to new domain
             keyword["$schema"] = current_jsonschemas.path_to_url(Keyword._schema)
             # soft delete the key_id
@@ -219,7 +213,7 @@ def format_file_integrity_report(report):
         lines.append("Last Check: {}".format(f.last_check_at))
         if "record" in entry:
             lines.append(
-                u"Record: {}".format(
+                "Record: {}".format(
                     format_pid_link(
                         current_app.config["RECORDS_UI_ENDPOINT"],
                         entry["record"].get("recid"),
@@ -228,7 +222,7 @@ def format_file_integrity_report(report):
             )
         if "deposit" in entry:
             lines.append(
-                u"Deposit: {}".format(
+                "Deposit: {}".format(
                     format_pid_link(
                         current_app.config["DEPOSIT_UI_ENDPOINT_DEFAULT"],
                         entry["deposit"].get("_deposit", {}).get("id"),
@@ -278,9 +272,7 @@ def file_integrity_report():
 
     if report:
         # Format and send the email
-        subject = u"[CDS Videos] Files integrity report [{}]".format(
-            datetime.now()
-        )
+        subject = "[CDS Videos] Files integrity report [{}]".format(datetime.now())
         body = format_file_integrity_report(report)
         sender = current_app.config["NOREPLY_EMAIL"]
         recipients = [current_app.config["CDS_ADMIN_EMAIL"]]
@@ -298,9 +290,7 @@ def subformats_integrity_report(start_date=None, end_date=None):
         Return a touple containing (report, accessible)
         """
         file_report = {}
-        path = obj.file.uri.replace(
-            current_app.config["VIDEOS_XROOTD_ENDPOINT"], ""
-        )
+        path = obj.file.uri.replace(current_app.config["VIDEOS_XROOTD_ENDPOINT"], "")
 
         if not os.path.exists(path):
             # Check if the file exists on disk
@@ -337,7 +327,7 @@ def subformats_integrity_report(start_date=None, end_date=None):
         lines = []
         for entry in report:
             lines.append(
-                u"Record: {}".format(
+                "Record: {}".format(
                     format_pid_link(
                         current_app.config["RECORDS_UI_ENDPOINT"],
                         entry.get("recid"),
@@ -347,26 +337,18 @@ def subformats_integrity_report(start_date=None, end_date=None):
             lines.append("Message: {}".format(entry.get("message")))
 
             if entry.get("report_number"):
-                lines.append(
-                    "Report number: {}".format(entry.get("report_number"))
-                )
+                lines.append("Report number: {}".format(entry.get("report_number")))
 
             subreports = entry.get("subreports")
             if subreports:
                 lines.append(("-" * 10) + "\n")
 
                 for subreport in subreports:
-                    lines.append(
-                        "  File name: {}".format(subreport.get("file_name"))
-                    )
-                    lines.append(
-                        "  Message: {}".format(subreport.get("message"))
-                    )
+                    lines.append("  File name: {}".format(subreport.get("file_name")))
+                    lines.append("  Message: {}".format(subreport.get("message")))
 
                     if subreport.get("error"):
-                        lines.append(
-                            "  Error: {}".format(subreport.get("error"))
-                        )
+                        lines.append("  Error: {}".format(subreport.get("error")))
 
             lines.append(("-" * 80) + "\n")
 
@@ -416,17 +398,13 @@ def subformats_integrity_report(start_date=None, end_date=None):
 
         subformats = CDSVideosFilesIterator.get_video_subformats(master)
         if not subformats:
-            report.append(
-                {"recid": record["recid"], "message": "No subformats found"}
-            )
+            report.append({"recid": record["recid"], "message": "No subformats found"})
             continue
 
         subformats_subreport = []
         for subformat in subformats:
             subformat_obj = as_object_version(subformat["version_id"])
-            subformat_subreport, accessible = _probe_video_file(
-                subformat_obj, record
-            )
+            subformat_subreport, accessible = _probe_video_file(subformat_obj, record)
 
             if not accessible:
                 update_cache = False
@@ -447,15 +425,11 @@ def subformats_integrity_report(start_date=None, end_date=None):
     if update_cache:
         # Set the start date for next time when the task will run
         cache["start_date"] = two_days_ago
-        current_cache.set(
-            "task_subformats_integrity:details", cache, timeout=-1
-        )
+        current_cache.set("task_subformats_integrity:details", cache, timeout=-1)
 
     if report:
         # Format and send the email
-        subject = u"[CDS Videos] Subformats integrity report [{}]".format(
-            datetime.now()
-        )
+        subject = "[CDS Videos] Subformats integrity report [{}]".format(datetime.now())
         body = _format_report(report)
         sender = current_app.config["NOREPLY_EMAIL"]
         recipients = [current_app.config["CDS_ADMIN_EMAIL"]]
@@ -481,15 +455,9 @@ def missing_subformats_report(start_date=None, end_date=None):
 
     def _get_missing_subformats(subformats, ar, w, h):
         """Return missing and transcodable subformats."""
-        dones = [
-            subformat["tags"]["preset_quality"] for subformat in subformats
-        ]
-        missing = set(
-            current_app.config["CDS_OPENCAST_QUALITIES"].keys()
-        ) - set(dones)
-        transcodables = list(
-            filter(lambda q: can_be_transcoded(q, w, h), missing)
-        )
+        dones = [subformat["tags"]["preset_quality"] for subformat in subformats]
+        missing = set(current_app.config["CDS_OPENCAST_QUALITIES"].keys()) - set(dones)
+        transcodables = list(filter(lambda q: can_be_transcoded(q, w, h), missing))
         return transcodables
 
     def _format_report(report):
@@ -498,20 +466,16 @@ def missing_subformats_report(start_date=None, end_date=None):
         for entry in report:
             lines.append("Message: {}".format(entry.get("message")))
             lines.append(
-                u"Record: {}".format(
+                "Record: {}".format(
                     format_pid_link(
                         current_app.config["RECORDS_UI_ENDPOINT"],
                         entry.get("recid"),
                     )
                 )
             )
+            lines.append("Report number: {}".format(entry.get("report_number")))
             lines.append(
-                "Report number: {}".format(entry.get("report_number"))
-            )
-            lines.append(
-                "Missing subformats: {}".format(
-                    entry.get("missing_subformats")
-                )
+                "Missing subformats: {}".format(entry.get("missing_subformats"))
             )
             lines.append(("-" * 80) + "\n")
 
@@ -580,9 +544,7 @@ def missing_subformats_report(start_date=None, end_date=None):
 
     if report:
         # Format and send the email
-        subject = u"[CDS Videos] Missing subformats report [{}]".format(
-            datetime.now()
-        )
+        subject = "[CDS Videos] Missing subformats report [{}]".format(datetime.now())
         body = _format_report(report)
         sender = current_app.config["NOREPLY_EMAIL"]
         recipients = [current_app.config["CDS_ADMIN_EMAIL"]]

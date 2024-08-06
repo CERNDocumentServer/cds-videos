@@ -19,7 +19,6 @@
 
 """CDS Fixture Modules."""
 
-from __future__ import absolute_import, print_function
 
 import click
 from click import ClickException
@@ -93,9 +92,7 @@ def quality(recid, depid, quality):
 
     qualities = list(current_app.config["CDS_OPENCAST_QUALITIES"].keys())
     if quality not in qualities:
-        raise ClickException(
-            "Input quality must be one of {0}".format(qualities)
-        )
+        raise ClickException("Input quality must be one of {0}".format(qualities))
 
     output = create_subformat(id_type=type_, id_value=value, quality=quality)
     if output:
@@ -156,9 +153,7 @@ def fix_bucket_conflict(recid):
         # Put tags correctly pointing to the right object
         master_file = CDSVideosFilesIterator.get_master_video_file(record)
         if master_file:
-            master_deposit_obj = ObjectVersion.get(
-                new_bucket, master_file["key"]
-            )
+            master_deposit_obj = ObjectVersion.get(new_bucket, master_file["key"])
 
             for slave in (
                 ObjectVersion.get_by_bucket(bucket=new_bucket)
@@ -214,9 +209,7 @@ def extract_frames(recid, depid):
         depid = record["_deposit"]["id"]
 
     flow_metadata = FlowMetadata.get_by_deposit(depid)
-    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(
-        depid
-    )
+    assert flow_metadata, "Cannot find Flow for given deposit id {0}".format(depid)
 
     payload = flow_metadata.payload
     payload = dict(

@@ -19,7 +19,6 @@
 
 """CDS Home UI."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint, render_template
 from flask_menu import current_menu
@@ -27,25 +26,24 @@ from invenio_cache.decorators import cached_unless_authenticated
 from invenio_i18n import lazy_gettext as _
 
 blueprint = Blueprint(
-    'cds_home',
+    "cds_home",
     __name__,
-    template_folder='templates',
-    static_folder='static',
+    template_folder="templates",
+    static_folder="static",
 )
 
-@blueprint.route('/')
-@cached_unless_authenticated(timeout=600, key_prefix='homepage')
+
+@blueprint.route("/")
+@cached_unless_authenticated(timeout=600, key_prefix="homepage")
 def index():
     """CDS home page."""
-    return render_template(
-        'cds_home/home.html'
-    )
+    return render_template("cds_home/home.html")
 
 
-@blueprint.route('/ping', methods=['HEAD', 'GET'])
+@blueprint.route("/ping", methods=["HEAD", "GET"])
 def ping():
     """Ping blueprint used by loadbalancer."""
-    return 'You Know, the CERN Document Server'
+    return "You Know, the CERN Document Server"
 
 
 def finalize_app(app):
@@ -55,9 +53,9 @@ def finalize_app(app):
 
 def init_menu(app):
     """Initialize menu before first request."""
-    item = current_menu.submenu('main.deposit')
+    item = current_menu.submenu("main.deposit")
     item.register(
-        'invenio_deposit_ui.index',
-        _('Upload'),
+        "invenio_deposit_ui.index",
+        _("Upload"),
         order=2,
     )

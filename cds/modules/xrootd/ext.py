@@ -24,15 +24,15 @@
 
 """Initialization of XRootD."""
 
-from __future__ import absolute_import, print_function
 
 from pkg_resources import DistributionNotFound, get_distribution
 
 try:
     # Import XRootDPyFS if available so opener gets registered on
     # PyFilesystem.
-    get_distribution('xrootdpyfs')
+    get_distribution("xrootdpyfs")
     import xrootdpyfs  # noqa
+
     XROOTD_ENABLED = True
 except DistributionNotFound:
     XROOTD_ENABLED = False
@@ -49,10 +49,11 @@ class CDSXRootD(object):
 
     def init_app(self, app):
         """Flask application initialization."""
-        app.config['XROOTD_ENABLED'] = XROOTD_ENABLED
+        app.config["XROOTD_ENABLED"] = XROOTD_ENABLED
         if XROOTD_ENABLED:
             #: Overwrite reported checksum from CERN EOS (due to XRootD 3.3.6).
-            app.config['XROOTD_CHECKSUM_ALGO'] = 'md5'
-            app.config['FILES_REST_STORAGE_FACTORY'] = \
-                'invenio_xrootd:eos_storage_factory'
-        app.extensions['cds-xrootd'] = self
+            app.config["XROOTD_CHECKSUM_ALGO"] = "md5"
+            app.config["FILES_REST_STORAGE_FACTORY"] = (
+                "invenio_xrootd:eos_storage_factory"
+            )
+        app.extensions["cds-xrootd"] = self

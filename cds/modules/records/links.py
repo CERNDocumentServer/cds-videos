@@ -24,7 +24,6 @@
 
 """Links for record serialization."""
 
-from __future__ import absolute_import, print_function
 
 from flask import current_app, request, url_for
 from invenio_pidstore.errors import PIDDoesNotExistError
@@ -88,9 +87,7 @@ def _fill_video_extra_links(record, links):
         if project:
             links.update(
                 **_build_deposit_project_links(
-                    deposit_project=project_resolver.resolve(
-                        project["_deposit"]["id"]
-                    )
+                    deposit_project=project_resolver.resolve(project["_deposit"]["id"])
                 )
             )
     except (KeyError, PIDDoesNotExistError):

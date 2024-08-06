@@ -23,7 +23,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 """Default rendering returning a default web page."""
 
-from __future__ import absolute_import, print_function
 
 from flask import render_template
 

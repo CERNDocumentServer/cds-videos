@@ -24,7 +24,6 @@
 
 """Deposit identifier provider."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.base import BaseProvider
@@ -33,7 +32,7 @@ from invenio_pidstore.providers.base import BaseProvider
 class DepositProvider(BaseProvider):
     """Deposit identifier provider."""
 
-    pid_type = 'depid'
+    pid_type = "depid"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -54,7 +53,8 @@ class DepositProvider(BaseProvider):
         :param object_uuid: The object UUID (Default: ``None``)
         :param kwargs: It contains the pid value.
         """
-        assert 'pid_value' in kwargs
-        kwargs.setdefault('status', cls.default_status)
+        assert "pid_value" in kwargs
+        kwargs.setdefault("status", cls.default_status)
         return super(DepositProvider, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )

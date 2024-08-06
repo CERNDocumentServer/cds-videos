@@ -24,7 +24,6 @@
 
 """Test previewer."""
 
-from __future__ import absolute_import, print_function
 
 import pytest
 from flask import url_for

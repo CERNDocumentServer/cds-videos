@@ -24,7 +24,6 @@
 
 """Anonymous benchmarks."""
 
-from __future__ import absolute_import, print_function
 
 from locust import HttpLocust, TaskSet, task
 
@@ -32,20 +31,20 @@ from locust import HttpLocust, TaskSet, task
 class AnonymousWebsiteTasks(TaskSet):
     """Benchmark anonymous user."""
 
-    base_url = 'https://videos.cern.ch/'
+    base_url = "https://videos.cern.ch/"
 
     @task
     def download(self):
         """Task download."""
         self.client.get(
-            self.base_url + 'api/files/0a5b827f-29a8-4a9a-975e-25fd7699e097/'
-            'posterframe.jpg?versionId=02f67d4c-2753-4258-9a1d-82fd21150935')
+            self.base_url + "api/files/0a5b827f-29a8-4a9a-975e-25fd7699e097/"
+            "posterframe.jpg?versionId=02f67d4c-2753-4258-9a1d-82fd21150935"
+        )
 
     @task
     def static(self):
         """Task static file."""
-        self.client.get(
-            self.base_url + 'static/gen/cds.0c24f045.css')
+        self.client.get(self.base_url + "static/gen/cds.0c24f045.css")
 
     @task
     def homepage(self):
@@ -55,7 +54,7 @@ class AnonymousWebsiteTasks(TaskSet):
     @task
     def search(self):
         """Task search result."""
-        self.client.get(self.base_url + 'search?page=1&size=20&q=')
+        self.client.get(self.base_url + "search?page=1&size=20&q=")
 
 
 class WebsiteUser(HttpLocust):

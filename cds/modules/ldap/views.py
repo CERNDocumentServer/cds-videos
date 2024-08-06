@@ -19,7 +19,6 @@
 
 """CDS LDAP views."""
 
-from __future__ import absolute_import, print_function
 
 import ldap
 from flask import Blueprint, abort, jsonify, make_response, request
@@ -29,16 +28,16 @@ from cds.modules.ldap.decorators import needs_authentication
 from cds.modules.ldap.serializers import serialize_ldap_users
 
 blueprint = Blueprint(
-    'cds_ldap',
+    "cds_ldap",
     __name__,
-    url_prefix='/ldap/',
+    url_prefix="/ldap/",
 )
 
 
-@blueprint.route('cern-users/', methods=["GET"])
+@blueprint.route("cern-users/", methods=["GET"])
 @needs_authentication
 def get_users():
-    query = request.args.get('query', '')
+    query = request.args.get("query", "")
     if query:
         try:
             ldap_client = LdapClient()
@@ -51,10 +50,10 @@ def get_users():
     abort(400)
 
 
-@blueprint.route('cern-egroups/', methods=["GET"])
+@blueprint.route("cern-egroups/", methods=["GET"])
 @needs_authentication
 def get_egroups():
-    query = request.args.get('query', '')
+    query = request.args.get("query", "")
     if query:
         try:
             ldap_client = LdapClient()

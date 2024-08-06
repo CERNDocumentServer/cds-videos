@@ -24,7 +24,6 @@
 
 """CDS files rest app for file download receivers."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_files_rest.signals import file_downloaded
 
@@ -41,10 +40,9 @@ class CDSFilesRestApp(object):
 
     def init_app(self, app):
         """Flask application initialization."""
-        app.extensions['cds-files-rest'] = self
+        app.extensions["cds-files-rest"] = self
         self.register_signals(app)
 
     def register_signals(self, app):
         """Register CDS files rest signals."""
-        file_downloaded.connect(
-            on_download_rename_file, sender=app, weak=False)
+        file_downloaded.connect(on_download_rename_file, sender=app, weak=False)

@@ -24,7 +24,6 @@
 
 """Configuration for records search."""
 
-from __future__ import absolute_import, print_function
 
 from flask import g
 from flask_login import current_user

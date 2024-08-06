@@ -24,7 +24,6 @@
 
 """Validators."""
 
-from __future__ import absolute_import, print_function
 
 from jsonschema.validators import Draft4Validator, extend
 

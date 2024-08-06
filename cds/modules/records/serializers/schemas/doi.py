@@ -19,7 +19,6 @@
 
 """DOI field."""
 
-from __future__ import absolute_import, print_function
 
 import idutils
 from invenio_i18n import lazy_gettext as _

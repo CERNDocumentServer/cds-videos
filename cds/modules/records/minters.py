@@ -24,7 +24,6 @@
 
 """Persistent identifier minters."""
 
-from __future__ import absolute_import, print_function
 
 import idutils
 from flask import current_app
@@ -63,18 +62,15 @@ def report_number_minter(record_uuid, data, **kwargs):
 
 def cds_doi_generator(recid, prefix=None):
     """Generate a DOI."""
-    return '{prefix}/videos.{recid}'.format(
-        prefix=prefix or current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'],
-        recid=recid
+    return "{prefix}/videos.{recid}".format(
+        prefix=prefix or current_app.config["PIDSTORE_DATACITE_DOI_PREFIX"], recid=recid
     )
 
 
 def _rec_minter(record_uuid, data):
     """Record minter."""
     assert "recid" not in data
-    provider = CDSRecordIdProvider.create(
-        object_type="rec", object_uuid=record_uuid
-    )
+    provider = CDSRecordIdProvider.create(object_type="rec", object_uuid=record_uuid)
     data["recid"] = int(provider.pid.pid_value)
     return provider
 

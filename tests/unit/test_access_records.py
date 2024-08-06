@@ -24,7 +24,6 @@
 
 """Test access control package."""
 
-from __future__ import absolute_import, print_function
 
 import uuid
 
@@ -40,45 +39,68 @@ from cds.modules.records.permissions import (
 )
 
 
-@pytest.mark.parametrize('access,action,is_allowed', [
-    ({'foo': 'bar'}, 'read', True),
-    ({'_access': {'read': [1, 'no-access@cern.ch',
-                  'no-access-either@cern.ch']}}, 'read', True),
-    ({'_access': {'read': [2, 'no-access@cern.ch']}}, 'read', False),
-    ({'_access': {'read': ['Test-egroup@cern.ch']}}, 'read', True),
-    ({'_access': {'read': []}}, 'read', True),
-    ({'foo': 'bar'}, 'create', True),
-    ({'_access': {'create': [1, 'no-access@cern.ch',
-                  'no-access-either@cern.ch']}}, 'create', True),
-    ({'_access': {'create': [2, 'no-access@cern.ch']}}, 'create', True),
-    ({'_access': {'create': ['test-egroup@cern.ch']}}, 'create', True),
-    ({'_access': {'create': []}}, 'create', True),
-    ({'foo': 'bar'}, 'read', True),
-    ({'_access': {'read': [1, 'no-access@cern.ch',
-                  'no-access-either@cern.ch']}}, 'read', True),
-    ({'_access': {'read': [2, 'no-access@cern.ch']}}, 'read',
-        False),
-    ({'_access': {'read': ['test-egroup@cern.ch']}}, 'read', True),
-    ({'_access': {'read': []}}, 'read', True),
-    ({'foo': 'bar'}, 'update', False),
-    ({'_access': {'update': [1, 'no-access@cern.ch',
-                  'no-access-either@cern.ch']}}, 'update', True),
-    ({'_access': {'update': [2, 'no-access@cern.ch']}}, 'update', False),
-    ({'_access': {'update': ['Test-egroup@cern.ch']}}, 'update', True),
-    ({'_access': {'update': []}}, 'update', False),
-    # Only admin can delete records
-    ({'foo': 'bar'}, 'delete', False),
-    ({'foo': 'bar'}, 'read-eos-path', False),
-    ({'eos': 'true'}, 'read-eos-path', True),
-])
+@pytest.mark.parametrize(
+    "access,action,is_allowed",
+    [
+        ({"foo": "bar"}, "read", True),
+        (
+            {"_access": {"read": [1, "no-access@cern.ch", "no-access-either@cern.ch"]}},
+            "read",
+            True,
+        ),
+        ({"_access": {"read": [2, "no-access@cern.ch"]}}, "read", False),
+        ({"_access": {"read": ["Test-egroup@cern.ch"]}}, "read", True),
+        ({"_access": {"read": []}}, "read", True),
+        ({"foo": "bar"}, "create", True),
+        (
+            {
+                "_access": {
+                    "create": [1, "no-access@cern.ch", "no-access-either@cern.ch"]
+                }
+            },
+            "create",
+            True,
+        ),
+        ({"_access": {"create": [2, "no-access@cern.ch"]}}, "create", True),
+        ({"_access": {"create": ["test-egroup@cern.ch"]}}, "create", True),
+        ({"_access": {"create": []}}, "create", True),
+        ({"foo": "bar"}, "read", True),
+        (
+            {"_access": {"read": [1, "no-access@cern.ch", "no-access-either@cern.ch"]}},
+            "read",
+            True,
+        ),
+        ({"_access": {"read": [2, "no-access@cern.ch"]}}, "read", False),
+        ({"_access": {"read": ["test-egroup@cern.ch"]}}, "read", True),
+        ({"_access": {"read": []}}, "read", True),
+        ({"foo": "bar"}, "update", False),
+        (
+            {
+                "_access": {
+                    "update": [1, "no-access@cern.ch", "no-access-either@cern.ch"]
+                }
+            },
+            "update",
+            True,
+        ),
+        ({"_access": {"update": [2, "no-access@cern.ch"]}}, "update", False),
+        ({"_access": {"update": ["Test-egroup@cern.ch"]}}, "update", True),
+        ({"_access": {"update": []}}, "update", False),
+        # Only admin can delete records
+        ({"foo": "bar"}, "delete", False),
+        ({"foo": "bar"}, "read-eos-path", False),
+        ({"eos": "true"}, "read-eos-path", True),
+    ],
+)
 def test_record_access(db, users, access, action, is_allowed):
     """Test access control for records."""
+
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
-        roles = [RoleNeed('Test-Egroup@cern.ch')]
-        if 'eos' in access:
-            roles.append(RoleNeed('vmo-restictedrights@cern.ch'))
+        roles = [RoleNeed("Test-Egroup@cern.ch")]
+        if "eos" in access:
+            roles.append(RoleNeed("vmo-restictedrights@cern.ch"))
         identity.provides |= set(roles)
 
     def login_and_test(user_id):

@@ -22,7 +22,6 @@
 
 """VTT serializer for records."""
 
-from __future__ import absolute_import, print_function
 
 from datetime import datetime
 
@@ -45,9 +44,10 @@ class VTTSerializer(object):
         :param record: Record instance.
         :param links_factory: Factory function for record links.
         """
-        if record['$schema'] != Video.get_record_schema():
-            raise RESTValidationError(errors=[FieldError(
-                str(record.id), 'Unsupported format')])
+        if record["$schema"] != Video.get_record_schema():
+            raise RESTValidationError(
+                errors=[FieldError(str(record.id), "Unsupported format")]
+            )
         return VTT(record=record).format()
 
 
@@ -57,47 +57,50 @@ class VTT(object):
     def __init__(self, record):
         """Initialize Smil formatter with the specific record."""
         self.record = record
-        self.data = ''
+        self.data = ""
 
     def format(self):
         thumbnail_data = self._format_frames(self.record)
-        return render_template('cds_records/thumbnails.vtt',
-                               frames=thumbnail_data)
+        return render_template("cds_records/thumbnails.vtt", frames=thumbnail_data)
 
     @staticmethod
     def _format_frames(record):
         """Select frames and format the start/end times."""
         master_file = CDSVideosFilesIterator.get_master_video_file(record)
-        frames = [{
-            'time': float(f['tags']['timestamp']),
-            'bucket': f['bucket_id'],
-            'key': f['key'],
-            'version_id': f['version_id'],
-        } for f in CDSVideosFilesIterator.get_video_frames(master_file)]
+        frames = [
+            {
+                "time": float(f["tags"]["timestamp"]),
+                "bucket": f["bucket_id"],
+                "key": f["key"],
+                "version_id": f["version_id"],
+            }
+            for f in CDSVideosFilesIterator.get_video_frames(master_file)
+        ]
 
-        last_time = float(master_file['tags']['duration'])
-        poster_size = current_app.config['VIDEO_POSTER_SIZE']
-        frames_tail = frames[1:] + [{'time': last_time}]
-        return [{
-            'start_time': VTT.time_format(f['time'] if i > 0 else 0.0),
-            'end_time': VTT.time_format(next_f['time']),
-            'file_name': VTT.resize_link(f, poster_size),
-        } for i, (f, next_f) in enumerate(zip(frames, frames_tail))]
+        last_time = float(master_file["tags"]["duration"])
+        poster_size = current_app.config["VIDEO_POSTER_SIZE"]
+        frames_tail = frames[1:] + [{"time": last_time}]
+        return [
+            {
+                "start_time": VTT.time_format(f["time"] if i > 0 else 0.0),
+                "end_time": VTT.time_format(next_f["time"]),
+                "file_name": VTT.resize_link(f, poster_size),
+            }
+            for i, (f, next_f) in enumerate(zip(frames, frames_tail))
+        ]
 
     @staticmethod
     def resize_link(frame, size):
-        return '{}{}'.format(
-            current_app.config.get('THEME_SITEURL'),
+        return "{}{}".format(
+            current_app.config.get("THEME_SITEURL"),
             ui_iiif_image_url(
-                    frame,
-                    size='!{0[0]},{0[1]}'.format(size),
-                    image_format='png'
-                )
-            )
+                frame, size="!{0[0]},{0[1]}".format(size), image_format="png"
+            ),
+        )
 
     @staticmethod
     def time_format(seconds):
         """Helper function to convert seconds to vtt time format."""
         d = datetime.utcfromtimestamp(seconds)
-        s = d.strftime('%M:%S.%f')
+        s = d.strftime("%M:%S.%f")
         return s[:-3]

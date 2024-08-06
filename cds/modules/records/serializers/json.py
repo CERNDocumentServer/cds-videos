@@ -21,7 +21,6 @@
 # or submit itself to any jurisdiction.
 """CDS JSON Serializer."""
 
-from __future__ import absolute_import, print_function
 
 from flask import has_request_context
 from flask_security import current_user

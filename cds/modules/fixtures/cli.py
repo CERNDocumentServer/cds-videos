@@ -19,7 +19,6 @@
 
 """CDS Fixture Modules."""
 
-from __future__ import absolute_import, print_function
 
 import copy
 import json
@@ -55,9 +54,9 @@ from ..records.utils import to_string
 def _load_json_source(filename):
     """Load json fixture."""
     source = pkg_resources.resource_filename(
-        'cds.modules.fixtures', 'data/{0}'.format(filename)
+        "cds.modules.fixtures", "data/{0}".format(filename)
     )
-    with open(source, 'r') as fp:
+    with open(source, "r") as fp:
         content = json.load(fp)
     return content
 
@@ -82,13 +81,12 @@ def _process_files(record, files_metadata):
         return
     bucket = Bucket.create()
     RecordsBuckets.create(record=record.model, bucket=bucket)
-    response = requests.get(
-        files_metadata['source'], stream=True, verify=False)
+    response = requests.get(files_metadata["source"], stream=True, verify=False)
 
     # Throw an error for bad status codes
     response.raise_for_status()
 
-    with tempfile.NamedTemporaryFile(suffix='.tar', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as f:
         for chunk in response:
             f.write(chunk)
     tar = tarfile.open(name=f.name)
@@ -97,17 +95,17 @@ def _process_files(record, files_metadata):
     tar.close()
     os.remove(f.name)
 
-    for f in files_metadata['metadata']:
-        obj = ObjectVersion.create(bucket, f['key'])
-        with open(os.path.join(files_base_dir, f['key']), 'rb') as fp:
+    for f in files_metadata["metadata"]:
+        obj = ObjectVersion.create(bucket, f["key"])
+        with open(os.path.join(files_base_dir, f["key"]), "rb") as fp:
             obj.set_contents(fp)
-        for k, v in f['tags'].items():
-            if k == 'master':
+        for k, v in f["tags"].items():
+            if k == "master":
                 v = ObjectVersion.get(bucket, v).version_id
             ObjectVersionTag.create(obj, k, to_string(v))
     shutil.rmtree(files_base_dir)
 
-    record['_files'] = record.files.dumps()
+    record["_files"] = record.files.dumps()
 
 
 def _mint_pids(record):
@@ -115,20 +113,20 @@ def _mint_pids(record):
     # TODO: refactor to get list of dicts with the parameters to pass to create
     # TODO: can we update the sequences for the report number?
     PersistentIdentifier.create(
-        pid_type='recid',
-        pid_value=record['recid'],
+        pid_type="recid",
+        pid_value=record["recid"],
         pid_provider=None,
-        object_type='rec',
+        object_type="rec",
         object_uuid=record.id,
-        status=PIDStatus.REGISTERED
+        status=PIDStatus.REGISTERED,
     )
     PersistentIdentifier.create(
-        pid_type='rn',
-        pid_value=record['report_number'][0],
+        pid_type="rn",
+        pid_value=record["report_number"][0],
         pid_provider=None,
-        object_type='rec',
+        object_type="rec",
         object_uuid=record.id,
-        status=PIDStatus.REGISTERED
+        status=PIDStatus.REGISTERED,
     )
 
 
@@ -143,52 +141,57 @@ def records():
     """Load demo records."""
     to_index = []
     for project_file in pkg_resources.resource_listdir(
-            'cds.modules.fixtures', os.path.join('data', 'videos')):
-        project_data = _load_json_source(os.path.join('videos', project_file))
+        "cds.modules.fixtures", os.path.join("data", "videos")
+    ):
+        project_data = _load_json_source(os.path.join("videos", project_file))
         with db.session.begin_nested():
-            files_metadata = copy.deepcopy(project_data.get('_files'))
-            project_data['_files'] = []
+            files_metadata = copy.deepcopy(project_data.get("_files"))
+            project_data["_files"] = []
             project = Record.create(data=project_data)
             _mint_pids(project)
             to_index.append(project.id)
-            videos = copy.deepcopy(project.get('videos'))
-            project['videos'] = []
+            videos = copy.deepcopy(project.get("videos"))
+            project["videos"] = []
             _process_files(project, files_metadata)
             for video_data in videos:
-                files_metadata = copy.deepcopy(video_data.get('_files'))
-                video_data['_files'] = []
+                files_metadata = copy.deepcopy(video_data.get("_files"))
+                video_data["_files"] = []
                 video = Record.create(data=video_data)
                 _mint_pids(video)
                 to_index.append(video.id)
-                video['_project_id'] = str(project['recid'])
+                video["_project_id"] = str(project["recid"])
                 _process_files(video, files_metadata)
                 # FIXME probably there is a better way to create the smil file
-                master_video = CDSVideosFilesIterator.get_master_video_file(
-                    video)
+                master_video = CDSVideosFilesIterator.get_master_video_file(video)
                 generate_smil_file(
-                    video['recid'], video,
-                    master_video['bucket_id'], master_video['version_id'],
-                    skip_schema_validation=True
+                    video["recid"],
+                    video,
+                    master_video["bucket_id"],
+                    master_video["version_id"],
+                    skip_schema_validation=True,
                 )
-                video['_files'] = video.files.dumps()
+                video["_files"] = video.files.dumps()
 
-                project['videos'].append({
-                    '$ref':
-                    'https://cds.cern.ch/api/record/{0}'.format(video['recid'])
-                })
+                project["videos"].append(
+                    {
+                        "$ref": "https://cds.cern.ch/api/record/{0}".format(
+                            video["recid"]
+                        )
+                    }
+                )
                 video.commit()
             project.commit()
         db.session.commit()
 
     _index(to_index)
-    click.echo('DONE :)')
+    click.echo("DONE :)")
 
 
 @fixtures.command()
 @with_appcontext
 def categories():
     """Load categories."""
-    categories = _load_json_source('categories.json')
+    categories = _load_json_source("categories.json")
 
     # save in db
     to_index = []
@@ -202,7 +205,7 @@ def categories():
 
     # index them
     _index(to_index)
-    click.echo('DONE :)')
+    click.echo("DONE :)")
 
 
 @fixtures.command()
@@ -210,74 +213,95 @@ def categories():
 def sequence_generator():
     """Register CDS templates for sequence generation."""
     with db.session.begin_nested():
-        Template.create(name='project-v1_0_0',
-                        meta_template='{category}-{type}-{year}-{counter:03d}',
-                        start=1)
-        Template.create(name='video-v1_0_0',
-                        meta_template='{project-v1_0_0}-{counter:03d}',
-                        start=1)
+        Template.create(
+            name="project-v1_0_0",
+            meta_template="{category}-{type}-{year}-{counter:03d}",
+            start=1,
+        )
+        Template.create(
+            name="video-v1_0_0", meta_template="{project-v1_0_0}-{counter:03d}", start=1
+        )
     db.session.commit()
-    click.echo('DONE :)')
+    click.echo("DONE :)")
 
 
 @fixtures.command()
 @with_appcontext
 def pages():
     """Register CDS static pages."""
+
     def page_data(page):
-        return pkg_resources.resource_stream(
-            'cds.modules.fixtures', os.path.join('data/pages', page)
-        ).read().decode('utf8')
+        return (
+            pkg_resources.resource_stream(
+                "cds.modules.fixtures", os.path.join("data/pages", page)
+            )
+            .read()
+            .decode("utf8")
+        )
 
     pages = [
-        Page(url='/about',
-             title='About',
-             description='About',
-             content=page_data('about.html'),
-             template_name='invenio_pages/dynamic.html'),
-        Page(url='/contact',
-             title='Contact',
-             description='Contact',
-             content=page_data('contact.html'),
-             template_name='invenio_pages/dynamic.html'),
-        Page(url='/faq',
-             title='FAQ',
-             description='FAQ',
-             content=page_data('faq.html'),
-             template_name='invenio_pages/dynamic.html'),
-        Page(url='/guide/search',
-             title='Search guide',
-             description='Search guide',
-             content=page_data('guides/search.html'),
-             template_name='invenio_pages/dynamic.html'),
-        Page(url='/terms',
-             title='Terms of Use',
-             description='Terms of Use',
-             content=page_data('terms_of_use.html'),
-             template_name='invenio_pages/dynamic.html')
+        Page(
+            url="/about",
+            title="About",
+            description="About",
+            content=page_data("about.html"),
+            template_name="invenio_pages/dynamic.html",
+        ),
+        Page(
+            url="/contact",
+            title="Contact",
+            description="Contact",
+            content=page_data("contact.html"),
+            template_name="invenio_pages/dynamic.html",
+        ),
+        Page(
+            url="/faq",
+            title="FAQ",
+            description="FAQ",
+            content=page_data("faq.html"),
+            template_name="invenio_pages/dynamic.html",
+        ),
+        Page(
+            url="/guide/search",
+            title="Search guide",
+            description="Search guide",
+            content=page_data("guides/search.html"),
+            template_name="invenio_pages/dynamic.html",
+        ),
+        Page(
+            url="/terms",
+            title="Terms of Use",
+            description="Terms of Use",
+            content=page_data("terms_of_use.html"),
+            template_name="invenio_pages/dynamic.html",
+        ),
     ]
     with db.session.begin_nested():
         Page.query.delete()
         db.session.add_all(pages)
     db.session.commit()
-    click.echo('DONE :)')
+    click.echo("DONE :)")
 
 
 @fixtures.command()
-@click.option('--url', '-u')
+@click.option("--url", "-u")
 @with_appcontext
 def keywords(url):
     """Load keywords."""
     if url:
-        current_app.config['CDS_KEYWORDS_HARVESTER_URL'] = url
+        current_app.config["CDS_KEYWORDS_HARVESTER_URL"] = url
 
     keywords_harvesting.s().apply()
-    click.echo('DONE :)')
+    click.echo("DONE :)")
 
 
 @fixtures.command()
-@click.option('--path', '-p', type=click.Path(exists=True, dir_okay=False),
-              default='cds/modules/fixtures/data/licenses.json')
+@click.option(
+    "--path",
+    "-p",
+    type=click.Path(exists=True, dir_okay=False),
+    default="cds/modules/fixtures/data/licenses.json",
+)
 @with_appcontext
 @click.pass_context
 def licenses(ctx, path):
@@ -287,7 +311,11 @@ def licenses(ctx, path):
     ctx.invoke(loadlicenses, path=path)
     db.session.commit()
     # index all licenses
-    query = (str(x[0]) for x in PersistentIdentifier.query.filter_by(
-        pid_type='od_lic').values(PersistentIdentifier.object_uuid))
+    query = (
+        str(x[0])
+        for x in PersistentIdentifier.query.filter_by(pid_type="od_lic").values(
+            PersistentIdentifier.object_uuid
+        )
+    )
     _index(query)
-    click.echo('DONE :)')
+    click.echo("DONE :)")

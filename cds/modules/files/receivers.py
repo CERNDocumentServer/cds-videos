@@ -24,7 +24,6 @@
 
 """CDS files rest receivers."""
 
-from __future__ import absolute_import, print_function
 
 from os.path import splitext
 
@@ -34,10 +33,10 @@ from invenio_files_rest.models import as_object_version
 def on_download_rename_file(sender, **kwargs):
     """Rename files generated from master file when downloading."""
     obj = kwargs["obj"]
-    master_version_id = obj.get_tags().get('master') if obj else None
+    master_version_id = obj.get_tags().get("master") if obj else None
     if master_version_id:
         master_obj = as_object_version(master_version_id)
         filename_no_ext = splitext(master_obj.key)[0]
         # master filename is the report number
         if filename_no_ext not in obj.key:
-            obj.key = '{}-{}'.format(filename_no_ext, obj.key)
+            obj.key = "{}-{}".format(filename_no_ext, obj.key)

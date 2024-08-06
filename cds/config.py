@@ -24,7 +24,6 @@
 
 """CDS base Invenio configuration."""
 
-from __future__ import absolute_import, print_function
 
 import ast
 import copy
@@ -1237,7 +1236,7 @@ THEME_PIWIK_ID = None
 ###############################################################################
 
 # Base CSS bundle to include in all previewers
-PREVIEWER_BASE_CSS_BUNDLES = ["cds_theme_styles"]
+PREVIEWER_BASE_CSS_BUNDLES = ["cds_previewer_styles"]
 # Base JS bundle to include in all previewers
 PREVIEWER_BASE_JS_BUNDLES = ["cds_theme_app"]
 # Decides which previewers are available and their priority.

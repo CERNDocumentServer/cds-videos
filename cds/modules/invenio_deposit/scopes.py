@@ -24,7 +24,6 @@
 
 """OAuth2 scopes."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_i18n import lazy_gettext as _
 from invenio_oauth2server.models import Scope

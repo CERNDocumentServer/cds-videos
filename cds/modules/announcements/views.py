@@ -24,30 +24,26 @@
 
 """CDS announcements api views."""
 
-from __future__ import absolute_import, print_function
 
 from flask import Blueprint, jsonify, request
 
 from cds.modules.announcements.models import Announcement
 
 api_blueprint = Blueprint(
-    'cds_api_announcements',
+    "cds_api_announcements",
     __name__,
 )
 
 
-@api_blueprint.route('/announcement')
+@api_blueprint.route("/announcement")
 def get_announcement():
     """."""
-    path = request.args.get('pathname', None)
+    path = request.args.get("pathname", None)
 
     result = {}
     if path:
         first = Announcement.get_for(path)
         if first:
-            result = {
-                'message': first.message,
-                'style': first.style
-            }
+            result = {"message": first.message, "style": first.style}
 
     return jsonify(result)

@@ -24,7 +24,6 @@
 
 """Test cds maintenance."""
 
-from __future__ import absolute_import, print_function
 
 import pytest
 from mock import patch
@@ -43,19 +42,19 @@ def _fill_video_subformats(qualities):
 def test_subformats_input_validation():
     """Test subformats module inputs."""
     with pytest.raises(Exception):
-        create_all_missing_subformats('otherid', 'value')
-        create_subformat('otherid', 'value', '')
-        create_all_subformats('otherid', 'value')
+        create_all_missing_subformats("otherid", "value")
+        create_subformat("otherid", "value", "")
+        create_all_subformats("otherid", "value")
 
-        create_subformat('recid', 'value', None)
-        create_subformat('recid', 'value', '720p')
+        create_subformat("recid", "value", None)
+        create_subformat("recid", "value", "720p")
 
 
-@patch('cds.modules.records.api.CDSVideosFilesIterator.get_video_subformats')
-@patch('cds.modules.maintenance.subformats.can_be_transcoded')
-@patch('cds.modules.maintenance.subformats._get_master_video')
-@patch('cds.modules.maintenance.subformats._resolve_deposit')
-@pytest.mark.skip(reason='TO BE CHECKED')
+@patch("cds.modules.records.api.CDSVideosFilesIterator.get_video_subformats")
+@patch("cds.modules.maintenance.subformats.can_be_transcoded")
+@patch("cds.modules.maintenance.subformats._get_master_video")
+@patch("cds.modules.maintenance.subformats._resolve_deposit")
+@pytest.mark.skip(reason="TO BE CHECKED")
 def test_create_all_missing_subformats(
     resolve_deposit,
     get_master_video,
@@ -64,44 +63,44 @@ def test_create_all_missing_subformats(
 ):
     """Test method to create missing subformats."""
     # set up
-    resolve_deposit.return_value = None, 'dep_uuid'
+    resolve_deposit.return_value = None, "dep_uuid"
     get_master_video.return_value = (
-        dict(version_id='uuid_version'),
-        '',
-        '',
+        dict(version_id="uuid_version"),
+        "",
+        "",
     )
 
     # test no missing subformats
     video_subformats.return_value = _fill_video_subformats(
-        ['360p', '480p', '720p', '1080p', '2160p']
+        ["360p", "480p", "720p", "1080p", "2160p"]
     )
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    result = create_all_missing_subformats('recid', 2)
+    result = create_all_missing_subformats("recid", 2)
     assert not result
 
     # test 480p, 720p and 1080p missing, 2160p not valid
-    video_subformats.return_value = _fill_video_subformats(['360p'])
+    video_subformats.return_value = _fill_video_subformats(["360p"])
 
     def all_but_highest(q, w, h):
-        return q != '2160p'
+        return q != "2160p"
 
     sorenson_can_transcode.side_effect = all_but_highest
-    result = create_all_missing_subformats('recid', 2)
-    assert result == ['480p', '720p', '1080p']
+    result = create_all_missing_subformats("recid", 2)
+    assert result == ["480p", "720p", "1080p"]
 
     # test all missing
     video_subformats.return_value = []
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    result = create_all_missing_subformats('recid', 2)
-    assert sorted(result) == sorted(['360p', '480p', '720p', '1080p', '2160p'])
+    result = create_all_missing_subformats("recid", 2)
+    assert sorted(result) == sorted(["360p", "480p", "720p", "1080p", "2160p"])
 
 
-@patch('cds.modules.maintenance.subformats.can_be_transcoded')
-@patch('cds.modules.maintenance.subformats._get_master_video')
-@patch('cds.modules.maintenance.subformats._resolve_deposit')
-@pytest.mark.skip(reason='TO BE CHECKED')
+@patch("cds.modules.maintenance.subformats.can_be_transcoded")
+@patch("cds.modules.maintenance.subformats._get_master_video")
+@patch("cds.modules.maintenance.subformats._resolve_deposit")
+@pytest.mark.skip(reason="TO BE CHECKED")
 def test_create_subformat(
     resolve_deposit,
     get_master_video,
@@ -109,31 +108,31 @@ def test_create_subformat(
 ):
     """Test method to recreate a specific subformat quality."""
     # set up
-    resolve_deposit.return_value = None, 'dep_uuid'
+    resolve_deposit.return_value = None, "dep_uuid"
     get_master_video.return_value = (
-        dict(version_id='uuid_version'),
-        '',
-        '',
+        dict(version_id="uuid_version"),
+        "",
+        "",
     )
     # test valid quality
-    sorenson_can_transcode.return_value = dict(quality='360p')
+    sorenson_can_transcode.return_value = dict(quality="360p")
     sorenson_can_transcode.side_effect = None
-    result, _ = create_subformat('recid', 'value', '360p')
-    assert result == dict(quality='360p')
+    result, _ = create_subformat("recid", "value", "360p")
+    assert result == dict(quality="360p")
 
     # test not valid quality
     def all_but_highest(q, w, h):
-        return q != '720p'
+        return q != "720p"
 
     sorenson_can_transcode.side_effect = all_but_highest
-    result, _ = create_subformat('recid', 'value', '720p')
+    result, _ = create_subformat("recid", "value", "720p")
     assert not result
 
 
-@patch('cds.modules.maintenance.subformats.can_be_transcoded')
-@patch('cds.modules.maintenance.subformats._get_master_video')
-@patch('cds.modules.maintenance.subformats._resolve_deposit')
-@pytest.mark.skip(reason='TO BE CHECKED')
+@patch("cds.modules.maintenance.subformats.can_be_transcoded")
+@patch("cds.modules.maintenance.subformats._get_master_video")
+@patch("cds.modules.maintenance.subformats._resolve_deposit")
+@pytest.mark.skip(reason="TO BE CHECKED")
 def test_recreate_all_subformats(
     resolve_deposit,
     get_master_video,
@@ -141,28 +140,28 @@ def test_recreate_all_subformats(
 ):
     """Test method to create missing subformats."""
     # set up
-    resolve_deposit.return_value = None, 'dep_uuid'
+    resolve_deposit.return_value = None, "dep_uuid"
     get_master_video.return_value = (
-        dict(version_id='uuid_version'),
-        '',
-        '',
+        dict(version_id="uuid_version"),
+        "",
+        "",
     )
 
     # test no subformats possible, should never happen
     sorenson_can_transcode.return_value = False
-    result = create_all_subformats('recid', 2)
+    result = create_all_subformats("recid", 2)
     assert not result
 
     # test recreate subformat but highest
     def all_but_highest(q, w, h):
-        return q != '2160p'
+        return q != "2160p"
 
     sorenson_can_transcode.side_effect = all_but_highest
-    result = create_all_subformats('recid', 2)
-    assert sorted(result) == sorted(['360p', '480p', '720p', '1080p'])
+    result = create_all_subformats("recid", 2)
+    assert sorted(result) == sorted(["360p", "480p", "720p", "1080p"])
 
     # test recreate all subformats
     sorenson_can_transcode.return_value = True
     sorenson_can_transcode.side_effect = None
-    result = create_all_subformats('recid', 2)
-    assert sorted(result) == sorted(['360p', '480p', '720p', '1080p', '2160p'])
+    result = create_all_subformats("recid", 2)
+    assert sorted(result) == sorted(["360p", "480p", "720p", "1080p", "2160p"])

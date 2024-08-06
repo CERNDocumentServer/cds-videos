@@ -24,7 +24,6 @@
 
 """Deposit Errors."""
 
-from __future__ import absolute_import, print_function
 
 from invenio_rest.errors import RESTException
 
@@ -33,4 +32,4 @@ class DiscardConflict(RESTException):
     """Error on discart a deposit."""
 
     code = 409
-    description = 'Deposit discard conflicts'
+    description = "Deposit discard conflicts"

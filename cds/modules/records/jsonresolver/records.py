@@ -24,14 +24,13 @@
 
 """Record resolver."""
 
-from __future__ import absolute_import, print_function
 
 import jsonresolver
 
 from ..resolver import record_resolver
 
 
-@jsonresolver.route('/api/record/<path:path>', host='cds.cern.ch')
+@jsonresolver.route("/api/record/<path:path>", host="cds.cern.ch")
 def record_jsonresolver(path):
     """Resolve local records."""
     _, record = record_resolver.resolve(path)
