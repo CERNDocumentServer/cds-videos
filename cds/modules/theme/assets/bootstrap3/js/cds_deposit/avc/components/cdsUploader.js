@@ -543,7 +543,7 @@ function cdsUploaderCtrl(
 
   this.thumbnailPreview = function (frame) {
     return urlBuilder.iiif({
-      deposit: that.cdsDepositCtrl.record._buckets.deposit,
+      deposit: frame.bucket_id,
       key: frame.key,
       res: "150,100",
       version_id: frame.version_id,
