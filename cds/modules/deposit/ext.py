@@ -24,11 +24,14 @@
 
 """CDSDeposit app for Webhook receivers."""
 
-from __future__ import absolute_import, print_function
+import re
 
 from invenio_base.signals import app_loaded
 from invenio_indexer.signals import before_record_index
-
+from invenio_files_rest.models import ObjectVersionTag
+from invenio_files_rest.signals import file_uploaded
+from invenio_records_files.utils import sorted_files_from_bucket
+from invenio_db import db
 from ..invenio_deposit.signals import post_action
 from .indexer import cdsdeposit_indexer_receiver
 from .receivers import (
@@ -37,6 +40,48 @@ from .receivers import (
     register_celery_class_based_tasks,
     update_project_id_after_publish,
 )
+
+
+def _create_tags(obj):
+    """Create additional tags for file."""
+    # Subtitle file
+    pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
+    with db.session.begin_nested():
+        # language tag
+        found = pattern.findall(obj.key)
+        if len(found) == 1:
+            lang = found[0]
+            ObjectVersionTag.create_or_update(obj, "language", lang)
+        else:
+            # clean to be sure there is no some previous value
+            ObjectVersionTag.delete(obj, "language")
+        # other tags
+        ObjectVersionTag.create_or_update(obj, "content_type", "vtt")
+        ObjectVersionTag.create_or_update(obj, "context_type", "subtitle")
+        ObjectVersionTag.create_or_update(obj, "media_type", "subtitle")
+        # refresh object
+        db.session.add(obj)
+
+        # Poster frame
+        pattern = re.compile("^poster\.(jpg|png)$")
+        try:
+            poster = pattern.findall(obj.key)
+            if poster:
+                ext = pattern.findall(poster.key)[0]
+                # frame tags
+                ObjectVersionTag.create_or_update(poster, "content_type", ext)
+                ObjectVersionTag.create_or_update(poster, "context_type", "poster")
+                ObjectVersionTag.create_or_update(poster, "media_type", "image")
+                # refresh object
+                db.session.add(poster)
+        except IndexError:
+            return
+
+
+def create_tags_on_file_upload(sender, obj):
+    """Create additional tags when file is uploaded."""
+    _create_tags(obj)
+    db.session.commit()
 
 
 class CDSDepositApp(object):
@@ -66,3 +111,6 @@ class CDSDepositApp(object):
 
         # register class based celery tasks
         app_loaded.connect(register_celery_class_based_tasks)
+
+        # file uploaded signal
+        file_uploaded.connect(create_tags_on_file_upload)
