@@ -25,7 +25,17 @@
 Changes
 =======
 
-Version 2.0.0 (2024-06-28)
+Version 2.1.0 (2024-08-07)
+
+- deposit: allow users to input date apart from using the datepicker
+- deposit: add comma as keyword separator
+- contributors: capitalize user input on suggestions
+- contributors: add role 'Subtitles by'
+- fix thumbnail preview
+- previewer: add subtitles for local video player and fix bundles
+- config: fix sorting by title on published records
+
+Version 2.0.0 (2024-08-05)
 
 - Move docker image to alma
 - Bump python version to 3.9
