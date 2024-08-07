@@ -185,7 +185,10 @@ function cdsFormCtrl($scope, $http, $q) {
     }
 
     var authorObj = {
-      name: authorName[1].trim() + ", " + authorName[2].trim(),
+      name:
+        _.capitalize(authorName[1].trim()) +
+        ", " +
+        _.capitalize(authorName[2].trim()),
     };
 
     return formAuthor(authorObj);
