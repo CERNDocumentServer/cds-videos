@@ -163,9 +163,8 @@ function cdsUploaderCtrl(
         that.cdsDepositsCtrl.fetchRecord();
 
         const checkDownloadTaskStatus = () => {
-          deposit
-            .getTaskFeedback(response.data.tags.flow_id)
-            .then(function (data) {
+          deposit.getTaskFeedback(response.data.tags.flow_id).then(
+            function (data) {
               var allFlowsTasksByName = _.groupBy(data, "name");
               const fileDownloadTask = allFlowsTasksByName?.file_download[0];
               if (["FAILED", "SUCCESS"].indexOf(fileDownloadTask.status) > -1) {
@@ -176,11 +175,19 @@ function cdsUploaderCtrl(
                 deposit.loading = false;
                 that.loading = false;
               }
-            });
+            },
+            function error(response) {
+              deposit.waitingUpload = false;
+              that.cdsDepositsCtrl.fetchRecord();
+              console.error(response);
+            }
+          );
         };
         const intervalId = setInterval(checkDownloadTaskStatus, 3000);
       },
       function error(response) {
+        deposit.waitingUpload = false;
+        that.cdsDepositsCtrl.fetchRecord();
         promise.reject(response);
       }
     );
