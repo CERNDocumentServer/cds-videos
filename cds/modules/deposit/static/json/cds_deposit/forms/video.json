@@ -236,7 +236,10 @@
       "templateUrl": "/static/templates/cds_deposit/angular-schema-form/datepicker.html",
       "format": "yyyy-MM-dd",
       "description": "Required. Format: YYYY-MM-DD. In case your upload was already published elsewhere, please use the date of first publication.",
-      "fa_cls": "fa-calendar"
+      "fa_cls": "fa-calendar",
+      "validationMessage": {
+        "default": "Wrong date format. Format: YYYY-MM-DD"
+      }
     },
     {
       "type": "array",
