@@ -153,6 +153,7 @@
               "Reporter",
               "Screenwriter",
               "Speaker",
+              "Subtitles by",
               "Translator"
             ],
             "type": "string"

@@ -98,7 +98,9 @@
       "minItems": 1,
       "items": {
         "additionalProperties": false,
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "type": "object",
         "description": "An entity responsible for making contributions to the resource. Examples of a Contributor include a person, an organization, or a service. Typically, the name of a Contributor should be used to indicate the entity.",
         "properties": {
@@ -148,6 +150,7 @@
               "Reporter",
               "Screenwriter",
               "Speaker",
+              "Subtitles by",
               "Translator"
             ],
             "type": "string"
@@ -167,7 +170,9 @@
     },
     "title": {
       "additionalProperties": false,
-      "required": ["title"],
+      "required": [
+        "title"
+      ],
       "type": "object",
       "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
       "properties": {
@@ -334,7 +339,9 @@
           },
           "title": {
             "additionalProperties": false,
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "type": "object",
             "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
             "properties": {

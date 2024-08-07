@@ -21,7 +21,9 @@
       "minItems": 1,
       "items": {
         "additionalProperties": false,
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "type": "object",
         "description": "An entity responsible for making contributions to the resource. Examples of a Contributor include a person, an organization, or a service. Typically, the name of a Contributor should be used to indicate the entity.",
         "properties": {
@@ -71,6 +73,7 @@
               "Reporter",
               "Screenwriter",
               "Speaker",
+              "Subtitles by",
               "Translator"
             ],
             "type": "string"
@@ -252,7 +255,9 @@
     },
     "title": {
       "additionalProperties": false,
-      "required": ["title"],
+      "required": [
+        "title"
+      ],
       "type": "object",
       "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
       "properties": {
@@ -272,7 +277,12 @@
         "description": "A file object described using some basic subfields. (Usually to be extended).",
         "properties": {
           "category": {
-            "enum": ["Master", "Slave", "Subtitle", "Other"],
+            "enum": [
+              "Master",
+              "Slave",
+              "Subtitle",
+              "Other"
+            ],
             "type": "string",
             "description": "Former BibDocFile.doctype."
           },
@@ -329,12 +339,17 @@
     "_deposit": {
       "description": "Internal deposit metadata.",
       "title": "Deposit",
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "type": "object",
       "properties": {
         "status": {
           "title": "Status",
-          "enum": ["draft", "published"],
+          "enum": [
+            "draft",
+            "published"
+          ],
           "type": "string",
           "description": "Status of the deposit, either 'draft' or 'published'.",
           "name": "status"
@@ -484,7 +499,9 @@
           },
           "title": {
             "additionalProperties": false,
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "type": "object",
             "description": "A name given to the resource. Typically, a Title will be a name by which the resource is formally known.",
             "properties": {

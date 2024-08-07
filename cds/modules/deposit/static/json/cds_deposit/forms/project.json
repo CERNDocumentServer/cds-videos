@@ -204,6 +204,10 @@
                 "name": "Speaker"
               },
               {
+                "value": "Subtitles by",
+                "name": "Subtitles by"
+              },
+              {
                 "value": "Translator",
                 "name": "Translator"
               }
