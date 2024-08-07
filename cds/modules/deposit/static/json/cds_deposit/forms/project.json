@@ -65,6 +65,7 @@
         "type": "uiselectmultiple",
         "notitle": false,
         "placeholder": "Keywords",
+        "description": "Search or add keywords as a comma separated list e.g. keyword1, keyword2 etc.",
         "options": {
           "refreshDelay": 100,
           "mergeObjects": true,
