@@ -167,12 +167,12 @@ CELERY_BEAT_SCHEDULE = {
     # indexing of statistics events & aggregations
     "stats-process-events": {
         **StatsEventTask,
-        "schedule": timedelta(seconds=10),  # Every hour at minute 25 and 55
+        "schedule": timedelta(minutes=30),  # Every 30 minutes
         "args": [("record-view", "file-download", "media-record-view")],
     },
     "stats-aggregate-events": {
         **StatsAggregationTask,
-        "schedule": timedelta(seconds=10),  # Every hour at minute 0
+        "schedule": timedelta(hours=1),  # Every hour at minute 0
         "args": [
             (
                 "record-view-agg",
