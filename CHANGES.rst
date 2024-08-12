@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.1.1 (2024-08-12)
+
+- disable remote upload
+
 Version 2.1.0 (2024-08-07)
 
 - deposit: allow users to input date apart from using the datepicker
