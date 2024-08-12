@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.1.2 (2024-08-12)
+
+- stats: configure celery beat
+
 Version 2.1.1 (2024-08-12)
 
 - disable remote upload
