@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.1.3 (2024-08-14)
+
+- flows: fix task revoke call
+- deposit: fix delete video button disable condition
+
 Version 2.1.2 (2024-08-12)
 
 - stats: configure celery beat
