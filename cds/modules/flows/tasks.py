@@ -36,7 +36,6 @@ from celery import current_app as celery_app
 from celery import shared_task
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
-from celery.worker.control import revoke
 from flask import current_app
 
 # from flask_iiif.utils import create_gif_from_frames
@@ -154,7 +153,7 @@ class CeleryTask(_Task):
     @staticmethod
     def stop_task(celery_task_id):
         """Stop singular task."""
-        revoke(str(celery_task_id), terminate=True, signal="SIGKILL")
+        celery_app.control.revoke(str(celery_task_id), terminate=True, signal="SIGKILL")
         result = AsyncResult(str(celery_task_id))
         result.forget()
 
