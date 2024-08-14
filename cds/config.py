@@ -39,7 +39,7 @@ from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
 from invenio_stats.aggregations import StatAggregator
 from invenio_stats.processors import EventsIndexer, anonymize_user, flag_robots
-from invenio_stats.queries import DateHistogramQuery, TermsQuery
+from invenio_stats.queries import TermsQuery
 from invenio_stats.tasks import StatsAggregationTask, StatsEventTask
 
 from .modules.deposit.facets import created_by_me_aggs
