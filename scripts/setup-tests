@@ -23,4 +23,10 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+set -e
+
 pip install -e .[tests]
+
+# build assets for the tests that require a built project
+script_path=$(dirname "$0")
+./"$script_path"/build-assets
