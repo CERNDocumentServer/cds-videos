@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.1.4 (2024-09-13)
+
+- deposit: fix publish on the first time by removing syncing of buckets and only rely on
+  snapshot of the bucket
+
 Version 2.1.3 (2024-08-14)
 
 - flows: fix task revoke call
