@@ -43,6 +43,7 @@ include scripts/bootstrap
 include scripts/celery
 include scripts/server
 include scripts/setup
+include scripts/setup-tests
 recursive-include .github *
 recursive-include benchmarks *.py
 recursive-include cds *.md
