@@ -308,12 +308,16 @@ class CDSDeposit(Deposit):
             self._fix_tags_refs_to_master(bucket=snapshot)
             # dump after fixing references
             data["_files"] = self.files.dumps(bucket=snapshot)
+            # during the first publish the smil file is generated only the published
+            # bucket i.e the snapshot
             data = self._generate_smil_file(record_id, data, snapshot)
             # dump after smil generation
             data["_files"] = self.files.dumps(bucket=snapshot)
             # dump the snapshot id to the record bucket
             # we need this to avoid creatng a new bucket on `Record.create(...)`
             data["_buckets"]["record"] = str(snapshot.id)
+            # dump record bucket also on deposit
+            self["_buckets"]["record"] = str(snapshot.id)
 
             # lock snapshot bucket
             snapshot.locked = True
