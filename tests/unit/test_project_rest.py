@@ -73,6 +73,11 @@ def test_simple_workflow(
         assert all({"$ref": video.ref} in project["videos"] for video in videos)
         assert len(videos) == len(project["videos"])
 
+    def assert_bucket_for_video(bucket_id, video):
+        """Check that the video files have the expected bucket_id."""
+        for f in video["_files"]:
+            assert f["bucket_id"] == bucket_id
+
     project_schema = (
         "https://cds.cern.ch/schemas/"
         "deposits/records/videos/project/project-v1.0.0.json"
@@ -286,7 +291,8 @@ def test_simple_workflow(
 
         def get_video_record(depid):
             deposit = deposit_video_resolver(depid)
-            return Video.get_record(deposit.fetch_published()[1].id)
+            published_deposit = deposit.fetch_published()[1]
+            return published_deposit
 
         video_1 = get_video_record(video_1_dict["metadata"]["_deposit"]["id"])
         video_2 = get_video_record(video_2_dict["metadata"]["_deposit"]["id"])
@@ -299,6 +305,14 @@ def test_simple_workflow(
         assert project_dict["metadata"]["recid"] == 3
         assert project_dict["metadata"]["videos"][0] == record_videos[0]
         assert project_dict["metadata"]["videos"][1] == record_videos[1]
+
+        # Assert published videos have the correct bucket assigned
+        assert_bucket_for_video(
+            record_videos[0]["_buckets"]["record"], record_videos[0]
+        )
+        assert_bucket_for_video(
+            record_videos[1]["_buckets"]["record"], record_videos[1]
+        )
         # check database: connection project <---> videos
         check_connection(
             record_videos,

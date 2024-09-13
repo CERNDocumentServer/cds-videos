@@ -210,6 +210,11 @@ class CDSRecord(Record):
         return PersistentIdentifier.get(pid.pid_type, pid.pid_value)
 
     @property
+    def ref(self):
+        """Get video url (for the record if it's published)."""
+        return "https://cds.cern.ch/api/record/{0}".format(str(self["recid"]))
+
+    @property
     def depid(self):
         """Return depid of the record."""
         return PersistentIdentifier.get(
