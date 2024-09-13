@@ -307,11 +307,9 @@ class CDSDeposit(Deposit):
             snapshot.locked = False
             self._fix_tags_refs_to_master(bucket=snapshot)
             # dump after fixing references
-            self.files.bucket.sync(bucket=snapshot, delete_extras=True)
             data["_files"] = self.files.dumps(bucket=snapshot)
             data = self._generate_smil_file(record_id, data, snapshot)
             # dump after smil generation
-            self.files.bucket.sync(bucket=snapshot, delete_extras=True)
             data["_files"] = self.files.dumps(bucket=snapshot)
             # dump the snapshot id to the record bucket
             # we need this to avoid creatng a new bucket on `Record.create(...)`
