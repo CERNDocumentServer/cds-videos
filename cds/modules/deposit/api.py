@@ -304,25 +304,20 @@ class CDSDeposit(Deposit):
 
             # create a copy of the deposit bucket for the record
             snapshot = self.files.bucket.snapshot()
+            snapshot.locked = False
             self._fix_tags_refs_to_master(bucket=snapshot)
             # dump after fixing references
-            self.files.bucket.locked = False
-            snapshot.sync(bucket=self.files.bucket, delete_extras=True)
-            self.files.bucket.locked = True
-            data["_files"] = self.files.dumps()
-
-            snapshot.locked = False
+            self.files.bucket.sync(bucket=snapshot, delete_extras=True)
+            data["_files"] = self.files.dumps(bucket=snapshot)
             data = self._generate_smil_file(record_id, data, snapshot)
-            snapshot.locked = True
             # dump after smil generation
-            self.files.bucket.locked = False
-            snapshot.sync(bucket=self.files.bucket, delete_extras=True)
-            data["_files"] = self.files.dumps()
-            self.files.bucket.locked = True
+            self.files.bucket.sync(bucket=snapshot, delete_extras=True)
+            data["_files"] = self.files.dumps(bucket=snapshot)
             # dump the snapshot id to the record bucket
             # we need this to avoid creatng a new bucket on `Record.create(...)`
-            snapshot.locked = False
             data["_buckets"]["record"] = str(snapshot.id)
+
+            # lock snapshot bucket
             snapshot.locked = True
 
             yield data
