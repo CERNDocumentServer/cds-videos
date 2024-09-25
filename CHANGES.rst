@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.1.5 (2024-09-25)
+
+- deposit: add tips and suggestion on how to add a cover for an uploaded video
+
 Version 2.1.4 (2024-09-13)
 
 - deposit: fix publish on the first time by removing syncing of buckets and only rely on
