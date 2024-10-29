@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.2.0 (2024-10-29)
+
+- faq: add link anchors to each section
+- trackingcode: add configuration for MATOMO
+
 Version 2.1.5 (2024-09-25)
 
 - deposit: add tips and suggestion on how to add a cover for an uploaded video
