@@ -59,6 +59,8 @@ The ``scripts`` folder contains the necessary setup scripts to initialize and co
 
    **Troubleshooting**:  
 
+      These are the macOS solutions using ``brew`` for installation.
+
       If you encounter the error ``pg_config executable not found``, you may need to install PostgreSQL and update the PATH:
 
       .. code-block:: bash
