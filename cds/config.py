@@ -1228,8 +1228,8 @@ THEME_500_TEMPLATE = "cds_theme/error/500.html"
 THEME_ERROR_TEMPLATE = "cds_theme/error/base.html"
 # Tracking template
 THEME_TRACKINGCODE_TEMPLATE = "cds_theme/trackingcode.html"
-# Piwik tracking code: set None to disabled it
-THEME_PIWIK_ID = None
+# Matomo tracking code: set None to disabled it
+THEME_MATOMO_ID = None
 
 ###############################################################################
 # Previewer
