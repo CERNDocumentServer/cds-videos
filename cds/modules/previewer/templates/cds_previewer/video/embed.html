@@ -30,7 +30,7 @@
 {%- block javascript %}
   {{ super() }}
 
-  {%- set theo_config = {'socialSharing': True, 'showTitle': True} -%}
+  {%- set theo_config = {'showTitle': True} -%}
 
   {# Create the log view url #}
   {%- set log_media_views_url = config.LOG_USER_ACTIONS_ENDPOINTS.get('media_view', '').format(base_url=config.LOG_USER_ACTIONS_ENDPOINTS.get('base_url', '') , recid=recid) -%}

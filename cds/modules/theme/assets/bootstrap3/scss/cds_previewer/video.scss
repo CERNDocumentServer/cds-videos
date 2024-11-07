@@ -65,3 +65,31 @@ video {
 .theo-primary-background {
   background-color: #d9d9d9 !important;
 }
+
+// LIGHT SKIN FOR EMBED PLAY BUTTON
+.theoplayer-skin.light .vjs-big-play-button{
+  width: 10% !important;
+  padding-bottom: 10% !important;
+}
+
+.theoplayer-skin.light .vjs-big-play-button:before {
+  background-size: 100%;
+  content: "";
+  background: url('../../../static/img/play.svg') no-repeat center center;
+  display: block;
+}
+
+.theoplayer-skin.light .vjs-big-play-button:hover {
+  background: none;
+}
+
+/* Hide the default THEOplayer icon */
+.theoplayer-skin.light .theo-big-play-button-svg-container svg {
+  display: none;
+}
+
+// /* Remove default spotlight around button on focus */
+.theoplayer-skin.light:hover .vjs-big-play-button:after,
+.theoplayer-skin.light .vjs-big-play-button:focus:after {
+  opacity: 0;
+}
