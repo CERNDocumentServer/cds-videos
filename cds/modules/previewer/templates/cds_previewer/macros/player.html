@@ -24,6 +24,11 @@
 
       var element = document.createElement('div');
       element.className = 'video-js theo-social-available theoplayer-skin theo-seekbar-above-controls {{ video_classes }}';
+
+      {% if embed_config.skin == 'light' %}
+        element.className += ' light';
+      {% endif %}
+
       if (/(MSIE|Trident\/|Edge\/)/i.test(window.navigator.userAgent)){
         element.className += ' ie-responsive';
       }
@@ -91,7 +96,8 @@
         {% endif %}
         preload: 'auto'
       };
-      {% if theo_config.socialSharing %}
+      {% set socialSharing = embed_config.socialSharing | default(1) | int %}
+      {% if socialSharing == 1 %}
         player.social.items = [
            {
              label : '{{ _("Video link") }}',

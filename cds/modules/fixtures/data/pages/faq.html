@@ -56,15 +56,18 @@ To simplify, this makes you appear as two different users on our side, when you 
 <p><strong><a href="#embed-options" name="embed-options" class="cds-anchor">Are there special options for embedding a video?</a></strong></p>
 <p>Yes, there are several parameters that can be added to the embedding link in order to control the appearance of the embedded video. Below you can find the complete list:</p>
 <dl>
- <dt>autoplay=1</dt><dd>this parameter triggers the auto playing of the video when the page is loaded. Please note that some web browsers turn off the sound for auto-playing videos.</dd>
-  <dt>controlsOff=1</dt><dd>this parameter hides the seeking bar, tool bar and title of the video.</dd>
-  <dt>muted=1</dt><dd>this parameter turns off the sound of the video.</dd>
-  <dt>start=5</dt><dd>this parameter starts playing the video at the 5th second.</dd>
-  <dt>end=30</dt><dd>this parameter stops playing the video at the 30th second.</dd>
-  <dt>subtitlesOff=1</dt><dd>this parameter turns off the subtitles of the video (if they are available).</dd>
-  <dt>subtitles=[lang]</dt><dd>this parameter activates the subtitles automatically. [lang] should be the short code for the available language, e.g. en.</dd>
-  <dt>loop=1</dt><dd>this parameter plays the video in a loop.</dd>
-  <dt>responsive=1</dt><dd>this parameter indicates that the video should fill the container and should be responsive.</dd>
+ <dt>autoplay=1</dt><dd>This parameter triggers the auto playing of the video when the page is loaded. Please note that some web browsers turn off the sound for auto-playing videos.</dd>
+  <dt>controlsOff=1</dt><dd>This parameter hides the seeking bar, tool bar and title of the video.</dd>
+  <dt>muted=1</dt><dd>This parameter turns off the sound of the video.</dd>
+  <dt>start=5</dt><dd>This parameter starts playing the video at the 5th second.</dd>
+  <dt>end=30</dt><dd>This parameter stops playing the video at the 30th second.</dd>
+  <dt>subtitlesOff=1</dt><dd>This parameter turns off the subtitles of the video (if they are available).</dd>
+  <dt>subtitles=[lang]</dt><dd>This parameter activates the subtitles automatically. [lang] should be the short code for the available language, e.g. en.</dd>
+  <dt>loop=1</dt><dd>This parameter plays the video in a loop.</dd>
+  <dt>responsive=1</dt><dd>This parameter indicates that the video should fill the container and should be responsive.</dd>
+  <dt>skin=light</dt><dd>This parameter changes the style and size of the big play button. By default, this parameter is not set, so the default skin is used.</dd>
+  <dt>socialSharing=0</dt><dd>This parameter controls the visibility of the social sharing button. Set to `0` to hide the social sharing button. The default is `1` (enabled).</dd>
+
 </dl>
 <p>Here is an the example of embedding a video that is muted and that will play in a loop:</p>
 <pre><code>&lt;iframe scrolling="no" src="http://videos.cern.ch/video/CERN-VIDEO-2018-002-001?muted=1&loop=1" width="560" height="315" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
