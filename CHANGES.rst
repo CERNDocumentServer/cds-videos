@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.3.0 (2024-11-08)
+
+- embed: add 2 new options skin and socialSharing to control the play button icon and
+  social sharing controls accordingly
+
 Version 2.2.0 (2024-10-29)
 
 - faq: add link anchors to each section
