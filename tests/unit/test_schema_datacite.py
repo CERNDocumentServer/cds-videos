@@ -27,13 +27,13 @@
 
 from invenio_records.api import Record
 
-from cds.modules.records.serializers import datacite_v31
+from cds.modules.records.serializers import datacite_v41
 
 
 def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
     """Test video metadata transformation."""
     video_record_metadata["doi"] = "10.1234/foo"
-    obj = datacite_v31.transform_record(recid_pid, Record(video_record_metadata))
+    obj = datacite_v41.transform_record(recid_pid, Record(video_record_metadata))
 
     expected = {
         "creators": [
@@ -61,5 +61,5 @@ def test_video_metadata_tranform(app, video_record_metadata, recid_pid):
     }
     assert expected == obj
 
-    result = datacite_v31.serialize(pid=recid_pid, record=Record(video_record_metadata))
+    result = datacite_v41.serialize(pid=recid_pid, record=Record(video_record_metadata))
     assert "<?xml version" in result

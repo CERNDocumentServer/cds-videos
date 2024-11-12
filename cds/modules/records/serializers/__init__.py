@@ -31,7 +31,7 @@ from invenio_records_rest.serializers.response import (
     search_responsify,
 )
 
-from .datacite import CDSDataCite31Serializer
+from .datacite import CDSDataCite41Serializer
 from .drupal import DrupalSerializer
 from .json import CDSJSONSerializer as JSONSerializer
 from .schemas.datacite import DataCiteSchemaV1
@@ -51,7 +51,7 @@ vtt_v1 = VTTSerializer()
 drupal_v1 = DrupalSerializer(RecordSchemaJSONV1)
 
 #: DataCite serializer
-datacite_v31 = CDSDataCite31Serializer(DataCiteSchemaV1, replace_refs=True)
+datacite_v41 = CDSDataCite41Serializer(DataCiteSchemaV1, replace_refs=True)
 
 #: CDSDeposit serializer
 cdsdeposit_json_v1 = JSONSerializer(RecordSchemaJSONV1, replace_refs=True)
@@ -71,8 +71,8 @@ vtt_v1_response = record_responsify(vtt_v1, "text/vtt")
 #: Drupal record serializer for individual records.
 drupal_v1_response = record_responsify(drupal_v1, "application/json")
 
-#: DataCite v3.1 record serializer for individual records.
-datacite_v31_response = record_responsify(datacite_v31, "application/x-datacite+xml")
+#: DataCite v4.1 record serializer for individual records.
+datacite_v41_response = record_responsify(datacite_v41, "application/x-datacite+xml")
 
 #: CDSDeposit record serializer for individual records.
 cdsdeposit_json_v1_response = record_responsify(cdsdeposit_json_v1, "application/json")
