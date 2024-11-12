@@ -22,10 +22,10 @@
 
 """VTT serializer for records."""
 
-from invenio_records_rest.serializers.datacite import DataCite31Serializer
+from invenio_records_rest.serializers.datacite import DataCite41Serializer
 
 
-class CDSDataCite31Serializer(DataCite31Serializer):
+class CDSDataCite41Serializer(DataCite41Serializer):
     """Drupal serializer for records."""
 
     def dump(self, obj, context=None):

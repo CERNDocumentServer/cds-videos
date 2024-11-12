@@ -39,7 +39,7 @@ from invenio_records.models import RecordMetadata
 from invenio_records_files.api import Record
 
 from ...modules.records.minters import is_local_doi
-from ...modules.records.serializers import datacite_v31
+from ...modules.records.serializers import datacite_v41
 from .api import Project
 
 
@@ -76,7 +76,7 @@ def datacite_register(self, pid_value, record_uuid, max_retries=5, countdown=5):
         lang = record.get("language")
         if lang and lang in ["zh_CN", "zh_TW"]:
             record["language"] = "zh"
-        doc = datacite_v31.serialize(dcp.pid, record)
+        doc = datacite_v41.serialize(dcp.pid, record)
 
         if dcp.pid.status == PIDStatus.REGISTERED:
             dcp.update(url, doc)

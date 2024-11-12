@@ -517,9 +517,9 @@ CDS_RECORDS_EXPORTFORMATS = {
         serializer="cds.modules.records.serializers:drupal_v1",
     ),
     "dcite": dict(
-        title="Datacite XML v3.1",
+        title="Datacite XML v4.1",
         mimetype="application/x-datacite+xml",
-        serializer="cds.modules.records.serializers:datacite_v31",
+        serializer="cds.modules.records.serializers:datacite_v41",
     ),
 }
 
@@ -630,7 +630,7 @@ RECORDS_REST_ENDPOINTS = dict(
                 "cds.modules.records.serializers" ":drupal_v1_response"
             ),
             "application/x-datacite+xml": (
-                "cds.modules.records.serializers.datacite_v31_response"
+                "cds.modules.records.serializers.datacite_v41_response"
             ),
         },
         record_serializers_aliases={

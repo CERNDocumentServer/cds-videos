@@ -27,7 +27,7 @@ click-repl==0.3.0
 commonmark==0.9.1
 counter-robots==2018.6
 cryptography==42.0.8
-datacite==1.0.1
+datacite==1.2.0
 dcxml==0.1.1
 decorator==5.1.1
 defusedxml==0.7.1
@@ -70,7 +70,7 @@ future==1.0.0
 github3.py==4.0.1
 greenlet==3.0.3
 idna==3.7
-IDUtils==0.2.3
+IDUtils==1.4.2
 importlib_metadata==8.0.0
 importlib_resources==6.4.0
 infinity==1.5
