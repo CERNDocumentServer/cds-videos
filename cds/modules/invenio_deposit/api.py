@@ -188,6 +188,8 @@ class Deposit(Record):
         args = [lca.dumps(), first.dumps(), self.dumps()]
         for arg in args:
             del arg["$schema"], arg["_deposit"]
+            # pop optional removed key `current_user_mail` when present
+            arg.get("_cds", {}).pop("current_user_mail", None)
         args.append({})
         m = Merger(*args)
         try:
