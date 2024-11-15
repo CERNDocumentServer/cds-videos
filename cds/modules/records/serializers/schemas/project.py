@@ -19,7 +19,7 @@
 """Project JSON schema."""
 
 from invenio_jsonschemas import current_jsonschemas
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, pre_load, post_load
 
 from ....deposit.api import Project, deposit_video_resolver
 from .common import (
@@ -43,6 +43,12 @@ class _CDSSSchema(Schema):
 
     state = fields.Raw()
     modified_by = fields.Int()
+
+    @pre_load
+    def remove_legacy_fields(self, data, **kwargs):
+        """Remove legacy fields."""
+        data.pop("current_user_mail", None)
+        return data
 
 
 class ProjectDepositSchema(DepositSchema):
