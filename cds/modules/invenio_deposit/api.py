@@ -188,7 +188,7 @@ class Deposit(Record):
         args = [lca.dumps(), first.dumps(), self.dumps()]
         for arg in args:
             del arg["$schema"], arg["_deposit"]
-            # pop optional removed key `current_user_mail` when present
+            # skip legacy `current_user_mail` when comparing for merging
             arg.get("_cds", {}).pop("current_user_mail", None)
         args.append({})
         m = Merger(*args)
@@ -196,6 +196,8 @@ class Deposit(Record):
             m.run()
         except UnresolvedConflictsException:
             raise MergeConflict()
+        # remove legacy `current_user_mail` when merging
+        lca.get("_cds", {}).pop("current_user_mail", None)
         return patch(m.unified_patches, lca)
 
     @index
