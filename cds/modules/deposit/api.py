@@ -899,11 +899,7 @@ class Video(CDSDeposit):
         # dump again renamed subtitles
         self["_files"] = self.files.dumps()
 
-        from cds.modules.records.permissions import is_public
-
-        if is_public(self, "read"):
-            # Mint the doi if necessary
-            doi_minter(record_uuid=self.id, data=self)
+        # Call the 'doi_minter' function if needed and if is_public
 
         return super(Video, self)._publish_edited()
 

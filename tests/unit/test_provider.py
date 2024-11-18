@@ -31,7 +31,7 @@ import mock
 import pytest
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
-from cds.modules.records.minters import cds_record_minter, is_local_doi
+from cds.modules.records.minters import cds_record_minter, doi_minter, is_local_doi
 
 
 def test_recid_provider(db):
@@ -57,14 +57,9 @@ def test_recid_provider(db):
             object_uuid=uuid,
             status=PIDStatus.REGISTERED,
         )
-        pid_create.assert_any_call(
-            "doi",
-            "10.0000/videos.1",
-            object_type="rec",
-            object_uuid=uuid,
-            pid_provider="datacite",
-            status=PIDStatus.RESERVED,
-        )
+        # Verify the video has no DOI after publishing
+        assert "doi" not in data
+
 
 
 @pytest.mark.parametrize(
@@ -80,6 +75,7 @@ def test_doi_minting(db, doi_in, doi_out):
     rec_uuid = uuid4()
     data = dict(doi=doi_in)
     cds_record_minter(rec_uuid, data)
+    doi_minter(rec_uuid, data)
     db.session.commit()
 
     pid = PersistentIdentifier.get("doi", doi_out)
@@ -99,7 +95,7 @@ def test_invalid_doi(db, doi):
     uuid = uuid4()
     data = dict(doi=doi)
     with pytest.raises(AssertionError):
-        cds_record_minter(uuid, data)
+        doi_minter(uuid, data)
 
 
 def test_no_doi_minted_for_projects(db, api_project):
@@ -111,6 +107,9 @@ def test_no_doi_minted_for_projects(db, api_project):
     # Project shouldn't have a DOI
     assert project.get("doi") is None
     cds_record_minter(uuid2, video_1)
+    # Video shouldn't have a DOI 
+    assert "doi" not in video_1
+    doi_minter(uuid2, video_1)
     # Video should have a DOI
     assert video_1.get("doi")
 
@@ -122,7 +121,7 @@ def test_recid_provider_exception(db):
 
 
 def test_minting_recid(db):
-    """Test reminting doi for published record."""
+    """Test reminting recid for published record."""
     data = dict()
     # Assert registration of recid.
     rec_uuid = uuid4()
@@ -131,7 +130,6 @@ def test_minting_recid(db):
     assert pid.pid_value == "1"
     assert pid.status == PIDStatus.REGISTERED
     assert pid.object_uuid == rec_uuid
-    assert data["doi"] == "10.0000/videos.1"
     with pytest.raises(AssertionError):
         cds_record_minter(rec_uuid, data)
 
