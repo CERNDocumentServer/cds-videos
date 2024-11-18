@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.4.0 (2024-11-18)
+
+- loaders: ignore old user email when present
+- doi: update datacite to v4
+
 Version 2.3.0 (2024-11-08)
 
 - embed: add 2 new options skin and socialSharing to control the play button icon and
