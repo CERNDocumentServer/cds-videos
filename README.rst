@@ -13,15 +13,25 @@ Prerequisites
 
 Ensure that the following dependencies are installed with the specified versions:
 
-1. **Python 3.9**  
+1. **Python 3.9**
 
-2. **Node.js v18**  
+2. **Node.js v18**
 
-3. **FFmpeg v5.0**  
+3. **FFmpeg v5.0**
 
-4. **Docker v2 or later:**  
+4. **Docker v2 or later:**
    If Docker is not already installed, download and install Docker Desktop from the `official Docker website <https://www.docker.com/products/docker-desktop/>`_.
 
+Update dependencies
+======================
+
+To update Python dependencies you need to run `npm install` in the target deployment environment:
+
+.. code-block:: shell
+
+    $ docker run -it --platform="linux/amd64" --rm -v $(pwd):/app -w /app \
+        registry.cern.ch/inveniosoftware/almalinux:1 \
+        sh -c "dnf install -y openldap-devel && pip install -e . && pip freeze > requirements.new.txt"
 
 Installation and Setup
 ======================
@@ -50,14 +60,14 @@ Use Docker Compose to start the required containers in detached mode:
 
 The ``scripts`` folder contains the necessary setup scripts to initialize and configure your instance.
 
-**1. Bootstrap Script**  
+**1. Bootstrap Script**
    Initialize the environment by running the bootstrap script:
 
    .. code-block:: bash
 
       ./scripts/bootstrap
 
-   **Troubleshooting**:  
+   **Troubleshooting**:
 
       These are the macOS solutions using ``brew`` for installation.
 
@@ -82,14 +92,14 @@ The ``scripts`` folder contains the necessary setup scripts to initialize and co
 
          brew install openssl@3
 
-**2. Setup Script**  
+**2. Setup Script**
    Run the setup script to finalize the installation and configuration:
 
    .. code-block:: bash
 
       ./scripts/setup
 
-   **Troubleshooting**:  
+   **Troubleshooting**:
    If you encounter the error ``connection to server at "localhost", port 5432 failed: FATAL: role ".." does not exist``, it may indicate an issue with the database role or a port conflict. To diagnose:
 
       1. First, connect to the Docker database container and verify that the expected role exists and the database is working correctly.
@@ -112,21 +122,21 @@ The ``scripts`` folder contains the necessary setup scripts to initialize and co
 
 To facilitate local development, open multiple terminal sessions and run the following commands separately:
 
-- **Start Web Server**  
+- **Start Web Server**
   This command launches the web server:
 
   .. code-block:: bash
 
      ./scripts/server
 
-- **Start Celery Workers**  
+- **Start Celery Workers**
   Celery workers are required for background task processing:
 
   .. code-block:: bash
 
      ./scripts/celery
 
-- **Watch Frontend Code**  
+- **Watch Frontend Code**
   This command watches frontend code for changes and rebuilds assets as needed:
 
   .. code-block:: bash
@@ -147,7 +157,7 @@ or (to also show test coverage) ::
 License
 =======
 
-Copyright (C) 2013-2016 CERN.
+Copyright (C) 2013-2024 CERN.
 
 CDS is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
