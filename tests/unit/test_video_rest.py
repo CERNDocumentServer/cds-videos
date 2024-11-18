@@ -30,6 +30,10 @@ import json
 from time import sleep
 
 import mock
+from cds.modules.maintenance.cli import create_doi
+from cds.modules.records.minters import doi_minter
+from click.testing import CliRunner
+
 import pytest
 from celery.exceptions import Retry
 from flask import url_for
@@ -90,22 +94,18 @@ def test_video_publish_registering_the_datacite(
             sender=api_app, action="publish", deposit=video_1
         )
 
-        assert datacite_mock.called is True
-        assert datacite_mock().metadata_post.call_count == 1
-        datacite_mock().doi_post.assert_called_once_with(
-            "10.0000/videos.1", "https://videos.cern.ch/record/1"
-        )
+        # [[ CONFIRM THERE'S NO DOI ]]
+        assert datacite_mock.called is False
+        assert datacite_mock().metadata_post.call_count == 0
+        datacite_mock().doi_post.assert_not_called()
 
         # [[ UPDATE DATACITE ]]
         datacite_register_after_publish(
             sender=api_app, action="publish", deposit=video_1
         )
 
-        assert datacite_mock.called is True
-        assert datacite_mock().metadata_post.call_count == 2
-        datacite_mock().doi_post.assert_called_with(
-            "10.0000/videos.1", "https://videos.cern.ch/record/1"
-        )
+        assert datacite_mock().metadata_post.call_count == 0
+        datacite_mock().doi_post.assert_not_called()
 
 
 @mock.patch("invenio_pidstore.providers.datacite.DataCiteMDSClient")
@@ -151,12 +151,10 @@ def test_video_publish_registering_the_datacite_if_fail(
         ):
             datacite_register.s(pid_value="1", record_uuid=str(video_1.id)).apply()
 
-        assert datacite_mock.called is True
-        assert datacite_mock().metadata_post.call_count == 1
-        datacite_mock().doi_post.assert_called_once_with(
-            "10.0000/videos.1", "https://videos.cern.ch/record/1"
-        )
-        assert datacite_mock.call_count == 3
+        # [[ CONFIRM THERE'S NO DOI ]]
+        assert datacite_mock.called is False
+        assert datacite_mock().metadata_post.call_count == 0
+        datacite_mock().doi_post.assert_not_called()
 
 
 @mock.patch("invenio_pidstore.providers.datacite.DataCiteMDSClient")
@@ -403,8 +401,8 @@ def test_video_publish_edit_publish_again(
             # [[ MODIFY DOI -> SAVE ]]
             video_1 = deposit_video_resolver(video_1_depid)
             video_1_dict = copy.deepcopy(video_1)
-            old_doi = video_1_dict["doi"]
-            video_1_dict["doi"] = "10.1123/doi"
+            old_doi = video_1_dict.get("doi")
+            # video_1_dict["doi"] = "10.1123/doi"
             del video_1_dict["_files"]
             res = client.put(
                 url_for(
@@ -418,7 +416,7 @@ def test_video_publish_edit_publish_again(
             assert res.status_code == 200
             data = json.loads(res.data.decode("utf-8"))
             # Ensure that doi once minted cannot be changed to another value
-            assert data["metadata"]["doi"] == old_doi
+            assert data["metadata"].get("doi") == old_doi
 
             video_1 = deposit_video_resolver(video_1_depid)
             #  video_1['doi'] = old_doi
@@ -526,6 +524,67 @@ def test_record_video_links(
             "project_html": url_prj,
             "project_edit": url_prj_edit,
         }
+
+
+@mock.patch("invenio_pidstore.providers.datacite.DataCiteMDSClient")
+def test_mint_doi_with_cli(
+    datacite_mock,
+    api_app,
+    users,
+    location,
+    json_headers,
+    json_partial_project_headers,
+    json_partial_video_headers,
+    deposit_metadata,
+    video_deposit_metadata,
+    project_deposit_metadata,
+):
+    """Test video publish without DOI, then mint DOI using CLI."""
+    api_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"] = True
+
+    with api_app.test_client() as client:
+        # Log in as the first user
+        login_user(User.query.get(users[0]))
+
+        # Create a new project
+        project_dict = _create_new_project(
+            client, json_partial_project_headers, project_deposit_metadata
+        )
+
+        # Add a new empty video
+        video_1_dict = _add_video_info_to_project(
+            client, json_partial_video_headers, project_dict, video_deposit_metadata
+        )
+
+        video_1_depid = video_1_dict["metadata"]["_deposit"]["id"]
+        video_1 = deposit_video_resolver(video_1_depid)
+        prepare_videos_for_publish([video_1])
+
+        # Publish the video
+        video_1.publish()
+
+        # Verify the video has no DOI after publishing
+        assert "doi" not in video_1
+
+        # Use the CLI command to mint the DOI
+        recid = video_1['_deposit']['pid']['value']
+        runner = CliRunner()
+        result = runner.invoke(create_doi, ["--recid", recid])
+        
+        assert result.exit_code == 0, f"CLI command failed: {result.output}"
+
+        # Fetch the updated record
+        _, updated_video = video_1.fetch_published()
+
+        # Verify that the DOI was minted successfully
+        doi = updated_video.get("doi")
+        assert doi is not None, "DOI was not minted"
+
+        #  Check that the DOI was registered with DataCite
+        assert datacite_mock.called is True
+        datacite_mock().doi_post.assert_called_once_with(
+            doi, f"https://videos.cern.ch/record/{recid}"
+        )
 
 
 def _deposit_edit(client, json_headers, id):
