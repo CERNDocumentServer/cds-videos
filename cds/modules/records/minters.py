@@ -37,11 +37,6 @@ def cds_record_minter(record_uuid, data):
     """Mint record identifiers."""
     provider = _rec_minter(record_uuid, data)
 
-    # from cds.modules.deposit.api import Project
-    # from .permissions import is_public
-    # project_schema = current_jsonschemas.path_to_url(Project._schema)
-    # Call the 'doi_minter' function if needed (not project and published)
-
     return provider.pid
 
 

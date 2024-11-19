@@ -31,7 +31,6 @@ from time import sleep
 
 import mock
 from cds.modules.maintenance.cli import create_doi
-from cds.modules.records.minters import doi_minter
 from click.testing import CliRunner
 
 import pytest
@@ -99,7 +98,7 @@ def test_video_publish_registering_the_datacite(
         assert datacite_mock().metadata_post.call_count == 0
         datacite_mock().doi_post.assert_not_called()
 
-        # [[ UPDATE DATACITE ]]
+        # [[ ENSURE NO UPDATE IN DATACITE ]]
         datacite_register_after_publish(
             sender=api_app, action="publish", deposit=video_1
         )
@@ -393,6 +392,9 @@ def test_video_publish_edit_publish_again(
             # [[ PUBLISH VIDEO ]]
             _deposit_publish(client, json_headers, video_1["_deposit"]["id"])
 
+            #  [[ MINT DOI TO VIDEO ]]
+            video_1 = deposit_video_resolver(video_1_depid)
+            video_1.edit().mint_doi().publish().commit()
             datacite_register.s(pid_value="123", record_uuid=str(video_1.id)).apply()
 
             # [[ EDIT VIDEO ]]
@@ -401,8 +403,8 @@ def test_video_publish_edit_publish_again(
             # [[ MODIFY DOI -> SAVE ]]
             video_1 = deposit_video_resolver(video_1_depid)
             video_1_dict = copy.deepcopy(video_1)
-            old_doi = video_1_dict.get("doi")
-            # video_1_dict["doi"] = "10.1123/doi"
+            old_doi = video_1_dict["doi"]
+            video_1_dict["doi"] = "10.1123/doi"
             del video_1_dict["_files"]
             res = client.put(
                 url_for(
@@ -416,7 +418,7 @@ def test_video_publish_edit_publish_again(
             assert res.status_code == 200
             data = json.loads(res.data.decode("utf-8"))
             # Ensure that doi once minted cannot be changed to another value
-            assert data["metadata"].get("doi") == old_doi
+            assert data["metadata"]["doi"] == old_doi
 
             video_1 = deposit_video_resolver(video_1_depid)
             #  video_1['doi'] = old_doi
