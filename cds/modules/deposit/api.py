@@ -25,6 +25,7 @@
 """Deposit API."""
 
 
+import idutils
 import datetime
 import os
 import re
@@ -52,7 +53,7 @@ from invenio_pidstore.errors import (
     PIDInvalidAction,
     ResolverError,
 )
-from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
 from invenio_records_files.models import RecordsBuckets
 from invenio_records_files.utils import sorted_files_from_bucket
@@ -73,10 +74,11 @@ from ..records.api import (
     CDSRecord,
     CDSVideosFilesIterator,
 )
-from ..records.minters import doi_minter, is_local_doi, report_number_minter
+from ..records.minters import cds_doi_generator, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
 from ..records.utils import is_record, lowercase_value
 from ..records.validators import PartialDraft4Validator
+from ..records.permissions import is_public
 from .errors import DiscardConflict
 from .resolver import get_video_pid
 
@@ -899,8 +901,6 @@ class Video(CDSDeposit):
         # dump again renamed subtitles
         self["_files"] = self.files.dumps()
 
-        # Call the 'doi_minter' function if needed and if is_public
-
         return super(Video, self)._publish_edited()
 
     @mark_as_action
@@ -1086,6 +1086,28 @@ class Video(CDSDeposit):
             except IndexError:
                 return
 
+
+    def mint_doi(self):
+        """Mint DOI."""
+        assert self.has_record()
+        assert not self.has_minted_doi(), "DOI already exists for this video."
+        assert is_public(self, "read"), "Record is not public and cannot mint a DOI."
+
+        doi = cds_doi_generator(self["recid"])
+        # Make sure it's a proper DOI
+        assert idutils.is_doi(doi)
+
+        self["doi"] = doi
+        PersistentIdentifier.create(
+            "doi",
+            doi,
+            pid_provider="datacite",
+            object_type="rec",
+            object_uuid=self.id,
+            status=PIDStatus.RESERVED,
+        )
+        return self
+            
 
 project_resolver = Resolver(
     pid_type="depid",

@@ -39,11 +39,10 @@ from cds.modules.maintenance.subformats import (
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.deposit.api import Video
 from cds.modules.records.resolver import record_resolver
-from cds.modules.records.minters import doi_minter
 from cds.modules.deposit.tasks import datacite_register
 from invenio_db import db
-from cds.modules.records.permissions import is_public
 from invenio_indexer.api import RecordIndexer
+from datacite.errors import DataCiteError
 
 
 
@@ -52,41 +51,35 @@ def abort_if_false(ctx, param, value):
         ctx.abort()
 
 @click.command()
-@click.option("--recid", "recid", help="ID of the video record", default=None)
+@click.option("--recid", "recid", help="ID of the video record", default=None, required=True)
 @with_appcontext
 def create_doi(recid):
-    if not recid:
-        raise ClickException('Missing option "--recid')
-    
+    """Mints the DOI for a video record."""
+    # Get the video object with recid
+    _, record = record_resolver.resolve(recid)
+    depid = record.depid
+    video_deposit = Video.get_record(depid.object_uuid)
+
     try:
-        # Get the video object with recid
-        _, record = record_resolver.resolve(recid)
-        depid = record.depid
-        video_deposit = Video.get_record(depid.object_uuid)
-    except Exception as exc:
-        raise ClickException("Failed to fetch the video record")
+        # Mint the doi and publish
+        edit_record = video_deposit.edit().mint_doi().publish().commit()
+        # Save changes
+        db.session.commit()
 
-    if is_public(video_deposit, "read") and video_deposit.is_published():
-        try:
-            # sync deposit files <--> record files
-            edit_record = video_deposit.edit()
-            doi_minter(record_uuid=edit_record.id, data=edit_record)
-            edit_record.publish().commit()
-
-            # save changes
-            db.session.commit()
-
-            # Register the doi to datacite 
-            datacite_register(recid, str(record.id))
-        except Exception as exc:
-            db.session.rollback()
-        # index the record again
+        # Index the record again
         _, record_video = edit_record.fetch_published()
         RecordIndexer().index(record_video)
-        click.echo(f"DOI created, registered, and indexed successfully for record '{recid}'")
-    else:
-        click.echo(f"Record '{recid}' is either not public or not published. Skipping DOI creation.")
+        click.echo(f"DOI minted, and indexed successfully for record '{recid}'")
 
+        # Register the doi to datacite 
+        datacite_register(recid, str(record_video.id))
+    
+    except DataCiteError as dexc:
+        raise ClickException(f"Failed to register DOI on datacite for the video record '{recid}': {str(dexc)}")
+    except Exception as exc:
+        db.session.rollback()
+        raise ClickException(f"Failed to mint DOI for the video record '{recid}': {str(exc)}")
+    
         
 
 @click.group()
