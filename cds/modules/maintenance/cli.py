@@ -50,37 +50,6 @@ def abort_if_false(ctx, param, value):
     if not value:
         ctx.abort()
 
-@click.command()
-@click.option("--recid", "recid", help="ID of the video record", default=None, required=True)
-@with_appcontext
-def create_doi(recid):
-    """Mints the DOI for a video record."""
-    # Get the video object with recid
-    _, record = record_resolver.resolve(recid)
-    depid = record.depid
-    video_deposit = Video.get_record(depid.object_uuid)
-
-    try:
-        # Mint the doi and publish
-        edit_record = video_deposit.edit().mint_doi().publish().commit()
-        # Save changes
-        db.session.commit()
-
-        # Index the record again
-        _, record_video = edit_record.fetch_published()
-        RecordIndexer().index(record_video)
-        click.echo(f"DOI minted, and indexed successfully for record '{recid}'")
-
-        # Register the doi to datacite 
-        datacite_register(recid, str(record_video.id))
-    
-    except DataCiteError as dexc:
-        raise ClickException(f"Failed to register DOI on datacite for the video record '{recid}': {str(dexc)}")
-    except Exception as exc:
-        db.session.rollback()
-        raise ClickException(f"Failed to mint DOI for the video record '{recid}': {str(exc)}")
-    
-        
 
 @click.group()
 def subformats():
@@ -262,3 +231,34 @@ def extract_frames(recid, depid):
 
     db.session.commit()
     index_deposit_project(payload["deposit_id"])
+
+
+@videos.command()
+@click.option("--recid", "recid", help="ID of the video record", default=None, required=True)
+@with_appcontext
+def create_doi(recid):
+    """Mints the DOI for a video record."""
+    # Get the video object with recid
+    _, record = record_resolver.resolve(recid)
+    depid = record.depid
+    video_deposit = Video.get_record(depid.object_uuid)
+
+    try:
+        # Mint the doi and publish
+        edit_record = video_deposit.edit().mint_doi().publish().commit()
+        # Save changes
+        db.session.commit()
+
+        # Index the record again
+        _, record_video = edit_record.fetch_published()
+        RecordIndexer().index(record_video)
+        click.echo(f"DOI minted, and indexed successfully for record '{recid}'")
+
+        # Register the doi to datacite 
+        datacite_register(recid, str(record_video.id))
+    
+    except DataCiteError as dexc:
+        raise ClickException(f"Failed to register DOI on datacite for the video record '{recid}': {str(dexc)}")
+    except Exception as exc:
+        db.session.rollback()
+        raise ClickException(f"Failed to mint DOI for the video record '{recid}': {str(exc)}")
