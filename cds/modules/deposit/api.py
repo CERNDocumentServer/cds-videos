@@ -869,7 +869,7 @@ class Video(CDSDeposit):
                 )
                 # copy tags to the newly created object version
                 for tag in subtitle_obj.tags:
-                    tag.object_version = obj
+                    ObjectVersionTag.create_or_update(obj, tag.key, tag.value)
                 subtitle_obj.remove()
 
     def _rename_master_file(self, master_file):
