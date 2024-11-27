@@ -79,7 +79,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n    \"$schema\": \"https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json\",\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"your-egroup@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
+          "json": "{\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"your-egroup@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -111,7 +111,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n   \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n   \"_project_id\":\"{{project_id}}\",\n   \"title\":\n      {\n         \"title\":\"your_title\"\n      },\n   \"_access\": {\n      \"read\": [\n            \"your-egroup@cern.ch\"\n      ]\n   },\n   \"vr\": false,\n   \"featured\": false,\n   \"language\": \"en\",\n   \"contributors\": [\n         {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n               {\n                     \"value\": \"cern id\",\n                     \"source\": \"cern\"\n               }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n         }\n   ],\n   \"description\": \"Description\",\n   \"date\": \"2024-11-12\",\n   \"keywords\":[\n      {\n         \"name\": \"keyword\",\n         \"value\": {\n               \"name\": \"keyword\"\n         }\n      },\n      {\n         \"name\": \"keyword2\",\n         \"value\": {\n               \"name\": \"keyword2\"\n         }\n      }\n   ],\n   \"related_links\":[\n      {\n         \"name\": \"related link\",\n         \"url\": \"https://relatedlink\"\n      }\n   ]\n}",
+          "json": "{\n   \"_project_id\":\"{{project_id}}\",\n   \"language\":\"en\",\n      \"title\":\n      {\n         \"title\":\"your_title\"\n      },\n   \"_access\": {\n      \"read\": [\n            \"your-egroup@cern.ch\"\n      ]\n   },\n   \"vr\": false,\n   \"featured\": false,\n   \"language\": \"en\",\n   \"contributors\": [\n         {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n               {\n                     \"value\": \"cern id\",\n                     \"source\": \"cern\"\n               }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n         }\n   ],\n   \"description\": \"Description\",\n   \"date\": \"2024-11-12\",\n   \"keywords\":[\n      {\n         \"name\": \"keyword\",\n         \"value\": {\n               \"name\": \"keyword\"\n         }\n      },\n      {\n         \"name\": \"keyword2\",\n         \"value\": {\n               \"name\": \"keyword2\"\n         }\n      }\n   ],\n   \"related_links\":[\n      {\n         \"name\": \"related link\",\n         \"url\": \"https://relatedlink\"\n      }\n   ]\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -200,7 +200,13 @@
       "request": {
         "url": "{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}",
         "method": "PUT",
-        "headers": [],
+        "headers": [
+          {
+            "name": "X-Invenio-File-Tags",
+            "value": "context_type=additional_file",
+            "enabled": true
+          }
+        ],
         "params": [],
         "body": {
           "mode": "json",
@@ -284,9 +290,6 @@
         "allow": true
       }
     },
-    "ignore": [
-      "node_modules",
-      ".git"
-    ]
+    "ignore": ["node_modules", ".git"]
   }
 }

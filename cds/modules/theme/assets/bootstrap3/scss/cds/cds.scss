@@ -81,6 +81,10 @@ html, body {
   }
 }
 
+.panel-heading-warning {
+  background-color: $brand-warning !important;
+}
+
 .cds-deposit-metadata-extraction-alert {
   line-height: 33px;
   span {

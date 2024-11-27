@@ -258,11 +258,6 @@ Step 1: Create a Project
      - **Location**
      - **Description**
      - **Required/Optional**
-   * - **$schema**
-     - string
-     - body
-     - Schema URL for the project creation.
-     - Required
    * - **category**
      - string
      - body
@@ -307,7 +302,6 @@ To restrict the project, add ``_access/read``:
 .. code-block:: json
 
    {
-      "$schema": "https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json",
       "_access": {
             "update": [
             "admin@test.ch",
@@ -379,11 +373,6 @@ Step 2: Create a Video
      - **Location**
      - **Description**
      - **Required/Optional**
-   * - **$schema**
-     - string
-     - body
-     - Schema URL for video creation.
-     - Required
    * - **_project_id**
      - string
      - body
@@ -423,7 +412,7 @@ Step 2: Create a Video
      - string
      - body
      - Language of the video.
-     - Optional
+     - Required
    * - **featured**
      - boolean
      - body
@@ -447,7 +436,6 @@ To restrict the video, add ``_access/read``. The ``_access/update`` will be the 
 .. code-block:: json
 
    {
-      "$schema":"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json",
       "_project_id":"{{project_id}}",
       "title":
          {
@@ -495,7 +483,8 @@ To restrict the video, add ``_access/read``. The ``_access/update`` will be the 
             "name": "related link",
             "url": "https://relatedlink"
          }
-      ]
+      ],
+      "language": "en"
    }
 
 **Response:**  
@@ -604,6 +593,10 @@ Step 5: (Optional) Upload Additional File
 **Request:**  
 
 ``PUT`` ``{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}``
+
+**Headers:**  
+
+- ``X-Invenio-File-Tags: context_type=additional_file``
 
 **Parameters:**
 

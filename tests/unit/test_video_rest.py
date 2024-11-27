@@ -27,6 +27,7 @@
 
 import copy
 import json
+from io import BytesIO
 from time import sleep
 
 import mock
@@ -44,6 +45,7 @@ from invenio_accounts.models import User
 from invenio_db import db
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
+from invenio_files_rest.models import ObjectVersion
 
 from cds.modules.deposit.api import deposit_project_resolver, deposit_video_resolver
 from cds.modules.deposit.receivers import datacite_register_after_publish
@@ -587,6 +589,68 @@ def test_mint_doi_with_cli(
         datacite_mock().doi_post.assert_called_once_with(
             doi, f"https://videos.cern.ch/record/{recid}"
         )
+
+def test_additional_files(    
+    api_app,
+    users,
+    location,
+    json_headers,
+    json_partial_project_headers,
+    json_partial_video_headers,
+    deposit_metadata,
+    video_deposit_metadata,
+    project_deposit_metadata,
+):
+    """Test video publish without DOI, then mint DOI using CLI."""
+    api_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"] = True
+
+    with api_app.test_client() as client:
+        # Log in as the first user
+        login_user(User.query.get(users[0]))
+
+        # Create a new project
+        project_dict = _create_new_project(
+            client, json_partial_project_headers, project_deposit_metadata
+        )
+
+        # Add a new empty video
+        video_dict = _add_video_info_to_project(
+            client, json_partial_video_headers, project_dict, video_deposit_metadata
+        )
+
+        video_depid = video_dict["metadata"]["_deposit"]["id"]
+        video_deposit = deposit_video_resolver(video_depid)
+        video_deposit_id = video_deposit["_deposit"]["id"]
+        bucket_id = video_deposit["_buckets"]["deposit"]
+        
+        # Upload additional file
+        key = "test.mp4"
+        headers = {
+            "X-Invenio-File-Tags": "context_type=additional_file"
+        }
+        resp = client.put(
+        url_for("invenio_files_rest.object_api", bucket_id=bucket_id, key=key),
+            input_stream=BytesIO(b"updated_content"),
+            headers=headers,
+        )
+        assert resp.status_code == 200
+        # Test it has the correct tags
+        tags = ObjectVersion.get(bucket_id, key).get_tags()
+        assert tags["context_type"] == "additional_file"
+        assert tags["content_type"] == "mp4"
+        assert tags["media_type"] == "video"
+        
+        # Upload invalid file and return 400
+        key = "test"
+        headers = {
+            "X-Invenio-File-Tags": "context_type=additional_file"
+        }
+        resp = client.put(
+        url_for("invenio_files_rest.object_api", bucket_id=bucket_id, key=key),
+            input_stream=BytesIO(b"updated_content"),
+            headers=headers,
+        )
+        assert resp.status_code == 400
 
 
 def _deposit_edit(client, json_headers, id):
