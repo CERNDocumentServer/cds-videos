@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.5.0 (2024-11-27)
+
+- make DOI optional and add CLI command for DOI minting
+- setup: upgrade celery and other dependencies
+
 Version 2.4.0 (2024-11-18)
 
 - loaders: ignore old user email when present
