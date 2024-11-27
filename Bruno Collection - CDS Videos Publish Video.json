@@ -4,38 +4,8 @@
   "items": [
     {
       "type": "http",
-      "name": "Step 6: Get Project to Check the Flow Status",
+      "name": "Optional- Update the Access of the Video",
       "seq": 7,
-      "request": {
-        "url": "{{baseURL}}/api/deposits/project/{{project_id}}",
-        "method": "GET",
-        "headers": [
-          {
-            "name": "content-type",
-            "value": "application/vnd.project.partial+json",
-            "enabled": true
-          }
-        ],
-        "params": [],
-        "body": {
-          "mode": "json",
-          "json": "",
-          "formUrlEncoded": [],
-          "multipartForm": []
-        },
-        "script": {},
-        "vars": {},
-        "assertions": [],
-        "tests": "",
-        "auth": {
-          "mode": "inherit"
-        }
-      }
-    },
-    {
-      "type": "http",
-      "name": "Optional: Update the Access of the Video",
-      "seq": 6,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
         "method": "PUT",
@@ -79,7 +49,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n    \"$schema\": \"https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json\",\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"your-egroup@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
+          "json": "{\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"your-egroup@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -111,7 +81,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n   \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n   \"_project_id\":\"{{project_id}}\",\n   \"title\":\n      {\n         \"title\":\"your_title\"\n      },\n   \"_access\": {\n      \"read\": [\n            \"your-egroup@cern.ch\"\n      ]\n   },\n   \"vr\": false,\n   \"featured\": false,\n   \"language\": \"en\",\n   \"contributors\": [\n         {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n               {\n                     \"value\": \"cern id\",\n                     \"source\": \"cern\"\n               }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n         }\n   ],\n   \"description\": \"Description\",\n   \"date\": \"2024-11-12\",\n   \"keywords\":[\n      {\n         \"name\": \"keyword\",\n         \"value\": {\n               \"name\": \"keyword\"\n         }\n      },\n      {\n         \"name\": \"keyword2\",\n         \"value\": {\n               \"name\": \"keyword2\"\n         }\n      }\n   ],\n   \"related_links\":[\n      {\n         \"name\": \"related link\",\n         \"url\": \"https://relatedlink\"\n      }\n   ]\n}",
+          "json": "{\n   \"_project_id\":\"{{project_id}}\",\n   \"language\":\"en\",\n      \"title\":\n      {\n         \"title\":\"your_title\"\n      },\n   \"_access\": {\n      \"read\": [\n            \"your-egroup@cern.ch\"\n      ]\n   },\n   \"vr\": false,\n   \"featured\": false,\n   \"language\": \"en\",\n   \"contributors\": [\n         {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n               {\n                     \"value\": \"cern id\",\n                     \"source\": \"cern\"\n               }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n         }\n   ],\n   \"description\": \"Description\",\n   \"date\": \"2024-11-12\",\n   \"keywords\":[\n      {\n         \"name\": \"keyword\",\n         \"value\": {\n               \"name\": \"keyword\"\n         }\n      },\n      {\n         \"name\": \"keyword2\",\n         \"value\": {\n               \"name\": \"keyword2\"\n         }\n      }\n   ],\n   \"related_links\":[\n      {\n         \"name\": \"related link\",\n         \"url\": \"https://relatedlink\"\n      }\n   ]\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -184,7 +154,9 @@
           "formUrlEncoded": [],
           "multipartForm": []
         },
-        "script": {},
+        "script": {
+          "res": "let data = res.body;\nbru.setEnvVar(\"main_video_key\", data.key);"
+        },
         "vars": {},
         "assertions": [],
         "tests": "",
@@ -195,12 +167,18 @@
     },
     {
       "type": "http",
-      "name": "Step 5: Upload additional file",
+      "name": "Optional: Upload additional file",
       "seq": 5,
       "request": {
         "url": "{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}",
         "method": "PUT",
-        "headers": [],
+        "headers": [
+          {
+            "name": "X-Invenio-File-Tags",
+            "value": "context_type=additional_file",
+            "enabled": true
+          }
+        ],
         "params": [],
         "body": {
           "mode": "json",
@@ -221,8 +199,38 @@
     },
     {
       "type": "http",
-      "name": "Step 7: Publish",
+      "name": "Step 5: Get Video to Check the Flow Status",
       "seq": 8,
+      "request": {
+        "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
+        "method": "GET",
+        "headers": [
+          {
+            "name": "content-type",
+            "value": "application/vnd.project.partial+json",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Step 6- Publish",
+      "seq": 9,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish",
         "method": "POST",
@@ -248,9 +256,40 @@
           "mode": "inherit"
         }
       }
+    },
+    {
+      "type": "http",
+      "name": "Optional: Replace Main File",
+      "seq": 6,
+      "request": {
+        "url": "{{baseURL}}/api/files/{{bucket_id}}/{{main_video_key}}",
+        "method": "PUT",
+        "headers": [
+          {
+            "name": "X-Invenio-File-Tags",
+            "value": "times_replaced=1",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {
+          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"video_name.mp4\"; // CHANGE HERE\nconst filePath = \"video_file_path\"; // CHANGE HERE\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n"
+        },
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
     }
   ],
-  "activeEnvironmentUid": "O01m8KLYsgrkGRjOSv443",
   "environments": [
     {
       "variables": [
@@ -284,9 +323,6 @@
         "allow": true
       }
     },
-    "ignore": [
-      "node_modules",
-      ".git"
-    ]
+    "ignore": ["node_modules", ".git"]
   }
 }
