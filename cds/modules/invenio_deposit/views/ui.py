@@ -84,7 +84,7 @@ def create_blueprint(endpoints):
         deposit_type = request.values.get("type")
         return render_template(
             current_app.config["DEPOSIT_UI_NEW_TEMPLATE"],
-            record={"_d`eposit": {"id": None}},
+            record={"_deposit": {"id": None}},
             jsonschema=current_deposit.jsonschemas[deposit_type],
             schemaform=current_deposit.schemaforms[deposit_type],
         )
