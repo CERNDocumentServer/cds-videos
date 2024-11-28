@@ -85,6 +85,9 @@ def test_simple_workflow(
     video_schema = (
         "https://cds.cern.ch/schemas/" "deposits/records/videos/video/video-v1.0.0.json"
     )
+    
+    project_deposit_metadata.setdefault("_access", {}).setdefault("update", [])
+    project_deposit_metadata["_access"]["update"].append("test@videos.ch")
 
     with api_app.test_client() as client:
         login_user(User.query.get(users[0]))
@@ -100,6 +103,8 @@ def test_simple_workflow(
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode("utf-8"))
         assert project_dict["metadata"]["videos"] == []
+        assert User.query.get(users[0]).email in project_dict["metadata"]["_access"]["update"] 
+        assert "test@videos.ch" in project_dict["metadata"]["_access"]["update"] 
         assert project_dict["metadata"]["title"]["title"] == "my project"
         assert project_dict["links"]["bucket"].startswith("http://localhost/files/")
         assert all(
