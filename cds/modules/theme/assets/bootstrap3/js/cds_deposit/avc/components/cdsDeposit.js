@@ -564,13 +564,15 @@ function cdsDepositCtrl(
       true
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
-      Object.values($window.CKEDITOR.instances).forEach(function (instance) {
-        try {
-          instance.setReadOnly(instance.element.$.disabled);
-        } catch (error) {
-          // Do nothing probably not initialized yet
-          console.log(error);
-        }
+      $scope.$applyAsync(function () { // Manually trigger UI updates
+        Object.values($window.CKEDITOR.instances).forEach(function (instance) {
+          try {
+            instance.setReadOnly(instance.element.$.disabled);
+          } catch (error) {
+            // Do nothing probably not initialized yet
+            console.log(error);
+          }
+        });
       });
     });
 
