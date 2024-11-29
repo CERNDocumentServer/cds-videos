@@ -95,7 +95,7 @@ invenio-jsonschemas==1.1.4
 invenio-logging==2.1.1
 invenio-mail==2.1.1
 invenio-oaiserver==2.2.3
-invenio-oauth2server==2.4.0
+invenio-oauth2server==2.3.0
 invenio-oauthclient==3.5.1
 invenio-opendefinition==2.0.0a2
 invenio-pages==1.0.0a7
@@ -205,7 +205,7 @@ webargs==5.5.3
 webencodings==0.5.1
 Werkzeug==2.2.3
 wrapt==1.16.0
-WTForms==3.1.2
+WTForms==2.3.3
 WTForms-Alchemy==0.18.0
-WTForms-Components==0.11.0
+WTForms-Components==0.10.5
 zipp==3.21.0
