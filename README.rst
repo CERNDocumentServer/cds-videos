@@ -185,10 +185,10 @@ Publish Video through REST API
 Generate a Personal Access Token
 ---------------------------------
 
-   - Navigate to the ``CDS Videos`` platform.  
-   - Click your user info in the top-right corner.  
-   - Go to **Applications** and create a new **Personal Access Token**.  
-   - Copy the token and store it securely.
+- Navigate to the ``CDS Videos`` platform.  
+- Click your user info in the top-right corner.  
+- Go to **Applications** and create a new **Personal Access Token**.  
+- Copy the token and store it securely.
 
 Using `Bruno`
 ~~~~~~~~~~~~~
@@ -197,11 +197,12 @@ If you'd like to use the pre-configured REST API collection in Bruno, ensure you
 
 1. **Install Bruno:**  
 
-   Visit the official Bruno `Bruno collection <./Bruno Collection - CDS Videos Publish Video.json>`_ or repository and install the application.
+   Visit the official Bruno `documentation <https://www.usebruno.com/>`_ or repository and install the application.
 
-2. **Create an Environment for the Collection:**  
+2. **Import the Collection:**  
 
-   - Open Bruno and import this [collection](https://link).
+   - Download this `Bruno collection <./Bruno%20Collection%20-%20CDS%20Videos%20Publish%20Video.json>`_.
+   - Open Bruno and import downloaded collection.
    - Create an environment for the collection.  
    - Configure the environment by adding a variable named ``baseURl``. Set its value to your API base URL (e.g., ``http://localhost:5000``).
 
@@ -231,22 +232,48 @@ Step 1: Create a Project
      - **Type**
      - **Location**
      - **Description**
+     - **Required/Optional**
    * - **$schema**
      - string
      - body
      - Schema URL for the project creation.
+     - Required
    * - **category**
      - string
      - body
      - Category of the project.
+     - Required
    * - **type**
      - string
      - body
      - Type of the project.
+     - Required
    * - **_access**
      - json
      - body
-     - Access options for the video.
+     - Access options for the project.
+     - Optional
+   * - **contributors**
+     - array<object>
+     - body
+     - List of contributors, including their details.
+     - Optional
+   * - **description**
+     - string
+     - body
+     - Description of the project.
+     - Optional
+   * - **title**
+     - json
+     - body
+     - Title of the project.
+     - Optional
+   * - **keywords**
+     - list<json>
+     - body
+     - Keywords related to the project.
+     - Optional
+
 
 **Body:**
 
@@ -254,20 +281,52 @@ To restrict the project, add ``_access/read``:
 
 .. code-block:: json
 
-    {
-        "$schema": "https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json",
-        "_access": {
+   {
+      "$schema": "https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json",
+      "_access": {
             "update": [
-              "admin@test.ch",
-              "atlas-outreach-cds-video@cern.ch"
-            ],
-            "read": [ 
-                "atlas-readaccess-active-members@cern.ch"
-            ]
-        },
-        "category": "ATLAS",
-        "type": "VIDEO"
-    }
+            "admin@test.ch",
+            "atlas-outreach-cds-video@cern.ch"
+         ],
+         "read": [
+               "atlas-readaccess-active-members@cern.ch"
+         ]
+      },
+      "category": "ATLAS",
+      "type": "VIDEO",
+      "contributors": [
+            {
+               "name": "Surname, Name",
+               "ids": [
+                     {
+                        "value": "cern id",
+                        "source": "cern"
+                     }
+               ],
+               "email": "test@cern.ch",
+               "role": "Co-Producer"
+            }
+         ],
+      "title":
+         {
+         "title":"project title"
+         },
+      "keywords":[
+         {
+               "name": "keyword",
+               "value": {
+                  "name": "keyword"
+               }
+         },
+         {
+               "name": "keyword2",
+               "value": {
+                  "name": "keyword2"
+               }
+         }
+         ],
+      "description": "Description"
+   }
 
 **Response:**  
 
@@ -294,83 +353,120 @@ Step 2: Create a Video
      - **Type**
      - **Location**
      - **Description**
+     - **Required/Optional**
    * - **$schema**
      - string
      - body
      - Schema URL for video creation.
+     - Required
    * - **_project_id**
      - string
      - body
      - ID of the project.
+     - Required
    * - **title**
      - string
      - body
      - Title of the video.
+     - Required
    * - **_access**
-     - json, optional
+     - json
      - body
-     - Access details for the project.
+     - Access details for the video.
+     - Optional
    * - **vr**
      - boolean
      - body
      - 
+     - Optional
    * - **contributors**
      - array<object>
      - body
      - List of contributors, including their details.
+     - Required
    * - **description**
      - string
      - body
      - Description of the video.
+     - Required
    * - **date**
      - string (date)
      - body
      - Date in ``YYYY-MM-DD`` format.
+     - Required
    * - **language**
      - string
      - body
      - Language of the video.
+     - Optional
    * - **featured**
      - boolean
      - body
      - Whether the video is featured.
+     - Optional
+   * - **keywords**
+     - list<json>
+     - body
+     - Keywords related to the video.
+     - Optional
+   * - **related_links**
+     - list<json>
+     - body
+     - Links related to the video.
+     - Optional
 
 **Body:**
 
-To restrict the video, add ``_access/read``. The `_access/update` will be the same as the project:
+To restrict the video, add ``_access/read``. The ``_access/update`` will be the same as the project:
 
 .. code-block:: json
 
-    {
+   {
       "$schema":"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json",
-     "_project_id":"{{project_id}}",
-      "title": {
-        "title":"217490_medium"
-      },
-      "_access": {
-          "read": [
-                "atlas-readaccess-active-members@cern.ch"
-            ]
-      },
+      "_project_id":"{{project_id}}",
+      "title":
+         {
+            "title":"217490_medium"
+         },
       "vr": false,
       "featured": false,
       "language": "en",
       "contributors": [
-          {
-              "name": "Surname, Name",
-              "ids": [
+            {
+               "name": "Surname, Name",
+               "ids": [
                   {
-                      "value": "cern id",
-                      "source": "cern"
+                        "value": "cern id",
+                        "source": "cern"
                   }
-              ],
-              "email": "email@cern.ch",
-              "role": "Co-Producer"
-          }
+               ],
+               "email": "test@cern.ch",
+               "role": "Co-Producer"
+            }
       ],
       "description": "Description",
-      "date": "2024-11-12"
-    }
+      "date": "2024-11-12",
+      "keywords":[
+         {
+            "name": "keyword",
+            "value": {
+                  "name": "keyword"
+            }
+         },
+         {
+            "name": "keyword2",
+            "value": {
+                  "name": "keyword2"
+            }
+         }
+      ],
+      "related_links":[
+         {
+            "name": "related link",
+            "url": "https://relatedlink"
+         }
+      ]
+   }
 
 **Response:**  
 
