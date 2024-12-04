@@ -7,7 +7,7 @@
       "name": "Optional Change access of the video",
       "seq": 8,
       "request": {
-        "url": "{{baseURl}}/api/deposits/video/{{video_id}}",
+        "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
         "method": "PUT",
         "headers": [
           {
@@ -19,7 +19,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n     \"_access\": {\n        \"update\": [\n          \"admin@test.ch\",\n          \"atlas-outreach-cds-video@cern.ch\" //Update the access according to category\n        ],\n        // If you want to restrict the video, update access read\n        \"read\": [\n              \"atlas-readaccess-active-members@cern.ch\"\n          ]\n\n     }\n}\n\n",
+          "json": "{\n     \"_access\": {\n        \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\" //Update the access according to category\n        ],\n        // If you want to restrict the video, update access read\n        \"read\": [\n              \"your-egroup@cern.ch\"\n          ]\n\n     }\n}\n\n",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -37,7 +37,7 @@
       "name": "Get project to check the flow is finished",
       "seq": 5,
       "request": {
-        "url": "{{baseURl}}/api/deposits/project/{{project_id}}",
+        "url": "{{baseURL}}/api/deposits/project/{{project_id}}",
         "method": "GET",
         "headers": [
           {
@@ -67,7 +67,7 @@
       "name": "Step 1- Create a project",
       "seq": 1,
       "request": {
-        "url": "{{baseURl}}/api/deposits/project/",
+        "url": "{{baseURL}}/api/deposits/project/",
         "method": "POST",
         "headers": [
           {
@@ -79,7 +79,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n    \"$schema\": \"https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json\",\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"atlas-outreach-cds-video@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"atlas-readaccess-active-members@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
+          "json": "{\n    \"$schema\": \"https://localhost:5000/schemas/deposits/records/videos/project/project-v1.0.0.json\",\n    \"_access\": {\n          \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\"\n        ],\n      \"read\": [ // If you want to restrict the project, add access read\n            \"your-egroup@cern.ch\"\n        ]\n    },\n    // Add category and type\n    \"category\": \"ATLAS\",\n    \"type\": \"VIDEO\"\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -99,7 +99,7 @@
       "name": "Step 2- Create a video",
       "seq": 2,
       "request": {
-        "url": "{{baseURl}}/api/deposits/video/",
+        "url": "{{baseURL}}/api/deposits/video/",
         "method": "POST",
         "headers": [
           {
@@ -111,7 +111,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n  \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n \"_project_id\":\"{{project_id}}\",\n  \"title\":\n  {\n    \"title\":\"217490_medium\"\n  },\n\n    \"vr\": false,\n    \"featured\": false,\n    \"language\": \"en\",\n    \"contributors\": [\n        {\n            \"name\": \"Civelek, Zubeyde\",\n            \"ids\": [\n                {\n                    \"value\": \"868056\",\n                    \"source\": \"cern\"\n                }\n            ],\n            \"email\": \"zubeyde.civelek@cern.ch\",\n            \"role\": \"Co-Producer\"\n        }\n    ],\n    \"description\": \"Description\",\n    \"date\": \"2024-11-12\"\n}",
+          "json": "{\n  \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n \"_project_id\":\"{{project_id}}\",\n  \"title\":\n  {\n    \"title\":\"217490_medium\"\n  },\n\n    \"vr\": false,\n    \"featured\": false,\n    \"language\": \"en\",\n    \"contributors\": [\n        {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n                {\n                    \"value\": \"868056\",\n                    \"source\": \"cern\"\n                }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n        }\n    ],\n    \"description\": \"Description\",\n    \"date\": \"2024-11-12\"\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -131,7 +131,7 @@
       "name": "Step 3- Upload the video",
       "seq": 3,
       "request": {
-        "url": "{{baseURl}}/api/files/{{bucket_id}}/{{video_name}}",
+        "url": "{{baseURL}}/api/files/{{bucket_id}}/{{video_name}}",
         "method": "PUT",
         "headers": [
           {
@@ -151,20 +151,6 @@
           }
         ],
         "params": [],
-        "body": {
-          "mode": "formUrlEncoded",
-          "formUrlEncoded": [],
-          "multipartForm": [
-            {
-              "type": "file",
-              "name": "",
-              "value": [
-                "/Users/zubeydecivelek/Downloads/217490_medium.mp4"
-              ],
-              "enabled": true
-            }
-          ]
-        },
         "script": {
           "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"CHANGE HERE\";\nconst filePath = \"CHANGE HERE\";\nbru.setEnvVar(\"video_name\",filename);\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Content-Type\", \"video/mp4\"); // File content type\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n",
           "res": "let data = res.body ;\nbru.setEnvVar(\"main_file_version_id\", data.version_id);\nbru.setEnvVar(\"video_key\", data.key);"
@@ -182,7 +168,7 @@
       "name": "Step 4- Create a flow",
       "seq": 4,
       "request": {
-        "url": "{{baseURl}}/api/flows/",
+        "url": "{{baseURL}}/api/flows/",
         "method": "POST",
         "headers": [
           {
@@ -212,7 +198,7 @@
       "name": "Step 5- Upload additional file",
       "seq": 6,
       "request": {
-        "url": "{{baseURl}}/api/files/{{bucket_id}}/{{additional_file}}",
+        "url": "{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}",
         "method": "PUT",
         "headers": [],
         "params": [],
@@ -238,7 +224,7 @@
       "name": "Step 6- Publish",
       "seq": 7,
       "request": {
-        "url": "{{baseURl}}/api/deposits/video/{{video_id}}/actions/publish",
+        "url": "{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish",
         "method": "POST",
         "headers": [
           {
@@ -269,7 +255,7 @@
     {
       "variables": [
         {
-          "name": "baseURl",
+          "name": "baseURL",
           "value": "https://localhost:5000/",
           "enabled": true,
           "secret": false,

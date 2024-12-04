@@ -26,9 +26,9 @@ Table of Contents
      - `Step 3: Upload the Video <#step-3-upload-the-video>`_
      - `Step 4: Create a Flow <#step-4-create-a-flow>`_
      - `Step 5: (Optional) Upload Additional File <#step-5-optional-upload-additional-file>`_
-     - `Step 6: Publish Video <#step-6-publish-video>`_
      - `Optional: Update the Access of the Video <#optional-update-the-access-of-the-video>`_
-     - `Optional: Get Project Status <#optional-get-project-status>`_
+     - `Step 6: Get Project to Check the Flow Status <#step-6-get-project-to-check-the-flow-status>`_
+     - `Step 7: Publish Video <#step-7-publish-video>`_
 - `License <#license>`_
 
 
@@ -186,7 +186,7 @@ Generate a Personal Access Token
 ---------------------------------
 
 - Navigate to the ``CDS Videos`` platform.  
-- Click your user info in the top-right corner.  
+- Click on your user info in the top-right corner.  
 - Go to **Applications** and create a new **Personal Access Token**.  
 - Copy the token and store it securely.
 
@@ -286,10 +286,10 @@ To restrict the project, add ``_access/read``:
       "_access": {
             "update": [
             "admin@test.ch",
-            "atlas-outreach-cds-video@cern.ch"
+            "your-egroup@cern.ch"
          ],
          "read": [
-               "atlas-readaccess-active-members@cern.ch"
+               "your-egroup@cern.ch"
          ]
       },
       "category": "ATLAS",
@@ -377,7 +377,7 @@ Step 2: Create a Video
    * - **vr**
      - boolean
      - body
-     - 
+     - Indicates if the video is 360. 
      - Optional
    * - **contributors**
      - array<object>
@@ -402,7 +402,7 @@ Step 2: Create a Video
    * - **featured**
      - boolean
      - body
-     - Whether the video is featured.
+     - Whether the video is featured. (Available for members of `VIDEOS_EOS_PATH_EGROUPS <./cds/config.py#L1277>`_)
      - Optional
    * - **keywords**
      - list<json>
@@ -428,6 +428,11 @@ To restrict the video, add ``_access/read``. The ``_access/update`` will be the 
          {
             "title":"217490_medium"
          },
+      "_access": {
+         "read": [
+               "your-egroup@cern.ch"
+         ]
+      },
       "vr": false,
       "featured": false,
       "language": "en",
@@ -600,35 +605,6 @@ Step 5: (Optional) Upload Additional File
 
 Uploaded additional file JSON.
 
-Step 6: Publish Video
-----------------------
-
-**Request:**  
-
-``POST`` ``{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish``
-
-**Headers:**  
-
-- ``content-type: application/json``
-
-**Parameters:**
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - **Name**
-     - **Type**
-     - **Location**
-     - **Description**
-   * - **video_id**
-     - string
-     - path
-     - ID of the video  to publish.
-
-
-**Response:**  
-
-Published video deposit JSON.
 
 Optional: Update the Access of the Video
 ----------------------------------------
@@ -665,10 +641,10 @@ To restrict the video, add ``_access/read``. If you want to change the access/up
      "_access": {
         "update": [
           "admin@test.ch",
-          "atlas-outreach-cds-video@cern.ch"
+          "your-egroup@cern.ch"
         ],
         "read": [
-              "atlas-readaccess-active-members@cern.ch"
+              "your-egroup@cern.ch"
         ]
      }
     }
@@ -678,8 +654,8 @@ To restrict the video, add ``_access/read``. If you want to change the access/up
 Updated video JSON.
 
 
-Optional: Get Project Status
----------------------------
+Step 6: Get Project to Check the Flow Status
+--------------------------------------------
 
 **Request:**  
 
@@ -719,6 +695,39 @@ Updated project JSON with flow status as ``state``:
         }
       }
     }
+
+
+Step 7: Publish Video
+----------------------
+
+Before publishing the video, ensure that the workflow is complete.
+
+**Request:**  
+
+``POST`` ``{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish``
+
+**Headers:**  
+
+- ``content-type: application/json``
+
+**Parameters:**
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - **Name**
+     - **Type**
+     - **Location**
+     - **Description**
+   * - **video_id**
+     - string
+     - path
+     - ID of the video  to publish.
+
+
+**Response:**  
+
+Published video deposit JSON.
 
 
 License
