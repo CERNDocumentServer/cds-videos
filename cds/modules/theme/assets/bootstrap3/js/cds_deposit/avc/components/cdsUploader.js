@@ -115,7 +115,7 @@ function cdsUploaderCtrl(
         if (!upload.key) {
           upload.key = upload.name;
         }
-        if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
+        if (!upload.isAdditional && that.cdsDepositsCtrl.isVideoFile(upload.key)) {
           _subpromise = Upload.http(_startWorkflow(upload, response));
         } else {
           var d = $q.defer();
@@ -282,20 +282,12 @@ function cdsUploaderCtrl(
       angular.forEach(_files, function (file) {
         file.key = file.name;
         file.local = !file.receiver;
+        file.isAdditional = true;
         // Add any extra paramemters to the files
         if (extraHeaders) {
           file.headers = extraHeaders;
         }
       });
-
-      // Add the files to the list
-      var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
-      var videoFiles = _.values(
-        that.cdsDepositsCtrl.filterOutFiles(_files).videos
-      );
-
-      // Exclude video files
-      _files = _.difference(_files, videoFiles);
 
       // Find if any of the existing files has been replaced
       // (file with same filename), and if yes remove it from the existing
@@ -323,6 +315,45 @@ function cdsUploaderCtrl(
       Array.prototype.push.apply(that.files, _files);
       // Add the files to the queue
       Array.prototype.push.apply(that.queue, _files);
+
+      // Start upload automatically if the option is selected
+      if (that.autoStartUpload) {
+        that.upload();
+      }
+    };
+
+    this.replaceMasterFile = function(_files, invalidFiles){
+      // Do nothing if files array is empty
+      if (!_files) {
+        return;
+      }
+      // Remove any invalid files
+      _files = _.difference(_files, invalidFiles || []);
+      // Make sure they have proper metadata
+      angular.forEach(_files, function (file) {
+        file.key = file.name;
+        file.local = !file.receiver;
+      });
+
+      // Add the files to the list
+      var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
+      var videoFiles = _.values(
+        that.cdsDepositsCtrl.filterOutFiles(_files).videos
+      );
+
+
+      if ((invalidFiles || []).length > 0) {
+        // Push a notification
+        toaster.pop({
+          type: "error",
+          title:
+            "Invalid file(s) for " +
+            (that.cdsDepositCtrl.record.title.title || "video."),
+          body: _.map(invalidFiles, "name").join(", "),
+          bodyOutputType: "trustedHtml",
+        });
+      }
+
       if (!that.cdsDepositCtrl.master) {
         // Check for new master file
         var newMasterFile = videoFiles[0];
@@ -359,10 +390,6 @@ function cdsUploaderCtrl(
         }
       }
 
-      // Start upload automatically if the option is selected
-      if (that.autoStartUpload) {
-        that.upload();
-      }
     };
 
     // Prepare file request
