@@ -4,38 +4,8 @@
   "items": [
     {
       "type": "http",
-      "name": "Optional Change access of the video",
-      "seq": 8,
-      "request": {
-        "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
-        "method": "PUT",
-        "headers": [
-          {
-            "name": "content-type",
-            "value": "application/vnd.video.partial+json",
-            "enabled": true
-          }
-        ],
-        "params": [],
-        "body": {
-          "mode": "json",
-          "json": "{\n     \"_access\": {\n        \"update\": [\n          \"admin@test.ch\",\n          \"your-egroup@cern.ch\" //Update the access according to category\n        ],\n        // If you want to restrict the video, update access read\n        \"read\": [\n              \"your-egroup@cern.ch\"\n          ]\n\n     }\n}\n\n",
-          "formUrlEncoded": [],
-          "multipartForm": []
-        },
-        "script": {},
-        "vars": {},
-        "assertions": [],
-        "tests": "",
-        "auth": {
-          "mode": "inherit"
-        }
-      }
-    },
-    {
-      "type": "http",
-      "name": "Get project to check the flow is finished",
-      "seq": 5,
+      "name": "Step 6: Get Project to Check the Flow Status",
+      "seq": 7,
       "request": {
         "url": "{{baseURL}}/api/deposits/project/{{project_id}}",
         "method": "GET",
@@ -64,7 +34,37 @@
     },
     {
       "type": "http",
-      "name": "Step 1- Create a project",
+      "name": "Optional: Update the Access of the Video",
+      "seq": 6,
+      "request": {
+        "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
+        "method": "PUT",
+        "headers": [
+          {
+            "name": "content-type",
+            "value": "application/vnd.video.partial+json",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n \"_access\": {\n    \"update\": [\n      \"admin@test.ch\",\n      \"your-egroup@cern.ch\" \n    ],\n    // If you want to restrict the video, update access read\n    \"read\": [\n          \"your-egroup@cern.ch\"\n      ]\n\n }\n}\n\n",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Step 1: Create a project",
       "seq": 1,
       "request": {
         "url": "{{baseURL}}/api/deposits/project/",
@@ -96,7 +96,7 @@
     },
     {
       "type": "http",
-      "name": "Step 2- Create a video",
+      "name": "Step 2: Create a video",
       "seq": 2,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/",
@@ -111,7 +111,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n  \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n \"_project_id\":\"{{project_id}}\",\n  \"title\":\n  {\n    \"title\":\"217490_medium\"\n  },\n\n    \"vr\": false,\n    \"featured\": false,\n    \"language\": \"en\",\n    \"contributors\": [\n        {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n                {\n                    \"value\": \"868056\",\n                    \"source\": \"cern\"\n                }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n        }\n    ],\n    \"description\": \"Description\",\n    \"date\": \"2024-11-12\"\n}",
+          "json": "{\n   \"$schema\":\"https://localhost:5000/schemas/deposits/records/videos/video/video-v1.0.0.json\",\n   \"_project_id\":\"{{project_id}}\",\n   \"title\":\n      {\n         \"title\":\"your_title\"\n      },\n   \"_access\": {\n      \"read\": [\n            \"your-egroup@cern.ch\"\n      ]\n   },\n   \"vr\": false,\n   \"featured\": false,\n   \"language\": \"en\",\n   \"contributors\": [\n         {\n            \"name\": \"Surname, Name\",\n            \"ids\": [\n               {\n                     \"value\": \"cern id\",\n                     \"source\": \"cern\"\n               }\n            ],\n            \"email\": \"test@cern.ch\",\n            \"role\": \"Co-Producer\"\n         }\n   ],\n   \"description\": \"Description\",\n   \"date\": \"2024-11-12\",\n   \"keywords\":[\n      {\n         \"name\": \"keyword\",\n         \"value\": {\n               \"name\": \"keyword\"\n         }\n      },\n      {\n         \"name\": \"keyword2\",\n         \"value\": {\n               \"name\": \"keyword2\"\n         }\n      }\n   ],\n   \"related_links\":[\n      {\n         \"name\": \"related link\",\n         \"url\": \"https://relatedlink\"\n      }\n   ]\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -128,7 +128,7 @@
     },
     {
       "type": "http",
-      "name": "Step 3- Upload the video",
+      "name": "Step 3: Upload the video",
       "seq": 3,
       "request": {
         "url": "{{baseURL}}/api/files/{{bucket_id}}/{{video_name}}",
@@ -152,7 +152,7 @@
         ],
         "params": [],
         "script": {
-          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"CHANGE HERE\";\nconst filePath = \"CHANGE HERE\";\nbru.setEnvVar(\"video_name\",filename);\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Content-Type\", \"video/mp4\"); // File content type\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n",
+          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"video_name.mp4\"; // CHANGE HERE\nconst filePath = \"video_file_path\"; // CHANGE HERE\nbru.setEnvVar(\"video_name\",filename);\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Content-Type\", \"video/mp4\"); // File content type\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n",
           "res": "let data = res.body ;\nbru.setEnvVar(\"main_file_version_id\", data.version_id);\nbru.setEnvVar(\"video_key\", data.key);"
         },
         "vars": {},
@@ -165,7 +165,7 @@
     },
     {
       "type": "http",
-      "name": "Step 4- Create a flow",
+      "name": "Step 4: Create a flow",
       "seq": 4,
       "request": {
         "url": "{{baseURL}}/api/flows/",
@@ -180,7 +180,7 @@
         "params": [],
         "body": {
           "mode": "json",
-          "json": "{\n  \"version_id\":\"{{main_file_version_id}}\", //response of the put the video 'version_id' \n  \"key\": \"{{video_key}}\",//response of the put the video 'key' \n \"bucket_id\":\"{{bucket_id}}\", // create video response \n \"deposit_id\":\"{{video_id}}\" // create video response\n}",
+          "json": "{\n  \"version_id\":\"{{main_file_version_id}}\", //response of the `upload the video` 'version_id' \n  \"key\": \"{{video_key}}\", //response of the `upload the video` 'key' \n \"bucket_id\":\"{{bucket_id}}\", // create video response \n \"deposit_id\":\"{{video_id}}\" // create video response\n}",
           "formUrlEncoded": [],
           "multipartForm": []
         },
@@ -195,8 +195,8 @@
     },
     {
       "type": "http",
-      "name": "Step 5- Upload additional file",
-      "seq": 6,
+      "name": "Step 5: Upload additional file",
+      "seq": 5,
       "request": {
         "url": "{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}",
         "method": "PUT",
@@ -209,7 +209,7 @@
           "multipartForm": []
         },
         "script": {
-          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"CHANGE HERE\";\nconst filePath = \"CHANGE HERE\";\nbru.setEnvVar(\"additional_file\", filename);\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n"
+          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"video_name.mp4\"; // CHANGE HERE\nconst filePath = \"video_file_path\"; // CHANGE HERE\nbru.setEnvVar(\"additional_file\", filename);\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n"
         },
         "vars": {},
         "assertions": [],
@@ -221,8 +221,8 @@
     },
     {
       "type": "http",
-      "name": "Step 6- Publish",
-      "seq": 7,
+      "name": "Step 7: Publish",
+      "seq": 8,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish",
         "method": "POST",
@@ -250,7 +250,7 @@
       }
     }
   ],
-  "activeEnvironmentUid": "zqLEVCQ0eIhimP48VysTg",
+  "activeEnvironmentUid": "O01m8KLYsgrkGRjOSv443",
   "environments": [
     {
       "variables": [

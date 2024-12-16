@@ -1,12 +1,20 @@
-===
-CDS
-===
+..
+    Copyright (C) 2013-2024 CERN.
+    CDS Videos is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License; see LICENSE file for more details.
 
-This is the CERN Document Server source code overlay.
+==========
+CDS Videos
+==========
+
+.. image:: https://img.shields.io/github/license/CERNDocumentServer/cds-videos.svg
+        :target: ./LICENSE
+
+This is the CDS Videos source code overlay.
 
 Powered by Invenio
 ===================
-CDS is a small layer on top of `Invenio <http://invenio-software.org>`_, a ​free software suite enabling you to run your own ​digital library or document repository on the web.
+CDS Videos is a small layer on top of `Invenio <http://invenio-software.org>`_, a ​free software suite enabling you to run your own ​digital library or document repository on the web.
 
 Table of Contents
 =================
@@ -29,7 +37,6 @@ Table of Contents
      - `Optional: Update the Access of the Video <#optional-update-the-access-of-the-video>`_
      - `Step 6: Get Project to Check the Flow Status <#step-6-get-project-to-check-the-flow-status>`_
      - `Step 7: Publish Video <#step-7-publish-video>`_
-- `License <#license>`_
 
 
 Prerequisites
@@ -170,13 +177,31 @@ To facilitate local development, open multiple terminal sessions and run the fol
 
 Testing
 =======
-Running the tests are as simple as: ::
 
-    python setup.py test
+To run the tests, follow these steps:
 
-or (to also show test coverage) ::
+1. **Activate your Python environment:**
 
-    source run-tests.sh
+2. **Set up the test environment:**
+
+   .. code-block:: bash
+
+      ./scripts/setup-tests
+
+3. **Run the tests:**
+
+   .. code-block:: bash
+
+      ./run-tests.sh
+
+
+   **Running Specific Tests**
+   
+   To run a specific test file or function, use the following command:
+
+   .. code-block:: bash
+
+      ./run-tests.sh tests/unit/test_example.py -k "test_specific_function"
 
 
 Publish Video through REST API
@@ -204,7 +229,7 @@ If you'd like to use the pre-configured REST API collection in Bruno, ensure you
    - Download this `Bruno collection <./Bruno%20Collection%20-%20CDS%20Videos%20Publish%20Video.json>`_.
    - Open Bruno and import downloaded collection.
    - Create an environment for the collection.  
-   - Configure the environment by adding a variable named ``baseURl``. Set its value to your API base URL (e.g., ``http://localhost:5000``).
+   - Configure the environment by adding a variable named ``baseURL``. Set its value to your API base URL (e.g., ``http://localhost:5000``).
 
 3. **Configure Authentication in Bruno:**  
 
@@ -513,6 +538,7 @@ Step 3: Upload the Video
      - body
      - Video file.
 
+- To include the file in the body, modify the `pre-request script` in Bruno.
 
 **Response:**  
 
@@ -600,6 +626,8 @@ Step 5: (Optional) Upload Additional File
      - file
      - body
      - The file to be uploaded.
+
+- To include the file in the body, modify the `pre-request script` in Bruno.
 
 **Response:**  
 
@@ -728,18 +756,4 @@ Before publishing the video, ensure that the workflow is complete.
 **Response:**  
 
 Published video deposit JSON.
-
-
-License
-=======
-
-Copyright (C) 2013-2024 CERN.
-
-CDS is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-
-CDS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with CDS; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
-
-In applying this licence, CERN does not waive the privileges and immunities granted to it by virtue of its status as an Intergovernmental Organization or submit itself to any jurisdiction.
 
