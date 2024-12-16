@@ -75,7 +75,7 @@
                   <li><a href=" {{url_for_security('login', next=request.path)}}"><strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong></a></li>
                 {%- else %}
                   <li>
-                    <a href="{{url_for('invenio_oauthclient.login', remote_app='cern_openid', next=request.path)}}">
+                    <a href="{{url_for('invenio_oauthclient.login', remote_app='cern_cdsvideos_openid', next=request.path)}}">
                        <strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong>
                     </a>
                   </li>

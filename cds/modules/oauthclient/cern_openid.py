@@ -22,62 +22,9 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Pre-configured remote application for enabling sign in/up with CERN.
+"""OpenID login.
 
-1. Edit your configuration and add:
-
-   .. code-block:: python
-
-       import copy
-
-       from invenio_oauthclient.contrib import cern_openid
-
-       OAUTH_REMOTE_REST_APP = copy.deepcopy(cern_openid.REMOTE_REST_APP)
-       # update any params if needed
-       OAUTH_REMOTE_REST_APP["params"].update({})
-
-       OAUTHCLIENT_REMOTE_APPS = dict(
-           cern_openid=OAUTH_REMOTE_REST_APP,
-       )
-       OAUTHCLIENT_REST_REMOTE_APPS = dict(
-           cern_openid=OAUTH_REMOTE_REST_APP,
-       )
-       CERN_APP_OPENID_CREDENTIALS = dict(
-           consumer_key="changeme",
-           consumer_secret="changeme",
-       )
-2. Register a new application with CERN OPENID visiting the page
-   ``https://application-portal.web.cern.ch/``. When registering the
-   application ensure that the *Redirect URI* points to:
-   ``http://localhost:5000/api/oauth/authorized/cern_openid/``, if you have
-   used the rest oauth application, or
-   ``http://localhost:5000/oauth/authorized/cern_openid/`` (note, CERN
-   does not allow localhost to be used, thus you need to follow the CERN OAUTH
-   section in the common recipes in
-   ``https://digital-repositories.web.cern.ch/digital-repositories``.
-3. Grab the *Client ID* and *Client Secret* after registering the application
-   and add them to your instance configuration (``invenio.cfg``):
-   .. code-block:: python
-       CERN_APP_OPENID_CREDENTIALS = dict(
-           consumer_key="<CLIENT ID>",
-           consumer_secret="<CLIENT SECRET>",
-       )
-4. Now login using CERN OAuth:
-   - http://localhost:5000/oauth/login/cern/ , if you configure the UI oauth
-     application.
-   - http://localhost:5000/api/oauth/login/cern/ , if you configure the API
-     oauth application.
-5. Also, you should see CERN listed under Linked accounts:
-   http://localhost:5000/account/settings/linkedaccounts/
-By default the CERN module will try first look if a link already exists
-between a CERN account and a user. If no link is found, the user is asked
-to provide an email address to sign-up.
-In templates you can add a sign in/up link:
-.. code-block:: jinja
-    <a href="{{ url_for("invenio_oauthclient.login",
-      remote_app="cern_openid") }}">
-      Sign in with CERN
-    </a>
+Copied from invenio-oauthclient, extended with e-groups fetching.
 """
 
 from datetime import datetime, timedelta
@@ -132,7 +79,7 @@ def logout():
 def find_remote_by_client_id(client_id):
     """Return a remote application based with given client ID."""
     for remote in current_oauthclient.oauth.remote_apps.values():
-        if remote.name == "cern_openid" and remote.consumer_key == client_id:
+        if remote.name == "cern_cdsvideos_openid" and remote.consumer_key == client_id:
             return remote
 
 
@@ -155,9 +102,7 @@ def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
         return account.extra_data.get("roles", []), account.extra_data.get("groups", [])
 
     roles = resource["cern_roles"]
-    extra_data = current_app.config.get(
-        "OAUTHCLIENT_CERN_OPENID_EXTRA_DATA_SERIALIZER", fetch_extra_data
-    )(resource)
+    extra_data = fetch_extra_data(resource)
 
     account.extra_data.update(roles=roles, updated=updated.isoformat(), **extra_data)
 
@@ -311,7 +256,7 @@ def on_identity_changed(sender, identity):
         return
 
     remote = g.get("oauth_logged_in_with_remote", None)
-    if not remote or remote.name != "cern_openid":
+    if not remote or remote.name != "cern_cdsvideos_openid":
         # signal coming from another remote app
         return
 
