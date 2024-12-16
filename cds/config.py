@@ -1140,10 +1140,10 @@ False value disabled the refresh.
 OAUTHCLIENT_CERN_OPENID_SESSION_KEY = "identity.cdsvideos_openid_provides"
 """Name of session key where CERN roles are stored."""
 
-REMOTE_APP_NAME = "cern_openid"
+REMOTE_APP_NAME = "cern_cdsvideos_openid"
 
 OAUTHCLIENT_CERN_OPENID_USERINFO_URL = (
-    "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/userinfo"
+    "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo"
 )
 
 OAUTH_REMOTE_APP = copy.deepcopy(cern_openid.REMOTE_APP)
@@ -1156,11 +1156,11 @@ OAUTH_REMOTE_APP["params"].update(
         ),
         access_token_url=os.environ.get(
             "OAUTH_CERN_OPENID_ACCESS_TOKEN_URL",
-            "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/token",
+            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token",
         ),
         authorize_url=os.environ.get(
             "OAUTH_CERN_OPENID_AUTHORIZE_URL",
-            "https://auth.cern.ch/auth/realms/cern/" "protocol/openid-connect/auth",
+            "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth",
         ),
     )
 )
@@ -1190,7 +1190,7 @@ OAUTHCLIENT_CERN_OPENID_JWT_TOKEN_DECODE_PARAMS = dict(
     algorithms=["HS256", "RS256"],
 )
 
-OAUTHCLIENT_REMOTE_APPS = dict(cern_openid=OAUTH_REMOTE_APP)
+OAUTHCLIENT_REMOTE_APPS = dict(cern_cdsvideos_openid=OAUTH_REMOTE_APP)
 """CERN Openid Remote Application."""
 
 ## Needed for populating the user profiles when users login via CERN Openid
