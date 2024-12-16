@@ -24,7 +24,7 @@ on:
 
 jobs:
   Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: [3.9]
@@ -49,7 +49,7 @@ jobs:
           sudo apt-get install ffmpeg
           ffmpeg -version
 
-      - name: Install ldap dependencies
+      - name: Install LDAP dependencies
         run: |
           sudo apt-get update
           sudo apt-get install libsasl2-dev libldap2-dev libssl-dev
