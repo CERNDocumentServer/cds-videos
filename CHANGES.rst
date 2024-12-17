@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.5.1 (2024-12-17)
+
+- Fix an issue with who can access to projects
+- Fix description field UI when editing projects
+- Fix an issue with fetching e-groups on login
+
 Version 2.5.0 (2024-11-27)
 
 - make DOI optional and add CLI command for DOI minting
