@@ -117,7 +117,7 @@ ipython==8.18.1
 isbnlib==3.10.14
 itsdangerous==2.0.1
 jedi==0.19.2
-Jinja2==3.1.4
+Jinja2==3.1.5
 jsmin==3.0.1
 jsonpatch==1.33
 jsonpointer==3.0.0
