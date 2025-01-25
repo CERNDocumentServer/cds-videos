@@ -467,6 +467,10 @@ To support weblectures effectively, this behavior needs to be updated to allow u
 
 In CDS the ids are integers, there is a risk of collision, therefore we should mint a legacy recid as done for cds-rdm.
 
+### Statistics
+
+The migration of all record's statistics from the current CDS system need to be moved on the CDS Videos Opensearch cluster.
+
 ### Subcollections
 
 The current structure includes several collections and subcollections:
