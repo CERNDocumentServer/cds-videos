@@ -72,7 +72,7 @@ class StatsResource(MethodView):
                 file=record.get("report_number")[0]
             )
         else:
-            return make_response("Invalid stats event request: {}".format(stat), 400)
+            return make_response("Invalid stats event request", 400)
 
         return make_response(jsonify(stats), 200)
 
@@ -111,7 +111,7 @@ class StatsResource(MethodView):
             )
             return make_response("", 202)
 
-        return make_response("Invalid stats event request: {}".format(stat), 400)
+        return make_response("Invalid stats event request", 400)
 
 
 blueprint.add_url_rule(
