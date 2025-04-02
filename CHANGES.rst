@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.5.2 (2025-04-02)
+
+- stats: return generic message when stat event not valid
+- requirements: Pin wtforms to 2.3.3 to be compatible with flask-admin
+
 Version 2.5.1 (2024-12-17)
 
 - Fix an issue with who can access to projects
