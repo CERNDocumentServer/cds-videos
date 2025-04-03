@@ -33,10 +33,11 @@ Table of Contents
      - `Step 2: Create a Video <#step-2-create-a-video>`_
      - `Step 3: Upload the Video <#step-3-upload-the-video>`_
      - `Step 4: Create a Flow <#step-4-create-a-flow>`_
-     - `Step 5: (Optional) Upload Additional File <#step-5-optional-upload-additional-file>`_
+     - `Optional: Upload Additional File <#optional-upload-additional-file>`_
+     - `Optional: Replace the Main Video File <#optional-replace-the-main-video-file>`_
      - `Optional: Update the Access of the Video <#optional-update-the-access-of-the-video>`_
-     - `Step 6: Get Project to Check the Flow Status <#step-6-get-project-to-check-the-flow-status>`_
-     - `Step 7: Publish Video <#step-7-publish-video>`_
+     - `Step 5: Get Video to Check the Flow Status <#step-5-get-video-to-check-the-flow-status>`_
+     - `Step 6: Publish Video <#step-6-publish-video>`_
 
 
 Prerequisites
@@ -228,6 +229,7 @@ If you'd like to use the pre-configured REST API collection in Bruno, ensure you
 
    - Download this `Bruno collection <./Bruno%20Collection%20-%20CDS%20Videos%20Publish%20Video.json>`_.
    - Open Bruno and import downloaded collection.
+   - Switch to **Developer Mode**.
    - Create an environment for the collection.  
    - Configure the environment by adding a variable named ``baseURL``. Set its value to your API base URL (e.g., ``http://localhost:5000``).
 
@@ -349,7 +351,7 @@ To restrict the project, add ``_access/read``:
 
 **Response:**  
 
-Created project JSON.
+Created project JSON. Save ``response.body.project_id`` as ``_project_id`` for later use.
 
 
 Step 2: Create a Video
@@ -489,7 +491,7 @@ To restrict the video, add ``_access/read``. The ``_access/update`` will be the 
 
 **Response:**  
 
-Created video JSON.
+Created video JSON. Save ``response.body.id`` as ``video_id`` and ``response.body.metadata._buckets.deposit`` as ``bucket_id`` for later use.
 
 
 Step 3: Upload the Video
@@ -531,7 +533,7 @@ Step 3: Upload the Video
 
 **Response:**  
 
-Uploaded video JSON.
+Uploaded video JSON. Save ``response.body.version_id`` as ``main_file_version_id`` and ``response.body.key`` as ``video_key`` for later use.
 
 
 Step 4: Create a Flow
@@ -584,10 +586,10 @@ Step 4: Create a Flow
 
 **Response:**  
 
-Created flow JSON.
+Created flow JSON. If you want to replace the main video file later, save ``response.body.key`` as ``main_video_key``.
 
 
-Step 5: (Optional) Upload Additional File
+Optional: Upload Additional File
 ------------------------------------------
 
 **Request:**  
@@ -622,9 +624,61 @@ Step 5: (Optional) Upload Additional File
 
 - To include the file in the body, modify the `pre-request script` in Bruno.
 
+
+Optional: Replace the Main Video File
+------------------------------------------
+
+**1. Request:**  
+
+``PUT`` ``{{baseURL}}/api/files/{{bucket_id}}/{{main_video_key}}``
+
+**Headers:**  
+
+-   ``X-Invenio-File-Tags: times_replaced=number_of_times_replaced``
+
+**Parameters:**
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - **Name**
+     - **Type**
+     - **Location**
+     - **Description**
+   * - **bucket_id**
+     - string
+     - path
+     - ID of the bucket to upload the file.
+   * - **main_video_key**
+     - string
+     - path
+     - Key of the previously uploaded main file.
+   * - **file**
+     - file
+     - body
+     - The file to be uploaded.
+
+
+- To include the file in the body, modify the `pre-request script` in Bruno.
+
+**⚠️ Important**
+
+You must use the exact ``key`` value from the response of the `Create a Flow <#step-4-create-a-flow>`_ request  
+(stored as ``main_video_key``) to overwrite the existing file when replacing the main video.
+
+This is required because the backend **renames the uploaded file** to distinguish it from automatically generated subformat files.
+Using the original file name (``video_name``) will not work for replacement.
+
+Do **not** confuse this with the initial video upload request, which uses the original video file name (``video_name``).
+
 **Response:**  
 
-Uploaded additional file JSON.
+Uploaded file JSON. Save ``response.body.version_id`` as ``main_file_version_id`` and ``response.body.key`` as ``video_key`` for later use.
+
+**2. Request:**  
+
+Start the flow again using the new main video file, along with the updated ``main_file_version_id`` and ``video_key``.  
+You can follow the same structure outlined in `Step 4 <#step-4-create-a-flow>`_.
 
 
 Optional: Update the Access of the Video
@@ -675,12 +729,12 @@ To restrict the video, add ``_access/read``. If you want to change the access/up
 Updated video JSON.
 
 
-Step 6: Get Project to Check the Flow Status
+Step 5: Get Video to Check the Flow Status
 --------------------------------------------
 
 **Request:**  
 
-``GET`` ``{{baseURL}}/api/deposits/project/{{project_id}}``
+``GET`` ``{{baseURL}}/api/deposits/video/{{video_id}}``
 
 **Headers:**  
 
@@ -695,19 +749,18 @@ Step 6: Get Project to Check the Flow Status
      - **Type**
      - **Location**
      - **Description**
-   * - **project_id**
+   * - **video_id**
      - string
      - path
-     - ID of the project.
+     - ID of the video.
 
 **Response:**  
 
-Updated project JSON with flow status as ``state``:
+Updated video JSON with flow status. You can find the flow status in ``response.body.metadata._cds.state``:
 
 .. code-block:: json
 
     {
-      "id": "b320568fc1264dda90a8f459be42892e",
       "_cds": {
         "state": {
           "file_transcode": "STARTED",
@@ -718,7 +771,7 @@ Updated project JSON with flow status as ``state``:
     }
 
 
-Step 7: Publish Video
+Step 6: Publish Video
 ----------------------
 
 Before publishing the video, ensure that the workflow is complete.

@@ -4,38 +4,8 @@
   "items": [
     {
       "type": "http",
-      "name": "Step 6: Get Project to Check the Flow Status",
+      "name": "Optional- Update the Access of the Video",
       "seq": 7,
-      "request": {
-        "url": "{{baseURL}}/api/deposits/project/{{project_id}}",
-        "method": "GET",
-        "headers": [
-          {
-            "name": "content-type",
-            "value": "application/vnd.project.partial+json",
-            "enabled": true
-          }
-        ],
-        "params": [],
-        "body": {
-          "mode": "json",
-          "json": "",
-          "formUrlEncoded": [],
-          "multipartForm": []
-        },
-        "script": {},
-        "vars": {},
-        "assertions": [],
-        "tests": "",
-        "auth": {
-          "mode": "inherit"
-        }
-      }
-    },
-    {
-      "type": "http",
-      "name": "Optional: Update the Access of the Video",
-      "seq": 6,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
         "method": "PUT",
@@ -184,7 +154,9 @@
           "formUrlEncoded": [],
           "multipartForm": []
         },
-        "script": {},
+        "script": {
+          "res": "let data = res.body;\nbru.setEnvVar(\"main_video_key\", data.key);"
+        },
         "vars": {},
         "assertions": [],
         "tests": "",
@@ -195,7 +167,7 @@
     },
     {
       "type": "http",
-      "name": "Step 5: Upload additional file",
+      "name": "Optional: Upload additional file",
       "seq": 5,
       "request": {
         "url": "{{baseURL}}/api/files/{{bucket_id}}/{{additional_file}}",
@@ -227,8 +199,38 @@
     },
     {
       "type": "http",
-      "name": "Step 7: Publish",
+      "name": "Step 5: Get Video to Check the Flow Status",
       "seq": 8,
+      "request": {
+        "url": "{{baseURL}}/api/deposits/video/{{video_id}}",
+        "method": "GET",
+        "headers": [
+          {
+            "name": "content-type",
+            "value": "application/vnd.project.partial+json",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Step 6- Publish",
+      "seq": 9,
       "request": {
         "url": "{{baseURL}}/api/deposits/video/{{video_id}}/actions/publish",
         "method": "POST",
@@ -254,9 +256,40 @@
           "mode": "inherit"
         }
       }
+    },
+    {
+      "type": "http",
+      "name": "Optional: Replace Main File",
+      "seq": 6,
+      "request": {
+        "url": "{{baseURL}}/api/files/{{bucket_id}}/{{main_video_key}}",
+        "method": "PUT",
+        "headers": [
+          {
+            "name": "X-Invenio-File-Tags",
+            "value": "times_replaced=1",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {
+          "req": "const fs = require('fs');\nconst path = require('path');\n\n// File details\nconst filename = \"video_name.mp4\"; // CHANGE HERE\nconst filePath = \"video_file_path\"; // CHANGE HERE\n\n// Read the file as raw binary data\nconst fileContent = fs.readFileSync(filePath);\n\n// Set request headers\nreq.setHeader(\"Accept\", \"application/json, text/plain, */*\"); \nreq.setHeader(\"Accept-Encoding\", \"gzip, deflate, br, zstd\"); \nreq.setHeader(\"Content-Length\", fileContent.length);\n\n// Attach the file content as the request body\nreq.setBody(fileContent);\n"
+        },
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
     }
   ],
-  "activeEnvironmentUid": "O01m8KLYsgrkGRjOSv443",
   "environments": [
     {
       "variables": [
