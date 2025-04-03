@@ -401,7 +401,7 @@ function cdsUploaderCtrl(
               : 1;
           // Add how many times has been changed tag
           newMasterFile.headers = {
-            "X-Invenio-File-Tags": "times_replaced=" + masterFileVersion,
+            "X-Invenio-File-Tags": `times_replaced=${masterFileVersion}&context_type=master`,
           };
           that.newMasterDefer.promise.then(function () {
             // FIXME masterFile.key is undefined !?!

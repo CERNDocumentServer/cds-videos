@@ -283,6 +283,9 @@ function cdsDepositsCtrl(
       angular.forEach(
         _files.videos,
         function (file, key) {
+          file.headers = {
+            "X-Invenio-File-Tags": "context_type=master",
+          };
           this.push([
             function () {
               return that.createDeposit(
