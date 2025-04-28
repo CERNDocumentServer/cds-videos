@@ -862,7 +862,15 @@ class Video(CDSDeposit):
                 subtitle_obj_key = "{}_{}.vtt".format(
                     self["report_number"][0], match.group("iso_lang")
                 )
-                subtitle_obj.key = subtitle_obj_key
+                obj = ObjectVersion.create(
+                    bucket=subtitle_obj.bucket,
+                    key=subtitle_obj_key,
+                    _file_id=subtitle_obj.file_id,
+                )
+                # copy tags to the newly created object version
+                for tag in subtitle_obj.tags:
+                    ObjectVersionTag.create_or_update(obj, tag.key, tag.value)
+                subtitle_obj.remove()
 
     def _rename_master_file(self, master_file):
         """Rename master file."""
