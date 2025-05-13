@@ -142,6 +142,7 @@ class VideoSchema(StrictKeysSchema):
     note = fields.Str()
     publication_date = fields.Str()
     recid = fields.Number()
+    legacy_recid =fields.Number()
     related_links = fields.Nested(RelatedLinksSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     schema = fields.Str(attribute="$schema", data_key="$schema")

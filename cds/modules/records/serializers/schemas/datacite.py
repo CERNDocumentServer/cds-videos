@@ -53,6 +53,7 @@ class DataCiteSchemaV1(Schema):
     """DataCite schema v1."""
 
     creators = fields.Method("get_creators")
+    contributors = fields.Method("get_contributors")
     dates = fields.Method("get_dates")
     descriptions = fields.Method("get_descriptions")
     identifier = fields.Nested(IdentifierSchema, attribute="metadata.doi")
@@ -101,23 +102,27 @@ class DataCiteSchemaV1(Schema):
         """Get creators."""
         items = []
         for item in obj["metadata"].get("contributors", []):
-            items.append(
-                {
-                    "creatorName": item.get("name", ""),
-                }
+            if item.get("role", "") != "ResearchGroup":
+                items.append(
+                    {
+                        "creatorName": item.get("name", ""),
+                    }
             )
         return items
 
-    #  def get_contributors(self, obj):
-    #      """Get contributors."""
-    #      items = []
-    #      for item in obj['metadata'].get('contributors', []):
-    #          items.append({
-    #              'contributorType': item.get('role', ''),
-    #              'contributorName': item.get('name', ''),
-    #              # FIXME nameIdentifier and nameIdentifierScheme, ... ?
-    #          })
-    #      return items
+    def get_contributors(self, obj):
+        """Get contributors."""
+        items = []
+        for item in obj['metadata'].get('contributors', []):
+            if item.get("role", "") == "ResearchGroup":
+                items.append(
+                    {
+                    'contributorType': item.get('role', ''),
+                    'contributorName': item.get('name', ''),
+                    # FIXME nameIdentifier and nameIdentifierScheme, ... ?
+                    }
+                )
+        return items
 
     def get_publication_year(self, obj):
         """Get publication year."""

@@ -293,6 +293,10 @@
               "name": "Co-Producer"
             },
             {
+              "value": "ContactPerson",
+              "name": "Contact Person"
+            },
+            {
               "value": "Creator",
               "name": "Creator"
             },
@@ -325,8 +329,16 @@
               "name": "Producer"
             },
             {
+              "value": "RelatedPerson",
+              "name": "Related Person"
+            },
+            {
               "value": "Reporter",
               "name": "Reporter"
+            },
+            {
+              "value": "ResearchGroup",
+              "name": "Research Group"
             },
             {
               "value": "Screenwriter",

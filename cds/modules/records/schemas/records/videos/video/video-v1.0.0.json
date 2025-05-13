@@ -62,6 +62,7 @@
               "Camera Operator",
               "Comments by",
               "Co-Producer",
+              "ContactPerson",
               "Creator",
               "Credits",
               "Director",
@@ -70,7 +71,9 @@
               "Narrator",
               "Photography",
               "Producer",
+              "RelatedPerson",
               "Reporter",
+              "ResearchGroup",
               "Screenwriter",
               "Speaker",
               "Subtitles by",
@@ -630,6 +633,10 @@
     "recid": {
       "type": "number",
       "description": "Invenio record identifier (integer)."
+    },
+    "legacy_recid": {
+      "type": "number",
+      "description": "Legacy record identifier (integer). Kept for auditing reasons."
     },
     "original_source": {
       "type": "string"
