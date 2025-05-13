@@ -228,6 +228,9 @@
       "recid": {
         "type": "double"
       },
+      "legacy_recid": {
+        "type": "double"
+      },
       "license": {
         "properties": {
           "license": {

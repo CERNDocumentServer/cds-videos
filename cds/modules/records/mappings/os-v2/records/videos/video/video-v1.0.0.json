@@ -234,6 +234,9 @@
       "recid": {
         "type": "double"
       },
+      "legacy_recid": {
+        "type": "double"
+      },
       "doi": {
         "type": "text"
       },
