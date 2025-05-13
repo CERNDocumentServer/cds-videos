@@ -25,13 +25,18 @@ from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import (
     AccessSchema,
+    AdditionalTitlesSchema,
+    AdditionalDescriptionsSchema,
+    AlternateIdentifiersSchema,
     BucketSchema,
     ContributorSchema,
+    CurationSchema,
     DepositSchema,
     ExternalSystemIdentifiersField,
     KeywordsSchema,
     LicenseSchema,
     OaiSchema,
+    RelatedIdentifiersSchema,
     RelatedLinksSchema,
     StrictKeysSchema,
     TitleSchema,
@@ -142,6 +147,7 @@ class VideoSchema(StrictKeysSchema):
     note = fields.Str()
     publication_date = fields.Str()
     recid = fields.Number()
+    legacy_recid =fields.Number()
     related_links = fields.Nested(RelatedLinksSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     schema = fields.Str(attribute="$schema", data_key="$schema")
@@ -149,7 +155,18 @@ class VideoSchema(StrictKeysSchema):
     translations = fields.Nested(TranslationsSchema, many=True)
     type = fields.Str()
     vr = fields.Boolean()
-
+    _curation = fields.Nested(CurationSchema)
+    additional_titles = fields.List(fields.Nested(AdditionalTitlesSchema))
+    additional_descriptions = fields.List(fields.Nested(AdditionalDescriptionsSchema))
+    alternate_identifiers = fields.Nested(
+        AlternateIdentifiersSchema, many=True
+    )
+    related_identifiers = fields.Nested(
+        RelatedIdentifiersSchema, many=True
+    )
+    collections = fields.List(fields.Str, many=True)
+    additional_languages = fields.List(fields.Str, many=True)
+    
     # Preservation fields
     location = fields.Str()
     original_source = fields.Str()
