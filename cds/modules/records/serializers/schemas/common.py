@@ -157,3 +157,63 @@ class ExternalSystemIdentifiersField(StrictKeysSchema):
 
     value = fields.Str()
     schema = fields.Str()
+
+
+class AlternateIdentifiersSchema(StrictKeysSchema):
+    """Field alternate_identifiers."""
+
+    value = fields.Str(required=True)
+    scheme = fields.Str(required=True)
+
+
+class LegacyMARCFieldsSchema(Schema):
+    tag_964 = fields.List(fields.Str(), data_key="964")
+    tag_336 = fields.List(fields.Str(), data_key="336")
+    tag_583 = fields.List(fields.Str(), data_key="583")
+    tag_306 = fields.List(fields.Str(), data_key="306")
+
+
+class DigitizedMetadataSchema(Schema):
+    url = fields.Str()
+    format = fields.Str()
+    link_text = fields.Str()
+    public_note = fields.Str()
+    nonpublic_note = fields.Str()
+    md5_checksum = fields.Str()
+    source = fields.Str()
+
+
+class CurationSchema(StrictKeysSchema):
+    """Curation schema."""
+
+    legacy_report_number = fields.List(fields.Str())
+    department = fields.Str()
+    volumes = fields.List(fields.Str())
+    physical_location = fields.List(fields.Str())
+    physical_medium = fields.List(fields.Str())
+    internal_note = fields.List(fields.Str())
+    legacy_marc_fields = fields.Nested(LegacyMARCFieldsSchema)
+    digitized = fields.Nested(DigitizedMetadataSchema)
+
+
+class AdditionalTitlesSchema(Schema):
+    """Additional titles schema."""
+
+    title = fields.Str()
+    type = fields.Str()
+    lang = fields.Str()
+
+
+class AdditionalDescriptionsSchema(Schema):
+    """Additional descriptions schema."""
+
+    description = fields.Str()
+    type = fields.Str()
+    lang = fields.Str()
+
+
+class RelatedIdentifiersSchema(Schema):
+    identifier = fields.Str(required=True)
+    scheme = fields.Str(required=True)
+    relation_type = fields.Str(required=True)
+    resource_type = fields.Str()
