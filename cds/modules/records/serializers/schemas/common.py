@@ -155,3 +155,16 @@ class ExternalSystemIdentifiersField(StrictKeysSchema):
 
     value = fields.Str()
     schema = fields.Str()
+
+
+class AlternateIdentifiersSchema(StrictKeysSchema):
+    """Field alternate_identifiers."""
+
+    value = fields.Str()
+    schema = fields.Str()
+
+
+class CurationSchema(StrictKeysSchema):
+    """Curation schema."""
+    legacy_report_number = fields.Str()
+    department = fields.Str()

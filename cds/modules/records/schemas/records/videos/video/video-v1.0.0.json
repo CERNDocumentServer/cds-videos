@@ -204,6 +204,23 @@
       "description": "List of identifiers on external systems.",
       "title": "External identifiers"
     },
+    "alternate_identifiers": {
+      "items": {
+        "properties": {
+          "scheme": {
+            "title": "Scheme of the identifier (Vocabulary)",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value of the identifier",
+            "type": "string"
+          }
+        }
+      },
+      "required": ["value", "scheme"],
+      "title": "List of alternate identifiers of the record",
+      "type": "array"
+    },
     "subject": {
       "additionalProperties": false,
       "description": "Subject.",
@@ -643,6 +660,20 @@
     },
     "_project_id": {
       "type": "string"
+    },
+    "_curation": {
+      "properties": {
+        "legacy_report_number": {
+          "title": "Legacy record report number.",
+          "type": "string"
+        },
+        "department": {
+          "title": "CERN department.",
+          "type": "string"
+        }
+      },
+      "title": "Fields that needs curation.",
+      "type": "object"
     }
   },
   "title": "CDS Base Record Schema v1.0.0"
