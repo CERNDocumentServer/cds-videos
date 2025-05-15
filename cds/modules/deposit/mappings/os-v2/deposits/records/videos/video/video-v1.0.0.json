@@ -336,6 +336,27 @@
             "type": "keyword"
           }
         }
+      },
+      "alternate_identifiers": {
+        "properties": {
+          "scheme": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        }
+      },
+      "_curation": {
+        "type": "object",
+        "properties": {
+          "legacy_report_number": {
+            "type": "keyword"
+          },
+          "department": {
+            "type": "keyword"
+          }
+        }
       }
     }
   }
