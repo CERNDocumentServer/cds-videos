@@ -353,6 +353,54 @@
           },
           "department": {
             "type": "keyword"
+          },
+          "volumes": {
+            "type": "text"
+          }
+        }
+      },
+      "additional_titles": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "text"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "lang": {
+            "type": "keyword"
+          }
+        }
+      },
+      "additional_descriptions": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "lang": {
+            "type": "keyword"
+          }
+        }
+      },
+      "related_identifiers": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "text"
+          },
+          "scheme": {
+            "type": "keyword"
+          },
+          "relation_type": {
+            "type": "keyword"
+          },
+          "resource_type": {
+            "type": "keyword"
           }
         }
       }
