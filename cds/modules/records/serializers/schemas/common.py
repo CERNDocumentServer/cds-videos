@@ -160,11 +160,36 @@ class ExternalSystemIdentifiersField(StrictKeysSchema):
 class AlternateIdentifiersSchema(StrictKeysSchema):
     """Field alternate_identifiers."""
 
-    value = fields.Str()
-    schema = fields.Str()
+    value = fields.Str(required=True)
+    scheme = fields.Str(required=True)
 
 
 class CurationSchema(StrictKeysSchema):
     """Curation schema."""
+
     legacy_report_number = fields.Str()
     department = fields.Str()
+    volumes = fields.List(fields.Str())
+
+
+class AdditionalTitlesSchema(Schema):
+    """Additional titles schema."""
+
+    title = fields.Str()
+    type = fields.Str()
+    lang = fields.Str()
+
+
+class AdditionalDescriptionsSchema(Schema):
+    """Additional descriptions schema."""
+
+    description = fields.Str()
+    type = fields.Str()
+    lang = fields.Str()
+
+
+class RelatedIdentifiersSchema(Schema):
+    identifier = fields.Str(required=True)
+    scheme = fields.Str(required=True)
+    relation_type = fields.Str(required=True)
+    resource_type = fields.Str()
