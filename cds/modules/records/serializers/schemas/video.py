@@ -25,6 +25,8 @@ from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import (
     AccessSchema,
+    AdditionalTitlesSchema,
+    AdditionalDescriptionsSchema,
     AlternateIdentifiersSchema,
     BucketSchema,
     ContributorSchema,
@@ -34,6 +36,7 @@ from .common import (
     KeywordsSchema,
     LicenseSchema,
     OaiSchema,
+    RelatedIdentifiersSchema,
     RelatedLinksSchema,
     StrictKeysSchema,
     TitleSchema,
@@ -134,9 +137,6 @@ class VideoSchema(StrictKeysSchema):
     external_system_identifiers = fields.Nested(
         ExternalSystemIdentifiersField, many=True
     )
-    alternate_identifiers = fields.Nested(
-        AlternateIdentifiersSchema, many=True
-    )
     featured = fields.Boolean()
     internal_note = fields.Str()
     internal_categories = fields.Raw()
@@ -154,9 +154,17 @@ class VideoSchema(StrictKeysSchema):
     title = fields.Nested(TitleSchema, required=True)
     translations = fields.Nested(TranslationsSchema, many=True)
     type = fields.Str()
-    vr = fields.Boolean(),
+    vr = fields.Boolean()
     _curation = fields.Nested(CurationSchema)
-
+    additional_titles = fields.List(fields.Nested(AdditionalTitlesSchema))
+    additional_descriptions = fields.List(fields.Nested(AdditionalDescriptionsSchema))
+    alternate_identifiers = fields.Nested(
+        AlternateIdentifiersSchema, many=True
+    )
+    related_identifiers = fields.Nested(
+        RelatedIdentifiersSchema, many=True
+    )
+    
     # Preservation fields
     location = fields.Str()
     original_source = fields.Str()

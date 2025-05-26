@@ -198,7 +198,8 @@
         "properties": {
           "scheme": {
             "title": "Scheme of the identifier (Vocabulary)",
-            "type": "string"
+            "type": "string",
+            "enum": ["URL", "DOI", "CDS"]
           },
           "value": {
             "title": "Value of the identifier",
@@ -735,10 +736,201 @@
         "department": {
           "title": "CERN department.",
           "type": "string"
+        },
+        "volumes": {
+          "title": "Volume list for this record.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "title": "Fields that needs curation.",
       "type": "object"
+    },
+    "additional_titles": {
+      "description": "Additional record titles.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "description": "Additional title of the record.",
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Subtitle", "Other", "TranslatedTitle", "AlternativeTitle"]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "ar",
+              "ast",
+              "bg",
+              "ca",
+              "ch",
+              "cs",
+              "cy",
+              "da",
+              "de",
+              "el",
+              "en",
+              "en-fr",
+              "es",
+              "et",
+              "eu",
+              "fi",
+              "fr",
+              "ga",
+              "gd",
+              "gl",
+              "he",
+              "hi",
+              "hr",
+              "hu",
+              "it",
+              "lt",
+              "ja",
+              "ka",
+              "ko",
+              "kw",
+              "nb",
+              "nl",
+              "nn",
+              "no",
+              "pl",
+              "pt",
+              "rm",
+              "ro",
+              "ru",
+              "se",
+              "silent",
+              "sk",
+              "sl",
+              "sr",
+              "sv",
+              "tr",
+              "uk",
+              "ur",
+              "zh",
+              "zh_CN",
+              "zh_TW"
+            ]
+          }
+        }
+      }
+    },
+    "additional_descriptions": {
+      "description": "Additional descriptions for the record.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Descriptive content."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Abstract",
+              "Methods",
+              "Other",
+              "SeriesInformation",
+              "TableOfContents",
+              "TechnicalInfo"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "ar",
+              "ast",
+              "bg",
+              "ca",
+              "ch",
+              "cs",
+              "cy",
+              "da",
+              "de",
+              "el",
+              "en",
+              "en-fr",
+              "es",
+              "et",
+              "eu",
+              "fi",
+              "fr",
+              "ga",
+              "gd",
+              "gl",
+              "he",
+              "hi",
+              "hr",
+              "hu",
+              "it",
+              "lt",
+              "ja",
+              "ka",
+              "ko",
+              "kw",
+              "nb",
+              "nl",
+              "nn",
+              "no",
+              "pl",
+              "pt",
+              "rm",
+              "ro",
+              "ru",
+              "se",
+              "silent",
+              "sk",
+              "sl",
+              "sr",
+              "sv",
+              "tr",
+              "uk",
+              "ur",
+              "zh",
+              "zh_CN",
+              "zh_TW"
+            ]
+          }
+        }
+      }
+    },
+    "related_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["identifier", "scheme", "relation_type"],
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The actual identifier (e.g., URL or DOI)."
+          },
+          "scheme": {
+            "type": "string",
+            "enum": ["URL", "DOI", "CDS", "Indico"],
+            "description": "The scheme describing the identifier type."
+          },
+          "relation_type": {
+            "type": "string",
+            "enum": ["IsPartOf", "IsVariantFormOf"],
+            "description": "Describes the relationship with the current record."
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": ["Event", "ConferencePaper", "Report"],
+            "description": "Type of the related resource."
+          }
+        }
+      }
     }
   }
 }
