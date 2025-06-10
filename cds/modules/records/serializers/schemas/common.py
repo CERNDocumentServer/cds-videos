@@ -164,12 +164,23 @@ class AlternateIdentifiersSchema(StrictKeysSchema):
     scheme = fields.Str(required=True)
 
 
+class LegacyMARCFieldsSchema(Schema):
+    tag_964 = fields.List(fields.Str(), data_key="964")
+    tag_336 = fields.List(fields.Str(), data_key="336")
+    tag_583 = fields.List(fields.Str(), data_key="583")
+    tag_306 = fields.List(fields.Str(), data_key="306")
+
+
 class CurationSchema(StrictKeysSchema):
     """Curation schema."""
 
     legacy_report_number = fields.Str()
     department = fields.Str()
     volumes = fields.List(fields.Str())
+    physical_location = fields.List(fields.Str())
+    physical_medium = fields.List(fields.Str())
+    internal_note = fields.List(fields.Str())
+    legacy_marc_fields = fields.Nested(LegacyMARCFieldsSchema)
 
 
 class AdditionalTitlesSchema(Schema):
