@@ -358,6 +358,32 @@
           },
           "volumes": {
             "type": "text"
+          },
+          "physical_location": {
+            "type": "text"
+          },
+          "physical_medium": {
+            "type": "text"
+          },
+          "internal_note": {
+            "type": "text"
+          },
+          "legacy_marc_fields": {
+            "type": "object",
+            "properties": {
+              "964": {
+                "type": "text"
+              },
+              "336": {
+                "type": "text"
+              },
+              "583": {
+                "type": "text"
+              },
+              "306": {
+                "type": "text"
+              }
+            }
           }
         }
       },
@@ -405,6 +431,12 @@
             "type": "keyword"
           }
         }
+      },
+      "collections": {
+        "type": "text"
+      },
+      "additional_languages": {
+        "type": "text"
       }
     }
   }

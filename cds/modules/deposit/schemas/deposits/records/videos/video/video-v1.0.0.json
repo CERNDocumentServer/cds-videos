@@ -462,59 +462,7 @@
           },
           "language": {
             "default": "en",
-            "enum": [
-              "ar",
-              "ast",
-              "bg",
-              "ca",
-              "ch",
-              "cs",
-              "cy",
-              "da",
-              "de",
-              "el",
-              "en",
-              "en-fr",
-              "es",
-              "et",
-              "eu",
-              "fi",
-              "fr",
-              "ga",
-              "gd",
-              "gl",
-              "he",
-              "hi",
-              "hr",
-              "hu",
-              "it",
-              "lt",
-              "ja",
-              "ka",
-              "ko",
-              "kw",
-              "nb",
-              "nl",
-              "nn",
-              "no",
-              "pl",
-              "pt",
-              "rm",
-              "ro",
-              "ru",
-              "se",
-              "silent",
-              "sk",
-              "sl",
-              "sr",
-              "sv",
-              "tr",
-              "uk",
-              "ur",
-              "zh",
-              "zh_CN",
-              "zh_TW"
-            ],
+            "$ref": "definitions-v1.0.0.json#/languages",
             "type": "string",
             "description": "A language of the resource."
           },
@@ -584,59 +532,7 @@
     "language": {
       "description": "A language of the resource.",
       "default": "en",
-      "enum": [
-        "ar",
-        "ast",
-        "bg",
-        "ca",
-        "ch",
-        "cs",
-        "cy",
-        "da",
-        "de",
-        "el",
-        "en",
-        "en-fr",
-        "es",
-        "et",
-        "eu",
-        "fi",
-        "fr",
-        "ga",
-        "gd",
-        "gl",
-        "he",
-        "hi",
-        "hr",
-        "hu",
-        "it",
-        "lt",
-        "ja",
-        "ka",
-        "ko",
-        "kw",
-        "nb",
-        "nl",
-        "nn",
-        "no",
-        "pl",
-        "pt",
-        "rm",
-        "ro",
-        "ru",
-        "se",
-        "silent",
-        "sk",
-        "sl",
-        "sr",
-        "sv",
-        "tr",
-        "uk",
-        "ur",
-        "zh",
-        "zh_CN",
-        "zh_TW"
-      ],
+      "$ref": "definitions-v1.0.0.json#/languages",
       "type": "string"
     },
     "license": {
@@ -743,6 +639,60 @@
           "items": {
             "type": "string"
           }
+        },
+        "physical_location": {
+          "title": "Tag 852 physical location.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "physical_medium": {
+          "title": "Tag 340 physical medium.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "internal_note": {
+          "title": "Tag 595 internal note.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "legacy_marc_fields": {
+          "type": "object",
+          "properties": {
+            "964": {
+              "title": "Tag 964.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "336": {
+              "title": "Tag 336.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "583": {
+              "title": "Tag 583.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "306": {
+              "title": "Tag 306.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       },
       "title": "Fields that needs curation.",
@@ -765,59 +715,7 @@
           },
           "lang": {
             "type": "string",
-            "enum": [
-              "ar",
-              "ast",
-              "bg",
-              "ca",
-              "ch",
-              "cs",
-              "cy",
-              "da",
-              "de",
-              "el",
-              "en",
-              "en-fr",
-              "es",
-              "et",
-              "eu",
-              "fi",
-              "fr",
-              "ga",
-              "gd",
-              "gl",
-              "he",
-              "hi",
-              "hr",
-              "hu",
-              "it",
-              "lt",
-              "ja",
-              "ka",
-              "ko",
-              "kw",
-              "nb",
-              "nl",
-              "nn",
-              "no",
-              "pl",
-              "pt",
-              "rm",
-              "ro",
-              "ru",
-              "se",
-              "silent",
-              "sk",
-              "sl",
-              "sr",
-              "sv",
-              "tr",
-              "uk",
-              "ur",
-              "zh",
-              "zh_CN",
-              "zh_TW"
-            ]
+            "$ref": "definitions-v1.0.0.json#/languages"
           }
         }
       }
@@ -846,59 +744,7 @@
           },
           "lang": {
             "type": "string",
-            "enum": [
-              "ar",
-              "ast",
-              "bg",
-              "ca",
-              "ch",
-              "cs",
-              "cy",
-              "da",
-              "de",
-              "el",
-              "en",
-              "en-fr",
-              "es",
-              "et",
-              "eu",
-              "fi",
-              "fr",
-              "ga",
-              "gd",
-              "gl",
-              "he",
-              "hi",
-              "hr",
-              "hu",
-              "it",
-              "lt",
-              "ja",
-              "ka",
-              "ko",
-              "kw",
-              "nb",
-              "nl",
-              "nn",
-              "no",
-              "pl",
-              "pt",
-              "rm",
-              "ro",
-              "ru",
-              "se",
-              "silent",
-              "sk",
-              "sl",
-              "sr",
-              "sv",
-              "tr",
-              "uk",
-              "ur",
-              "zh",
-              "zh_CN",
-              "zh_TW"
-            ]
+            "$ref": "definitions-v1.0.0.json#/languages"
           }
         }
       }
@@ -926,10 +772,24 @@
           },
           "resource_type": {
             "type": "string",
-            "enum": ["Event", "ConferencePaper", "Report"],
+            "enum": ["Event", "ConferencePaper", "Report", "Book"],
             "description": "Type of the related resource."
           }
         }
+      }
+    },
+    "collections": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "additional_languages": {
+      "description": "Additional languages for the record.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "$ref": "definitions-v1.0.0.json#/languages"
       }
     }
   }

@@ -164,6 +164,8 @@ class VideoSchema(StrictKeysSchema):
     related_identifiers = fields.Nested(
         RelatedIdentifiersSchema, many=True
     )
+    collections = fields.List(fields.Str, many=True)
+    additional_languages = fields.List(fields.Str, many=True)
     
     # Preservation fields
     location = fields.Str()
