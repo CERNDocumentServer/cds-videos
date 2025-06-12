@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.5.3 (2025-06-12)
+
+- keywords: add missing source field used in old migrated records
+- contrib: fix CERN contrib login with token
+
 Version 2.5.2 (2025-04-02)
 
 - stats: return generic message when stat event not valid
