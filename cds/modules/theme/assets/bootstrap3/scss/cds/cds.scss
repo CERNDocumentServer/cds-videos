@@ -314,6 +314,89 @@ a.cds-anchor:hover{
   align-items: center;
 }
 
+.cds-channel-tags-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 5px;
+}
+
+.channel-tag-list {
+  display: inline-block;
+  position: relative;
+}
+
+.channel-tag-list::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background-color: $divider-color;
+}
+
+.cds-channel-topics-wrapper {
+  margin-top: -10px;
+}
+
+.cds-lecture-tags {
+  ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  li:not(.sub) {
+    display: block !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  // Subcategories
+  li.sub {
+    position: relative;
+    display: inline-block !important;
+
+    &::before {
+      content: '↳'; // Or '→', '›'
+      position: absolute;
+      left: 0;
+
+      top: 50%;
+      transform: translateY(-50%);
+      color: lighten($cds-navbar-form-bg, 20%);
+      font-size: 1.5rem;
+      padding-left: 1rem;
+    }
+  }
+
+  li a {
+    max-width: 400px !important;
+    background-color: $cds-navbar-form-bg !important;
+    display: inline-block !important;
+  }
+
+  // Subcategory
+  li.sub a {
+    max-width: 400px !important;
+    background-color: lighten($cds-navbar-form-bg, 20%) !important;
+    // color: #666 !important;
+    margin-left: 2.5rem !important;
+    font-style: italic !important;
+  }
+}
+
+.cds-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.cds-title-link:hover,
+.cds-title-link:focus,
+.cds-title-link:active {
+  color: inherit;
+}
+
 /////////
 
 // /search
@@ -615,7 +698,7 @@ a.cds-anchor:hover{
 }
 
 .cds-home-video-featured {
-  margin-top: -15px;
+  margin-top: -10px;
 }
 
 .download-list-fade {

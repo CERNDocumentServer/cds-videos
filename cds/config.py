@@ -943,6 +943,8 @@ FRONTPAGE_ENDPOINT = "cds_home.index"
 FRONTPAGE_FEATURED_QUERY = "/api/records/?q=featured:true&size=1&sort=mostrecent"
 # Recent videos query
 FRONTPAGE_RECENT_QUERY = "/api/records/?size=3&sort=mostrecent&type=VIDEO"
+# Recent lectures query
+FRONTPAGE_POPULAR_LECTURES_QUERY = "/api/records/?size=3&sort=mostrecent&q=collections=Lectures"
 # Queries for the boxes
 FRONTPAGE_QUERIES = [
     {"size": 5, "page": 1},
@@ -996,6 +998,10 @@ FRONTPAGE_CHANNELS = [
         # https://github.com/CERNDocumentServer/cds-videos/issues/1759
         "img_filename": "channel_animations.jpg",
         "qs": "keyword=animations",
+    },
+    {
+        "label": "Lectures",
+        "qs": "collections=Lectures",
     },
 ]
 

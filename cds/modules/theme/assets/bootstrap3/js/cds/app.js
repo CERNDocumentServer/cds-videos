@@ -131,4 +131,10 @@ angular.element(document).ready(function () {
     ["cds", "invenioSearch"],
     { strictDi: true }
   );
+  angular.bootstrap(
+    document.getElementById("cds-recent-lectures"),
+    ["cds", "invenioSearch"],
+    { strictDi: true }
+  );
+
 });
