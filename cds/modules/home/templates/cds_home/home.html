@@ -1,35 +1,54 @@
-{%- extends "cds_home/default.html" %}
-
-{%- block page_body %}
+{%- extends "cds_home/default.html" %} {%- block page_body %}
 <div class="flex-item">
+  <!-- Channels -->
+  <div class="cds-channel-topics-wrapper bg-b pt-10 pb-10">
+    <div class="{{ container_class }}">
+      <div class="cds-tags cds-home-tags cds-channel-tags-custom">
+        <ul class="channel-tag-list">
+          {% for channel in config.FRONTPAGE_CHANNELS %}
+          <li><a href="/search?{{ channel.qs }}">{{ channel.label }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Channels -->
+
   {% block home_featured_video %}
   <div id="cds-featured-video" class="cds-home-video-featured bg-b">
     <!-- List group -->
     <invenio-search
-        disable-url-handler="true"
-        search-endpoint='{{ config.FRONTPAGE_FEATURED_QUERY }}'
+      disable-url-handler="true"
+      search-endpoint="{{ config.FRONTPAGE_FEATURED_QUERY }}"
     >
       <div class="text-center">
         <invenio-search-loading
-            template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-            message="">
+          template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+          message=""
+        >
         </invenio-search-loading>
       </div>
       <invenio-search-results
-          template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}">
+        template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_FEATURED) }}"
+      >
       </invenio-search-results>
     </invenio-search>
   </div>
   {% endblock home_featured_video %}
   <!-- Recent videos and trends-->
-  <div id="cds-recent-videos" class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20">
+  <div
+    id="cds-recent-videos"
+    class="cds-home-recent-videos cds-content-section bg-n pt-20 pb-20"
+  >
     <div class="{{container_class}}">
       <div class="col-md-8">
         <div class="row">
           <div class="col-md-12">
             <!-- Title -->
             <div class="cds-title-section pt-10 mb-20 l-w">
-              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('RECENT') }}</h2>
+              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">
+                {{ _('RECENT') }}
+              </h2>
               <p>{{ _('MOST RECENTLY ADDED VIDEOS') }}</p>
             </div>
             <!-- Title -->
@@ -37,17 +56,19 @@
         </div>
         <!-- List group -->
         <invenio-search
-            disable-url-handler="true"
-            search-endpoint='{{ config.FRONTPAGE_RECENT_QUERY }}'
+          disable-url-handler="true"
+          search-endpoint="{{ config.FRONTPAGE_RECENT_QUERY }}"
         >
           <div class="text-center">
             <invenio-search-loading
-                template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
-                message="">
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message=""
+            >
             </invenio-search-loading>
           </div>
           <invenio-search-results
-              template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}">
+            template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}"
+          >
           </invenio-search-results>
         </invenio-search>
       </div>
@@ -56,7 +77,9 @@
           <div class="col-md-12">
             <!-- Title -->
             <div class="cds-title-section pt-10 mb-20 l-w">
-              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('TRENDS') }}</h2>
+              <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">
+                {{ _('TRENDS') }}
+              </h2>
               <p>{{ _('MOST POPULAR TOPICS') }}</p>
             </div>
             <!-- Title -->
@@ -66,9 +89,9 @@
           <div class="col-md-12">
             <div class="cds-tags cds-home-tags">
               <ul>
-              {% for topic in config.FRONTPAGE_TREND_TOPICS %}
+                {% for topic in config.FRONTPAGE_TREND_TOPICS %}
                 <li><a href="/search?{{ topic.qs }}">{{ topic.label }}</a></li>
-              {% endfor %}
+                {% endfor %}
               </ul>
             </div>
           </div>
@@ -78,35 +101,127 @@
   </div>
   <!-- Recent videos and trends -->
 
-  <!-- Channels -->
-  <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pt-20 pb-20">
-    <div class="{{container_class}}">
-      <div class="row">
-        <div class="col-md-12">
-          <!-- Title -->
-          <div class="cds-title-section pt-10 mb-20">
-            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">{{ _('CHANNELS') }}</h2>
-            <p>{{ _('MOST RECENTLY UPDATED CHANNELS') }}</p>
-          </div>
-          <!-- Title -->
-        </div>
+  <!-- BROWSE -->
+  <div class="bg-w pt-20 pb-20">
+    <div class="{{ container_class }}">
+      <div class="cds-title-section pt-10 mb-20">
+        <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">
+          {{ _('BROWSE') }}
+        </h2>
       </div>
-      <!-- List group -->
+
       <div class="row">
-        {% for channel in config.FRONTPAGE_CHANNELS %}
-        {% set img_url = url_for('static', filename='img/{0}'.format(channel.img_filename)) %}
+        <!-- Collection tags -->
         <div class="col-md-4">
-          <a class="cds-video-title l-b" href="/search?{{ channel.qs }}">
-            <img class="img-responsive" src="{{ img_url }}" />
-            <p>
-              {{ channel.label }}
-            </p>
-          </a>
+          <div class="cds-title-section pt-10 mb-20">
+            <a href="/search?q=collectionsLectures" class="cds-title-link">
+              <p>{{ _('LECTURES') }}</p>
+            </a>
+          </div>
+
+          <!-- Collections -->
+          <div class="cds-tags cds-home-tags cds-lecture-tags">
+            <ul>
+              <li>
+                <a
+                  href="/search?q=collections:'Lectures,Academic Training Lectures'"
+                  >Academic Training Lectures</a
+                >
+              </li>
+              <li>
+                <a href="/search?q=collections:'Lectures,E-learning modules'"
+                  >E-learning lectures</a
+                >
+              </li>
+              <li>
+                <a href="/search?q=collections:'Lectures,Video Lectures'"
+                  >Video Lectures</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events'"
+                  >Talks, Seminars and Other Events</a
+                >
+              </li>
+
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Colloquia'"
+                  >Colloquia</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Other Talks'"
+                  >Other Talks</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:Lectures,Talks Seminars and Other Events,Conference records"
+                  >Conference records</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,CERN-wide meetings trainings and events'"
+                  >CERN-wide meetings, trainings and events</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Outreach events'"
+                  >Outreach events</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Scientific Seminars and Workshops'"
+                  >Scientific Seminars and Workshops</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Teacher Programmes'"
+                  >Teacher Programmes</a
+                >
+              </li>
+              <li class="sub">
+                <a
+                  href="/search?q=collections:'Lectures,Talks Seminars and Other Events,Student Lectures'"
+                  >Student Lectures</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
-        {% endfor %}
+
+        <!-- Popular lectures -->
+        <div id="cds-recent-lectures" class="col-md-8">
+          <div class="cds-title-section pt-10 mb-20">
+            <p>{{ _('MOST POPULAR LECTURES') }}</p>
+          </div>
+
+          <invenio-search
+            disable-url-handler="true"
+            search-endpoint="{{ config.FRONTPAGE_POPULAR_LECTURES_QUERY }}"
+          >
+            <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message=""
+            >
+            </invenio-search-loading>
+
+            <invenio-search-results
+              template="{{ url_for('static', filename=config.SEARCH_UI_VIDEO_MEDIUM) }}"
+            >
+            </invenio-search-results>
+          </invenio-search>
+        </div>
       </div>
     </div>
   </div>
-  <!-- Channels -->
+  <!-- END BROWSE -->
 </div>
 {%- endblock page_body %}
