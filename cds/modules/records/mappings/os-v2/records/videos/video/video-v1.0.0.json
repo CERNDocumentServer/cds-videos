@@ -366,6 +366,32 @@
           "internal_note": {
             "type": "text"
           },
+          "digitized": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "text"
+              },
+              "format": {
+                "type": "text"
+              },
+              "link_text": {
+                "type": "text"
+              },
+              "public_note": {
+                "type": "text"
+              },
+              "nonpublic_note": {
+                "type": "text"
+              },
+              "md5_checksum": {
+                "type": "text"
+              },
+              "source": {
+                "type": "text"
+              }
+            }
+          },
           "legacy_marc_fields": {
             "type": "object",
             "properties": {

@@ -627,7 +627,10 @@
       "properties": {
         "legacy_report_number": {
           "title": "Legacy record report number.",
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "department": {
           "title": "CERN department.",
@@ -659,6 +662,33 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "digitized": {
+          "title": "Digitized metadata.",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "link_text": {
+              "type": "string"
+            },
+            "public_note": {
+              "type": "string"
+            },
+            "nonpublic_note": {
+              "type": "string"
+            },
+            "md5_checksum": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            }
           }
         },
         "legacy_marc_fields": {
@@ -696,6 +726,7 @@
         }
       },
       "title": "Fields that needs curation.",
+      "description": "This section contains MARC21 metadata fields that could not be mapped during weblectures migration.",
       "type": "object"
     },
     "additional_titles": {

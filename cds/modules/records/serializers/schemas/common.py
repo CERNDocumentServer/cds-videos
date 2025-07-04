@@ -171,16 +171,27 @@ class LegacyMARCFieldsSchema(Schema):
     tag_306 = fields.List(fields.Str(), data_key="306")
 
 
+class DigitizedMetadataSchema(Schema):
+    url = fields.Str()
+    format = fields.Str()
+    link_text = fields.Str()
+    public_note = fields.Str()
+    nonpublic_note = fields.Str()
+    md5_checksum = fields.Str()
+    source = fields.Str()
+
+
 class CurationSchema(StrictKeysSchema):
     """Curation schema."""
 
-    legacy_report_number = fields.Str()
+    legacy_report_number = fields.List(fields.Str())
     department = fields.Str()
     volumes = fields.List(fields.Str())
     physical_location = fields.List(fields.Str())
     physical_medium = fields.List(fields.Str())
     internal_note = fields.List(fields.Str())
     legacy_marc_fields = fields.Nested(LegacyMARCFieldsSchema)
+    digitized = fields.Nested(DigitizedMetadataSchema)
 
 
 class AdditionalTitlesSchema(Schema):
