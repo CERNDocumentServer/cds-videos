@@ -1,0 +1,27 @@
+<div cds-search-results class="row">
+  <div class="col-xs-6 col-sm-4 col-md-2 mb-4"
+       ng-repeat="record in vm.invenioSearchResults.hits.hits track by $index">
+    <a ng-mouseenter="show=true"
+       ng-mouseleave="show=false"
+       class="cds-transition cds-video-title l-w cds-line-height-100"
+       target="_self"
+       ng-href="/record/{{ record.id }}"
+       ng-class="{'cds-video-title-with-play-button': !show}">
+
+      <div class="video-thumbnail-wrapper">
+        <img
+          gif-src="{{ getImagePreview(record, true, [400,220]) }}"
+          img-src="{{ getImagePreview(record, false, [400,220]) }}"
+          ng-src="{{ getImagePreview(record, false, [400,220]) }}"
+          err-src="/static/img/not_found.png"
+          image-progressive-loading
+        />
+      </div>
+
+      <p class="cds-video-title-text">
+        {{ record.metadata.title.title || 'No title' | ellipsis: 60 }}
+      </p>
+    </a>
+
+  </div>
+</div>

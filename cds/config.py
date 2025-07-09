@@ -290,6 +290,7 @@ SEARCH_UI_VIDEO_FEATURED = "templates/cds/video/featured.html"
 SEARCH_UI_VIDEO_MEDIUM = "templates/cds/video/featured-medium.html"
 # Angular template for small size (used for search results)
 SEARCH_UI_VIDEO_SMALL = "templates/cds/video/small.html"
+HOMEPAGE_VIDEO_SMALL = "templates/cds/video/small_video_card.html"
 
 # Invenio-Stats
 # =============
@@ -997,6 +998,44 @@ FRONTPAGE_CHANNELS = [
         "img_filename": "channel_animations.jpg",
         "qs": "keyword=animations",
     },
+]
+
+HOMEPAGE_DYNAMIC_QUERIES = [
+    {
+        "label": "LECTURES",
+        "query":  "/api/records/?size=6&sort=mostrecent&q=collections:Lectures",
+        "qs": "collections=Lectures",
+        "subcategories":  [
+            {
+                "label": "Academic Training Lectures",
+                "qs": 'collections="Lectures::Academic Training Lectures"',
+            },
+            {
+                "label": "CERN Accelerator School Lectures",
+                "qs": 'collections="Lectures::CERN Accelerator School"',
+            },
+            {
+                "label": "E-Learning",
+                "qs": 'collections="Lectures::E-learning modules"',
+            },    
+            {
+                "label": "Conference records",
+                "qs": 'collections="Lectures::Talks, Seminars and Other Events,Conference records"',
+            },     
+            {
+                "label": "Scientific Seminars and Workshops",
+                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Scientific Seminars and Workshops"',
+            },    
+            {
+                "label": "Teacher Programmes",
+                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Teacher Programmes"',
+            },
+            {
+                "label": "Student Lectures",
+                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Student Lectures"',
+            }
+        ]
+    }
 ]
 
 FRONTPAGE_TREND_TOPICS = [
