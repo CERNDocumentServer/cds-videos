@@ -78,8 +78,55 @@
   </div>
   <!-- Recent videos and trends -->
 
+  <!-- SECTIONS -->
+  {% for section in config.HOMEPAGE_DYNAMIC_QUERIES %}
+    <div class="bg-w pt-20 cds-content-section">
+      <div class="{{ container_class }}">
+        <div class="cds-title-section pb-0 custom-flex-row">
+          <div class="title-wrapper">
+            <h2 class="cds-title-section-decoration bt bw-2 mb-5 pt-10">
+              {{ _(section.label) }}
+            </h2>
+          </div>
+
+          <a href="/search?q={{ section.qs }}" class="explore-link t-b">
+            {{ _('Explore all') }} <i class="fa fa-chevron-right"></i>
+          </a>
+        </div>
+
+        {% if section.subcategories %}
+        <div class="cds-tags cds-home-tags cds-tags-custom pb-20">
+          <ul >
+            {% for sub in section.subcategories %}
+            <li><a href="/search?q={{ sub.qs }}">{{ _(sub.label) }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div id="cds-dynamic-results-{{ loop.index }}" class="cds-dynamic-results">
+          <invenio-search
+            disable-url-handler="true"
+            search-endpoint="{{ section.query }}"
+          >
+            <invenio-search-loading
+              template="{{ url_for('static', filename=config.SEARCH_UI_JSTEMPLATE_LOADING) }}"
+              message=""
+            ></invenio-search-loading>
+            <invenio-search-results
+              template="{{ url_for('static', filename=config.HOMEPAGE_VIDEO_SMALL) }}"
+            >
+            </invenio-search-results>
+          </invenio-search>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  <!-- END SECTIONS -->
+
+
   <!-- Channels -->
-  <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pt-20 pb-20">
+  <div id="cds-recent-videos" class="cds-home-recent-videos bg-w cds-content-section pb-20">
     <div class="{{container_class}}">
       <div class="row">
         <div class="col-md-12">
