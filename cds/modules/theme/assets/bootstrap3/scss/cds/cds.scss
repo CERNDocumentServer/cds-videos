@@ -314,6 +314,35 @@ a.cds-anchor:hover{
   align-items: center;
 }
 
+.cds-tags-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 5px;
+
+    li a {
+    max-width: 400px !important;
+    background-color: transparent !important;
+    border: 1px solid $cds-primary-color !important;
+    color: $cds-primary-color !important;
+    &:hover {
+      background-color:lighten($cds-primary-color, 10%) !important;
+      color: #fff !important;
+    }
+  }  
+}
+
+.custom-flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cds-video-title-text {
+  color: $cds-primary-color !important;
+  min-height: 3em;
+}
+
 /////////
 
 // /search

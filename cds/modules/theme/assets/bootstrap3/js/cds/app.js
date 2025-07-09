@@ -131,4 +131,7 @@ angular.element(document).ready(function () {
     ["cds", "invenioSearch"],
     { strictDi: true }
   );
+  document.querySelectorAll(".cds-dynamic-results").forEach((el) => {
+    angular.bootstrap(el, ["cds", "invenioSearch"], { strictDi: true });
+  });
 });
