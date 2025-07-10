@@ -502,11 +502,11 @@ class Project(CDSDeposit):
         data.setdefault("videos", [])
         data.setdefault("_cds", {})
         data.setdefault("_access", {})
-        access_update = data["_access"].setdefault("update", [])
+        data["_access"].setdefault("update", [])
         try:
-            if  current_user.email not in access_update:
+            if  current_user.email not in data["_access"]["update"]:
                 # Add the current user to the ``_access.update`` list
-                access_update.append(current_user.email)
+                data["_access"]["update"].append(current_user.email)
         except AttributeError:
             current_app.logger.warning(
                 "No current user found, _access.update will stay empty."

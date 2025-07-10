@@ -47,6 +47,7 @@ class KeywordsSchema(Schema):
 
     name = fields.Str()
     value = fields.Dict()
+    source = fields.Str()
 
     @validates_schema
     def validate_keyword_schema(self, data, **kwargs):

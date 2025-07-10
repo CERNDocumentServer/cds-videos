@@ -255,14 +255,17 @@ def on_identity_changed(sender, identity):
         disconnect_identity(identity)
         return
 
-    remote = g.get("oauth_logged_in_with_remote", None)
-    if not remote or remote.name != "cern_cdsvideos_openid":
-        # signal coming from another remote app
-        return
-
+    # This is not ideal: it assumes that the personal token used this CERN contrib
+    # method to login, which might not be the case.
+    # However, it is not harmful because it will simply fetch the extra roles cached
+    # in the DB.
+    # Changing this requires large refactoring.
     logged_in_via_token = hasattr(current_user, "login_via_oauth2") and getattr(
         current_user, "login_via_oauth2"
     )
+
+    remote = g.get("oauth_logged_in_with_remote", None)
+    logged_in_with_cern_openid = remote and remote.name == "cern_cdsvideos_openid"
 
     client_id = current_app.config["CERN_APP_OPENID_CREDENTIALS"]["consumer_key"]
     remote_account = RemoteAccount.get(
@@ -271,7 +274,12 @@ def on_identity_changed(sender, identity):
     roles = []
     groups = []
 
-    if remote_account and not logged_in_via_token:
+    if remote_account and logged_in_via_token:
+        # use cached roles, fetched from the DB
+        roles.extend(remote_account.extra_data["roles"])
+        groups.extend(remote_account.extra_data["groups"])
+    elif remote_account and logged_in_with_cern_openid:
+        # new login, fetch roles remotely
         refresh = current_app.config["OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA"]
         if refresh:
             resource = get_resource(remote)
@@ -283,10 +291,7 @@ def on_identity_changed(sender, identity):
         else:
             roles.extend(remote_account.extra_data["roles"])
             groups.extend(remote_account.extra_data["groups"])
-    elif remote_account and logged_in_via_token:
-        roles.extend(remote_account.extra_data["roles"])
-        groups.extend(remote_account.extra_data["groups"])
-
+    # must be always called, to add the user email in the roles
     extend_identity(identity, roles, groups)
 
 
