@@ -95,5 +95,18 @@
     "_access": {
       "read": ["alice-secretariat@cern.ch"]
     }
+  },
+  {
+    "name": "LECTURES",
+    "types": ["VIDEO"],
+    "access": {
+      "public": true,
+      "restricted": [],
+      "responsible": ["weblecture-service@cern.ch"]
+    },
+    "_record_type": ["PROJECT"],
+    "_access": {
+      "read": ["weblecture-service@cern.ch"]
+    }
   }
 ]
