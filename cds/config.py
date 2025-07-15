@@ -1002,8 +1002,8 @@ FRONTPAGE_CHANNELS = [
 
 HOMEPAGE_DYNAMIC_QUERIES = [
     {
-        "label": "LECTURES",
-        "query":  "/api/records/?size=6&sort=mostrecent&q=collections:Lectures",
+        "label": "LATEST LECTURES",
+        "query":  "/api/records/?size=4&sort=mostrecent&q=collections:Lectures",
         "qs": "collections=Lectures",
         "subcategories":  [
             {
