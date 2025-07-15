@@ -751,3 +751,17 @@ app.filter("assembleShareURL", [
     };
   },
 ]);
+
+
+angular.module("cds").directive("bootstrapInvenioSearch", function () {
+  return {
+    restrict: "A",
+    link: function (scope, element) {
+      try {
+        angular.bootstrap(element[0], ["cds", "invenioSearch"], { strictDi: true });
+      } catch (e) {
+        if (!/already bootstrapped/.test(e.message)) throw e;
+      }
+    },
+  };
+});

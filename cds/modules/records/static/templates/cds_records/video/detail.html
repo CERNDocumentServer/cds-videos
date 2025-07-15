@@ -202,6 +202,10 @@
           <!-- More -->
           <div class="cds-detail-more cds-detail-video-more px-20">
             <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
+            <ng-include 
+              ng-if="(record.metadata.related_identifiers | filter:{scheme:'indico'}).length > 0" 
+              src="'/static/templates/cds_records/video/related_indico_section.html'">
+            </ng-include>           
           </div>
           <!-- /More -->
         </div>
