@@ -93,11 +93,13 @@
     {% set user_action_media_download_url = '' %}
     {% endif %}
     {# TODO: remove and replace with jinja ? #}
+    {% set related_query_url = config.CDS_RECORDS_RELATED_QUERY or '' %}
     <cds-record-view
         template="{{ url_for('static', filename='templates/cds_records/%s/detail.html' | format(type)) }}"
         record='/api/record/{{record.recid}}'
         record-views="{{ record_view_url }}"
         media-download-event-url="{{ user_action_media_download_url }}"
+        related-query-url="{{ related_query_url }}"
     ></cds-record-view>
   </div>
   <!-- Recent videos -->

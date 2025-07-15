@@ -26,6 +26,7 @@ import "./cdsRecord";
 import "angular-sanitize";
 import "angular-strap";
 import "invenio-files-js/dist/invenio-files-js";
+import "invenio-search-js/dist/invenio-search-js";
 import "ngmodal";
 import "./user_actions_logger";
 
@@ -41,6 +42,7 @@ angular.element(document).ready(function () {
       "ngModal",
       "ngclipboard",
       "ngSanitize",
+      "invenioSearch",
     ],
     { strictDi: true }
   );
