@@ -212,6 +212,8 @@ function cdsRecordView($http) {
   function link(scope, element, attrs, vm) {
     scope.mediaDownloadEventUrl = attrs.mediaDownloadEventUrl;
 
+    scope.relatedQueryUrl = attrs.relatedQueryUrl;
+
     // Get the record object and make it available to the scope
     $http.get(attrs.record).then(
       function (response) {

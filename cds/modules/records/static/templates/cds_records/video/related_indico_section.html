@@ -1,0 +1,39 @@
+<div
+  ng-init="indicoIdentifier = (record.metadata.related_identifiers | filter:{scheme:'indico'})[0]"
+>
+  <div
+    class="cds-dynamic-results bg-w custom-video-style"
+    bootstrap-invenio-search
+  >
+    <invenio-search
+      search-endpoint="{{ relatedQueryUrl.replace('%s', 'related_identifiers.identifier:' + indicoIdentifier.identifier + ' AND -recid:' + record.metadata.recid) }}"
+      disable-url-handler="true"
+    >
+      <div
+        ng-if="vm.invenioSearchResults.hits && vm.invenioSearchResults.hits.total > 0"
+      >
+        <hr />
+        <div class="cds-title-section custom-flex-row">
+          <h4 class="cds-title-section-decoration bw-2 mb-10">
+            More videos from this Indico event
+          </h4>
+          <a
+            ng-href="/search?q=related_identifiers.identifier:{{ indicoIdentifier.identifier }}"
+            class="explore-link t-b"
+          >
+            Explore all <i class="fa fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <invenio-search-loading
+        template="/static/templates/cds_deposit/loading.html"
+        message=""
+      ></invenio-search-loading>
+
+      <invenio-search-results
+        template="/static/templates/cds/video/medium.html"
+      ></invenio-search-results>
+    </invenio-search>
+  </div>
+</div>
