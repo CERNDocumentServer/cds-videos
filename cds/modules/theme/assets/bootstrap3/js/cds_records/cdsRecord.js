@@ -26,6 +26,7 @@
  */
 
 import angular from "angular";
+import { WebVTT } from "vtt.js";
 
 import { getCookie } from "../getCookie";
 
@@ -38,7 +39,7 @@ import { getCookie } from "../getCookie";
  * @description
  *    CDS record controller.
  */
-function cdsRecordController($scope, $sce, $http) {
+function cdsRecordController($scope, $sce, $http, $timeout) {
   // Parameters
 
   // Assign the controller to `vm`
@@ -53,9 +54,214 @@ function cdsRecordController($scope, $sce, $http) {
   // Record Warn - if the cdsRecord has any warning
   vm.cdsRecordWarning = null;
 
+  $scope.transcriptsByLanguage = {};
+  $scope.transcript = [];
+  $scope.filteredTranscript = [];
+  $scope.selectedTranscriptLanguage = null;
+
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
     "X-CSRFToken": getCookie("csrftoken"),
+  };
+
+  $scope.seekTo = function (timecode) {
+    const player = window.top.player;
+    if (player) {
+      player.currentTime = timecode;
+      if (player.paused) {
+        player.play().catch(function (err) {
+          console.warn("Autoplay might be blocked by the browser:", err);
+        });
+      }
+    } else {
+      console.warn("Player not available");
+    }
+  };
+
+  $scope.toggleTranscript = function () {
+    $scope.showTranscript = !$scope.showTranscript;
+
+    // Jump to Transcriptions section
+    if ($scope.showTranscript) {
+      setTimeout(function () {
+        const el = document.getElementById("transcriptionsSection");
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const isVisible =
+            rect.top >= 0 &&
+            rect.bottom <=
+              (window.innerHeight || document.documentElement.clientHeight);
+
+          if (!isVisible) {
+            const topOffset = rect.top + window.scrollY - 60;
+            window.scrollTo({ top: topOffset, behavior: "smooth" });
+          }
+        }
+      }, 100);
+    }
+  };
+
+  $scope.parseVttFromUrl = function (url, type, lang) {
+    fetch(url)
+      .then((res) => res.text())
+      .then(function (vttText) {
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        const cues = {};
+
+        parser.oncue = function (cue) {
+          cues[cue.text] = {
+            start: cue.startTime,
+            end: cue.endTime,
+            text: cue.text,
+          };
+        };
+
+        parser.parse(vttText);
+        parser.flush();
+
+        $timeout(function () {
+          if (type === "transcript") {
+            $scope.transcriptsByLanguage[lang] = cues;
+
+            // Use the first one that loads
+            if (!$scope.selectedTranscriptLanguage) {
+              $scope.transcript = cues;
+              $scope.filterTranscript();
+              $scope.selectedTranscriptLanguage = lang;
+            }
+          } else {
+            console.warn("Unknown type for VTT parsing:", type);
+          }
+        });
+      })
+      .catch(function (err) {
+        console.error("VTT parsing failed", err);
+      });
+  };
+
+  $scope.transcriptSearch = "";
+
+  $scope.filterTranscript = function () {
+    var searchTerm = $scope.transcriptSearch.toLowerCase();
+    $scope.filteredTranscript = Object.values($scope.transcript).filter(
+      function (line) {
+        return (
+          !searchTerm ||
+          (line.text && line.text.toLowerCase().indexOf(searchTerm) !== -1)
+        );
+      }
+    );
+  };
+
+  $scope.$watch("transcript", function (newVal) {
+    if (newVal) $scope.filterTranscript();
+  });
+
+  $scope.$watch("record", function (newVal) {
+    if (newVal) {
+      $scope.initVttLoad(newVal);
+    }
+  });
+
+  $scope.initVttLoad = function (record) {
+    console.log("Initializing VTT load for record:", record);
+    const files = record.metadata._files || [];
+
+    // Subtitles (transcripts)
+    const transcriptVttFiles = files.filter(
+      (f) => f.context_type === "subtitle" && f.content_type === "vtt"
+    );
+
+    // Step 2: If found, load it
+    transcriptVttFiles.forEach((file) => {
+      const lang = file.tags.language || "unknown";
+      if (file.links?.self) {
+        $scope.parseVttFromUrl(file.links.self, "transcript", lang);
+      } else {
+        console.warn("No subtitle file found.");
+      }
+    });
+  };
+
+  $scope.setTranscriptLanguage = function (lang) {
+    if ($scope.transcriptsByLanguage[lang]) {
+      $scope.transcript = $scope.transcriptsByLanguage[lang];
+      $scope.filterTranscript();
+    } else {
+      console.warn("Transcript not found for language:", lang);
+    }
+  };
+
+  // Follow transcriptions
+  $scope.currentTranscriptLine = null;
+  function getScrollableParent(el) {
+    while (el && el !== document.body) {
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if (overflowY === "auto" || overflowY === "scroll") {
+        return el;
+      }
+      el = el.parentElement;
+    }
+    return null;
+  }
+  function updateTranscriptHighlight() {
+    const player = window.top.player;
+    if (!player || !$scope.transcript) return;
+
+    const currentTime = player.currentTime;
+    const lines = Object.values($scope.transcript);
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (currentTime >= line.start && currentTime <= line.end) {
+        if ($scope.currentTranscriptLine !== line) {
+          $scope.currentTranscriptLine = line;
+          $scope.$applyAsync(); // Trigger Angular update
+
+          // Auto-scroll to the active line
+          setTimeout(() => {
+            const el = document.querySelector(".transcript-line.active");
+            const container = getScrollableParent(el);
+
+            if (el && container) {
+              const elRect = el.getBoundingClientRect();
+              const containerRect = container.getBoundingClientRect();
+
+              const currentScroll = container.scrollTop;
+              const topOffset = elRect.top - containerRect.top;
+
+              const targetScroll = currentScroll + topOffset - 10;
+
+              container.scrollTo({
+                top: targetScroll,
+                behavior: "smooth",
+              });
+            }
+          }, 50);
+        }
+        return;
+      }
+    }
+
+    $scope.currentTranscriptLine = null;
+    $scope.$applyAsync();
+  }
+
+  let transcriptTimer = setInterval(updateTranscriptHighlight, 100);
+
+  $scope.$on("$destroy", function () {
+    clearInterval(transcriptTimer);
+  });
+
+  $scope.convertToMinutesSeconds = function (seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+
+    // Pad with zero if needed
+    const paddedSecs = secs < 10 ? "0" + secs : secs;
+
+    return `${minutes}:${paddedSecs}`;
   };
 
   /**
@@ -180,7 +386,7 @@ function cdsRecordController($scope, $sce, $http) {
   $scope.$on("cds.record.loading.stop", cdsRecordLoadingStop);
 }
 
-cdsRecordController.$inject = ["$scope", "$sce", "$http"];
+cdsRecordController.$inject = ["$scope", "$sce", "$http", "$timeout"];
 
 ////////////
 

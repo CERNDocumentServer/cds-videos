@@ -64,7 +64,7 @@
                   <i class="fa fa-info-circle"></i>
                 </a>
               </h1>
-              <modal-dialog show="showTranslations" dialog-title="Available transations" >
+              <modal-dialog show="showTranslations" dialog-title="Available translations" >
                 <div ng-repeat="translation in record.metadata.translations">
                   <strong>{{translation.language | isoToLanguage}}</strong>
                   <h4>{{translation.title.title}}</h4>
@@ -201,6 +201,24 @@
           <!-- /Description -->
           <!-- More -->
           <div class="cds-detail-more cds-detail-video-more px-20">
+            <!-- Show Transcriptions -->
+            <div class="mb-20"
+                ng-show="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0" 
+              >
+              <hr />
+              <div class="transcription-text">
+                <p><strong>Transcriptions</strong></p>
+                <small class="text-muted">Follow along or search within the transcript.</small>
+              </div>
+
+              <div class="transcription-button-wrapper pt-10">
+                <button class="btn btn-sm btn-default transcription-button"
+                        ng-click="toggleTranscript()">
+                  {{ showTranscript ? 'Hide Transcriptions' : 'Show Transcriptions' }}
+                </button>
+              </div>
+            </div>
+            <!-- Show Transcriptions -->
             <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
             <ng-include 
               ng-if="(record.metadata.related_identifiers | filter:{scheme:'indico'}).length > 0" 
@@ -216,10 +234,59 @@
           <ng-include src="'/static/templates/cds_records/video/share.html'"></ng-include>
         </div>
       </div>
-      <!-- /Section -->
       <!-- /Left Column -->
       <!-- Right Column -->
       <div class="col-md-4">
+        <!-- Section Transcriptions -->
+        <div 
+          id="transcriptionsSection"
+          class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b"
+          ng-show="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript" >
+          <div class="cds-detail-title cds-detail-video-title pb-20">
+            <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-0">
+              <i class="fa fa-align-left"></i> Transcription
+            </h3>
+          </div>
+            <input type="text"
+                class="form-control mb-10"
+                placeholder="Search transcript..."
+                ng-model="transcriptSearch"
+                ng-change="filterTranscript()">
+          <div>
+            <div
+              class="panel panel-default" 
+              style="max-height: 300px; overflow-y: auto;"
+              ng-show="filteredTranscript.length > 0">
+              <div class="panel-body p-0">
+                <ul class="list-unstyled mb-0">
+                  <li ng-repeat="line in filteredTranscript"
+                      ng-click="seekTo(line.start)"
+                      class="mb-10 transcript-line"
+                      ng-class="{ 'active': currentTranscriptLine === line }"
+                      style="cursor: pointer;">
+                      <a>
+                        <strong>{{ convertToMinutesSeconds(line.start) }} - {{ convertToMinutesSeconds(line.end) }}</strong>
+                      </a>
+                    <div class="cds-deposit-frame-thumbnail-label">
+                      {{ line.text }}
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>  
+            <div class="form-group mb-10">
+              <label for="languageSelect">Transcript Language:</label>
+              <select
+                id="languageSelect"
+                class="form-control"
+                ng-model="selectedTranscriptLanguage"
+                ng-options="lang as (lang | isoToLanguage) for (lang, _) in transcriptsByLanguage"
+                ng-change="setTranscriptLanguage(selectedTranscriptLanguage)"
+              ></select>
+            </div>
+          </div>
+        </div>
+        <!-- /Section Transcriptions -->
         <!-- Section Download -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>
