@@ -1003,9 +1003,9 @@ FRONTPAGE_CHANNELS = [
 HOMEPAGE_DYNAMIC_QUERIES = [
     {
         "label": "LATEST LECTURES",
-        "query":  "/api/records/?size=4&sort=mostrecent&q=collections:Lectures",
+        "query": "/api/records/?size=4&sort=mostrecent&q=collections:Lectures",
         "qs": "collections=Lectures",
-        "subcategories":  [
+        "subcategories": [
             {
                 "label": "Academic Training Lectures",
                 "qs": 'collections="Lectures::Academic Training Lectures"',
@@ -1017,15 +1017,15 @@ HOMEPAGE_DYNAMIC_QUERIES = [
             {
                 "label": "E-Learning",
                 "qs": 'collections="Lectures::E-learning modules"',
-            },    
+            },
             {
                 "label": "Conference records",
                 "qs": 'collections="Lectures::Talks, Seminars and Other Events,Conference records"',
-            },     
+            },
             {
                 "label": "Scientific Seminars and Workshops",
                 "qs": 'collections="Lectures::Talks, Seminars and Other Events::Scientific Seminars and Workshops"',
-            },    
+            },
             {
                 "label": "Teacher Programmes",
                 "qs": 'collections="Lectures::Talks, Seminars and Other Events::Teacher Programmes"',
@@ -1033,8 +1033,8 @@ HOMEPAGE_DYNAMIC_QUERIES = [
             {
                 "label": "Student Lectures",
                 "qs": 'collections="Lectures::Talks, Seminars and Other Events::Student Lectures"',
-            }
-        ]
+            },
+        ],
     }
 ]
 
@@ -1297,6 +1297,7 @@ PREVIEWER_BASE_TEMPLATE = "cds_previewer/base.html"
 # Licence key and base URL for THEO player
 THEOPLAYER_LIBRARY_LOCATION = None
 THEOPLAYER_LICENSE = None
+
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = (
     "https://wowza.cern.ch/cds/_definist_/smil:" "{filepath}/playlist.m3u8"
@@ -1672,3 +1673,6 @@ CDS_LDAP_URL = "ldap://xldap.cern.ch"
 
 # Sets the location to share the video files among the different tasks
 CDS_FILES_TMP_FOLDER = "/tmp/videos"
+
+# TODO: needs latest files-rest enabling range requests
+FILES_REST_ALLOW_RANGE_REQUESTS = True
