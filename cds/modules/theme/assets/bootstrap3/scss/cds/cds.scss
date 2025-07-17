@@ -1116,3 +1116,19 @@ div[cds-search-results] {
     }
   }
 }
+
+.transcript-line:hover,
+.transcript-line.active  {
+  background-color: $gray-lighter; 
+}
+
+.transcription-button {
+  border-radius: 9px !important;
+  border: 1px solid $cds-primary-color !important;
+  color: $cds-primary-color !important;
+}
+
+.transcription-button:hover {
+  background-color: $cds-primary-color !important;
+  color: #fff !important;
+}

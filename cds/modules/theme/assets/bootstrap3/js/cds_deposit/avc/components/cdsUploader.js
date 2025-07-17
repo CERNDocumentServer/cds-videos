@@ -314,9 +314,12 @@ function cdsUploaderCtrl(
         if (extraHeaders) {
           file.headers = extraHeaders;
         }
-        file.headers = {
-          "X-Invenio-File-Tags": "context_type=additional_file",
-        };
+
+        if (!extraHeaders || !("X-Invenio-File-Tags" in extraHeaders)) {
+          file.headers = {
+            "X-Invenio-File-Tags": "context_type=additional_file",
+          };
+        }
       });
 
       // Find if any of the existing files has been replaced
@@ -543,6 +546,15 @@ function cdsUploaderCtrl(
     // i.e. jessica_jones-en.vtt
     var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2}).vtt/) || [];
     return match.length > 1 && match[1] in isoLanguages;
+  };
+
+  this.validateAdditionalFiles = function (_file) {
+    // If it's a .vtt file, validate as subtitle
+    if (_file.name.toLowerCase().endsWith(".vtt")) {
+      return this.validateSubtitles(_file);
+    }
+    // Accept other types
+    return true;
   };
 
   this.updateFile = function (key, data, force) {
