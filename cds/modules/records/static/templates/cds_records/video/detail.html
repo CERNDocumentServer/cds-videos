@@ -4,7 +4,7 @@
 <div class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Video Section -->
   <div ng-if="record.metadata.recid && (record | findMaster).key" class="bg-b">
-    <div class="cds-video-iframe text-center">
+    <div class="cds-video-iframe text-center" ng-show="!showTranscript" >
       <iframe scrolling="no"
               width="100%"
               height="100%"
@@ -13,7 +13,74 @@
               allowfullscreen>
       </iframe>
     </div>
+    <div class="container-fluid">
+      <div ng-show="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript" class="row">
+        <div class="col-md-8">
+          <div class="cds-video-iframe text-center">
+            <iframe scrolling="no"
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    ng-src="{{ '' | previewIframeSrc: record.metadata.recid:(record | findMaster).key }}"
+                    allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        <!-- Section Transcriptions -->
+        <div class="col-md-4 bg-b">
+          <div 
+            id="transcriptionsSection"
+            class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b"
+          >
+            <div class="pb-20">
+              <h3 class="bt bw-1 pt-10 mb-0">
+                <i class="fa fa-align-left"></i> Transcription
+                <div class="pull-right"><i class="fa fa-close transcription-close" ng-click="toggleTranscript()"></i></div>
+              </h3>
+            </div>
+            <input type="text"
+                class="form-control mb-10"
+                placeholder="Search transcript..."
+                ng-model="transcriptSearch"
+                ng-change="filterTranscript()">
+          <div>
+        <div
+            class="panel panel-default" 
+            style="max-height: 300px; overflow-y: auto;"
+            ng-show="filteredTranscript.length > 0">
+            <div class="panel-body p-0">
+              <ul class="list-unstyled mb-0">
+                <li ng-repeat="line in filteredTranscript"
+                    ng-click="seekTo(line.start)"
+                    class="mb-10 transcript-line"
+                    ng-class="{ 'active': currentTranscriptLine === line }"
+                    style="cursor: pointer;">
+                    <a>
+                      <strong>{{ convertToMinutesSeconds(line.start) }} - {{ convertToMinutesSeconds(line.end) }}</strong>
+                    </a>
+                  <div class="cds-deposit-frame-thumbnail-label">
+                    {{ line.text }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>  
+          <div class="form-group mb-10">
+            <label for="languageSelect">Transcript Language:</label>
+            <select
+              id="languageSelect"
+              class="form-control"
+              ng-model="selectedTranscriptLanguage"
+              ng-options="lang as (lang | isoToLanguage) for (lang, _) in transcriptsByLanguage"
+              ng-change="setTranscriptLanguage(selectedTranscriptLanguage)"
+            ></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
   </div>
+    <!-- /Section Transcriptions -->
   <!-- /Video Section -->
   <!-- Metadata Section -->
   <div class="container-fluid">
@@ -181,6 +248,7 @@
                    </li>
                  </ul>
                </div>
+               <!-- License -->
               </div>
             </div>
             <!-- Related links -->
@@ -237,56 +305,6 @@
       <!-- /Left Column -->
       <!-- Right Column -->
       <div class="col-md-4">
-        <!-- Section Transcriptions -->
-        <div 
-          id="transcriptionsSection"
-          class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b"
-          ng-show="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript" >
-          <div class="cds-detail-title cds-detail-video-title pb-20">
-            <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-0">
-              <i class="fa fa-align-left"></i> Transcription
-            </h3>
-          </div>
-            <input type="text"
-                class="form-control mb-10"
-                placeholder="Search transcript..."
-                ng-model="transcriptSearch"
-                ng-change="filterTranscript()">
-          <div>
-            <div
-              class="panel panel-default" 
-              style="max-height: 300px; overflow-y: auto;"
-              ng-show="filteredTranscript.length > 0">
-              <div class="panel-body p-0">
-                <ul class="list-unstyled mb-0">
-                  <li ng-repeat="line in filteredTranscript"
-                      ng-click="seekTo(line.start)"
-                      class="mb-10 transcript-line"
-                      ng-class="{ 'active': currentTranscriptLine === line }"
-                      style="cursor: pointer;">
-                      <a>
-                        <strong>{{ convertToMinutesSeconds(line.start) }} - {{ convertToMinutesSeconds(line.end) }}</strong>
-                      </a>
-                    <div class="cds-deposit-frame-thumbnail-label">
-                      {{ line.text }}
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>  
-            <div class="form-group mb-10">
-              <label for="languageSelect">Transcript Language:</label>
-              <select
-                id="languageSelect"
-                class="form-control"
-                ng-model="selectedTranscriptLanguage"
-                ng-options="lang as (lang | isoToLanguage) for (lang, _) in transcriptsByLanguage"
-                ng-change="setTranscriptLanguage(selectedTranscriptLanguage)"
-              ></select>
-            </div>
-          </div>
-        </div>
-        <!-- /Section Transcriptions -->
         <!-- Section Download -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>
