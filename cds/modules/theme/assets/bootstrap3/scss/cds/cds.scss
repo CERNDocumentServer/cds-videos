@@ -1132,3 +1132,8 @@ div[cds-search-results] {
   background-color: $cds-primary-color !important;
   color: #fff !important;
 }
+
+.transcription-close
+.transcription-close:hover {
+  cursor: pointer;
+}
