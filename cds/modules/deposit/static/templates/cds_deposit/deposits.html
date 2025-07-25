@@ -69,9 +69,9 @@
         <div class="row">
           <div class="col-md-9">
             <ul class="list-inline text-left">
-              <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks)">
-                <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
-                <a ng-click="$ctrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="task === 'file_transcode'"></i></a>
+              <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks) track by task">
+                <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ ::task | taskRepr }}
+                <a ng-click="$ctrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="::task === 'file_transcode'"></i></a>
               </li>
             </ul>
           </div>
@@ -112,7 +112,7 @@
           </cds-form>
           <!-- Published Project -->
           <!-- ADD children -->
-          <div id="{{child._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by $index">
+          <div id="{{child._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by child._deposit.id">
             <cds-deposit
               index="$index + 1"
               id="child._deposit.id"

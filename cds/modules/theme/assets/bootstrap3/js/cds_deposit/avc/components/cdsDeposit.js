@@ -379,6 +379,13 @@ function cdsDepositCtrl(
       if (anyTaskIsRunning) {
         that.fetchFlowTasksStatuses();
       }
+      // Restart polling with appropriate interval if status changed
+      var currentInterval = getPollingInterval();
+      if (that.fetchStatusInterval.$$intervalId && 
+          (anyTaskIsRunning && currentInterval === 15000) || 
+          (!anyTaskIsRunning && currentInterval === 5000)) {
+        setupSmartPolling();
+      }
     };
 
     // Update deposit based on extracted metadata from task
@@ -552,16 +559,35 @@ function cdsDepositCtrl(
     that.videoPreviewer();
     // Update subformat statuses
     that.fetchFlowTasksStatuses();
-    that.fetchStatusInterval = $interval(
-      that.recurrentFetchFlowTasksStatuses,
-      5000
-    );
-    // What the order of contributors and check make it dirty, throttle the
-    // function for 1sec
+    // Smart polling: use different intervals based on task activity
+    var getPollingInterval = function() {
+      var anyTaskIsRunning = that.anyTaskIsRunning();
+      return anyTaskIsRunning ? 5000 : 15000; // 5s when active, 15s when idle
+    };
+    
+    var setupSmartPolling = function() {
+      if (that.fetchStatusInterval) {
+        $interval.cancel(that.fetchStatusInterval);
+      }
+      that.fetchStatusInterval = $interval(
+        that.recurrentFetchFlowTasksStatuses,
+        getPollingInterval()
+      );
+    };
+    
+    setupSmartPolling();
+    // Watch contributors with optimized shallow watching and increased debounce
+    // Use shallow watching and manual comparison for better performance
+    var lastContributorsState = null;
     $scope.$watch(
       "$ctrl.record.contributors",
-      _.throttle(that.setDirty, 1000),
-      true
+      _.debounce(function(newVal, oldVal) {
+        if (newVal && (!lastContributorsState || !angular.equals(newVal, lastContributorsState))) {
+          lastContributorsState = angular.copy(newVal);
+          that.setDirty();
+        }
+      }, 2000),
+      false // Changed from deep watching (true) to shallow watching (false)
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
       $scope.$applyAsync(function () { // Manually trigger UI updates

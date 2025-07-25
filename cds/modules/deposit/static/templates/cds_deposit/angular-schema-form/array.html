@@ -16,7 +16,7 @@
       <li
         class="{{ form.fieldHtmlClass }} list-group-item"
         ng-class="{'deposit-inline': form.inline, 'bg-warn': form.firstItemMessage && $first}"
-        ng-repeat="item in modelArray track by $index">
+        ng-repeat="item in modelArray track by (item.id || item.uuid || $index)">
         <div
           ng-hide="(form.firstItemMessage && $first)"
           class="close-container pull-right"
@@ -32,8 +32,8 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="pb-20" ng-if="form.firstItemMessage && $first">
-          <span class="label label-default">{{form.firstItemMessage}}</span>
+        <div class="pb-20" ng-if="::form.firstItemMessage && $first">
+          <span class="label label-default">{{::form.firstItemMessage}}</span>
         </div>
         <div class="clearfix"></div>
         <sf-decorator
@@ -48,7 +48,7 @@
       <li
         class="{{ form.fieldHtmlClass }} list-group-item"
         ng-class="{'deposit-inline': form.inline, 'bg-warn': form.firstItemMessage && $first}"
-        ng-repeat="item in modelArray track by $index">
+        ng-repeat="item in modelArray track by (item.id || item.uuid || $index)">
         <div
           ng-hide="(form.firstItemMessage && $first)"
           class="close-container pull-right"
@@ -64,8 +64,8 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="pb-20" ng-if="form.firstItemMessage && $first">
-          <span class="label label-default">{{form.firstItemMessage}}</span>
+        <div class="pb-20" ng-if="::form.firstItemMessage && $first">
+          <span class="label label-default">{{::form.firstItemMessage}}</span>
         </div>
         <div class="clearfix"></div>
         <sf-decorator
