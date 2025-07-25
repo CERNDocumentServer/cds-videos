@@ -58,6 +58,7 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.transcript = [];
   $scope.filteredTranscript = [];
   $scope.selectedTranscriptLanguage = null;
+  $scope.transcriptSearch = "";
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
@@ -139,18 +140,15 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
       });
   };
 
-  $scope.transcriptSearch = "";
-
   $scope.filterTranscript = function () {
-    var searchTerm = $scope.transcriptSearch.toLowerCase();
-    $scope.filteredTranscript = Object.values($scope.transcript).filter(
-      function (line) {
-        return (
-          !searchTerm ||
-          (line.text && line.text.toLowerCase().indexOf(searchTerm) !== -1)
-        );
-      }
-    );
+    var searchTerm = this.transcriptSearch.toLowerCase();
+    $scope.filteredTranscript = Object.values($scope.transcript).filter(function (
+      line
+    ) {
+      return (
+        !searchTerm || (line.text && line.text.toLowerCase().indexOf(searchTerm) !== -1)
+      );
+    });
   };
 
   $scope.$watch("transcript", function (newVal) {
@@ -164,7 +162,6 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   });
 
   $scope.initVttLoad = function (record) {
-    console.log("Initializing VTT load for record:", record);
     const files = record.metadata._files || [];
 
     // Subtitles (transcripts)
@@ -473,9 +470,7 @@ cdsRecordView.$inject = ["$http"];
 
 // Setup everything
 
-angular
-  .module("cdsRecord.directives", [])
-  .directive("cdsRecordView", cdsRecordView);
+angular.module("cdsRecord.directives", []).directive("cdsRecordView", cdsRecordView);
 
 angular
   .module("cdsRecord.controllers", [])
