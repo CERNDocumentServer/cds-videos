@@ -499,6 +499,26 @@ body.cds-deposit-edit-page {
       // Better button spacing
       .btn {
         margin: 5px;
+        border-radius: 6px;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        &.btn-success {
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          border-color: #28a745;
+        }
+        
+        &.btn-warning {
+          background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+          border-color: #ffc107;
+          color: #212529;
+        }
         
         &.btn-sm {
           padding: 6px 12px;
@@ -531,6 +551,26 @@ body.cds-deposit-edit-page {
       .pull-right {
         .btn {
           margin-left: 8px;
+          border-radius: 6px;
+          font-weight: 500;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+          transition: all 0.2s ease;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          }
+          
+          &.btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-color: #28a745;
+          }
+          
+          &.btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            border-color: #ffc107;
+            color: #212529;
+          }
         }
       }
     }
@@ -648,6 +688,52 @@ body.cds-deposit-edit-page {
             opacity: 0.7;
           }
           
+          // Published video styling
+          &.video-published {
+            background-color: #e8f5e9;
+            border-left-color: #28a745;
+            
+            .video-title {
+              color: #155724;
+            }
+            
+            &:hover {
+              background-color: #d4edda;
+              border-left-color: #28a745;
+            }
+            
+            &.active {
+              background-color: #c3e6cb;
+              border-left-color: #28a745;
+              
+              .video-title {
+                color: #155724;
+                font-weight: 600;
+              }
+            }
+          }
+          
+          // Editing (draft) video styling
+          &.video-editing {
+            background-color: #fff3cd;
+            border-left-color: #fd7e14;
+            
+            &:hover {
+              background-color: #ffeaa7;
+              border-left-color: #fd7e14;
+            }
+            
+            &.active {
+              background-color: #ffe082;
+              border-left-color: #fd7e14;
+              
+              .video-title {
+                color: #8a4800;
+                font-weight: 600;
+              }
+            }
+          }
+          
           .video-item-content {
             display: flex;
             align-items: center;
@@ -687,82 +773,168 @@ body.cds-deposit-edit-page {
             min-width: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
+            gap: 8px;
             
-            .video-title-wrapper {
-              flex: 1;
+            .video-header-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 12px;
               
-              .video-title {
-                margin: 0 0 4px 0;
-                font-size: 13px;
-                font-weight: 500;
-                line-height: 1.2;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                line-clamp: 2;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-height: 2.4em;
-              }
-              
-              .video-info-line {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
+              .video-title-section {
+                flex: 1;
+                min-width: 0;
                 
-                .video-number {
-                  font-size: 11px;
-                  color: #6c757d;
+                .video-title {
+                  margin: 0 0 4px 0;
+                  font-size: 13px;
                   font-weight: 500;
+                  line-height: 1.3;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-height: 2.6em;
                 }
                 
-                .report-number {
-                  padding: 1px 4px;
-                  background: #e3f2fd;
-                  border: 1px solid #bbdefb;
-                  border-radius: 2px;
-                  font-size: 10px;
-                  color: #1976d2;
-                  font-weight: 500;
+                .video-meta {
+                  .video-number {
+                    font-size: 10px;
+                    color: #6c757d;
+                    font-weight: 500;
+                  }
+                }
+              }
+              
+              .video-actions {
+                flex-shrink: 0;
+                display: flex;
+                align-items: flex-end;
+                flex-direction: column;
+                gap: 4px;
+                min-width: 80px;
+                text-align: right;
+                
+                .video-status-published {
+                  display: flex;
+                  align-items: flex-end;
+                  flex-direction: column;
+                  gap: 4px;
+                  width: 100%;
+                  
+                  .label {
+                    font-size: 9px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-weight: 500;
+                    align-self: flex-end;
+                  }
+                  
+                  .visit-video-btn {
+                    font-size: 9px;
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    text-decoration: none;
+                    background: #007bff;
+                    border-color: #007bff;
+                    color: #fff;
+                    transition: all 0.2s ease;
+                    align-self: flex-end;
+                    
+                    &:hover {
+                      background: #0056b3;
+                      border-color: #0056b3;
+                      color: #fff;
+                      text-decoration: none;
+                      transform: translateY(-1px);
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                    }
+                    
+                    i {
+                      margin-right: 2px;
+                      font-size: 8px;
+                    }
+                  }
+                }
+                
+                .video-status-editing {
+                  width: 100%;
+                  text-align: right;
+                  
+                  .label {
+                    font-size: 9px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-weight: 500;
+                  }
                 }
               }
             }
             
-            .video-status-section {
-              .status-badge-wrapper {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 4px;
-                
-                .label {
-                  font-size: 9px;
-                  padding: 2px 5px;
-                  border-radius: 3px;
-                  font-weight: 500;
-                }
-                
-                .file-info {
-                  font-size: 10px;
-                  color: #6c757d;
-                  background: #f8f9fa;
-                  padding: 1px 4px;
-                  border-radius: 2px;
-                  font-weight: 500;
-                }
-              }
-              
+            .video-progress-section {
               .progress-xs {
-                height: 2px;
+                height: 3px;
                 margin: 0;
                 background-color: #e9ecef;
-                border-radius: 1px;
+                border-radius: 2px;
                 
                 .progress-bar {
-                  line-height: 2px;
+                  line-height: 3px;
+                }
+              }
+            }
+            
+            .video-description-section {
+              .video-description {
+                position: relative;
+                
+                .description-text {
+                  margin: 0;
+                  font-size: 11px;
+                  line-height: 1.4;
+                  color: #6c757d;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-height: 2.8em;
+                  transition: max-height 0.3s ease;
+                  
+                  &.no-description {
+                    color: #adb5bd;
+                    font-style: italic;
+                    font-size: 10px;
+                  }
+                }
+                
+                &.expanded .description-text {
+                  display: block;
+                  -webkit-line-clamp: unset;
+                  max-height: none;
+                  overflow: visible;
+                }
+                
+                .description-toggle {
+                  position: absolute;
+                  top: 0;
+                  right: 0;
+                  background: none;
+                  border: none;
+                  color: #007bff;
+                  font-size: 10px;
+                  padding: 2px;
+                  cursor: pointer;
+                  transition: color 0.2s ease;
+                  
+                  &:hover {
+                    color: #0056b3;
+                  }
+                  
+                  &:focus {
+                    outline: none;
+                  }
                 }
               }
             }
@@ -933,11 +1105,12 @@ body.cds-deposit-edit-page {
       }
       
       .video-editor-header {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-bottom: none;
-        padding: 15px 20px;
-        border-radius: 4px 4px 0 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-bottom: 2px solid #007bff;
+        padding: 18px 25px;
+        border-radius: 6px 6px 0 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         
         .video-header-content {
           display: flex;
@@ -946,11 +1119,24 @@ body.cds-deposit-edit-page {
           
           h4 {
             margin: 0;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 600;
             flex: 1;
+            color: #495057;
+            
+            i.fa-video-camera {
+              color: #007bff;
+              margin-right: 8px;
+            }
             
             small {
-              font-weight: normal;
+              font-weight: 500;
+              color: #6c757d;
+              background: #e9ecef;
+              padding: 2px 8px;
+              border-radius: 12px;
+              margin-left: 10px;
+              font-size: 12px;
             }
           }
           
@@ -960,16 +1146,32 @@ body.cds-deposit-edit-page {
             
             // Style action buttons for better integration
             .btn {
-              margin-left: 5px;
-              border-radius: 4px;
+              margin-left: 8px;
+              border-radius: 6px;
+              font-weight: 500;
+              padding: 8px 16px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+              transition: all 0.2s ease;
               
-              &.btn-success, &.btn-primary {
-                font-weight: 500;
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+              }
+              
+              &.btn-success {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                border-color: #28a745;
+              }
+              
+              &.btn-warning {
+                background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+                border-color: #ffc107;
+                color: #212529;
               }
               
               &.btn-sm {
-                padding: 5px 10px;
-                font-size: 12px;
+                padding: 6px 12px;
+                font-size: 13px;
               }
             }
           }
@@ -1827,6 +2029,193 @@ div[cds-search-results] {
 
 .transcription-close:hover {
   cursor: pointer;
+}
+
+// Transcription section alignment with video player
+.cds-detail-video {
+  // When transcription is active, ensure proper alignment
+  .container-fluid .row {
+    margin-left: 0;
+    margin-right: 0;
+    align-items: flex-start;
+    // Add top margin to account for fixed header
+    margin-top: 20px;
+    
+    // Video column when transcription is active
+    .col-md-8 {
+      padding-left: 0;
+      padding-right: 15px;
+      
+      .cds-video-iframe {
+        // Reset all margins to ensure perfect alignment
+        margin: 0;
+        padding: 0;
+        
+        // Use more stable sizing that works better with zoom
+        width: 100%;
+        
+        // Fallback for browsers without aspect-ratio support
+        height: 56.25vw; // 16:9 aspect ratio fallback
+        
+        // Modern browsers with aspect-ratio support
+        aspect-ratio: 16/9;
+        height: auto;
+        
+        max-width: 100%;
+        max-height: 80vh;
+        
+        // Responsive adjustments for smaller screens
+        @media (max-width: 991px) {
+          height: 56.25vw; // Fallback
+          aspect-ratio: 16/9;
+          height: auto; // Override for modern browsers
+          max-height: 60vh;
+        }
+        
+        iframe {
+          width: 100% !important;
+          height: 100% !important;
+          max-width: 100%;
+          max-height: 100%;
+          margin: 0;
+          padding: 0;
+          vertical-align: top;
+        }
+      }
+    }
+    
+    // Transcription column
+    .col-md-4 {
+      padding-left: 15px;
+      padding-right: 0;
+      
+      // Ensure transcription section aligns with video top
+      #transcriptionsSection {
+        margin: 0 !important;
+        padding: 0;
+        height: auto;
+        min-height: 400px;
+        overflow-y: auto;
+        border-top: none;
+        position: relative;
+        z-index: 10;
+        background: #fff;
+        
+        // Override ALL inherited spacing classes
+        &.mt-20, &.mb-30, &.pt-10, &.pb-10 {
+          margin: 0 !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+        
+        // Responsive height adjustment
+        @media (max-width: 991px) {
+          height: auto;
+          max-height: 400px;
+          margin-top: 20px;
+        }
+        
+        // Transcription content styling
+        .panel {
+          max-height: calc(100% - 200px);
+          
+          .panel-body {
+            max-height: inherit;
+            
+            .list-unstyled {
+              .transcript-line {
+                padding: 8px 12px;
+                margin-bottom: 0;
+                border-bottom: 1px solid #f0f0f0;
+                transition: background-color 0.2s ease;
+                
+                &:hover {
+                  background-color: #f8f9fa;
+                }
+                
+                &.active {
+                  background-color: #e3f2fd;
+                  border-left: 3px solid #2196f3;
+                }
+                
+                strong {
+                  color: #666;
+                  font-size: 11px;
+                }
+                
+                .cds-deposit-frame-thumbnail-label {
+                  margin-top: 4px;
+                  font-size: 13px;
+                  line-height: 1.4;
+                  color: #333;
+                }
+              }
+            }
+          }
+        }
+        
+        // Search input styling
+        .form-control {
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          font-size: 14px;
+          
+          &:focus {
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+          }
+        }
+        
+        // Language select styling
+        #languageSelect {
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          font-size: 14px;
+        }
+        
+        // Header styling
+        h3 {
+          color: #333;
+          font-size: 18px;
+          margin: 0;
+          padding: 0 0 10px 0;
+          background: #fff;
+          position: relative;
+          z-index: 15;
+          border-bottom: 1px solid #eee;
+          
+          .fa-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            
+            &:hover {
+              opacity: 1;
+            }
+          }
+        }
+        
+        // Remove ALL spacing from transcription container and children
+        .pb-20, .pt-10, .mt-20, .mb-30, .px-20 {
+          margin: 0 !important;
+          padding: 10px !important;
+        }
+        
+        // Ensure the first child element (header) has no extra margin
+        > div:first-child {
+          margin: 0 !important;
+          padding: 10px !important;
+        }
+        
+        // Force container to start at top
+        > * {
+          &:first-child {
+            margin-top: 0 !important;
+            padding-top: 10px !important;
+          }
+        }
+      }
+    }
+  }
 }
 
 // Video Keywords styling

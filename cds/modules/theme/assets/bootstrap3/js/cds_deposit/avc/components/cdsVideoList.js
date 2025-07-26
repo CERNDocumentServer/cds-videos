@@ -124,6 +124,32 @@ function cdsVideoListCtrl($scope, $timeout) {
     return result;
   };
   
+  // Check if video is published
+  this.isVideoPublished = function(video) {
+    return video._deposit.status === 'published';
+  };
+  
+  // Get video item CSS classes
+  this.getVideoItemClasses = function(video) {
+    var classes = [];
+    
+    if (that.isSelected(video._deposit.id)) {
+      classes.push('active');
+    }
+    
+    if (that.isLoading(video._deposit.id)) {
+      classes.push('loading');
+    }
+    
+    if (that.isVideoPublished(video)) {
+      classes.push('video-published');
+    } else {
+      classes.push('video-editing');
+    }
+    
+    return classes.join(' ');
+  };
+  
   // Get video title for display (cached)
   this.getVideoTitle = function(video) {
     var videoId = video._deposit.id;
@@ -197,6 +223,55 @@ function cdsVideoListCtrl($scope, $timeout) {
     
     return Math.round((completedTasks / tasks.length) * 100);
   };
+  
+  // Get video description for display
+  this.getVideoDescription = function(video) {
+    // Try different possible paths for description
+    if (video.description) {
+      if (typeof video.description === 'string') {
+        return video.description;
+      } else if (video.description.description) {
+        return video.description.description;
+      }
+    }
+    
+    // Try abstract field as fallback
+    if (video.abstract) {
+      if (typeof video.abstract === 'string') {
+        return video.abstract;
+      } else if (video.abstract.summary) {
+        return video.abstract.summary;
+      }
+    }
+    
+    // Debug: log the video object structure (can be removed later)
+    console.log('Video object for description debugging:', video);
+    
+    // Fallback message
+    return 'No description available';
+  };
+  
+  // Track expanded descriptions
+  this.expandedDescriptions = new Set();
+  
+  // Toggle description expansion
+  this.toggleDescription = function(videoId, event) {
+    // Stop event from bubbling to prevent video selection
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    if (that.expandedDescriptions.has(videoId)) {
+      that.expandedDescriptions.delete(videoId);
+    } else {
+      that.expandedDescriptions.add(videoId);
+    }
+  };
+  
+  // Check if description is expanded
+  this.isDescriptionExpanded = function(videoId) {
+    return that.expandedDescriptions.has(videoId);
+  };
 }
 
 cdsVideoListCtrl.$inject = ['$scope', '$timeout'];
@@ -255,10 +330,7 @@ function cdsVideoList() {
                 <div class="video-sidebar-list">
                   <div class="video-list-item" 
                        ng-repeat="video in $ctrl.videos track by video._deposit.id"
-                       ng-class="{ 
-                         'active': $ctrl.isSelected(video._deposit.id),
-                         'loading': $ctrl.isLoading(video._deposit.id)
-                       }"
+                       ng-class="$ctrl.getVideoItemClasses(video)"
                        ng-click="$ctrl.selectVideo(video._deposit.id)">
                     <div class="video-item-content">
                       <div class="video-thumbnail-sidebar">
@@ -270,37 +342,56 @@ function cdsVideoList() {
                         </div>
                       </div>
                       <div class="video-item-details">
-                        <div class="video-title-wrapper">
-                          <h6 class="video-title" title="{{ $ctrl.getVideoTitle(video) }}">
-                            {{ $ctrl.getVideoTitle(video) }}
-                          </h6>
-                          <div class="video-info-line">
-                            <span class="video-number">Video #{{ $index + 1 }}</span>
-                            <span ng-if="video.report_number" class="report-number">
-                              {{ video.report_number[0] }}
-                            </span>
+                        <div class="video-header-row">
+                          <div class="video-title-section">
+                            <h6 class="video-title" title="{{ $ctrl.getVideoTitle(video) }}">
+                              {{ $ctrl.getVideoTitle(video) }}
+                            </h6>
+                            <div class="video-meta">
+                              <span class="video-number">Video #{{ $index + 1 }}</span>
+                            </div>
+                          </div>
+                          <div class="video-actions">
+                            <div ng-if="$ctrl.isVideoPublished(video)" class="video-status-published">
+                              <span class="label label-success">
+                                <i class="fa fa-check-circle"></i> Published
+                              </span>
+                              <a ng-href="/record/{{ video.recid }}" 
+                                 target="_blank" 
+                                 class="btn btn-xs btn-primary visit-video-btn"
+                                 title="Visit video page">
+                                <i class="fa fa-external-link"></i> View
+                              </a>
+                            </div>
+                            <div ng-if="!$ctrl.isVideoPublished(video)" class="video-status-editing">
+                              <span class="label {{ $ctrl.getVideoStatus(video).class }}">
+                                <i class="fa fa-edit"></i> {{ $ctrl.getVideoStatus(video).label }}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div class="video-status-section">
-                          <div class="status-badge-wrapper">
-                            <span class="label {{ $ctrl.getVideoStatus(video).class }}">
-                              {{ $ctrl.getVideoStatus(video).label }}
-                            </span>
-                          </div>
-                          <div ng-if="$ctrl.getVideoStatus(video).status === 'processing'" 
-                               class="progress progress-xs">
+                        <div ng-if="$ctrl.getVideoStatus(video).status === 'processing'" 
+                             class="video-progress-section">
+                          <div class="progress progress-xs">
                             <div class="progress-bar progress-bar-info" 
                                  style="width: {{ $ctrl.getProcessingProgress(video) }}%">
                             </div>
                           </div>
                         </div>
-                        <div ng-if="video.keywords && video.keywords.length > 0" class="video-keywords-row">
-                          <span ng-repeat="keyword in video.keywords | limitTo:5" class="label label-default keyword-pill">
-                            {{ keyword.name }}
-                          </span>
-                          <span ng-if="video.keywords.length > 5" class="label label-info keyword-pill-more">
-                            +{{ video.keywords.length - 5 }} more
-                          </span>
+                        <div class="video-description-section">
+                          <div class="video-description" 
+                               ng-class="{ 'expanded': $ctrl.isDescriptionExpanded(video._deposit.id) }">
+                            <p class="description-text" 
+                               ng-class="{ 'no-description': $ctrl.getVideoDescription(video) === 'No description available' }">
+                              {{ $ctrl.getVideoDescription(video) }}
+                            </p>
+                            <button ng-if="$ctrl.getVideoDescription(video).length > 100 && $ctrl.getVideoDescription(video) !== 'No description available'" 
+                                    class="description-toggle"
+                                    ng-click="$ctrl.toggleDescription(video._deposit.id, $event)"
+                                    title="{{ $ctrl.isDescriptionExpanded(video._deposit.id) ? 'Show less' : 'Show more' }}">
+                              <i class="fa" ng-class="{ 'fa-chevron-up': $ctrl.isDescriptionExpanded(video._deposit.id), 'fa-chevron-down': !$ctrl.isDescriptionExpanded(video._deposit.id) }"></i>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
