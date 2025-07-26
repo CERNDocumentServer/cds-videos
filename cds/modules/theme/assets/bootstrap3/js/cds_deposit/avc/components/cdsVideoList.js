@@ -71,10 +71,14 @@ function cdsVideoListCtrl($scope, $timeout) {
   
   // Select a video from the list
   this.selectVideo = function(videoId) {
+    // If clicking on the same video that's already selected and expanded, do nothing
     if (that.selectedVideoId === videoId && that.expandedVideoId === videoId) {
-      // If already selected and expanded, collapse it
-      that.expandedVideoId = null;
       return;
+    }
+    
+    // If switching to a different video, trigger autosave for the currently expanded video
+    if (that.expandedVideoId && that.expandedVideoId !== videoId) {
+      $scope.$broadcast("cds.deposit.project.saveAll");
     }
     
     that.selectedVideoId = videoId;
@@ -282,9 +286,6 @@ function cdsVideoList() {
                             <span class="label {{ $ctrl.getVideoStatus(video).class }}">
                               {{ $ctrl.getVideoStatus(video).label }}
                             </span>
-                            <span ng-if="video._files && video._files.length > 0" class="file-info">
-                              {{ video._files.length }} file{{ video._files.length > 1 ? 's' : '' }}
-                            </span>
                           </div>
                           <div ng-if="$ctrl.getVideoStatus(video).status === 'processing'" 
                                class="progress progress-xs">
@@ -292,6 +293,14 @@ function cdsVideoList() {
                                  style="width: {{ $ctrl.getProcessingProgress(video) }}%">
                             </div>
                           </div>
+                        </div>
+                        <div ng-if="video.keywords && video.keywords.length > 0" class="video-keywords-row">
+                          <span ng-repeat="keyword in video.keywords | limitTo:5" class="label label-default keyword-pill">
+                            {{ keyword.name }}
+                          </span>
+                          <span ng-if="video.keywords.length > 5" class="label label-info keyword-pill-more">
+                            +{{ video.keywords.length - 5 }} more
+                          </span>
                         </div>
                       </div>
                     </div>

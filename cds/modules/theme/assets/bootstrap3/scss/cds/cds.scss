@@ -1828,3 +1828,31 @@ div[cds-search-results] {
 .transcription-close:hover {
   cursor: pointer;
 }
+
+// Video Keywords styling
+.video-keywords-row {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  
+  .keyword-pill {
+    font-size: 10px;
+    padding: 2px 6px;
+    margin: 0;
+    border-radius: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+  
+  .keyword-pill-more {
+    font-size: 10px;
+    padding: 2px 6px;
+    margin: 0;
+    border-radius: 10px;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+  }
+}
