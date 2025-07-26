@@ -62,9 +62,9 @@ html, body {
 }
 
 .cds-deposit-panel {
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
+  // max-width: 1000px;
+  // margin-left: auto;
+  // margin-right: auto;
   .is-sticky {
     // the height of the navbar
     margin-top: 65px !important;
@@ -436,6 +436,698 @@ a.cds-anchor:hover{
 
 .cds-tab-content {
   background-color: #fff;
+}
+
+// Expand container width for deposit pages
+.cds-max-fluid-width {
+  max-width: 95% !important;
+  margin: 0 auto;
+}
+
+// Override container constraints for deposit edit pages
+body.cds-deposit-edit-page {
+  .container-fluid.cds-max-fluid-width {
+    max-width: 98% !important;
+    width: 98% !important;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+}
+
+// Wide container for video deposit interface
+.cds-video-deposit-container {
+  max-width: 98%;
+  margin: 0 auto;
+  padding: 0 15px 50px 15px; // Added bottom padding to prevent footer overlap
+  
+  // Ensure project section uses full width efficiently
+  .cds-deposit-panel-project {
+    .panel-body {
+      padding: 20px 30px;
+      
+      // Better spacing for project form layout
+      .row {
+        margin-left: -20px;
+        margin-right: -20px;
+        
+        .col-sm-6 {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        
+        .col-sm-12 {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+      
+      // Improve form field spacing in project
+      .form-group {
+        margin-bottom: 20px;
+        
+        label {
+          font-weight: 500;
+          margin-bottom: 8px;
+        }
+        
+        .form-control {
+          padding: 8px 12px;
+          font-size: 14px;
+        }
+      }
+      
+      // Better button spacing
+      .btn {
+        margin: 5px;
+        
+        &.btn-sm {
+          padding: 6px 12px;
+        }
+      }
+      
+      // Improve help text spacing
+      .text-muted {
+        margin-top: 15px;
+        line-height: 1.5;
+      }
+    }
+    
+    // Project header styling to match video list aesthetic
+    .panel-heading {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 30px;
+      
+      .text-muted {
+        font-size: 16px;
+        font-weight: 500;
+        color: #495057;
+        
+        i {
+          margin-right: 8px;
+        }
+      }
+      
+      .pull-right {
+        .btn {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  
+  // Improve uploader section styling within project
+  .cds-deposit-box {
+    margin: 20px 0;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #adb5bd;
+      background: #f1f3f4;
+    }
+    
+    .cds-deposit-box-upload-wrapper {
+      padding: 40px 20px;
+      
+      .cds-deposit-box-upload-icon {
+        color: #6c757d;
+      }
+      
+      .cds-deposit-box-upload-title h3 {
+        color: #495057;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      
+      .cds-deposit-box-upload-description {
+        color: #6c757d;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Video List Sidebar Component Styles
+.cds-video-list-sidebar {
+  // Make sure we use full width
+  width: 100%;
+  
+  .video-list-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .video-sidebar-layout {
+    min-height: calc(100vh - 300px);
+    margin-bottom: 50px;
+    
+    // Responsive adjustments
+    @media (max-width: 768px) {
+      .col-lg-3, .col-md-4 {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .col-lg-9, .col-md-8 {
+        width: 100%;
+      }
+    }
+    
+    // Left sidebar
+    .video-sidebar {
+      background: #f8f9fa;
+      border-right: 1px solid #e9ecef;
+      height: auto;
+      min-height: 650px; // Header + 5 videos + upload area
+      display: flex;
+      flex-direction: column;
+      
+      .video-sidebar-header {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+        background: #fff;
+        flex-shrink: 0;
+      }
+      
+      .video-sidebar-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+        max-height: 550px; // Height for approximately 5 videos (110px per video)
+        min-height: 550px;
+        
+        .video-list-item {
+          cursor: pointer;
+          padding: 12px 15px;
+          border-bottom: 1px solid #e9ecef;
+          transition: all 0.2s ease;
+          border-left: 3px solid transparent;
+          min-height: 100px; // Consistent height for each video item
+          display: flex;
+          align-items: center;
+          
+          &:hover {
+            background-color: #fff;
+            border-left-color: #ddd;
+          }
+          
+          &.active {
+            background-color: #e7f3ff;
+            border-left-color: #007bff;
+            
+            .video-title {
+              color: #007bff;
+              font-weight: 600;
+            }
+          }
+          
+          &.loading {
+            opacity: 0.7;
+          }
+          
+          .video-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+          }
+          
+          .video-thumbnail-sidebar {
+            position: relative;
+            flex-shrink: 0;
+            
+            img {
+              width: 80px;
+              height: 45px;
+              object-fit: cover;
+              border-radius: 4px;
+              border: 1px solid #e9ecef;
+            }
+            
+            .loading-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: rgba(0, 0, 0, 0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 4px;
+              color: white;
+            }
+          }
+          
+          .video-item-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            
+            .video-title-wrapper {
+              flex: 1;
+              
+              .video-title {
+                margin: 0 0 4px 0;
+                font-size: 13px;
+                font-weight: 500;
+                line-height: 1.2;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-clamp: 2;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-height: 2.4em;
+              }
+              
+              .video-info-line {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                
+                .video-number {
+                  font-size: 11px;
+                  color: #6c757d;
+                  font-weight: 500;
+                }
+                
+                .report-number {
+                  padding: 1px 4px;
+                  background: #e3f2fd;
+                  border: 1px solid #bbdefb;
+                  border-radius: 2px;
+                  font-size: 10px;
+                  color: #1976d2;
+                  font-weight: 500;
+                }
+              }
+            }
+            
+            .video-status-section {
+              .status-badge-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 4px;
+                
+                .label {
+                  font-size: 9px;
+                  padding: 2px 5px;
+                  border-radius: 3px;
+                  font-weight: 500;
+                }
+                
+                .file-info {
+                  font-size: 10px;
+                  color: #6c757d;
+                  background: #f8f9fa;
+                  padding: 1px 4px;
+                  border-radius: 2px;
+                  font-weight: 500;
+                }
+              }
+              
+              .progress-xs {
+                height: 2px;
+                margin: 0;
+                background-color: #e9ecef;
+                border-radius: 1px;
+                
+                .progress-bar {
+                  line-height: 2px;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Upload area in sidebar (using original style)
+      .video-sidebar-upload {
+        margin-top: 10px;
+        
+        .upload-divider {
+          height: 1px;
+          background: #e9ecef;
+          margin: 15px 0;
+        }
+        
+        .sidebar-upload-box {
+          margin: 0 15px 15px 15px;
+          
+          .cds-deposit-box-upload-wrapper {
+            padding: 25px 15px;
+            
+            .cds-deposit-box-upload-icon {
+              font-size: 20px;
+              margin-bottom: 10px;
+              
+              i {
+                color: $btn-info-bg;
+              }
+            }
+            
+            .cds-deposit-box-upload-title h5 {
+              color: $gray-dark;
+              margin-bottom: 8px;
+              font-size: 16px;
+            }
+            
+            .cds-deposit-box-upload-description {
+              color: $gray;
+              font-size: 13px;
+              margin: 0;
+            }
+            
+            &:hover {
+              .cds-deposit-box-upload-icon i {
+                color: $primary-color;
+              }
+            }
+          }
+        }
+      }
+      
+      // Max videos message in sidebar
+      .video-sidebar-max-message {
+        margin-top: 10px;
+        
+        .upload-divider {
+          height: 1px;
+          background: #e9ecef;
+          margin: 15px 0;
+        }
+        
+        .max-videos-message {
+          padding: 12px 15px;
+          margin: 0 15px;
+          background: #fff3cd;
+          border: 1px solid #ffeaa7;
+          border-radius: 6px;
+          font-size: 12px;
+          text-align: center;
+          color: #856404;
+          
+          i {
+            margin-right: 6px;
+            color: #f39c12;
+          }
+        }
+      }
+    }
+    
+    // Right editor area
+    .video-editor-area {
+      padding-left: 20px;
+      height: calc(100vh - 300px);
+      min-height: 500px;
+      margin-bottom: 30px;
+      
+      // Make forms use full height without scrollbar
+      .video-editor-content {
+        height: 100%;
+        
+        .video-details-container {
+          height: 100%;
+          
+          // Video form container
+          .panel.panel-default {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            
+            .panel-body {
+              flex: 1;
+              overflow: visible;
+              padding: 20px;
+              
+              // Tab content should fill available space
+              .tab-content {
+                height: calc(100% - 60px); // Account for tab nav height
+                
+                .tab-pane {
+                  height: 100%;
+                  overflow-y: auto;
+                  padding: 10px 0;
+                  
+                  // Form sections
+                  .row {
+                    margin-bottom: 15px;
+                    
+                    .col-sm-6, .col-sm-12 {
+                      .form-group {
+                        margin-bottom: 15px;
+                        
+                        .form-control {
+                          border-radius: 4px;
+                        }
+                        
+                        // Textarea adjustments
+                        textarea.form-control {
+                          min-height: 80px;
+                          resize: vertical;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // Tab navigation
+              .nav-tabs {
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 10px;
+                flex-shrink: 0;
+              }
+            }
+          }
+        }
+      }
+      
+      @media (max-width: 768px) {
+        padding-left: 0;
+        margin-top: 20px;
+      }
+      
+      .video-editor-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          border-color: #adb5bd;
+        }
+      }
+      
+      .video-editor-header {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-bottom: none;
+        padding: 15px 20px;
+        border-radius: 4px 4px 0 0;
+        
+        .video-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          h4 {
+            margin: 0;
+            font-size: 16px;
+            flex: 1;
+            
+            small {
+              font-weight: normal;
+            }
+          }
+          
+          .video-header-actions {
+            flex-shrink: 0;
+            margin-left: 15px;
+            
+            // Style action buttons for better integration
+            .btn {
+              margin-left: 5px;
+              border-radius: 4px;
+              
+              &.btn-success, &.btn-primary {
+                font-weight: 500;
+              }
+              
+              &.btn-sm {
+                padding: 5px 10px;
+                font-size: 12px;
+              }
+            }
+          }
+        }
+      }
+      
+      .video-editor-content {
+        border: 1px solid #e9ecef;
+        border-radius: 0 0 4px 4px;
+        background: #fff;
+        
+        .video-details-container {
+          padding: 20px;
+          
+          // Reset panel styles to integrate better - but preserve form functionality
+          > .cds-deposit-panel {
+            margin-bottom: 0;
+            border: none;
+            box-shadow: none;
+            
+            // Keep the panel heading but style it for better integration
+            > .panel-heading[hl-sticky] {
+              background: #f8f9fa;
+              border: none;
+              border-bottom: 1px solid #e9ecef;
+              padding: 10px 15px;
+              margin: -20px -20px 20px -20px;
+              
+              // Hide the redundant video title and info, but keep actions
+              .text-muted {
+                display: none;
+              }
+              
+              // Keep actions visible and properly positioned
+              .pull-right {
+                display: block;
+                float: right;
+                
+                // Style action buttons for better integration
+                .btn {
+                  margin-left: 5px;
+                  border-radius: 4px;
+                  
+                  &.btn-success, &.btn-primary {
+                    font-weight: 500;
+                  }
+                  
+                  &.btn-sm {
+                    padding: 5px 10px;
+                    font-size: 12px;
+                  }
+                }
+              }
+            }
+          }
+          
+          // Keep form panels intact for proper field rendering
+          .panel.panel-default {
+            border: 1px solid #ddd;
+            
+            .panel-heading {
+              display: block !important;
+              background-color: #f5f5f5;
+              padding: 10px 15px;
+            }
+            
+            .panel-body {
+              padding: 15px;
+            }
+          }
+          
+          // Ensure form controls work properly
+          .form-control {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+          }
+          
+          // Fix for CKEditor and textarea in the editor area
+          textarea.form-control {
+            height: auto;
+            resize: vertical;
+          }
+          
+          // Ensure CKEditor instances render properly
+          .cke {
+            border: 1px solid #ccc;
+          }
+        }
+      }
+    }
+  }
+  
+  // Legacy compact view styles (for backward compatibility)
+  .video-list-compact {
+    .video-list-item {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      
+      &:hover {
+        background-color: #f8f9fa;
+        border-left-color: #ddd;
+      }
+      
+      &.active {
+        background-color: #e7f3ff;
+        border-left-color: #007bff;
+        
+        .list-group-item-heading {
+          color: #007bff;
+          font-weight: 600;
+        }
+      }
+      
+      &.loading {
+        opacity: 0.7;
+      }
+    }
+    
+    .video-thumbnail {
+      position: relative;
+      
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: white;
+      }
+    }
+    
+    .progress-xs {
+      height: 4px;
+      margin-bottom: 0;
+      
+      .progress-bar {
+        line-height: 4px;
+      }
+    }
+  }
+  
+  // Empty state styling
+  .py-40 {
+    padding: 40px 0;
+  }
 }
 
 .cds-pills-center {

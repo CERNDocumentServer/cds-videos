@@ -276,61 +276,66 @@ function cdsUploaderCtrl(
 
     this.addFiles = function (_files, invalidFiles, extraHeaders) {
       // Do nothing if files array is empty
-      if (!_files) {
+      if (!_files || _files.length === 0) {
         return;
       }
       // Remove any invalid files
       _files = _.difference(_files, invalidFiles || []);
 
-      // Filter out files without a valid MIME type or with zero size
-      _files = _files.filter((file) => {
+      // Filter out files without a valid MIME type or with zero size - optimized with early returns
+      var validFiles = [];
+      var invalidMessages = [];
+      
+      for (var i = 0; i < _files.length; i++) {
+        var file = _files[i];
         if (!file.type || file.type.trim() === "") {
-          toaster.pop(
-            "warning",
-            "Invalid File Type",
-            `The file ${file.name} has no valid type.`
-          );
-          return false; // Exclude invalid files
+          invalidMessages.push(`The file ${file.name} has no valid type.`);
+          continue;
         }
-
         if (!file.size || file.size === 0) {
-          toaster.pop(
-            "warning",
-            "Empty File",
-            `The file ${file.name} is empty and cannot be uploaded.`
-          );
-          return false; // Exclude zero-size files
+          invalidMessages.push(`The file ${file.name} is empty and cannot be uploaded.`);
+          continue;
         }
+        validFiles.push(file);
+      }
+      
+      // Show all invalid file messages at once
+      if (invalidMessages.length > 0) {
+        toaster.pop(
+          "warning",
+          "Invalid Files",
+          invalidMessages.join("<br>"),
+          { bodyOutputType: "trustedHtml" }
+        );
+      }
+      
+      _files = validFiles;
 
-        return true;
-      });
-
-      // Make sure they have proper metadata
-      angular.forEach(_files, function (file) {
+      // Optimize file processing - batch operations and reduce iterations
+      var keysToRemove = [];
+      var defaultHeaders = { "X-Invenio-File-Tags": "context_type=additional_file" };
+      
+      for (var i = 0; i < _files.length; i++) {
+        var file = _files[i];
         file.key = file.name;
         file.local = !file.receiver;
         file.isAdditional = true;
-        // Add any extra paramemters to the files
-        if (extraHeaders) {
-          file.headers = extraHeaders;
-        }
+        
+        // Set headers efficiently
+        file.headers = extraHeaders && ("X-Invenio-File-Tags" in extraHeaders) 
+          ? extraHeaders 
+          : (extraHeaders ? angular.merge({}, extraHeaders, defaultHeaders) : defaultHeaders);
+        
+        // Collect keys to remove in one pass
+        keysToRemove.push(file.key);
+      }
 
-        if (!extraHeaders || !("X-Invenio-File-Tags" in extraHeaders)) {
-          file.headers = {
-            "X-Invenio-File-Tags": "context_type=additional_file",
-          };
-        }
-      });
-
-      // Find if any of the existing files has been replaced
-      // (file with same filename), and if yes remove it from the existing
-      // file list (aka from the interface).
-      _files = _.each(_files, function (file) {
-        // Remove the existing file from the list
-        _.remove(that.files, function (_f) {
-          return _f.key === file.key;
+      // Remove existing files with same keys in one efficient operation
+      if (keysToRemove.length > 0) {
+        that.files = that.files.filter(function(f) {
+          return keysToRemove.indexOf(f.key) === -1;
         });
-      });
+      }
 
       if ((invalidFiles || []).length > 0) {
         // Push a notification
@@ -537,8 +542,32 @@ function cdsUploaderCtrl(
     }
   };
 
+  // Cache file indices for better performance in frequent lookups
+  var _fileIndexCache = {};
+  var _lastFilesLength = 0;
+  
   this.findFileIndex = function (files, key) {
-    return _.indexOf(files, _.find(that.files, { key: key }));
+    // Invalidate cache if files array changed
+    if (that.files.length !== _lastFilesLength) {
+      _fileIndexCache = {};
+      _lastFilesLength = that.files.length;
+    }
+    
+    // Check cache first
+    if (_fileIndexCache[key] !== undefined) {
+      return _fileIndexCache[key];
+    }
+    
+    // Find and cache the index
+    for (var i = 0; i < that.files.length; i++) {
+      if (that.files[i].key === key) {
+        _fileIndexCache[key] = i;
+        return i;
+      }
+    }
+    
+    _fileIndexCache[key] = -1;
+    return -1;
   };
 
   this.validateSubtitles = function (_file) {

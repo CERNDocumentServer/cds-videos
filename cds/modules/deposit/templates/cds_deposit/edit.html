@@ -1,6 +1,7 @@
 {%- extends "cds_theme/page.html" %}
 {%- set title_prefix = record.get('title', {}).get('title', 'Project') -%}
 {%- set container_class = '{{container_class}} cds-max-fluid-width' -%}
+{%- set body_css_classes = ['flex-container', 'bootstrap-padding-top', 'cds-deposit-edit-page'] -%}
 
 {%- block css %}
     {{ super() }}

@@ -602,8 +602,8 @@ function cdsDepositCtrl(
       });
     });
 
-    // Listen for task status changes
-    $scope.$on("cds.deposit.task", function (evt, type, status, data) {
+    // Listen for task status changes - use throttling to prevent excessive updates
+    var taskStatusHandler = _.throttle(function (evt, type, status, data) {
       if (type == "file_video_metadata_extraction" && status == "SUCCESS") {
         var allMetadata = data.payload.extracted_metadata;
         that.setOnLocalStorage("metadata", allMetadata);
@@ -611,26 +611,55 @@ function cdsDepositCtrl(
       } else if (type == "file_video_extract_frames" && status == "SUCCESS") {
         that.framesReady = true;
       }
-    });
+    }, 500);
+    $scope.$on("cds.deposit.task", taskStatusHandler);
+
+    // Cache status check results to avoid frequent recalculation
+    var _lastDepositStatus = null;
+    var _cachedStatusChecks = {};
+    
+    function _getCachedStatusCheck(statusType) {
+      if (that.currentDepositStatus !== _lastDepositStatus) {
+        _cachedStatusChecks = {};
+        _lastDepositStatus = that.currentDepositStatus;
+      }
+      return _cachedStatusChecks[statusType];
+    }
 
     this.displayFailure = function () {
-      return that.currentDepositStatus === that.depositStatuses.FAILURE;
+      var cached = _getCachedStatusCheck('failure');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['failure'] = that.currentDepositStatus === that.depositStatuses.FAILURE;
+      }
+      return cached;
     };
 
     this.displayPending = function () {
-      return that.currentDepositStatus === that.depositStatuses.PENDING;
+      var cached = _getCachedStatusCheck('pending');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['pending'] = that.currentDepositStatus === that.depositStatuses.PENDING;
+      }
+      return cached;
     };
 
     this.displayStarted = function () {
-      return that.currentDepositStatus === that.depositStatuses.STARTED;
+      var cached = _getCachedStatusCheck('started');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['started'] = that.currentDepositStatus === that.depositStatuses.STARTED;
+      }
+      return cached;
     };
 
     this.displaySuccess = function () {
-      return (
-        that.currentDepositStatus === that.depositStatuses.SUCCESS &&
-        !that.isPublished() &&
-        !that.record.recid
-      );
+      var cached = _getCachedStatusCheck('success');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['success'] = (
+          that.currentDepositStatus === that.depositStatuses.SUCCESS &&
+          !that.isPublished() &&
+          !that.record.recid
+        );
+      }
+      return cached;
     };
 
     this.postSuccessProcess = function (responses) {

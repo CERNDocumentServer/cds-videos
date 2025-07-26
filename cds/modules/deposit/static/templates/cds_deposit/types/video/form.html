@@ -291,7 +291,7 @@
             </div>
             <!-- Record permissions -->
           </div>
-          <div ng-if="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
+          <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
             <div ng-transclude></div>
           </div>
           <div ng-if="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
