@@ -281,19 +281,22 @@ function cdsDepositCtrl(
         : that.cachedFlowTasksById;
 
       var reFetchRecord = false;
+      var statusHasChanged = false;
       for (var taskId in flowTasksById) {
         var cachedTask = _.get(cachedFlowTasksById, taskId, null);
         if (!cachedTask) {
           // something wrong with the cached tasks, maybe a flow restart?
           // refetch the record to be sure
           reFetchRecord = true;
+          statusHasChanged = true;
           break;
         }
 
-        var statusHasChanged =
+        var taskStatusChanged =
           flowTasksById[taskId]["status"] !== cachedTask["status"];
-        if (statusHasChanged) {
+        if (taskStatusChanged) {
           reFetchRecord = true;
+          statusHasChanged = true;
           break;
         }
       }
@@ -303,6 +306,15 @@ function cdsDepositCtrl(
 
       if (reFetchRecord) {
         that.cdsDepositsCtrl.fetchRecord();
+      }
+      
+      // Broadcast status change to update video list sidebar and other UI components
+      if (statusHasChanged) {
+        $scope.$broadcast("cds.deposit.status.changed", {
+          depositId: that.id,
+          taskStatuses: flowTasksById,
+          currentDepositStatus: that.currentDepositStatus
+        });
       }
     };
 
@@ -386,6 +398,13 @@ function cdsDepositCtrl(
           (!anyTaskIsRunning && currentInterval === 5000)) {
         setupSmartPolling();
       }
+      
+      // Ensure UI components stay synchronized during polling
+      $scope.$broadcast("cds.deposit.polling.update", {
+        depositId: that.id,
+        anyTaskIsRunning: anyTaskIsRunning,
+        currentDepositStatus: that.currentDepositStatus
+      });
     };
 
     // Update deposit based on extracted metadata from task
@@ -478,6 +497,9 @@ function cdsDepositCtrl(
       }
       that.currentStartedTaskName = currentStartedTaskName;
 
+      // Store previous status to detect changes
+      var previousDepositStatus = that.currentDepositStatus;
+
       // Change the Deposit Status
       var values = _.values(that.record._cds.state);
       if (!values.length) {
@@ -490,6 +512,17 @@ function cdsDepositCtrl(
         that.currentDepositStatus = depositStatuses.PENDING;
       } else {
         that.currentDepositStatus = depositStatuses.SUCCESS;
+      }
+      
+      // Broadcast status change to update video list sidebar and other UI components
+      if (previousDepositStatus !== that.currentDepositStatus) {
+        $scope.$broadcast("cds.deposit.status.changed", {
+          depositId: that.id,
+          previousStatus: previousDepositStatus,
+          currentStatus: that.currentDepositStatus,
+          currentStartedTaskName: that.currentStartedTaskName,
+          taskStates: that.record._cds.state
+        });
       }
     };
 

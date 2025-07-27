@@ -33,6 +33,34 @@ function cdsVideoListCtrl($scope, $timeout) {
       }, 100);
     }
     
+    // Listen for deposit status changes to clear cache and update UI
+    $scope.$on("cds.deposit.status.changed", function(event, statusData) {
+      if (statusData && statusData.depositId) {
+        // Clear cache for the specific video that had status changes
+        that._statusCache.delete(statusData.depositId);
+        that._titleCache.delete(statusData.depositId);
+        that._thumbnailCache.delete(statusData.depositId);
+        
+        // Force UI update by triggering digest cycle
+        $scope.$applyAsync();
+      }
+    });
+    
+    // Listen for metadata updates which can also affect status display
+    $scope.$on("cds.deposit.metadata.update", function(event, data) {
+      // Clear all cache when metadata updates occur
+      clearCache();
+      $scope.$applyAsync();
+    });
+    
+    // Listen for polling updates to ensure UI synchronization
+    $scope.$on("cds.deposit.polling.update", function(event, pollingData) {
+      if (pollingData && pollingData.depositId) {
+        // Clear cache for the specific video during polling to ensure fresh status
+        that._statusCache.delete(pollingData.depositId);
+      }
+    });
+    
     // Watch for video changes and clear cache
     $scope.$watch('$ctrl.videos', function(newVideos, oldVideos) {
       if (newVideos !== oldVideos) {
