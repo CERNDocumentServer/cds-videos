@@ -451,14 +451,43 @@ body.cds-deposit-edit-page {
     width: 98% !important;
     margin: 0 auto;
     padding: 0 15px;
+    
+    // For larger desktop monitors (1440px+), use contained layout
+    @media (min-width: 1440px) {
+      max-width: 1350px !important;
+      width: 1350px !important;
+      padding: 0 30px;
+    }
+    
+    // For very large screens (1920px+), more contained
+    @media (min-width: 1920px) {
+      max-width: 1600px !important;
+      width: 1600px !important;
+      padding: 0 40px;
+    }
   }
 }
 
 // Wide container for video deposit interface
 .cds-video-deposit-container {
+  // Full width up to larger desktop screens (MacBook Pro 13" and similar)
   max-width: 98%;
   margin: 0 auto;
   padding: 0 15px 50px 15px; // Added bottom padding to prevent footer overlap
+  
+  // For larger desktop monitors (1440px+), use contained layout
+  @media (min-width: 1440px) {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 0 30px 50px 30px;
+  }
+  
+  // For very large screens (1920px+), more contained
+  @media (min-width: 1920px) {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 40px 50px 40px;
+  }
   
   // Ensure project section uses full width efficiently
   .cds-deposit-panel-project {
@@ -510,14 +539,21 @@ body.cds-deposit-edit-page {
         }
         
         &.btn-success {
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-          border-color: #28a745;
+          background: #5cb85c;
+          border-color: #4cae4c;
+          color: #fff;
+        }
+        
+        &.btn-primary {
+          background: #337ab7;
+          border-color: #2e6da4;
+          color: #fff;
         }
         
         &.btn-warning {
-          background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-          border-color: #ffc107;
-          color: #212529;
+          background: #f0ad4e;
+          border-color: #eea236;
+          color: #fff;
         }
         
         &.btn-sm {
@@ -562,14 +598,21 @@ body.cds-deposit-edit-page {
           }
           
           &.btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border-color: #28a745;
+            background: #5cb85c;
+            border-color: #4cae4c;
+            color: #fff;
+          }
+          
+          &.btn-primary {
+            background: #337ab7;
+            border-color: #2e6da4;
+            color: #fff;
           }
           
           &.btn-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-            border-color: #ffc107;
-            color: #212529;
+            background: #f0ad4e;
+            border-color: #eea236;
+            color: #fff;
           }
         }
       }
@@ -619,19 +662,56 @@ body.cds-deposit-edit-page {
     border-bottom: 1px solid #e9ecef;
     padding-bottom: 15px;
     margin-bottom: 20px;
+    
+    @media (max-width: 768px) {
+      .col-md-8, .col-md-4 {
+        width: 100%;
+        text-align: left !important;
+        margin-bottom: 10px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
   }
   
   .video-sidebar-layout {
     min-height: calc(100vh - 300px);
     margin-bottom: 50px;
     
-    // Responsive adjustments
-    @media (max-width: 768px) {
-      .col-lg-3, .col-md-4 {
+    // Adjust proportions to prevent tab wrapping
+    .col-lg-4, .col-md-5 {
+      // Reduce sidebar width more to give tabs space
+      @media (min-width: 992px) {
+        width: 28% !important; // Further reduced from 30%
+        padding-right: 5px; // Reduce right padding
+      }
+      @media (min-width: 768px) and (max-width: 991px) {
+        width: 32% !important; // Further reduced from 35%
+        padding-right: 5px;
+      }
+    }
+    
+    .col-lg-8, .col-md-7 {
+      // Increase main content width more
+      @media (min-width: 992px) {
+        width: 72% !important; // Increased from 70%
+        padding-left: 5px; // Reduce left padding
+      }
+      @media (min-width: 768px) and (max-width: 991px) {
+        width: 68% !important; // Increased from 65%
+        padding-left: 5px;
+      }
+    }
+    
+    // Responsive adjustments for mobile
+    @media (max-width: 767px) {
+      .col-lg-4, .col-md-5 {
         width: 100%;
         margin-bottom: 20px;
       }
-      .col-lg-9, .col-md-8 {
+      .col-lg-8, .col-md-7 {
         width: 100%;
       }
     }
@@ -644,6 +724,95 @@ body.cds-deposit-edit-page {
       min-height: 650px; // Header + 5 videos + upload area
       display: flex;
       flex-direction: column;
+      
+      // Status Filter Section
+      .video-sidebar-filter {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+        background: #fff;
+        flex-shrink: 0;
+        
+        .filter-header {
+          margin-bottom: 10px;
+          
+          small {
+            font-weight: 500;
+            color: #495057;
+            
+            i {
+              margin-right: 5px;
+              color: #6c757d;
+            }
+          }
+        }
+        
+        .filter-buttons {
+          .btn-group {
+            width: 100%;
+            display: flex;
+            
+            .filter-btn {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-direction: column;
+              text-align: center;
+              padding: 8px 4px;
+              font-size: 11px;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              white-space: nowrap;
+              overflow: hidden;
+              
+              i {
+                margin-bottom: 2px;
+                font-size: 12px;
+              }
+              
+              .badge {
+                background-color: #6c757d;
+                font-size: 9px;
+                padding: 1px 4px;
+                border-radius: 8px;
+                margin-top: 2px;
+                min-width: 16px;
+                text-align: center;
+              }
+              
+              &.btn-primary .badge {
+                background-color: #fff;
+                color: #007bff;
+              }
+              
+              &.btn-success .badge {
+                background-color: #fff;
+                color: #28a745;
+              }
+              
+              &.btn-warning .badge {
+                background-color: #fff;
+                color: #ffc107;
+              }
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              
+              // Responsive text adjustments
+              @media (max-width: 1200px) {
+                font-size: 10px;
+                padding: 6px 2px;
+                
+                i {
+                  font-size: 11px;
+                }
+              }
+            }
+          }
+        }
+      }
       
       .video-sidebar-header {
         padding: 15px;
@@ -665,9 +834,9 @@ body.cds-deposit-edit-page {
           border-bottom: 1px solid #e9ecef;
           transition: all 0.2s ease;
           border-left: 3px solid transparent;
-          min-height: 100px; // Consistent height for each video item
+          min-height: 120px; // Increased height to accommodate expanded descriptions
           display: flex;
-          align-items: center;
+          align-items: flex-start; // Changed from center to flex-start
           
           &:hover {
             background-color: #fff;
@@ -744,6 +913,8 @@ body.cds-deposit-edit-page {
           .video-thumbnail-sidebar {
             position: relative;
             flex-shrink: 0;
+            align-self: flex-start; // Keep thumbnail at top
+            margin-top: 8px; // Add some top margin for alignment
             
             img {
               width: 80px;
@@ -916,24 +1087,22 @@ body.cds-deposit-edit-page {
                   overflow: visible;
                 }
                 
-                .description-toggle {
-                  position: absolute;
-                  top: 0;
-                  right: 0;
-                  background: none;
-                  border: none;
-                  color: #007bff;
-                  font-size: 10px;
-                  padding: 2px;
+                .description-toggle-text {
+                  margin-top: 4px;
                   cursor: pointer;
-                  transition: color 0.2s ease;
                   
-                  &:hover {
-                    color: #0056b3;
-                  }
-                  
-                  &:focus {
-                    outline: none;
+                  .show-more,
+                  .show-less {
+                    font-size: 10px;
+                    color: #007bff;
+                    font-weight: 500;
+                    text-decoration: underline;
+                    transition: color 0.2s ease;
+                    
+                    &:hover {
+                      color: #0056b3;
+                      text-decoration: none;
+                    }
                   }
                 }
               }
@@ -1018,7 +1187,7 @@ body.cds-deposit-edit-page {
     
     // Right editor area
     .video-editor-area {
-      padding-left: 20px;
+      padding-left: 10px; // Reduced from 20px to 10px
       height: calc(100vh - 300px);
       min-height: 500px;
       margin-bottom: 30px;
@@ -1078,6 +1247,28 @@ body.cds-deposit-edit-page {
                 border-bottom: 1px solid #ddd;
                 margin-bottom: 10px;
                 flex-shrink: 0;
+                
+                // Ensure tabs don't wrap and have enough space
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                white-space: nowrap;
+                
+                li {
+                  flex-shrink: 0;
+                  
+                  a {
+                    white-space: nowrap;
+                    padding: 8px 12px;
+                    font-size: 13px;
+                    
+                    // Ensure Admin tab and others fit properly
+                    @media (min-width: 768px) {
+                      padding: 10px 16px;
+                      font-size: 14px;
+                    }
+                  }
+                }
               }
             }
           }
@@ -1111,6 +1302,8 @@ body.cds-deposit-edit-page {
         padding: 18px 25px;
         border-radius: 6px 6px 0 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+
         
         .video-header-content {
           display: flex;
@@ -1159,14 +1352,21 @@ body.cds-deposit-edit-page {
               }
               
               &.btn-success {
-                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                border-color: #28a745;
+                background: #5cb85c;
+                border-color: #4cae4c;
+                color: #fff;
+              }
+              
+              &.btn-primary {
+                background: #337ab7;
+                border-color: #2e6da4;
+                color: #fff;
               }
               
               &.btn-warning {
-                background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-                border-color: #ffc107;
-                color: #212529;
+                background: #f0ad4e;
+                border-color: #eea236;
+                color: #fff;
               }
               
               &.btn-sm {
@@ -1259,7 +1459,16 @@ body.cds-deposit-edit-page {
           // Fix for CKEditor and textarea in the editor area
           textarea.form-control {
             height: auto;
+            min-height: 80px;
             resize: vertical;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
           }
           
           // Ensure CKEditor instances render properly
@@ -2016,6 +2225,79 @@ div[cds-search-results] {
   background-color: $gray-lighter; 
 }
 
+// Chapter styling
+.chapter-item {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #e8f4fd;
+  }
+  
+  &:last-child {
+    border-bottom: none !important;
+  }
+}
+
+.chapter-timestamp {
+  color: #2196F3;
+  font-weight: 600;
+}
+
+// Main chapters section styling
+.cds-detail-chapters {
+  .chapter-item-main {
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    
+    .chapter-timestamp-main {
+      .badge {
+        font-family: monospace;
+      }
+    }
+    
+    .chapter-title-main {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .chapter-item-main {
+      margin-bottom: 10px;
+      
+      div[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        
+        .chapter-thumbnail {
+          margin-bottom: 8px;
+          margin-right: 0 !important;
+        }
+        
+        .chapter-info {
+          .chapter-timestamp-main {
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
+  }
+  
+  // Chapter thumbnail styling
+  .chapter-thumbnail {
+    img {
+      transition: transform 0.2s ease;
+    }
+    
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+}
+
 .transcription-button {
   border-radius: 9px !important;
   border: 1px solid $cds-primary-color !important;
@@ -2243,5 +2525,212 @@ div[cds-search-results] {
     border-radius: 10px;
     background-color: #5bc0de;
     border-color: #46b8da;
+  }
+}
+
+// Video detail chapters and transcript styles
+.chapters-main-horizontal,
+.chapters-main-horizontal-additional {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+// Transcript line styling
+.transcript-line {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa !important;
+    border-left: 3px solid #e3f2fd;
+    padding-left: 11px !important;
+  }
+  
+  &.active {
+    background-color: #e3f2fd !important;
+    border-left: 4px solid #2196F3;
+    padding-left: 10px !important;
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+    
+    .transcript-timestamp {
+      color: #1976D2 !important;
+      font-weight: 700 !important;
+    }
+    
+    .transcript-text {
+      color: #333 !important;
+      font-weight: 500 !important;
+    }
+  }
+}
+
+// In this video panel styles
+.in-this-video-panel {
+  .tabs-container {
+    margin-bottom: 15px;
+    margin-top: 10px;
+    
+    .nav-tabs {
+      border-bottom: 1px solid #ddd;
+      
+      a {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .search-container {
+    margin-bottom: 15px;
+    
+    .form-control {
+      font-size: 14px;
+    }
+  }
+  
+  .content-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+  
+  .language-selector {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-bottom: 0;
+    
+    label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    
+    .form-control {
+      font-size: 14px;
+    }
+  }
+}
+
+// Chapter item styles
+.chapter-item {
+  cursor: pointer;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .chapter-content {
+    display: flex;
+    align-items: center;
+    
+    .chapter-thumbnail {
+      min-width: 80px;
+      margin-right: 12px;
+      
+      .thumbnail-container {
+        width: 80px;
+        height: 45px;
+        border-radius: 4px;
+        overflow: hidden;
+        background-color: #f5f5f5;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .thumbnail-placeholder {
+          width: 100%;
+          height: 100%;
+          background-color: #e9ecef;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          .fa {
+            color: #6c757d;
+            font-size: 16px;
+          }
+        }
+      }
+    }
+    
+    .chapter-info {
+      flex: 1;
+      
+      .chapter-title {
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin-bottom: 4px;
+      }
+      
+      .chapter-timestamp {
+        font-size: 14px;
+        color: #2196F3;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Transcript item styles
+.transcript-item {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  
+  .transcript-timestamp {
+    font-size: 14px;
+    color: #2196F3;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .transcript-text {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+}
+
+// Responsive styles for chapters
+@media (max-width: 768px) {
+  .chapter-item-horizontal-main {
+    width: 150px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 126px !important;
+    height: 71px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chapter-item-horizontal-main {
+    width: 130px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 106px !important;
+    height: 60px !important;
   }
 }

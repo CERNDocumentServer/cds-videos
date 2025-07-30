@@ -7,8 +7,10 @@ function cdsVideoListCtrl($scope, $timeout) {
   // State management for video list
   this.selectedVideoId = null;
   this.expandedVideoId = null;
-  this.videoListView = true; // Start in list view
   this.loadingVideo = null;
+  
+  // Filter state
+  this.statusFilter = 'all'; // 'all', 'published', 'draft'
   
   // Performance optimization: cache computed values
   this._statusCache = new Map();
@@ -24,8 +26,8 @@ function cdsVideoListCtrl($scope, $timeout) {
   
   // Initialize component
   this.$onInit = function() {
-    // Auto-select and expand first video if available in list view
-    if (that.videos && that.videos.length > 0 && that.videoListView) {
+    // Auto-select and expand first video if available
+    if (that.videos && that.videos.length > 0) {
       that.selectedVideoId = that.videos[0]._deposit.id;
       // Auto-expand first video after a short delay
       $timeout(function() {
@@ -61,6 +63,36 @@ function cdsVideoListCtrl($scope, $timeout) {
       }
     });
     
+    // Listen for video deletion events to update UI
+    $scope.$on("cds.video.deleted", function(event, deletionData) {
+      if (deletionData && deletionData.videoId) {
+        // Clear cache for the deleted video
+        that._statusCache.delete(deletionData.videoId);
+        that._titleCache.delete(deletionData.videoId);
+        that._thumbnailCache.delete(deletionData.videoId);
+        
+        // If the deleted video was selected, clear selection
+        if (that.selectedVideoId === deletionData.videoId) {
+          that.selectedVideoId = null;
+          that.expandedVideoId = null;
+          
+          // Auto-select first remaining video if any
+          if (that.videos && that.videos.length > 0) {
+            that.selectedVideoId = that.videos[0]._deposit.id;
+            $timeout(function() {
+              that.expandedVideoId = that.videos[0]._deposit.id;
+            }, 100);
+          }
+        }
+        
+        // Remove from expanded descriptions set
+        that.expandedDescriptions.delete(deletionData.videoId);
+        
+        // Force UI update
+        $scope.$applyAsync();
+      }
+    });
+    
     // Watch for video changes and clear cache
     $scope.$watch('$ctrl.videos', function(newVideos, oldVideos) {
       if (newVideos !== oldVideos) {
@@ -75,8 +107,8 @@ function cdsVideoListCtrl($scope, $timeout) {
             var oldVideoIds = oldVideos.map(v => v._deposit.id);
             var addedVideoIds = newVideoIds.filter(id => !oldVideoIds.includes(id));
             
-            // Auto-select the newest added video if in list view
-            if (addedVideoIds.length > 0 && that.videoListView) {
+            // Auto-select the newest added video
+            if (addedVideoIds.length > 0) {
               var newestVideoId = addedVideoIds[addedVideoIds.length - 1];
               that.selectedVideoId = newestVideoId;
               $timeout(function() {
@@ -87,7 +119,7 @@ function cdsVideoListCtrl($scope, $timeout) {
         }
         
         // Auto-select first video when videos are loaded initially
-        if (newVideos && newVideos.length > 0 && !that.selectedVideoId && that.videoListView) {
+        if (newVideos && newVideos.length > 0 && !that.selectedVideoId) {
           that.selectedVideoId = newVideos[0]._deposit.id;
           $timeout(function() {
             that.expandedVideoId = newVideos[0]._deposit.id;
@@ -217,13 +249,6 @@ function cdsVideoListCtrl($scope, $timeout) {
     return '/static/img/video-placeholder.svg';
   };
   
-  // Toggle between list and detailed view
-  this.toggleView = function() {
-    that.videoListView = !that.videoListView;
-    if (that.videoListView) {
-      that.expandedVideoId = null;
-    }
-  };
   
   // Check if video is selected
   this.isSelected = function(videoId) {
@@ -300,6 +325,64 @@ function cdsVideoListCtrl($scope, $timeout) {
   this.isDescriptionExpanded = function(videoId) {
     return that.expandedDescriptions.has(videoId);
   };
+  
+  // Filter videos based on status
+  this.getFilteredVideos = function() {
+    if (!that.videos) return [];
+    
+    switch (that.statusFilter) {
+      case 'published':
+        return that.videos.filter(function(video) {
+          return that.isVideoPublished(video);
+        });
+      case 'draft':
+        return that.videos.filter(function(video) {
+          return !that.isVideoPublished(video);
+        });
+      default:
+        return that.videos;
+    }
+  };
+  
+  // Set status filter
+  this.setStatusFilter = function(filter) {
+    that.statusFilter = filter;
+    
+    // If current selected video is not in filtered results, clear selection
+    var filteredVideos = that.getFilteredVideos();
+    var selectedVideoInFilter = filteredVideos.find(function(video) {
+      return video._deposit.id === that.selectedVideoId;
+    });
+    
+    if (!selectedVideoInFilter && filteredVideos.length > 0) {
+      // Auto-select first video in filtered results
+      that.selectedVideoId = filteredVideos[0]._deposit.id;
+      $timeout(function() {
+        that.expandedVideoId = filteredVideos[0]._deposit.id;
+      }, 100);
+    } else if (filteredVideos.length === 0) {
+      // Clear selection if no videos match filter
+      that.selectedVideoId = null;
+      that.expandedVideoId = null;
+    }
+  };
+  
+  // Get filter counts
+  this.getFilterCounts = function() {
+    if (!that.videos) return { all: 0, published: 0, draft: 0 };
+    
+    var published = that.videos.filter(function(video) {
+      return that.isVideoPublished(video);
+    }).length;
+    
+    var draft = that.videos.length - published;
+    
+    return {
+      all: that.videos.length,
+      published: published,
+      draft: draft
+    };
+  };
 }
 
 cdsVideoListCtrl.$inject = ['$scope', '$timeout'];
@@ -318,46 +401,59 @@ function cdsVideoList() {
     controller: cdsVideoListCtrl,
     template: `
       <div class="cds-video-list-sidebar">
-        <!-- Header with view toggle -->
+        <!-- Header -->
         <div class="video-list-header mb-20" ng-if="$ctrl.videos.length > 0">
           <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
               <h4 class="mb-0">
                 <i class="fa fa-video-camera"></i> 
-                Videos ({{ $ctrl.videos.length }} of {{ $ctrl.maxNumberOfVideos }})
+                Videos
               </h4>
-            </div>
-            <div class="col-md-4 text-right">
-              <div class="btn-group btn-group-sm">
-                <button class="btn btn-default" 
-                        ng-class="{ active: $ctrl.videoListView }"
-                        ng-click="$ctrl.toggleView()"
-                        title="List View">
-                  <i class="fa fa-list"></i> List
-                </button>
-                <button class="btn btn-default" 
-                        ng-class="{ active: !$ctrl.videoListView }"
-                        ng-click="$ctrl.toggleView()"
-                        title="Traditional View">
-                  <i class="fa fa-th-large"></i> Full
-                </button>
-              </div>
             </div>
           </div>
         </div>
         
         <!-- Side-by-side Video List View -->
-        <div ng-if="$ctrl.videoListView && $ctrl.videos.length > 0" class="video-sidebar-layout">
+        <div ng-if="$ctrl.videos.length > 0" class="video-sidebar-layout">
           <div class="row">
             <!-- Left sidebar with video list -->
-            <div class="col-lg-3 col-md-4">
+            <div class="col-lg-4 col-md-5">
               <div class="video-sidebar">
+                <!-- Status Filter in Sidebar -->
+                <div class="video-sidebar-filter">
+                  <div class="filter-header">
+                    <small class="text-muted"><i class="fa fa-filter"></i> Filter by Status</small>
+                  </div>
+                  <div class="filter-buttons">
+                    <div class="btn-group btn-group-sm" style="width: 100%;">
+                      <button class="btn filter-btn" 
+                              ng-class="{ 'btn-primary': $ctrl.statusFilter === 'all', 'btn-default': $ctrl.statusFilter !== 'all' }"
+                              ng-click="$ctrl.setStatusFilter('all')">
+                        <i class="fa fa-video-camera"></i> All
+                        <span class="badge">{{ $ctrl.getFilterCounts().all }}</span>
+                      </button>
+                      <button class="btn filter-btn" 
+                              ng-class="{ 'btn-warning': $ctrl.statusFilter === 'draft', 'btn-default': $ctrl.statusFilter !== 'draft' }"
+                              ng-click="$ctrl.setStatusFilter('draft')">
+                        <i class="fa fa-edit"></i> Draft
+                        <span class="badge">{{ $ctrl.getFilterCounts().draft }}</span>
+                      </button>
+                      <button class="btn filter-btn" 
+                              ng-class="{ 'btn-success': $ctrl.statusFilter === 'published', 'btn-default': $ctrl.statusFilter !== 'published' }"
+                              ng-click="$ctrl.setStatusFilter('published')">
+                        <i class="fa fa-check-circle"></i> Published
+                        <span class="badge">{{ $ctrl.getFilterCounts().published }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <div class="video-sidebar-header">
                   <small class="text-muted">Select a video to edit</small>
                 </div>
                 <div class="video-sidebar-list">
                   <div class="video-list-item" 
-                       ng-repeat="video in $ctrl.videos track by video._deposit.id"
+                       ng-repeat="video in $ctrl.getFilteredVideos() track by video._deposit.id"
                        ng-class="$ctrl.getVideoItemClasses(video)"
                        ng-click="$ctrl.selectVideo(video._deposit.id)">
                     <div class="video-item-content">
@@ -413,12 +509,12 @@ function cdsVideoList() {
                                ng-class="{ 'no-description': $ctrl.getVideoDescription(video) === 'No description available' }">
                               {{ $ctrl.getVideoDescription(video) }}
                             </p>
-                            <button ng-if="$ctrl.getVideoDescription(video).length > 100 && $ctrl.getVideoDescription(video) !== 'No description available'" 
-                                    class="description-toggle"
-                                    ng-click="$ctrl.toggleDescription(video._deposit.id, $event)"
-                                    title="{{ $ctrl.isDescriptionExpanded(video._deposit.id) ? 'Show less' : 'Show more' }}">
-                              <i class="fa" ng-class="{ 'fa-chevron-up': $ctrl.isDescriptionExpanded(video._deposit.id), 'fa-chevron-down': !$ctrl.isDescriptionExpanded(video._deposit.id) }"></i>
-                            </button>
+                            <div ng-if="$ctrl.getVideoDescription(video).length > 100 && $ctrl.getVideoDescription(video) !== 'No description available'" 
+                                 class="description-toggle-text"
+                                 ng-click="$ctrl.toggleDescription(video._deposit.id, $event)">
+                              <span ng-if="!$ctrl.isDescriptionExpanded(video._deposit.id)" class="show-more">Show more</span>
+                              <span ng-if="$ctrl.isDescriptionExpanded(video._deposit.id)" class="show-less">Show less</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -464,7 +560,7 @@ function cdsVideoList() {
             </div>
             
             <!-- Right content area with video editor -->
-            <div class="col-lg-9 col-md-8">
+            <div class="col-lg-8 col-md-7">
               <div class="video-editor-area">
                 <div ng-if="!$ctrl.expandedVideoId" class="video-editor-placeholder">
                   <div class="text-center text-muted py-40">
@@ -522,59 +618,25 @@ function cdsVideoList() {
           </div>
         </div>
         
-        <!-- Traditional Detailed View (when toggled) -->
-        <div ng-if="!$ctrl.videoListView">
-          <!-- Only show traditional video forms, not upload areas -->
-          <div ng-repeat="child in $ctrl.videos track by child._deposit.id">
-            <cds-deposit
-              index="$index + 1"
-              id="child._deposit.id"
-              update-record-in-background="10000"
-              links="child.links"
-              schema="$ctrl.cdsDepositsCtrl.childrenSchemaResolved"
-              record="child"
-            >
-              <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
-                <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted px-20 py-10">
-                  <span class="text-muted">
-                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} (of {{$ctrl.maxNumberOfVideos}}) <span ng-show="child.report_number" class="label ml-10 label-primary"> {{child.report_number[0]}} </span> <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
-                  </span>
-                  <span class="pull-right">
-                    <cds-actions template="/static/templates/cds_deposit/types/video/actions.html">
-                    </cds-actions>
-                  </span>
-                </div>
-                <div ng-init="showForm=false" class="panel-body">
-                  <!-- Draft Video -->
-                  <cds-form
-                    template="/static/templates/cds_deposit/types/video/form.html"
-                    form="$ctrl.cdsDepositsCtrl.childrenFormResolved"
-                  >
-                  <cds-uploader
-                    auto-start-upload="true"
-                    files="child._files"
-                    template="/static/templates/cds_deposit/types/video/uploader.html"
-                    remote-master-receiver="/api/flows/"
-                  >
-                    <!-- <cds-remote-uploader
-                        template="/static/templates/cds_deposit/remote_upload.html"
-                        remote-master-receiver="/api/flows/"
-                        remote-children-receiver="/api/flows/"
-                    > -->
-                    </cds-remote-uploader>
-                  </cds-uploader>
-                  </cds-form>
-                </div>
-              </div>
-            </cds-deposit>
-          </div>
-        </div>
         
         <!-- Empty state -->
         <div ng-if="$ctrl.videos.length === 0" class="text-center text-muted py-40">
           <i class="fa fa-video-camera fa-3x mb-20"></i>
           <h4>No videos yet</h4>
           <p>Upload video files to get started</p>
+        </div>
+        
+        <!-- No videos match filter -->
+        <div ng-if="$ctrl.videos.length > 0 && $ctrl.getFilteredVideos().length === 0" class="text-center text-muted py-40">
+          <i class="fa fa-filter fa-2x mb-20"></i>
+          <h4>No videos match the current filter</h4>
+          <p>
+            <span ng-if="$ctrl.statusFilter === 'published'">No published videos found.</span>
+            <span ng-if="$ctrl.statusFilter === 'draft'">No draft videos found.</span>
+          </p>
+          <button class="btn btn-default btn-sm" ng-click="$ctrl.setStatusFilter('all')">
+            <i class="fa fa-times"></i> Clear Filter
+          </button>
         </div>
         
         <!-- Upload areas (shown in both views) -->

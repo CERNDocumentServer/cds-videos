@@ -39,7 +39,7 @@ import { getCookie } from "../getCookie";
  * @description
  *    CDS record controller.
  */
-function cdsRecordController($scope, $sce, $http, $timeout) {
+function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   // Parameters
 
   // Assign the controller to `vm`
@@ -59,6 +59,10 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.filteredTranscript = [];
   $scope.selectedTranscriptLanguage = null;
   $scope.transcriptSearch = "";
+  $scope.chapters = [];
+  $scope.showChapters = true;
+  $scope.showAllChapters = false;
+  $scope.activeTab = 'chapters'; // Default to chapters tab
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
@@ -178,6 +182,24 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
         console.warn("No subtitle file found.");
       }
     });
+
+    // Use chapters from API or parse from description as fallback
+    if (record.metadata.chapters && record.metadata.chapters.length > 0) {
+      $scope.chapters = record.metadata.chapters;
+    } else if (record.metadata.description) {
+      $scope.chapters = $scope.parseChapters(record.metadata.description);
+    }
+    
+    // Set default active tab based on what's available (prioritize chapters)
+    const hasTranscripts = (record.metadata._files || []).some(f => 
+      f.context_type === 'subtitle' && f.content_type === 'vtt'
+    );
+    
+    if ($scope.chapters.length > 0) {
+      $scope.activeTab = 'chapters';
+    } else if (hasTranscripts) {
+      $scope.activeTab = 'transcript';
+    }
   };
 
   $scope.setTranscriptLanguage = function (lang) {
@@ -259,6 +281,125 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
     const paddedSecs = secs < 10 ? "0" + secs : secs;
 
     return `${minutes}:${paddedSecs}`;
+  };
+
+  $scope.parseChapters = function (description) {
+    if (!description) return [];
+    
+    // Regex pattern to match timestamp formats: 0:00, 00:00, 0:00:00, 00:00:00
+    const pattern = /(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{2})\s*[-\s]*(.+?)(?=\n|$)/gm;
+    const chapters = [];
+    let match;
+    
+    while ((match = pattern.exec(description)) !== null) {
+      const [, timestampStr, title] = match;
+      
+      // Parse timestamp to seconds
+      const timeParts = timestampStr.split(':');
+      let totalSeconds;
+      
+      if (timeParts.length === 2) { // MM:SS format
+        const [minutes, seconds] = timeParts.map(Number);
+        totalSeconds = minutes * 60 + seconds;
+      } else if (timeParts.length === 3) { // HH:MM:SS format
+        const [hours, minutes, seconds] = timeParts.map(Number);
+        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      } else {
+        continue;
+      }
+      
+      // Clean up title
+      const cleanTitle = title.trim();
+      if (cleanTitle) {
+        chapters.push({
+          timestamp: timestampStr,
+          seconds: totalSeconds,
+          title: cleanTitle
+        });
+      }
+    }
+    
+    // Sort chapters by timestamp
+    chapters.sort((a, b) => a.seconds - b.seconds);
+    return chapters;
+  };
+
+  $scope.toggleChapters = function () {
+    $scope.showChapters = !$scope.showChapters;
+  };
+
+  $scope.setActiveTab = function (tab) {
+    $scope.activeTab = tab;
+  };
+
+  $scope.toggleInThisVideoFromMain = function () {
+    $scope.showTranscript = !$scope.showTranscript;
+    
+    // If opening, scroll to the "In this video" section and set chapters tab
+    if ($scope.showTranscript && $scope.chapters.length > 0) {
+      $scope.activeTab = 'chapters';
+      setTimeout(function () {
+        const el = document.getElementById('transcriptionsSection');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  };
+
+  $scope.processDescriptionWithClickableTimestamps = function (description) {
+    if (!description) return description;
+    
+    // Regex pattern to match timestamp formats: 0:00, 00:00, 0:00:00, 00:00:00
+    const pattern = /(\d{1,2}:(?:\d{1,2}:)?\d{2})/g;
+    
+    return description.replace(pattern, function(match) {
+      // Parse timestamp to seconds for the seek function
+      const timeParts = match.split(':');
+      let totalSeconds;
+      
+      if (timeParts.length === 2) {
+        const [minutes, seconds] = timeParts.map(Number);
+        totalSeconds = minutes * 60 + seconds;
+      } else if (timeParts.length === 3) {
+        const [hours, minutes, seconds] = timeParts.map(Number);
+        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      } else {
+        return match; // Return unchanged if invalid format
+      }
+      
+      // Return clickable timestamp using onclick for ng-bind-html compatibility
+      return `<a href="javascript:void(0)" class="timestamp-link" onclick="(function(){ try { angular.element(document.querySelector('.cds-detail-description')).scope().seekTo(${totalSeconds}); } catch(e) { console.error('Could not seek to timestamp:', e); } })()" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
+    });
+  };
+
+  $scope.getChapterFrame = function (chapter) {
+    if (!$scope.record || !chapter) return null;
+    
+    // Use the findMaster filter to get the master file (this filter is defined in cds/module.js)
+    const master = $filter('findMaster')($scope.record);
+    
+    if (!master || !master.frame) return null;
+    
+    // Look for a frame with filename that matches chapter timestamp
+    // Chapter frames are named like "chapter-{seconds}.jpg"
+    const expectedFrameName = `chapter-${chapter.seconds}.jpg`;
+    
+    const chapterFrame = master.frame.find(frame => 
+      frame.key === expectedFrameName
+    );
+    
+    return chapterFrame || null;
+  };
+
+  $scope.cleanHtmlFromTitle = function (title) {
+    if (!title) return title;
+    
+    // Remove HTML tags and clean up whitespace for display purposes only
+    let cleanTitle = title.replace(/<[^>]+>/g, ' ');
+    cleanTitle = cleanTitle.replace(/\s+/g, ' ').trim();
+    
+    return cleanTitle;
   };
 
   /**
@@ -383,7 +524,7 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.$on("cds.record.loading.stop", cdsRecordLoadingStop);
 }
 
-cdsRecordController.$inject = ["$scope", "$sce", "$http", "$timeout"];
+cdsRecordController.$inject = ["$scope", "$sce", "$http", "$timeout", "$filter"];
 
 ////////////
 

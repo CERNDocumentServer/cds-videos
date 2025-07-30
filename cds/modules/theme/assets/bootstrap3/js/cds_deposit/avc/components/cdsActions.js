@@ -32,10 +32,47 @@ function cdsActionsCtrl($scope, $q, cdsAPI) {
       that.actionHandler("DELETE").then(function () {
         var children =
           that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
-        for (var i in children) {
-          if (children[i]._deposit.id === that.cdsDepositCtrl.id) {
-            children.splice(i, 1);
+        var videoIdToDelete = that.cdsDepositCtrl.id;
+        
+        // Find and remove the video from the array
+        var videoIndex = children.findIndex(function(video) {
+          return video._deposit.id === videoIdToDelete;
+        });
+        
+        if (videoIndex !== -1) {
+          children.splice(videoIndex, 1);
+          
+          // Broadcast deletion event to update other UI components
+          $scope.$broadcast("cds.video.deleted", {
+            videoId: videoIdToDelete,
+            remainingVideos: children.length
+          });
+          
+          // Force digest cycle to update UI
+          $scope.$applyAsync();
+        }
+      }).catch(function(error) {
+        // Handle case where video was already deleted
+        if (error.status === 404) {
+          // Video already deleted, just remove from UI
+          var children = that.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.videos;
+          var videoIdToDelete = that.cdsDepositCtrl.id;
+          
+          var videoIndex = children.findIndex(function(video) {
+            return video._deposit.id === videoIdToDelete;
+          });
+          
+          if (videoIndex !== -1) {
+            children.splice(videoIndex, 1);
+            $scope.$broadcast("cds.video.deleted", {
+              videoId: videoIdToDelete,
+              remainingVideos: children.length
+            });
+            $scope.$applyAsync();
           }
+        } else {
+          // Re-throw other errors
+          throw error;
         }
       });
     };

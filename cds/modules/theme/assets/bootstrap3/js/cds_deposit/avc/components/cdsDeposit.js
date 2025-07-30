@@ -274,6 +274,42 @@ function cdsDepositCtrl(
       }
     };
 
+    this.refreshFormFromBackend = function () {
+      // Fetch latest deposit state from the backend to ensure consistency
+      if (that.links && that.links.self) {
+        cdsAPI.action(that.links.self, "GET", {})
+          .then(function(response) {
+            // Update the record with latest backend state
+            var latestRecord = response.data.metadata;
+            
+            // Preserve form changes for specific fields if form is dirty
+            var preserveFields = ['title', 'description', 'contributors'];
+            var updatedRecord = angular.copy(latestRecord);
+            
+            if (!that.isPristine()) {
+              preserveFields.forEach(function(field) {
+                if (that.record[field] && !angular.equals(that.record[field], latestRecord[field])) {
+                  // Keep the form value if it differs from backend (user might be editing)
+                  updatedRecord[field] = that.record[field];
+                }
+              });
+            }
+            
+            // Update the record while preserving user changes
+            that.record = _.merge(that.record, updatedRecord);
+            
+            // Update deposit status and flows
+            that.updateDeposit(latestRecord);
+            that.fetchFlowTasksStatuses();
+            
+            console.log('Form refreshed from backend at', new Date().toISOString());
+          })
+          .catch(function(error) {
+            console.warn('Failed to refresh form from backend:', error);
+          });
+      }
+    };
+
     this.refetchRecordOnTaskStatusChanged = function (flowTasksById) {
       // init if not set yet
       var cachedFlowTasksById = _.isEmpty(that.cachedFlowTasksById)
@@ -609,6 +645,22 @@ function cdsDepositCtrl(
     };
     
     setupSmartPolling();
+
+    // Setup 5-minute interval for form re-initialization
+    var formRefreshInterval = $interval(function() {
+      that.refreshFormFromBackend();
+    }, 300000); // 5 minutes = 300000ms
+
+    // Clean up form refresh interval on component destroy
+    var originalDestroy = that.$onDestroy;
+    that.$onDestroy = function() {
+      try {
+        $interval.cancel(formRefreshInterval);
+      } catch (error) {}
+      if (originalDestroy) {
+        originalDestroy.call(that);
+      }
+    };
     // Watch contributors with optimized shallow watching and increased debounce
     // Use shallow watching and manual comparison for better performance
     var lastContributorsState = null;
