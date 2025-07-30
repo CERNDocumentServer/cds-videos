@@ -69,9 +69,9 @@
         <div class="row">
           <div class="col-md-9">
             <ul class="list-inline text-left">
-              <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks)">
-                <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
-                <a ng-click="$ctrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="task === 'file_transcode'"></i></a>
+              <li ng-repeat="(task, status) in ($ctrl.master.metadata._cds.state | orderTasks) track by task">
+                <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ ::task | taskRepr }}
+                <a ng-click="$ctrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="::task === 'file_transcode'"></i></a>
               </li>
             </ul>
           </div>
@@ -89,7 +89,7 @@
       <p class="text-left">Please notice that the transcoding platform at CERN is provided by the Webcast service and it is not managed by the CDS service.</p>
     </modal-dialog>
     <!-- Top status bar -->
-    <div class="container-fluid">
+    <div class="cds-video-deposit-container">
       <div class="row">
         <div class="col-md-12">
           <!-- Draft Project -->
@@ -110,53 +110,16 @@
               </cds-remote-uploader> -->
             </cds-uploader>
           </cds-form>
-          <!-- Published Project -->
-          <!-- ADD children -->
-          <div id="{{child._deposit.id}}" ng-repeat="child in $ctrl.master.metadata.videos track by $index">
-            <cds-deposit
-              index="$index + 1"
-              id="child._deposit.id"
-              update-record-in-background="10000"
-              links="child.links"
-              schema="$ctrl.childrenSchemaResolved"
-              record="child"
-            >
-              <div id="video_{{child._deposit.id}}" class="cds-deposit-panel panel panel-default">
-                <div hl-sticky="" offset="0" container="video_{{child._deposit.id}}" class="panel-heading text-muted px-20 py-10">
-                  <span class="text-muted">
-                    <i class="fa fa-video-camera"></i> Video #{{$index + 1}} (of {{$ctrl.maxNumberOfVideos}}) <span ng-show="child.report_number" class="label ml-10 label-primary"> {{child.report_number[0]}} </span> <span ng-show="$ctrl.isPublished()" class="label ml-10 label-primary">Published</span>
-                  </span>
-                  <span class="pull-right">
-                    <cds-actions template="/static/templates/cds_deposit/types/video/actions.html">
-                    </cds-actions>
-                  </span>
-                </div>
-                <div ng-init="showForm=false" class="panel-body">
-                  <!-- Draft Video -->
-                  <cds-form
-                    template="/static/templates/cds_deposit/types/video/form.html"
-                    form="$ctrl.childrenFormResolved"
-                  >
-                  <cds-uploader
-                    auto-start-upload="true"
-                    files="child._files"
-                    template="/static/templates/cds_deposit/types/video/uploader.html"
-                    remote-master-receiver="/api/flows/"
-                  >
-                    <!-- <cds-remote-uploader
-                        template="/static/templates/cds_deposit/remote_upload.html"
-                        remote-master-receiver="/api/flows/"
-                        remote-children-receiver="/api/flows/"
-                    > -->
-                    </cds-remote-uploader>
-                  </cds-uploader>
-                  </cds-form>
-                </div>
-              </div>
-            </cds-deposit>
-          </div>
-          <!-- /ADD children -->
-          <!-- Uploader Extra -->
+          <!-- Video List Component -->
+          <cds-video-list 
+            videos="$ctrl.master.metadata.videos"
+            max-number-of-videos="$ctrl.maxNumberOfVideos"
+            is-published="$ctrl.isPublished()">
+            
+            
+          </cds-video-list>
+          
+          <!-- Traditional Upload Areas (shown when not in list view) -->
           <div id="cds-deposit-main-uploader" class="mt-40 cds-deposit-panel cds-deposit-box" ng-if="$ctrl.master.metadata._deposit.status == 'published'">
             <p class="f5 text-center text-muted">
               <strong>Everything is published.</strong>
@@ -209,6 +172,7 @@
               </div>
           </div>
           <!-- //Max Number of Videos per Project -->
+          
           <div ng-if="$ctrl.duplicateVideos.length" class="alert alert-danger">
             <p>
               Multiple deposits with the same filename are not allowed:

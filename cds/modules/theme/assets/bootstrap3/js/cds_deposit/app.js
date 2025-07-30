@@ -35,6 +35,7 @@ import "./avc/components/cdsDeposits.js";
 import "./avc/components/cdsForm.js";
 import "./avc/components/cdsUploader.js";
 import "./avc/components/cdsRemoteUploader.js";
+import "./avc/components/cdsVideoList.js";
 
 $(document).ready(function () {
   // show warning if IE (not supported for deposit)

@@ -62,9 +62,9 @@ html, body {
 }
 
 .cds-deposit-panel {
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
+  // max-width: 1000px;
+  // margin-left: auto;
+  // margin-right: auto;
   .is-sticky {
     // the height of the navbar
     margin-top: 65px !important;
@@ -436,6 +436,1109 @@ a.cds-anchor:hover{
 
 .cds-tab-content {
   background-color: #fff;
+}
+
+// Expand container width for deposit pages
+.cds-max-fluid-width {
+  max-width: 95% !important;
+  margin: 0 auto;
+}
+
+// Override container constraints for deposit edit pages
+body.cds-deposit-edit-page {
+  .container-fluid.cds-max-fluid-width {
+    max-width: 98% !important;
+    width: 98% !important;
+    margin: 0 auto;
+    padding: 0 15px;
+    
+    // For larger desktop monitors (1440px+), use contained layout
+    @media (min-width: 1440px) {
+      max-width: 1350px !important;
+      width: 1350px !important;
+      padding: 0 30px;
+    }
+    
+    // For very large screens (1920px+), more contained
+    @media (min-width: 1920px) {
+      max-width: 1600px !important;
+      width: 1600px !important;
+      padding: 0 40px;
+    }
+  }
+}
+
+// Wide container for video deposit interface
+.cds-video-deposit-container {
+  // Full width up to larger desktop screens (MacBook Pro 13" and similar)
+  max-width: 98%;
+  margin: 0 auto;
+  padding: 0 15px 50px 15px; // Added bottom padding to prevent footer overlap
+  
+  // For larger desktop monitors (1440px+), use contained layout
+  @media (min-width: 1440px) {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 0 30px 50px 30px;
+  }
+  
+  // For very large screens (1920px+), more contained
+  @media (min-width: 1920px) {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 40px 50px 40px;
+  }
+  
+  // Ensure project section uses full width efficiently
+  .cds-deposit-panel-project {
+    .panel-body {
+      padding: 20px 30px;
+      
+      // Better spacing for project form layout
+      .row {
+        margin-left: -20px;
+        margin-right: -20px;
+        
+        .col-sm-6 {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        
+        .col-sm-12 {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+      
+      // Improve form field spacing in project
+      .form-group {
+        margin-bottom: 20px;
+        
+        label {
+          font-weight: 500;
+          margin-bottom: 8px;
+        }
+        
+        .form-control {
+          padding: 8px 12px;
+          font-size: 14px;
+        }
+      }
+      
+      // Better button spacing
+      .btn {
+        margin: 5px;
+        border-radius: 6px;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        &.btn-success {
+          background: #5cb85c;
+          border-color: #4cae4c;
+          color: #fff;
+        }
+        
+        &.btn-primary {
+          background: #337ab7;
+          border-color: #2e6da4;
+          color: #fff;
+        }
+        
+        &.btn-warning {
+          background: #f0ad4e;
+          border-color: #eea236;
+          color: #fff;
+        }
+        
+        &.btn-sm {
+          padding: 6px 12px;
+        }
+      }
+      
+      // Improve help text spacing
+      .text-muted {
+        margin-top: 15px;
+        line-height: 1.5;
+      }
+    }
+    
+    // Project header styling to match video list aesthetic
+    .panel-heading {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 30px;
+      
+      .text-muted {
+        font-size: 16px;
+        font-weight: 500;
+        color: #495057;
+        
+        i {
+          margin-right: 8px;
+        }
+      }
+      
+      .pull-right {
+        .btn {
+          margin-left: 8px;
+          border-radius: 6px;
+          font-weight: 500;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+          transition: all 0.2s ease;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          }
+          
+          &.btn-success {
+            background: #5cb85c;
+            border-color: #4cae4c;
+            color: #fff;
+          }
+          
+          &.btn-primary {
+            background: #337ab7;
+            border-color: #2e6da4;
+            color: #fff;
+          }
+          
+          &.btn-warning {
+            background: #f0ad4e;
+            border-color: #eea236;
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+  
+  // Improve uploader section styling within project
+  .cds-deposit-box {
+    margin: 20px 0;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #adb5bd;
+      background: #f1f3f4;
+    }
+    
+    .cds-deposit-box-upload-wrapper {
+      padding: 40px 20px;
+      
+      .cds-deposit-box-upload-icon {
+        color: #6c757d;
+      }
+      
+      .cds-deposit-box-upload-title h3 {
+        color: #495057;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      
+      .cds-deposit-box-upload-description {
+        color: #6c757d;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Video List Sidebar Component Styles
+.cds-video-list-sidebar {
+  // Make sure we use full width
+  width: 100%;
+  
+  .video-list-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    
+    @media (max-width: 768px) {
+      .col-md-8, .col-md-4 {
+        width: 100%;
+        text-align: left !important;
+        margin-bottom: 10px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  .video-sidebar-layout {
+    min-height: calc(100vh - 300px);
+    margin-bottom: 50px;
+    
+    // Adjust proportions to prevent tab wrapping
+    .col-lg-4, .col-md-5 {
+      // Reduce sidebar width more to give tabs space
+      @media (min-width: 992px) {
+        width: 28% !important; // Further reduced from 30%
+        padding-right: 5px; // Reduce right padding
+      }
+      @media (min-width: 768px) and (max-width: 991px) {
+        width: 32% !important; // Further reduced from 35%
+        padding-right: 5px;
+      }
+    }
+    
+    .col-lg-8, .col-md-7 {
+      // Increase main content width more
+      @media (min-width: 992px) {
+        width: 72% !important; // Increased from 70%
+        padding-left: 5px; // Reduce left padding
+      }
+      @media (min-width: 768px) and (max-width: 991px) {
+        width: 68% !important; // Increased from 65%
+        padding-left: 5px;
+      }
+    }
+    
+    // Responsive adjustments for mobile
+    @media (max-width: 767px) {
+      .col-lg-4, .col-md-5 {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .col-lg-8, .col-md-7 {
+        width: 100%;
+      }
+    }
+    
+    // Left sidebar
+    .video-sidebar {
+      background: #f8f9fa;
+      border-right: 1px solid #e9ecef;
+      height: auto;
+      min-height: 650px; // Header + 5 videos + upload area
+      display: flex;
+      flex-direction: column;
+      
+      // Status Filter Section
+      .video-sidebar-filter {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+        background: #fff;
+        flex-shrink: 0;
+        
+        .filter-header {
+          margin-bottom: 10px;
+          
+          small {
+            font-weight: 500;
+            color: #495057;
+            
+            i {
+              margin-right: 5px;
+              color: #6c757d;
+            }
+          }
+        }
+        
+        .filter-buttons {
+          .btn-group {
+            width: 100%;
+            display: flex;
+            
+            .filter-btn {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-direction: column;
+              text-align: center;
+              padding: 8px 4px;
+              font-size: 11px;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              white-space: nowrap;
+              overflow: hidden;
+              
+              i {
+                margin-bottom: 2px;
+                font-size: 12px;
+              }
+              
+              .badge {
+                background-color: #6c757d;
+                font-size: 9px;
+                padding: 1px 4px;
+                border-radius: 8px;
+                margin-top: 2px;
+                min-width: 16px;
+                text-align: center;
+              }
+              
+              &.btn-primary .badge {
+                background-color: #fff;
+                color: #007bff;
+              }
+              
+              &.btn-success .badge {
+                background-color: #fff;
+                color: #28a745;
+              }
+              
+              &.btn-warning .badge {
+                background-color: #fff;
+                color: #ffc107;
+              }
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              
+              // Responsive text adjustments
+              @media (max-width: 1200px) {
+                font-size: 10px;
+                padding: 6px 2px;
+                
+                i {
+                  font-size: 11px;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      .video-sidebar-header {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+        background: #fff;
+        flex-shrink: 0;
+      }
+      
+      .video-sidebar-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+        max-height: 550px; // Height for approximately 5 videos (110px per video)
+        min-height: 550px;
+        
+        .video-list-item {
+          cursor: pointer;
+          padding: 12px 15px;
+          border-bottom: 1px solid #e9ecef;
+          transition: all 0.2s ease;
+          border-left: 3px solid transparent;
+          min-height: 120px; // Increased height to accommodate expanded descriptions
+          display: flex;
+          align-items: flex-start; // Changed from center to flex-start
+          
+          &:hover {
+            background-color: #fff;
+            border-left-color: #ddd;
+          }
+          
+          &.active {
+            background-color: #e7f3ff;
+            border-left-color: #007bff;
+            
+            .video-title {
+              color: #007bff;
+              font-weight: 600;
+            }
+          }
+          
+          &.loading {
+            opacity: 0.7;
+          }
+          
+          // Published video styling
+          &.video-published {
+            background-color: #e8f5e9;
+            border-left-color: #28a745;
+            
+            .video-title {
+              color: #155724;
+            }
+            
+            &:hover {
+              background-color: #d4edda;
+              border-left-color: #28a745;
+            }
+            
+            &.active {
+              background-color: #c3e6cb;
+              border-left-color: #28a745;
+              
+              .video-title {
+                color: #155724;
+                font-weight: 600;
+              }
+            }
+          }
+          
+          // Editing (draft) video styling
+          &.video-editing {
+            background-color: #fff3cd;
+            border-left-color: #fd7e14;
+            
+            &:hover {
+              background-color: #ffeaa7;
+              border-left-color: #fd7e14;
+            }
+            
+            &.active {
+              background-color: #ffe082;
+              border-left-color: #fd7e14;
+              
+              .video-title {
+                color: #8a4800;
+                font-weight: 600;
+              }
+            }
+          }
+          
+          .video-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+          }
+          
+          .video-thumbnail-sidebar {
+            position: relative;
+            flex-shrink: 0;
+            align-self: flex-start; // Keep thumbnail at top
+            margin-top: 8px; // Add some top margin for alignment
+            
+            img {
+              width: 80px;
+              height: 45px;
+              object-fit: cover;
+              border-radius: 4px;
+              border: 1px solid #e9ecef;
+            }
+            
+            .loading-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: rgba(0, 0, 0, 0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 4px;
+              color: white;
+            }
+          }
+          
+          .video-item-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            
+            .video-header-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 12px;
+              
+              .video-title-section {
+                flex: 1;
+                min-width: 0;
+                
+                .video-title {
+                  margin: 0 0 4px 0;
+                  font-size: 13px;
+                  font-weight: 500;
+                  line-height: 1.3;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-height: 2.6em;
+                }
+                
+                .video-meta {
+                  .video-number {
+                    font-size: 10px;
+                    color: #6c757d;
+                    font-weight: 500;
+                  }
+                }
+              }
+              
+              .video-actions {
+                flex-shrink: 0;
+                display: flex;
+                align-items: flex-end;
+                flex-direction: column;
+                gap: 4px;
+                min-width: 80px;
+                text-align: right;
+                
+                .video-status-published {
+                  display: flex;
+                  align-items: flex-end;
+                  flex-direction: column;
+                  gap: 4px;
+                  width: 100%;
+                  
+                  .label {
+                    font-size: 9px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-weight: 500;
+                    align-self: flex-end;
+                  }
+                  
+                  .visit-video-btn {
+                    font-size: 9px;
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    text-decoration: none;
+                    background: #007bff;
+                    border-color: #007bff;
+                    color: #fff;
+                    transition: all 0.2s ease;
+                    align-self: flex-end;
+                    
+                    &:hover {
+                      background: #0056b3;
+                      border-color: #0056b3;
+                      color: #fff;
+                      text-decoration: none;
+                      transform: translateY(-1px);
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                    }
+                    
+                    i {
+                      margin-right: 2px;
+                      font-size: 8px;
+                    }
+                  }
+                }
+                
+                .video-status-editing {
+                  width: 100%;
+                  text-align: right;
+                  
+                  .label {
+                    font-size: 9px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-weight: 500;
+                  }
+                }
+              }
+            }
+            
+            .video-progress-section {
+              .progress-xs {
+                height: 3px;
+                margin: 0;
+                background-color: #e9ecef;
+                border-radius: 2px;
+                
+                .progress-bar {
+                  line-height: 3px;
+                }
+              }
+            }
+            
+            .video-description-section {
+              .video-description {
+                position: relative;
+                
+                .description-text {
+                  margin: 0;
+                  font-size: 11px;
+                  line-height: 1.4;
+                  color: #6c757d;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-height: 2.8em;
+                  transition: max-height 0.3s ease;
+                  
+                  &.no-description {
+                    color: #adb5bd;
+                    font-style: italic;
+                    font-size: 10px;
+                  }
+                }
+                
+                &.expanded .description-text {
+                  display: block;
+                  -webkit-line-clamp: unset;
+                  max-height: none;
+                  overflow: visible;
+                }
+                
+                .description-toggle-text {
+                  margin-top: 4px;
+                  cursor: pointer;
+                  
+                  .show-more,
+                  .show-less {
+                    font-size: 10px;
+                    color: #007bff;
+                    font-weight: 500;
+                    text-decoration: underline;
+                    transition: color 0.2s ease;
+                    
+                    &:hover {
+                      color: #0056b3;
+                      text-decoration: none;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Upload area in sidebar (using original style)
+      .video-sidebar-upload {
+        margin-top: 10px;
+        
+        .upload-divider {
+          height: 1px;
+          background: #e9ecef;
+          margin: 15px 0;
+        }
+        
+        .sidebar-upload-box {
+          margin: 0 15px 15px 15px;
+          
+          .cds-deposit-box-upload-wrapper {
+            padding: 25px 15px;
+            
+            .cds-deposit-box-upload-icon {
+              font-size: 20px;
+              margin-bottom: 10px;
+              
+              i {
+                color: $btn-info-bg;
+              }
+            }
+            
+            .cds-deposit-box-upload-title h5 {
+              color: $gray-dark;
+              margin-bottom: 8px;
+              font-size: 16px;
+            }
+            
+            .cds-deposit-box-upload-description {
+              color: $gray;
+              font-size: 13px;
+              margin: 0;
+            }
+            
+            &:hover {
+              .cds-deposit-box-upload-icon i {
+                color: $primary-color;
+              }
+            }
+          }
+        }
+      }
+      
+      // Max videos message in sidebar
+      .video-sidebar-max-message {
+        margin-top: 10px;
+        
+        .upload-divider {
+          height: 1px;
+          background: #e9ecef;
+          margin: 15px 0;
+        }
+        
+        .max-videos-message {
+          padding: 12px 15px;
+          margin: 0 15px;
+          background: #fff3cd;
+          border: 1px solid #ffeaa7;
+          border-radius: 6px;
+          font-size: 12px;
+          text-align: center;
+          color: #856404;
+          
+          i {
+            margin-right: 6px;
+            color: #f39c12;
+          }
+        }
+      }
+    }
+    
+    // Right editor area
+    .video-editor-area {
+      padding-left: 10px; // Reduced from 20px to 10px
+      height: calc(100vh - 300px);
+      min-height: 500px;
+      margin-bottom: 30px;
+      
+      // Make forms use full height without scrollbar
+      .video-editor-content {
+        height: 100%;
+        
+        .video-details-container {
+          height: 100%;
+          
+          // Video form container
+          .panel.panel-default {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            
+            .panel-body {
+              flex: 1;
+              overflow: visible;
+              padding: 20px;
+              
+              // Tab content should fill available space
+              .tab-content {
+                height: calc(100% - 60px); // Account for tab nav height
+                
+                .tab-pane {
+                  height: 100%;
+                  overflow-y: auto;
+                  padding: 10px 0;
+                  
+                  // Form sections
+                  .row {
+                    margin-bottom: 15px;
+                    
+                    .col-sm-6, .col-sm-12 {
+                      .form-group {
+                        margin-bottom: 15px;
+                        
+                        .form-control {
+                          border-radius: 4px;
+                        }
+                        
+                        // Textarea adjustments
+                        textarea.form-control {
+                          min-height: 80px;
+                          resize: vertical;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // Tab navigation
+              .nav-tabs {
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 10px;
+                flex-shrink: 0;
+                
+                // Ensure tabs don't wrap and have enough space
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                white-space: nowrap;
+                
+                li {
+                  flex-shrink: 0;
+                  
+                  a {
+                    white-space: nowrap;
+                    padding: 8px 12px;
+                    font-size: 13px;
+                    
+                    // Ensure Admin tab and others fit properly
+                    @media (min-width: 768px) {
+                      padding: 10px 16px;
+                      font-size: 14px;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      @media (max-width: 768px) {
+        padding-left: 0;
+        margin-top: 20px;
+      }
+      
+      .video-editor-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          border-color: #adb5bd;
+        }
+      }
+      
+      .video-editor-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-bottom: 2px solid #007bff;
+        padding: 18px 25px;
+        border-radius: 6px 6px 0 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+
+        
+        .video-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+            color: #495057;
+            
+            i.fa-video-camera {
+              color: #007bff;
+              margin-right: 8px;
+            }
+            
+            small {
+              font-weight: 500;
+              color: #6c757d;
+              background: #e9ecef;
+              padding: 2px 8px;
+              border-radius: 12px;
+              margin-left: 10px;
+              font-size: 12px;
+            }
+          }
+          
+          .video-header-actions {
+            flex-shrink: 0;
+            margin-left: 15px;
+            
+            // Style action buttons for better integration
+            .btn {
+              margin-left: 8px;
+              border-radius: 6px;
+              font-weight: 500;
+              padding: 8px 16px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+              transition: all 0.2s ease;
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+              }
+              
+              &.btn-success {
+                background: #5cb85c;
+                border-color: #4cae4c;
+                color: #fff;
+              }
+              
+              &.btn-primary {
+                background: #337ab7;
+                border-color: #2e6da4;
+                color: #fff;
+              }
+              
+              &.btn-warning {
+                background: #f0ad4e;
+                border-color: #eea236;
+                color: #fff;
+              }
+              
+              &.btn-sm {
+                padding: 6px 12px;
+                font-size: 13px;
+              }
+            }
+          }
+        }
+      }
+      
+      .video-editor-content {
+        border: 1px solid #e9ecef;
+        border-radius: 0 0 4px 4px;
+        background: #fff;
+        
+        .video-details-container {
+          padding: 20px;
+          
+          // Reset panel styles to integrate better - but preserve form functionality
+          > .cds-deposit-panel {
+            margin-bottom: 0;
+            border: none;
+            box-shadow: none;
+            
+            // Keep the panel heading but style it for better integration
+            > .panel-heading[hl-sticky] {
+              background: #f8f9fa;
+              border: none;
+              border-bottom: 1px solid #e9ecef;
+              padding: 10px 15px;
+              margin: -20px -20px 20px -20px;
+              
+              // Hide the redundant video title and info, but keep actions
+              .text-muted {
+                display: none;
+              }
+              
+              // Keep actions visible and properly positioned
+              .pull-right {
+                display: block;
+                float: right;
+                
+                // Style action buttons for better integration
+                .btn {
+                  margin-left: 5px;
+                  border-radius: 4px;
+                  
+                  &.btn-success, &.btn-primary {
+                    font-weight: 500;
+                  }
+                  
+                  &.btn-sm {
+                    padding: 5px 10px;
+                    font-size: 12px;
+                  }
+                }
+              }
+            }
+          }
+          
+          // Keep form panels intact for proper field rendering
+          .panel.panel-default {
+            border: 1px solid #ddd;
+            
+            .panel-heading {
+              display: block !important;
+              background-color: #f5f5f5;
+              padding: 10px 15px;
+            }
+            
+            .panel-body {
+              padding: 15px;
+            }
+          }
+          
+          // Ensure form controls work properly
+          .form-control {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+          }
+          
+          // Fix for CKEditor and textarea in the editor area
+          textarea.form-control {
+            height: auto;
+            min-height: 80px;
+            resize: vertical;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+          }
+          
+          // Ensure CKEditor instances render properly
+          .cke {
+            border: 1px solid #ccc;
+          }
+        }
+      }
+    }
+  }
+  
+  // Legacy compact view styles (for backward compatibility)
+  .video-list-compact {
+    .video-list-item {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      
+      &:hover {
+        background-color: #f8f9fa;
+        border-left-color: #ddd;
+      }
+      
+      &.active {
+        background-color: #e7f3ff;
+        border-left-color: #007bff;
+        
+        .list-group-item-heading {
+          color: #007bff;
+          font-weight: 600;
+        }
+      }
+      
+      &.loading {
+        opacity: 0.7;
+      }
+    }
+    
+    .video-thumbnail {
+      position: relative;
+      
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: white;
+      }
+    }
+    
+    .progress-xs {
+      height: 4px;
+      margin-bottom: 0;
+      
+      .progress-bar {
+        line-height: 4px;
+      }
+    }
+  }
+  
+  // Empty state styling
+  .py-40 {
+    padding: 40px 0;
+  }
 }
 
 .cds-pills-center {
@@ -1122,6 +2225,79 @@ div[cds-search-results] {
   background-color: $gray-lighter; 
 }
 
+// Chapter styling
+.chapter-item {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #e8f4fd;
+  }
+  
+  &:last-child {
+    border-bottom: none !important;
+  }
+}
+
+.chapter-timestamp {
+  color: #2196F3;
+  font-weight: 600;
+}
+
+// Main chapters section styling
+.cds-detail-chapters {
+  .chapter-item-main {
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    
+    .chapter-timestamp-main {
+      .badge {
+        font-family: monospace;
+      }
+    }
+    
+    .chapter-title-main {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .chapter-item-main {
+      margin-bottom: 10px;
+      
+      div[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        
+        .chapter-thumbnail {
+          margin-bottom: 8px;
+          margin-right: 0 !important;
+        }
+        
+        .chapter-info {
+          .chapter-timestamp-main {
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
+  }
+  
+  // Chapter thumbnail styling
+  .chapter-thumbnail {
+    img {
+      transition: transform 0.2s ease;
+    }
+    
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+}
+
 .transcription-button {
   border-radius: 9px !important;
   border: 1px solid $cds-primary-color !important;
@@ -1135,4 +2311,426 @@ div[cds-search-results] {
 
 .transcription-close:hover {
   cursor: pointer;
+}
+
+// Transcription section alignment with video player
+.cds-detail-video {
+  // When transcription is active, ensure proper alignment
+  .container-fluid .row {
+    margin-left: 0;
+    margin-right: 0;
+    align-items: flex-start;
+    // Add top margin to account for fixed header
+    margin-top: 20px;
+    
+    // Video column when transcription is active
+    .col-md-8 {
+      padding-left: 0;
+      padding-right: 15px;
+      
+      .cds-video-iframe {
+        // Reset all margins to ensure perfect alignment
+        margin: 0;
+        padding: 0;
+        
+        // Use more stable sizing that works better with zoom
+        width: 100%;
+        
+        // Fallback for browsers without aspect-ratio support
+        height: 56.25vw; // 16:9 aspect ratio fallback
+        
+        // Modern browsers with aspect-ratio support
+        aspect-ratio: 16/9;
+        height: auto;
+        
+        max-width: 100%;
+        max-height: 80vh;
+        
+        // Responsive adjustments for smaller screens
+        @media (max-width: 991px) {
+          height: 56.25vw; // Fallback
+          aspect-ratio: 16/9;
+          height: auto; // Override for modern browsers
+          max-height: 60vh;
+        }
+        
+        iframe {
+          width: 100% !important;
+          height: 100% !important;
+          max-width: 100%;
+          max-height: 100%;
+          margin: 0;
+          padding: 0;
+          vertical-align: top;
+        }
+      }
+    }
+    
+    // Transcription column
+    .col-md-4 {
+      padding-left: 15px;
+      padding-right: 0;
+      
+      // Ensure transcription section aligns with video top
+      #transcriptionsSection {
+        margin: 0 !important;
+        padding: 0;
+        height: auto;
+        min-height: 400px;
+        overflow-y: auto;
+        border-top: none;
+        position: relative;
+        z-index: 10;
+        background: #fff;
+        
+        // Override ALL inherited spacing classes
+        &.mt-20, &.mb-30, &.pt-10, &.pb-10 {
+          margin: 0 !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+        
+        // Responsive height adjustment
+        @media (max-width: 991px) {
+          height: auto;
+          max-height: 400px;
+          margin-top: 20px;
+        }
+        
+        // Transcription content styling
+        .panel {
+          max-height: calc(100% - 200px);
+          
+          .panel-body {
+            max-height: inherit;
+            
+            .list-unstyled {
+              .transcript-line {
+                padding: 8px 12px;
+                margin-bottom: 0;
+                border-bottom: 1px solid #f0f0f0;
+                transition: background-color 0.2s ease;
+                
+                &:hover {
+                  background-color: #f8f9fa;
+                }
+                
+                &.active {
+                  background-color: #e3f2fd;
+                  border-left: 3px solid #2196f3;
+                }
+                
+                strong {
+                  color: #666;
+                  font-size: 11px;
+                }
+                
+                .cds-deposit-frame-thumbnail-label {
+                  margin-top: 4px;
+                  font-size: 13px;
+                  line-height: 1.4;
+                  color: #333;
+                }
+              }
+            }
+          }
+        }
+        
+        // Search input styling
+        .form-control {
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          font-size: 14px;
+          
+          &:focus {
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+          }
+        }
+        
+        // Language select styling
+        #languageSelect {
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          font-size: 14px;
+        }
+        
+        // Header styling
+        h3 {
+          color: #333;
+          font-size: 18px;
+          margin: 0;
+          padding: 0 0 10px 0;
+          background: #fff;
+          position: relative;
+          z-index: 15;
+          border-bottom: 1px solid #eee;
+          
+          .fa-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            
+            &:hover {
+              opacity: 1;
+            }
+          }
+        }
+        
+        // Remove ALL spacing from transcription container and children
+        .pb-20, .pt-10, .mt-20, .mb-30, .px-20 {
+          margin: 0 !important;
+          padding: 10px !important;
+        }
+        
+        // Ensure the first child element (header) has no extra margin
+        > div:first-child {
+          margin: 0 !important;
+          padding: 10px !important;
+        }
+        
+        // Force container to start at top
+        > * {
+          &:first-child {
+            margin-top: 0 !important;
+            padding-top: 10px !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Video Keywords styling
+.video-keywords-row {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  
+  .keyword-pill {
+    font-size: 10px;
+    padding: 2px 6px;
+    margin: 0;
+    border-radius: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+  
+  .keyword-pill-more {
+    font-size: 10px;
+    padding: 2px 6px;
+    margin: 0;
+    border-radius: 10px;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+  }
+}
+
+// Video detail chapters and transcript styles
+.chapters-main-horizontal,
+.chapters-main-horizontal-additional {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+// Transcript line styling
+.transcript-line {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa !important;
+    border-left: 3px solid #e3f2fd;
+    padding-left: 11px !important;
+  }
+  
+  &.active {
+    background-color: #e3f2fd !important;
+    border-left: 4px solid #2196F3;
+    padding-left: 10px !important;
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+    
+    .transcript-timestamp {
+      color: #1976D2 !important;
+      font-weight: 700 !important;
+    }
+    
+    .transcript-text {
+      color: #333 !important;
+      font-weight: 500 !important;
+    }
+  }
+}
+
+// In this video panel styles
+.in-this-video-panel {
+  .tabs-container {
+    margin-bottom: 15px;
+    margin-top: 10px;
+    
+    .nav-tabs {
+      border-bottom: 1px solid #ddd;
+      
+      a {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .search-container {
+    margin-bottom: 15px;
+    
+    .form-control {
+      font-size: 14px;
+    }
+  }
+  
+  .content-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+  
+  .language-selector {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-bottom: 0;
+    
+    label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    
+    .form-control {
+      font-size: 14px;
+    }
+  }
+}
+
+// Chapter item styles
+.chapter-item {
+  cursor: pointer;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .chapter-content {
+    display: flex;
+    align-items: center;
+    
+    .chapter-thumbnail {
+      min-width: 80px;
+      margin-right: 12px;
+      
+      .thumbnail-container {
+        width: 80px;
+        height: 45px;
+        border-radius: 4px;
+        overflow: hidden;
+        background-color: #f5f5f5;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .thumbnail-placeholder {
+          width: 100%;
+          height: 100%;
+          background-color: #e9ecef;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          .fa {
+            color: #6c757d;
+            font-size: 16px;
+          }
+        }
+      }
+    }
+    
+    .chapter-info {
+      flex: 1;
+      
+      .chapter-title {
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin-bottom: 4px;
+      }
+      
+      .chapter-timestamp {
+        font-size: 14px;
+        color: #2196F3;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Transcript item styles
+.transcript-item {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  
+  .transcript-timestamp {
+    font-size: 14px;
+    color: #2196F3;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .transcript-text {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+}
+
+// Responsive styles for chapters
+@media (max-width: 768px) {
+  .chapter-item-horizontal-main {
+    width: 150px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 126px !important;
+    height: 71px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chapter-item-horizontal-main {
+    width: 130px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 106px !important;
+    height: 60px !important;
+  }
 }

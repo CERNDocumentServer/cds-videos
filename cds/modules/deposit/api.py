@@ -76,7 +76,7 @@ from ..records.api import (
 )
 from ..records.minters import cds_doi_generator, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
-from ..records.utils import is_record, lowercase_value
+from ..records.utils import is_record, lowercase_value, parse_video_chapters
 from ..records.validators import PartialDraft4Validator
 from ..records.permissions import is_public
 from .errors import DiscardConflict
@@ -504,7 +504,7 @@ class Project(CDSDeposit):
         data.setdefault("_access", {})
         access_update = data["_access"].setdefault("update", [])
         try:
-            if  current_user.email not in access_update:
+            if current_user.email not in access_update:
                 # Add the current user to the ``_access.update`` list
                 access_update.append(current_user.email)
         except AttributeError:
@@ -905,11 +905,95 @@ class Video(CDSDeposit):
 
         return super(Video, self)._publish_edited()
 
+    def _has_chapters_changed(self, old_record=None):
+        """Check if chapters in description have changed."""
+        current_description = self.get("description", "")
+        current_chapters = parse_video_chapters(current_description)
+
+        if old_record is None:
+            # First publish - trigger if chapters exist
+            return len(current_chapters) > 0
+
+        old_description = old_record.get("description", "")
+        old_chapters = parse_video_chapters(old_description)
+
+        # Compare chapter timestamps and titles
+        if len(current_chapters) != len(old_chapters):
+            return True
+
+        for curr, old in zip(current_chapters, old_chapters):
+            if curr["seconds"] != old["seconds"] or curr["title"] != old["title"]:
+                return True
+
+        return False
+
+    def _trigger_chapter_frame_extraction(self):
+        """Trigger chapter frame extraction asynchronously for existing video files."""
+        try:
+            from ..flows.tasks import ExtractChapterFramesTask
+            from ..flows.models import FlowMetadata
+
+            # Find the master video file
+            master_file = CDSVideosFilesIterator.get_master_video_file(self)
+
+            if master_file is None:
+                current_app.logger.warning(
+                    f"No master video file found for video {self.id}"
+                )
+                return
+
+            # Get the current flow for this deposit
+            current_flow = FlowMetadata.get_by_deposit(self["_deposit"]["id"])
+            if current_flow is None:
+                current_app.logger.warning(
+                    f"No current flow found for video {self.id}. Cannot trigger chapter frame extraction."
+                )
+                return
+
+            current_app.logger.info(
+                f"Triggering asynchronous ExtractChapterFramesTask for video {self.id} with flow {current_flow.id}"
+            )
+
+            # Prepare the payload for the async task with correct parameter names
+            payload = {
+                "deposit_id": str(self["_deposit"]["id"]),
+                "version_id": master_file["version_id"],  # Keep as UUID, don't convert to string
+                "flow_id": str(current_flow.id),
+                "key": master_file["key"],
+            }
+
+            current_app.logger.info(f"Submitting ExtractChapterFramesTask with payload: {payload}")
+
+            # Submit the chapter frame extraction task asynchronously
+            ExtractChapterFramesTask.create_flow_tasks(payload)
+            task_result = ExtractChapterFramesTask().s(**payload).apply_async()
+
+            current_app.logger.info(
+                f"ExtractChapterFramesTask submitted asynchronously for video {self.id}, flow_id: {current_flow.id}, task_id: {task_result.id}"
+            )
+
+        except Exception as e:
+            current_app.logger.error(
+                f"Failed to trigger async chapter frame extraction for video {self.id}: {e}"
+            )
+            import traceback
+
+            current_app.logger.error(f"Traceback: {traceback.format_exc()}")
+
     @mark_as_action
     def publish(self, pid=None, id_=None, **kwargs):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self["_deposit"]["id"]
+
+        # Check if this is a republish and get the old record
+        old_record = None
+        try:
+            _, old_record = self.fetch_published()
+        except:
+            # First publish
+            pass
+
         try:
             self["category"] = self.project["category"]
             self["type"] = self.project["type"]
@@ -925,6 +1009,13 @@ class Video(CDSDeposit):
         self.generate_duration()
         # generate extra tags for files
         self._create_tags()
+
+        # Check if chapters have changed and trigger frame extraction if needed
+        if self._has_chapters_changed(old_record):
+            current_app.logger.info(
+                f"Chapters changed for video {self.id}, triggering frame extraction"
+            )
+            self._trigger_chapter_frame_extraction()
 
         # publish the video
         video_published = super(Video, self).publish(pid=pid, id_=id_, **kwargs)
@@ -1088,7 +1179,6 @@ class Video(CDSDeposit):
             except IndexError:
                 return
 
-
     def mint_doi(self):
         """Mint DOI."""
         assert self.has_record()
@@ -1109,7 +1199,7 @@ class Video(CDSDeposit):
             status=PIDStatus.RESERVED,
         )
         return self
-            
+
 
 project_resolver = Resolver(
     pid_type="depid",

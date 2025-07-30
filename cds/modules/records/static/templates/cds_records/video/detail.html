@@ -4,72 +4,15 @@
 <div class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Video Section -->
   <div ng-if="record.metadata.recid && (record | findMaster).key" class="bg-b">
-    <div ng-class="{ 'container-fluid': showTranscript }">
-      <div ng-class="{ 'row': (record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript }">
-        <div ng-class="{ 'col-md-8': (record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript }">
-          <div class="cds-video-iframe text-center">
-            <iframe scrolling="no"
-                    width="100%"
-                    height="100%"
-                    frameborder="0"
-                    ng-src="{{ '' | previewIframeSrc: record.metadata.recid:(record | findMaster).key }}"
-                    allowfullscreen>
-            </iframe>
-          </div>
-        </div>
-        <!-- Section Transcriptions -->
-        <div ng-show="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 && showTranscript" class="col-md-4 bg-b">
-          <div 
-            id="transcriptionsSection"
-            class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b"
-          >
-            <div class="pb-20">
-              <h3 class="bt bw-1 pt-10 mb-0">
-                <i class="fa fa-align-left"></i> Transcription
-                <div class="pull-right"><i class="fa fa-close transcription-close" ng-click="toggleTranscript()"></i></div>
-              </h3>
-            </div>
-            <input type="text"
-                class="form-control mb-10"
-                placeholder="Search transcript..."
-                ng-model="transcriptSearch"
-                ng-change="filterTranscript()">
-          <div>
-        <div
-            class="panel panel-default" 
-            style="max-height: 300px; overflow-y: auto;"
-            ng-show="filteredTranscript.length > 0">
-            <div class="panel-body p-0">
-              <ul class="list-unstyled mb-0">
-                <li ng-repeat="line in filteredTranscript"
-                    ng-click="seekTo(line.start)"
-                    class="mb-10 transcript-line"
-                    ng-class="{ 'active': currentTranscriptLine === line }"
-                    style="cursor: pointer;">
-                    <a>
-                      <strong>{{ convertToMinutesSeconds(line.start) }} - {{ convertToMinutesSeconds(line.end) }}</strong>
-                    </a>
-                  <div class="cds-deposit-frame-thumbnail-label">
-                    {{ line.text }}
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>  
-          <div class="form-group mb-10">
-            <label for="languageSelect">Transcript Language:</label>
-            <select
-              id="languageSelect"
-              class="form-control"
-              ng-model="selectedTranscriptLanguage"
-              ng-options="lang as (lang | isoToLanguage) for (lang, _) in transcriptsByLanguage"
-              ng-change="setTranscriptLanguage(selectedTranscriptLanguage)"
-            ></select>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+    <div class="cds-video-iframe text-center">
+      <iframe scrolling="no"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              ng-src="{{ '' | previewIframeSrc: record.metadata.recid:(record | findMaster).key }}"
+              allowfullscreen>
+      </iframe>
+    </div>   
   </div>
     <!-- /Section Transcriptions -->
   <!-- /Video Section -->
@@ -188,7 +131,7 @@
           <!-- Date & Views -->
           <!-- Description -->
           <div ng-init="showFullDescription=false" class="cds-detail-description cds-detail-video-description t-b px-20">
-            <p class="mb-30" ng-bind-html="(record.metadata.description | trustHtml) || 'No description'"></p>
+            <p class="mb-30" ng-bind-html="(processDescriptionWithClickableTimestamps(record.metadata.description) | trustHtml) || 'No description'"></p>
             <!-- Hidden content -->
             <div class="mt-20" ng-show="showFullDescription">
               <!-- Contributors -->
@@ -258,6 +201,91 @@
             </div>
           </div>
           <!-- /Description -->
+          
+          <!-- Chapters Section -->
+          <div ng-if="chapters.length > 0" class="cds-detail-chapters px-20 mb-20">
+            <hr />
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+              <h3><strong>Chapters</strong></h3>
+              <button class="btn btn-sm btn-default" ng-click="showAllChapters ? (showAllChapters = false) : toggleInThisVideoFromMain()">
+                {{ showAllChapters ? 'Show Less' : 'View All' }}
+              </button>
+            </div>
+            
+            <!-- Horizontal Chapter List (first 6 always visible) -->
+            <div class="chapters-main-horizontal" style="overflow-x: auto; overflow-y: hidden; white-space: nowrap; margin-bottom: 15px;">
+              <div style="display: inline-flex; gap: 15px; padding-bottom: 8px;">
+                <div ng-repeat="chapter in chapters" 
+                     ng-if="$index < 6"
+                     class="chapter-item-horizontal-main"
+                     ng-click="seekTo(chapter.seconds)"
+                     style="display: inline-block; cursor: pointer; width: 180px; flex-shrink: 0; padding: 12px; border: 1px solid #e1e8ed; border-radius: 8px; transition: all 0.2s ease; background-color: white;"
+                     onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#2196F3'; this.style.transform='translateY(-2px)';"
+                     onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e1e8ed'; this.style.transform='translateY(0)';">
+                  <!-- Chapter Thumbnail -->
+                  <div class="chapter-thumbnail-main-horizontal" style="width: 156px; height: 88px; border-radius: 6px; overflow: hidden; background-color: #f5f5f5; margin-bottom: 8px; position: relative;">
+                    <img ng-if="getChapterFrame(chapter)"
+                         ng-src="/api/iiif/v2/{{ getChapterFrame(chapter).bucket_id }}:{{ getChapterFrame(chapter).version_id }}:{{ getChapterFrame(chapter).key }}/full/156,88/0/default.jpg"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         alt="Chapter {{ chapter.timestamp }}"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div ng-if="!getChapterFrame(chapter)" 
+                         style="width: 100%; height: 100%; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                      <i class="fa fa-film" style="color: #6c757d; font-size: 20px;"></i>
+                    </div>
+                    <!-- Timestamp overlay -->
+                    <div style="position: absolute; bottom: 4px; right: 4px; background-color: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 2px; font-size: 11px; font-weight: 500;">
+                      {{ chapter.timestamp }}
+                    </div>
+                  </div>
+                  <!-- Chapter Info -->
+                  <div class="chapter-info-main-horizontal">
+                    <div style="font-size: 13px; font-weight: 600; line-height: 1.3; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; max-height: 2.6em;">
+                      {{ cleanHtmlFromTitle(chapter.title) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Additional Chapters (when "View All" is clicked) -->
+            <div ng-if="showAllChapters && chapters.length > 6" class="chapters-main-horizontal-additional" style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+              <div style="display: inline-flex; gap: 15px; padding-bottom: 8px;">
+                <div ng-repeat="chapter in chapters" 
+                     ng-if="$index >= 6"
+                     class="chapter-item-horizontal-main"
+                     ng-click="seekTo(chapter.seconds)"
+                     style="display: inline-block; cursor: pointer; width: 180px; flex-shrink: 0; padding: 12px; border: 1px solid #e1e8ed; border-radius: 8px; transition: all 0.2s ease; background-color: white;"
+                     onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#2196F3'; this.style.transform='translateY(-2px)';"
+                     onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e1e8ed'; this.style.transform='translateY(0)';">
+                  <!-- Chapter Thumbnail -->
+                  <div class="chapter-thumbnail-main-horizontal" style="width: 156px; height: 88px; border-radius: 6px; overflow: hidden; background-color: #f5f5f5; margin-bottom: 8px; position: relative;">
+                    <img ng-if="getChapterFrame(chapter)"
+                         ng-src="/api/iiif/v2/{{ getChapterFrame(chapter).bucket_id }}:{{ getChapterFrame(chapter).version_id }}:{{ getChapterFrame(chapter).key }}/full/156,88/0/default.jpg"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         alt="Chapter {{ chapter.timestamp }}"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div ng-if="!getChapterFrame(chapter)" 
+                         style="width: 100%; height: 100%; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                      <i class="fa fa-film" style="color: #6c757d; font-size: 20px;"></i>
+                    </div>
+                    <!-- Timestamp overlay -->
+                    <div style="position: absolute; bottom: 4px; right: 4px; background-color: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 2px; font-size: 11px; font-weight: 500;">
+                      {{ chapter.timestamp }}
+                    </div>
+                  </div>
+                  <!-- Chapter Info -->
+                  <div class="chapter-info-main-horizontal">
+                    <div style="font-size: 13px; font-weight: 600; line-height: 1.3; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; max-height: 2.6em;">
+                      {{ cleanHtmlFromTitle(chapter.title) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /Chapters Section -->
+          
           <!-- More -->
           <div class="cds-detail-more cds-detail-video-more px-20">
             <!-- Show Transcriptions -->
@@ -266,7 +294,7 @@
               >
               <hr />
               <div class="transcription-text">
-                <p><strong>Transcriptions</strong></p>
+                <h3><strong>Transcriptions</strong></h3>
                 <small class="text-muted">Follow along or search within the transcript.</small>
               </div>
 
@@ -296,6 +324,110 @@
       <!-- /Left Column -->
       <!-- Right Column -->
       <div class="col-md-4">
+        <!-- Section In this video -->
+        <div ng-show="((record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 || chapters.length > 0) && showTranscript" class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b in-this-video-panel">
+          <div class="cds-detail-title cds-detail-video-title">
+            <h3 class="bt bw-1 pt-10 mb-0">
+              <i class="fa fa-video-camera"></i> In this video
+              <div class="pull-right"><i class="fa fa-close transcription-close" ng-click="toggleTranscript()"></i></div>
+            </h3>
+          </div>
+          
+          <!-- Tabs -->
+          <div class="tabs-container">
+            <ul class="nav nav-tabs">
+              <li ng-class="{ 'active': activeTab === 'chapters' }" ng-if="chapters.length > 0">
+                <a href="javascript:void(0)" ng-click="setActiveTab('chapters')">
+                  <i class="fa fa-list-ol"></i> Chapters
+                </a>
+              </li>
+              <li ng-class="{ 'active': activeTab === 'transcript' }" ng-if="(record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0">
+                <a href="javascript:void(0)" ng-click="setActiveTab('transcript')">
+                  <i class="fa fa-align-left"></i> Transcript
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Search Bar (outside scrollable area for transcript) -->
+          <div ng-show="activeTab === 'transcript' && (record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0" class="search-container">
+            <input type="text"
+                class="form-control"
+                placeholder="Search transcript..."
+                ng-model="transcriptSearch"
+                ng-change="filterTranscript()">
+          </div>
+          
+          <!-- Tab Content (scrollable area) -->
+          <div class="content-container">
+            <!-- Chapters Tab Content -->
+            <div ng-show="activeTab === 'chapters' && chapters.length > 0">
+              <ul class="list-unstyled mb-0">
+                <li ng-repeat="chapter in chapters"
+                    ng-click="seekTo(chapter.seconds)"
+                    class="chapter-item">
+                  <div class="chapter-content">
+                    <div class="chapter-thumbnail">
+                      <div ng-if="getChapterFrame(chapter)" class="thumbnail-container">
+                        <img ng-src="/api/iiif/v2/{{ getChapterFrame(chapter).bucket_id }}:{{ getChapterFrame(chapter).version_id }}:{{ getChapterFrame(chapter).key }}/full/80,45/0/default.jpg"
+                             alt="Chapter {{ chapter.timestamp }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="thumbnail-placeholder" style="display: none;">
+                          <i class="fa fa-film"></i>
+                        </div>
+                      </div>
+                      <div ng-if="!getChapterFrame(chapter)" class="thumbnail-container">
+                        <div class="thumbnail-placeholder">
+                          <i class="fa fa-film"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="chapter-info">
+                      <div class="chapter-title">
+                        {{ cleanHtmlFromTitle(chapter.title) }}
+                      </div>
+                      <div class="chapter-timestamp">
+                        {{ chapter.timestamp }}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            
+            <!-- Transcript Tab Content (scrollable part only) -->
+            <div ng-show="activeTab === 'transcript' && (record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0">
+              <div ng-show="filteredTranscript.length > 0">
+                <ul class="list-unstyled mb-0">
+                  <li ng-repeat="line in filteredTranscript"
+                      ng-click="seekTo(line.start)"
+                      class="transcript-line transcript-item"
+                      ng-class="{ 'active': currentTranscriptLine === line }">
+                      <div class="transcript-timestamp">
+                        {{ convertToMinutesSeconds(line.start) }} - {{ convertToMinutesSeconds(line.end) }}
+                      </div>
+                      <div class="transcript-text">
+                        {{ line.text }}
+                      </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Language Selector (outside scrollable area for transcript) -->
+          <div ng-show="activeTab === 'transcript' && (record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0" class="form-group language-selector">
+            <label>Transcript Language:</label>
+            <select
+              class="form-control"
+              ng-model="selectedTranscriptLanguage"
+              ng-options="lang as (lang | isoToLanguage) for (lang, _) in transcriptsByLanguage"
+              ng-change="setTranscriptLanguage(selectedTranscriptLanguage)">
+            </select>
+          </div>
+        </div>
+        <!-- /Section In this video -->
+        
         <!-- Section Download -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>

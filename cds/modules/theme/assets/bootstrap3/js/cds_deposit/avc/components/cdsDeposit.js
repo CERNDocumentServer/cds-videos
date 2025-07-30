@@ -274,6 +274,42 @@ function cdsDepositCtrl(
       }
     };
 
+    this.refreshFormFromBackend = function () {
+      // Fetch latest deposit state from the backend to ensure consistency
+      if (that.links && that.links.self) {
+        cdsAPI.action(that.links.self, "GET", {})
+          .then(function(response) {
+            // Update the record with latest backend state
+            var latestRecord = response.data.metadata;
+            
+            // Preserve form changes for specific fields if form is dirty
+            var preserveFields = ['title', 'description', 'contributors'];
+            var updatedRecord = angular.copy(latestRecord);
+            
+            if (!that.isPristine()) {
+              preserveFields.forEach(function(field) {
+                if (that.record[field] && !angular.equals(that.record[field], latestRecord[field])) {
+                  // Keep the form value if it differs from backend (user might be editing)
+                  updatedRecord[field] = that.record[field];
+                }
+              });
+            }
+            
+            // Update the record while preserving user changes
+            that.record = _.merge(that.record, updatedRecord);
+            
+            // Update deposit status and flows
+            that.updateDeposit(latestRecord);
+            that.fetchFlowTasksStatuses();
+            
+            console.log('Form refreshed from backend at', new Date().toISOString());
+          })
+          .catch(function(error) {
+            console.warn('Failed to refresh form from backend:', error);
+          });
+      }
+    };
+
     this.refetchRecordOnTaskStatusChanged = function (flowTasksById) {
       // init if not set yet
       var cachedFlowTasksById = _.isEmpty(that.cachedFlowTasksById)
@@ -281,19 +317,22 @@ function cdsDepositCtrl(
         : that.cachedFlowTasksById;
 
       var reFetchRecord = false;
+      var statusHasChanged = false;
       for (var taskId in flowTasksById) {
         var cachedTask = _.get(cachedFlowTasksById, taskId, null);
         if (!cachedTask) {
           // something wrong with the cached tasks, maybe a flow restart?
           // refetch the record to be sure
           reFetchRecord = true;
+          statusHasChanged = true;
           break;
         }
 
-        var statusHasChanged =
+        var taskStatusChanged =
           flowTasksById[taskId]["status"] !== cachedTask["status"];
-        if (statusHasChanged) {
+        if (taskStatusChanged) {
           reFetchRecord = true;
+          statusHasChanged = true;
           break;
         }
       }
@@ -303,6 +342,15 @@ function cdsDepositCtrl(
 
       if (reFetchRecord) {
         that.cdsDepositsCtrl.fetchRecord();
+      }
+      
+      // Broadcast status change to update video list sidebar and other UI components
+      if (statusHasChanged) {
+        $scope.$broadcast("cds.deposit.status.changed", {
+          depositId: that.id,
+          taskStatuses: flowTasksById,
+          currentDepositStatus: that.currentDepositStatus
+        });
       }
     };
 
@@ -379,6 +427,20 @@ function cdsDepositCtrl(
       if (anyTaskIsRunning) {
         that.fetchFlowTasksStatuses();
       }
+      // Restart polling with appropriate interval if status changed
+      var currentInterval = getPollingInterval();
+      if (that.fetchStatusInterval.$$intervalId && 
+          (anyTaskIsRunning && currentInterval === 15000) || 
+          (!anyTaskIsRunning && currentInterval === 5000)) {
+        setupSmartPolling();
+      }
+      
+      // Ensure UI components stay synchronized during polling
+      $scope.$broadcast("cds.deposit.polling.update", {
+        depositId: that.id,
+        anyTaskIsRunning: anyTaskIsRunning,
+        currentDepositStatus: that.currentDepositStatus
+      });
     };
 
     // Update deposit based on extracted metadata from task
@@ -471,6 +533,9 @@ function cdsDepositCtrl(
       }
       that.currentStartedTaskName = currentStartedTaskName;
 
+      // Store previous status to detect changes
+      var previousDepositStatus = that.currentDepositStatus;
+
       // Change the Deposit Status
       var values = _.values(that.record._cds.state);
       if (!values.length) {
@@ -483,6 +548,17 @@ function cdsDepositCtrl(
         that.currentDepositStatus = depositStatuses.PENDING;
       } else {
         that.currentDepositStatus = depositStatuses.SUCCESS;
+      }
+      
+      // Broadcast status change to update video list sidebar and other UI components
+      if (previousDepositStatus !== that.currentDepositStatus) {
+        $scope.$broadcast("cds.deposit.status.changed", {
+          depositId: that.id,
+          previousStatus: previousDepositStatus,
+          currentStatus: that.currentDepositStatus,
+          currentStartedTaskName: that.currentStartedTaskName,
+          taskStates: that.record._cds.state
+        });
       }
     };
 
@@ -552,16 +628,51 @@ function cdsDepositCtrl(
     that.videoPreviewer();
     // Update subformat statuses
     that.fetchFlowTasksStatuses();
-    that.fetchStatusInterval = $interval(
-      that.recurrentFetchFlowTasksStatuses,
-      5000
-    );
-    // What the order of contributors and check make it dirty, throttle the
-    // function for 1sec
+    // Smart polling: use different intervals based on task activity
+    var getPollingInterval = function() {
+      var anyTaskIsRunning = that.anyTaskIsRunning();
+      return anyTaskIsRunning ? 5000 : 15000; // 5s when active, 15s when idle
+    };
+    
+    var setupSmartPolling = function() {
+      if (that.fetchStatusInterval) {
+        $interval.cancel(that.fetchStatusInterval);
+      }
+      that.fetchStatusInterval = $interval(
+        that.recurrentFetchFlowTasksStatuses,
+        getPollingInterval()
+      );
+    };
+    
+    setupSmartPolling();
+
+    // Setup 5-minute interval for form re-initialization
+    var formRefreshInterval = $interval(function() {
+      that.refreshFormFromBackend();
+    }, 300000); // 5 minutes = 300000ms
+
+    // Clean up form refresh interval on component destroy
+    var originalDestroy = that.$onDestroy;
+    that.$onDestroy = function() {
+      try {
+        $interval.cancel(formRefreshInterval);
+      } catch (error) {}
+      if (originalDestroy) {
+        originalDestroy.call(that);
+      }
+    };
+    // Watch contributors with optimized shallow watching and increased debounce
+    // Use shallow watching and manual comparison for better performance
+    var lastContributorsState = null;
     $scope.$watch(
       "$ctrl.record.contributors",
-      _.throttle(that.setDirty, 1000),
-      true
+      _.debounce(function(newVal, oldVal) {
+        if (newVal && (!lastContributorsState || !angular.equals(newVal, lastContributorsState))) {
+          lastContributorsState = angular.copy(newVal);
+          that.setDirty();
+        }
+      }, 2000),
+      false // Changed from deep watching (true) to shallow watching (false)
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
       $scope.$applyAsync(function () { // Manually trigger UI updates
@@ -576,8 +687,8 @@ function cdsDepositCtrl(
       });
     });
 
-    // Listen for task status changes
-    $scope.$on("cds.deposit.task", function (evt, type, status, data) {
+    // Listen for task status changes - use throttling to prevent excessive updates
+    var taskStatusHandler = _.throttle(function (evt, type, status, data) {
       if (type == "file_video_metadata_extraction" && status == "SUCCESS") {
         var allMetadata = data.payload.extracted_metadata;
         that.setOnLocalStorage("metadata", allMetadata);
@@ -585,26 +696,55 @@ function cdsDepositCtrl(
       } else if (type == "file_video_extract_frames" && status == "SUCCESS") {
         that.framesReady = true;
       }
-    });
+    }, 500);
+    $scope.$on("cds.deposit.task", taskStatusHandler);
+
+    // Cache status check results to avoid frequent recalculation
+    var _lastDepositStatus = null;
+    var _cachedStatusChecks = {};
+    
+    function _getCachedStatusCheck(statusType) {
+      if (that.currentDepositStatus !== _lastDepositStatus) {
+        _cachedStatusChecks = {};
+        _lastDepositStatus = that.currentDepositStatus;
+      }
+      return _cachedStatusChecks[statusType];
+    }
 
     this.displayFailure = function () {
-      return that.currentDepositStatus === that.depositStatuses.FAILURE;
+      var cached = _getCachedStatusCheck('failure');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['failure'] = that.currentDepositStatus === that.depositStatuses.FAILURE;
+      }
+      return cached;
     };
 
     this.displayPending = function () {
-      return that.currentDepositStatus === that.depositStatuses.PENDING;
+      var cached = _getCachedStatusCheck('pending');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['pending'] = that.currentDepositStatus === that.depositStatuses.PENDING;
+      }
+      return cached;
     };
 
     this.displayStarted = function () {
-      return that.currentDepositStatus === that.depositStatuses.STARTED;
+      var cached = _getCachedStatusCheck('started');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['started'] = that.currentDepositStatus === that.depositStatuses.STARTED;
+      }
+      return cached;
     };
 
     this.displaySuccess = function () {
-      return (
-        that.currentDepositStatus === that.depositStatuses.SUCCESS &&
-        !that.isPublished() &&
-        !that.record.recid
-      );
+      var cached = _getCachedStatusCheck('success');
+      if (cached === undefined) {
+        cached = _cachedStatusChecks['success'] = (
+          that.currentDepositStatus === that.depositStatuses.SUCCESS &&
+          !that.isPublished() &&
+          !that.record.recid
+        );
+      }
+      return cached;
     };
 
     this.postSuccessProcess = function (responses) {

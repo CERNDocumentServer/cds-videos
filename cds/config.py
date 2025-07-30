@@ -1297,7 +1297,6 @@ PREVIEWER_BASE_TEMPLATE = "cds_previewer/base.html"
 # Licence key and base URL for THEO player
 THEOPLAYER_LIBRARY_LOCATION = None
 THEOPLAYER_LICENSE = None
-
 # Wowza server URL for m3u8 playlist generation
 WOWZA_PLAYLIST_URL = (
     "https://wowza.cern.ch/cds/_definist_/smil:" "{filepath}/playlist.m3u8"
@@ -1569,7 +1568,7 @@ DEPOSIT_AVC_COPYRIGHT = {
 
 # The number of max videos per project. It blocks the upload of new videos in a
 # project only client side
-DEPOSIT_PROJECT_MAX_N_VIDEOS = 10
+DEPOSIT_PROJECT_MAX_N_VIDEOS = 20
 
 ###############################################################################
 # Keywords

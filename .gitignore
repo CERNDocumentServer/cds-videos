@@ -80,3 +80,6 @@ tmp
 
 # local python version/venv
 .python-version
+
+# AI artifact files
+CLAUDE.md

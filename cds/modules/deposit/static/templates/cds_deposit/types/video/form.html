@@ -49,8 +49,8 @@
       </div>
       <div class="col-sm-9">
         <ul class="list-inline">
-          <li><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
-          <li><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
+          <li><span class="label label-default">{{::$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></li>
+          <li><span class="label label-warning">{{::$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></li>
           <li><span class="label label-primary">Published</span></li>
         </ul>
         <hr class="my-15" />
@@ -117,11 +117,11 @@
             <div class="row">
               <div class="col-md-6">
                 <p class="mb-0">Category</p>
-                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category"><span class="label label-default">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
+                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category"><span class="label label-default">{{::$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.category}}</span></p>
               </div>
               <div class="col-md-6">
                 <p class="mb-0">Type</p>
-                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type"><span class="label label-warning">{{$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
+                <p ng-if="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type"><span class="label label-warning">{{::$ctrl.cdsDepositCtrl.cdsDepositsCtrl.master.metadata.type}}</span></p>
               </div>
             </div>
             <hr class="my-10" />
@@ -151,10 +151,10 @@
           <div ng-hide="$ctrl.cdsDepositCtrl.isPublished()" class="text-muted">
             <p>The video is <strong>not</strong> published.</p>
             <ul class="list-unstyled text-left my">
-              <li ng-repeat="(task, status) in ($ctrl.cdsDepositCtrl.record._cds.state | orderTasks)">
+              <li ng-repeat="(task, status) in ($ctrl.cdsDepositCtrl.record._cds.state | orderTasks) track by task">
                 <small>
-                  <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ task | taskRepr }}
-                  <a ng-click="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="task === 'file_transcode'"></i></a>
+                  <i class="fa fa-fw {{ status | progressIcon }} {{ status | progressClass }}"></i> {{ ::task | taskRepr }}
+                  <a ng-click="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.videoTranscodingHelpDialogShown = true"><i class="fa fa-info-circle" ng-if="::task === 'file_transcode'"></i></a>
                 </small>
               </li>
             </ul>
@@ -206,7 +206,7 @@
           </li>
           <li role="presentation" ng-class="{active: active=='related_links'}">
             <a ng-click="active='related_links'" role="tab" data-toggle="tab">
-              Related links
+              Related information
             </a>
           </li>
           <li role="presentation" ng-class="{active: active=='admin'}" ng-show="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.isSuperAdmin">
@@ -217,7 +217,7 @@
         </ul>
         <!-- Tab panes -->
         <div class="tab-content cds-tab-content pa-20">
-          <div ng-show="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
+          <div ng-if="active=='metadata'" role="tabpanel" ng-class="{active: active=='metadata'}" class="tab-pane">
             <form
               name="$ctrl.cdsDepositCtrl.depositFormModels[0]"
               class="form"
@@ -294,7 +294,7 @@
           <div ng-show="active=='files'" role="tabpanel" ng-class="{active: active=='files'}"  class="tab-pane">
             <div ng-transclude></div>
           </div>
-          <div ng-show="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
+          <div ng-if="active=='licenses'" role="tabpanel" ng-class="{active: active=='licenses'}"  class="tab-pane">
             <form
               name="$ctrl.cdsDepositCtrl.depositFormModels[1]"
               class="form"
@@ -304,7 +304,7 @@
               sf-options="$ctrl.sfOptions"
             ></form>
           </div>
-          <div ng-show="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
+          <div ng-if="active=='translations'" role="tabpanel" ng-class="{active: active=='translations'}" class="tab-pane">
             <form
               name="$ctrl.cdsDepositCtrl.depositFormModels[2]"
               class="form"
@@ -322,7 +322,7 @@
               </div>
             </div>
           </div>
-          <div ng-show="active=='related_links'" role="tabpanel" ng-class="{active: active=='related_links'}"  class="tab-pane">
+          <div ng-if="active=='related_links'" role="tabpanel" ng-class="{active: active=='related_links'}"  class="tab-pane">
             <form
               name="$ctrl.cdsDepositCtrl.depositFormModels[3]"
               class="form"
@@ -332,7 +332,7 @@
               sf-options="$ctrl.sfOptions"
             ></form>
           </div>
-          <div ng-show="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
+          <div ng-if="active=='admin'" role="tabpanel" ng-class="{active: active=='admin'}" class="tab-pane">
             <div class="mb-10 text-center">
               <i class="fa fa-external-link" aria-hidden="true"></i>
               <a href="/api/deposits/video/{{$ctrl.cdsDepositCtrl.record._deposit.id}}" target="_blank">See JSON</a>
