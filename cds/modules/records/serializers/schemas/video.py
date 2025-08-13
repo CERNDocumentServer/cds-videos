@@ -19,7 +19,7 @@
 """Video JSON schema."""
 
 from invenio_jsonschemas import current_jsonschemas
-from marshmallow import Schema, fields, pre_load, post_load
+from marshmallow import Schema, fields, pre_load, post_load, post_dump
 
 from ....deposit.api import Video
 from ..fields.datetime import DateString
@@ -43,6 +43,7 @@ from .common import (
     TranslationsSchema,
 )
 from .doi import DOI
+from ...utils import parse_video_chapters
 
 
 class _CDSSSchema(Schema):
@@ -166,6 +167,7 @@ class VideoSchema(StrictKeysSchema):
     )
     collections = fields.List(fields.Str, many=True)
     additional_languages = fields.List(fields.Str, many=True)
+    chapters = fields.List(fields.Dict, dump_only=True)
     
     # Preservation fields
     location = fields.Str()
@@ -176,4 +178,15 @@ class VideoSchema(StrictKeysSchema):
     def post_load(self, data, **kwargs):
         """Post load."""
         data["$schema"] = current_jsonschemas.path_to_url(Video._schema)
+        return data
+
+    @post_dump(pass_many=False)
+    def post_dump(self, data, **kwargs):
+        """Post dump - add parsed chapters."""
+        description = data.get('description', '')
+        if description:
+            data['chapters'] = parse_video_chapters(description)
+        else:
+            data['chapters'] = []
+        
         return data

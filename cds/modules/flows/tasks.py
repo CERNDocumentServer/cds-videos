@@ -62,7 +62,7 @@ from ..ffmpeg import ff_frames, ff_probe_all
 from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
 from ..opencast.utils import get_qualities
-from ..records.utils import to_string
+from ..records.utils import to_string, parse_video_chapters
 from ..xrootd.utils import file_opener_xrootd
 from .deposit import index_deposit_project
 from .files import dispose_object_version, move_file_into_local
@@ -197,7 +197,9 @@ class AVCTask(CeleryTask):
         NOTE: workaround to be able to save the payload in celery in case of
         exceptions.
         """
-        meta = dict(message=str(exc), payload=self._base_payload)
+        # Safety check in case base payload is not set yet
+        payload = getattr(self, '_base_payload', {})
+        meta = dict(message=str(exc), payload=payload)
         return dict(exc_message=meta, exc_type=exc.__class__.__name__)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -223,7 +225,16 @@ class AVCTask(CeleryTask):
     def _reindex_video_project(self):
         """Reindex video and project."""
         with celery_app.flask_app.app_context():
-            deposit_id = self._base_payload["deposit_id"]
+            # Safety check in case base payload is not set yet
+            if not hasattr(self, '_base_payload') or not self._base_payload or 'deposit_id' not in self._base_payload:
+                if hasattr(self, 'deposit_id') and self.deposit_id:
+                    deposit_id = self.deposit_id
+                else:
+                    self.log("Cannot reindex: deposit_id not available")
+                    return
+            else:
+                deposit_id = self._base_payload["deposit_id"]
+            
             try:
                 index_deposit_project(deposit_id)
             except PIDDeletedError:
@@ -590,16 +601,18 @@ class ExtractFramesTask(AVCTask):
                     object_=self.object_version,
                     output_dir=output_folder,
                     progress_updater=progress_updater,
-                    **options
+                    **options,
                 ),
                 object_=self.object_version,
-                **options
+                **options,
             )
         except Exception:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
             self.clean(version_id=self.object_version_id)
             raise
+
+        total_frames = len(frames)
 
         # Generate GIF images
         self._create_gif(
@@ -618,7 +631,7 @@ class ExtractFramesTask(AVCTask):
         db.session.commit()
 
         self.log("Finished task {0}".format(kwargs["task_id"]))
-        return "Created {0} frames.".format(len(frames))
+        return "Created {0} frames.".format(total_frames)
 
     @classmethod
     def _time_position(cls, duration, frames_start=5, frames_end=95, frames_gap=10):
@@ -648,7 +661,7 @@ class ExtractFramesTask(AVCTask):
         duration,
         output_dir,
         progress_updater=None,
-        **kwargs
+        **kwargs,
     ):
         """Create frames in temporary files."""
         # Generate frames
@@ -727,6 +740,239 @@ class ExtractFramesTask(AVCTask):
         [ObjectVersionTag.create(obj, k, to_string(tags[k])) for k in tags]
 
 
+class ExtractChapterFramesTask(AVCTask):
+    """Extract chapter frames task - dedicated task for chapter frame extraction only."""
+
+    name = "file_video_extract_chapter_frames"
+
+    @staticmethod
+    def clean(version_id, *args, **kwargs):
+        """Delete generated chapter frame ObjectVersion slaves."""
+        # remove all objects version "slave" with type "frame" that are chapter frames
+        tag_alias_1 = aliased(ObjectVersionTag)
+        tag_alias_2 = aliased(ObjectVersionTag)
+        tag_alias_3 = aliased(ObjectVersionTag)
+
+        slaves = (
+            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
+            .join(tag_alias_2, ObjectVersion.tags)
+            .join(tag_alias_3, ObjectVersion.tags)
+            .filter(tag_alias_1.key == "master", tag_alias_1.value == version_id)
+            .filter(tag_alias_2.key == "context_type", tag_alias_2.value == "frame")
+            .filter(tag_alias_3.key == "is_chapter_frame", tag_alias_3.value == "true")
+            .all()
+        )
+
+        for slave in slaves:
+            dispose_object_version(slave)
+
+    def run(self, *args, **kwargs):
+        """Extract frames only at chapter timestamps from video description.
+
+        This task is specifically designed to extract frames for chapters only,
+        without affecting other frame extraction processes.
+        
+        The task receives parameters through the standard AVCTask initialization:
+        - self.deposit_id: The deposit ID containing the video description  
+        - self.object_version: The ObjectVersion of the master video file
+        - self.flow_id: The current flow ID for task metadata integration
+        """
+        
+        # Create or update the TaskMetadata
+        flow_task_metadata = self.get_or_create_flow_task()
+        kwargs["celery_task_id"] = str(self.request.id)
+        kwargs["task_id"] = str(flow_task_metadata.id)
+        flow_task_metadata.payload = self.get_full_payload(**kwargs)
+        flow_task_metadata.status = FlowTaskStatus.STARTED
+        flow_task_metadata.message = ""
+        db.session.commit()
+
+        self.log("Started task {0}".format(kwargs["task_id"]))
+
+        output_folder = tempfile.mkdtemp()
+
+        bucket_was_locked = False
+        if self.object_version.bucket.locked:
+            # If record was published we need to unlock the bucket
+            bucket_was_locked = True
+            self.object_version.bucket.locked = False
+
+        try:
+            # Get the deposit to access the description
+            from cds.modules.deposit.api import deposit_video_resolver
+            db.session.refresh(self.object_version)
+            deposit_video = deposit_video_resolver(self.deposit_id)
+            description = deposit_video.get("description", "")
+            
+            self.log("Found description with {0} characters".format(len(description)))
+
+            # Parse chapters from description
+            chapters = parse_video_chapters(description)
+            
+            if not chapters:
+                self.log("No chapters found in description - task completed")
+                return {"chapter_frames_extracted": 0, "status": "no_chapters"}
+
+            self.log("Found {0} chapters in description".format(len(chapters)))
+
+            # Get video duration from metadata
+            duration = float(self._base_payload.get("tags", {}).get("duration", 0))
+            
+            if duration == 0:
+                raise ValueError("Video duration is 0 - cannot extract frames")
+
+            # Check which timestamps already have frames
+            existing_timestamps = self._get_existing_frame_timestamps()
+            
+            def progress_updater(current_chapter):
+                """Progress reporter."""
+                percentage = current_chapter / len(chapters) * 100
+                meta = dict(
+                    payload=dict(size=len(chapters), percentage=percentage),
+                    message="Extracting chapter frames [{0} out of {1}]".format(
+                        current_chapter, len(chapters)
+                    ),
+                )
+                self.log(meta["message"])
+
+            frames = self._create_chapter_frames(
+                chapters=chapters,
+                duration=duration,
+                object_=self.object_version,
+                output_dir=output_folder,
+                existing_timestamps=existing_timestamps,
+                progress_updater=progress_updater,
+            )
+
+            # Sync deposit and record files
+            sync_records_with_deposit_files(self.deposit_id)
+
+        except Exception:
+            db.session.rollback()
+            shutil.rmtree(output_folder, ignore_errors=True)
+            self.clean(version_id=self.object_version_id)
+            raise
+
+        total_frames = len(frames)
+
+        if bucket_was_locked:
+            # Lock the bucket again
+            self.object_version.bucket.locked = True
+
+        # Cleanup
+        shutil.rmtree(output_folder)
+        
+        self.log("Finished task {0}".format(kwargs["task_id"]))
+        return "Created {0} chapter frames.".format(total_frames)
+
+    def _get_existing_frame_timestamps(self):
+        """Get set of existing frame timestamps to avoid duplicates."""
+        tag_alias_1 = aliased(ObjectVersionTag)
+        tag_alias_2 = aliased(ObjectVersionTag)
+        tag_alias_3 = aliased(ObjectVersionTag)
+
+        existing = (
+            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
+            .join(tag_alias_2, ObjectVersion.tags)
+            .join(tag_alias_3, ObjectVersion.tags)
+            .filter(tag_alias_1.key == "master", tag_alias_1.value == self.object_version_id)
+            .filter(tag_alias_2.key == "context_type", tag_alias_2.value == "frame")
+            .filter(tag_alias_3.key == "timestamp")
+            .all()
+        )
+        
+        existing_timestamps = set()
+        for obj in existing:
+            for tag in obj.tags:
+                if tag.key == "timestamp":
+                    try:
+                        existing_timestamps.add(float(tag.value))
+                    except ValueError:
+                        continue
+        
+        return existing_timestamps
+
+    @classmethod
+    def _create_chapter_frames(
+        cls,
+        chapters,
+        duration,
+        object_,
+        output_dir,
+        existing_timestamps,
+        progress_updater=None,
+    ):
+        """Create frames for chapters that don't already exist at those timestamps."""
+        created_frames = []
+        current_chapter = 0
+        
+        with move_file_into_local(object_, delete=True) as url:
+            for chapter in chapters:
+                current_chapter += 1
+                
+                if progress_updater:
+                    progress_updater(current_chapter)
+                
+                chapter_seconds = chapter["seconds"]
+                chapter_title = chapter["title"]
+                
+                # Skip chapters that are beyond video duration
+                if chapter_seconds > duration:
+                    continue
+                
+                # Skip if frame already exists at this timestamp (with some tolerance)
+                timestamp_exists = any(
+                    abs(existing_ts - chapter_seconds) < 0.1 
+                    for existing_ts in existing_timestamps
+                )
+                if timestamp_exists:
+                    continue
+                
+                frame_filename = "chapter-{0}.jpg".format(int(chapter_seconds))
+                frame_path = os.path.join(output_dir, frame_filename)
+                
+                # For 0:00 chapters, use a small offset to avoid extraction issues
+                chapter_seconds = max(chapter_seconds, 0.1) if chapter_seconds == 0 else chapter_seconds
+                
+                try:
+                    # Extract single frame at chapter timestamp using ff_frames
+                    ff_frames(
+                        input_file=url,
+                        start=chapter_seconds,
+                        end=chapter_seconds + 0.01,  # Extract just one frame
+                        step=1,
+                        duration=duration,
+                        output=frame_path,
+                    )
+                    
+                    if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
+                        # Create ObjectVersion for chapter frame (as normal frame)
+                        ExtractFramesTask._create_object(
+                            bucket=object_.bucket,
+                            key=frame_filename,
+                            stream=file_opener_xrootd(frame_path, "rb"),
+                            size=os.path.getsize(frame_path),
+                            media_type="image",
+                            context_type="frame",
+                            master_id=object_.version_id,
+                            is_chapter_frame=True,
+                            timestamp=chapter_seconds,
+                        )
+                        
+                        created_frames.append(frame_path)
+                        
+                except Exception as e:
+                    # Log error but continue with other chapters
+                    current_app.logger.error(
+                        "Failed to extract frame for chapter at {0}s: {1}".format(
+                            chapter_seconds, str(e)
+                        )
+                    )
+                    continue
+        
+        return created_frames
+
+
 class TranscodeVideoTask(AVCTask):
     """Transcode video task.
 
@@ -793,7 +1039,7 @@ class TranscodeVideoTask(AVCTask):
                 opencast_publication_tag=current_app.config["CDS_OPENCAST_QUALITIES"][
                     quality
                 ]["opencast_publication_tag"],
-                **kwargs  # may contain `opencast_event_id`
+                **kwargs,  # may contain `opencast_event_id`
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
             flow_task_metadata.payload = new_payload
@@ -848,7 +1094,7 @@ class TranscodeVideoTask(AVCTask):
             new_payload.update(
                 task_id=str(t.id),
                 celery_task_id=str(self.request.id),
-                **self._base_payload
+                **self._base_payload,
             )
             # JSONb cols needs to be assigned (not updated) to be persisted
             t.payload = new_payload

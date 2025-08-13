@@ -39,6 +39,7 @@ from .models import FlowTaskStatus, as_task
 from .tasks import (
     CeleryTask,
     DownloadTask,
+    ExtractChapterFramesTask,
     ExtractFramesTask,
     ExtractMetadataTask,
     TranscodeVideoTask,
@@ -245,6 +246,7 @@ class FlowService:
                 ExtractMetadataTask,
                 ExtractFramesTask,
                 TranscodeVideoTask,
+                ExtractChapterFramesTask,
             ]:
                 if celery_task.name == name:
                     return celery_task

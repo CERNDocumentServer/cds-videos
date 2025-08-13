@@ -39,7 +39,7 @@ import { getCookie } from "../getCookie";
  * @description
  *    CDS record controller.
  */
-function cdsRecordController($scope, $sce, $http, $timeout) {
+function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   // Parameters
 
   // Assign the controller to `vm`
@@ -59,6 +59,8 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.filteredTranscript = [];
   $scope.selectedTranscriptLanguage = null;
   $scope.transcriptSearch = "";
+  $scope.chapters = [];
+  $scope.activeTab = "chapters"; // Default to chapters tab
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
@@ -68,22 +70,34 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.seekTo = function (timecode) {
     const player = window.top.player;
     if (player) {
+      if (timecode < 0 || timecode > player.duration) {
+        console.warn("Invalid timecode:", timecode);
+        return;
+      }
       player.currentTime = timecode;
       if (player.paused) {
-        player.play().catch(function (err) {
-          console.warn("Autoplay might be blocked by the browser:", err);
-        });
+        try {
+          const playPromise = player.play();
+          if (playPromise && playPromise.catch) {
+            playPromise.catch(function (err) {
+              console.warn("Autoplay might be blocked by the browser:", err);
+            });
+          }
+        } catch (err) {
+          console.warn("Error playing video:", err);
+        }
       }
     } else {
       console.warn("Player not available");
     }
   };
 
-  $scope.toggleTranscript = function () {
-    $scope.showTranscript = !$scope.showTranscript;
+  $scope.toggleInThisVideo = function (tab) {
+    $scope.showInThisVideoSection = !$scope.showInThisVideoSection;
+    $scope.activeTab = tab;
 
     // Jump to Transcriptions section
-    if ($scope.showTranscript) {
+    if ($scope.showInThisVideoSection) {
       setTimeout(function () {
         const el = document.getElementById("transcriptionsSection");
         if (el) {
@@ -142,13 +156,14 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
 
   $scope.filterTranscript = function () {
     var searchTerm = this.transcriptSearch.toLowerCase();
-    $scope.filteredTranscript = Object.values($scope.transcript).filter(function (
-      line
-    ) {
-      return (
-        !searchTerm || (line.text && line.text.toLowerCase().indexOf(searchTerm) !== -1)
-      );
-    });
+    $scope.filteredTranscript = Object.values($scope.transcript).filter(
+      function (line) {
+        return (
+          !searchTerm ||
+          (line.text && line.text.toLowerCase().indexOf(searchTerm) !== -1)
+        );
+      }
+    );
   };
 
   $scope.$watch("transcript", function (newVal) {
@@ -178,6 +193,24 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
         console.warn("No subtitle file found.");
       }
     });
+
+    // Use chapters from API or parse from description as fallback
+    if (record.metadata.chapters && record.metadata.chapters.length > 0) {
+      $scope.chapters = record.metadata.chapters;
+    } else if (record.metadata.description) {
+      $scope.chapters = $scope.parseChapters(record.metadata.description);
+    }
+
+    // Set default active tab based on what's available (prioritize chapters)
+    const hasTranscripts = (record.metadata._files || []).some(
+      (f) => f.context_type === "subtitle" && f.content_type === "vtt"
+    );
+
+    if ($scope.chapters.length > 0) {
+      $scope.activeTab = "chapters";
+    } else if (hasTranscripts) {
+      $scope.activeTab = "transcript";
+    }
   };
 
   $scope.setTranscriptLanguage = function (lang) {
@@ -189,8 +222,6 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
     }
   };
 
-  // Follow transcriptions
-  $scope.currentTranscriptLine = null;
   function getScrollableParent(el) {
     while (el && el !== document.body) {
       const style = window.getComputedStyle(el);
@@ -202,6 +233,9 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
     }
     return null;
   }
+
+  // Follow transcriptions
+  $scope.currentTranscriptLine = null;
   function updateTranscriptHighlight() {
     const player = window.top.player;
     if (!player || !$scope.transcript) return;
@@ -245,10 +279,60 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
     $scope.$applyAsync();
   }
 
+  $scope.currentChapter = null;
+  function updateChapterHighlight() {
+    const player = window.top.player;
+    if (!player || !$scope.chapters || $scope.chapters.length === 0) return;
+
+    const currentTime = player.currentTime;
+
+    for (let i = 0; i < $scope.chapters.length; i++) {
+      const chapter = $scope.chapters[i];
+      const nextChapter = $scope.chapters[i + 1];
+
+      // If current time is within this chapter range
+      if (
+        currentTime >= chapter.seconds &&
+        (!nextChapter || currentTime < nextChapter.seconds)
+      ) {
+        if ($scope.currentChapter !== chapter) {
+          $scope.currentChapter = chapter;
+          $scope.$applyAsync();
+
+          // Auto-scroll to active chapter
+          setTimeout(() => {
+            const el = document.querySelector(".chapter-item.active");
+            const container = getScrollableParent(el);
+
+            if (el && container) {
+              const elRect = el.getBoundingClientRect();
+              const containerRect = container.getBoundingClientRect();
+              const currentScroll = container.scrollTop;
+              const topOffset = elRect.top - containerRect.top;
+              const targetScroll = currentScroll + topOffset - 10;
+
+              container.scrollTo({
+                top: targetScroll,
+                behavior: "smooth",
+              });
+            }
+          }, 50);
+        }
+        return;
+      }
+    }
+
+    // No chapter active
+    $scope.currentChapter = null;
+    $scope.$applyAsync();
+  }
+
   let transcriptTimer = setInterval(updateTranscriptHighlight, 100);
+  let chapterTimer = setInterval(updateChapterHighlight, 100);
 
   $scope.$on("$destroy", function () {
     clearInterval(transcriptTimer);
+    clearInterval(chapterTimer);
   });
 
   $scope.convertToMinutesSeconds = function (seconds) {
@@ -259,6 +343,129 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
     const paddedSecs = secs < 10 ? "0" + secs : secs;
 
     return `${minutes}:${paddedSecs}`;
+  };
+
+  $scope.parseChapters = function (description) {
+    if (!description) return [];
+
+    // Regex pattern to match timestamp formats: 0:00, 00:00, 0:00:00, 00:00:00
+    const pattern =
+      /(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)/gm;
+    const chapters = [];
+    let match;
+
+    while ((match = pattern.exec(description)) !== null) {
+      const [, timestampStr, title] = match;
+
+      // Parse timestamp to seconds
+      const timeParts = timestampStr.split(":");
+      let totalSeconds;
+
+      if (timeParts.length === 2) {
+        // MM:SS format
+        const [minutes, seconds] = timeParts.map(Number);
+        totalSeconds = minutes * 60 + seconds;
+      } else if (timeParts.length === 3) {
+        // HH:MM:SS format
+        const [hours, minutes, seconds] = timeParts.map(Number);
+        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      } else {
+        continue;
+      }
+
+      // Clean up title
+      const cleanTitle = title.trim();
+      if (cleanTitle) {
+        chapters.push({
+          timestamp: timestampStr,
+          seconds: totalSeconds,
+          title: cleanTitle,
+        });
+      }
+    }
+
+    // Sort chapters by timestamp
+    chapters.sort((a, b) => a.seconds - b.seconds);
+    return chapters;
+  };
+
+  $scope.setActiveTab = function (tab) {
+    $scope.activeTab = tab;
+  };
+
+  $scope.processDescriptionWithClickableTimestamps = function (description) {
+    if (!description) return description;
+
+    // Regex pattern to match timestamp formats: 0:00, 00:00, 0:00:00, 00:00:00
+    const pattern = /(\d{1,2}:(?:\d{1,2}:)?\d{1,2})/g;
+
+    return description.replace(pattern, function (match) {
+      // Parse timestamp to seconds for the seek function
+      const timeParts = match.split(":");
+      let totalSeconds;
+
+      if (timeParts.length === 2) {
+        const [minutes, seconds] = timeParts.map(Number);
+        totalSeconds = minutes * 60 + seconds;
+      } else if (timeParts.length === 3) {
+        const [hours, minutes, seconds] = timeParts.map(Number);
+        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      } else {
+        return match; // Return unchanged if invalid format
+      }
+
+      // Return clickable timestamp using onclick for ng-bind-html compatibility
+      return `<a href="javascript:void(0)" class="timestamp-link" onclick="(function(){ try { angular.element(document.querySelector('.cds-detail-description')).scope().seekTo(${totalSeconds}); } catch(e) { console.error('Could not seek to timestamp:', e); } })()" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
+    });
+  };
+
+  $scope.getChapterFrame = function (chapter) {
+    if (!$scope.record || !chapter) return null;
+
+    // Use the findMaster filter to get the master file (this filter is defined in cds/module.js)
+    const master = $filter("findMaster")($scope.record);
+
+    if (!master || !master.frame) return null;
+
+    // Look for a frame with filename that matches chapter timestamp
+    // Chapter frames are named like "chapter-{seconds}.jpg"
+    const expectedFrameName = `chapter-${chapter.seconds}.jpg`;
+
+    let chapterFrame = master.frame.find(
+      (frame) => frame.key === expectedFrameName
+    );
+    if (!chapterFrame) {
+      // Find the frame with closest timestamp
+      const target = Number(chapter.seconds);
+      let closest = null;
+      let minDiff = Infinity;
+
+      master.frame.forEach((frame) => {
+        if (!frame.tags || frame.tags.timestamp == null) return;
+
+        const ts = Number(frame.tags.timestamp);
+
+        const diff = Math.abs(ts - target);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = frame;
+        }
+      });
+
+      chapterFrame = closest;
+    }
+
+    return chapterFrame || null;
+  };
+
+  $scope.cleanHtmlFromTitle = function (title) {
+    if (!title) return title;
+
+    // Remove HTML tags and clean up whitespace for display purposes only
+    let cleanTitle = title.replace(/<[^>]+>/g, " ");
+    cleanTitle = cleanTitle.replace(/\s+/g, " ").trim();
+
+    return cleanTitle;
   };
 
   /**
@@ -383,7 +590,13 @@ function cdsRecordController($scope, $sce, $http, $timeout) {
   $scope.$on("cds.record.loading.stop", cdsRecordLoadingStop);
 }
 
-cdsRecordController.$inject = ["$scope", "$sce", "$http", "$timeout"];
+cdsRecordController.$inject = [
+  "$scope",
+  "$sce",
+  "$http",
+  "$timeout",
+  "$filter",
+];
 
 ////////////
 

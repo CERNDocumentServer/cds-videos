@@ -33,6 +33,7 @@ from cds.modules.deposit.api import record_unbuild_url
 from cds.modules.flows.tasks import (
     DownloadTask,
     ExtractFramesTask,
+    ExtractChapterFramesTask,
     ExtractMetadataTask,
     TranscodeVideoTask,
 )
@@ -87,4 +88,5 @@ def register_celery_class_based_tasks(sender, app=None):
     celery.register_task(ExtractMetadataTask())
     celery.register_task(DownloadTask())
     celery.register_task(ExtractFramesTask())
+    celery.register_task(ExtractChapterFramesTask())
     celery.register_task(TranscodeVideoTask())
