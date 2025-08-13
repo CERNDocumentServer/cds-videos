@@ -236,7 +236,16 @@ function cdsDepositCtrl(
         };
       });
       _.forEach(that.record._cds.state, function (value, state) {
-        that.stateReporter[state].status = value;
+        if (!that.stateReporter[state]) {
+          // Task not in mainStatuses, add `file_video_extract_chapter_frames`
+          that.stateReporter[state] = {
+            status: value,
+            message: state
+          };
+        } else {
+          // Update existing
+          that.stateReporter[state].status = value;
+        }
       });
       that.calculateCurrentDepositStatus();
     };
@@ -452,6 +461,10 @@ function cdsDepositCtrl(
       if (status && !info.status) {
         info.status = status;
       }
+      if (!that.stateReporter[name]) {
+        // New task not in mainStatuses, add `file_video_extract_chapter_frames`
+        that.stateReporter[name] = info;
+      }
       if (that.stateReporter[name].status !== info.status) {
         // Get metadata
         $scope.$broadcast("cds.deposit.task", name, info.status, info);
@@ -471,8 +484,10 @@ function cdsDepositCtrl(
       }
       that.currentStartedTaskName = currentStartedTaskName;
 
-      // Change the Deposit Status
-      var values = _.values(that.record._cds.state);
+      // Change the Deposit Status, ignore `file_video_extract_chapter_frames`
+      var values = _.values(
+        _.omit(that.record._cds.state, "file_video_extract_chapter_frames")
+      );
       if (!values.length) {
         that.currentDepositStatus = null;
       } else if (values.includes(depositStatuses.FAILURE)) {

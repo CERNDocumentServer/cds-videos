@@ -163,6 +163,12 @@ app.filter("previewIframeSrc", [
   function ($sce, $window) {
     return function (text, id, key, external) {
       var _url = "/record/" + id + "/preview/" + key;
+      // Pass through timestamp query parameter if present
+      var urlParams = new URLSearchParams($window.location.search);
+      var timestamp = urlParams.get("t");
+      if (timestamp) {
+        _url += "?t=" + timestamp;
+      }
       if (external) {
         _url = $window.location.origin + _url;
       }

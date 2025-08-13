@@ -53,45 +53,70 @@
       });
 
       window.top.player = player;
-      // Preload
-      player.source = {
-        sources: [
-          {
-            {% if video_source %}
-              src: "{{ video_source }}",
-              type: 'application/x-mpegURL'
-            {% elif obj.m3u8_uri and obj.subformats|length > 0 %}
-              src: '{{ obj.m3u8_uri }}',
-              type: 'application/x-mpegURL'
-            {% else %}
-              src: '{{ obj.uri }}',
-              type: 'video/mp4'
-            {% endif %}
-          },
-        ],
-        {% if not embed_config.subtitlesOff %}
-        textTracks: [
-          {
-            kind: 'metadata',
-            src: '{{ obj.thumbnails_uri }}',
-            label: 'thumbnails',
-            default: true,
-          },
-          {% for uri, lang in obj.subtitles %}
-          {
-            kind: 'subtitles',
-            src: '{{ uri }}',
-            label: '{{ lang }}',
-            srclang: '{{ lang }}',
-            {% if embed_config.subtitles and embed_config.subtitles == lang %}
-            default: true,
-            {% endif %}
-          },
-          {% endfor %}
-        ],
+
+    // --- helpers ---
+    function durationToSeconds(durationStr) {
+      if (!durationStr) return null;
+      const parts = durationStr.split(':').map(Number); // [HH, MM, SS] or [MM, SS]
+      if (parts.length === 3) {
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+      if (parts.length === 2) {
+        return parts[0] * 60 + parts[1];
+      }
+      return null;
+    }
+
+    // Preload
+    player.source = {
+      sources: [
+        {
+          {% if video_source %}
+            src: "{{ video_source }}",
+            type: 'application/x-mpegURL'
+          {% elif obj.m3u8_uri and obj.subformats|length > 0 %}
+            src: '{{ obj.m3u8_uri }}',
+            type: 'application/x-mpegURL'
+          {% else %}
+            src: '{{ obj.uri }}',
+            type: 'video/mp4'
+          {% endif %}
+        },
+      ],
+      textTracks: [
+        {
+          kind: 'metadata',
+          src: '{{ obj.thumbnails_uri }}',
+          label: 'thumbnails',
+          default: true,
+        },
+
+        // Add chapters.vtt if available
+        {% if obj.chapters_uri %}
+        {
+          kind: 'chapters',
+          src: '{{ obj.chapters_uri }}',
+          label: 'Chapters',
+        },
         {% endif %}
-        poster: '{{ obj.poster_uri }}',
-        {% if obj.vr %}
+
+        // Add subtitles
+        {% if not embed_config.subtitlesOff %}
+        {% for uri, lang in obj.subtitles %}
+        {
+          kind: 'subtitles',
+          src: '{{ uri }}',
+          label: '{{ lang }}',
+          srclang: '{{ lang }}',
+          {% if embed_config.subtitles and embed_config.subtitles == lang %}
+          default: true,
+          {% endif %}
+        },
+        {% endfor %}
+        {% endif %}
+      ],
+      poster: '{{ obj.poster_uri }}',
+      {% if obj.vr %}
         vr: {
           360: true,
         },
@@ -164,6 +189,14 @@
           }
         })(player);
       {% endif %}
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const videoDuration = durationToSeconds({{ (record.duration if record and record.duration else "") | tojson }});
+        const startTime = parseInt(params.get('t'), 10);
+        if (!isNaN(startTime) && startTime >= 0 && startTime < videoDuration) {
+            player.currentTime = startTime;
+        }
+      })();
     </script>
   {% endif %}
 {%- endmacro %}

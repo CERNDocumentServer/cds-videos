@@ -1136,3 +1136,312 @@ div[cds-search-results] {
 .transcription-close:hover {
   cursor: pointer;
 }
+
+// Video detail chapters and transcript styles
+.chapters-main-horizontal {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+// In this video panel styles
+.in-this-video-panel {
+  height: calc((9/16)*70vw);
+  max-height: calc(100vh - 300px);
+  min-height: var(--flex854-mode-player-height);
+  display: flex;
+  flex-direction: column;
+  .tabs-container {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    
+    .nav-tabs {
+      border-bottom: 1px solid #ddd;
+      
+      a {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+    }
+  }
+  .transcript-content{
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .content-container {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .language-selector {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    margin-bottom: 0;
+    
+    label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+  .form-control {
+      font-size: 14px;
+      height: 30px;
+
+    }
+  }
+  
+  .search-container {
+    margin-bottom: 10px;
+    
+    .form-control {
+      height: 30px;
+      font-size: 14px;
+    }
+  }
+}
+
+// Common styles for both transcript and chapter items
+.transcript-item,
+.chapter-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  // Active and hover states
+  &.active {
+    background-color: #e3f2fd !important;
+    border-left: 4px solid #2196F3;
+    padding-left: 10px !important;
+    
+    .transcript-timestamp {
+      color: #1976D2 !important;
+      font-weight: 700 !important;
+    }
+    
+    .transcript-text {
+      color: #333 !important;
+      font-weight: 500 !important;
+    }
+  }
+  
+  &:hover:not(.active) {
+    border-left: 3px solid #e3f2fd;
+    padding-left: 11px !important;
+  }
+}
+
+// Transcript specific styles
+.transcript-item {
+  padding: 6px 8px;
+  border-radius: 3px;
+
+  .transcript-timestamp {
+    font-size: 12px;
+    color: #2196F3;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .transcript-text {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
+
+// Chapter specific styles
+.chapter-item {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .chapter-content {
+    display: flex;
+    align-items: center;
+
+    .chapter-thumbnail {
+      min-width: 120px;
+      margin-right: 12px;
+
+      .thumbnail-container {
+        width: 120px;
+        height: 67px;
+        border-radius: 4px;
+        overflow: hidden;
+        background-color: #f5f5f5;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .thumbnail-placeholder {
+          width: 100%;
+          height: 100%;
+          background-color: #e9ecef;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .fa {
+            color: #6c757d;
+            font-size: 16px;
+          }
+        }
+      }
+    }
+
+    .chapter-info {
+      flex: 1;
+
+      .chapter-title {
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin-bottom: 4px;
+      }
+
+      .chapter-timestamp {
+        font-size: 14px;
+        color: #2196F3;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Main chapters section
+.cds-detail-chapters {
+  .chapter-item-main {
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    
+    .chapter-timestamp-main .badge {
+      font-family: monospace;
+    }
+    
+    .chapter-title-main {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+  
+  .chapter-thumbnail img {
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .cds-detail-chapters .chapter-item-main {
+    margin-bottom: 10px;
+    
+    div[style*="display: flex"] {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      
+      .chapter-thumbnail {
+        margin-bottom: 8px;
+        margin-right: 0 !important;
+      }
+      
+      .chapter-info .chapter-timestamp-main {
+        margin-bottom: 5px;
+      }
+    }
+  }
+  
+  .chapter-item-horizontal-main {
+    width: 264px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 240px !important;
+    height: 135px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chapter-item-horizontal-main {
+    width: 224px !important;
+  }
+  
+  .chapter-thumbnail-main-horizontal {
+    width: 200px !important;
+    height: 113px !important;
+  }
+}
+
+@media(max-width: 992px) {
+  .in-this-video-panel {
+    min-height: 400px;
+  }
+}
+
+
+.cds-detail-sharelink {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cds-detail-sharelink .input-group {
+  flex: 1 1 420px;
+  margin-right: 10px;
+}
+.sharelink-start {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.sharelink-start .start-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+}
+.sharelink-start .start-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  transform: scale(1.25);
+}
+.start-time {
+  width: 64px;
+  border: none;
+  color: #ccc;
+  background: transparent;
+  text-align: center;
+  outline: none;
+}
+.sharelink-start:has(input[type="checkbox"]:checked) .start-time {
+  border-bottom: 1px solid #888;
+  color: #333333;
+}
