@@ -1084,6 +1084,11 @@ FRONTPAGE_TREND_TOPICS = [
         "qs": 'q=keywords.name:"VNR" OR keywords.name:"video news release"',
     },
 ]
+###############################################################################
+# Record Landing page
+###############################################################################
+
+DESCRIPTION_PREVIEW_LINES = 10
 
 ###############################################################################
 # Security
@@ -1127,7 +1132,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "'unsafe-inline'",
     ],
     "img-src": ["'self'", "https://*.theoplayer.com", "data:"],
-    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch"],
+    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch", "blob:"],
     "object-src": ["'self'"],
     "media-src": ["'self'", "blob:"],
     "frame-src": ["'self'", "https://*.theoplayer.com"],

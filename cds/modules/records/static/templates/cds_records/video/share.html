@@ -1,3 +1,46 @@
+<!-- Share link -->
+<div class="cds-detail-sharelink mb-20 d-flex align-items-center">
+
+  <!-- Share URL + Copy -->
+  <div class="input-group" style="flex:1;">
+    <input id="copyShare"
+           type="text"
+           class="form-control"
+           ng-model="share.link"
+           readonly
+           aria-label="Shareable link" />
+
+    <span class="input-group-btn">
+      <button ngclipboard
+              class="btn btn-default"
+              data-clipboard-target="#copyShare"
+              type="button">
+        <i class="fa fa-copy"></i>
+      </button>
+    </span>
+  </div>
+
+  <!-- Start at -->
+  <div class="sharelink-start">
+    <label class="start-checkbox">
+      <input type="checkbox"
+            ng-model="share.withStart"
+            ng-change="updateShareLink()">
+      Start at:
+    </label>
+
+    <input type="text"
+          class="start-time"
+          placeholder="0:00"
+          ng-disabled="!share.withStart"
+          ng-model="share.startInput"
+          ng-change="updateShareLink()"
+          ng-pattern="/^[0-9:]*$/">
+  </div>
+
+</div>
+<!-- /Share link -->
+
 <!-- Social -->
 <div class="cds-detail-video-social-media mb-20">
   <h4>Social media</h4>
