@@ -567,17 +567,143 @@
   ],
   "related_links": [
     {
-      "key": "related_links",
+      "key": "related_identifiers",
       "type": "array",
-      "add": "Add related links",
+      "add": "Add related identifiers",
+      "title": "Related Identifiers",
+      "description": "Add identifiers for related resources such as DOIs, URLs, or Indico event IDs.",
       "items": [
         {
-          "title": "Name",
-          "key": "related_links[].name"
+          "title": "Identifier",
+          "key": "related_identifiers[].identifier",
+          "required": true,
+          "placeholder": "e.g., 10.1234/example.doi, https://example.com, 12345",
+          "description": "The identifier value (DOI, URL, or Indico event ID)"
         },
         {
-          "title": "URL",
-          "key": "related_links[].url"
+          "title": "Scheme",
+          "key": "related_identifiers[].scheme",
+          "type": "select",
+          "required": true,
+          "placeholder": "Select identifier scheme",
+          "description": "The type of identifier scheme",
+          "titleMap": [
+            {
+              "value": "URL",
+              "name": "URL (Uniform Resource Locator)"
+            },
+            {
+              "value": "DOI",
+              "name": "DOI (Digital Object Identifier)"
+            },
+            {
+              "value": "Indico",
+              "name": "Indico (Event ID)"
+            },
+            {
+              "value": "CDS",
+              "name": "CDS (CERN Document Server Record ID)"
+            }
+          ]
+        },
+        {
+          "title": "Relation Type",
+          "key": "related_identifiers[].relation_type",
+          "type": "select",
+          "required": true,
+          "placeholder": "Select relation type",
+          "description": "How this resource relates to the identified resource",
+          "titleMap": [
+            {
+              "value": "IsPartOf",
+              "name": "Is part of"
+            },
+            {
+              "value": "IsVariantFormOf",
+              "name": "Is variant form of"
+            }
+          ]
+        },
+        {
+          "title": "Resource Type",
+          "key": "related_identifiers[].resource_type",
+          "type": "select",
+          "placeholder": "Select resource type (optional)",
+          "description": "The type of the related resource (optional)",
+          "titleMap": [
+            {
+              "value": "Audiovisual",
+              "name": "Audiovisual"
+            },
+            {
+              "value": "Book",
+              "name": "Book"
+            },
+            {
+              "value": "Collection",
+              "name": "Collection"
+            },
+            {
+              "value": "ConferencePaper",
+              "name": "Conference Paper"
+            },
+            {
+              "value": "DataPaper",
+              "name": "Data Paper"
+            },
+            {
+              "value": "Dataset",
+              "name": "Dataset"
+            },
+            {
+              "value": "Event",
+              "name": "Event"
+            },
+            {
+              "value": "Image",
+              "name": "Image"
+            },
+            {
+              "value": "InteractiveResource",
+              "name": "Interactive Resource"
+            },
+            {
+              "value": "Model",
+              "name": "Model"
+            },
+            {
+              "value": "PhysicalObject",
+              "name": "Physical Object"
+            },
+            {
+              "value": "Report",
+              "name": "Report"
+            },
+            {
+              "value": "Service",
+              "name": "Service"
+            },
+            {
+              "value": "Software",
+              "name": "Software"
+            },
+            {
+              "value": "Sound",
+              "name": "Sound"
+            },
+            {
+              "value": "Text",
+              "name": "Text"
+            },
+            {
+              "value": "Workflow",
+              "name": "Workflow"
+            },
+            {
+              "value": "Other",
+              "name": "Other"
+            }
+          ]
         }
       ]
     }
