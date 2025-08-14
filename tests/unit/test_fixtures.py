@@ -91,7 +91,7 @@ def test_fixture_categories(app, script_info, db, es, location):
     res = runner.invoke(cli_categories, [], obj=script_info)
     assert res.exit_code == 0
     categories = RecordMetadata.query.all()
-    assert len(categories) == 7
+    assert len(categories) == 8
     for category in categories:
         assert "VIDEO" in category.json["types"]
 
