@@ -254,6 +254,14 @@
           }
         })(player);
       {% endif %}
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const videoDuration = durationToSeconds({{ (record.duration if record and record.duration else "") | tojson }});
+        const startTime = parseInt(params.get('t'), 10);
+        if (!isNaN(startTime) && startTime >= 0 && startTime < videoDuration) {
+            player.currentTime = startTime;
+        }
+      })();
     </script>
   {% endif %}
 {%- endmacro %}
