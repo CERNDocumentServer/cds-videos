@@ -85,8 +85,10 @@ def find_remote_by_client_id(client_id):
 
 def fetch_extra_data(resource):
     """Return a dict with extra data retrieved from CERN OAuth."""
-    person_id = resource.get("cern_person_id")
-    return dict(person_id=person_id, groups=resource["groups"])
+    data = {"groups": resource.get("groups", [])}
+    if resource.get("cern_person_id"):
+        data["person_id"] = resource["cern_person_id"]
+    return data
 
 
 def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
@@ -178,10 +180,19 @@ def _account_info(remote, resp):
             resp,
         )
 
-    email = resource["email"]
-    external_id = str(resource["cern_uid"])
-    nice = resource["preferred_username"]
-    name = resource["name"]
+    email = resource.get("email")
+    if not email:
+        raise OAuthCERNRejectedAccountError("No email in userinfo", remote, resp)
+
+    external_id = resource.get("cern_uid") or resource.get("sub")
+    if not external_id:
+        raise OAuthCERNRejectedAccountError("No external_id in userinfo", remote, resp)
+    external_id = str(external_id)
+    raw_username = resource.get("preferred_username") or email
+    if "@" in raw_username:
+        raw_username = raw_username.replace("@", "_").replace(".", "_")
+    nice = raw_username
+    name = resource.get("name") or nice
 
     return dict(
         user=dict(email=email.lower(), profile=dict(username=nice, full_name=name)),
@@ -231,7 +242,7 @@ def account_setup(remote, token, resp):
     resource = get_resource(remote, resp)
 
     with db.session.begin_nested():
-        external_id = resource.get("cern_uid")
+        external_id = resource.get("cern_uid") or resource.get("sub")
 
         # Set CERN person ID in extra_data.
         token.remote_account.extra_data = {"external_id": external_id}
