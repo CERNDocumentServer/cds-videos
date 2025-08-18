@@ -1168,7 +1168,9 @@ OAUTHCLIENT_CERN_OPENID_USERINFO_URL = os.environ.get(
     "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo",
 )
 
-OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user"]
+OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user", "user"]
+
+UPLOAD_ALLOWED_ROLES = ["cern-user"]
 
 OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA = timedelta(minutes=-5)
 """Default interval for refreshing CERN extra data (e.g. groups).

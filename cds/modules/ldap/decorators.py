@@ -22,7 +22,7 @@
 from functools import wraps
 
 from flask_login import current_user
-from flask_restful import abort
+from flask import abort, current_app
 
 
 def needs_authentication(func):
@@ -33,3 +33,31 @@ def needs_authentication(func):
             abort(401)
         return func(*args, **kwargs)
     return decorated_api_view
+
+
+def cern_user_required():
+    """Restrict access based on roles from RemoteAccount.extra_data["roles"]."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                abort(401)  # Unauthorized (not logged in)
+
+            allowed_roles = current_app.config.get("UPLOAD_ALLOWED_ROLES", [])
+
+            # Collect roles from all RemoteAccounts
+            remote_account_roles = []
+            for ra in getattr(current_user, "remote_accounts", []):
+                if not ra.extra_data:
+                    continue
+                roles = ra.extra_data.get("roles", [])
+                if isinstance(roles, list):
+                    remote_account_roles.extend(roles)
+
+            # If user has at least one allowed role → grant access
+            if not any(role in allowed_roles for role in remote_account_roles):
+                abort(403)  # Forbidden
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
