@@ -79,6 +79,7 @@ from cds.modules.deposit.api import Project, Video
 from cds.modules.invenio_deposit.permissions import action_admin_access
 from cds.modules.records.resolver import record_resolver
 from cds.modules.redirector.views import api_blueprint as cds_api_blueprint
+from cds.modules.records.permissions import upload_access_action
 
 
 @pytest.yield_fixture(scope="module", autouse=True)
@@ -203,11 +204,33 @@ def users(app, db):
         superadmin_role = Role(name="superadmin")
         db.session.add(ActionRoles(action=superuser_access.value, role=superadmin_role))
         datastore.add_role_to_user(superadmin, superadmin_role)
+        # Give upload permission to all users
+        cern_user_role = Role(name="cern-user")
+        db.session.add(
+            ActionRoles(action=upload_access_action.value, role=cern_user_role)
+        )
+        datastore.add_role_to_user(admin, cern_user_role)
+        datastore.add_role_to_user(user1, cern_user_role)
+        datastore.add_role_to_user(user2, cern_user_role)
+        datastore.add_role_to_user(superadmin, cern_user_role)
     db.session.commit()
     id_1 = user1.id
     id_2 = user2.id
     id_4 = admin.id
     return [id_1, id_2, id_4]
+
+
+@pytest.fixture()
+def external_user(app, db):
+    """Create external user."""
+    with db.session.begin_nested():
+        datastore = app.extensions["security"].datastore
+        user = datastore.create_user(
+            email="external@gmail.com", password="tester", active=True
+        )
+    db.session.commit()
+    id = user.id
+    return id
 
 
 @pytest.fixture()
