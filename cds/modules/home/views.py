@@ -25,6 +25,8 @@ from flask_menu import current_menu
 from invenio_cache.decorators import cached_unless_authenticated
 from invenio_i18n import lazy_gettext as _
 
+from ..records.permissions import has_upload_permission
+
 blueprint = Blueprint(
     "cds_home",
     __name__,
@@ -58,4 +60,5 @@ def init_menu(app):
         "invenio_deposit_ui.index",
         _("Upload"),
         order=2,
+        visible_when=lambda: has_upload_permission()
     )

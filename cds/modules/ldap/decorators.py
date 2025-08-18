@@ -33,3 +33,20 @@ def needs_authentication(func):
             abort(401)
         return func(*args, **kwargs)
     return decorated_api_view
+
+
+def require_upload_permission():
+    """Restrict access using the has_upload_permission check."""
+    def decorator(f):
+        from cds.modules.records.permissions import has_upload_permission
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                abort(401)
+
+            if not has_upload_permission():
+                abort(403)
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

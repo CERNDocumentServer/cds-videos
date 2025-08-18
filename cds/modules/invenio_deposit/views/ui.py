@@ -27,6 +27,7 @@
 
 from copy import deepcopy
 
+from cds.modules.ldap.decorators import require_upload_permission
 from flask import Blueprint, current_app, render_template, request
 from flask_login import login_required
 from invenio_pidstore.errors import PIDDeletedError
@@ -73,12 +74,14 @@ def create_blueprint(endpoints):
 
     @blueprint.route("/deposit")
     @login_required
+    @require_upload_permission()
     def index():
         """List user deposits."""
         return render_template(current_app.config["DEPOSIT_UI_INDEX_TEMPLATE"])
 
     @blueprint.route("/deposit/new")
     @login_required
+    @require_upload_permission()
     def new():
         """Create new deposit."""
         deposit_type = request.values.get("type")

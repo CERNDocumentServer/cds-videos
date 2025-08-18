@@ -1000,43 +1000,7 @@ FRONTPAGE_CHANNELS = [
     },
 ]
 
-HOMEPAGE_DYNAMIC_QUERIES = [
-    {
-        "label": "LATEST LECTURES",
-        "query": "/api/records/?size=4&sort=mostrecent&q=collections:Lectures",
-        "qs": "collections=Lectures",
-        "subcategories": [
-            {
-                "label": "Academic Training Lectures",
-                "qs": 'collections="Lectures::Academic Training Lectures"',
-            },
-            {
-                "label": "CERN Accelerator School Lectures",
-                "qs": 'collections="Lectures::CERN Accelerator School"',
-            },
-            {
-                "label": "E-Learning",
-                "qs": 'collections="Lectures::E-learning modules"',
-            },
-            {
-                "label": "Conference records",
-                "qs": 'collections="Lectures::Talks, Seminars and Other Events,Conference records"',
-            },
-            {
-                "label": "Scientific Seminars and Workshops",
-                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Scientific Seminars and Workshops"',
-            },
-            {
-                "label": "Teacher Programmes",
-                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Teacher Programmes"',
-            },
-            {
-                "label": "Student Lectures",
-                "qs": 'collections="Lectures::Talks, Seminars and Other Events::Student Lectures"',
-            },
-        ],
-    }
-]
+HOMEPAGE_DYNAMIC_QUERIES = []
 
 FRONTPAGE_TREND_TOPICS = [
     {
@@ -1132,7 +1096,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "'unsafe-inline'",
     ],
     "img-src": ["'self'", "https://*.theoplayer.com", "data:"],
-    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch", "blob:"],
+    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch"],
     "object-src": ["'self'"],
     "media-src": ["'self'", "blob:"],
     "frame-src": ["'self'", "https://*.theoplayer.com"],
@@ -1173,7 +1137,7 @@ OAUTHCLIENT_CERN_OPENID_USERINFO_URL = os.environ.get(
     "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo",
 )
 
-OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user"]
+OAUTHCLIENT_CERN_OPENID_ALLOWED_ROLES = ["cern-user", "authenticated-user"]
 
 OAUTHCLIENT_CERN_OPENID_REFRESH_TIMEDELTA = timedelta(minutes=-5)
 """Default interval for refreshing CERN extra data (e.g. groups).
