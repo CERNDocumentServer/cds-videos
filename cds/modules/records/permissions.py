@@ -25,7 +25,7 @@
 
 from flask import current_app
 from flask_security import current_user
-from invenio_access import Permission
+from invenio_access import Permission, action_factory
 from invenio_files_rest.models import Bucket, MultipartObject, ObjectVersion
 from invenio_records_files.api import FileObject
 from invenio_records_files.models import RecordsBuckets
@@ -34,6 +34,8 @@ from ..invenio_deposit.permissions import action_admin_access
 from .api import CDSRecord as Record
 from .utils import get_user_provides, is_deposit, is_record, lowercase_value
 
+
+upload_access_action = action_factory("videos-upload-access")
 
 def files_permission_factory(obj, action=None):
     """Permission for files are always based on the type of bucket.
@@ -228,7 +230,7 @@ class RecordPermission(object):
     def create(cls, record, action, user=None):
         """Create a record permission."""
         if action in cls.create_actions:
-            return cls(record, allow, user)
+            return cls(record, has_upload_permission, user)
         elif action in cls.read_actions:
             return cls(record, has_read_record_permission, user)
         elif action in cls.read_eos_path_actions:
@@ -359,3 +361,8 @@ def has_admin_permission(user=None, record=None):
     """
     # Allow administrators
     return Permission(action_admin_access).can()
+
+
+def has_upload_permission(*args, **kwargs):
+    """Return permission to allow only cern users."""
+    return Permission(upload_access_action).can()
