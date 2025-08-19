@@ -104,6 +104,9 @@
       "restricted": [],
       "responsible": ["weblecture-service@cern.ch"]
     },
-    "_record_type": ["PROJECT"]
+    "_record_type": ["PROJECT"],
+    "_access": {
+      "read": ["weblecture-service@cern.ch"]
+    }
   }
 ]
