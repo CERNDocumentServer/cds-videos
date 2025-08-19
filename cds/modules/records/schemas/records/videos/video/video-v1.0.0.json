@@ -62,6 +62,7 @@
               "Camera Operator",
               "Comments by",
               "Co-Producer",
+              "ContactPerson",
               "Creator",
               "Credits",
               "Director",
@@ -70,7 +71,9 @@
               "Narrator",
               "Photography",
               "Producer",
+              "RelatedPerson",
               "Reporter",
+              "ResearchGroup",
               "Screenwriter",
               "Speaker",
               "Subtitles by",
@@ -200,6 +203,24 @@
       "type": "array",
       "description": "List of identifiers on external systems.",
       "title": "External identifiers"
+    },
+    "alternate_identifiers": {
+      "items": {
+        "properties": {
+          "scheme": {
+            "title": "Scheme of the identifier (Vocabulary)",
+            "type": "string",
+            "enum": ["URL", "DOI", "CDS"]
+          },
+          "value": {
+            "title": "Value of the identifier",
+            "type": "string"
+          }
+        }
+      },
+      "required": ["value", "scheme"],
+      "title": "List of alternate identifiers of the record",
+      "type": "array"
     },
     "subject": {
       "additionalProperties": false,
@@ -400,59 +421,7 @@
           },
           "language": {
             "default": "en",
-            "enum": [
-              "ar",
-              "ast",
-              "bg",
-              "ca",
-              "ch",
-              "cs",
-              "cy",
-              "da",
-              "de",
-              "el",
-              "en",
-              "en-fr",
-              "es",
-              "et",
-              "eu",
-              "fi",
-              "fr",
-              "ga",
-              "gd",
-              "gl",
-              "he",
-              "hi",
-              "hr",
-              "hu",
-              "it",
-              "lt",
-              "ja",
-              "ka",
-              "ko",
-              "kw",
-              "nb",
-              "nl",
-              "nn",
-              "no",
-              "pl",
-              "pt",
-              "rm",
-              "ro",
-              "ru",
-              "se",
-              "silent",
-              "sk",
-              "sl",
-              "sr",
-              "sv",
-              "tr",
-              "uk",
-              "ur",
-              "zh",
-              "zh_CN",
-              "zh_TW"
-            ],
+            "$ref": "definitions-v1.0.0.json#/languages",
             "type": "string",
             "description": "A language of the resource."
           },
@@ -538,59 +507,7 @@
     "language": {
       "description": "A language of the resource.",
       "default": "en",
-      "enum": [
-        "ar",
-        "ast",
-        "bg",
-        "ca",
-        "ch",
-        "cs",
-        "cy",
-        "da",
-        "de",
-        "el",
-        "en",
-        "en-fr",
-        "es",
-        "et",
-        "eu",
-        "fi",
-        "fr",
-        "ga",
-        "gd",
-        "gl",
-        "he",
-        "hi",
-        "hr",
-        "hu",
-        "it",
-        "lt",
-        "ja",
-        "ka",
-        "ko",
-        "kw",
-        "nb",
-        "nl",
-        "nn",
-        "no",
-        "pl",
-        "pt",
-        "rm",
-        "ro",
-        "ru",
-        "se",
-        "silent",
-        "sk",
-        "sl",
-        "sr",
-        "sv",
-        "tr",
-        "uk",
-        "ur",
-        "zh",
-        "zh_CN",
-        "zh_TW"
-      ],
+      "$ref": "definitions-v1.0.0.json#/languages",
       "type": "string"
     },
     "accelerator_experiment": {
@@ -631,11 +548,218 @@
       "type": "number",
       "description": "Invenio record identifier (integer)."
     },
+    "legacy_recid": {
+      "type": "number",
+      "description": "Legacy record identifier (integer). Kept for auditing reasons."
+    },
     "original_source": {
       "type": "string"
     },
     "_project_id": {
       "type": "string"
+    },
+    "_curation": {
+      "properties": {
+        "legacy_report_number": {
+          "title": "Legacy record report number.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "department": {
+          "title": "CERN department.",
+          "type": "string"
+        },
+        "volumes": {
+          "title": "Volume list for this record.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "physical_location": {
+          "title": "Tag 852 physical location.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "physical_medium": {
+          "title": "Tag 340 physical medium.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "internal_note": {
+          "title": "Tag 595 internal note.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized": {
+          "title": "Digitized metadata.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "link_text": {
+                "type": "string"
+              },
+              "public_note": {
+                "type": "string"
+              },
+              "nonpublic_note": {
+                "type": "string"
+              },
+              "md5_checksum": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "legacy_marc_fields": {
+          "type": "object",
+          "properties": {
+            "964": {
+              "title": "Tag 964.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "336": {
+              "title": "Tag 336.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "583": {
+              "title": "Tag 583.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "306": {
+              "title": "Tag 306.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "title": "Fields that needs curation.",
+      "description": "This section contains MARC21 metadata fields that could not be mapped during weblectures migration.",
+      "type": "object"
+    },
+    "additional_titles": {
+      "description": "Additional record titles.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "description": "Additional title of the record.",
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Subtitle", "Other", "TranslatedTitle", "AlternativeTitle"]
+          },
+          "lang": {
+            "type": "string",
+            "$ref": "definitions-v1.0.0.json#/languages"
+          }
+        }
+      }
+    },
+    "additional_descriptions": {
+      "description": "Additional descriptions for the record.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Descriptive content."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Abstract",
+              "Methods",
+              "Other",
+              "SeriesInformation",
+              "TableOfContents",
+              "TechnicalInfo"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "$ref": "definitions-v1.0.0.json#/languages"
+          }
+        }
+      }
+    },
+    "related_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["identifier", "scheme", "relation_type"],
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The actual identifier (e.g., URL or DOI)."
+          },
+          "scheme": {
+            "type": "string",
+            "enum": ["URL", "DOI", "CDS", "Indico"],
+            "description": "The scheme describing the identifier type."
+          },
+          "relation_type": {
+            "type": "string",
+            "enum": ["IsPartOf", "IsVariantFormOf"],
+            "description": "Describes the relationship with the current record."
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": ["Event", "ConferencePaper", "Report", "Book"],
+            "description": "Type of the related resource."
+          }
+        }
+      }
+    },
+    "collections": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "additional_languages": {
+      "description": "Additional languages for the record.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "$ref": "definitions-v1.0.0.json#/languages"
+      }
     }
   },
   "title": "CDS Base Record Schema v1.0.0"

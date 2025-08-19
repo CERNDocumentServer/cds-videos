@@ -115,7 +115,10 @@ function cdsUploaderCtrl(
         if (!upload.key) {
           upload.key = upload.name;
         }
-        if (that.cdsDepositsCtrl.isVideoFile(upload.key)) {
+        if (
+          !upload.isAdditional &&
+          that.cdsDepositsCtrl.isVideoFile(upload.key)
+        ) {
           _subpromise = Upload.http(_startWorkflow(upload, response));
         } else {
           var d = $q.defer();
@@ -278,24 +281,46 @@ function cdsUploaderCtrl(
       }
       // Remove any invalid files
       _files = _.difference(_files, invalidFiles || []);
+
+      // Filter out files without a valid MIME type or with zero size
+      _files = _files.filter((file) => {
+        if (!file.type || file.type.trim() === "") {
+          toaster.pop(
+            "warning",
+            "Invalid File Type",
+            `The file ${file.name} has no valid type.`
+          );
+          return false; // Exclude invalid files
+        }
+
+        if (!file.size || file.size === 0) {
+          toaster.pop(
+            "warning",
+            "Empty File",
+            `The file ${file.name} is empty and cannot be uploaded.`
+          );
+          return false; // Exclude zero-size files
+        }
+
+        return true;
+      });
+
       // Make sure they have proper metadata
       angular.forEach(_files, function (file) {
         file.key = file.name;
         file.local = !file.receiver;
+        file.isAdditional = true;
         // Add any extra paramemters to the files
         if (extraHeaders) {
           file.headers = extraHeaders;
         }
+
+        if (!extraHeaders || !("X-Invenio-File-Tags" in extraHeaders)) {
+          file.headers = {
+            "X-Invenio-File-Tags": "context_type=additional_file",
+          };
+        }
       });
-
-      // Add the files to the list
-      var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
-      var videoFiles = _.values(
-        that.cdsDepositsCtrl.filterOutFiles(_files).videos
-      );
-
-      // Exclude video files
-      _files = _.difference(_files, videoFiles);
 
       // Find if any of the existing files has been replaced
       // (file with same filename), and if yes remove it from the existing
@@ -323,6 +348,44 @@ function cdsUploaderCtrl(
       Array.prototype.push.apply(that.files, _files);
       // Add the files to the queue
       Array.prototype.push.apply(that.queue, _files);
+
+      // Start upload automatically if the option is selected
+      if (that.autoStartUpload) {
+        that.upload();
+      }
+    };
+
+    this.replaceMasterFile = function (_files, invalidFiles) {
+      // Do nothing if files array is empty
+      if (!_files) {
+        return;
+      }
+      // Remove any invalid files
+      _files = _.difference(_files, invalidFiles || []);
+      // Make sure they have proper metadata
+      angular.forEach(_files, function (file) {
+        file.key = file.name;
+        file.local = !file.receiver;
+      });
+
+      // Add the files to the list
+      var masterFile = that.cdsDepositCtrl.findMasterFile() || {};
+      var videoFiles = _.values(
+        that.cdsDepositsCtrl.filterOutFiles(_files).videos
+      );
+
+      if ((invalidFiles || []).length > 0) {
+        // Push a notification
+        toaster.pop({
+          type: "error",
+          title:
+            "Invalid file(s) for " +
+            (that.cdsDepositCtrl.record.title.title || "video."),
+          body: _.map(invalidFiles, "name").join(", "),
+          bodyOutputType: "trustedHtml",
+        });
+      }
+
       if (!that.cdsDepositCtrl.master) {
         // Check for new master file
         var newMasterFile = videoFiles[0];
@@ -357,11 +420,6 @@ function cdsUploaderCtrl(
             that.upload();
           });
         }
-      }
-
-      // Start upload automatically if the option is selected
-      if (that.autoStartUpload) {
-        that.upload();
       }
     };
 
@@ -431,13 +489,26 @@ function cdsUploaderCtrl(
             function error(response) {
               // Inform the parents
               $scope.$emit("cds.deposit.error", response);
-              // Error uploading notification
-              toaster.pop({
-                type: "error",
-                title: "Error uploading the file(s).",
-                body: (_.map(response, "config.data.key") || []).join(", "),
-                bodyOutputType: "trustedHtml",
-              });
+              // Check if the response contains the error message
+              if (
+                response.status === 400 &&
+                response.data &&
+                response.data.message
+              ) {
+                toaster.pop({
+                  type: "error",
+                  title: response.data.message,
+                  bodyOutputType: "trustedHtml",
+                });
+              } else {
+                // Error uploading notification
+                toaster.pop({
+                  type: "error",
+                  title: "Error uploading the file(s).",
+                  body: (_.map(response, "config.data.key") || []).join(", "),
+                  bodyOutputType: "trustedHtml",
+                });
+              }
             }
           )
           .finally(function done() {
@@ -475,6 +546,15 @@ function cdsUploaderCtrl(
     // i.e. jessica_jones-en.vtt
     var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2}).vtt/) || [];
     return match.length > 1 && match[1] in isoLanguages;
+  };
+
+  this.validateAdditionalFiles = function (_file) {
+    // If it's a .vtt file, validate as subtitle
+    if (_file.name.toLowerCase().endsWith(".vtt")) {
+      return this.validateSubtitles(_file);
+    }
+    // Accept other types
+    return true;
   };
 
   this.updateFile = function (key, data, force) {

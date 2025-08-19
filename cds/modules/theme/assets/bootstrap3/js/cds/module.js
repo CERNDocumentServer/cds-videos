@@ -341,6 +341,24 @@ app.filter("ellipsis", function () {
   };
 });
 
+app.filter("middleEllipsis", function () {
+  return function (text, length) {
+    if (!text || text.length <= length) return text;
+
+    const dotIndex = text.lastIndexOf(".");
+    const hasExtension = dotIndex > 0;
+
+    if (hasExtension) {
+      const namePart = text.substring(0, dotIndex);
+      const extensionPart = text.substring(dotIndex);
+
+      return namePart.substr(0, length) + " [...]" + extensionPart;
+    }
+
+    return text.substr(0, length) + " [...]";
+  };
+});
+
 // Trust as html
 app.filter("trustHtml", [
   "$sce",
@@ -403,7 +421,7 @@ app.filter("getFilesByType", function () {
     }
 
     return files.filter(function (file) {
-      return types.indexOf(file.context_type) !== -1;
+      return types.indexOf(file.media_type) !== -1;
     });
   };
 });
@@ -429,7 +447,7 @@ app.filter("getAllFilesExcept", function () {
     }
 
     return files.filter(function (file) {
-      return types.indexOf(file.context_type) == -1;
+      return types.indexOf(file.media_type) == -1;
     });
   };
 });
@@ -733,3 +751,17 @@ app.filter("assembleShareURL", [
     };
   },
 ]);
+
+
+angular.module("cds").directive("bootstrapInvenioSearch", function () {
+  return {
+    restrict: "A",
+    link: function (scope, element) {
+      try {
+        angular.bootstrap(element[0], ["cds", "invenioSearch"], { strictDi: true });
+      } catch (e) {
+        if (!/already bootstrapped/.test(e.message)) throw e;
+      }
+    },
+  };
+});

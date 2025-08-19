@@ -228,6 +228,9 @@
       "recid": {
         "type": "double"
       },
+      "legacy_recid": {
+        "type": "double"
+      },
       "license": {
         "properties": {
           "license": {
@@ -333,6 +336,133 @@
             "type": "keyword"
           }
         }
+      },
+      "alternate_identifiers": {
+        "properties": {
+          "scheme": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        }
+      },
+      "_curation": {
+        "type": "object",
+        "properties": {
+          "legacy_report_number": {
+            "type": "keyword"
+          },
+          "department": {
+            "type": "keyword"
+          },
+          "volumes": {
+            "type": "text"
+          },
+          "physical_location": {
+            "type": "text"
+          },
+          "physical_medium": {
+            "type": "text"
+          },
+          "internal_note": {
+            "type": "text"
+          },
+          "digitized": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "text"
+              },
+              "format": {
+                "type": "text"
+              },
+              "link_text": {
+                "type": "text"
+              },
+              "public_note": {
+                "type": "text"
+              },
+              "nonpublic_note": {
+                "type": "text"
+              },
+              "md5_checksum": {
+                "type": "text"
+              },
+              "source": {
+                "type": "text"
+              }
+            }
+          },
+          "legacy_marc_fields": {
+            "type": "object",
+            "properties": {
+              "964": {
+                "type": "text"
+              },
+              "336": {
+                "type": "text"
+              },
+              "583": {
+                "type": "text"
+              },
+              "306": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "additional_titles": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "text"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "lang": {
+            "type": "keyword"
+          }
+        }
+      },
+      "additional_descriptions": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "lang": {
+            "type": "keyword"
+          }
+        }
+      },
+      "related_identifiers": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "text"
+          },
+          "scheme": {
+            "type": "keyword"
+          },
+          "relation_type": {
+            "type": "keyword"
+          },
+          "resource_type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "collections": {
+        "type": "keyword"
+      },
+      "additional_languages": {
+        "type": "text"
       }
     }
   }

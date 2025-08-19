@@ -9,7 +9,7 @@
 <!-- Master video and subformats -->
 <div ng-show="$ctrl.files.length > 0" class="panel panel-default">
   <div class="panel-heading">
-    Master & Subformats files
+    Main & Subformats files
   </div>
   <table class="table">
     <tr>
@@ -224,12 +224,12 @@
   </table>
 </div>
 <!-- Subtitles -->
-<!-- Other -->
-<div ng-show="($ctrl.files | removeBy:'context_type':'poster' |removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' || []).length > 0" class="panel panel-default">
+<!-- Additional files -->
+<div class="panel panel-default">
   <div class="panel-heading">
-    Other files
+    Additional files
   </div>
-  <div class="panel-heading">
+  <div ng-show="($ctrl.files | removeBy:'context_type':'poster' |removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' || []).length > 0"  class="panel-heading">
     <div class="row">
       <div class="col-sm-6">
         <p ng-show="$ctrl.files.length > 0" class="text-muted">
@@ -242,7 +242,7 @@
       </div>
     </div>
   </div>
-  <table class="table">
+  <table ng-show="($ctrl.files | removeBy:'context_type':'poster' |removeBy:'context_type':'master' | removeBy:'context_type':'subtitle' || []).length > 0" class="table">
     <tr>
       <th>Filename</th>
       <th>Size</th>
@@ -271,6 +271,32 @@
       </td>
     </tr>
   </table>
+  <!-- Upload Additional files -->
+  <div class="panel-body">
+    <div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+      <div 
+        ngf-drag-over-class="'cds-deposit-dragover'"
+        ngf-drop=""
+        ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
+        ngf-select=""
+        ngf-model-options="{allowInvalid: false}"
+        ngf-max-size="500GB"
+        ngf-multiple="true"
+        ngf-validate-fn="$ctrl.validateAdditionalFiles($file)"
+      >
+        <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
+          <p class="cds-deposit-box-upload-icon mb-20">
+            <i class="fa fa-3x fa-files-o" aria-hidden="true"></i>
+          </p>
+          <div class="cds-deposit-box-upload-content">
+            <h4>Upload complimentary files for this video</h4>
+            <p class="cds-deposit-box-upload-description">Or Drag & Drop files</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Upload Additional files -->
 </div>
 <hr class="my-20" />
 <!-- Error alert -->
@@ -283,36 +309,40 @@
   </ul>
 </div>
 <!-- Error alert -->
-<div class="cds-deposit-box" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
-  <div
-       ngf-drag-over-class="'cds-deposit-dragover'"
-       ngf-drop=""
-       ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-       ngf-select=""
-       ngf-model-options="{allowInvalid: false}"
-       ngf-max-size="500GB"
-       ngf-multiple="true"
-  >
-    <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
-      <p class="cds-deposit-box-upload-icon mb-20">
-        <i class="fa fa-3x fa-files-o" aria-hidden="true"></i>
-      </p>
-      <div class="cds-deposit-box-upload-content">
-        <div class="cds-deposit-box-upload-title">
-          <h4>Upload complimentary files for this video</h4>
+
+<!-- Replacing Master Video File -->
+<div class="panel panel-default" ng-if="!$ctrl.cdsDepositCtrl.isPublished()">
+  <div class="panel-heading panel-heading-warning">
+    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Replace Video File
+  </div>
+  <div class="panel-body">
+    <div class="cds-deposit-box" >
+      <div 
+        ngf-drag-over-class="{accept: 'cds-deposit-dragover', delay:100}"
+        ngf-drop=""
+        ngf-change="$ctrl.replaceMasterFile($newFiles, $invalidFiles)"
+        ngf-select=""
+        ngf-model-options="{allowInvalid: false}"
+        ngf-max-size="500GB"
+        ngf-multiple="true"
+        ngf-accept="'{{$ctrl.cdsDepositsCtrl.videoExtensions}}'"
+        ngf-pattern="'{{$ctrl.cdsDepositsCtrl.videoExtensions}}'"
+      >
+        <div class="pa-10 cds-deposit-box-upload-wrapper text-center">
+          <p class="cds-deposit-box-upload-icon mb-20">
+            <i class="fa fa-2x fa-video-camera" aria-hidden="true"></i>
+          </p>
+          <div class="cds-deposit-box-upload-content">
+            <h4>To replace the video file, just upload a video here.</h4>
+            <p class="cds-deposit-box-upload-description">Or Drag & Drop files</p>
+          </div>
         </div>
-        <p class="cds-deposit-box-upload-description"> Or Drag & Drop files</p>
       </div>
     </div>
   </div>
-  <hr class="my-10" />
-  <div class="text-muted">
-    <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
-    <ul>
-      <li>To replace the video file, just upload another video.</li>
-    </ul>
-  </div>
 </div>
+
+
 <div ng-if="$ctrl.cdsDepositCtrl.isPublished()" class="cds-deposit-box text-muted">
   <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
   <ul>

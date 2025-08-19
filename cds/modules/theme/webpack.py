@@ -98,6 +98,7 @@ theme = WebpackThemeBundle(
                 "rr-ng-ckeditor": "~0.2.1",
                 # needed because ci fails on tests otherwise. not imported in any bundle
                 "semantic-ui-less": "^2.4.1",
+                "vtt.js": "~0.13.0",
             },
             aliases={
                 "@js/cds": "js/cds",

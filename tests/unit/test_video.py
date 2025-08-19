@@ -514,7 +514,6 @@ def test_video_keywords(es, api_project, keyword_1, keyword_2, users):
 
 
 @mock.patch("flask_login.current_user", mock_current_user)
-@pytest.mark.skip(reason="TO BE CHECKED")
 def test_deposit_vtt_tags(api_app, db, api_project, users):
     """Test VTT tag generation."""
     project, video_1, video_2 = api_project
@@ -554,7 +553,7 @@ def test_deposit_vtt_tags(api_app, db, api_project, users):
     video_1 = deposit_video_resolver(video_1_depid)
     ObjectVersion.delete(bucket=video_1._bucket, key=obj.key)
     obj2 = ObjectVersion.create(
-        video_1._bucket, key="test_en.vtt", stream=BytesIO(b"hello")
+        video_1._bucket, key="new_fr.vtt", stream=BytesIO(b"hello")
     )
 
     # publish again the video
@@ -567,7 +566,7 @@ def test_deposit_vtt_tags(api_app, db, api_project, users):
         content_type="vtt",
         media_type="subtitle",
         context_type="subtitle",
-        language="en",
+        language="fr",
     )
 
     # edit a re-published video
@@ -717,13 +716,17 @@ def test_video_name_after_publish(api_app, db, api_project, users):
 def check_object_tags(obj, video, **tags):
     """Check tags on an ObjectVersion (i.e. on DB and deposit/record dump)."""
     assert obj.get_tags() == tags
-    for dump in [
-        [d for d in files if d["key"] == obj.key][0]
-        for files in [video._get_files_dump(), video.fetch_published()[1]["_files"]]
-    ]:
-        assert dump["content_type"] == tags["content_type"]
-        assert dump["context_type"] == tags["context_type"]
-        assert dump["media_type"] == tags["media_type"]
-        assert dump["tags"] == {
-            t: tags[t] for t in tags if t not in ["context_type", "media_type"]
-        }
+
+    file_sources = [
+        video._get_files_dump(),
+        video.fetch_published()[1]["_files"]
+    ]
+    for files in file_sources:
+        matching_files = [d for d in files if d["key"] == obj.key]
+        for dump in matching_files:
+            assert dump["content_type"] == tags["content_type"]
+            assert dump["context_type"] == tags["context_type"]
+            assert dump["media_type"] == tags["media_type"]
+            assert dump["tags"] == {
+                t: tags[t] for t in tags if t not in ["context_type", "media_type"]
+            }
