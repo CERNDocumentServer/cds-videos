@@ -21,6 +21,7 @@
 
 from marshmallow import RAISE, Schema, ValidationError, fields, validates_schema
 from marshmallow.validate import Length
+from marshmallow_utils.fields import SanitizedHTML
 
 from ...api import Keyword
 from ...resolver import keyword_resolver
@@ -140,7 +141,7 @@ class TranslationsSchema(StrictKeysSchema):
     """Translations schema."""
 
     title = fields.Nested(TitleSchema)
-    description = fields.Str()
+    description = SanitizedHTML()
     language = fields.Str()
 
 

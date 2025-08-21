@@ -32,6 +32,7 @@ from ..permissions import (
     has_read_record_permission,
 )
 from ..utils import HTMLTagRemover, remove_html_tags
+from marshmallow_utils.html import sanitize_html
 
 
 class CDSJSONSerializer(JSONSerializer):
@@ -45,6 +46,41 @@ class CDSJSONSerializer(JSONSerializer):
     def dump(self, obj, context=None):
         """Serialize object with schema."""
         return self.schema_class(context=context).dump(obj)
+
+    def _sanitize_metadata(self, metadata):
+        """Sanitize title, description and translations in metadata."""
+        try:
+            if "title" in metadata and "title" in metadata["title"]:
+                title = metadata["title"]["title"]
+                title = self.html_tag_remover.unescape(title)
+                metadata["title"]["title"] = remove_html_tags(
+                    self.html_tag_remover, title
+                )
+
+            if "description" in metadata:
+                description = metadata["description"]
+                description = self.html_tag_remover.unescape(description)
+                metadata["description"] = sanitize_html(description)
+
+            if "translations" in metadata:
+                for t in metadata["translations"]:
+                    if "title" in t and "title" in t["title"]:
+                        t_title = t["title"]["title"]
+                        t_title = self.html_tag_remover.unescape(t_title)
+                        t["title"]["title"] = remove_html_tags(
+                            self.html_tag_remover, t_title
+                        )
+
+                    if "description" in t:
+                        t_desc = t["description"]
+                        t_desc = self.html_tag_remover.unescape(t_desc)
+                        t["description"] = sanitize_html(t_desc)
+
+        except KeyError:
+            # ignore error if keys are missing
+            pass
+
+        return metadata
 
     def preprocess_record(self, pid, record, links_factory=None):
         """Include ``_eos_library_path`` for single record retrievals."""
@@ -62,16 +98,7 @@ class CDSJSONSerializer(JSONSerializer):
 
             # sanitize title by unescaping and stripping html tags
             try:
-                title = metadata["title"]["title"]
-                title = self.html_tag_remover.unescape(title)
-                metadata["title"]["title"] = remove_html_tags(
-                    self.html_tag_remover, title
-                )
-
-                # decode html entities
-                metadata["description"] = self.html_tag_remover.unescape(
-                    metadata["description"]
-                )
+                metadata = self._sanitize_metadata(metadata)
                 if has_request_context():
                     metadata["videos"] = [
                         video
@@ -93,19 +120,6 @@ class CDSJSONSerializer(JSONSerializer):
 
         if "metadata" in result:
             metadata = result["metadata"]
-
-            try:
-                title = metadata["title"]["title"]
-                title = self.html_tag_remover.unescape(title)
-                metadata["title"]["title"] = remove_html_tags(
-                    self.html_tag_remover, title
-                )
-
-                metadata["description"] = self.html_tag_remover.unescape(
-                    metadata["description"]
-                )
-            except KeyError:
-                # ignore error if keys are missing in the metadata
-                pass
+            result["metadata"] = self._sanitize_metadata(result["metadata"])
 
         return result
