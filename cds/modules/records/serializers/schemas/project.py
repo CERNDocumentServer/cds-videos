@@ -20,6 +20,7 @@
 
 from invenio_jsonschemas import current_jsonschemas
 from marshmallow import Schema, fields, pre_load, post_load
+from marshmallow_utils.fields import SanitizedHTML
 
 from ....deposit.api import Project, deposit_video_resolver
 from .common import (
@@ -76,7 +77,7 @@ class ProjectSchema(StrictKeysSchema):
     _deposit = fields.Nested(ProjectDepositSchema, required=True)
     _cds = fields.Nested(_CDSSSchema, required=True)
     title = fields.Nested(TitleSchema, required=True)
-    description = fields.Str()
+    description = SanitizedHTML()
     category = fields.Str(required=True)
     type = fields.Str(required=True)
     note = fields.Str()

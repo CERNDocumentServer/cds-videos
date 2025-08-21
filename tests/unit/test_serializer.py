@@ -29,6 +29,9 @@ import xml.etree.ElementTree as ET
 
 from cds.modules.deposit.api import Video
 from cds.modules.records.serializers.drupal import VideoDrupal
+from cds.modules.records.serializers.json import CDSJSONSerializer
+from cds.modules.records.api import CDSRecord
+from unittest.mock import Mock
 from cds.modules.records.serializers.smil import Smil
 from cds.modules.records.serializers.vtt import VTT
 
@@ -149,3 +152,59 @@ def test_drupal_serializer(video_record_metadata, deposit_metadata):
     data = serializer.format()["entries"][0]["entry"]
     data = {k: data[k] for k in data if k in expected}
     assert data == expected
+
+
+def test_cds_json_serializer_sanitization(video_record_metadata):
+    """Test HTML sanitization in CDSJSONSerializer."""
+    record = CDSRecord.create(video_record_metadata)
+    
+    # Add malicious HTML
+    record['description'] = '<script>alert("xss")</script>Safe content <b>bold</b>'
+    record['title']['title'] = 'Test <script>alert("title")</script> Title  <b>bold</b>'
+    record['translations'] = [
+        {
+            'language': 'en',
+            'description': '<script>alert("desc")</script>Translated <i>italic</i>',
+            'title': {'title': '<b>Translated</b> <script>alert("title")</script> Title'}
+        },
+        {
+            'language': 'fr',
+            'description': 'Bonjour <script>alert("desc")</script> <u>underline</u>',
+            'title': {'title': '<script>alert("bad")</script> Titre'}
+        }
+    ]
+    
+    # Test the serializer
+    serializer = CDSJSONSerializer()
+    
+    # Create a mock PID (required by the serializer)
+    mock_pid = Mock()
+    mock_pid.pid_value = '1'
+    
+    # Test preprocess_record method
+    result = serializer.preprocess_record(mock_pid, record)
+    
+    # Check sanitization 
+    description = result['metadata']['description']
+    assert '<script>' not in description
+    assert '</script>' not in description
+    assert 'Safe content' in description
+    # Keep safe HTML tags like <b>
+    assert '<b>bold</b>' in description
+    
+    # Remove everything in title
+    title = result['metadata']['title']['title']
+    assert '<script>' not in title
+    assert '</script>' not in title
+    assert 'Test' in title and 'Title' in title
+    assert '<b>' not in title
+    
+    # --- Translations checks ---
+    translations = result['metadata']['translations']
+    for tr in translations:
+        # description
+        assert '<script>' not in tr['description']
+        # title
+        assert '<script>' not in tr['title']['title']
+        assert '<b>' not in tr['title']['title']
+

@@ -20,7 +20,7 @@
 
 from invenio_jsonschemas import current_jsonschemas
 from marshmallow import Schema, fields, pre_load, post_load
-
+from marshmallow_utils.fields import SanitizedHTML
 from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import (
@@ -126,7 +126,7 @@ class VideoSchema(StrictKeysSchema):
     contributors = fields.Nested(ContributorSchema, many=True, required=True)
     copyright = fields.Nested(CopyrightSchema)
     date = DateString(required=True)
-    description = fields.Str(required=True)
+    description = SanitizedHTML(required=True)
     doi = DOI()
     duration = fields.Str()
     external_system_identifiers = fields.Nested(

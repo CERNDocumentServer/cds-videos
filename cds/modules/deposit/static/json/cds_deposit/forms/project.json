@@ -45,9 +45,6 @@
                   "Replace",
                   "-",
                   "RemoveFormat"
-                ],
-                [
-                  "Source"
                 ]
               ],
               "disableNativeSpellChecker": false,
