@@ -468,6 +468,51 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     return cleanTitle;
   };
 
+  $scope.share = {
+    link: window.location.href.split("?")[0],
+    startInput: "0:00",
+    withStart: false,
+  };
+
+  function parseHMS(txt) {
+    if (txt == null) return NaN;
+    txt = String(txt).trim();
+    if (!txt) return NaN;
+    if (!/^\d{1,2}(?::\d{1,2}){0,2}$/.test(txt)) return NaN;
+
+    var parts = txt.split(":").map(Number);
+    if (parts.length === 1) return parts[0]; // ss
+    if (parts.length === 2) return parts[0] * 60 + parts[1]; // mm:ss
+    return parts[0] * 3600 + parts[1] * 60 + parts[2]; // hh:mm:ss
+  }
+
+  $scope.updateShareLink = function () {
+    var url = window.location.href.split("?")[0];
+    if ($scope.share.withStart) {
+      var secs = parseHMS($scope.share.startInput);
+      if (!isNaN(secs) && secs > 0) {
+        url += (url.indexOf("?") === -1 ? "?" : "&") + "t=" + Math.floor(secs);
+      }
+    }
+    $scope.share.link = url;
+  };
+
+  $scope.copyShareLink = function () {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText($scope.share.link);
+    } else {
+      var tmp = document.createElement("textarea");
+      tmp.value = $scope.share.link;
+      document.body.appendChild(tmp);
+      tmp.select();
+      try {
+        document.execCommand("copy");
+      } catch (e) {}
+      document.body.removeChild(tmp);
+    }
+  };
+
+
   /**
    * Trust iframe url
    * @memberof cdsRecordController

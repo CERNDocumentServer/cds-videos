@@ -1405,3 +1405,43 @@ div[cds-search-results] {
     max-height: calc(100vh - 120px);
   }
 }
+
+
+.cds-detail-sharelink {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cds-detail-sharelink .input-group {
+  flex: 1 1 420px;
+  margin-right: 10px;
+}
+.sharelink-start {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.sharelink-start .start-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+}
+.sharelink-start .start-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  transform: scale(1.25);
+}
+.start-time {
+  width: 64px;
+  border: none;
+  color: #ccc;
+  background: transparent;
+  text-align: center;
+  outline: none;
+}
+.sharelink-start:has(input[type="checkbox"]:checked) .start-time {
+  border-bottom: 1px solid #888;
+  color: #333333;
+}
