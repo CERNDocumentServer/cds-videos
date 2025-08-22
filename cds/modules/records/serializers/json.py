@@ -31,7 +31,7 @@ from ..permissions import (
     has_read_record_eos_path_permission,
     has_read_record_permission,
 )
-from ..utils import HTMLTagRemover, remove_html_tags
+from ..utils import HTMLTagRemover, parse_video_chapters, remove_html_tags
 
 
 class CDSJSONSerializer(JSONSerializer):
@@ -81,6 +81,12 @@ class CDSJSONSerializer(JSONSerializer):
             except KeyError:
                 # ignore error if keys are missing in the metadata
                 pass
+            
+            description = metadata.get('description', '')
+            if description:
+                metadata['chapters'] = parse_video_chapters(description)
+            else:
+                metadata['chapters'] = []
 
         return result
 

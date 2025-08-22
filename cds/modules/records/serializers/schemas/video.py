@@ -167,7 +167,6 @@ class VideoSchema(StrictKeysSchema):
     )
     collections = fields.List(fields.Str, many=True)
     additional_languages = fields.List(fields.Str, many=True)
-    chapters = fields.List(fields.Dict, dump_only=True)
     
     # Preservation fields
     location = fields.Str()
@@ -180,13 +179,3 @@ class VideoSchema(StrictKeysSchema):
         data["$schema"] = current_jsonschemas.path_to_url(Video._schema)
         return data
 
-    @post_dump(pass_many=False)
-    def post_dump(self, data, **kwargs):
-        """Post dump - add parsed chapters."""
-        description = data.get('description', '')
-        if description:
-            data['chapters'] = parse_video_chapters(description)
-        else:
-            data['chapters'] = []
-        
-        return data

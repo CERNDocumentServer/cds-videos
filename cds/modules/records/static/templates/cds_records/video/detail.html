@@ -4,7 +4,7 @@
 <div class="cds-detail-video cds-detail-video-wrapper bg-n pb-20">
   <!-- Video Section -->
   <div ng-if="record.metadata.recid && (record | findMaster).key" class="bg-b">
-    <div ng-class="{ 'container-fluid': showInThisVideoSection }">
+    <div ng-class="{ 'container-fluid': showInThisVideoSection }" class="video-section" id="videoPlayerSection">
       <div ng-class="{ 'row': ((record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 || chapters.length > 0) && showInThisVideoSection }">
         <div ng-class="{ 'col-md-8 pt-20': ((record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 || chapters.length > 0) && showInThisVideoSection }">
           <div class="cds-video-iframe text-center">
@@ -21,7 +21,7 @@
         <!-- Section In this video -->
         <div ng-show="((record.metadata._files | filter:{context_type:'subtitle', content_type:'vtt'}).length > 0 || chapters.length > 0) && showInThisVideoSection" 
           class="col-md-4 bg-b pt-20"
-          id="transcriptionsSection">
+          id="inThisVideoSection">
           <div class="in-this-video-panel bg-w pl-10 pb-10 pr-10 pt-10">
             <div class="cds-detail-title cds-detail-video-title">
               <h3 class="bt bw-1 pt-10 mb-0">
@@ -316,13 +316,12 @@
               </button>
             </div>
             
-            <!-- Horizontal Chapter List (first 6 always visible) -->
+            <!-- Horizontal Chapter List -->
             <div class="chapters-main-horizontal" style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
               <div style="display: inline-flex; gap: 15px; padding-bottom: 8px; padding-top: 8px;">
                 <div ng-repeat="chapter in chapters" 
-                     ng-if="$index < 6"
                      class="chapter-item-horizontal-main"
-                     ng-click="seekTo(chapter.seconds)"
+                     ng-click="jumpToChapter(chapter.seconds)"
                      style="display: inline-block; cursor: pointer; width: 180px; flex-shrink: 0; padding: 12px; border: 1px solid #e1e8ed; border-radius: 8px; transition: all 0.2s ease; background-color: white;"
                      onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#2196F3'; this.style.transform='translateY(-2px)';"
                      onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e1e8ed'; this.style.transform='translateY(0)';">

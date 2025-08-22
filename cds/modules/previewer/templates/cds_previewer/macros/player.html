@@ -66,77 +66,27 @@
       }
       return null;
     }
-    function cleanHtmlFromTitle(title) {
-      if (!title) return title;
-
-      // Decode HTML entities by using a temporary DOM element
-      const temp = document.createElement("textarea");
-      temp.innerHTML = title;
-      let decoded = temp.value;
-      decoded = decoded.replace(/<[^>]+>/g, " ");
-      decoded = decoded.replace(/\s+/g, " ").trim();
-
-      return decoded;
-    }
-    function parseChapters(description) {
-      if (!description) return [];
-
-      const pattern = /(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)/gm;
-      const chapters = [];
-      let match;
-
-      while ((match = pattern.exec(description)) !== null) {
-        const [, timestampStr, title] = match;
-
-        const timeParts = timestampStr.split(":");
-        let totalSeconds;
-
-        if (timeParts.length === 2) {
-          const [minutes, seconds] = timeParts.map(Number);
-          totalSeconds = minutes * 60 + seconds;
-        } else if (timeParts.length === 3) {
-          const [hours, minutes, seconds] = timeParts.map(Number);
-          totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        } else {
-          continue;
-        }
-
-        const cleanTitle = cleanHtmlFromTitle(title);
-        if (cleanTitle) {
-          chapters.push({
-            startTime: totalSeconds,
-            text: cleanTitle
-          });
-        }
-      }
-
-      chapters.sort((a, b) => a.startTime - b.startTime);
-
-      // Add endTime for VTT
-      const videoDuration = durationToSeconds({{ (record.duration if record and record.duration else "") | tojson }});
-      for (let i = 0; i < chapters.length; i++) {
-        if (i + 1 < chapters.length) {
-          chapters[i].endTime = chapters[i + 1].startTime;
-        } else {
-          chapters[i].endTime = videoDuration || (chapters[i].startTime + 1);
-        }
-      }
-
-      return chapters;
-    }
     function formatVttTime(total) {
       const h = Math.floor(total / 3600);
       const m = Math.floor((total % 3600) / 60);
       const s = Math.floor(total % 60);
       return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.000';
     }
-    function buildChaptersVtt(description) {
-      const chapters = parseChapters(description);
-      if (!chapters.length) return null;
+    function buildChaptersVttFromArray(chaptersArr, videoDurationStr) {
+      if (!chaptersArr || !chaptersArr.length) return null;
+
+      chaptersArr.sort((a,b) => a.seconds - b.seconds);
+      const videoDuration = durationToSeconds(videoDurationStr);
+      if (videoDuration !== null && videoDuration <= 0) return null;
       let vtt = 'WEBVTT\n\n';
-      for (let i = 0; i < chapters.length; i++) {
-        const c = chapters[i];
-        vtt += `${i+1}\n${formatVttTime(c.startTime)} --> ${formatVttTime(c.endTime)}\n${c.text}\n\n`;
+      for (let i = 0; i < chaptersArr.length; i++) {
+        const c = chaptersArr[i];
+        const start = c.seconds;
+        const end = (i + 1 < chaptersArr.length)
+                      ? chaptersArr[i+1].seconds
+                      : (videoDuration || start + 1);
+
+        vtt += `${i+1}\n${formatVttTime(start)} --> ${formatVttTime(end)}\n${c.title}\n\n`;
       }
       return vtt;
     }
@@ -144,8 +94,9 @@
     // Build textTracks
     var textTracksArr = [];
     // Chapters
-    var descStr = {{ (record.description if record and record.description else "") | tojson }};
-    var vttStr = buildChaptersVtt(descStr);
+    var chaptersArr = {{ (record.chapters if record and record.chapters else []) | tojson }};
+    var videoDurationStr = {{ (record.duration if record and record.duration else "") | tojson }};
+    var vttStr = buildChaptersVttFromArray(chaptersArr, videoDurationStr);
     if (vttStr) {
       var chapUrl = URL.createObjectURL(new Blob([vttStr], { type: 'text/vtt' }));
       textTracksArr.push({ kind: 'chapters', src: chapUrl, label: 'Chapters' });
