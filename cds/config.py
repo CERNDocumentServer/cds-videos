@@ -1127,7 +1127,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
         "'unsafe-inline'",
     ],
     "img-src": ["'self'", "https://*.theoplayer.com", "data:"],
-    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch"],
+    "connect-src": ["'self'", "https://*.theoplayer.com", "https://*.cern.ch", "blob:"],
     "object-src": ["'self'"],
     "media-src": ["'self'", "blob:"],
     "frame-src": ["'self'", "https://*.theoplayer.com"],

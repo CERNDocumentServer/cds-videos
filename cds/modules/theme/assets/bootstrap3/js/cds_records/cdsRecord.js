@@ -67,6 +67,26 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     "X-CSRFToken": getCookie("csrftoken"),
   };
 
+  $scope.scrollToElement = function (id) {
+    setTimeout(function () {
+      const el = document.getElementById(id);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const isVisible =
+          rect.top >= 0 &&
+          rect.bottom <=
+            (window.innerHeight || document.documentElement.clientHeight);
+
+        if (!isVisible) {
+          const topOffset = rect.top + window.scrollY - 60; // adjust for sticky header
+          window.scrollTo({ top: topOffset, behavior: "smooth" });
+        }
+      } else {
+        console.warn("Element not found:", id);
+      }
+    }, 100);
+  };
+
   $scope.seekTo = function (timecode) {
     const player = window.top.player;
     if (player) {
@@ -92,27 +112,18 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     }
   };
 
+  $scope.jumpToChapter = function (timecode) {
+    $scope.scrollToElement("videoPlayerSection");
+    $scope.seekTo(timecode);
+  };
+
   $scope.toggleInThisVideo = function (tab) {
     $scope.showInThisVideoSection = !$scope.showInThisVideoSection;
     $scope.activeTab = tab;
 
     // Jump to Transcriptions section
     if ($scope.showInThisVideoSection) {
-      setTimeout(function () {
-        const el = document.getElementById("transcriptionsSection");
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const isVisible =
-            rect.top >= 0 &&
-            rect.bottom <=
-              (window.innerHeight || document.documentElement.clientHeight);
-
-          if (!isVisible) {
-            const topOffset = rect.top + window.scrollY - 60;
-            window.scrollTo({ top: topOffset, behavior: "smooth" });
-          }
-        }
-      }, 100);
+      $scope.scrollToElement("inThisVideoSection");
     }
   };
 
@@ -197,8 +208,6 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     // Use chapters from API or parse from description as fallback
     if (record.metadata.chapters && record.metadata.chapters.length > 0) {
       $scope.chapters = record.metadata.chapters;
-    } else if (record.metadata.description) {
-      $scope.chapters = $scope.parseChapters(record.metadata.description);
     }
 
     // Set default active tab based on what's available (prioritize chapters)
@@ -345,50 +354,6 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     return `${minutes}:${paddedSecs}`;
   };
 
-  $scope.parseChapters = function (description) {
-    if (!description) return [];
-
-    // Regex pattern to match timestamp formats: 0:00, 00:00, 0:00:00, 00:00:00
-    const pattern =
-      /(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)/gm;
-    const chapters = [];
-    let match;
-
-    while ((match = pattern.exec(description)) !== null) {
-      const [, timestampStr, title] = match;
-
-      // Parse timestamp to seconds
-      const timeParts = timestampStr.split(":");
-      let totalSeconds;
-
-      if (timeParts.length === 2) {
-        // MM:SS format
-        const [minutes, seconds] = timeParts.map(Number);
-        totalSeconds = minutes * 60 + seconds;
-      } else if (timeParts.length === 3) {
-        // HH:MM:SS format
-        const [hours, minutes, seconds] = timeParts.map(Number);
-        totalSeconds = hours * 3600 + minutes * 60 + seconds;
-      } else {
-        continue;
-      }
-
-      // Clean up title
-      const cleanTitle = title.trim();
-      if (cleanTitle) {
-        chapters.push({
-          timestamp: timestampStr,
-          seconds: totalSeconds,
-          title: cleanTitle,
-        });
-      }
-    }
-
-    // Sort chapters by timestamp
-    chapters.sort((a, b) => a.seconds - b.seconds);
-    return chapters;
-  };
-
   $scope.setActiveTab = function (tab) {
     $scope.activeTab = tab;
   };
@@ -415,7 +380,7 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
       }
 
       // Return clickable timestamp using onclick for ng-bind-html compatibility
-      return `<a href="javascript:void(0)" class="timestamp-link" onclick="(function(){ try { angular.element(document.querySelector('.cds-detail-description')).scope().seekTo(${totalSeconds}); } catch(e) { console.error('Could not seek to timestamp:', e); } })()" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
+      return `<a href="javascript:void(0)" class="timestamp-link" onclick="(function(){ try { angular.element(document.querySelector('.cds-detail-description')).scope().jumpToChapter(${totalSeconds}); } catch(e) { console.error('Could not seek to timestamp:', e); } })()" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
     });
   };
 

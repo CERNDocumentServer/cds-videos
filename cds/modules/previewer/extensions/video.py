@@ -25,6 +25,7 @@
 """Previews video files."""
 
 
+from cds.modules.records.utils import parse_video_chapters
 from flask import render_template
 
 
@@ -63,6 +64,12 @@ class VideoExtension(object):
             if "report_number" in record and len(record["report_number"])
             else ""
         )
+        
+        description = record.get('description', '')
+        if description:
+            record['chapters'] = parse_video_chapters(description)
+        else:
+            record['chapters'] = []
 
         return render_template(
             self.template,

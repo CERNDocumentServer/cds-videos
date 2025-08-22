@@ -500,6 +500,7 @@ def parse_video_chapters(description):
     Returns:
         list: List of chapter dicts with 'timestamp', 'seconds', and 'title' keys
     """
+    html_tag_remover = HTMLTagRemover()
     if not description:
         return []
     
@@ -524,7 +525,7 @@ def parse_video_chapters(description):
             continue
             
         # Clean up title
-        title = title.strip()
+        title = remove_html_tags(html_tag_remover, title).strip()
         if title:
             chapters.append({
                 'timestamp': timestamp_str,
