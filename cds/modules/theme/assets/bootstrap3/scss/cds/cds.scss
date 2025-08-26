@@ -1400,9 +1400,9 @@ div[cds-search-results] {
   }
 }
 
-@media(max-width: 768px) {
+@media(max-width: 992px) {
   .in-this-video-panel {
-    max-height: calc(100vh - 120px);
+    min-height: 400px;
   }
 }
 
