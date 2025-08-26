@@ -1281,12 +1281,12 @@ div[cds-search-results] {
     align-items: center;
 
     .chapter-thumbnail {
-      min-width: 80px;
+      min-width: 120px;
       margin-right: 12px;
 
       .thumbnail-container {
-        width: 80px;
-        height: 45px;
+        width: 120px;
+        height: 67px;
         border-radius: 4px;
         overflow: hidden;
         background-color: #f5f5f5;
@@ -1380,23 +1380,23 @@ div[cds-search-results] {
   }
   
   .chapter-item-horizontal-main {
-    width: 150px !important;
+    width: 264px !important;
   }
   
   .chapter-thumbnail-main-horizontal {
-    width: 126px !important;
-    height: 71px !important;
+    width: 240px !important;
+    height: 135px !important;
   }
 }
 
 @media (max-width: 480px) {
   .chapter-item-horizontal-main {
-    width: 130px !important;
+    width: 224px !important;
   }
   
   .chapter-thumbnail-main-horizontal {
-    width: 106px !important;
-    height: 60px !important;
+    width: 200px !important;
+    height: 113px !important;
   }
 }
 
