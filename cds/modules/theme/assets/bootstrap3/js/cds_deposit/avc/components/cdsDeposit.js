@@ -480,8 +480,10 @@ function cdsDepositCtrl(
       }
       that.currentStartedTaskName = currentStartedTaskName;
 
-      // Change the Deposit Status
-      var values = _.values(that.record._cds.state);
+      // Change the Deposit Status, ignore `file_video_extract_chapter_frames`
+      var values = _.values(
+        _.omit(that.record._cds.state, "file_video_extract_chapter_frames")
+      );
       if (!values.length) {
         that.currentDepositStatus = null;
       } else if (values.includes(depositStatuses.FAILURE)) {

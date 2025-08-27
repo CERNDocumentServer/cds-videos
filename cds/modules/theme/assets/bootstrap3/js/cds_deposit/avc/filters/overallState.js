@@ -3,7 +3,7 @@ import _ from "lodash";
 
 function overallState(depositStatuses) {
   return function (tasks) {
-    var values = _.values(tasks);
+    var values = _.values(_.omit(tasks, "file_video_extract_chapter_frames"));
     if (values.length !== 0) {
       if (_.includes(values, "FAILURE")) {
         return depositStatuses.FAILURE;
