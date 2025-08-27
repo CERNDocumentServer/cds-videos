@@ -236,7 +236,16 @@ function cdsDepositCtrl(
         };
       });
       _.forEach(that.record._cds.state, function (value, state) {
-        that.stateReporter[state].status = value;
+        if (!that.stateReporter[state]) {
+          // Task not in mainStatuses, add `file_video_extract_chapter_frames`
+          that.stateReporter[state] = {
+            status: value,
+            message: state
+          };
+        } else {
+          // Update existing
+          that.stateReporter[state].status = value;
+        }
       });
       that.calculateCurrentDepositStatus();
     };
