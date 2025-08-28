@@ -34,10 +34,12 @@ Table of Contents
      - `Step 3: Upload the Video <#step-3-upload-the-video>`_
      - `Step 4: Create a Flow <#step-4-create-a-flow>`_
      - `Optional: Upload Additional File <#optional-upload-additional-file>`_
-     - `Optional: Replace the Main Video File <#optional-replace-the-main-video-file>`_
      - `Optional: Update the Access of the Video <#optional-update-the-access-of-the-video>`_
      - `Step 5: Get Video to Check the Flow Status <#step-5-get-video-to-check-the-flow-status>`_
      - `Step 6: Publish Video <#step-6-publish-video>`_
+- `Replace the Main Video File through REST API <#replace-the-main-video-file-through-rest-api>`_
+     - `General Flow <#general-flow>`_
+     - `Alternative: Without Doing the Get Request <#alternative-without-doing-the-get-request>`_
 
 
 Prerequisites
@@ -625,62 +627,6 @@ Optional: Upload Additional File
 - To include the file in the body, modify the `pre-request script` in Bruno.
 
 
-Optional: Replace the Main Video File
-------------------------------------------
-
-**1. Request:**  
-
-``PUT`` ``{{baseURL}}/api/files/{{bucket_id}}/{{main_video_key}}``
-
-**Headers:**  
-
--   ``X-Invenio-File-Tags: times_replaced=number_of_times_replaced``
-
-**Parameters:**
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - **Name**
-     - **Type**
-     - **Location**
-     - **Description**
-   * - **bucket_id**
-     - string
-     - path
-     - ID of the bucket to upload the file.
-   * - **main_video_key**
-     - string
-     - path
-     - Key of the previously uploaded main file.
-   * - **file**
-     - file
-     - body
-     - The file to be uploaded.
-
-
-- To include the file in the body, modify the `pre-request script` in Bruno.
-
-**⚠️ Important**
-
-You must use the exact ``key`` value from the response of the `Create a Flow <#step-4-create-a-flow>`_ request  
-(stored as ``main_video_key``) to overwrite the existing file when replacing the main video.
-
-This is required because the backend **renames the uploaded file** to distinguish it from automatically generated subformat files.
-Using the original file name (``video_name``) will not work for replacement.
-
-Do **not** confuse this with the initial video upload request, which uses the original video file name (``video_name``).
-
-**Response:**  
-
-Uploaded file JSON. Save ``response.body.version_id`` as ``main_file_version_id`` and ``response.body.key`` as ``video_key`` for later use.
-
-**2. Request:**  
-
-Start the flow again using the new main video file, along with the updated ``main_file_version_id`` and ``video_key``.  
-You can follow the same structure outlined in `Step 4 <#step-4-create-a-flow>`_.
-
-
 Optional: Update the Access of the Video
 ----------------------------------------
 
@@ -803,3 +749,180 @@ Before publishing the video, ensure that the workflow is complete.
 
 Published video deposit JSON.
 
+
+Replace the Main Video File through REST API
+============================================
+
+General Flow
+------------
+
+1. Get the video (see `Step 5 <#step-5-get-video-to-check-the-flow-status>`_) and find the master file key from the response.
+
+   **Request:**
+
+   ``GET {{baseURL}}/api/deposits/video/{{video_id}}``
+
+   **Headers:**
+
+   - ``content-type: application/vnd.project.partial+json``
+
+   **Parameters:**
+
+   .. list-table::
+      :header-rows: 1
+
+      * - **Name**
+        - **Type**
+        - **Location**
+        - **Description**
+      * - **video_id**
+        - string
+        - path
+        - ID of the video.
+
+   **Response:**
+
+   Video JSON. You can find the main file inside ``response.body.metadata._files``.
+
+   .. code-block:: javascript
+
+      let files = data.metadata?._files || [];
+      // Find the master file
+      let masterFile = files.find(f => f.context_type === "master");
+      video_key = masterFile.key;
+
+
+2. Upload the new video with the same master key and same ``bucket_id`` (see `Step 3 <#step-3-upload-the-video>`_)
+
+   **Upload Request**
+
+   ``PUT {{baseURL}}/api/files/{{bucket_id}}/{{main_video_key}}``
+
+   **Headers:**
+
+   - ``X-Invenio-File-Tags: times_replaced=number_of_times_replaced``
+
+   **Parameters:**
+
+   .. list-table::
+      :header-rows: 1
+
+      * - **Name**
+        - **Type**
+        - **Location**
+        - **Description**
+      * - **bucket_id**
+        - string
+        - path
+        - ID of the bucket to upload the file.
+      * - **main_video_key**
+        - string
+        - path
+        - Key of the previous main file.
+      * - **file**
+        - file
+        - body
+        - The file to be uploaded.
+
+   **Response:**
+
+   Uploaded file JSON. Save version_id and key for later use:
+
+   - ``response.body.version_id`` → ``version_id``  
+   - ``response.body.key`` → ``video_key``  
+
+
+
+3. Start the flow with your new ``video_key`` and ``version_id`` but keep the same ``bucket_id`` and ``deposit_id`` (see `Step 4 <#step-4-create-a-flow>`_)
+
+   **Request:**
+
+   ``POST /api/flows/``
+
+   **Headers:**
+
+   - ``content-type: application/vnd.project.partial+json``
+
+   **Parameters:**
+
+   .. list-table::
+      :header-rows: 1
+
+      * - **Name**
+        - **Type**
+        - **Location**
+        - **Description**
+      * - **version_id**
+        - string
+        - body
+        - Version ID from the uploaded video response.
+      * - **key**
+        - string
+        - body
+        - Video key from the uploaded video response.
+      * - **bucket_id**
+        - string
+        - body
+        - Bucket ID from the Create Video response.
+      * - **deposit_id**
+        - string
+        - body
+        - Deposit ID from the Create Video response.
+
+   **Body:**
+
+   .. code-block:: json
+
+      {
+        "version_id": "{{main_file_version_id}}",
+        "key": "{{video_key}}",
+        "bucket_id": "{{bucket_id}}",
+        "deposit_id": "{{video_id}}"
+      }
+
+
+Alternative: Without Doing the Get Request
+------------------------------------------
+
+If you want to integrate this process into your workflow **without calling the Get Video request**,  
+you must be careful about which **video key** you are using, since it changes during different stages.
+
+**⚠️ Important: Using the Correct Video Key**
+
+The ``video_key`` changes and you must use the correct key depending on when you're performing the replacement:
+
+- **Scenario 1: Replacing after initial file upload (before creating flow)**  
+
+  - Use the ``video_key`` returned from the upload file request response.
+
+- **Scenario 2: Replacing after creating the flow (before publishing)**  
+
+  - Use the ``key`` value from the Create Flow response.
+
+      This is required because the backend **renames the uploaded file** to distinguish it from automatically generated subformat files.
+
+- **Scenario 3: Replacing after publishing the video**
+
+  - First make an edit request to modify the published video.  
+
+  - ``POST {{baseURL}}/api/deposits/video/{{deposit_id}}/actions/edit``  
+
+  - Find the master file key from the response:
+
+       .. code-block:: javascript
+
+          let files = data.metadata?._files || [];
+          // Find the master file
+          let masterFile = files.find(f => f.context_type === "master");
+          video_key = masterFile.key;
+
+  - Use this ``video_key`` for the replacement request.  
+
+
+Do **not** use the original video file name (``video_name``) for replacement requests,  
+as this will not work due to the backend file renaming process.
+
+After finding the correct key, you can upload your new file (see `Step 3 <#step-3-upload-the-video>`_).
+
+Then, start the flow again using the new main video file, along with the updated ``version_id`` and ``video_key``.  
+You can follow the same structure outlined in `Step 4 <#step-4-create-a-flow>`_.
