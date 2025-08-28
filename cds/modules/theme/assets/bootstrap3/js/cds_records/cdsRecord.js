@@ -117,8 +117,12 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     $scope.seekTo(timecode);
   };
 
+  $scope.closeInThisVideoSection = function () {
+    $scope.showInThisVideoSection = false;
+  };
+
   $scope.toggleInThisVideo = function (tab) {
-    $scope.showInThisVideoSection = !$scope.showInThisVideoSection;
+    $scope.showInThisVideoSection = true;
     $scope.activeTab = tab;
 
     // Jump to Transcriptions section
