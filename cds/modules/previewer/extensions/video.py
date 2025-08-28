@@ -65,12 +65,6 @@ class VideoExtension(object):
             else ""
         )
         
-        description = record.get('description', '')
-        if description:
-            record['chapters'] = parse_video_chapters(description)
-        else:
-            record['chapters'] = []
-
         return render_template(
             self.template,
             file=file,

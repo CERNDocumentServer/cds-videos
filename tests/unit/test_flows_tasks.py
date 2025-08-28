@@ -580,7 +580,7 @@ def test_sync_records_with_deposits(
 
 
 def test_extract_chapter_frames_task(app, db, bucket, video, users):
-    """Test that chapter frames are extracted for each chapter timestamp in the description."""
+    """Test that chapter frames and chapters.vtt are created from description."""
     # Create a video object version
     obj = ObjectVersion.create(bucket=bucket, key="video.mp4", stream=open(video, "rb"))
     add_video_tags(obj)
@@ -592,8 +592,7 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
         "type": "VIDEO",
     }
     project = Project.create(project_data)
-    
-    # All chapters < 60 seconds so they are in range of test video
+
     video_data = {
         "_project_id": project["_deposit"]["id"],
         "title": {"title": "Test Video with Chapters"},
@@ -629,7 +628,7 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
     # Expected chapter timestamps in seconds (0 becomes 0.1 offset)
     expected_timestamps = [0.1, 10, 20, 30, 40]
 
-    # Mock file operations, ffmpeg, and duration
+    # Mocks
     with mock.patch("cds.modules.flows.tasks.move_file_into_local") as mock_move, \
          mock.patch("cds.modules.flows.tasks.ff_frames") as mock_ff_frames, \
          mock.patch("cds.modules.flows.tasks.file_opener_xrootd") as mock_file_opener, \
@@ -637,11 +636,16 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
          mock.patch("os.path.getsize", return_value=1024), \
          mock.patch("cds.modules.flows.tasks.sync_records_with_deposit_files"), \
          mock.patch.object(ExtractChapterFramesTask, "_base_payload", {"tags": {"duration": 500}}), \
-         mock.patch("cds.modules.flows.tasks.ExtractFramesTask._create_object") as mock_create_object:
+         mock.patch("cds.modules.flows.tasks.ExtractFramesTask._create_object") as mock_create_object, \
+         mock.patch("cds.modules.flows.tasks.ObjectVersion.create") as mock_obj_create, \
+         mock.patch("cds.modules.flows.tasks.ObjectVersionTag.create") as mock_tag_create:
 
         mock_move.return_value.__enter__.return_value = "/tmp/test_video.mp4"
         mock_file_opener.return_value = BytesIO(b"fake_frame_data")
-        
+
+        fake_obj = mock.Mock()
+        mock_obj_create.return_value = fake_obj
+
         # Run task
         ExtractChapterFramesTask().s(**payload.copy()).apply_async()
         
@@ -663,3 +667,107 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
             assert kwargs["is_chapter_frame"] is True
             assert kwargs["context_type"] == "frame"
             assert kwargs["media_type"] == "image"
+
+        # ---- Verify chapters.vtt creation ----
+        mock_obj_create.assert_called_once()
+        vtt_call_args = mock_obj_create.call_args
+        assert vtt_call_args.kwargs["bucket"] == obj.bucket
+        assert vtt_call_args.kwargs["key"] == "chapters.vtt"
+
+        # Tags applied to chapters.vtt
+        tag_keys = [c.args[1] for c in mock_tag_create.call_args_list]
+        assert "context_type" in tag_keys
+        assert "content_type" in tag_keys
+        assert "media_type" in tag_keys
+
+
+def test_extract_chapter_frames_task_cleanup(app, db, bucket, video, users):
+    """Test that chapter frames are updated/cleaned when description changes."""
+
+    # Create master ObjectVersion
+    obj = ObjectVersion.create(bucket=bucket, key="video.mp4", stream=open(video, "rb"))
+    add_video_tags(obj)
+    db.session.commit()
+    master_version_id = str(obj.version_id)
+
+    # Create project + video deposit
+    project = Project.create({"category": "OPEN", "type": "VIDEO"})
+    video_deposit = Video.create({
+        "_project_id": project["_deposit"]["id"],
+        "title": {"title": "Video with chapters"},
+        "description": """0:00 Intro
+                          0:10 Chapter 1
+                          0:20 Chapter 2""",
+    })
+    deposit_id = str(video_deposit["_deposit"]["id"])
+
+    # Flow metadata
+    payload = dict(
+        version_id=master_version_id,
+        key=obj.key,
+        bucket_id=str(obj.bucket_id),
+        deposit_id=deposit_id,
+    )
+    flow_metadata = FlowMetadata.create(
+        deposit_id=deposit_id, user_id=users[0], payload=payload
+    )
+    payload["flow_id"] = str(flow_metadata.id)
+    flow_metadata.payload = payload
+    FlowService(flow_metadata)
+    db.session.commit()
+
+    with mock.patch("cds.modules.flows.tasks.move_file_into_local"), \
+         mock.patch("cds.modules.flows.tasks.ff_frames"), \
+         mock.patch("cds.modules.flows.tasks.file_opener_xrootd", return_value=BytesIO(b"fake_frame_data")), \
+         mock.patch("os.path.exists", return_value=True), \
+         mock.patch("os.path.getsize", return_value=1024), \
+         mock.patch("cds.modules.flows.tasks.sync_records_with_deposit_files"), \
+         mock.patch.object(ExtractChapterFramesTask, "_base_payload", {"tags": {"duration": 100}}), \
+         mock.patch("cds.modules.flows.tasks.ExtractFramesTask._create_object") as mock_create_object, \
+         mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask._build_chapter_vtt"), \
+         mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask._get_existing_chapter_frame_timestamps") as mock_existing:
+
+        # Track created & disposed timestamps (floats)
+        created_timestamps = set()
+        disposed_timestamps = []
+
+        def fake_create_object(*args, **kwargs):
+            if "timestamp" in kwargs:
+                created_timestamps.add(float(kwargs["timestamp"]))
+            return mock.Mock()
+
+        def fake_clean(version_id, valid_chapter_seconds=None, *args, **kwargs):
+            """Simulate cleaning: if 20.0 isn't in valid seconds, mark it disposed."""
+            valid_floats = {float(s) for s in (valid_chapter_seconds or [])}
+            if 20.0 not in valid_floats:
+                disposed_timestamps.append(20.0)
+
+        mock_create_object.side_effect = fake_create_object
+
+        # First run → should create frames at 0.1, 10.0, 20.0
+        mock_existing.return_value = set()
+        with mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask.clean", side_effect=fake_clean):
+            ExtractChapterFramesTask().s(**payload.copy()).apply_async()
+        assert created_timestamps == {0.1, 10.0, 20.0}
+        assert disposed_timestamps == []  # nothing disposed on first run
+
+        # Update description → now chapters at 0.1, 10.0, 30.0
+        video_deposit["description"] = """0:00 Intro
+                                          0:10 Chapter 1
+                                          0:30 Chapter 3"""
+        video_deposit.commit()
+        db.session.commit()
+
+        # Reset state
+        created_timestamps.clear()
+        disposed_timestamps.clear()
+
+        # Second run → should create 30.0, dispose 20.0
+        mock_existing.return_value = {0.1, 10.0, 20.0}
+        with mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask.clean", side_effect=fake_clean):
+            ExtractChapterFramesTask().s(**payload.copy()).apply_async()
+
+        assert 30.0 in created_timestamps
+        assert 20.0 in disposed_timestamps
+
+

@@ -28,6 +28,7 @@ import os
 import shutil
 import signal
 import tempfile
+from io import BytesIO
 
 import jsonpatch
 import requests
@@ -57,7 +58,7 @@ from werkzeug.utils import import_string
 
 from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
-
+from cds.modules.records.api import CDSVideosFilesIterator
 from ..ffmpeg import ff_frames, ff_probe_all
 from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
@@ -746,8 +747,13 @@ class ExtractChapterFramesTask(AVCTask):
     name = "file_video_extract_chapter_frames"
 
     @staticmethod
-    def clean(version_id, *args, **kwargs):
-        """Delete generated chapter frame ObjectVersion slaves."""
+    def clean(version_id, valid_chapter_seconds=None, *args, **kwargs):
+        """Delete generated chapter frame ObjectVersion slaves.
+        
+        - If valid_chapter_seconds is given, keep them.
+        - If not, remove all chapter frames.
+        """
+        valid_chapter_seconds = valid_chapter_seconds or []
         # remove all objects version "slave" with type "frame" that are chapter frames
         tag_alias_1 = aliased(ObjectVersionTag)
         tag_alias_2 = aliased(ObjectVersionTag)
@@ -764,7 +770,17 @@ class ExtractChapterFramesTask(AVCTask):
         )
 
         for slave in slaves:
+            ts_val = next(t.value for t in slave.tags if t.key == "timestamp")
+            if ts_val in valid_chapter_seconds:
+                continue
             dispose_object_version(slave)
+
+        # If no valid chapter seconds, remove the chapters.vtt file
+        if not valid_chapter_seconds:
+            master_obj = ObjectVersion.query.get(version_id)                  
+            vtt_objs = ObjectVersion.get_versions(master_obj.bucket_id, "chapters.vtt")
+            for vtt_obj in vtt_objs:
+                dispose_object_version(vtt_obj)
 
     def run(self, *args, **kwargs):
         """Extract frames only at chapter timestamps from video description.
@@ -808,10 +824,6 @@ class ExtractChapterFramesTask(AVCTask):
 
             # Parse chapters from description
             chapters = parse_video_chapters(description)
-            
-            if not chapters:
-                self.log("No chapters found in description - task completed")
-                return {"chapter_frames_extracted": 0, "status": "no_chapters"}
 
             self.log("Found {0} chapters in description".format(len(chapters)))
 
@@ -822,7 +834,7 @@ class ExtractChapterFramesTask(AVCTask):
                 raise ValueError("Video duration is 0 - cannot extract frames")
 
             # Check which timestamps already have frames
-            existing_timestamps = self._get_existing_frame_timestamps()
+            existing_timestamps = self._get_existing_chapter_frame_timestamps(deposit_video)
             
             def progress_updater(current_chapter):
                 """Progress reporter."""
@@ -835,7 +847,7 @@ class ExtractChapterFramesTask(AVCTask):
                 )
                 self.log(meta["message"])
 
-            frames = self._create_chapter_frames(
+            frames, chapter_seconds = self._create_chapter_frames(
                 chapters=chapters,
                 duration=duration,
                 object_=self.object_version,
@@ -843,6 +855,12 @@ class ExtractChapterFramesTask(AVCTask):
                 existing_timestamps=existing_timestamps,
                 progress_updater=progress_updater,
             )
+
+            # Clean unused chapters
+            self.clean(version_id=self.object_version_id, valid_chapter_seconds=chapter_seconds)
+
+            # Create or update WebVTT file for chapters
+            self._build_chapter_vtt(chapters, duration)
 
             # Sync deposit and record files
             sync_records_with_deposit_files(self.deposit_id)
@@ -865,32 +883,17 @@ class ExtractChapterFramesTask(AVCTask):
         self.log("Finished task {0}".format(kwargs["task_id"]))
         return "Created {0} chapter frames.".format(total_frames)
 
-    def _get_existing_frame_timestamps(self):
-        """Get set of existing frame timestamps to avoid duplicates."""
-        tag_alias_1 = aliased(ObjectVersionTag)
-        tag_alias_2 = aliased(ObjectVersionTag)
-        tag_alias_3 = aliased(ObjectVersionTag)
+    def _get_existing_chapter_frame_timestamps(self, deposit):
+        """Get timestamps of existing chapter frames."""
+        master_file = CDSVideosFilesIterator.get_master_video_file(deposit)
+        frames = CDSVideosFilesIterator.get_video_frames(master_file)
 
-        existing = (
-            ObjectVersion.query.join(tag_alias_1, ObjectVersion.tags)
-            .join(tag_alias_2, ObjectVersion.tags)
-            .join(tag_alias_3, ObjectVersion.tags)
-            .filter(tag_alias_1.key == "master", tag_alias_1.value == self.object_version_id)
-            .filter(tag_alias_2.key == "context_type", tag_alias_2.value == "frame")
-            .filter(tag_alias_3.key == "timestamp")
-            .all()
-        )
-        
-        existing_timestamps = set()
-        for obj in existing:
-            for tag in obj.tags:
-                if tag.key == "timestamp":
-                    try:
-                        existing_timestamps.add(float(tag.value))
-                    except ValueError:
-                        continue
-        
-        return existing_timestamps
+        existing = set()
+        for f in frames:
+            tags = f.get("tags", {})
+            if tags.get("is_chapter_frame") == "true":
+                existing.add(float(tags.get("timestamp")))
+        return existing
 
     @classmethod
     def _create_chapter_frames(
@@ -904,6 +907,7 @@ class ExtractChapterFramesTask(AVCTask):
     ):
         """Create frames for chapters that don't already exist at those timestamps."""
         created_frames = []
+        valid_chapter_seconds = []
         current_chapter = 0
         
         with move_file_into_local(object_, delete=True) as url:
@@ -920,6 +924,10 @@ class ExtractChapterFramesTask(AVCTask):
                 if chapter_seconds > duration:
                     continue
                 
+                # For 0:00 chapters, use a small offset to avoid extraction issues
+                chapter_seconds = max(chapter_seconds, 0.1) if chapter_seconds == 0 else chapter_seconds
+                valid_chapter_seconds.append(to_string(chapter_seconds))
+                
                 # Skip if frame already exists at this timestamp (with some tolerance)
                 timestamp_exists = any(
                     abs(existing_ts - chapter_seconds) < 0.1 
@@ -930,9 +938,6 @@ class ExtractChapterFramesTask(AVCTask):
                 
                 frame_filename = "chapter-{0}.jpg".format(int(chapter_seconds))
                 frame_path = os.path.join(output_dir, frame_filename)
-                
-                # For 0:00 chapters, use a small offset to avoid extraction issues
-                chapter_seconds = max(chapter_seconds, 0.1) if chapter_seconds == 0 else chapter_seconds
                 
                 try:
                     # Extract single frame at chapter timestamp using ff_frames
@@ -970,7 +975,41 @@ class ExtractChapterFramesTask(AVCTask):
                     )
                     continue
         
-        return created_frames
+        return created_frames, valid_chapter_seconds
+
+    def _build_chapter_vtt(self, chapters, duration):
+        """Build WebVTT content string from chapters list."""
+        if not chapters:
+            return
+        vtt = "WEBVTT\n\n"
+        for i, c in enumerate(sorted(chapters, key=lambda x: x["seconds"])):
+            start = c["seconds"]
+            end = chapters[i+1]["seconds"] if i+1 < len(chapters) else duration
+            start_str = "{:02}:{:02}:{:02}.000".format(
+                int(start // 3600),
+                int((start % 3600) // 60),
+                int(start % 60)
+            )
+            end_str = "{:02}:{:02}:{:02}.000".format(
+                int(end // 3600),
+                int((end % 3600) // 60),
+                int(end % 60)
+            )
+            vtt += f"{i+1}\n{start_str} --> {end_str}\n{c['title']}\n\n"
+        
+        vtt_bytes = vtt.encode("utf-8")
+        vtt_key = "chapters.vtt"
+
+        obj = ObjectVersion.create(
+            bucket=self.object_version.bucket,
+            key=vtt_key,
+            stream=BytesIO(vtt_bytes),
+            size=len(vtt_bytes),
+        )
+        ObjectVersionTag.create(obj, "media_type", "chapters")
+        ObjectVersionTag.create(obj, "context_type", "chapters")
+        ObjectVersionTag.create(obj, "content_type", "vtt")
+        self.log("Created chapters.vtt")
 
 
 class TranscodeVideoTask(AVCTask):

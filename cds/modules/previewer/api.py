@@ -128,6 +128,18 @@ class CDSPreviewRecordFile(PreviewFile):
         """Get video's VR flag."""
         return self.record.get("vr")
 
+    @property
+    def chapters_uri(self):
+        """Get the chapters.vtt file link if available."""
+        try:
+            return [
+                f["links"]["self"]
+                for f in self.record["_files"]
+                if f.get("context_type") == "chapters" and f.get("content_type") == "vtt"
+            ][0]
+        except IndexError:
+            return None
+
 
 class CDSPreviewDepositFile(PreviewFile):
     """Preview deposit files implementation."""

@@ -26,7 +26,7 @@
             <div class="cds-detail-title cds-detail-video-title">
               <h3 class="bt bw-1 pt-10 mb-0">
                 <i class="fa fa-video-camera"></i> In this video
-                <div class="pull-right"><i class="fa fa-close transcription-close" ng-click="toggleInThisVideo()"></i></div>
+                <div class="pull-right"><i class="fa fa-close transcription-close" ng-click="closeInThisVideoSection()"></i></div>
               </h3>
             </div>
             <!-- Tabs -->
@@ -312,7 +312,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
               <h3><strong>Chapters</strong></h3>
               <button class="btn btn-sm btn-default transcription-button" ng-click="toggleInThisVideo('chapters')">
-                {{ showInThisVideoSection ? 'Show Less' : 'View All' }}
+                View All
               </button>
             </div>
             
@@ -369,7 +369,7 @@
               <div class="transcription-button-wrapper pt-10">
                 <button class="btn btn-sm btn-default transcription-button"
                         ng-click="toggleInThisVideo('transcript')">
-                  {{ showInThisVideoSection ? 'Hide Transcriptions' : 'Show Transcriptions' }}
+                  Show Transcriptions
                 </button>
               </div>
             </div>

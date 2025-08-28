@@ -54,7 +54,7 @@
 
       window.top.player = player;
 
-    // --- Chapters helpers ---
+    // --- helpers ---
     function durationToSeconds(durationStr) {
       if (!durationStr) return null;
       const parts = durationStr.split(':').map(Number); // [HH, MM, SS] or [MM, SS]
@@ -66,55 +66,8 @@
       }
       return null;
     }
-    function formatVttTime(total) {
-      const h = Math.floor(total / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = Math.floor(total % 60);
-      return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.000';
-    }
-    function buildChaptersVttFromArray(chaptersArr, videoDurationStr) {
-      if (!chaptersArr || !chaptersArr.length) return null;
 
-      chaptersArr.sort((a,b) => a.seconds - b.seconds);
-      const videoDuration = durationToSeconds(videoDurationStr);
-      if (videoDuration !== null && videoDuration <= 0) return null;
-      let vtt = 'WEBVTT\n\n';
-      for (let i = 0; i < chaptersArr.length; i++) {
-        const c = chaptersArr[i];
-        const start = c.seconds;
-        const end = (i + 1 < chaptersArr.length)
-                      ? chaptersArr[i+1].seconds
-                      : (videoDuration || start + 1);
-
-        vtt += `${i+1}\n${formatVttTime(start)} --> ${formatVttTime(end)}\n${c.title}\n\n`;
-      }
-      return vtt;
-    }
-
-    // Build textTracks
-    var textTracksArr = [];
-    // Chapters
-    var chaptersArr = {{ (record.chapters if record and record.chapters else []) | tojson }};
-    var videoDurationStr = {{ (record.duration if record and record.duration else "") | tojson }};
-    var vttStr = buildChaptersVttFromArray(chaptersArr, videoDurationStr);
-    if (vttStr) {
-      var chapUrl = URL.createObjectURL(new Blob([vttStr], { type: 'text/vtt' }));
-      textTracksArr.push({ kind: 'chapters', src: chapUrl, label: 'Chapters' });
-    }
-    {% if not embed_config.subtitlesOff %}
-    textTracksArr.push({ kind: 'metadata', src: '{{ obj.thumbnails_uri }}', label: 'thumbnails', default: true });
-    {% for uri, lang in obj.subtitles %}
-    textTracksArr.push({
-      kind: 'subtitles',
-      src: '{{ uri }}',
-      label: '{{ lang }}',
-      srclang: '{{ lang }}'
-      {% if embed_config.subtitles and embed_config.subtitles == lang %}, default: true{% endif %}
-    });
-    {% endfor %}
-    {% endif %}
-
-    // Set source with textTracks
+    // Preload
     player.source = {
       sources: [
         {
@@ -128,11 +81,42 @@
             src: '{{ obj.uri }}',
             type: 'video/mp4'
           {% endif %}
-        }
+        },
       ],
-      textTracks: textTracksArr,
+      textTracks: [
+        {
+          kind: 'metadata',
+          src: '{{ obj.thumbnails_uri }}',
+          label: 'thumbnails',
+          default: true,
+        },
+
+        // Add chapters.vtt if available
+        {% if obj.chapters_uri %}
+        {
+          kind: 'chapters',
+          src: '{{ obj.chapters_uri }}',
+          label: 'Chapters',
+        },
+        {% endif %}
+
+        // Add subtitles
+        {% if not embed_config.subtitlesOff %}
+        {% for uri, lang in obj.subtitles %}
+        {
+          kind: 'subtitles',
+          src: '{{ uri }}',
+          label: '{{ lang }}',
+          srclang: '{{ lang }}',
+          {% if embed_config.subtitles and embed_config.subtitles == lang %}
+          default: true,
+          {% endif %}
+        },
+        {% endfor %}
+        {% endif %}
+      ],
       poster: '{{ obj.poster_uri }}',
-        {% if obj.vr %}
+      {% if obj.vr %}
         vr: {
           360: true,
         },
