@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.5.4 (2025-09-01)
+
+- Fix handling of ``_access.update`` to correctly append the current user.  
+- Override ``bytesToHumanReadable`` to display units as KB, MB, GB, TB.  
+- Add ``marshmallow_utils`` and sanitize metadata fields to remove unsafe HTML.  
+
 Version 2.5.3 (2025-06-12)
 
 - keywords: add missing source field used in old migrated records
