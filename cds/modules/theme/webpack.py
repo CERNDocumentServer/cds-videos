@@ -77,6 +77,7 @@ theme = WebpackThemeBundle(
                 "invenio-search-js": "^1.5.4",
                 "invenio-charts-js": "^0.2.7",
                 "invenio-records-js": "~0.0.8",
+                # TODO: check if we can remove invenio-files-js
                 "invenio-files-js": "~0.0.2",
                 "ng-file-upload": "~12.0.4",
                 "jquery": "~3.2.1",

@@ -285,7 +285,6 @@ angular.module("cdsDeposit", [
   "mgcrea.ngStrap.tooltip",
   "ngFileUpload",
   "monospaced.elastic",
-  "invenioFiles.filters",
   "afkl.lazyImage",
   "hl.sticky",
   "duScroll",
