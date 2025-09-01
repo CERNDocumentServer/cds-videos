@@ -40,7 +40,6 @@ angular.element(document).ready(function () {
       "cds",
       "ngModal",
       "ngclipboard",
-      "invenioFiles.filters",
       "ngSanitize",
     ],
     { strictDi: true }
