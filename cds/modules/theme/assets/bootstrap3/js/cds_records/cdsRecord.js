@@ -61,6 +61,8 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   $scope.transcriptSearch = "";
   $scope.chapters = [];
   $scope.activeTab = "chapters"; // Default to chapters tab
+  $scope.shortDescription = "";
+  $scope.fullDescription = "";
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
@@ -188,8 +190,23 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   $scope.$watch("record", function (newVal) {
     if (newVal) {
       $scope.initVttLoad(newVal);
+      $scope.prepareDescriptions(newVal.metadata.description);
     }
   });
+
+  $scope.prepareDescriptions = function (description) {
+    if (!description) {
+      $scope.shortDescription = "No description";
+      $scope.fullDescription = "No description";
+      return;
+    }
+
+    const lines = description.split(/\r?\n/);
+    const firstTen = lines.slice(0, $scope.DESCRIPTION_PREVIEW_LINES).join("\n");
+
+    $scope.shortDescription = $scope.processDescriptionWithClickableTimestamps(firstTen);
+    $scope.fullDescription = $scope.processDescriptionWithClickableTimestamps(description);
+  };
 
   $scope.initVttLoad = function (record) {
     const files = record.metadata._files || [];
@@ -643,6 +660,8 @@ function cdsRecordView($http) {
     scope.mediaDownloadEventUrl = attrs.mediaDownloadEventUrl;
 
     scope.relatedQueryUrl = attrs.relatedQueryUrl;
+
+    scope.DESCRIPTION_PREVIEW_LINES = parseInt(attrs.previewLines, 10) || 10;
 
     // Get the record object and make it available to the scope
     $http.get(attrs.record).then(
