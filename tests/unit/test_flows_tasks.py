@@ -725,7 +725,7 @@ def test_extract_chapter_frames_task_cleanup(app, db, bucket, video, users):
          mock.patch.object(ExtractChapterFramesTask, "_base_payload", {"tags": {"duration": 100}}), \
          mock.patch("cds.modules.flows.tasks.ExtractFramesTask._create_object") as mock_create_object, \
          mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask._build_chapter_vtt"), \
-         mock.patch("cds.modules.flows.tasks.ExtractChapterFramesTask._get_existing_chapter_frame_timestamps") as mock_existing:
+         mock.patch("cds.modules.flows.tasks.get_existing_chapter_frame_timestamps") as mock_existing:
 
         # Track created & disposed timestamps (floats)
         created_timestamps = set()

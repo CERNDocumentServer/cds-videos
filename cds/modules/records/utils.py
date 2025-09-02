@@ -32,6 +32,7 @@ from html import unescape
 from urllib import parse
 
 import six
+from cds.modules.records.api import CDSVideosFilesIterator
 from flask import current_app, g, request
 from flask_security import current_user
 from invenio_db import db
@@ -484,6 +485,19 @@ def to_string(value):
         return value
     else:
         return json.dumps(value)
+
+
+def get_existing_chapter_frame_timestamps(deposit):
+    """Get timestamps of existing chapter frames."""
+    master_file = CDSVideosFilesIterator.get_master_video_file(deposit)
+    frames = CDSVideosFilesIterator.get_video_frames(master_file)
+
+    existing = set()
+    for f in frames:
+        tags = f.get("tags", {})
+        if tags.get("is_chapter_frame") == "true":
+            existing.add(float(tags.get("timestamp")))
+    return existing 
 
 
 def parse_video_chapters(description):
