@@ -77,7 +77,7 @@ from ..records.api import (
 )
 from ..records.minters import cds_doi_generator, is_local_doi, report_number_minter
 from ..records.resolver import record_resolver
-from ..records.utils import is_record, lowercase_value, parse_video_chapters
+from ..records.utils import is_record, lowercase_value, parse_video_chapters, get_existing_chapter_frame_timestamps
 from ..records.validators import PartialDraft4Validator
 from ..records.permissions import is_public
 from .errors import DiscardConflict
@@ -925,6 +925,10 @@ class Video(CDSDeposit):
         for curr, old in zip(current_chapters, old_chapters):
             if curr["seconds"] != old["seconds"] or curr["title"] != old["title"]:
                 return True
+
+        if current_chapters and not get_existing_chapter_frame_timestamps(self):
+            # Chapters did not change, but chapter frames doesn't exist
+            return True
 
         return False
 

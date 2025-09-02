@@ -63,7 +63,7 @@ from ..ffmpeg import ff_frames, ff_probe_all
 from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
 from ..opencast.utils import get_qualities
-from ..records.utils import to_string, parse_video_chapters
+from ..records.utils import to_string, parse_video_chapters, get_existing_chapter_frame_timestamps
 from ..xrootd.utils import file_opener_xrootd
 from .deposit import index_deposit_project
 from .files import dispose_object_version, move_file_into_local
@@ -834,7 +834,7 @@ class ExtractChapterFramesTask(AVCTask):
                 raise ValueError("Video duration is 0 - cannot extract frames")
 
             # Check which timestamps already have frames
-            existing_timestamps = self._get_existing_chapter_frame_timestamps(deposit_video)
+            existing_timestamps = get_existing_chapter_frame_timestamps(deposit_video)
             
             def progress_updater(current_chapter):
                 """Progress reporter."""
@@ -882,18 +882,6 @@ class ExtractChapterFramesTask(AVCTask):
         
         self.log("Finished task {0}".format(kwargs["task_id"]))
         return "Created {0} chapter frames.".format(total_frames)
-
-    def _get_existing_chapter_frame_timestamps(self, deposit):
-        """Get timestamps of existing chapter frames."""
-        master_file = CDSVideosFilesIterator.get_master_video_file(deposit)
-        frames = CDSVideosFilesIterator.get_video_frames(master_file)
-
-        existing = set()
-        for f in frames:
-            tags = f.get("tags", {})
-            if tags.get("is_chapter_frame") == "true":
-                existing.add(float(tags.get("timestamp")))
-        return existing
 
     @classmethod
     def _create_chapter_frames(
