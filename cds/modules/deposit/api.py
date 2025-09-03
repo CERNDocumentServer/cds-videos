@@ -966,7 +966,7 @@ class Video(CDSDeposit):
             current_app.logger.error(f"Traceback: {traceback.format_exc()}")
 
     @mark_as_action
-    def publish(self, pid=None, id_=None, **kwargs):
+    def publish(self, pid=None, id_=None, extract_chapters=True, **kwargs):
         """Publish a video and update the related project."""
         # save a copy of the old PID
         video_old_id = self["_deposit"]["id"]
@@ -999,7 +999,7 @@ class Video(CDSDeposit):
         _, record_new = self.fetch_published()
 
         # Check if chapters have changed and trigger frame extraction
-        if self._has_chapters_changed(old_record):
+        if extract_chapters and self._has_chapters_changed(old_record):
             current_app.logger.info(
                 f"Chapters changed for video {self.id}, triggering frame extraction"
             )
