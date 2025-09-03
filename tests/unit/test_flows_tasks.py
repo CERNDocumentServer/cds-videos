@@ -683,7 +683,6 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
 
 def test_extract_chapter_frames_task_cleanup(app, db, bucket, video, users):
     """Test that chapter frames are updated/cleaned when description changes."""
-
     # Create master ObjectVersion
     obj = ObjectVersion.create(bucket=bucket, key="video.mp4", stream=open(video, "rb"))
     add_video_tags(obj)
@@ -751,6 +750,7 @@ def test_extract_chapter_frames_task_cleanup(app, db, bucket, video, users):
         assert created_timestamps == {0.1, 10.0, 20.0}
         assert disposed_timestamps == []  # nothing disposed on first run
 
+        video_deposit = deposit_video_resolver(deposit_id)
         # Update description → now chapters at 0.1, 10.0, 30.0
         video_deposit["description"] = """0:00 Intro
                                           0:10 Chapter 1

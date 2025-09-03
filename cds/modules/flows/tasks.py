@@ -807,6 +807,22 @@ class ExtractChapterFramesTask(AVCTask):
 
         output_folder = tempfile.mkdtemp()
 
+        # Remove temporary directory on abrupt execution halts.
+        self.set_revoke_handler(
+            lambda: shutil.rmtree(output_folder, ignore_errors=True)
+        )
+
+        def progress_updater(current_chapter):
+            """Progress reporter."""
+            percentage = current_chapter / len(chapters) * 100
+            meta = dict(
+                payload=dict(size=len(chapters), percentage=percentage),
+                message="Extracting chapter frames [{0} out of {1}]".format(
+                    current_chapter, len(chapters)
+                ),
+            )
+            self.log(meta["message"])
+
         bucket_was_locked = False
         if self.object_version.bucket.locked:
             # If record was published we need to unlock the bucket
@@ -835,17 +851,6 @@ class ExtractChapterFramesTask(AVCTask):
 
             # Check which timestamps already have frames
             existing_timestamps = get_existing_chapter_frame_timestamps(deposit_video)
-            
-            def progress_updater(current_chapter):
-                """Progress reporter."""
-                percentage = current_chapter / len(chapters) * 100
-                meta = dict(
-                    payload=dict(size=len(chapters), percentage=percentage),
-                    message="Extracting chapter frames [{0} out of {1}]".format(
-                        current_chapter, len(chapters)
-                    ),
-                )
-                self.log(meta["message"])
 
             frames, chapter_seconds = self._create_chapter_frames(
                 chapters=chapters,
@@ -988,8 +993,9 @@ class ExtractChapterFramesTask(AVCTask):
         vtt_bytes = vtt.encode("utf-8")
         vtt_key = "chapters.vtt"
 
+        bucket = as_bucket(self.object_version.bucket.id)
         obj = ObjectVersion.create(
-            bucket=self.object_version.bucket,
+            bucket=bucket,
             key=vtt_key,
             stream=BytesIO(vtt_bytes),
             size=len(vtt_bytes),

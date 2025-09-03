@@ -461,6 +461,10 @@ function cdsDepositCtrl(
       if (status && !info.status) {
         info.status = status;
       }
+      if (!that.stateReporter[name]) {
+        // New task not in mainStatuses, add `file_video_extract_chapter_frames`
+        that.stateReporter[name] = info;
+      }
       if (that.stateReporter[name].status !== info.status) {
         // Get metadata
         $scope.$broadcast("cds.deposit.task", name, info.status, info);
