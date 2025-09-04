@@ -931,7 +931,10 @@ class ExtractChapterFramesTask(AVCTask):
                 
                 frame_filename = "chapter-{0}.jpg".format(int(chapter_seconds))
                 frame_path = os.path.join(output_dir, frame_filename)
-                
+
+                # Ensure we don't exceed duration
+                if chapter_seconds + 0.01 >= duration:
+                    chapter_seconds = max(0, duration - 0.02)
                 try:
                     # Extract single frame at chapter timestamp using ff_frames
                     ff_frames(
@@ -978,6 +981,8 @@ class ExtractChapterFramesTask(AVCTask):
         for i, c in enumerate(sorted(chapters, key=lambda x: x["seconds"])):
             start = c["seconds"]
             end = chapters[i+1]["seconds"] if i+1 < len(chapters) else duration
+            if end > duration:
+                end = duration
             start_str = "{:02}:{:02}:{:02}.000".format(
                 int(start // 3600),
                 int((start % 3600) // 60),

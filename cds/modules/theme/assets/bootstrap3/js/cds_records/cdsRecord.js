@@ -63,6 +63,7 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   $scope.activeTab = "chapters"; // Default to chapters tab
   $scope.shortDescription = "";
   $scope.fullDescription = "";
+  $scope.chapterFrames = {};
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
@@ -191,6 +192,7 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     if (newVal) {
       $scope.initVttLoad(newVal);
       $scope.prepareDescriptions(newVal.metadata.description);
+      $scope.buildChapterFrames();
     }
   });
 
@@ -202,10 +204,14 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     }
 
     const lines = description.split(/\r?\n/);
-    const firstTen = lines.slice(0, $scope.DESCRIPTION_PREVIEW_LINES).join("\n");
+    const firstTen = lines
+      .slice(0, $scope.DESCRIPTION_PREVIEW_LINES)
+      .join("\n");
 
-    $scope.shortDescription = $scope.processDescriptionWithClickableTimestamps(firstTen);
-    $scope.fullDescription = $scope.processDescriptionWithClickableTimestamps(description);
+    $scope.shortDescription =
+      $scope.processDescriptionWithClickableTimestamps(firstTen);
+    $scope.fullDescription =
+      $scope.processDescriptionWithClickableTimestamps(description);
   };
 
   $scope.initVttLoad = function (record) {
@@ -405,32 +411,44 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     });
   };
 
-  $scope.getChapterFrame = function (chapter) {
-    if (!$scope.record || !chapter) return null;
+  $scope.buildChapterFrames = function () {
+    if (!$scope.record || !$scope.chapters) return;
 
-    // Use the findMaster filter to get the master file (this filter is defined in cds/module.js)
     const master = $filter("findMaster")($scope.record);
+    if (!master || !master.frame) return;
 
-    if (!master || !master.frame) return null;
+    const frames = master.frame;
+    let matches = {};
 
-    // Look for a frame with filename that matches chapter timestamp
-    // Chapter frames are named like "chapter-{seconds}.jpg"
-    const expectedFrameName = `chapter-${chapter.seconds}.jpg`;
-
-    let chapterFrame = master.frame.find(
-      (frame) => frame.key === expectedFrameName
+    // --- Exact filename match ---
+    $scope.chapters.forEach((chapter) => {
+      const expectedName = `chapter-${chapter.seconds}.jpg`;
+      const frame = frames.find((f) => f.key === expectedName);
+      if (frame) {
+        matches[chapter.seconds] = frame;
+      }
+    });
+    console.log("Exact matches found:", matches);
+    // Collect chapters still missing
+    let missing = $scope.chapters.filter(
+      (c) => !matches.hasOwnProperty(c.seconds)
     );
-    if (!chapterFrame) {
-      // Find the frame with closest timestamp
+
+    // If none missing, return
+    if (missing.length === 0) {
+      $scope.chapterFrames = matches;
+      return;
+    }
+
+    // --- Fallback closest timestamp ---
+    missing.forEach((chapter) => {
       const target = Number(chapter.seconds);
       let closest = null;
       let minDiff = Infinity;
 
-      master.frame.forEach((frame) => {
+      frames.forEach((frame) => {
         if (!frame.tags || frame.tags.timestamp == null) return;
-
         const ts = Number(frame.tags.timestamp);
-
         const diff = Math.abs(ts - target);
         if (diff < minDiff) {
           minDiff = diff;
@@ -438,10 +456,10 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
         }
       });
 
-      chapterFrame = closest;
-    }
+      matches[chapter.seconds] = closest || null;
+    });
 
-    return chapterFrame || null;
+    $scope.chapterFrames = matches;
   };
 
   $scope.cleanHtmlFromTitle = function (title) {

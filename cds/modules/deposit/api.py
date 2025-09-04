@@ -926,7 +926,7 @@ class Video(CDSDeposit):
             if curr["seconds"] != old["seconds"] or curr["title"] != old["title"]:
                 return True
 
-        if current_chapters and not get_existing_chapter_frame_timestamps(self):
+        if len(current_chapters) != len(get_existing_chapter_frame_timestamps(self)):
             # Chapters did not change, but chapter frames doesn't exist
             return True
 
