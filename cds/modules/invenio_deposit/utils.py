@@ -28,6 +28,7 @@
 from flask import request
 from invenio_oauth2server import require_api_auth, require_oauth_scopes
 
+from cds.modules.ldap.decorators import cern_user_required
 from .scopes import write_scope
 
 
@@ -84,6 +85,7 @@ def check_oauth2_scope(can_method, *myscopes):
 
     def check(record, *args, **kwargs):
         @require_api_auth()
+        @cern_user_required()
         @require_oauth_scopes(*myscopes)
         def can(self):
             return can_method(record)

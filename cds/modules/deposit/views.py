@@ -25,6 +25,7 @@
 """CDS interface."""
 
 
+from cds.modules.ldap.decorators import cern_user_required
 from flask import (
     Blueprint,
     abort,
@@ -118,6 +119,7 @@ def to_links_js(pid, deposit=None, dep_type=None):
 
 @blueprint.route("/deposit/reportnumbers/new", methods=["GET", "POST"])
 @login_required
+@cern_user_required()
 def reserve_report_number():
     """Form to reserver a new report number."""
     if not has_read_record_eos_path_permission(current_user, None):
@@ -156,6 +158,7 @@ def reserve_report_number():
     "/deposit/reportnumbers/assign/<string:depid>", methods=["GET", "POST"]
 )
 @login_required
+@cern_user_required()
 def assign_report_number(depid):
     """Form to reserver a new report number."""
     if not has_read_record_eos_path_permission(current_user, None):
