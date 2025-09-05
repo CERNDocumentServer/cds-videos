@@ -58,7 +58,7 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   $scope.transcript = [];
   $scope.filteredTranscript = [];
   $scope.selectedTranscriptLanguage = null;
-  $scope.transcriptSearch = "";
+  $scope.search = { transcriptSearch: "" };
   $scope.chapters = [];
   $scope.activeTab = "chapters"; // Default to chapters tab
   $scope.shortDescription = "";
@@ -173,7 +173,7 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   };
 
   $scope.filterTranscript = function () {
-    var searchTerm = this.transcriptSearch.toLowerCase();
+    var searchTerm = $scope.search.transcriptSearch.toLowerCase();
     $scope.filteredTranscript = Object.values($scope.transcript).filter(
       function (line) {
         return (
@@ -428,7 +428,6 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
         matches[chapter.seconds] = frame;
       }
     });
-    console.log("Exact matches found:", matches);
     // Collect chapters still missing
     let missing = $scope.chapters.filter(
       (c) => !matches.hasOwnProperty(c.seconds)
