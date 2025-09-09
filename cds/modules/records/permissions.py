@@ -336,6 +336,9 @@ def has_update_permission(user, record):
     """Check if user has update access to the record."""
     user_id = int(user.get_id()) if user.is_authenticated else None
 
+    if not has_upload_permission():
+        return False
+
     # Allow owners
     deposit_creator = record.get("_deposit", {}).get("created_by", -1)
     if user_id == deposit_creator:
