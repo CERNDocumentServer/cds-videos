@@ -274,7 +274,7 @@ def test_external_user_deposit_operations(
         # Setup: Create project and video as CERN user
         cern_user = User.query.get(users[0])
         login_user(cern_user)
-        
+
         with api_app.test_client() as client:
             # Create project
             resp = client.post(
@@ -285,7 +285,7 @@ def test_external_user_deposit_operations(
             assert resp.status_code == 201
             project_data = json.loads(resp.data.decode("utf-8"))
             project_id = project_data["metadata"]["_deposit"]["id"]
-            
+
             # Create video
             video_deposit_metadata["_project_id"] = project_id
             resp = client.post(
@@ -296,12 +296,12 @@ def test_external_user_deposit_operations(
             assert resp.status_code == 201
             video_data = json.loads(resp.data.decode("utf-8"))
             video_id = video_data["metadata"]["_deposit"]["id"]
-            
+
             # Switch to external user for testing
             logout_user()
             ext_user = User.query.get(external_user)
             login_user(ext_user)
-            
+
             # Test 1: Project creation - should be forbidden
             resp = client.post(
                 url_for("invenio_deposit_rest.project_list"),
@@ -309,14 +309,14 @@ def test_external_user_deposit_operations(
                 headers=json_partial_project_headers,
             )
             assert resp.status_code == 403
-            
+
             # Test 2: Project item operations - should be forbidden
             # GET project
             resp = client.get(
                 url_for("invenio_deposit_rest.project_item", pid_value=project_id)
             )
             assert resp.status_code in [403, 404]
-            
+
             # PUT project
             resp = client.put(
                 url_for("invenio_deposit_rest.project_item", pid_value=project_id),
@@ -324,13 +324,13 @@ def test_external_user_deposit_operations(
                 headers=json_partial_project_headers,
             )
             assert resp.status_code == 403
-            
+
             # DELETE project
             resp = client.delete(
                 url_for("invenio_deposit_rest.project_item", pid_value=project_id)
             )
             assert resp.status_code == 403
-            
+
             # Test 3: Project actions - should be forbidden
             actions = ["publish", "edit", "discard"]
             for action in actions:
@@ -342,21 +342,21 @@ def test_external_user_deposit_operations(
                     )
                 )
                 assert resp.status_code in [403, 404]
-            
+
             # Test 4: File operations - should be forbidden
             # GET files list
             resp = client.get(
                 url_for("invenio_deposit_rest.project_files", pid_value=project_id)
             )
             assert resp.status_code in [403, 404]
-            
+
             # POST file upload
             resp = client.post(
                 url_for("invenio_deposit_rest.project_files", pid_value=project_id),
                 data={"file": (BytesIO(b"test content"), "test.txt")},
             )
             assert resp.status_code in [403, 404]
-            
+
             # Test 5: Flows API - should be forbidden
             flow_payload = {
                 "bucket_id": "test-bucket-id",
@@ -370,3 +370,86 @@ def test_external_user_deposit_operations(
                 headers=json_partial_project_headers,
             )
             assert resp.status_code in [401, 403, 404]
+
+
+def test_external_user_update_access_without_upload_permission(
+    api_app, location, users, external_user, api_project
+):
+    """Test that external user in _access.update still can't edit without upload permission."""
+
+    @identity_loaded.connect
+    def mock_identity_provides(sender, identity):
+        """Ensure external users have their email in identity for testing."""
+        if (
+            not isinstance(identity, AnonymousIdentity)
+            and current_user.is_authenticated
+        ):
+            if (
+                current_user.email
+                and UserNeed(current_user.email) not in identity.provides
+            ):
+                identity.provides.add(UserNeed(current_user.email))
+
+    (_, video_1, _) = api_project
+    cern_user = User.query.get(users[0])
+    ext_user = User.query.get(external_user)
+
+    # Prepare videos for publishing
+    prepare_videos_for_publish([video_1])
+    vid1 = video_1["_deposit"]["id"]
+
+    with api_app.test_client() as client:
+        login_user(cern_user)
+
+        # Create video with external user in update access
+        video_1_metadata = dict(video_1)
+        for key in ["_files"]:
+            video_1_metadata.pop(key, None)
+        video_1_metadata["_access"]["update"] = [ext_user.email]
+
+        resp = client.put(
+            url_for("invenio_deposit_rest.video_item", pid_value=vid1),
+            data=json.dumps(video_1_metadata),
+            headers=[
+                ("Content-Type", "application/vnd.video.partial+json"),
+                ("Accept", "application/json"),
+            ],
+        )
+        # Publish video
+        url = url_for(
+            "invenio_deposit_rest.video_actions", pid_value=vid1, action="publish"
+        )
+        assert client.post(url).status_code == 202
+        rec_pid1, _ = deposit_video_resolver(vid1).fetch_published()
+
+        # Test external user (has update access but can't edit)
+        logout_user()
+        login_user(ext_user)
+
+        # External user should be able to read the record
+        resp = client.get(
+            url_for("invenio_records_rest.recid_item", pid_value=rec_pid1.pid_value)
+        )
+        assert resp.status_code == 200
+        video_data = json.loads(resp.data.decode("utf-8"))
+
+        project_id = video_data["metadata"]["_project_id"]
+        deposit_id = video_data["metadata"]["_deposit"]["id"]
+
+        # External user should not be able to get the deposit
+        resp = client.get(
+            url_for("invenio_deposit_rest.project_item", pid_value=project_id)
+        )
+        assert resp.status_code in [403, 404]
+
+        # External user should not be able to get the video deposit
+        res = client.get(
+            url_for("invenio_deposit_rest.video_item", pid_value=deposit_id)
+        )
+        assert res.status_code in [403, 404]
+
+        # External user should not be able to edit the video
+        url = url_for(
+            "invenio_deposit_rest.video_actions", pid_value=deposit_id, action="edit"
+        )
+        assert client.post(url).status_code in [403, 404]
