@@ -92,7 +92,9 @@
                       <div ng-class="{'is-placeholder': !frame}" class="thumbnail-container">
                         <img 
                           ng-if="frame"
-                          ng-src="/api/iiif/v2/{{ frame.bucket_id }}:{{ frame.version_id }}:{{ frame.key }}/full/320,180/0/default.jpg"
+                          ng-src="/api/iiif/v2/{{ frame.bucket_id }}:{{ frame.version_id }}:{{ frame.key }}/full/{{ chapter.thumbnailHovered ? '720,405' : '360,203' }}/0/default.jpg"
+                          ng-mouseenter="chapter.thumbnailHovered = true"
+                          ng-mouseleave="chapter.thumbnailHovered = false"
                           alt="Chapter {{ chapter.timestamp }}"
                           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="thumbnail-placeholder" ng-style="{'display': frame ? 'none' : 'flex'}">
