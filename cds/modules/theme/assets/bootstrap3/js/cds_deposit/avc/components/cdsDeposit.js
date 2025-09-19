@@ -240,7 +240,7 @@ function cdsDepositCtrl(
           // Task not in mainStatuses, add `file_video_extract_chapter_frames`
           that.stateReporter[state] = {
             status: value,
-            message: state
+            message: state,
           };
         } else {
           // Update existing
@@ -579,7 +579,8 @@ function cdsDepositCtrl(
       true
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
-      $scope.$applyAsync(function () { // Manually trigger UI updates
+      $scope.$applyAsync(function () {
+        // Manually trigger UI updates
         Object.values($window.CKEDITOR.instances).forEach(function (instance) {
           try {
             instance.setReadOnly(instance.element.$.disabled);
@@ -625,9 +626,19 @@ function cdsDepositCtrl(
     this.postSuccessProcess = function (responses) {
       // Get only the latest response (in case of multiple actions)
       var response = (responses[responses.length - 1] || responses).data;
+      var originalRecord = _.cloneDeep(that.record);
       // Update record: use _ and not ng because otherwise it will destroy references to the parent record
       that.record = _.merge(that.record, response.metadata);
-    };
+
+      // Since we sanitize description, we need to force pristine
+      if (originalRecord.description !== that.record.description || originalRecord.translations !== that.record.translations) {
+        $timeout(function() {
+          that.depositFormModels.forEach(function (form) {
+             form.$setPristine();
+          });
+        }, 50);
+      }
+     };
 
     this.postErrorProcess = function (response) {
       // Process validation errors if any
