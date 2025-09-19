@@ -240,7 +240,7 @@ function cdsDepositCtrl(
           // Task not in mainStatuses, add `file_video_extract_chapter_frames`
           that.stateReporter[state] = {
             status: value,
-            message: state
+            message: state,
           };
         } else {
           // Update existing
@@ -579,7 +579,8 @@ function cdsDepositCtrl(
       true
     );
     $scope.$watch("$ctrl.record._deposit.status", function () {
-      $scope.$applyAsync(function () { // Manually trigger UI updates
+      $scope.$applyAsync(function () {
+        // Manually trigger UI updates
         Object.values($window.CKEDITOR.instances).forEach(function (instance) {
           try {
             instance.setReadOnly(instance.element.$.disabled);
@@ -711,7 +712,12 @@ function cdsDepositCtrl(
     // Inform the parents
     $scope.$emit("cds.deposit.success", message);
     // Make the form pristine again
-    that.setPristine();
+    // Backend sanitizes HTML (e.g. <strong> → <b>), causing form to become dirty because
+    // model content differs. Timeout ensures setPristine runs after digest cycle completes
+    // and all async operations settle.
+    $timeout(function () {
+      that.setPristine();
+    }, 50);
   };
 
   this.onErrorAction = function (response) {
