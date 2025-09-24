@@ -865,8 +865,10 @@ class ExtractChapterFramesTask(AVCTask):
             )
 
             # Clean unused chapters
-            self.clean(
-                version_id=self.object_version_id, valid_chapter_seconds=chapter_seconds
+            self._ensure_bucket_unlocked(
+                self.clean,
+                version_id=self.object_version_id,
+                valid_chapter_seconds=chapter_seconds,
             )
 
             # Create or update WebVTT file for chapters
@@ -878,7 +880,7 @@ class ExtractChapterFramesTask(AVCTask):
         except Exception:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
-            self.clean(version_id=self.object_version_id)
+            self._ensure_bucket_unlocked(self.clean, version_id=self.object_version_id)
             raise
 
         total_frames = len(frames)
@@ -1289,6 +1291,7 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5, countdown=5
 
     deposit_video = deposit_video_resolver(deposit_id)
     db.session.refresh(deposit_video.model)
+    deposit_video = deposit_video.__class__(deposit_video.model.json, model=deposit_video.model)
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files
