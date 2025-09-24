@@ -1247,7 +1247,7 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5, countdown=5
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files
-            deposit_video = deposit_video.edit().publish().commit()
+            deposit_video = deposit_video.edit().publish(extract_chapters=False).commit()
             record_pid, record = deposit_video.fetch_published()
             # save changes
             deposit_video.commit()

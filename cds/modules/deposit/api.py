@@ -918,14 +918,14 @@ class Video(CDSDeposit):
         old_description = old_record.get("description", "")
         old_chapters = parse_video_chapters(old_description)
 
-        # Compare chapter timestamps and titles
+        # Compare chapter timestamps
         if len(current_chapters) != len(old_chapters):
             return True
 
         for curr, old in zip(current_chapters, old_chapters):
-            if curr["seconds"] != old["seconds"] or curr["title"] != old["title"]:
+            if curr["seconds"] != old["seconds"]:
                 return True
-
+        
         if len(current_chapters) != len(get_existing_chapter_frame_timestamps(self)):
             # Chapters did not change, but chapter frames doesn't exist
             return True

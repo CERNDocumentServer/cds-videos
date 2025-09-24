@@ -524,6 +524,7 @@ def parse_video_chapters(description):
     pattern = r'(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)'
     
     chapters = []
+    seen_timestamps = set()  # Unique seconds in timestamps
     matches = re.findall(pattern, description, re.MULTILINE)
     
     for timestamp_str, title in matches:
@@ -540,7 +541,8 @@ def parse_video_chapters(description):
             
         # Clean up title
         title = remove_html_tags(html_tag_remover, title).strip()
-        if title:
+        if title and total_seconds not in seen_timestamps:
+            seen_timestamps.add(total_seconds)
             chapters.append({
                 'timestamp': timestamp_str,
                 'seconds': total_seconds,
