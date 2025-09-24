@@ -63,7 +63,11 @@ from ..ffmpeg import ff_frames, ff_probe_all
 from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
 from ..opencast.utils import get_qualities
-from ..records.utils import to_string, parse_video_chapters, get_existing_chapter_frame_timestamps
+from ..records.utils import (
+    to_string,
+    parse_video_chapters,
+    get_existing_chapter_frame_timestamps,
+)
 from ..xrootd.utils import file_opener_xrootd
 from .deposit import index_deposit_project
 from .files import dispose_object_version, move_file_into_local
@@ -199,7 +203,7 @@ class AVCTask(CeleryTask):
         exceptions.
         """
         # Safety check in case base payload is not set yet
-        payload = getattr(self, '_base_payload', {})
+        payload = getattr(self, "_base_payload", {})
         meta = dict(message=str(exc), payload=payload)
         return dict(exc_message=meta, exc_type=exc.__class__.__name__)
 
@@ -227,15 +231,19 @@ class AVCTask(CeleryTask):
         """Reindex video and project."""
         with celery_app.flask_app.app_context():
             # Safety check in case base payload is not set yet
-            if not hasattr(self, '_base_payload') or not self._base_payload or 'deposit_id' not in self._base_payload:
-                if hasattr(self, 'deposit_id') and self.deposit_id:
+            if (
+                not hasattr(self, "_base_payload")
+                or not self._base_payload
+                or "deposit_id" not in self._base_payload
+            ):
+                if hasattr(self, "deposit_id") and self.deposit_id:
                     deposit_id = self.deposit_id
                 else:
                     self.log("Cannot reindex: deposit_id not available")
                     return
             else:
                 deposit_id = self._base_payload["deposit_id"]
-            
+
             try:
                 index_deposit_project(deposit_id)
             except PIDDeletedError:
@@ -749,7 +757,7 @@ class ExtractChapterFramesTask(AVCTask):
     @staticmethod
     def clean(version_id, valid_chapter_seconds=None, *args, **kwargs):
         """Delete generated chapter frame ObjectVersion slaves.
-        
+
         - If valid_chapter_seconds is given, keep them.
         - If not, remove all chapter frames.
         """
@@ -777,7 +785,7 @@ class ExtractChapterFramesTask(AVCTask):
 
         # If no valid chapter seconds, remove the chapters.vtt file
         if not valid_chapter_seconds:
-            master_obj = ObjectVersion.query.get(version_id)                  
+            master_obj = ObjectVersion.query.get(version_id)
             vtt_objs = ObjectVersion.get_versions(master_obj.bucket_id, "chapters.vtt")
             for vtt_obj in vtt_objs:
                 dispose_object_version(vtt_obj)
@@ -787,13 +795,13 @@ class ExtractChapterFramesTask(AVCTask):
 
         This task is specifically designed to extract frames for chapters only,
         without affecting other frame extraction processes.
-        
+
         The task receives parameters through the standard AVCTask initialization:
-        - self.deposit_id: The deposit ID containing the video description  
+        - self.deposit_id: The deposit ID containing the video description
         - self.object_version: The ObjectVersion of the master video file
         - self.flow_id: The current flow ID for task metadata integration
         """
-        
+
         # Create or update the TaskMetadata
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
@@ -823,19 +831,14 @@ class ExtractChapterFramesTask(AVCTask):
             )
             self.log(meta["message"])
 
-        bucket_was_locked = False
-        if self.object_version.bucket.locked:
-            # If record was published we need to unlock the bucket
-            bucket_was_locked = True
-            self.object_version.bucket.locked = False
-
         try:
             # Get the deposit to access the description
             from cds.modules.deposit.api import deposit_video_resolver
+
             db.session.refresh(self.object_version)
             deposit_video = deposit_video_resolver(self.deposit_id)
             description = deposit_video.get("description", "")
-            
+
             self.log("Found description with {0} characters".format(len(description)))
 
             # Parse chapters from description
@@ -845,7 +848,7 @@ class ExtractChapterFramesTask(AVCTask):
 
             # Get video duration from metadata
             duration = float(self._base_payload.get("tags", {}).get("duration", 0))
-            
+
             if duration == 0:
                 raise ValueError("Video duration is 0 - cannot extract frames")
 
@@ -862,10 +865,12 @@ class ExtractChapterFramesTask(AVCTask):
             )
 
             # Clean unused chapters
-            self.clean(version_id=self.object_version_id, valid_chapter_seconds=chapter_seconds)
+            self.clean(
+                version_id=self.object_version_id, valid_chapter_seconds=chapter_seconds
+            )
 
             # Create or update WebVTT file for chapters
-            self._build_chapter_vtt(chapters, duration)
+            self._ensure_bucket_unlocked(self._build_chapter_vtt, chapters, duration)
 
             # Sync deposit and record files
             sync_records_with_deposit_files(self.deposit_id)
@@ -878,19 +883,28 @@ class ExtractChapterFramesTask(AVCTask):
 
         total_frames = len(frames)
 
-        if bucket_was_locked:
-            # Lock the bucket again
-            self.object_version.bucket.locked = True
-
         # Cleanup
         shutil.rmtree(output_folder)
-        
+
         self.log("Finished task {0}".format(kwargs["task_id"]))
         return "Created {0} chapter frames.".format(total_frames)
 
-    @classmethod
+    def _ensure_bucket_unlocked(self, _method, *args, **kwargs):
+        """Ensure the bucket is unlocked for writing."""
+        from invenio_files_rest.errors import BucketLockedError
+
+        if self.object_version.bucket.locked:
+            # If record was published we need to unlock the bucket
+            try:
+                return _method(*args, **kwargs)
+            except BucketLockedError:
+                self.object_version.bucket.locked = False
+                result = _method(*args, **kwargs)
+                self.object_version.bucket.locked = True
+                return result
+
     def _create_chapter_frames(
-        cls,
+        self,
         chapters,
         duration,
         object_,
@@ -902,33 +916,37 @@ class ExtractChapterFramesTask(AVCTask):
         created_frames = []
         valid_chapter_seconds = []
         current_chapter = 0
-        
+
         with move_file_into_local(object_, delete=True) as url:
             for chapter in chapters:
                 current_chapter += 1
-                
+
                 if progress_updater:
                     progress_updater(current_chapter)
-                
+
                 chapter_seconds = chapter["seconds"]
                 chapter_title = chapter["title"]
-                
+
                 # Skip chapters that are beyond video duration
                 if chapter_seconds > duration:
                     continue
-                
+
                 # For 0:00 chapters, use a small offset to avoid extraction issues
-                chapter_seconds = max(chapter_seconds, 0.1) if chapter_seconds == 0 else chapter_seconds
+                chapter_seconds = (
+                    max(chapter_seconds, 0.1)
+                    if chapter_seconds == 0
+                    else chapter_seconds
+                )
                 valid_chapter_seconds.append(to_string(chapter_seconds))
-                
+
                 # Skip if frame already exists at this timestamp (with some tolerance)
                 timestamp_exists = any(
-                    abs(existing_ts - chapter_seconds) < 0.1 
+                    abs(existing_ts - chapter_seconds) < 0.1
                     for existing_ts in existing_timestamps
                 )
                 if timestamp_exists:
                     continue
-                
+
                 frame_filename = "chapter-{0}.jpg".format(int(chapter_seconds))
                 frame_path = os.path.join(output_dir, frame_filename)
 
@@ -945,23 +963,10 @@ class ExtractChapterFramesTask(AVCTask):
                         duration=duration,
                         output=frame_path,
                     )
-                    
+
                     if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
-                        # Create ObjectVersion for chapter frame (as normal frame)
-                        ExtractFramesTask._create_object(
-                            bucket=object_.bucket,
-                            key=frame_filename,
-                            stream=file_opener_xrootd(frame_path, "rb"),
-                            size=os.path.getsize(frame_path),
-                            media_type="image",
-                            context_type="frame",
-                            master_id=object_.version_id,
-                            is_chapter_frame=True,
-                            timestamp=chapter_seconds,
-                        )
-                        
-                        created_frames.append(frame_path)
-                        
+                        created_frames.append((frame_filename, frame_path))
+
                 except Exception as e:
                     # Log error but continue with other chapters
                     current_app.logger.error(
@@ -970,7 +975,51 @@ class ExtractChapterFramesTask(AVCTask):
                         )
                     )
                     continue
-        
+        # Create ObjectVersion for chapter frame (as normal frame)
+
+        for frame_filename, frame_path in created_frames:
+            if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
+                self._ensure_bucket_unlocked(
+                    ExtractFramesTask._create_object,
+                    bucket=object_.bucket,
+                    key=frame_filename,
+                    stream=file_opener_xrootd(frame_path, "rb"),
+                    size=os.path.getsize(frame_path),
+                    media_type="image",
+                    context_type="frame",
+                    master_id=object_.version_id,
+                    is_chapter_frame=True,
+                    timestamp=chapter_seconds,
+                )
+
+                # try:
+                #     ExtractFramesTask._create_object(
+                #         bucket=object_.bucket,
+                #         key=frame_filename,
+                #         stream=file_opener_xrootd(frame_path, "rb"),
+                #         size=os.path.getsize(frame_path),
+                #         media_type="image",
+                #         context_type="frame",
+                #         master_id=object_.version_id,
+                #         is_chapter_frame=True,
+                #         timestamp=chapter_seconds,
+                #     )
+                # except BucketLockedError as e:
+                #     self.log("Bucket is locked, unlocking temporarily.")
+                #     self.object_version.bucket.locked = False
+                #     ExtractFramesTask._create_object(
+                #         bucket=object_.bucket,
+                #         key=frame_filename,
+                #         stream=file_opener_xrootd(frame_path, "rb"),
+                #         size=os.path.getsize(frame_path),
+                #         media_type="image",
+                #         context_type="frame",
+                #         master_id=object_.version_id,
+                #         is_chapter_frame=True,
+                #         timestamp=chapter_seconds,
+                #     )
+                #     self.object_version.bucket.locked = True
+
         return created_frames, valid_chapter_seconds
 
     def _build_chapter_vtt(self, chapters, duration):
@@ -980,21 +1029,17 @@ class ExtractChapterFramesTask(AVCTask):
         vtt = "WEBVTT\n\n"
         for i, c in enumerate(sorted(chapters, key=lambda x: x["seconds"])):
             start = c["seconds"]
-            end = chapters[i+1]["seconds"] if i+1 < len(chapters) else duration
+            end = chapters[i + 1]["seconds"] if i + 1 < len(chapters) else duration
             if end > duration:
                 end = duration
             start_str = "{:02}:{:02}:{:02}.000".format(
-                int(start // 3600),
-                int((start % 3600) // 60),
-                int(start % 60)
+                int(start // 3600), int((start % 3600) // 60), int(start % 60)
             )
             end_str = "{:02}:{:02}:{:02}.000".format(
-                int(end // 3600),
-                int((end % 3600) // 60),
-                int(end % 60)
+                int(end // 3600), int((end % 3600) // 60), int(end % 60)
             )
             vtt += f"{i+1}\n{start_str} --> {end_str}\n{c['title']}\n\n"
-        
+
         vtt_bytes = vtt.encode("utf-8")
         vtt_key = "chapters.vtt"
 
@@ -1247,7 +1292,9 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5, countdown=5
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files
-            deposit_video = deposit_video.edit().publish(extract_chapters=False).commit()
+            deposit_video = (
+                deposit_video.edit().publish(extract_chapters=False).commit()
+            )
             record_pid, record = deposit_video.fetch_published()
             # save changes
             deposit_video.commit()
