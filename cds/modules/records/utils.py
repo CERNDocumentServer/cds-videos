@@ -497,39 +497,39 @@ def get_existing_chapter_frame_timestamps(deposit):
         tags = f.get("tags", {})
         if tags.get("is_chapter_frame") == "true":
             existing.add(float(tags.get("timestamp")))
-    return existing 
+    return existing
 
 
 def parse_video_chapters(description):
     """Parse YouTube-style chapter timestamps from video description.
-    
+
     Looks for patterns like:
     00:00 Introduction
     0:30 Getting Started
     1:23:45 Advanced Topics
-    
+
     Args:
         description (str): Video description text
-        
+
     Returns:
         list: List of chapter dicts with 'timestamp', 'seconds', and 'title' keys
     """
     html_tag_remover = HTMLTagRemover()
     if not description:
         return []
-    
+
     # Regex pattern to match timestamp formats:
     # - 0:00, 00:00, 0:0, 00:0, 0:00:00, 00:00:00, etc.
     # - Followed by optional space/tab and chapter title
-    pattern = r'(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)'
-    
+    pattern = r"(?:^|\n)\s*(\d{1,2}:(?:\d{1,2}:)?\d{1,2})\s*[-\s]*(.+?)(?=\n|$)"
+
     chapters = []
     seen_timestamps = set()  # Unique seconds in timestamps
     matches = re.findall(pattern, description, re.MULTILINE)
-    
+
     for timestamp_str, title in matches:
         # Parse timestamp to seconds
-        time_parts = timestamp_str.split(':')
+        time_parts = timestamp_str.split(":")
         if len(time_parts) == 2:  # MM:SS format
             minutes, seconds = map(int, time_parts)
             total_seconds = minutes * 60 + seconds
@@ -538,29 +538,27 @@ def parse_video_chapters(description):
             total_seconds = hours * 3600 + minutes * 60 + seconds
         else:
             continue
-            
+
         # Clean up title
         title = remove_html_tags(html_tag_remover, title).strip()
         if title and total_seconds not in seen_timestamps:
             seen_timestamps.add(total_seconds)
-            chapters.append({
-                'timestamp': timestamp_str,
-                'seconds': total_seconds,
-                'title': title
-            })
-    
+            chapters.append(
+                {"timestamp": timestamp_str, "seconds": total_seconds, "title": title}
+            )
+
     # Sort chapters by timestamp
-    chapters.sort(key=lambda x: x['seconds'])
-    
+    chapters.sort(key=lambda x: x["seconds"])
+
     return chapters
 
 
 def seconds_to_timestamp(seconds):
     """Convert seconds to timestamp string (MM:SS or HH:MM:SS).
-    
+
     Args:
         seconds (int): Number of seconds
-        
+
     Returns:
         str: Formatted timestamp string
     """
@@ -568,7 +566,7 @@ def seconds_to_timestamp(seconds):
     hours = td.seconds // 3600
     minutes = (td.seconds % 3600) // 60
     secs = td.seconds % 60
-    
+
     if hours > 0:
         return f"{hours}:{minutes:02d}:{secs:02d}"
     else:
