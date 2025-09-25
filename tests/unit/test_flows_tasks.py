@@ -584,6 +584,7 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
     # Create a video object version
     obj = ObjectVersion.create(bucket=bucket, key="video.mp4", stream=open(video, "rb"))
     add_video_tags(obj)
+    master_version_id = obj.version_id
     db.session.commit()
     
     # Create a project and video deposit with short chapter timestamps
@@ -663,7 +664,7 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
         # Verify all calls to _create_object had correct master_id
         for call_args in mock_create_object.call_args_list:
             kwargs = call_args.kwargs
-            assert kwargs["master_id"] == obj.version_id
+            assert kwargs["master_id"] == master_version_id
             assert kwargs["is_chapter_frame"] is True
             assert kwargs["context_type"] == "frame"
             assert kwargs["media_type"] == "image"
@@ -671,7 +672,7 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
         # ---- Verify chapters.vtt creation ----
         mock_obj_create.assert_called_once()
         vtt_call_args = mock_obj_create.call_args
-        assert vtt_call_args.kwargs["bucket"] == obj.bucket
+        assert vtt_call_args.kwargs["bucket"] == bucket
         assert vtt_call_args.kwargs["key"] == "chapters.vtt"
 
         # Tags applied to chapters.vtt
