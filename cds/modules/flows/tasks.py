@@ -772,8 +772,11 @@ class ExtractChapterFramesTask(AVCTask):
             .join(tag_alias_2, ObjectVersion.tags)
             .join(tag_alias_3, ObjectVersion.tags)
             .filter(tag_alias_1.key == "master", tag_alias_1.value == version_id)
+            .filter(ObjectVersion.is_head.is_(True))
+            .filter(ObjectVersion.file_id.isnot(None))
             .filter(tag_alias_2.key == "context_type", tag_alias_2.value == "frame")
             .filter(tag_alias_3.key == "is_chapter_frame", tag_alias_3.value == "true")
+            .distinct()  # optional: avoid dup rows from multiple joins
             .all()
         )
 
@@ -865,22 +868,22 @@ class ExtractChapterFramesTask(AVCTask):
             )
 
             # Clean unused chapters
-            self._ensure_bucket_unlocked(
-                self.clean,
-                version_id=self.object_version_id,
-                valid_chapter_seconds=chapter_seconds,
+            self.clean(
+                version_id=self.object_version_id, valid_chapter_seconds=chapter_seconds
             )
 
             # Create or update WebVTT file for chapters
             self._ensure_bucket_unlocked(self._build_chapter_vtt, chapters, duration)
 
             # Sync deposit and record files
+            # Force session expire to avoid stale data issues
+            db.session.expire_all()
             sync_records_with_deposit_files(self.deposit_id)
 
         except Exception:
             db.session.rollback()
             shutil.rmtree(output_folder, ignore_errors=True)
-            self._ensure_bucket_unlocked(self.clean, version_id=self.object_version_id)
+            self.clean(version_id=self.object_version_id)
             raise
 
         total_frames = len(frames)
@@ -927,7 +930,6 @@ class ExtractChapterFramesTask(AVCTask):
                     progress_updater(current_chapter)
 
                 chapter_seconds = chapter["seconds"]
-                chapter_title = chapter["title"]
 
                 # Skip chapters that are beyond video duration
                 if chapter_seconds > duration:
@@ -967,7 +969,9 @@ class ExtractChapterFramesTask(AVCTask):
                     )
 
                     if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
-                        created_frames.append((frame_filename, frame_path))
+                        created_frames.append(
+                            (frame_filename, frame_path, chapter_seconds)
+                        )
 
                 except Exception as e:
                     # Log error but continue with other chapters
@@ -979,7 +983,7 @@ class ExtractChapterFramesTask(AVCTask):
                     continue
         # Create ObjectVersion for chapter frame (as normal frame)
 
-        for frame_filename, frame_path in created_frames:
+        for frame_filename, frame_path, chapter_seconds in created_frames:
             if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
                 self._ensure_bucket_unlocked(
                     ExtractFramesTask._create_object,
@@ -993,34 +997,6 @@ class ExtractChapterFramesTask(AVCTask):
                     is_chapter_frame=True,
                     timestamp=chapter_seconds,
                 )
-
-                # try:
-                #     ExtractFramesTask._create_object(
-                #         bucket=object_.bucket,
-                #         key=frame_filename,
-                #         stream=file_opener_xrootd(frame_path, "rb"),
-                #         size=os.path.getsize(frame_path),
-                #         media_type="image",
-                #         context_type="frame",
-                #         master_id=object_.version_id,
-                #         is_chapter_frame=True,
-                #         timestamp=chapter_seconds,
-                #     )
-                # except BucketLockedError as e:
-                #     self.log("Bucket is locked, unlocking temporarily.")
-                #     self.object_version.bucket.locked = False
-                #     ExtractFramesTask._create_object(
-                #         bucket=object_.bucket,
-                #         key=frame_filename,
-                #         stream=file_opener_xrootd(frame_path, "rb"),
-                #         size=os.path.getsize(frame_path),
-                #         media_type="image",
-                #         context_type="frame",
-                #         master_id=object_.version_id,
-                #         is_chapter_frame=True,
-                #         timestamp=chapter_seconds,
-                #     )
-                #     self.object_version.bucket.locked = True
 
         return created_frames, valid_chapter_seconds
 
@@ -1291,7 +1267,6 @@ def sync_records_with_deposit_files(self, deposit_id, max_retries=5, countdown=5
 
     deposit_video = deposit_video_resolver(deposit_id)
     db.session.refresh(deposit_video.model)
-    deposit_video = deposit_video.__class__(deposit_video.model.json, model=deposit_video.model)
     if deposit_video.is_published():
         try:
             # sync deposit files <--> record files
