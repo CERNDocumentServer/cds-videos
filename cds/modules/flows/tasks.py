@@ -878,7 +878,12 @@ class ExtractChapterFramesTask(AVCTask):
             # Sync deposit and record files
             # Force session expire to avoid stale data issues
             db.session.expire_all()
-            sync_records_with_deposit_files(self.deposit_id)
+            deposit_video = deposit_video_resolver(self.deposit_id)
+            if deposit_video.is_published():
+                sync_records_with_deposit_files(self.deposit_id)
+            else:
+                deposit_video.commit()
+                db.session.commit()
 
         except Exception:
             db.session.rollback()
