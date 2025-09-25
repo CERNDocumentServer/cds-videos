@@ -898,15 +898,14 @@ class ExtractChapterFramesTask(AVCTask):
         """Ensure the bucket is unlocked for writing."""
         from invenio_files_rest.errors import BucketLockedError
 
-        if self.object_version.bucket.locked:
-            # If record was published we need to unlock the bucket
-            try:
-                return _method(*args, **kwargs)
-            except BucketLockedError:
-                self.object_version.bucket.locked = False
-                result = _method(*args, **kwargs)
-                self.object_version.bucket.locked = True
-                return result
+        # If record was published we need to unlock the bucket
+        try:
+            return _method(*args, **kwargs)
+        except BucketLockedError:
+            self.object_version.bucket.locked = False
+            result = _method(*args, **kwargs)
+            self.object_version.bucket.locked = True
+            return result
 
     def _create_chapter_frames(
         self,
