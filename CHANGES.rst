@@ -25,6 +25,14 @@
 Changes
 =======
 
+Version 2.6.0 (2025-10-01)
+
+- Introduce video chapters for users to better describe key moments of their uploaded videos
+- Introduce transcription searching and automatic follow-through when users upload subtitles to their videos
+- Introduce the possibility for users to upload additional video files alongside the main video.
+- Introduce sharing of a video from a specific point in time.
+- Allow non-CERN accounts to login to the platform so that restricted video can be shared with them. However, uploading content is still limited to CERN users only.
+
 Version 2.5.4 (2025-09-01)
 
 - Fix handling of ``_access.update`` to correctly append the current user.  
