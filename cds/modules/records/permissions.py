@@ -286,6 +286,13 @@ def is_public(data, action):
     return "_access" not in data or not data.get("_access", {}).get(action)
 
 
+def is_owner(user, record):
+    """Check if the user is the owner of the record."""
+    user_id = int(user.get_id()) if user.is_authenticated else None
+    deposit_creator = record.get("_deposit", {}).get("created_by", -1)
+    return user_id == deposit_creator
+
+
 def has_read_files_permission(user, record):
     """Check if user has read access to the record's files."""
     # TODO: decide on files access rights
@@ -293,6 +300,9 @@ def has_read_files_permission(user, record):
 
     # Allow everyone for public records
     if is_public(record, "read"):
+        return True
+
+    if is_owner(user, record):
         return True
 
     # Allow e-group members
@@ -309,6 +319,9 @@ def has_read_record_permission(user, record):
     """Check if user has read access to the record."""
     # Allow everyone for public records
     if is_public(record, "read"):
+        return True
+
+    if is_owner(user, record):
         return True
 
     # Allow e-group members
@@ -340,8 +353,7 @@ def has_update_permission(user, record):
         return False
 
     # Allow owners
-    deposit_creator = record.get("_deposit", {}).get("created_by", -1)
-    if user_id == deposit_creator:
+    if is_owner(user, record):
         return True
 
     # Allow based in the '_access' key
