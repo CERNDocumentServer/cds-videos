@@ -24,6 +24,7 @@ from marshmallow.validate import Length
 
 from ...api import Keyword
 from ...resolver import keyword_resolver
+from ..fields.datetime import DateString
 
 
 class LicenseSchema(Schema):
@@ -169,6 +170,7 @@ class LegacyMARCFieldsSchema(Schema):
     tag_336 = fields.List(fields.Str(), data_key="336")
     tag_583 = fields.List(fields.Str(), data_key="583")
     tag_306 = fields.List(fields.Str(), data_key="306")
+    tag_088 = fields.List(fields.Str(), data_key="088")
 
 
 class DigitizedMetadataSchema(Schema):
@@ -185,6 +187,7 @@ class CurationSchema(StrictKeysSchema):
     """Curation schema."""
 
     legacy_report_number = fields.List(fields.Str())
+    legacy_dates = fields.List(DateString())
     department = fields.Str()
     volumes = fields.List(fields.Str())
     physical_location = fields.List(fields.Str())

@@ -659,7 +659,22 @@
               "items": {
                 "type": "string"
               }
+            },
+            "088": {
+              "title": "Tag 088.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
+          }
+        },
+        "legacy_dates": {
+          "type": "array",
+          "title": "Legacy dates.",
+          "items": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
