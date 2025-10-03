@@ -1,4 +1,4 @@
-{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None) -%}
+{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None, embed=False) -%}
 {%- if embed_config.responsive %}
       {%- set video_classes = video_classes + " embed-responsive-background" %}
   {% endif %}
@@ -52,7 +52,9 @@
         initialRendition: 'first'
       });
 
-      window.top.player = player;
+      if(!embed) {
+        window.top.player = player;
+      }
 
     // --- helpers ---
     function durationToSeconds(durationStr) {
