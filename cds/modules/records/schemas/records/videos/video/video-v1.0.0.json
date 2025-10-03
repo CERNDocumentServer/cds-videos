@@ -601,28 +601,31 @@
         },
         "digitized": {
           "title": "Digitized metadata.",
-          "type": "object",
-          "properties": {
-            "url": {
-              "type": "string"
-            },
-            "format": {
-              "type": "string"
-            },
-            "link_text": {
-              "type": "string"
-            },
-            "public_note": {
-              "type": "string"
-            },
-            "nonpublic_note": {
-              "type": "string"
-            },
-            "md5_checksum": {
-              "type": "string"
-            },
-            "source": {
-              "type": "string"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "link_text": {
+                "type": "string"
+              },
+              "public_note": {
+                "type": "string"
+              },
+              "nonpublic_note": {
+                "type": "string"
+              },
+              "md5_checksum": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
             }
           }
         },
@@ -656,7 +659,22 @@
               "items": {
                 "type": "string"
               }
+            },
+            "088": {
+              "title": "Tag 088.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
+          }
+        },
+        "legacy_dates": {
+          "type": "array",
+          "title": "Legacy dates.",
+          "items": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
