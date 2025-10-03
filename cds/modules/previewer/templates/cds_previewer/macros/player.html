@@ -1,4 +1,4 @@
-{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None, embed=False) -%}
+{% macro theo_player(obj, theo_config, record=None, video_classes='', append_to_element=None, video_source=None, log_media_views_url=None, embed_config=None, embed_mode_enabled=Νone) -%}
 {%- if embed_config.responsive %}
       {%- set video_classes = video_classes + " embed-responsive-background" %}
   {% endif %}
@@ -52,9 +52,11 @@
         initialRendition: 'first'
       });
 
-      if(!embed) {
+      // Expose the player to the top window only when not embedding. This allows
+      // controlling the player from inside our instance but not from other sites.
+      {% if not embed_mode_enabled %}
         window.top.player = player;
-      }
+      {% endif %}
 
     // --- helpers ---
     function durationToSeconds(durationStr) {

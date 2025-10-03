@@ -44,9 +44,10 @@ class VideoExtension(object):
     ]
     _file_exts = [".{0}".format(ext) for ext in previewable_extensions]
 
-    def __init__(self, template=None):
+    def __init__(self, template=None, embed_mode_enabled=False):
         """Init video previewer."""
         self.template = template
+        self.embed_mode_enabled = embed_mode_enabled
 
     def can_preview(self, file):
         """Determine if the given file can be previewed."""
@@ -73,10 +74,11 @@ class VideoExtension(object):
             report_number=report_number,
             record=record,
             embed_config=embed_config,
+            embed_mode_enabled=self.embed_mode_enabled,
             title=title,
         )
 
 
 video = VideoExtension("cds_previewer/video/internal.html")
-embed_video = VideoExtension("cds_previewer/video/embed.html")
+embed_video = VideoExtension("cds_previewer/video/embed.html", embed_mode_enabled=True)
 deposit_video = VideoExtension("cds_previewer/video/deposit.html")
