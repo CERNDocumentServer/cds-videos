@@ -406,8 +406,14 @@
               },
               "306": {
                 "type": "text"
+              },
+              "088": {
+                "type": "text"
               }
             }
+          },
+          "legacy_dates": {
+            "type": "date"
           }
         }
       },
