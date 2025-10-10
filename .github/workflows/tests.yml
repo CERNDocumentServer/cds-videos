@@ -14,8 +14,7 @@ on:
   pull_request:
     branches: 
       - main
-      - additional-files
-
+      - dev
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 4 * * 6"
