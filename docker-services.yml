@@ -49,28 +49,28 @@ services:
     image: cds-videos-lb
     restart: "always"
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:80:80"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:443:443"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:8080:8080"
   frontend:
     build: ./docker/nginx/
     image: cds-videos-frontend
     restart: "always"
     ports:
-      - "80"
-      - "443"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:80:80"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:443:443"
   cache:
     image: redis:6
     restart: "always"
     read_only: true
     ports:
-      - "6379:6379"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:6379:6379"
   cache-iiif:
     image: redis:6
     restart: "always"
     read_only: true
     ports:
-      - "16379:6379"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:16379:6379"
     command: redis-server --save ""
   db:
     image: postgres:14
@@ -80,13 +80,13 @@ services:
       - "POSTGRES_PASSWORD=cds-videos"
       - "POSTGRES_DB=cds-videos"
     ports:
-      - "5432:5432"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5432:5432"
   mq:
     image: rabbitmq:3-management
     restart: "unless-stopped"
     ports:
-      - "15672:15672"
-      - "5672:5672"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:15672:15672"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5672:5672"
   search:
     image: opensearchproject/opensearch:2
     restart: "unless-stopped"
@@ -106,14 +106,14 @@ services:
         hard: 65536
     mem_limit: 2g
     ports:
-      - "9200:9200"
-      - "9600:9600"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:9200:9200"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:9600:9600"
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2
     ports:
-      - "5601:5601"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5601:5601"
     expose:
-      - "5601"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5601"
     environment:
       # settings only for development. DO NOT use in production!
       - 'OPENSEARCH_HOSTS=["http://search:9200"]'
