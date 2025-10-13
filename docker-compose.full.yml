@@ -47,7 +47,7 @@ services:
     command: ["uwsgi --module invenio_app.wsgi:application --socket 0.0.0.0:5000 --master --processes 2 --threads 2 --stats /tmp/stats.socket"]
     image: cds-videos-web
     ports:
-      - "5000"
+      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5000"
     volumes:
       - static_data:/opt/cds_videos/var/instance/static
       - files_data:/opt/cds_videos/var/instance/files
