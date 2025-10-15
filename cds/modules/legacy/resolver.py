@@ -40,4 +40,3 @@ def get_pid_by_legacy_recid(legacy_recid):
     ).one()
 
     return record_pid
-
