@@ -625,6 +625,17 @@ app.filter("isoToLanguage", [
   },
 ]);
 
+app.filter("format_relation_resource_type", function () {
+  return function (input) {
+    if (!input) return "";
+    // Replace camel-case transitions with spaces
+    let formatted = input.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
+    // Capitalize the first letter
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    return formatted;
+  };
+});
+
 // Join array or return the String
 app.filter("joinArray", function () {
   return function (item) {
