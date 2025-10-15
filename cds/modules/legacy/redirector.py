@@ -24,7 +24,7 @@
 
 """Redirector functions and rules."""
 
-from flask import Blueprint, current_app, abort, redirect
+from flask import Blueprint, abort, current_app, redirect
 from sqlalchemy.orm.exc import NoResultFound
 
 from .resolver import get_pid_by_legacy_recid
@@ -34,6 +34,7 @@ HTTP_MOVED_PERMANENTLY = 301
 blueprint = Blueprint(
     "cds_legacy", __name__, template_folder="templates", url_prefix="/legacy"
 )
+
 
 @blueprint.route("/record/<legacy_id>", strict_slashes=False)
 def legacy_record_redirect(legacy_id):
