@@ -192,9 +192,36 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     if (newVal) {
       $scope.initVttLoad(newVal);
       $scope.prepareDescriptions(newVal.metadata.description);
+      $scope.prepareRelatedIdentifiers(newVal.metadata);
       $scope.buildChapterFrames();
     }
   });
+
+  $scope.prepareRelatedIdentifiers = function (metadata) {
+    const grouped = {};
+    (metadata.related_identifiers || []).forEach(item => {
+      if (item.scheme === "Indico") return;
+      switch (item.scheme) {
+        case "URL":
+          item.url = item.identifier;
+          break;
+        case "CDS":
+          item.url = `https://cds.cern.ch/record/${item.identifier}`;
+          break;
+        case "DOI":
+          item.url = `https://doi.org/${item.identifier}`;
+          break;
+        default:
+          return; // skip unrecognized schemes
+      }
+      // Group by relation_type
+      if (!grouped[item.relation_type]) {
+        grouped[item.relation_type] = [];
+      }
+      grouped[item.relation_type].push(item);
+    });
+    $scope.grouped_related_identifiers = grouped;
+  };
 
   $scope.prepareDescriptions = function (description) {
     if (!description) {

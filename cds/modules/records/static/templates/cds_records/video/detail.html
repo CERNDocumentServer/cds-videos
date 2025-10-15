@@ -292,15 +292,34 @@
               </div>
             </div>
             <!-- Related links -->
-            <li ng-if="record.metadata.related_links.length > 0">
+            <div ng-if="record.metadata.related_links.length > 0">
               <strong>Related links</strong>
               <ul ng-repeat="related_link in record.metadata.related_links">
                 <li>
                   <a ng-href='{{ :: related_link.url | absoluteURL }}' target="_blank">{{ related_link.name }}</a>
                 </li>
               </ul>
-            </li>
+            </div>
             <!-- Related links -->
+            <!-- Related identifiers -->
+            <div ng-if="grouped_related_identifiers && ! (grouped_related_identifiers | isEmpty)">
+              <strong>Related identifiers</strong>
+              <ul>
+                <li ng-repeat="(relation_type, items) in grouped_related_identifiers">
+                  <strong>{{ relation_type | format_relation_resource_type }}</strong>
+                  <ul>
+                    <li ng-repeat="ri in items">
+                      <span ng-if="ri.resource_type">
+                        {{ ri.resource_type | format_relation_resource_type }}:
+                      </span>
+                      <a ng-href="{{ ri.url }}" target="_blank">{{ ri.identifier }}</a>
+                      ({{ ri.scheme }})
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+            <!-- Related identifiers -->
             <!-- Hidden content -->
             <div ng-show="!showFullDescription" class="text-center">
               <a class="btn btn-link btn-sm" ng-click="showFullDescription=!showFullDescription">{{ showFullDescription ? 'Show less' : 'Show more' }}</a>
@@ -377,7 +396,6 @@
               </div>
             </div>
             <!-- Show Transcriptions -->
-            <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
             <ng-include 
               ng-if="(record.metadata.related_identifiers | filter:{scheme:'indico'}).length > 0" 
               src="'/static/templates/cds_records/video/related_event_section.html'">
@@ -400,6 +418,9 @@
           <ng-include src="'/static/templates/cds_records/video/downloads.html'"></ng-include>
         </div>
         <!-- /Section Download -->
+        <!-- Section Keywords -->
+        <ng-include src="'/static/templates/cds_records/keywords.html'"></ng-include>
+        <!-- /Section Keywords -->
         <!-- Section Technical Metadata -->
         <div class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
           <ng-include src="'/static/templates/cds_records/video/technical_metadata.html'"></ng-include>
