@@ -1,5 +1,8 @@
-<div ng-if="record.metadata.keywords.length > 0">
-  <hr />
+<div ng-if="record.metadata.keywords.length > 0"
+    class="cds-detail cds-detail-video cds-div-shadow bg-w pt-10 px-20 pb-10 mb-30 mt-20 t-b">
+<div class="cds-detail-title cds-detail-video-title">
+    <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20"><i class="fa fa-tags"></i> Keywords</h3>
+  </div>
   <div class="cds-tags">
     <ul>
       <li ng-repeat="keyword in record.metadata.keywords">
