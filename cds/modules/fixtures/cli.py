@@ -29,7 +29,7 @@ import tempfile
 import uuid
 
 import click
-import pkg_resources
+import importlib.resources as resources
 import requests
 from flask import current_app
 from flask.cli import with_appcontext
@@ -52,11 +52,10 @@ from ..records.utils import to_string
 
 
 def _load_json_source(filename):
-    """Load json fixture."""
-    source = pkg_resources.resource_filename(
-        "cds.modules.fixtures", "data/{0}".format(filename)
-    )
-    with open(source, "r") as fp:
+    """Load JSON fixture."""
+    with resources.files("cds.modules.fixtures").joinpath(f"data/{filename}").open(
+        "r"
+    ) as fp:
         content = json.load(fp)
     return content
 
