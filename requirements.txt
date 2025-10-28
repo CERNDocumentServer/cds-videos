@@ -107,7 +107,7 @@ invenio-records-files==1.2.1
 invenio-records-rest==2.4.1
 invenio-records-ui==1.2.2
 invenio-rest==1.5.0
-invenio-search==2.4.1
+invenio-search==2.4.2
 invenio-search-ui==2.9.1
 invenio-sequencegenerator==1.0.0a3
 invenio-stats==4.2.1
