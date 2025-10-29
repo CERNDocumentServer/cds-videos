@@ -45,3 +45,16 @@ def test_legacy_record_redirection(app, video_published):
         response = client.get("/legacy/record/654321")
         assert response.status_code == 404
 
+        # --- Embed redirection ---
+        expected_embed_location = (
+            f"{app.config['SITE_URL']}/record/{recid_pid.pid_value}/embed"
+        )
+
+        url_embed = f"/legacy/record/{LEGACY_RECID}/embed"
+        response = client.get(url_embed, follow_redirects=False)
+        assert response.status_code == 301
+        assert response.location == expected_embed_location
+
+        # --- Not found case ---
+        response = client.get("/legacy/record/654321/embed")
+        assert response.status_code == 404
