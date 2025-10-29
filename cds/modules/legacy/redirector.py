@@ -46,3 +46,15 @@ def legacy_record_redirect(legacy_id):
 
     url_path = f"{current_app.config['SITE_URL']}/record/{pid.pid_value}"
     return redirect(url_path, HTTP_MOVED_PERMANENTLY)
+
+
+@blueprint.route("/record/<legacy_id>/embed", strict_slashes=False)
+def legacy_record_embed_redirect(legacy_id):
+    """Redirect legacy recid to record embed view."""
+    try:
+        pid = get_pid_by_legacy_recid(legacy_id)
+    except NoResultFound:
+        abort(404)
+
+    url_path = f"{current_app.config['SITE_URL']}/record/{pid.pid_value}/embed"
+    return redirect(url_path, HTTP_MOVED_PERMANENTLY)
