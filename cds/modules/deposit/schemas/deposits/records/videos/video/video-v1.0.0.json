@@ -806,7 +806,26 @@
           },
           "resource_type": {
             "type": "string",
-            "enum": ["Event", "ConferencePaper", "Report", "Book"],
+            "enum": [
+              "Audiovisual",
+              "Book",
+              "Collection",
+              "ConferencePaper",
+              "DataPaper",
+              "Dataset",
+              "Event",
+              "Image",
+              "InteractiveResource",
+              "Model",
+              "PhysicalObject",
+              "Report",
+              "Service",
+              "Software",
+              "Sound",
+              "Text",
+              "Workflow",
+              "Other"
+            ],
             "description": "Type of the related resource."
           }
         }
