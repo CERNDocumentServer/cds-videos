@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.7.0 (2025-11-05)
+
+- Add `related_identifiers`, `LECTURES` category.
+
 Version 2.6.0 (2025-10-01)
 
 - Introduce video chapters for users to better describe key moments of their uploaded videos
