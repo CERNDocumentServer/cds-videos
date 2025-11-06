@@ -40,6 +40,12 @@
         },
         "updated_timestamp": {
           "type": "date"
+        },
+        "is_cds": {
+          "type": "boolean"
+        },
+        "before_COUNTER": {
+          "type": "boolean"
         }
       }
     },
