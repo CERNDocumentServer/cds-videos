@@ -97,3 +97,7 @@ video {
 .theoplayer-skin .vjs-menu-item {
   white-space: nowrap !important; // prevent line breaks
 }
+
+.theoplayer-skin .vjs-menu .vjs-menu-content * {
+  text-transform: none !important;
+}
