@@ -3,7 +3,7 @@
 <div class="cds-detail-title cds-detail-video-title">
     <h3 class="cds-title-section-decoration bt bw-1 pt-10 mb-20"><i class="fa fa-tags"></i> Keywords</h3>
   </div>
-  <div class="cds-tags">
+  <div class="cds-tags cds-keywords">
     <ul>
       <li ng-repeat="keyword in record.metadata.keywords">
         <a ng-href='/search?q=keywords.name:"{{ keyword.name }}"'>{{ keyword.name }}</a>
