@@ -267,6 +267,7 @@ a.cds-anchor:hover{
   display: inline-block;
   margin: 0 .3em .3em 0;
   padding: 0;
+  max-width: 100%;
 }
 
 .cds-tags ul li a {
@@ -285,6 +286,14 @@ a.cds-anchor:hover{
   text-decoration: none;
   -webkit-transition: .2s;
   transition: .2s;
+  max-width: 100%;
+}
+
+.cds-keywords ul li a:hover {
+  height: auto;
+  text-overflow: visible;
+  white-space: normal;
+
 }
 
 .cds-home-tags ul li a {
