@@ -104,6 +104,14 @@
       },
       "keywords": {
         "properties": {
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          },
           "source": {
             "type": "text"
           },

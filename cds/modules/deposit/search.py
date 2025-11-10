@@ -32,21 +32,19 @@ from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 from invenio_search.engine import dsl
 
+from ..records.search import query_parser_with_fields
 from ..records.utils import get_user_provides
 from .facets import deposit_facets_factory
 
 
-def deposit_search_factory(self, search, search_query_parser):
+def deposit_search_factory(_, search_obj, query_parser=None):
     """Replace default search factory to use custom facet factory."""
     from invenio_records_rest.sorter import default_sorter_factory
 
     query_string = request.values.get("q", "")
-    query_parser = (
-        dsl.Q("query_string", query=query_string) if query_string else dsl.Q()
-    )
-
+    query_parser = query_parser_with_fields(search_obj, query_string)
     try:
-        search = search.query(query_parser)
+        search = search_obj.query(query_parser)
     except SyntaxError:
         current_app.logger.debug(
             "Failed parsing query: {0}".format(request.values.get("q", "")),
@@ -55,7 +53,7 @@ def deposit_search_factory(self, search, search_query_parser):
         raise InvalidQueryRESTError()
 
     search_index = getattr(search, "_original_index", search._index)[0]
-    search, urlkwargs = deposit_facets_factory(search, search_index)
+    search, urlkwargs = deposit_facets_factory(search, search_index)  # changed from default implementation, not overridable
     search, sortkwargs = default_sorter_factory(search, search_index)
     for key, value in sortkwargs.items():
         urlkwargs.add(key, value)
@@ -92,5 +90,30 @@ class DepositVideosSearch(RecordsSearch):
 
         index = "deposits-records-videos-project"
         doc_types = None
-        fields = ("*",)
+        fields = (
+            "category",
+            "contributors.email",
+            "contributors.name",
+            "description^5",
+            "keywords.name",
+            "publication_date",
+            "report_number",
+            "title.title^10",
+            "type",
+            "videos.accelerator_experiment.project",
+            "videos.accelerator_experiment.study",
+            "videos.accelerator_experiment.experiment",
+            "videos.accelerator_experiment.accelerator",
+            "videos.accelerator_experiment.facility",
+            "videos.category",
+            "videos.contributors.email",
+            "videos.contributors.name",
+            "videos.description^5",
+            "videos.keywords.name",
+            #"videos.publication_date",  # auto-mapped as a date, and not text
+            "videos.report_number",
+            "videos.title.title^10",
+            "videos.title.subtitle",
+            "videos.type",
+        )
         default_filter = DefaultFilter(cern_filter)
