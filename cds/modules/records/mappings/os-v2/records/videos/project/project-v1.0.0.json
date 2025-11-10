@@ -9,6 +9,14 @@
       },
       "keywords": {
         "properties": {
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          },
           "value": {
             "type": "text"
           },
