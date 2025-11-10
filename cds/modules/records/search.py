@@ -25,9 +25,10 @@
 """Configuration for records search."""
 
 
-from flask import g
+from flask import current_app, g, request
 from flask_login import current_user
 from invenio_access.permissions import Permission, superuser_access
+from invenio_records_rest.errors import InvalidQueryRESTError
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
 from invenio_search.engine import dsl
@@ -79,7 +80,23 @@ class RecordVideosSearch(RecordsSearch):
 
         index = "records-videos-video"
         doc_types = None
-        fields = ("*",)
+        fields = (
+            "accelerator_experiment.project",
+            "accelerator_experiment.study",
+            "accelerator_experiment.experiment",
+            "accelerator_experiment.accelerator",
+            "accelerator_experiment.facility",
+            "category",
+            "contributors.email",
+            "contributors.name",
+            "description^5",
+            "keywords.name",
+            "publication_date",
+            "report_number",
+            "title.title^10",
+            "title.subtitle",
+            "type",
+        )
         default_filter = DefaultFilter(cern_filter)
 
 
@@ -119,3 +136,40 @@ def query_to_objects(query, cls):
     results = query.scan()
     ids = [res.meta.id for res in results]
     return cls.get_records(ids)
+
+
+def query_parser_with_fields(search_obj, qstr=None):
+    """Custom query parser with fields."""
+    if qstr:
+        extra_params = {
+            "fields": getattr(search_obj.Meta, "fields", []),
+        }
+        return dsl.Q("query_string", query=qstr, **extra_params)
+    return dsl.Q()
+
+
+def videos_search_factory(_, search_obj, query_parser=None):
+    """Custom query parser."""
+    from invenio_records_rest.facets import default_facets_factory
+    from invenio_records_rest.sorter import default_sorter_factory
+
+    query_string = request.values.get("q")
+    query_parser = query_parser_with_fields(search_obj, query_string)
+
+    try:
+        search = search_obj.query(query_parser)
+    except SyntaxError:
+        current_app.logger.debug(
+            "Failed parsing query: {0}".format(request.values.get("q", "")),
+            exc_info=True,
+        )
+        raise InvalidQueryRESTError()
+
+    search_index = getattr(search, "_original_index", search._index)[0]
+    search, urlkwargs = default_facets_factory(search, search_index)
+    search, sortkwargs = default_sorter_factory(search, search_index)
+    for key, value in sortkwargs.items():
+        urlkwargs.add(key, value)
+
+    urlkwargs.add("q", query_string)
+    return search, urlkwargs

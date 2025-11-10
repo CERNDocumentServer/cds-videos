@@ -28,7 +28,8 @@ from flask import has_request_context
 from flask_login import current_user
 from invenio_search import RecordsSearch
 from invenio_search.api import DefaultFilter
-from opensearch_dsl import Q, TermsFacet
+from invenio_search.engine import dsl
+from opensearch_dsl import TermsFacet
 
 from .permissions import admin_permission_factory
 

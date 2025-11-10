@@ -622,7 +622,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher="cds_recid",
         indexer_class=CDSRecordIndexer,
         search_class=RecordVideosSearch,
-        search_factory_imp="invenio_records_rest.query.es_search_factory",
+        search_factory_imp="cds.modules.records.search:videos_search_factory",
         record_serializers={
             "application/json": ("cds.modules.records.serializers" ":json_v1_response"),
             "application/smil": ("cds.modules.records.serializers" ":smil_v1_response"),
@@ -659,7 +659,7 @@ RECORDS_REST_ENDPOINTS = dict(
         indexer_class=CDSRecordIndexer,
         search_index="categories",
         search_class=RecordVideosSearch,
-        search_factory_imp="invenio_records_rest.query.es_search_factory",
+        search_factory_imp="cds.modules.records.search:videos_search_factory",
         record_serializers={
             "application/json": (
                 "invenio_records_rest.serializers" ":json_v1_response"
@@ -689,7 +689,7 @@ RECORDS_REST_ENDPOINTS = dict(
         indexer_class=CDSRecordIndexer,
         search_index="keywords",
         search_class=NotDeletedKeywordSearch,
-        search_factory_imp="invenio_records_rest.query.es_search_factory",
+        search_factory_imp="cds.modules.records.search:videos_search_factory",
         record_serializers={
             "application/json": (
                 "invenio_records_rest.serializers" ":json_v1_response"
@@ -1365,6 +1365,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         search_serializers={
             "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
+        search_factory_imp="cds.modules.records.search:videos_search_factory",
         list_route="/deposits/",
         indexer_class=CDSRecordIndexer,
         item_route="/deposits/<{0}:pid_value>".format(_CDSDeposit_PID),
@@ -1468,6 +1469,7 @@ DEPOSIT_REST_ENDPOINTS = dict(
         search_serializers={
             "application/json": ("invenio_records_rest.serializers" ":json_v1_search"),
         },
+        search_factory_imp="cds.modules.records.search:videos_search_factory",
         list_route="/deposits/video/",
         indexer_class=CDSRecordIndexer,
         item_route="/deposits/video/<{0}:pid_value>".format(_Video_PID),
