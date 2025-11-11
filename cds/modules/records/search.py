@@ -91,7 +91,7 @@ class RecordVideosSearch(RecordsSearch):
             "contributors.name",
             "description^5",
             "keywords.name",
-            "publication_date",
+            #"publication_date",  # auto-mapped as a date, and not text. Requires mappings change
             "report_number",
             "title.title^10",
             "title.subtitle",

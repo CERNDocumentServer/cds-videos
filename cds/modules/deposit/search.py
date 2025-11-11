@@ -96,7 +96,7 @@ class DepositVideosSearch(RecordsSearch):
             "contributors.name",
             "description^5",
             "keywords.name",
-            "publication_date",
+            #"publication_date",  # auto-mapped as a date, and not text. Requires mappings change
             "report_number",
             "title.title^10",
             "type",
@@ -110,7 +110,7 @@ class DepositVideosSearch(RecordsSearch):
             "videos.contributors.name",
             "videos.description^5",
             "videos.keywords.name",
-            #"videos.publication_date",  # auto-mapped as a date, and not text
+            #"videos.publication_date",  # auto-mapped as a date, and not text. Requires mappings change
             "videos.report_number",
             "videos.title.title^10",
             "videos.title.subtitle",
