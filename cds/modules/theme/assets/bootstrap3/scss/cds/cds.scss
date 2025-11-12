@@ -1222,6 +1222,12 @@ div[cds-search-results] {
       font-size: 14px;
     }
   }
+
+  .in-this-video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 }
 
 // Common styles for both transcript and chapter items
