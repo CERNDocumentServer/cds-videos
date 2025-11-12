@@ -516,6 +516,20 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
     return parts[0] * 3600 + parts[1] * 60 + parts[2]; // hh:mm:ss
   }
 
+  $scope.updateShareStart = function () {
+    if ($scope.share.withStart) {
+      const player = window.top.player;
+      if (player) {
+        var currentTime = window.top.player.currentTime;
+        // Set player time to $scope.share.startInput
+        $scope.share.startInput = $scope.convertToMinutesSeconds(currentTime);
+      }
+    } else {
+      $scope.share.startInput = "0:00";
+    }
+    $scope.updateShareLink();
+  };
+
   $scope.updateShareLink = function () {
     var url = window.location.href.split("?")[0];
     if ($scope.share.withStart) {
