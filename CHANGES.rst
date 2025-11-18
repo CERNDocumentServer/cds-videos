@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.9.0 (2025-11-18)
+
+- stats: add fields for migration
+- share: set start time from current player position
+- fix(in-this-video-section): align title and top line
+
 Version 2.8.0 (2025-11-05)
 
 - fix(search): restrict searches to pre-defined fields
