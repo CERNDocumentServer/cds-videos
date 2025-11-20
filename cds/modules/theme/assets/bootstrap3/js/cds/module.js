@@ -259,6 +259,24 @@ app.filter("findMaster", [
   },
 ]);
 
+// Find master video's frames in record's files
+app.filter("findFrames", [
+  "$filter",
+  function ($filter) {
+    return function (record) {
+      if (!record) return [];
+      // Get the master object
+      const master = $filter("findMaster")(record);
+      if (!master || !master.frame) return [];
+
+      // Filter out frames that are chapters
+      return master.frame.filter(function(frame) {
+        return !(frame?.tags?.is_chapter_frame);
+      });
+    };
+  },
+]);
+
 // Find closest video resolution
 app.filter("findResolution", [
   "$filter",

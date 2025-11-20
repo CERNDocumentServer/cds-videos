@@ -87,7 +87,7 @@
 <!-- /Other formats -->
 
 <!-- Frame -->
-<div ng-if="(record | findMaster).frame.length > 0" class="cds-video-subformats bt bw-1 bc-gl pt-10 pb-10">
+<div ng-if="(record | findFrames).length > 0" class="cds-video-subformats bt bw-1 bc-gl pt-10 pb-10">
   <div class="row">
     <div class="col-md-12">
       <a class="f8 display-block" ng-click="showAllFrames = !showAllFrames">
@@ -103,9 +103,9 @@
       </a>
     </div>
   </div>
-  <div ng-show="(record | findMaster).frame.length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box  mt-5">
+  <div ng-show="(record | findFrames).length > 0 && showAllFrames" class="cds-detail-download-box cds-detail-video-download-box  mt-5">
     <div class="list-group">
-      <a ng-repeat="file in (record | findMaster).frame" class="download-list-item-other" ng-href="{{ file.links.self | download }}" target="_blank">
+      <a ng-repeat="file in (record | findFrames)" class="download-list-item-other" ng-href="{{ file.links.self | download }}" target="_blank">
         {{ file.key }}
         <span class="pull-right">
           <small>{{ file.size | bytesToHumanReadable }}</small>
