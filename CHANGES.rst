@@ -25,13 +25,17 @@
 Changes
 =======
 
+Version 2.9.1 (2025-11-20)
+
+- downloads: re-added thumbnails section with chapter frames filtered out
+
 Version 2.9.0 (2025-11-18)
 
 - stats: add fields for migration
 - share: set start time from current player position
 - fix(in-this-video-section): align title and top line
 
-Version 2.8.0 (2025-11-05)
+Version 2.8.1 (2025-11-05)
 
 - fix(search): restrict searches to pre-defined fields
 - fix(keywords): overlapping on render
