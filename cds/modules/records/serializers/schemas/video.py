@@ -18,9 +18,12 @@
 # 59 Temple Place, Suite 330, Boston, MA 02D111-1307, USA.
 """Video JSON schema."""
 
+from cds.modules.records.serializers.json import (
+    CUSTOM_ALLOWED_ATTRS,
+    CUSTOM_ALLOWED_CSS,
+)
 from invenio_jsonschemas import current_jsonschemas
 from marshmallow import Schema, fields, pre_load, post_load
-from marshmallow_utils.fields import SanitizedHTML
 from ....deposit.api import Video
 from ..fields.datetime import DateString
 from .common import (
@@ -38,6 +41,7 @@ from .common import (
     OaiSchema,
     RelatedIdentifiersSchema,
     RelatedLinksSchema,
+    SanitizedHTMLWithCSS,
     StrictKeysSchema,
     TitleSchema,
     TranslationsSchema,
@@ -131,7 +135,9 @@ class VideoSchema(StrictKeysSchema):
     contributors = fields.Nested(ContributorSchema, many=True, required=True)
     copyright = fields.Nested(CopyrightSchema)
     date = DateString(required=True)
-    description = SanitizedHTML(required=True)
+    description = SanitizedHTMLWithCSS(
+        attrs=CUSTOM_ALLOWED_ATTRS, css_styles=CUSTOM_ALLOWED_CSS, required=True
+    )
     doi = DOI()
     duration = fields.Str()
     external_system_identifiers = fields.Nested(
@@ -147,7 +153,7 @@ class VideoSchema(StrictKeysSchema):
     note = fields.Str()
     publication_date = fields.Str()
     recid = fields.Number()
-    legacy_recid =fields.Number()
+    legacy_recid = fields.Number()
     related_links = fields.Nested(RelatedLinksSchema, many=True)
     report_number = fields.List(fields.Str, many=True)
     schema = fields.Str(attribute="$schema", data_key="$schema")
@@ -158,15 +164,11 @@ class VideoSchema(StrictKeysSchema):
     _curation = fields.Nested(CurationSchema)
     additional_titles = fields.List(fields.Nested(AdditionalTitlesSchema))
     additional_descriptions = fields.List(fields.Nested(AdditionalDescriptionsSchema))
-    alternate_identifiers = fields.Nested(
-        AlternateIdentifiersSchema, many=True
-    )
-    related_identifiers = fields.Nested(
-        RelatedIdentifiersSchema, many=True
-    )
+    alternate_identifiers = fields.Nested(AlternateIdentifiersSchema, many=True)
+    related_identifiers = fields.Nested(RelatedIdentifiersSchema, many=True)
     collections = fields.List(fields.Str, many=True)
     additional_languages = fields.List(fields.Str, many=True)
-    
+
     # Preservation fields
     location = fields.Str()
     original_source = fields.Str()

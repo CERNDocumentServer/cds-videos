@@ -22,6 +22,7 @@
 from marshmallow import RAISE, Schema, ValidationError, fields, validates_schema
 from marshmallow.validate import Length
 from marshmallow_utils.fields import SanitizedHTML
+from marshmallow_utils.html import sanitize_html
 
 from ...api import Keyword
 from ...resolver import keyword_resolver
@@ -220,3 +221,41 @@ class RelatedIdentifiersSchema(Schema):
     scheme = fields.Str(required=True)
     relation_type = fields.Str(required=True)
     resource_type = fields.Str()
+
+
+class SanitizedHTMLWithCSS(fields.String):
+    """Enhanced SanitizedHTML supporting inline CSS sanitization.
+
+    Fully compatible with marshmallow_utils.fields.SanitizedHTML,
+    but adds CSS.
+    """
+
+    def __init__(
+        self,
+        tags=None,
+        attrs=None,
+        css_styles=None,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param tags: Allowed HTML tags.
+        :param attrs: Allowed HTML attributes per tag.
+        :param css_styles: List of allowed CSS properties (e.g., ["color"]).
+        """
+        super().__init__(*args, **kwargs)
+
+        self.tags = tags
+        self.attrs = attrs
+        self.css_styles = css_styles
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        """Run bleach sanitize with CSS support."""
+        value = super()._deserialize(value, attr, data, **kwargs)
+
+        return sanitize_html(
+            value,
+            tags=self.tags,
+            attrs=self.attrs,
+            css_styles=self.css_styles,
+        )

@@ -32,7 +32,15 @@ from ..permissions import (
     has_read_record_permission,
 )
 from ..utils import HTMLTagRemover, parse_video_chapters, remove_html_tags
-from marshmallow_utils.html import sanitize_html
+from marshmallow_utils.html import sanitize_html, ALLOWED_HTML_ATTRS, ALLOWED_CSS_STYLES
+
+CUSTOM_ALLOWED_ATTRS = {
+    **ALLOWED_HTML_ATTRS,
+    "span": ALLOWED_HTML_ATTRS.get("span", []) + ["style"],
+    "p": ALLOWED_HTML_ATTRS.get("p", []) + ["style"],
+}
+
+CUSTOM_ALLOWED_CSS = ALLOWED_CSS_STYLES + ["color"]
 
 
 class CDSJSONSerializer(JSONSerializer):
@@ -60,7 +68,11 @@ class CDSJSONSerializer(JSONSerializer):
             if "description" in metadata:
                 description = metadata["description"]
                 description = self.html_tag_remover.unescape(description)
-                metadata["description"] = sanitize_html(description)
+                metadata["description"] = sanitize_html(
+                    description,
+                    attrs=CUSTOM_ALLOWED_ATTRS,
+                    css_styles=CUSTOM_ALLOWED_CSS,
+                )
 
             if "translations" in metadata:
                 for t in metadata["translations"]:
@@ -108,12 +120,12 @@ class CDSJSONSerializer(JSONSerializer):
             except KeyError:
                 # ignore error if keys are missing in the metadata
                 pass
-            
-            description = metadata.get('description', '')
+
+            description = metadata.get("description", "")
             if description:
-                metadata['chapters'] = parse_video_chapters(description)
+                metadata["chapters"] = parse_video_chapters(description)
             else:
-                metadata['chapters'] = []
+                metadata["chapters"] = []
 
         return result
 
