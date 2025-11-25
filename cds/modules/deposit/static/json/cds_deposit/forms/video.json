@@ -18,6 +18,11 @@
             "enterMode": 2,
             "entities": false,
             "height": 200,
+            "allowedContent": true,
+            "forcePasteAsPlainText": false,
+            "extraAllowedContent": "*{color}; *[style]",
+            "disableAutoInline": true,
+            "extraPlugins": "colorbutton",
             "toolbar": [
               [
                 "PasteText",
@@ -30,6 +35,9 @@
                 "-",
                 "Subscript",
                 "Superscript"
+              ],
+              [
+                "TextColor"
               ],
               [
                 "NumberedList",
