@@ -97,6 +97,7 @@ theme = WebpackThemeBundle(
                 "angular-schema-form-ckeditor": "git+https://github.com/CERNDocumentServer/cds-videos-angular-schema-ckeditor",
                 "ckeditor": "4.12.1",
                 "rr-ng-ckeditor": "~0.2.1",
+                "dompurify": "^2.4.5",
                 # needed because ci fails on tests otherwise. not imported in any bundle
                 "semantic-ui-less": "^2.4.1",
                 "vtt.js": "~0.13.0",

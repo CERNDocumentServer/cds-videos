@@ -28,6 +28,7 @@ import "angular-ui-sortable";
 
 // CKEditor
 import "ckeditor";
+import "../ckeditor-sanitizer";
 import "rr-ng-ckeditor/ng-ckeditor";
 import "angular-schema-form-ckeditor/bootstrap-ckeditor";
 
