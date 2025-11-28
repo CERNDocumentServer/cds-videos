@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.9.2 (2025-11-28)
+
+- deposit: add CKEditor `Source` back and sanitize HTML using DOMPurify
+- dependencies: add DOMPurify (MPL-2.0) for HTML sanitization
+- sanitizer: allow style attribute for description
+
 Version 2.9.1 (2025-11-20)
 
 - downloads: re-added thumbnails section with chapter frames filtered out
