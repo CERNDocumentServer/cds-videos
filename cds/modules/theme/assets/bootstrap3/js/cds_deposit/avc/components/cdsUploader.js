@@ -284,7 +284,12 @@ function cdsUploaderCtrl(
 
       // Filter out files without a valid MIME type or with zero size
       _files = _files.filter((file) => {
-        if (!file.type || file.type.trim() === "") {
+        // Allow SRT and VTT files even if they don't have a MIME type
+        var fileName = file.name.toLowerCase();
+        var isSubtitleFile =
+          fileName.endsWith(".vtt") || fileName.endsWith(".srt");
+
+        if ((!file.type || file.type.trim() === "") && !isSubtitleFile) {
           toaster.pop(
             "warning",
             "Invalid File Type",
@@ -544,13 +549,14 @@ function cdsUploaderCtrl(
   this.validateSubtitles = function (_file) {
     // Check if the filename matches the pattern and is a valid ISO language
     // i.e. jessica_jones-en.vtt
-    var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2}).vtt/) || [];
+    var match = _file.name.match(/(?:.+)[_|-]([a-zA-Z]{2})\.(vtt|srt)/) || [];
     return match.length > 1 && match[1] in isoLanguages;
   };
 
   this.validateAdditionalFiles = function (_file) {
-    // If it's a .vtt file, validate as subtitle
-    if (_file.name.toLowerCase().endsWith(".vtt")) {
+    // If it's a .vtt or .srt file, validate as subtitle
+    var fileName = _file.name.toLowerCase();
+    if (fileName.endsWith(".vtt") || fileName.endsWith(".srt")) {
       return this.validateSubtitles(_file);
     }
     // Accept other types
