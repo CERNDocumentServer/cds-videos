@@ -26,14 +26,18 @@
 
 import re
 import mimetypes
+import tempfile
+import os
+import shutil
 
 from invenio_base.signals import app_loaded
 from invenio_db import db
-from invenio_files_rest.models import ObjectVersionTag
+from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_files_rest.signals import file_uploaded
 from invenio_files_rest.errors import InvalidKeyError
 from invenio_indexer.signals import before_record_index
 from invenio_records_files.utils import sorted_files_from_bucket
+from srt_to_vtt import srt_to_vtt
 
 from ..invenio_deposit.signals import post_action
 from .indexer import cdsdeposit_indexer_receiver
@@ -45,16 +49,66 @@ from .receivers import (
 )
 
 
+def _create_vtt_from_srt(srt_obj):
+    """Create a VTT file from an SRT file.
+
+    :param srt_obj: ObjectVersion of the SRT file
+    :returns: ObjectVersion of the created VTT file or None
+    """
+    # Generate VTT filename from SRT filename
+    vtt_key = srt_obj.key.rsplit(".", 1)[0] + ".vtt"
+
+    # Check if VTT file already exists
+    existing_vtt = ObjectVersion.get(srt_obj.bucket_id, vtt_key)
+    if existing_vtt:
+        # If it exists, skip
+        return existing_vtt
+
+    # Ensure the SRT file has a file instance
+    if not srt_obj.file or not srt_obj.file.uri:
+        return None
+
+    srt_path = srt_obj.file.uri
+    tmp_dir = None
+    try:
+        # Create temporary directory for VTT file
+        tmp_dir = tempfile.mkdtemp()
+        vtt_path = os.path.join(tmp_dir, vtt_key)
+
+        # Convert using srt-to-vtt library
+        srt_to_vtt(srt_path, vtt_path)
+
+        # Create VTT ObjectVersion
+        vtt_obj = ObjectVersion.create(
+            bucket=srt_obj.bucket,
+            key=vtt_key,
+            stream=open(vtt_path, "rb"),
+            size=os.path.getsize(vtt_path),
+        )
+        _create_tags(vtt_obj)
+        return vtt_obj
+    except (OSError, IOError, AttributeError, Exception):
+        return None
+    finally:
+        # Clean up temporary directory
+        if tmp_dir and os.path.exists(tmp_dir):
+            try:
+                shutil.rmtree(tmp_dir)
+            except OSError:
+                pass
+
+
 def _create_tags(obj):
     """Create additional tags for file."""
     pattern_subtitle = re.compile(r".*_([a-zA-Z]{2})\.vtt$")
     pattern_poster = re.compile(r"^poster\.(jpg|png)$")
-    
+
     # Get the media_type and content_type(file ext)
     file_name = obj.key
     mimetypes.add_type("subtitle/vtt", ".vtt")
+    mimetypes.add_type("text/srt", ".srt")
     guessed_type = mimetypes.guess_type(file_name)[0]
-    if guessed_type is None:        
+    if guessed_type is None:
         raise InvalidKeyError(description=f"Unsupported File: {file_name}")
 
     media_type = guessed_type.split("/")[0]
@@ -73,7 +127,13 @@ def _create_tags(obj):
             # other tags
             ObjectVersionTag.create_or_update(obj, "content_type", "vtt")
             ObjectVersionTag.create_or_update(obj, "context_type", "subtitle")
-        # poster tag 
+        elif file_ext == "srt":
+            # Create VTT version from SRT
+            try:
+                _create_vtt_from_srt(obj)
+            except Exception:
+                pass
+        # poster tag
         elif pattern_poster.match(file_name):
             ObjectVersionTag.create_or_update(obj, "context_type", "poster")
 

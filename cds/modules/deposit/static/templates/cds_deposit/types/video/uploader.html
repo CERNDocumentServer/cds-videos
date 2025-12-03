@@ -148,8 +148,8 @@
         ngf-model-options="{allowInvalid: false}"
         ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
         ngf-select=""
-        ngf-pattern="'.vtt'"
-        ngf-accept="'.vtt'"
+        ngf-pattern="'.vtt,.srt'"
+        ngf-accept="'.vtt,.srt'"
         ngf-validate-fn="$ctrl.validateSubtitles($file)"
         ngf-max-size="500GB"
       ><i class="fa fa-plus-square"></i></a>
@@ -167,8 +167,8 @@
   ng-if="!$ctrl.cdsDepositCtrl.isPublished()"
   ngf-select=""
   ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
-  ngf-pattern="'.vtt'"
-  ngf-accept="'text/vtt'"
+  ngf-pattern="'.vtt,.srt'"
+  ngf-accept="'text/vtt,.vtt,.srt'"
   ngf-validate-fn="$ctrl.validateSubtitles($file)"
   ngf-max-size="500GB"
   ngf-multiple="true"
@@ -183,15 +183,15 @@
         ngf-model-options="{allowInvalid: false}"
         ngf-change="$ctrl.addFiles($newFiles, $invalidFiles)"
         ngf-select=""
-        ngf-pattern="'.vtt'"
-        ngf-accept="'.vtt'"
+        ngf-pattern="'.vtt,.srt'"
+        ngf-accept="'.vtt,.srt'"
         ngf-validate-fn="$ctrl.validateSubtitles($file)"
-        ngf-max-size="500GB">select</a> <mark>.vtt</mark> files.
+        ngf-max-size="500GB">select</a> <mark>.vtt</mark> or <mark>.srt</mark> files.
         <hr class="my-10" />
         <div class="text-muted text-left">
           <h5 class="text-muted"><strong>Tips and suggestions</strong></h5>
           <ul>
-            <li>Subtitle filename should have a valid ISO language code. Example: <mark>subtitles_fr.vtt</mark> </li>
+            <li>Subtitle filename should have a valid ISO language code. Example: <mark>subtitles_fr.vtt</mark> or <mark>subtitles_fr.srt</mark> </li>
           </ul>
         </div>
     </p>
