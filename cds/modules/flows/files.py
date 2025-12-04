@@ -85,16 +85,18 @@ def dispose_object_version(object_version):
 
 
 @contextmanager
-def move_file_into_local(obj, delete=True):
+def move_file_into_local(obj, delete=True, tmp_dir=None):
     """Move file from XRootD accessed file system into a local path
 
     :param obj: Object version to make locally available.
     :param delete: Whether or not the tmp file should be deleted on exit.
     """
+    if not tmp_dir:
+        tmp_dir = current_app.config["CDS_FILES_TMP_FOLDER"]
     if os.path.exists(obj.file.uri):
         yield obj.file.uri
     else:
-        tmp_path = os.path.join(current_app.config["CDS_FILES_TMP_FOLDER"], str(obj.file_id))
+        tmp_path = os.path.join(tmp_dir, str(obj.file_id))
         if not os.path.exists(tmp_path):
             os.makedirs(tmp_path)
 
