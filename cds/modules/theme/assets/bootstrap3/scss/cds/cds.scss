@@ -1465,3 +1465,83 @@ div[cds-search-results] {
   border-bottom: 1px solid #888;
   color: #333333;
 }
+
+/* Dark clickable overlay */
+.chapter-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9998;
+}
+
+/* Centering container (also click-to-close) */
+.chapter-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chapter-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chapter-modal-image {
+  max-width: 80vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.chapter-modal-close {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+.chapter-modal-arrow {
+  position: absolute;
+  top: 50%;
+  font-size: 48px;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.chapter-modal-arrow:hover {
+  opacity: 0.6;
+}
+
+.chapter-modal-arrow.left {
+  left: -40px;
+}
+
+.chapter-modal-arrow.right {
+  right: -40px;
+}
+
+/* Caption */
+.chapter-modal-caption {
+  margin-top: 12px;
+  text-align: center;
+  color: white;
+}
+
+.chapter-modal-caption .title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chapter-modal-caption .time {
+  opacity: 0.8;
+  font-size: 14px;
+}

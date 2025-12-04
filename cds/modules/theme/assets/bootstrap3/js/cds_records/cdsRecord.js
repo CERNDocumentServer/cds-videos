@@ -64,11 +64,72 @@ function cdsRecordController($scope, $sce, $http, $timeout, $filter) {
   $scope.shortDescription = "";
   $scope.fullDescription = "";
   $scope.chapterFrames = {};
+  $scope.chapterModal = {
+    open: false,
+    index: 0,
+    currentChapter: null,
+    currentFrameUrl: null,
+  };
 
   const REQUEST_HEADERS = {
     "Content-Type": "application/json",
     "X-CSRFToken": getCookie("csrftoken"),
   };
+
+  // Open modal at specific chapter index
+  $scope.openChapterModal = function (index) {
+    $scope.chapterModal.index = index;
+    $scope.chapterModal.open = true;
+    $scope.updateChapterModalContent();
+  };
+
+  // Close modal
+  $scope.closeChapterModal = function () {
+    $scope.chapterModal.open = false;
+  };
+
+  // Build IIIF frame URL
+  $scope.getFrameUrl = function (frame) {
+    console.log("Getting frame URL for", frame);
+    if (!frame) return null;
+    return `/api/iiif/v2/${frame.bucket_id}:${frame.version_id}:${frame.key}/full/full/0/default.jpg`;
+  };
+
+  // Update modal contents after navigation
+  $scope.updateChapterModalContent = function () {
+    const chapter = $scope.chapters[$scope.chapterModal.index];
+    const frame = $scope.chapterFrames[chapter.seconds];
+    $scope.chapterModal.currentChapter = chapter;
+    $scope.chapterModal.currentFrameUrl = $scope.getFrameUrl(frame);
+  };
+
+  // Navigation
+  $scope.nextChapter = function ($event) {
+    $event.stopPropagation(); // prevent closing modal
+    if ($scope.chapterModal.index < $scope.chapters.length - 1) {
+      $scope.chapterModal.index++;
+      $scope.updateChapterModalContent();
+    }
+  };
+
+  $scope.prevChapter = function ($event) {
+    $event.stopPropagation();
+    if ($scope.chapterModal.index > 0) {
+      $scope.chapterModal.index--;
+      $scope.updateChapterModalContent();
+    }
+  };
+
+  // Keyboard navigation for modal
+  document.addEventListener("keydown", function (e) {
+    if (!$scope.chapterModal.open) return;
+
+    if (e.key === "ArrowRight") {
+      $scope.$apply(() => $scope.nextChapter(e));
+    } else if (e.key === "ArrowLeft") {
+      $scope.$apply(() => $scope.prevChapter(e));
+    }
+  });
 
   $scope.scrollToElement = function (id) {
     setTimeout(function () {
