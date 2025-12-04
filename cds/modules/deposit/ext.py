@@ -39,6 +39,7 @@ from invenio_indexer.signals import before_record_index
 from invenio_records_files.utils import sorted_files_from_bucket
 from srt_to_vtt import srt_to_vtt
 
+from ..flows.files import move_file_into_local
 from ..invenio_deposit.signals import post_action
 from .indexer import cdsdeposit_indexer_receiver
 from .receivers import (
@@ -68,25 +69,26 @@ def _create_vtt_from_srt(srt_obj):
     if not srt_obj.file or not srt_obj.file.uri:
         return None
 
-    srt_path = srt_obj.file.uri
     tmp_dir = None
     try:
-        # Create temporary directory for VTT file
+        # Create temporary directory for SRT and VTT file
         tmp_dir = tempfile.mkdtemp()
         vtt_path = os.path.join(tmp_dir, vtt_key)
 
-        # Convert using srt-to-vtt library
-        srt_to_vtt(srt_path, vtt_path)
+        with move_file_into_local(srt_obj, tmp_dir=tmp_dir) as local_srt_path:
+            # Convert using srt-to-vtt library
+            srt_to_vtt(local_srt_path, vtt_path)
 
-        # Create VTT ObjectVersion
-        vtt_obj = ObjectVersion.create(
-            bucket=srt_obj.bucket,
-            key=vtt_key,
-            stream=open(vtt_path, "rb"),
-            size=os.path.getsize(vtt_path),
-        )
-        _create_tags(vtt_obj)
-        return vtt_obj
+            # Create VTT ObjectVersion
+            vtt_obj = ObjectVersion.create(
+                bucket=srt_obj.bucket,
+                key=vtt_key,
+                stream=open(vtt_path, "rb"),
+                size=os.path.getsize(vtt_path),
+            )
+            _create_tags(vtt_obj)
+
+            return vtt_obj
     except (OSError, IOError, AttributeError, Exception):
         return None
     finally:
