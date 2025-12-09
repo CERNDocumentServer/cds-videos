@@ -25,7 +25,7 @@ click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
 commonmark==0.9.1
-counter-robots==2018.6
+counter-robots==2025.11
 cryptography==44.0.0
 datacite==1.2.0
 dcxml==0.1.1
