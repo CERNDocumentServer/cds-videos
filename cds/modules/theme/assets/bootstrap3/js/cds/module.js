@@ -809,6 +809,13 @@ app.filter("assembleShareURL", [
   },
 ]);
 
+// Escape double quotes filter
+app.filter("escapeDoubleQuotes", function () {
+  return function (text) {
+    return text ? text.replace(/"/g, '\\"') : text;
+  };
+});
+
 
 angular.module("cds").directive("bootstrapInvenioSearch", function () {
   return {
