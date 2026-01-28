@@ -6,7 +6,7 @@
   <div class="cds-tags cds-keywords">
     <ul>
       <li ng-repeat="keyword in record.metadata.keywords">
-        <a ng-href='/search?q=keywords.name:"{{ keyword.name }}"'>{{ keyword.name }}</a>
+        <a ng-href='/search?q=keywords.name:"{{ keyword.name.replace(/"/g, '\\"') }}"'>{{ keyword.name }}</a>
       </li>
     </ul>
   </div>
