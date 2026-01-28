@@ -25,6 +25,13 @@
 Changes
 =======
 
+Version 2.10.0 (2026-01-28)
+
+- fix(keywords): escape double quotes on keyword name
+- fix(stats): remove double variable assignment
+- requirements: bump counter-robots lib
+- subtitles: support srt files and convert to vtt
+
 Version 2.9.2 (2025-11-28)
 
 - deposit: add CKEditor `Source` back and sanitize HTML using DOMPurify
