@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.10.1 (2026-01-28)
+
+- fix(keywords): syntax error on escape double quotes on keyword name
+
 Version 2.10.0 (2026-01-28)
 
 - fix(keywords): escape double quotes on keyword name
