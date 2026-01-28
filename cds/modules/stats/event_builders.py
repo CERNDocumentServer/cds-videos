@@ -16,7 +16,6 @@ from invenio_stats.utils import get_user
 
 def file_download_event_builder(event, sender_app, obj=None, record=None, **kwargs):
     """Build a file-download event."""
-    tags = obj.get_tags()
     # File information
     content_type = splitext(obj.key)[1][1:].lower()
     tags = obj.get_tags()
@@ -56,7 +55,6 @@ def media_record_view_event_builder(event, sender_app, obj=None, record=None, **
 
     This is the event tracking users clicking the play button on videos.
     """
-    tags = obj.get_tags()
     # File information
     content_type = splitext(obj.key)[1][1:].lower()
     tags = obj.get_tags()
