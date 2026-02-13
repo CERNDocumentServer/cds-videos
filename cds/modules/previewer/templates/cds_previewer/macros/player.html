@@ -201,6 +201,130 @@
             player.currentTime = startTime;
         }
       })();
+
+      // Keyboard shortcuts
+      (function() {
+        var SEEK_STEP = 5;
+        var VOLUME_STEP = 0.05;
+
+        function togglePlay() {
+          if (player.paused) {
+            player.play();
+          } else {
+            player.pause();
+          }
+        }
+
+        function rewind() {
+          var timeToSeek = Math.max(0, player.currentTime - SEEK_STEP);
+          player.currentTime = timeToSeek;
+        }
+
+        function forward() {
+          var timeToSeek = Math.min(player.duration || 0, player.currentTime + SEEK_STEP);
+          player.currentTime = timeToSeek;
+        }
+
+        function increaseVolume() {
+          player.volume = Math.min(1, player.volume + VOLUME_STEP);
+        }
+
+        function decreaseVolume() {
+          player.volume = Math.max(0, player.volume - VOLUME_STEP);
+        }
+
+        function toggleFullScreen() {
+          if (player.presentation.currentMode === 'fullscreen') {
+            player.presentation.requestMode('inline');
+          } else {
+            player.presentation.requestMode('fullscreen');
+          }
+        }
+
+        function toggleSubtitles() {
+          var tracks = player.textTracks;
+          for (var i = 0; i < tracks.length; i++) {
+            var t = tracks[i];
+            if (t.kind === 'subtitles' || t.kind === 'captions') {
+              t.mode = (t.mode === 'showing') ? 'hidden' : 'showing';
+              return;
+            }
+          }
+        }
+
+        function toggleMute() {
+          player.muted = !player.muted;
+        }
+
+        function handleKeydown(e) {
+          // Ignore typing in form fields
+          var tag = (e.target.tagName || '').toLowerCase();
+          if (
+            tag === 'input' ||
+            tag === 'textarea' ||
+            tag === 'select' ||
+            e.target.isContentEditable
+          ) {
+            return;
+          }
+
+          var key = e.key;
+          var action = false;
+
+          switch (key) {
+            case ' ':
+            case 'Spacebar': // legacy support
+              togglePlay();
+              action = true;
+              break;
+
+            case 'ArrowLeft':
+              rewind();
+              action = true;
+              break;
+
+            case 'ArrowRight':
+              forward();
+              action = true;
+              break;
+
+            case 'ArrowUp':
+              increaseVolume();
+              action = true;
+              break;
+
+            case 'ArrowDown':
+              decreaseVolume();
+              action = true;
+              break;
+
+            case 'f':
+            case 'F':
+              toggleFullScreen();
+              action = true;
+              break;
+
+            case 'c':
+            case 'C':
+              toggleSubtitles();
+              action = true;
+              break;
+
+            case 'm':
+            case 'M':
+              toggleMute();
+              action = true;
+              break;
+          }
+
+          if (action) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+
+        document.addEventListener('keydown', handleKeydown);
+      })();
     </script>
   {% endif %}
 {%- endmacro %}
