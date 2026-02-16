@@ -158,7 +158,7 @@ def test_records_rest(
         res = client.get(url2, headers=json_headers)
         assert res.status_code == 200
         video_dict = json.loads(res.data.decode("utf-8"))
-        assert video_dict["metadata"]["title"]["title"] == "My english title"
+        assert video_dict["metadata"]["title"]["title"] == "My <b>english</b> title"
         expect_desc = "in tempor reprehenderit enim eiusmod <b><i>html</i></b>"
         assert video_dict["metadata"]["description"] == expect_desc
 

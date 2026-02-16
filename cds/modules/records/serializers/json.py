@@ -31,7 +31,7 @@ from ..permissions import (
     has_read_record_eos_path_permission,
     has_read_record_permission,
 )
-from ..utils import HTMLTagRemover, parse_video_chapters, remove_html_tags
+from ..utils import HTMLTagRemover, parse_video_chapters
 from marshmallow_utils.html import sanitize_html, ALLOWED_HTML_ATTRS, ALLOWED_CSS_STYLES
 
 CUSTOM_ALLOWED_ATTRS = {
@@ -61,9 +61,6 @@ class CDSJSONSerializer(JSONSerializer):
             if "title" in metadata and "title" in metadata["title"]:
                 title = metadata["title"]["title"]
                 title = self.html_tag_remover.unescape(title)
-                metadata["title"]["title"] = remove_html_tags(
-                    self.html_tag_remover, title
-                )
 
             if "description" in metadata:
                 description = metadata["description"]
@@ -79,9 +76,6 @@ class CDSJSONSerializer(JSONSerializer):
                     if "title" in t and "title" in t["title"]:
                         t_title = t["title"]["title"]
                         t_title = self.html_tag_remover.unescape(t_title)
-                        t["title"]["title"] = remove_html_tags(
-                            self.html_tag_remover, t_title
-                        )
 
                     if "description" in t:
                         t_desc = t["description"]
