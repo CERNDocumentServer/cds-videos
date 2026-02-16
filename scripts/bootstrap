@@ -29,6 +29,7 @@ script_path=$(dirname "$0")
 
 requirements_file=${1:-'requirements.txt'}
 
+pip install "setuptools<82"
 pip install -r $requirements_file
 pip install -e . --upgrade
 
