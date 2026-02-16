@@ -191,20 +191,13 @@ def test_cds_json_serializer_sanitization(video_record_metadata):
     assert 'Safe content' in description
     # Keep safe HTML tags like <b>
     assert '<b>bold</b>' in description
-    
-    # Remove everything in title
+
+    # Title: only unescape, no HTML tag removal
     title = result['metadata']['title']['title']
-    assert '<script>' not in title
-    assert '</script>' not in title
     assert 'Test' in title and 'Title' in title
-    assert '<b>' not in title
-    
-    # --- Translations checks ---
+    assert '<b>bold</b>' in title
+
+    # Translations: descriptions sanitized, titles only unescaped
     translations = result['metadata']['translations']
     for tr in translations:
-        # description
         assert '<script>' not in tr['description']
-        # title
-        assert '<script>' not in tr['title']['title']
-        assert '<b>' not in tr['title']['title']
-
