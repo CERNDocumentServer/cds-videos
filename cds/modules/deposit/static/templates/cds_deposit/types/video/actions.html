@@ -42,21 +42,21 @@
       <i class="fa fa-trash-o"></i>
     </button>
     <button
-      ng-hide='$ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isPristine()'
-      ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+      ng-hide='$ctrl.cdsDepositCtrl.isPublished()'
+      ng-disabled="$ctrl.cdsDepositCtrl.isPristine() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-sm btn-success"
       ng-click="$ctrl.actionHandler('SAVE_PARTIAL')">
       {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Saving ...' : 'Save' }}
     </button>
     <button
-      ng-hide='$ctrl.cdsDepositCtrl.currentDepositStatus !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
+      ng-hide='$ctrl.cdsDepositCtrl.currentDepositStatus !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished()'
       ng-disabled="!$ctrl.cdsDepositCtrl.framesReady ||$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading || $ctrl.cdsDepositCtrl.currentDepositStatus !== $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS"
       class="btn btn-sm btn-primary "
       ng-click="$ctrl.actionHandler(['SAVE', 'PUBLISH']);$ctrl.cdsDepositCtrl.changeShowAll(true)">
       {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Publishing ...' : 'Publish' }}
     </button>
     <button
-      ng-hide='$ctrl.cdsDepositCtrl.currentDepositStatus === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished() || $ctrl.cdsDepositCtrl.isDirty()'
+      ng-hide='$ctrl.cdsDepositCtrl.currentDepositStatus === $ctrl.cdsDepositCtrl.depositStatuses.SUCCESS || $ctrl.cdsDepositCtrl.isPublished()'
       ng-disabled="!$ctrl.cdsDepositCtrl.framesReady ||$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
       class="btn btn-sm btn-primary"
       ng-click="form.publishInfoShown = true">

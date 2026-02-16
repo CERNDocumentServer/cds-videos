@@ -1,12 +1,12 @@
 <button
-  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isPristine()'
-  ng-disabled="$ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
+  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'
+  ng-disabled="$ctrl.cdsDepositCtrl.isPristine() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
   class="btn btn-sm btn-success"
   ng-click="$ctrl.saveAllPartial()">
 {{ $ctrl.cdsDepositCtrl.actionLoading ? 'Saving ...' : 'Save Project and Videos' }}
 </button>
 <button
-  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published" || $ctrl.cdsDepositCtrl.isDirty()'
+  ng-hide='$ctrl.cdsDepositCtrl.record._deposit.status == "published"'
   ng-disabled="$ctrl.cdsDepositCtrl.isInvalid() || $ctrl.cdsDepositCtrl.cdsDepositsCtrl.loading"
   class="btn btn-sm btn-primary"
   ng-click="$ctrl.actionHandler('PUBLISH')">
