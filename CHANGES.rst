@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.11.0 (2026-02-17)
+
+- player: add keyboard shortcuts
+- ui: always display edit and publish buttons
+- fix(serializer): do not remove HTML tags for titles
+
 Version 2.10.1 (2026-01-28)
 
 - fix(keywords): syntax error on escape double quotes on keyword name
