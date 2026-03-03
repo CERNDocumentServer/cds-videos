@@ -207,7 +207,7 @@ watchdog==2.2.1
 wcwidth==0.2.13
 webargs==5.5.3
 webencodings==0.5.1
-Werkzeug==2.2.3
+Werkzeug==3.0.6
 wrapt==1.17.0
 WTForms==2.3.3
 WTForms-Alchemy==0.18.0
