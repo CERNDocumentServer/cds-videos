@@ -25,16 +25,15 @@
 """Initialization of XRootD."""
 
 
-from pkg_resources import DistributionNotFound, get_distribution
+from importlib import metadata
 
 try:
-    # Import XRootDPyFS if available so opener gets registered on
-    # PyFilesystem.
-    get_distribution("xrootdpyfs")
+    # Check if xrootdpyfs is installed
+    metadata.version("xrootdpyfs")
     import xrootdpyfs  # noqa
 
     XROOTD_ENABLED = True
-except DistributionNotFound:
+except metadata.PackageNotFoundError:
     XROOTD_ENABLED = False
     xrootdpyfs = None
 
