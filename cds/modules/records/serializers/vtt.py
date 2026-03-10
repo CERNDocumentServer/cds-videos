@@ -102,5 +102,5 @@ class VTT(object):
     def time_format(seconds):
         """Helper function to convert seconds to vtt time format."""
         d = datetime.utcfromtimestamp(seconds)
-        s = d.strftime("%M:%S.%f")
+        s = d.strftime("%H:%M:%S.%f")
         return s[:-3]
