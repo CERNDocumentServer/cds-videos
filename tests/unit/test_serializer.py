@@ -87,7 +87,7 @@ def test_vtt_serializer(video_record_metadata):
     ]
 
     # Check first and last timestamp
-    assert start_times[0] == "00:00.000"
+    assert start_times[0] == "00:00:00.000"
     assert end_times[-1] == VTT.time_format(
         float(video_record_metadata["_files"][0]["tags"]["duration"])
     )
