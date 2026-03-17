@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.11.1 (2026-03-17)
+
+- fix(serializer): include hours in VTT timestamp formatting
+
 Version 2.11.0 (2026-02-17)
 
 - player: add keyboard shortcuts
