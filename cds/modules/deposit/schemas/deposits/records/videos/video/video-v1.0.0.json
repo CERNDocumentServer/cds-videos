@@ -690,6 +690,9 @@
               },
               "source": {
                 "type": "string"
+              },
+              "description": {
+                "type": "string"
               }
             }
           }
@@ -724,6 +727,126 @@
               "items": {
                 "type": "string"
               }
+            },
+            "020": {
+              "title": "Tag 020.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "digitized_description": {
+          "title": "Digitized description.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_language": {
+          "title": "Digitized language.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_keywords": {
+          "title": "Digitized keywords.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_imprint_date": {
+          "title": "Digitized imprint date.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_notes": {
+          "title": "Digitized notes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_subject_categories": {
+          "title": "Digitized subject categories.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cds_modification_field": {
+          "title": "CDS modification field.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_comments": {
+          "title": "Digitized comments.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_data_quality_note": {
+          "title": "Digitized data quality note.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_filmed_people": {
+          "title": "Digitized filmed people.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_access": {
+          "title": "Digitized access.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_physical_description": {
+          "title": "Digitized physical description.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "digitized_preservation": {
+          "title": "Digitized preservation metadata.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "format": { "type": "string" },
+              "institution": { "type": "string" },
+              "batch": { "type": "string" },
+              "sequence_identifier": { "type": "string" },
+              "action": { "type": "string" },
+              "digitization_setup": { "type": "string" },
+              "date": { "type": "string" },
+              "preservation_notes": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "workflow": { "type": "string" },
+              "vendor": { "type": "string" },
+              "title": { "type": "string" },
+              "duration_value": { "type": "string" },
+              "duration_unit": { "type": "string" },
+              "related_record": { "type": "string" },
+              "timing_note": { "type": "string" },
+              "quality_control_note": { "type": "string" }
             }
           }
         }

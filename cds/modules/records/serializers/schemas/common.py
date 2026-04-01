@@ -174,6 +174,7 @@ class LegacyMARCFieldsSchema(Schema):
     tag_583 = fields.List(fields.Str(), data_key="583")
     tag_306 = fields.List(fields.Str(), data_key="306")
     tag_088 = fields.List(fields.Str(), data_key="088")
+    tag_020 = fields.List(fields.Str(), data_key="020")
 
 
 class DigitizedMetadataSchema(Schema):
@@ -184,6 +185,27 @@ class DigitizedMetadataSchema(Schema):
     nonpublic_note = fields.Str()
     md5_checksum = fields.Str()
     source = fields.Str()
+    description = fields.Str()
+
+
+class DigitizedPreservationMetadataSchema(Schema):
+    source = fields.Str()
+    format = fields.Str()
+    institution = fields.Str()
+    batch = fields.Str()
+    sequence_identifier = fields.Str()
+    action = fields.Str()
+    digitization_setup = fields.Str()
+    date = fields.Str()
+    preservation_notes = fields.List(fields.Str())
+    workflow = fields.Str()
+    vendor = fields.Str()
+    title = fields.Str()
+    duration_value = fields.Str()
+    duration_unit = fields.Str()
+    related_record = fields.Str()
+    timing_note = fields.Str()
+    quality_control_note = fields.Str()
 
 
 class CurationSchema(StrictKeysSchema):
@@ -197,7 +219,20 @@ class CurationSchema(StrictKeysSchema):
     physical_medium = fields.List(fields.Str())
     internal_note = fields.List(fields.Str())
     legacy_marc_fields = fields.Nested(LegacyMARCFieldsSchema)
-    digitized = fields.Nested(DigitizedMetadataSchema)
+    digitized = fields.List(fields.Nested(DigitizedMetadataSchema))
+    digitized_preservation = fields.List(fields.Nested(DigitizedPreservationMetadataSchema))
+    digitized_description = fields.List(fields.Str())
+    digitized_language = fields.List(fields.Str())
+    digitized_keywords = fields.List(fields.Str())
+    digitized_imprint_date = fields.List(fields.Str())
+    digitized_notes = fields.List(fields.Str())
+    digitized_subject_categories = fields.List(fields.Str())
+    cds_modification_field = fields.List(fields.Str())
+    digitized_comments = fields.List(fields.Str())
+    digitized_data_quality_note = fields.List(fields.Str())
+    digitized_filmed_people = fields.List(fields.Str())
+    digitized_access = fields.List(fields.Str())
+    digitized_physical_description = fields.List(fields.Str())
 
 
 class AdditionalTitlesSchema(Schema):

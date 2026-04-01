@@ -397,6 +397,9 @@
               },
               "source": {
                 "type": "text"
+              },
+              "description": {
+                "type": "text"
               }
             }
           },
@@ -417,11 +420,72 @@
               },
               "088": {
                 "type": "text"
+              },
+              "020": {
+                "type": "text"
               }
             }
           },
           "legacy_dates": {
             "type": "date"
+          },
+          "digitized_description": {
+            "type": "text"
+          },
+          "digitized_language": {
+            "type": "text"
+          },
+          "digitized_keywords": {
+            "type": "text"
+          },
+          "digitized_imprint_date": {
+            "type": "text"
+          },
+          "digitized_notes": {
+            "type": "text"
+          },
+          "digitized_subject_categories": {
+            "type": "text"
+          },
+          "cds_modification_field": {
+            "type": "text"
+          },
+          "digitized_comments": {
+            "type": "text"
+          },
+          "digitized_data_quality_note": {
+            "type": "text"
+          },
+          "digitized_filmed_people": {
+            "type": "text"
+          },
+          "digitized_access": {
+            "type": "text"
+          },
+          "digitized_physical_description": {
+            "type": "text"
+          },
+          "digitized_preservation": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "text" },
+              "format": { "type": "text" },
+              "institution": { "type": "text" },
+              "batch": { "type": "text" },
+              "sequence_identifier": { "type": "text" },
+              "action": { "type": "text" },
+              "digitization_setup": { "type": "text" },
+              "date": { "type": "text" },
+              "preservation_notes": { "type": "text" },
+              "workflow": { "type": "text" },
+              "vendor": { "type": "text" },
+              "title": { "type": "text" },
+              "duration_value": { "type": "text" },
+              "duration_unit": { "type": "text" },
+              "related_record": { "type": "text" },
+              "timing_note": { "type": "text" },
+              "quality_control_note": { "type": "text" }
+            }
           }
         }
       },
