@@ -19,7 +19,15 @@
 
 """Common JSON schemas."""
 
-from marshmallow import RAISE, Schema, ValidationError, fields, validates_schema
+from marshmallow import (
+    RAISE,
+    Schema,
+    ValidationError,
+    fields,
+    post_load,
+    pre_load,
+    validates_schema,
+)
 from marshmallow.validate import Length
 from marshmallow_utils.fields import SanitizedHTML
 from marshmallow_utils.html import sanitize_html
@@ -176,6 +184,24 @@ class LegacyMARCFieldsSchema(Schema):
     tag_088 = fields.List(fields.Str(), data_key="088")
     tag_020 = fields.List(fields.Str(), data_key="020")
 
+    def _strip_tag_prefix(self, data):
+        """Shared logic to convert tag_XXX <-> XXX."""
+        transformed = {}
+        for key, value in data.items():
+            if key.startswith("tag_"):
+                transformed[key[4:]] = value
+            else:
+                transformed[key] = value
+        return transformed
+
+    @pre_load
+    def normalize_tag_keys(self, data, **kwargs):
+        return self._strip_tag_prefix(data)
+
+    @post_load
+    def restore_numeric_keys(self, data, **kwargs):
+        return self._strip_tag_prefix(data)
+
 
 class DigitizedMetadataSchema(Schema):
     url = fields.Str()
@@ -220,7 +246,9 @@ class CurationSchema(StrictKeysSchema):
     internal_note = fields.List(fields.Str())
     legacy_marc_fields = fields.Nested(LegacyMARCFieldsSchema)
     digitized = fields.List(fields.Nested(DigitizedMetadataSchema))
-    digitized_preservation = fields.List(fields.Nested(DigitizedPreservationMetadataSchema))
+    digitized_preservation = fields.List(
+        fields.Nested(DigitizedPreservationMetadataSchema)
+    )
     digitized_description = fields.List(fields.Str())
     digitized_language = fields.List(fields.Str())
     digitized_keywords = fields.List(fields.Str())
