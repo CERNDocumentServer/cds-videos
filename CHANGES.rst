@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.12.0 (2026-04-08)
+
+- schema: normalize MARC tag keys to numeric format in serializer
+- schema: add new curation fields for digitized videos
+- requirements: bump invenio-files-rest to allow range requests
+
 Version 2.11.1 (2026-03-17)
 
 - fix(serializer): include hours in VTT timestamp formatting
