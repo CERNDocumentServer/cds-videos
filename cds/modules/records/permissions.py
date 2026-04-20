@@ -293,11 +293,17 @@ def is_owner(user, record):
     return user_id == deposit_creator
 
 
+def _get_access_groups(record, *actions):
+    """Return a deduplicated lowercased list of principals across given actions."""
+    groups = set()
+    for action in actions:
+        for value in record.get("_access", {}).get(action, []):
+            groups.add(lowercase_value(value))
+    return groups
+
+
 def has_read_files_permission(user, record):
     """Check if user has read access to the record's files."""
-    # TODO: decide on files access rights
-    # Same permissions as for record itself
-
     # Allow everyone for public records
     if is_public(record, "read"):
         return True
@@ -305,11 +311,10 @@ def has_read_files_permission(user, record):
     if is_owner(user, record):
         return True
 
-    # Allow e-group members
+    # Users with update permission can also read
     user_provides = get_user_provides()
-    read_access_groups = [lowercase_value(value) for value in record["_access"]["read"]]
-
-    if not set(user_provides).isdisjoint(set(read_access_groups)):
+    allowed = _get_access_groups(record, "read", "update")
+    if not set(user_provides).isdisjoint(allowed):
         return True
 
     return has_admin_permission(user, record)
@@ -324,11 +329,10 @@ def has_read_record_permission(user, record):
     if is_owner(user, record):
         return True
 
-    # Allow e-group members
+    # Users with update permission can also read
     user_provides = get_user_provides()
-    read_access_groups = [lowercase_value(value) for value in record["_access"]["read"]]
-
-    if not set(user_provides).isdisjoint(set(read_access_groups)):
+    allowed = _get_access_groups(record, "read", "update")
+    if not set(user_provides).isdisjoint(allowed):
         return True
 
     return has_admin_permission()
