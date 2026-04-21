@@ -100,6 +100,8 @@ PRESERVE_FIELDS = (
     "_project_id",
     "doi",
     "_eos_library_path",
+    "legacy_recid",
+    "_curation"
 )
 
 
