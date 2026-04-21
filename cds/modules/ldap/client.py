@@ -121,6 +121,18 @@ class LdapClient(object):
         return [x[1] for x in res]
 
     def search_egroup_by_email(self, email):
+        # Return if exact full mail match
+        exact_mail = f"{email}@cern.ch" if "@" not in email else email
+        exact_filter = f"(mail={exact_mail})"
+        msgid = self.ldap.search_ext(
+            self.LDAP_EGROUP_BASE,
+            ldap.SCOPE_ONELEVEL,
+            exact_filter,
+            self.LDAP_EGROUP_RESP_FIELDS,
+        )
+        exact_res = self.ldap.result(msgid=msgid)[1]
+        exact_entries = [x[1] for x in exact_res]
+
         name_filter = "(&(mail={email}*))"
         self.ldap.search_ext(
             self.LDAP_EGROUP_BASE,
@@ -129,11 +141,22 @@ class LdapClient(object):
             self.LDAP_EGROUP_RESP_FIELDS,
             serverctrls=[
                 ldap.controls.SimplePagedResultsControl(
-                    True, size=7, cookie=""
+                    True, size=10, cookie=""
                 )
             ],
         )
 
         res = self.ldap.result()[1]
+        prefix_entries = [x[1] for x in res]
 
-        return [x[1] for x in res]
+        # Remove duplicates
+        seen = set()
+        result = []
+
+        for entry in exact_entries + prefix_entries:
+            mail = entry["mail"][0]
+            if mail not in seen:
+                seen.add(mail)
+                result.append(entry)
+
+        return result
