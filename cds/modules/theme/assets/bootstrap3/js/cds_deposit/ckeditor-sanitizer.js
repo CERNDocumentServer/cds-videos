@@ -44,7 +44,7 @@ var sanitizeConfig = {
     "u",
     "ul",
   ],
-  ALLOWED_ATTR: ["style", "dir", "lang", "color"],
+  ALLOWED_ATTR: ["style", "dir", "lang", "color", "href", "title", "target", "rel"],
   ALLOW_STYLE: true,
   ALLOW_DATA_ATTR: false,
 };
