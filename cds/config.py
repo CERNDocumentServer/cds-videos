@@ -812,6 +812,21 @@ RECORD_VIDEOS_FACETS = {
             "language": {
                 "terms": {"field": "language.untouched"},
             },
+            "collections": {
+                "terms": {
+                    "field": "collections",
+                    "size": 50,
+                    "order": {"_key": "asc"},
+                    # Include if the collection term contains '::'.
+                    **(
+                        {"include": r".*::.*"}
+                    ),
+                    # Exclude if the collection term contains two '::' (3-level paths like A::B::C).
+                    **(
+                        {"exclude": r".*::.*::.*"}
+                    ),
+                },
+            },
             "years": {
                 "date_histogram": {
                     "field": "date",
@@ -826,6 +841,7 @@ RECORD_VIDEOS_FACETS = {
             "category": terms_filter("category.untouched"),
             "type": terms_filter("type.untouched"),
             "language": terms_filter("language"),
+            "collections": terms_filter("collections"),
             "years": range_filter("date", format="yyyy", end_date_math="/y"),
         },
     }
