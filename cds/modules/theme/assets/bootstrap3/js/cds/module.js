@@ -643,6 +643,15 @@ app.filter("isoToLanguage", [
   },
 ]);
 
+// Filter to translate collection keys to display labels
+app.filter("collectionLabel", function () {
+  return function (key) {
+    if (!key) return key;
+    const strKey = String(key);
+    return strKey.includes("::") ? strKey.split("::").pop() : strKey;
+  };
+});
+
 app.filter("format_relation_resource_type", function () {
   return function (input) {
     if (!input) return "";
