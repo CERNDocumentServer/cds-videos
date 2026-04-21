@@ -22,7 +22,7 @@
             "forcePasteAsPlainText": false,
             "extraAllowedContent": "*{color}; *[style]",
             "disableAutoInline": true,
-            "extraPlugins": "colorbutton",
+            "extraPlugins": "colorbutton,link",
             "toolbar": [
               [
                 "PasteText",
@@ -35,6 +35,10 @@
                 "-",
                 "Subscript",
                 "Superscript"
+              ],
+              [
+                "Link",
+                "Unlink"
               ],
               [
                 "TextColor"

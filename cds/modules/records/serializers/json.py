@@ -36,6 +36,7 @@ from marshmallow_utils.html import sanitize_html, ALLOWED_HTML_ATTRS, ALLOWED_CS
 
 CUSTOM_ALLOWED_ATTRS = {
     **ALLOWED_HTML_ATTRS,
+    "a": ALLOWED_HTML_ATTRS.get("a", []) + ["href", "title", "target", "rel"],
     "span": ALLOWED_HTML_ATTRS.get("span", []) + ["style"],
     "p": ALLOWED_HTML_ATTRS.get("p", []) + ["style"],
 }
