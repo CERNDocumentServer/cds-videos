@@ -705,7 +705,7 @@ class ExtractFramesTask(AVCTask):
                 media_type="image",
                 context_type="frame",
                 master_id=object_.version_id,
-                timestamp=start_time + (i + 1) * time_step,
+                timestamp=start_time + i * time_step,
             )
             for i, filename in enumerate(frames)
         ]
