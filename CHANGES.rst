@@ -25,6 +25,15 @@
 Changes
 =======
 
+Version 2.13.0 (2026-04-22)
+
+- facets: add collection facet
+- fix(frames): correct extracted frame timestamp calculation
+- fix(ldap):add exact e-group mail match
+- deposit: preserve legacy_recid and _curation fields
+- sanitizer: allow href and link in ckeditor
+- fix(permissions): allow update users to read metadata/files
+
 Version 2.12.0 (2026-04-08)
 
 - schema: normalize MARC tag keys to numeric format in serializer
