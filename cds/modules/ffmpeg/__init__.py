@@ -20,6 +20,6 @@
 """CDS FFmpeg wrappers."""
 
 
-from .ffmpeg import ff_frames, ff_probe, ff_probe_all
+from .ffmpeg import ff_frames, ff_probe, ff_probe_all, ff_sprite_sheets
 
-__all__ = ("ff_frames", "ff_probe", "ff_probe_all")
+__all__ = ("ff_frames", "ff_probe", "ff_probe_all", "ff_sprite_sheets")

@@ -1290,6 +1290,12 @@ WOWZA_PLAYLIST_URL = (
 WOWZA_VIDEO_URL = "https://wowza.cern.ch/cds/_definist_/mp4:%s/playlist.m3u8"
 # Size
 VIDEO_POSTER_SIZE = (180, 101)
+# Sprite sheet thumbnail dimensions (pixels)
+VIDEO_SPRITE_THUMBNAIL_WIDTH = 160
+VIDEO_SPRITE_THUMBNAIL_HEIGHT = 90
+# Number of columns and rows in each sprite sheet grid
+VIDEO_SPRITE_COLS = 10
+VIDEO_SPRITE_ROWS = 10
 # File system location of videos
 VIDEOS_LOCATION = "/eos/media/cds/test/videos/files/"
 # XRootD prefix for videos

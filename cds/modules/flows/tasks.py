@@ -24,6 +24,7 @@
 """Celery tasks for Webhook Receivers."""
 
 import json
+import math
 import os
 import shutil
 import signal
@@ -59,7 +60,7 @@ from werkzeug.utils import import_string
 from cds.modules.flows.models import FlowTaskMetadata
 from cds.modules.flows.models import FlowTaskStatus as FlowTaskStatus
 from cds.modules.records.api import CDSVideosFilesIterator
-from ..ffmpeg import ff_frames, ff_probe_all
+from ..ffmpeg import ff_frames, ff_probe_all, ff_sprite_sheets
 from ..opencast.api import OpenCast
 from ..opencast.error import RequestError
 from ..opencast.utils import get_qualities
@@ -524,15 +525,13 @@ class ExtractMetadataTask(AVCTask):
 
 
 class ExtractFramesTask(AVCTask):
-    """Extract frames task."""
+    """Extract frames as sprite sheets for per-second thumbnail scrubbing."""
 
     name = "file_video_extract_frames"
 
     @staticmethod
     def clean(version_id, *args, **kwargs):
         """Delete generated ObjectVersion slaves."""
-        # remove all objects version "slave" with type "frame" and,
-        # automatically, all tags connected
         tag_alias_1 = aliased(ObjectVersionTag)
         tag_alias_2 = aliased(ObjectVersionTag)
         slaves = (
@@ -541,27 +540,33 @@ class ExtractFramesTask(AVCTask):
             .filter(tag_alias_1.key == "master", tag_alias_1.value == version_id)
             .filter(
                 tag_alias_2.key == "context_type",
-                tag_alias_2.value.in_(["frame", "frames-preview"]),
+                tag_alias_2.value.in_(["frame", "frames-preview", "sprite"]),
             )
             .all()
         )
-        # FIXME do a test for check separately every "undo" when
         for slave in slaves:
             dispose_object_version(slave)
 
     def run(self, frames_start=5, frames_end=95, frames_gap=10, *args, **kwargs):
-        """Extract images from some frames of the video.
+        """Extract video frames and sprite sheet images.
 
-        Each of the frame images generates an ``ObjectVersion`` tagged as
-        "frame" using ``ObjectVersionTags``.
+        Runs two complementary extractions:
 
-        :param self: reference to instance of task base class
-        :param frames_start: start percentage, default 5.
-        :param frames_end: end percentage, default 95.
-        :param frames_gap: percentage between frames from start to end,
-            default 10.
+        1. **Sparse individual frames** (one per ``frames_gap`` percent) —
+           stored as ``context_type=frame``.  Used for the poster thumbnail,
+           the GIF preview, and as a fallback VTT track for legacy records.
+
+        2. **Per-second sprite sheets** — stored as ``context_type=sprite``.
+           One sprite is a ``VIDEO_SPRITE_COLS`` × ``VIDEO_SPRITE_ROWS`` grid
+           of ``VIDEO_SPRITE_THUMBNAIL_WIDTH`` × ``VIDEO_SPRITE_THUMBNAIL_HEIGHT``
+           cells, so a 1-hour video at 10×10 produces 36 files instead of
+           3,600.  The VTT serializer prefers these when present and emits
+           ``URL#xywh=x,y,w,h`` fragment cues.
+
+        :param frames_start: start percentage for sparse frames, default 5.
+        :param frames_end: end percentage for sparse frames, default 95.
+        :param frames_gap: percentage step between sparse frames, default 10.
         """
-        # create or update the TaskMetadata db row
         flow_task_metadata = self.get_or_create_flow_task()
         kwargs["celery_task_id"] = str(self.request.id)
         kwargs["task_id"] = str(flow_task_metadata.id)
@@ -573,47 +578,74 @@ class ExtractFramesTask(AVCTask):
         self.log("Started task {0}".format(kwargs["task_id"]))
 
         output_folder = tempfile.mkdtemp()
-
-        # Remove temporary directory on abrupt execution halts.
         self.set_revoke_handler(
             lambda: shutil.rmtree(output_folder, ignore_errors=True)
         )
 
-        # Calculate time positions
-        options = self._time_position(
+        # ── Sparse individual frames ──────────────────────────────────────────
+        frame_options = self._time_position(
             duration=self._base_payload["tags"]["duration"],
             frames_start=frames_start,
             frames_end=frames_end,
             frames_gap=frames_gap,
         )
+        number_of_frames = frame_options["number_of_frames"]
 
-        def progress_updater(current_frame):
-            """Progress reporter."""
-            percentage = current_frame / options["number_of_frames"] * 100
-            meta = dict(
-                payload=dict(size=options["duration"], percentage=percentage),
-                message="Extracting frames [{0} out of {1}]".format(
-                    current_frame, options["number_of_frames"]
-                ),
+        def frame_progress_updater(current_frame):
+            self.log(
+                "Extracting frame [{0} out of {1}]".format(
+                    current_frame, number_of_frames
+                )
             )
-            self.log(meta["message"])
+
+        # ── Sprite sheet config ───────────────────────────────────────────────
+        duration = frame_options["duration"]
+        cols = current_app.config["VIDEO_SPRITE_COLS"]
+        rows = current_app.config["VIDEO_SPRITE_ROWS"]
+        thumb_w = current_app.config["VIDEO_SPRITE_THUMBNAIL_WIDTH"]
+        thumb_h = current_app.config["VIDEO_SPRITE_THUMBNAIL_HEIGHT"]
+        frames_per_sprite = cols * rows
+        sprite_start = duration * frames_start / 100
+        sprite_end = duration * frames_end / 100
 
         bucket_was_locked = False
         if self.object_version.bucket.locked:
-            # If record was published we need to unlock the bucket
             bucket_was_locked = True
             self.object_version.bucket.locked = False
 
         try:
+            # Individual sparse frames
             frames = self._create_frames(
                 frames=self._create_tmp_frames(
                     object_=self.object_version,
                     output_dir=output_folder,
-                    progress_updater=progress_updater,
-                    **options,
+                    progress_updater=frame_progress_updater,
+                    **frame_options,
                 ),
                 object_=self.object_version,
-                **options,
+                **frame_options,
+            )
+
+            # Per-second sprite sheets
+            sprites = self._create_tmp_sprites(
+                object_=self.object_version,
+                start_time=sprite_start,
+                end_time=sprite_end,
+                output_dir=output_folder,
+                thumb_width=thumb_w,
+                thumb_height=thumb_h,
+                cols=cols,
+                rows=rows,
+            )
+            self._create_sprites(
+                sprites=sprites,
+                object_=self.object_version,
+                start_time=sprite_start,
+                frames_per_sprite=frames_per_sprite,
+                thumb_width=thumb_w,
+                thumb_height=thumb_h,
+                cols=cols,
+                rows=rows,
             )
         except Exception:
             db.session.rollback()
@@ -621,9 +653,6 @@ class ExtractFramesTask(AVCTask):
             self.clean(version_id=self.object_version_id)
             raise
 
-        total_frames = len(frames)
-
-        # Generate GIF images
         self._create_gif(
             bucket=str(self.object_version.bucket.id),
             frames=frames,
@@ -632,26 +661,77 @@ class ExtractFramesTask(AVCTask):
         )
 
         if bucket_was_locked:
-            # Lock the bucket again
             self.object_version.bucket.locked = True
 
-        # Cleanup
         shutil.rmtree(output_folder)
         db.session.commit()
 
         self.log("Finished task {0}".format(kwargs["task_id"]))
-        return "Created {0} frames.".format(total_frames)
+        return "Created {0} frames and {1} sprite sheets.".format(
+            len(frames), len(sprites)
+        )
+
+    @classmethod
+    def _create_tmp_sprites(
+        cls, object_, start_time, end_time, output_dir,
+        thumb_width, thumb_height, cols, rows,
+    ):
+        """Run ffmpeg and return sorted list of sprite sheet file paths."""
+        with move_file_into_local(object_, delete=True) as url:
+            ff_sprite_sheets(
+                input_file=url,
+                start=start_time,
+                end=end_time,
+                output_pattern=os.path.join(output_dir, "sprite-%03d.jpg"),
+                thumb_width=thumb_width,
+                thumb_height=thumb_height,
+                cols=cols,
+                rows=rows,
+            )
+        return sorted(
+            [
+                os.path.join(output_dir, f)
+                for f in os.listdir(output_dir)
+                if f.startswith("sprite-")
+            ],
+            key=lambda p: int(
+                os.path.basename(p).rsplit("-", 1)[1].split(".", 1)[0]
+            ),
+        )
+
+    @classmethod
+    def _create_sprites(
+        cls, sprites, object_, start_time, frames_per_sprite,
+        thumb_width, thumb_height, cols, rows,
+    ):
+        """Persist sprite sheet files as ObjectVersions with grid metadata."""
+        for i, sprite_path in enumerate(sprites):
+            cls._create_object(
+                bucket=object_.bucket,
+                key=os.path.basename(sprite_path),
+                stream=open(sprite_path, "rb"),
+                size=os.path.getsize(sprite_path),
+                media_type="image",
+                context_type="sprite",
+                master_id=object_.version_id,
+                sprite_cols=cols,
+                sprite_rows=rows,
+                thumb_width=thumb_width,
+                thumb_height=thumb_height,
+                sprite_index=i,
+                frames_per_sprite=frames_per_sprite,
+                start_second=int(start_time) + i * frames_per_sprite,
+            )
+        return sprites
 
     @classmethod
     def _time_position(cls, duration, frames_start=5, frames_end=95, frames_gap=10):
-        """Calculate time positions."""
+        """Calculate time positions for sparse frame extraction."""
         duration = float(duration)
         time_step = duration * frames_gap / 100
         start_time = duration * frames_start / 100
         end_time = (duration * frames_end / 100) + 0.01
-
         number_of_frames = ((frames_end - frames_start) / frames_gap) + 1
-
         return {
             "duration": duration,
             "start_time": start_time,
@@ -662,18 +742,10 @@ class ExtractFramesTask(AVCTask):
 
     @classmethod
     def _create_tmp_frames(
-        cls,
-        object_,
-        start_time,
-        end_time,
-        time_step,
-        duration,
-        output_dir,
-        progress_updater=None,
-        **kwargs,
+        cls, object_, start_time, end_time, time_step, duration,
+        output_dir, progress_updater=None, **kwargs,
     ):
-        """Create frames in temporary files."""
-        # Generate frames
+        """Create sparse frames in temporary files."""
         with move_file_into_local(object_, delete=True) as url:
             ff_frames(
                 input_file=url,
@@ -684,18 +756,15 @@ class ExtractFramesTask(AVCTask):
                 progress_callback=progress_updater,
                 output=os.path.join(output_dir, "frame-{:d}.jpg"),
             )
-        # sort them
         sorted_ff_frames = sorted(
             os.listdir(output_dir),
             key=lambda f: int(f.rsplit("-", 1)[1].split(".", 1)[0]),
         )
-        # return full path
         return [os.path.join(output_dir, path) for path in sorted_ff_frames]
 
     @classmethod
     def _create_frames(cls, frames, object_, start_time, time_step, **kwargs):
-        """Create frames."""
-
+        """Persist sparse frames as ObjectVersions tagged context_type=frame."""
         [
             cls._create_object(
                 bucket=object_.bucket,
@@ -709,19 +778,17 @@ class ExtractFramesTask(AVCTask):
             )
             for i, filename in enumerate(frames)
         ]
-
         return frames
 
     @classmethod
     def _create_gif(cls, bucket, frames, output_dir, master_id):
-        """Generate a gif image."""
+        """Generate a GIF preview from the sparse individual frames."""
         gif_filename = "frames.gif"
         bucket = as_bucket(bucket)
 
         images = []
         for f in frames:
             image = Image.open(file_opener_xrootd(f, "rb"))
-            # Convert image for better quality
             im = image.convert("RGB").convert("P", palette=Image.ADAPTIVE, colors=255)
             images.append(im)
         gif_image = create_gif_from_frames(images)

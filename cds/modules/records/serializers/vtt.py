@@ -25,8 +25,7 @@
 
 from datetime import datetime
 
-from flask import current_app, render_template, url_for
-from invenio_iiif.utils import ui_iiif_image_url
+from flask import current_app, render_template
 from invenio_rest.errors import FieldError, RESTValidationError
 
 from ...deposit.api import Video
@@ -52,21 +51,76 @@ class VTTSerializer(object):
 
 
 class VTT(object):
-    """Smil formatter."""
+    """VTT thumbnail track formatter.
+
+    Prefers sprite-sheet cues (``context_type=sprite``) which use WebVTT media
+    fragment syntax (``URL#xywh=x,y,w,h``) so the browser only fetches a
+    small number of grid images instead of one image per second.  Falls back
+    to the legacy per-frame IIIF approach when no sprites are present.
+    """
 
     def __init__(self, record):
-        """Initialize Smil formatter with the specific record."""
+        """Initialize VTT formatter with the specific record."""
         self.record = record
         self.data = ""
 
     def format(self):
-        thumbnail_data = self._format_frames(self.record)
+        master_file = CDSVideosFilesIterator.get_master_video_file(self.record)
+        sprites = CDSVideosFilesIterator.get_video_sprites(master_file)
+        if sprites:
+            thumbnail_data = self._format_sprite_cues(master_file, sprites)
+        else:
+            thumbnail_data = self._format_frame_cues(self.record, master_file)
         return render_template("cds_records/thumbnails.vtt", frames=thumbnail_data)
 
     @staticmethod
-    def _format_frames(record):
-        """Select frames and format the start/end times."""
-        master_file = CDSVideosFilesIterator.get_master_video_file(record)
+    def _format_sprite_cues(master_file, sprites):
+        """Build per-second VTT cues from sprite sheets using #xywh= fragments.
+
+        Each cue points into a cell of the sprite grid via the WebVTT / W3C
+        media fragment ``#xywh=x,y,width,height`` syntax, which is supported
+        by Video.js and other major players without any extra HTTP requests.
+        """
+        duration = float(master_file["tags"]["duration"])
+        site_url = current_app.config.get("THEME_SITEURL", "")
+        cues = []
+
+        for sprite in sprites:
+            tags = sprite["tags"]
+            cols = int(tags["sprite_cols"])
+            rows = int(tags["sprite_rows"])
+            w = int(tags["thumb_width"])
+            h = int(tags["thumb_height"])
+            start_second = int(tags["start_second"])
+            frames_per_sprite = int(tags["frames_per_sprite"])
+
+            sprite_url = "{}/api/files/{}/{}".format(
+                site_url, sprite["bucket_id"], sprite["key"]
+            )
+
+            for i in range(frames_per_sprite):
+                second = start_second + i
+                if second >= duration:
+                    break
+                col = i % cols
+                row = i // cols
+                x = col * w
+                y = row * h
+                cues.append({
+                    "start_time": VTT.time_format(float(second)),
+                    "end_time": VTT.time_format(min(float(second + 1), duration)),
+                    "file_name": "{}#xywh={},{},{},{}".format(
+                        sprite_url, x, y, w, h
+                    ),
+                })
+
+        return cues
+
+    @staticmethod
+    def _format_frame_cues(record, master_file):
+        """Legacy per-frame cues via IIIF image URLs (fallback)."""
+        from invenio_iiif.utils import ui_iiif_image_url
+
         frames = [
             {
                 "time": float(f["tags"]["timestamp"]),
@@ -79,24 +133,23 @@ class VTT(object):
 
         last_time = float(master_file["tags"]["duration"])
         poster_size = current_app.config["VIDEO_POSTER_SIZE"]
+        site_url = current_app.config.get("THEME_SITEURL", "")
         frames_tail = frames[1:] + [{"time": last_time}]
         return [
             {
                 "start_time": VTT.time_format(f["time"] if i > 0 else 0.0),
                 "end_time": VTT.time_format(next_f["time"]),
-                "file_name": VTT.resize_link(f, poster_size),
+                "file_name": "{}{}".format(
+                    site_url,
+                    ui_iiif_image_url(
+                        f,
+                        size="!{0[0]},{0[1]}".format(poster_size),
+                        image_format="png",
+                    ),
+                ),
             }
             for i, (f, next_f) in enumerate(zip(frames, frames_tail))
         ]
-
-    @staticmethod
-    def resize_link(frame, size):
-        return "{}{}".format(
-            current_app.config.get("THEME_SITEURL"),
-            ui_iiif_image_url(
-                frame, size="!{0[0]},{0[1]}".format(size), image_format="png"
-            ),
-        )
 
     @staticmethod
     def time_format(seconds):

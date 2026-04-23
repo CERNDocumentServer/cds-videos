@@ -182,6 +182,14 @@ class CDSVideosFilesIterator(CDSFilesIterator):
         )
 
     @staticmethod
+    def get_video_sprites(master_file):
+        """Get sorted list of sprite sheet files for timeline scrubbing."""
+        return sorted(
+            master_file.get("sprite", []),
+            key=lambda s: int(s["tags"]["sprite_index"]),
+        )
+
+    @staticmethod
     def get_video_posterframe(record):
         """Get the video poster frame."""
         # First check if we have a custom thumbnail for this video

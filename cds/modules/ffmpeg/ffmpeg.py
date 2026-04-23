@@ -171,6 +171,54 @@ def _refactoring_metadata(metadata):
 #
 # Frame extraction
 #
+def ff_sprite_sheets(input_file, start, end, output_pattern,
+                     thumb_width=160, thumb_height=90,
+                     cols=10, rows=10):
+    """Extract frames as sprite sheet images in a single ffmpeg pass.
+
+    Uses the ``fps=1`` and ``tile`` filters to produce grid images where each
+    cell is a thumbnail of size ``thumb_width`` × ``thumb_height``.  One sprite
+    sheet is written per ``cols * rows`` seconds of video.
+
+    :param input_file: path to the input video file
+    :param start: start time in seconds
+    :param end: end time in seconds
+    :param output_pattern: output path pattern accepted by ffmpeg, e.g.
+        ``/tmp/abc/sprite-%03d.jpg``
+    :param thumb_width: width of each thumbnail cell in pixels
+    :param thumb_height: height of each thumbnail cell in pixels
+    :param cols: number of columns in the sprite grid
+    :param rows: number of rows in the sprite grid
+    :raises FrameExtractionInvalidArguments: when time arguments are invalid
+    :raises FrameExtractionExecutionError: when ffmpeg fails
+    """
+    if not (0 <= start < end):
+        raise FrameExtractionInvalidArguments()
+
+    fps_filter = (
+        'fps=1,'
+        'scale={w}:{h}:force_original_aspect_ratio=decrease,'
+        'pad={w}:{h}:(ow-iw)/2:(oh-ih)/2'
+    ).format(w=thumb_width, h=thumb_height)
+
+    tile_filter = 'tile={cols}x{rows}'.format(cols=cols, rows=rows)
+
+    cmd = (
+        'ffmpeg -accurate_seek -ss {start} -i {input} -t {duration} '
+        '-vf {fps},{tile} '
+        '-qscale:v 5 '
+        '-an {output}'
+    ).format(
+        start=start,
+        input=input_file,
+        duration=end - start,
+        fps=fps_filter,
+        tile=tile_filter,
+        output=output_pattern,
+    )
+    run_command(cmd, error_class=FrameExtractionExecutionError)
+
+
 def ff_frames(input_file, start, end, step, duration, output,
               progress_callback=None):
     """Extract requested frames from video.
