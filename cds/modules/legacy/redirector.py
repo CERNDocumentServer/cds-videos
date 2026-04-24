@@ -25,7 +25,11 @@
 """Redirector functions and rules."""
 
 from flask import Blueprint, abort, current_app, redirect
+from invenio_pidstore.errors import PIDDoesNotExistError, ResolverError
 from sqlalchemy.orm.exc import NoResultFound
+
+from cds.modules.records.resolver import record_resolver
+from cds.modules.records.utils import is_project_record
 
 from .resolver import get_pid_by_legacy_recid
 
@@ -58,3 +62,41 @@ def legacy_record_embed_redirect(legacy_id):
 
     url_path = f"{current_app.config['SITE_URL']}/record/{pid.pid_value}/embed"
     return redirect(url_path, HTTP_MOVED_PERMANENTLY)
+
+
+@blueprint.route("/record/<legacy_id>/files/<file_name>", strict_slashes=False)
+def legacy_record_file_redirect(legacy_id, file_name):
+    """Redirect legacy recid file to new file download link."""
+
+    def _find_file_url(record):
+        for file_ in record.get("_files", []):
+            if file_.get("key") == file_name:
+                return (file_.get("links", {}).get("self"))
+        return None
+
+    try:
+        pid = get_pid_by_legacy_recid(legacy_id)
+        _, record = record_resolver.resolve(pid_value=pid.pid_value)
+    except (NoResultFound, PIDDoesNotExistError, ResolverError, KeyError, TypeError):
+        abort(404)
+
+    # Video record, try to get the file from the record
+    if not is_project_record(record):
+        url = _find_file_url(record)
+        if url:
+            return redirect(url, HTTP_MOVED_PERMANENTLY)
+        abort(404)
+
+    # Project record, try to get the file from the video records
+    for video in record.get("videos", []):
+        try:
+            video_pid = video["$ref"].rstrip("/").split("/")[-1]
+            _, video_record = record_resolver.resolve(pid_value=video_pid)
+        except (PIDDoesNotExistError, ResolverError, KeyError, TypeError):
+            continue
+
+        url = _find_file_url(video_record)
+        if url:
+            return redirect(url, HTTP_MOVED_PERMANENTLY)
+
+    abort(404)
