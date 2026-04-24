@@ -255,6 +255,13 @@ a.cds-anchor:hover{
   display: block;
 }
 
+.cds-text-break {
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 // Tags
 
 .cds-tags ul {
