@@ -24,7 +24,7 @@
 
 """Permissions for deposit."""
 
-import pkg_resources
+from importlib import metadata
 from flask_principal import ActionNeed
 
 action_admin_access = ActionNeed("deposit-admin-access")
@@ -40,9 +40,9 @@ def admin_permission_factory():
     :returns: Permission instance.
     """
     try:
-        pkg_resources.get_distribution("invenio-access")
+        metadata.version("invenio-access")
         from invenio_access.permissions import Permission
-    except pkg_resources.DistributionNotFound:
+    except metadata.PackageNotFoundError:
         from flask_principal import Permission
 
     return Permission(action_admin_access)
