@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.13.1 (2026-05-29)
+
+- legacy: add new route to resolve legacy file links
+- fix(ui): wrap long related identifiers
+
 Version 2.13.0 (2026-04-22)
 
 - facets: add collection facet
