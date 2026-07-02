@@ -20,7 +20,6 @@
 """CDS Records UI."""
 
 
-import six
 from flask import (
     Blueprint,
     abort,
@@ -79,7 +78,7 @@ def records_ui_export(pid, record, template=None, **kwargs):
             response.headers["Content-Type"] = formats[fmt]["mimetype"]
             return response
         else:
-            if isinstance(data, six.binary_type):
+            if isinstance(data, bytes):
                 data = data.decode("utf8")
 
             return render_template(

@@ -31,7 +31,6 @@ from datetime import timedelta
 from html import unescape
 from urllib import parse
 
-import six
 from cds.modules.records.api import CDSVideosFilesIterator
 from flask import current_app, g, request
 from flask_security import current_user
@@ -49,7 +48,7 @@ from invenio_records.models import RecordMetadata
 from invenio_records_files.models import RecordsBuckets
 from invenio_search import current_search
 from invenio_search.engine import search
-from six.moves.html_parser import HTMLParser
+from html.parser import HTMLParser
 from sqlalchemy_continuum import version_class
 
 from ..deposit.fetcher import deposit_fetcher
@@ -481,7 +480,7 @@ def delete_record(record_uuid, reason):
 
 def to_string(value):
     """Ensure that the input value is returned as a string."""
-    if isinstance(value, six.string_types):
+    if isinstance(value, str):
         return value
     else:
         return json.dumps(value)
