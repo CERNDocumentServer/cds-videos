@@ -112,8 +112,6 @@ services:
     image: opensearchproject/opensearch-dashboards:2
     ports:
       - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5601:5601"
-    expose:
-      - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5601"
     environment:
       # settings only for development. DO NOT use in production!
       - 'OPENSEARCH_HOSTS=["http://search:9200"]'
