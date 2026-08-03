@@ -21,18 +21,18 @@
 # or submit itself to any jurisdiction.
 """CDS JSON Serializer."""
 
-
 from flask import has_request_context
 from flask_security import current_user
 from invenio_records_rest.serializers.json import JSONSerializer
+from marshmallow_utils.html import ALLOWED_CSS_STYLES, ALLOWED_HTML_ATTRS, sanitize_html
 
 from ..api import CDSRecord
 from ..permissions import (
     has_read_record_eos_path_permission,
     has_read_record_permission,
+    has_update_permission,
 )
 from ..utils import HTMLTagRemover, parse_video_chapters
-from marshmallow_utils.html import sanitize_html, ALLOWED_HTML_ATTRS, ALLOWED_CSS_STYLES
 
 CUSTOM_ALLOWED_ATTRS = {
     **ALLOWED_HTML_ATTRS,
@@ -89,6 +89,15 @@ class CDSJSONSerializer(JSONSerializer):
 
         return metadata
 
+    def _remove_internal_fields(self, record, metadata):
+        """Remove _access from the metadata if the user doesn't have update permissions on the record."""
+        if not has_update_permission(current_user, record):
+            metadata.pop("_access", None)
+            metadata.pop("_buckets", None)
+            metadata.pop("_cds", None)
+            metadata.pop("_deposit", None)
+        return metadata
+
     def preprocess_record(self, pid, record, links_factory=None):
         """Include ``_eos_library_path`` for single record retrievals."""
         result = super(CDSJSONSerializer, self).preprocess_record(
@@ -106,6 +115,7 @@ class CDSJSONSerializer(JSONSerializer):
             # sanitize title by unescaping and stripping html tags
             try:
                 metadata = self._sanitize_metadata(metadata)
+                metadata = self._remove_internal_fields(record, metadata)
                 if has_request_context():
                     metadata["videos"] = [
                         video
@@ -134,5 +144,8 @@ class CDSJSONSerializer(JSONSerializer):
         if "metadata" in result:
             metadata = result["metadata"]
             result["metadata"] = self._sanitize_metadata(result["metadata"])
+            result["metadata"] = self._remove_internal_fields(
+                record_hit, result["metadata"]
+            )
 
         return result
