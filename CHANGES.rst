@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 2.13.2 (2026-08-04)
+
+- tests(serializer): ensure internal fields are removed
+- fix(serializer): remove unnecessary fields for non-permitted users
+- fix(setup): incorrect expose for docker compose OS dashboard
+
 Version 2.13.1 (2026-05-29)
 
 - legacy: add new route to resolve legacy file links
