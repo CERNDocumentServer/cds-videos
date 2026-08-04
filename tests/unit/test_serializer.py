@@ -173,6 +173,16 @@ def test_cds_json_serializer_sanitization(video_record_metadata):
             'title': {'title': '<script>alert("bad")</script> Titre'}
         }
     ]
+
+    record["_access"] = {
+        "key": "value"
+    }
+    record["_buckets"] = {
+        "key":"value"
+    }
+    record["_cds"] = {
+        "key":"value"
+    }
     
     # Test the serializer
     serializer = CDSJSONSerializer()
@@ -201,3 +211,7 @@ def test_cds_json_serializer_sanitization(video_record_metadata):
     translations = result['metadata']['translations']
     for tr in translations:
         assert '<script>' not in tr['description']
+
+    assert "_access" not in result
+    assert "_buckets" not in result
+    assert "_cds" not in result

@@ -95,7 +95,6 @@ class CDSJSONSerializer(JSONSerializer):
             metadata.pop("_access", None)
             metadata.pop("_buckets", None)
             metadata.pop("_cds", None)
-            metadata.pop("_deposit", None)
         return metadata
 
     def preprocess_record(self, pid, record, links_factory=None):
