@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.13.3 (2026-09-28)
+
+- fix(ui): encode keyword names in search links
+
 Version 2.13.2 (2026-08-04)
 
 - tests(serializer): ensure internal fields are removed
