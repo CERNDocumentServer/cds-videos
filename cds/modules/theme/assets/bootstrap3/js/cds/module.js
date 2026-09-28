@@ -825,6 +825,14 @@ app.filter("escapeDoubleQuotes", function () {
   };
 });
 
+// Encode a value so it can be placed inside a query-string parameter.
+// Keyword names can contain "&", which otherwise splits the search URL.
+app.filter("encodeURIComponent", function () {
+  return function (text) {
+    return text ? encodeURIComponent(text) : text;
+  };
+});
+
 
 angular.module("cds").directive("bootstrapInvenioSearch", function () {
   return {
