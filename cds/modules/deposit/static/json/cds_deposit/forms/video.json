@@ -397,7 +397,7 @@
           "type": "uiselect",
           "key": "license[].license",
           "title": "Licence",
-          "placeholder": "License name",
+          "placeholder": "Search for a license name...",
           "minLength": 1,
           "options": {
             "refreshDelay": 100,
