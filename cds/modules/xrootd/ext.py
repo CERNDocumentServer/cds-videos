@@ -53,7 +53,12 @@ class CDSXRootD(object):
         if XROOTD_ENABLED:
             #: Overwrite reported checksum from CERN EOS (due to XRootD 3.3.6).
             app.config["XROOTD_CHECKSUM_ALGO"] = "md5"
+            # Offload-aware EOS storage. Behaves exactly like the plain
+            # ``invenio_xrootd:eos_storage_factory`` unless the offload flags
+            # (``CDS_EOS_OFFLOAD_ENABLED`` + ``FILES_REST_XSENDFILE_ENABLED``)
+            # are enabled, in which case ``/api/files`` downloads are offloaded
+            # to EOS via nginx.
             app.config["FILES_REST_STORAGE_FACTORY"] = (
-                "invenio_xrootd:eos_storage_factory"
+                "cds.modules.xrootd.storage:offload_storage_factory"
             )
         app.extensions["cds-xrootd"] = self

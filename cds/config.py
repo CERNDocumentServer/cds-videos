@@ -938,6 +938,39 @@ FILES_REST_PERMISSION_FACTORY = (
 # Files storage
 FIXTURES_FILES_LOCATION = os.environ.get("APP_FIXTURES_FILES_LOCATION", "/tmp")
 
+# EOS download offload
+# -----------------------------------------------------------------------------
+# Offload ``/api/files`` downloads to nginx, which streams the bytes directly
+# from EOS via an ``X-Accel-Redirect`` internal proxy (see
+# ``cds.modules.xrootd.storage:OffloadEOSFileStorage``). Video streaming is
+# served by a separate streaming server and is unaffected.
+FILES_REST_XSENDFILE_ENABLED = False
+"""Master switch: allow the storage to return ``X-Accel-Redirect`` responses."""
+
+CDS_EOS_OFFLOAD_ENABLED = False
+"""Enable offloading of file downloads to EOS."""
+
+CDS_EOS_OFFLOAD_HTTPHOST = "https://eosmedia.cern.ch:8444"
+"""EOS HTTP gateway used to resolve the physical file URL."""
+
+CDS_EOS_OFFLOAD_REDIRECT_BASE_PATH = "/eos_storage"
+"""Internal nginx location prefix used for the ``X-Accel-Redirect``."""
+
+CDS_EOS_OFFLOAD_ENDPOINTS = ["invenio_files_rest.object_api"]
+"""Files-rest endpoints whose downloads are offloaded (``/api/files`` only)."""
+
+CDS_EOS_OFFLOAD_TIMEOUT = 5
+"""Timeout (seconds) for the EOS gateway redirect-resolution request."""
+
+CDS_EOS_OFFLOAD_AUTH_X509 = True
+"""Authenticate to the EOS gateway with X.509 (otherwise Kerberos)."""
+
+CDS_EOS_OFFLOAD_X509_CERT_PATH = "/etc/certificates/cert.pem"
+"""Path to the X.509 service certificate used for EOS gateway auth."""
+
+CDS_EOS_OFFLOAD_X509_KEY_PATH = "/etc/certificates/key.pem"
+"""Path to the X.509 service key used for EOS gateway auth."""
+
 ###############################################################################
 # Formatter
 ###############################################################################
