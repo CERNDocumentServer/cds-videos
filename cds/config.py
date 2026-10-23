@@ -821,9 +821,11 @@ RECORD_VIDEOS_FACETS = {
                     **(
                         {"include": r".*::.*"}
                     ),
-                    # Exclude if the collection term contains two '::' (3-level paths like A::B::C).
+                    # Exclude 3-level paths (A::B::C) and specific Lectures sub-collections.
                     **(
-                        {"exclude": r".*::.*::.*"}
+                        {
+                            "exclude": r".*::.*::.*|Lectures::Talks, Seminars and Other Events|Lectures::Video Lectures"
+                        }
                     ),
                 },
             },
