@@ -309,7 +309,9 @@ STATS_EVENTS = {
                 anonymize_user,
                 drop_undesired_fields,
                 build_file_unique_id,
-            ]
+            ],
+            # Create one index per year which will store the events.
+            "suffix": "%Y",
         },
     },
     "media-record-view": {
@@ -324,7 +326,9 @@ STATS_EVENTS = {
                 anonymize_user,
                 drop_undesired_fields,
                 build_file_unique_id,
-            ]
+            ],
+            # Create one index per year which will store the events.
+            "suffix": "%Y",
         },
     },
     "record-view": {
@@ -340,7 +344,9 @@ STATS_EVENTS = {
                 anonymize_user,
                 drop_undesired_fields,
                 build_record_unique_id,
-            ]
+            ],
+            # Create one index per year which will store the events.
+            "suffix": "%Y",
         },
     },
 }
@@ -353,7 +359,7 @@ STATS_AGGREGATIONS = {
             "event": "file-download",
             "field": "unique_id",
             "interval": "day",
-            "index_interval": "month",
+            "index_interval": "year",
             "copy_fields": {"file": "file"},
             "query_modifiers": [],
             "metric_fields": {
@@ -372,7 +378,7 @@ STATS_AGGREGATIONS = {
             "event": "media-record-view",
             "field": "unique_id",
             "interval": "day",
-            "index_interval": "month",
+            "index_interval": "year",
             "copy_fields": {"file": "file", "recid": "recid"},
             "query_modifiers": [],
             "metric_fields": {
@@ -391,7 +397,7 @@ STATS_AGGREGATIONS = {
             "event": "record-view",
             "field": "unique_id",
             "interval": "day",
-            "index_interval": "month",
+            "index_interval": "year",
             "copy_fields": {
                 "record_id": "record_id",
                 "pid_type": "pid_type",
