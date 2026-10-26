@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 2.14.0 (2026-10-26)
+
+- migrate statistics to yearly indices
+
 Version 2.13.3 (2026-09-28)
 
 - fix(ui): encode keyword names in search links
