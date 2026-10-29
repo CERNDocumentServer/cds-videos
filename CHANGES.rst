@@ -25,6 +25,11 @@
 Changes
 =======
 
+Version 2.15.0 (2026-10-29)
+
+- feat(files): add support for EOS storage offloading
+- feat(collections): hide multiple collection facet values and keep only the selected one
+
 Version 2.14.0 (2026-10-26)
 
 - migrate statistics to yearly indices
