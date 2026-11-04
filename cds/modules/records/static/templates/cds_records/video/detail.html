@@ -344,7 +344,7 @@
               <div style="display: inline-flex; gap: 15px; padding-bottom: 8px; padding-top: 8px;">
                 <div ng-repeat="chapter in chapters" 
                      class="chapter-item-horizontal-main"
-                     ng-click="jumpToChapter(chapter.seconds)"
+                     ng-click="openChapterModal($index)"
                      style="display: inline-block; cursor: pointer; width: 213px; flex-shrink: 0; padding: 12px; border: 1px solid #e1e8ed; border-radius: 8px; transition: all 0.2s ease; background-color: white;"
                      onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#2196F3'; this.style.transform='translateY(-2px)';"
                      onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e1e8ed'; this.style.transform='translateY(0)';">
@@ -433,4 +433,43 @@
     </div>
   </div>
   <!-- /Metadata Section -->
+</div>
+
+<!-- Chapter Frames Modal -->
+<div class="chapter-modal-overlay"
+     ng-show="chapterModal.open"
+     ng-click="closeChapterModal()"></div>
+
+<!-- Container -->
+<div class="chapter-modal-container"
+     ng-show="chapterModal.open"
+     ng-click="closeChapterModal()">
+
+  <div class="chapter-modal" ng-click="$event.stopPropagation()">
+
+    <!-- Close button -->
+    <button class="chapter-modal-close" ng-click="closeChapterModal()">
+      ✕
+    </button>
+
+    <!-- Left arrow -->
+    <div class="chapter-modal-arrow left"
+         ng-if="chapterModal.index > 0"
+         ng-click="prevChapter($event)">‹</div>
+
+    <!-- Image -->
+    <img class="chapter-modal-image"
+         ng-src="{{ chapterModal.currentFrameUrl }}">
+
+    <!-- Right arrow -->
+    <div class="chapter-modal-arrow right"
+         ng-if="chapterModal.index < chapters.length - 1"
+         ng-click="nextChapter($event)">›</div>
+
+    <!-- Caption -->
+    <div class="chapter-modal-caption">
+      <div class="title">{{ chapterModal.currentChapter.title }}</div>
+      <div class="time">{{ chapterModal.currentChapter.timestamp }}</div>
+    </div>
+  </div>
 </div>
