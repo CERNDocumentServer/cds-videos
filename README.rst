@@ -45,7 +45,9 @@ Prerequisites
 
 Ensure that the following dependencies are installed with the specified versions:
 
-1. **Python 3.9**
+1. **uv**
+   The Python package and project manager, see the `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
+   It installs Python 3.9 (set in ``.python-version``) when it is not available.
 
 2. **Node.js v18**
 
@@ -57,13 +59,13 @@ Ensure that the following dependencies are installed with the specified versions
 Update dependencies
 ======================
 
-To update Python dependencies you need to run `npm install` in the target deployment environment:
+The Python dependencies are declared in ``pyproject.toml`` and locked in ``uv.lock``.
+To update them, change ``pyproject.toml`` if needed, then update the lock file and commit it:
 
 .. code-block:: shell
 
-    $ docker run -it --platform="linux/amd64" --rm -v $(pwd):/app -w /app \
-        registry.cern.ch/inveniosoftware/almalinux:1 \
-        sh -c "dnf install -y openldap-devel && pip install -e . && pip freeze > requirements.new.txt"
+    $ uv lock                                   # after changing pyproject.toml
+    $ uv lock --upgrade-package <package-name>  # to upgrade one package
 
 Installation and Setup
 ======================
@@ -93,7 +95,8 @@ Use Docker Compose to start the required containers in detached mode:
 The ``scripts`` folder contains the necessary setup scripts to initialize and configure your instance.
 
 **1. Bootstrap Script**
-   Initialize the environment by running the bootstrap script:
+   Initialize the environment by running the bootstrap script. It installs the
+   Python dependencies of ``uv.lock`` in ``.venv`` and builds the assets:
 
    .. code-block:: bash
 
@@ -129,7 +132,7 @@ The ``scripts`` folder contains the necessary setup scripts to initialize and co
 
    .. code-block:: bash
 
-      ./scripts/setup
+      uv run ./scripts/setup
 
    **Troubleshooting**:
    If you encounter the error ``connection to server at "localhost", port 5432 failed: FATAL: role ".." does not exist``, it may indicate an issue with the database role or a port conflict. To diagnose:
@@ -152,28 +155,29 @@ The ``scripts`` folder contains the necessary setup scripts to initialize and co
 4. Local Development
 -----------------------
 
-To facilitate local development, open multiple terminal sessions and run the following commands separately:
+To facilitate local development, open multiple terminal sessions and run the following commands separately.
+``uv run`` runs them in the ``.venv`` environment (you can also activate it with ``source .venv/bin/activate``):
 
 - **Start Web Server**
   This command launches the web server:
 
   .. code-block:: bash
 
-     ./scripts/server
+     uv run ./scripts/server
 
 - **Start Celery Workers**
   Celery workers are required for background task processing:
 
   .. code-block:: bash
 
-     ./scripts/celery
+     uv run ./scripts/celery
 
 - **Watch Frontend Code**
   This command watches frontend code for changes and rebuilds assets as needed:
 
   .. code-block:: bash
 
-     ./scripts/assets-watch
+     uv run ./scripts/assets-watch
 
 
 Testing
@@ -181,19 +185,17 @@ Testing
 
 To run the tests, follow these steps:
 
-1. **Activate your Python environment:**
-
-2. **Set up the test environment:**
+1. **Set up the test environment:**
 
    .. code-block:: bash
 
       ./scripts/setup-tests
 
-3. **Run the tests:**
+2. **Run the tests:**
 
    .. code-block:: bash
 
-      ./run-tests.sh
+      uv run ./run-tests.sh
 
 
    **Running Specific Tests**
@@ -202,7 +204,7 @@ To run the tests, follow these steps:
 
    .. code-block:: bash
 
-      ./run-tests.sh tests/unit/test_example.py -k "test_specific_function"
+      uv run ./run-tests.sh tests/unit/test_example.py -k "test_specific_function"
 
 
 Publish Video through REST API

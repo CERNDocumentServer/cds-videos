@@ -45,8 +45,21 @@ RUN mkdir -p ${INVENIO_STATIC_FOLDER}
 # Create files folder
 RUN mkdir -p ${INVENIO_INSTANCE_PATH}/files
 
+# Python dependencies at the versions of uv.lock, installed in the system
+# Python next to uWSGI (``--inexact`` keeps the packages not in the lock)
+ENV UV_PROJECT_ENVIRONMENT=/usr/ \
+    UV_SYSTEM_PYTHON=1 \
+    UV_NO_MANAGED_PYTHON=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_FROZEN=1 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_NO_CACHE=1
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+RUN uv sync --no-dev --inexact
 
-RUN ./scripts/bootstrap
+# Static files and assets
+RUN cds collect -v && cds webpack buildall
 
 # Set folder permissions
 RUN chgrp -R 0 ${WORKING_DIR} && \

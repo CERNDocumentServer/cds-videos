@@ -9,6 +9,7 @@
 *.~
 
 CDS.egg-info
+.venv
 
 .dockerignore
 Dockerfile
