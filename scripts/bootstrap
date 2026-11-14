@@ -27,12 +27,8 @@ set -e
 
 script_path=$(dirname "$0")
 
-requirements_file=${1:-'requirements.txt'}
+# Python dependencies at the versions of uv.lock, in .venv
+uv sync --frozen
 
-pip install "setuptools<82"
-pip install -r $requirements_file
-pip install -e . --upgrade
-
-# # Build assets
-invenio collect -v
-invenio webpack buildall
+uv run --frozen cds collect -v
+uv run --frozen cds webpack buildall
