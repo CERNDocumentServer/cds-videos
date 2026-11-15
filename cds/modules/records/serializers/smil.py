@@ -22,11 +22,12 @@
 """Smil serializer for records."""
 
 
+from io import BytesIO
+
 from flask import render_template
 from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag, as_object_version
 from invenio_rest.errors import FieldError, RESTValidationError
-from six import BytesIO
 
 from ...deposit.api import Video
 from ...previewer.api import get_relative_path

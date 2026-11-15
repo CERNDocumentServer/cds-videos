@@ -45,11 +45,11 @@ function emailOf(item) {
 }
 
 export function EmailsSelect({
-  values,
+  values = [],
   onChange,
-  disabled,
-  delay,
-  lockedValues,
+  disabled = false,
+  delay = 100,
+  lockedValues = [],
 }) {
   const emails = values || [];
   return (
@@ -83,15 +83,8 @@ EmailsSelect.propTypes = {
   lockedValues: PropTypes.array,
 };
 
-EmailsSelect.defaultProps = {
-  values: [],
-  disabled: false,
-  delay: 100,
-  lockedValues: [],
-};
-
 /** "Project restrictions when published" and "Published video restrictions". */
-export function RestrictionsBox({ id, project }) {
+export function RestrictionsBox({ id, project = false }) {
   const { record, permissions } = useDeposit(id);
   const actions = useDepositActions(id);
   const access = _get(useAccessRights(), "metadata.access") || {};
@@ -166,8 +159,6 @@ RestrictionsBox.propTypes = {
   id: PropTypes.string.isRequired,
   project: PropTypes.bool,
 };
-
-RestrictionsBox.defaultProps = { project: false };
 
 /** "Project editors" tab. */
 export function EditorsField({ id }) {

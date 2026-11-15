@@ -27,11 +27,11 @@ let appCounter = 0;
  */
 export function SearchApp({
   endpoint,
-  headers,
-  extraParams,
-  hiddenParams,
-  disableUrlHandler,
-  appName,
+  headers = {},
+  extraParams = {},
+  hiddenParams = {},
+  disableUrlHandler = false,
+  appName = null,
   children,
 }) {
   const [config] = useState(() => {
@@ -73,12 +73,4 @@ SearchApp.propTypes = {
   disableUrlHandler: PropTypes.bool,
   appName: PropTypes.string,
   children: PropTypes.node.isRequired,
-};
-
-SearchApp.defaultProps = {
-  headers: {},
-  extraParams: {},
-  hiddenParams: {},
-  disableUrlHandler: false,
-  appName: null,
 };

@@ -27,7 +27,7 @@ set -e
 
 script_path=$(dirname "$0")
 
-export FLASK_ENV=development
+export FLASK_DEBUG=1
 
 celery -A invenio_app.celery worker --beat --events --loglevel INFO
 

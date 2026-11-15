@@ -26,7 +26,12 @@ function loadImage(src) {
  * Image blurred until loaded, which plays the gif animation of the video on
  * mouse over (``image-progressive-loading`` + ``err-src`` directives).
  */
-export function ProgressiveImage({ imgSrc, gifSrc, className, errSrc }) {
+export function ProgressiveImage({
+  imgSrc,
+  gifSrc = null,
+  className = null,
+  errSrc = NOT_FOUND_IMAGE,
+}) {
   const [src, setSrc] = useState(imgSrc);
   const [loaded, setLoaded] = useState(false);
   const state = useRef({ over: false, gifLoaded: false, gifError: false });
@@ -103,10 +108,4 @@ ProgressiveImage.propTypes = {
   gifSrc: PropTypes.string,
   className: PropTypes.string,
   errSrc: PropTypes.string,
-};
-
-ProgressiveImage.defaultProps = {
-  gifSrc: null,
-  className: null,
-  errSrc: NOT_FOUND_IMAGE,
 };

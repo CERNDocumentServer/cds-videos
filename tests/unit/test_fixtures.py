@@ -30,7 +30,8 @@ import json
 import mock
 import pytest
 from click.testing import CliRunner
-from invenio_pages import InvenioPages, Page
+from invenio_pages import InvenioPages
+from invenio_pages import PageModel as Page
 from invenio_records.models import RecordMetadata
 from invenio_sequencegenerator.models import TemplateDefinition
 

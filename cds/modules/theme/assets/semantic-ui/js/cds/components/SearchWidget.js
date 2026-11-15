@@ -23,12 +23,12 @@ import { VIDEO_TEMPLATES } from "./VideoTemplates";
 export function SearchWidget({
   endpoint,
   template,
-  loadingMessage,
-  centeredLoading,
-  withLoading,
-  hiddenParams,
-  extraParams,
-  children,
+  loadingMessage = "",
+  centeredLoading = true,
+  withLoading = true,
+  hiddenParams = {},
+  extraParams = {},
+  children = null,
 }) {
   const Template =
     typeof template === "string" ? VIDEO_TEMPLATES[template] : template;
@@ -68,13 +68,4 @@ SearchWidget.propTypes = {
   hiddenParams: PropTypes.object,
   extraParams: PropTypes.object,
   children: PropTypes.node,
-};
-
-SearchWidget.defaultProps = {
-  loadingMessage: "",
-  centeredLoading: true,
-  withLoading: true,
-  hiddenParams: {},
-  extraParams: {},
-  children: null,
 };

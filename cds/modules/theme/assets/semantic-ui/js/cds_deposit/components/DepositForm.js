@@ -38,7 +38,7 @@ function useCounterEffect(counter, effect) {
   }, [counter]);
 }
 
-function FormBridge({ id, type, children }) {
+function FormBridge({ id, type, children = null }) {
   const formik = useFormikContext();
   const dispatch = useDispatch();
   const store = useStore();
@@ -71,9 +71,7 @@ FormBridge.propTypes = {
   children: PropTypes.node,
 };
 
-FormBridge.defaultProps = { children: null };
-
-export function DepositForm({ id, children }) {
+export function DepositForm({ id, children = null }) {
   const store = useStore();
   const type = useSelector((state) => state.deposits[id].type);
   const [initialValues] = useState(() =>
@@ -97,5 +95,3 @@ DepositForm.propTypes = {
   id: PropTypes.string.isRequired,
   children: PropTypes.node,
 };
-
-DepositForm.defaultProps = { children: null };

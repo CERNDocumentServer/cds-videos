@@ -19,8 +19,6 @@ export const selectPage = (state) => state.page;
 /** An action of the page is running (``depositsCtrl.loading``). */
 export const selectLoading = (state) => state.page.pending > 0;
 
-export const selectDeposit = (state, id) => state.deposits[id];
-
 export const selectProject = (state) =>
   state.page.projectId ? state.deposits[state.page.projectId] : undefined;
 

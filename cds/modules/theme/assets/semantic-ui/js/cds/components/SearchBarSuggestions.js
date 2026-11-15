@@ -67,7 +67,7 @@ export function addToHistory(selected) {
   return false;
 }
 
-function SuggestionLabel({ label }) {
+function SuggestionLabel({ label = "" }) {
   // ``ng-bind-html`` of the label (the history entries carry their icon)
   return (
     <span
@@ -77,14 +77,18 @@ function SuggestionLabel({ label }) {
 }
 
 SuggestionLabel.propTypes = { label: PropTypes.string };
-SuggestionLabel.defaultProps = { label: "" };
 
 /**
  * Header search bar with suggestions (``mass-autocomplete`` with the
  * ``cdsSuggest`` app, or ``invenio-search-bar-suggestions`` on the search
  * page, when a search ``store`` is given).
  */
-export function SearchBarSuggestions({ action, placeholder, store, formId }) {
+export function SearchBarSuggestions({
+  action = "/search",
+  placeholder = "Search CDS",
+  store = null,
+  formId = "cdsSearchFormSuggest",
+}) {
   const searchState = useStoreState(store || NULL_STORE);
   const inSearch = Boolean(store);
   const [value, setValue] = useState(
@@ -386,13 +390,6 @@ SearchBarSuggestions.propTypes = {
   placeholder: PropTypes.string,
   store: PropTypes.object,
   formId: PropTypes.string,
-};
-
-SearchBarSuggestions.defaultProps = {
-  action: "/search",
-  placeholder: "Search CDS",
-  store: null,
-  formId: "cdsSearchFormSuggest",
 };
 
 /* A store that never changes, used when there is no search store. */

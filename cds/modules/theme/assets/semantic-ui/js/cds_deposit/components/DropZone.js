@@ -46,18 +46,18 @@ export function matchesPattern(file, pattern) {
 
 export function DropZone({
   onFiles,
-  multiple,
-  accept,
-  pattern,
-  validate,
-  dragOverClass,
-  className,
-  disabled,
-  clickable,
-  droppable,
-  style,
-  children,
-  as: Component,
+  multiple = false,
+  accept = null,
+  pattern = null,
+  validate = null,
+  dragOverClass = "cds-deposit-dragover",
+  className = null,
+  disabled = false,
+  clickable = true,
+  droppable = true,
+  style = null,
+  children = null,
+  as: Component = "div",
 }) {
   const input = useRef(null);
   const [over, setOver] = useState(false);
@@ -154,19 +154,4 @@ DropZone.propTypes = {
   style: PropTypes.object,
   children: PropTypes.node,
   as: PropTypes.elementType,
-};
-
-DropZone.defaultProps = {
-  multiple: false,
-  accept: null,
-  pattern: null,
-  validate: null,
-  dragOverClass: "cds-deposit-dragover",
-  className: null,
-  disabled: false,
-  clickable: true,
-  droppable: true,
-  style: null,
-  children: null,
-  as: "div",
 };

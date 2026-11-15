@@ -17,7 +17,7 @@ import { SearchWidget } from "@js/cds/components/SearchWidget";
 import { useSearch } from "@js/cds/search/hooks";
 import { angularFilterBy, get } from "@js/cds/utils";
 
-function Header({ identifier }) {
+function Header({ identifier = undefined }) {
   const [state] = useSearch();
   const hits = state.results.hits;
   if (!(hits && hits.total > 0)) {
@@ -42,9 +42,8 @@ function Header({ identifier }) {
 }
 
 Header.propTypes = { identifier: PropTypes.string };
-Header.defaultProps = { identifier: undefined };
 
-export function RelatedEventSection({ record, relatedQueryUrl }) {
+export function RelatedEventSection({ record, relatedQueryUrl = "" }) {
   const indicoIdentifier =
     angularFilterBy(get(record, "metadata.related_identifiers"), {
       scheme: "indico",
@@ -71,5 +70,3 @@ RelatedEventSection.propTypes = {
   record: PropTypes.object.isRequired,
   relatedQueryUrl: PropTypes.string,
 };
-
-RelatedEventSection.defaultProps = { relatedQueryUrl: "" };

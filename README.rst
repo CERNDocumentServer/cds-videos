@@ -47,9 +47,9 @@ Ensure that the following dependencies are installed with the specified versions
 
 1. **uv**
    The Python package and project manager, see the `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
-   It installs Python 3.9 (set in ``.python-version``) when it is not available.
+   It installs Python 3.14 (set in ``.python-version``) when it is not available.
 
-2. **Node.js v18**
+2. **Node.js v24**
 
 3. **FFmpeg v5.0**
 

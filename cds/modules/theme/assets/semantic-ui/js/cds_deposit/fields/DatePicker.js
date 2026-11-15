@@ -74,7 +74,7 @@ function chunk(items, size) {
   return rows;
 }
 
-function Calendar({ selected, onSelect }) {
+function Calendar({ selected = null, onSelect }) {
   const [view, setView] = useState(0); // 0 days, 1 months, 2 years
   const [viewDate, setViewDate] = useState(() => selected || new Date());
   const year = viewDate.getFullYear();
@@ -229,13 +229,11 @@ Calendar.propTypes = {
   onSelect: PropTypes.func.isRequired,
 };
 
-Calendar.defaultProps = { selected: null };
-
 export function DatePickerInput({
-  name,
-  value,
-  placeholder,
-  disabled,
+  name = undefined,
+  value = "",
+  placeholder = "",
+  disabled = false,
   onChange,
 }) {
   const [open, setOpen] = useState(false);
@@ -300,11 +298,4 @@ DatePickerInput.propTypes = {
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-};
-
-DatePickerInput.defaultProps = {
-  name: undefined,
-  value: "",
-  placeholder: "",
-  disabled: false,
 };

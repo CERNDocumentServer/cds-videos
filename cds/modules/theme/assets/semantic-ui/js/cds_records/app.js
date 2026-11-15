@@ -11,7 +11,7 @@
 /* ``cds_records_app`` entry point: the record page (``/record/<recid>``). */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { onReady, parseJSON } from "@js/cds/dom";
 import { mountLoadingBar } from "@js/cds/search/mount";
@@ -26,7 +26,7 @@ onReady(() => {
   const data = element.dataset;
   // The record embedded in the page (as the API returns it)
   const embedded = document.getElementById("cds-record-json");
-  ReactDOM.render(
+  createRoot(element).render(
     <RecordView
       type={data.type === "project" ? "project" : "video"}
       recordUrl={data.record}
@@ -37,8 +37,7 @@ onReady(() => {
       mediaDownloadEventUrl={data.mediaDownloadEventUrl || ""}
       relatedQueryUrl={data.relatedQueryUrl || ""}
       previewLines={parseInt(data.previewLines, 10) || 10}
-    />,
-    element
+    />
   );
   mountLoadingBar();
 });

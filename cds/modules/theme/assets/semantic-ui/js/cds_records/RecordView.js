@@ -21,11 +21,11 @@ import { VideoDetail } from "./video/VideoDetail";
 export function RecordView({
   type,
   recordUrl,
-  initialRecord,
-  recordViewsUrl,
-  mediaDownloadEventUrl,
-  relatedQueryUrl,
-  previewLines,
+  initialRecord = undefined,
+  recordViewsUrl = "",
+  mediaDownloadEventUrl = "",
+  relatedQueryUrl = "",
+  previewLines = 10,
 }) {
   // The record embedded in the page shows at once, else it is fetched
   const [record, setRecord] = useState(initialRecord || null);
@@ -85,12 +85,4 @@ RecordView.propTypes = {
   mediaDownloadEventUrl: PropTypes.string,
   relatedQueryUrl: PropTypes.string,
   previewLines: PropTypes.number,
-};
-
-RecordView.defaultProps = {
-  initialRecord: undefined,
-  recordViewsUrl: "",
-  mediaDownloadEventUrl: "",
-  relatedQueryUrl: "",
-  previewLines: 10,
 };

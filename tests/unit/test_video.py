@@ -26,6 +26,7 @@
 
 
 import json
+from io import BytesIO
 
 import mock
 import pytest
@@ -48,7 +49,6 @@ from invenio_records.models import RecordMetadata
 from invenio_search.engine import dsl
 from jsonschema.exceptions import ValidationError
 from mock import MagicMock
-from six import BytesIO
 
 from cds.modules.deposit.api import (
     Video,

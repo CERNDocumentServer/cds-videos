@@ -29,7 +29,7 @@ import {
 } from "../filters";
 
 /** Search bar of the deposits (``invenio_deposit/searchbar.html``). */
-export function DepositSearchBar({ placeholder }) {
+export function DepositSearchBar({ placeholder = "" }) {
   const [state, store] = useSearch();
   const query = state.currentParams.q || "";
   const [userQuery, setUserQuery] = useState(query);
@@ -63,8 +63,6 @@ export function DepositSearchBar({ placeholder }) {
 }
 
 DepositSearchBar.propTypes = { placeholder: PropTypes.string };
-
-DepositSearchBar.defaultProps = { placeholder: "" };
 
 const STATE_CLASSES = {
   // As before, the overall state is never prefixed, so only the published

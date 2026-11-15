@@ -471,7 +471,13 @@ export function ProjectUploader({ id }) {
 
 ProjectUploader.propTypes = { id: PropTypes.string.isRequired };
 
-function AddLink({ onFiles, accept, pattern, validate, multiple }) {
+function AddLink({
+  onFiles,
+  accept = null,
+  pattern = null,
+  validate = null,
+  multiple = false,
+}) {
   return (
     <DropZone
       as="a"
@@ -494,13 +500,6 @@ AddLink.propTypes = {
   pattern: PropTypes.string,
   validate: PropTypes.func,
   multiple: PropTypes.bool,
-};
-
-AddLink.defaultProps = {
-  accept: null,
-  pattern: null,
-  validate: null,
-  multiple: false,
 };
 
 /** Files of a video (``types/video/uploader.html``). */

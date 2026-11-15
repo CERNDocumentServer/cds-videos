@@ -329,6 +329,9 @@ def test_serialize_record(app, api_app, users, api_project_published, json_heade
             )
             assert res.status_code == 200
             expected = json.loads(res.data.decode("utf-8"))
+        # Each application context has its own session (Flask-SQLAlchemy 3):
+        # release the user row updated by the login
+        db.session.commit()
 
         assert sorted(embedded) == sorted(expected)
         for key in expected:

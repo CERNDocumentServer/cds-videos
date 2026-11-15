@@ -26,14 +26,14 @@
 
 
 import copy
+import importlib.resources
 import json
 import os
 import random
 import uuid
+from io import BytesIO
 from os.path import join
 
-import pkg_resources
-import six
 from celery import shared_task, states
 from flask import current_app
 from flask_security import current_user, login_user
@@ -44,7 +44,6 @@ from invenio_indexer.api import RecordIndexer
 from invenio_pidstore import current_pidstore
 from invenio_records import Record
 from invenio_search import current_search_client
-from six import BytesIO
 
 from cds.modules.deposit.api import Project, Video, deposit_project_resolver
 from cds.modules.flows.api import FlowService
@@ -305,7 +304,7 @@ def get_indexed_records_from_mock(mock_indexer):
     indexed = []
     for call in mock_indexer.call_args_list:
         ((arg,), _) = call
-        if isinstance(arg, six.string_types):
+        if isinstance(arg, str):
             indexed.append(arg)
         else:
             indexed.extend(arg)
@@ -457,7 +456,8 @@ def rand_version_id():
 
 def endpoint_get_schema(path):
     """Get schema for jsonschemas."""
-    with open(pkg_resources.resource_filename("cds_dojson.schemas", path), "r") as f:
+    schema_path = importlib.resources.files("cds_dojson.schemas").joinpath(path)
+    with schema_path.open("r") as f:
         return json.load(f)
 
 

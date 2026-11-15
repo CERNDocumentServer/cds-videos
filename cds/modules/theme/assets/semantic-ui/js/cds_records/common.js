@@ -106,7 +106,7 @@ export function Keywords({ record }) {
 Keywords.propTypes = { record: PropTypes.object.isRequired };
 
 /** Text of the record (``ng-bind-html`` with trusted HTML). */
-export function Html({ html, as: Component, ...props }) {
+export function Html({ html = "", as: Component = "span", ...props }) {
   return <Component {...props} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
@@ -114,5 +114,3 @@ Html.propTypes = {
   html: PropTypes.string,
   as: PropTypes.elementType,
 };
-
-Html.defaultProps = { html: "", as: "span" };

@@ -30,7 +30,7 @@ import {
 } from "./options";
 
 /** Metadata translations. */
-export function TranslationsField({ project }) {
+export function TranslationsField({ project = false }) {
   return (
     <ArrayField
       name="translations"
@@ -63,8 +63,6 @@ export function TranslationsField({ project }) {
 }
 
 TranslationsField.propTypes = { project: PropTypes.bool };
-
-TranslationsField.defaultProps = { project: false };
 
 /** Copyright of a video. */
 export function CopyrightFieldset() {

@@ -11,14 +11,12 @@ test.describe("home page", () => {
       ).toBeVisible();
     }
     // Trends and channels link to searches
-    await expect(page.getByRole("link", { name: "Higgs" })).toHaveAttribute(
-      "href",
-      /^\/search\?/
-    );
-    await expect(page.getByRole("link", { name: "Physics" })).toHaveAttribute(
-      "href",
-      /^\/search\?/
-    );
+    await expect(
+      page.getByRole("link", { name: "Higgs", exact: true })
+    ).toHaveAttribute("href", /^\/search\?/);
+    await expect(
+      page.getByRole("link", { name: "Physics", exact: true })
+    ).toHaveAttribute("href", /^\/search\?/);
   });
 
   test("opens a recent video", async ({ page }) => {

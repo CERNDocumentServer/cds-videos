@@ -31,12 +31,12 @@ export function show(condition) {
 
 /** Bootstrap like panel (``panel panel-default``). */
 export function Panel({
-  className,
-  heading,
-  headingClassName,
-  children,
-  bodyClassName,
-  id,
+  className = null,
+  heading = null,
+  headingClassName = null,
+  children = null,
+  bodyClassName = null,
+  id = undefined,
 }) {
   return (
     <div id={id} className={["cds-panel", className].filter(Boolean).join(" ")}>
@@ -71,17 +71,14 @@ Panel.propTypes = {
   id: PropTypes.string,
 };
 
-Panel.defaultProps = {
-  className: null,
-  heading: null,
-  headingClassName: null,
-  children: null,
-  bodyClassName: null,
-  id: undefined,
-};
-
 /** Bootstrap like progress bar. */
-export function ProgressBar({ striped, active, success, width, children }) {
+export function ProgressBar({
+  striped = false,
+  active = false,
+  success = false,
+  width = 100,
+  children = null,
+}) {
   return (
     <div className="cds-progress">
       <div
@@ -108,14 +105,6 @@ ProgressBar.propTypes = {
   success: PropTypes.bool,
   width: PropTypes.number,
   children: PropTypes.node,
-};
-
-ProgressBar.defaultProps = {
-  striped: false,
-  active: false,
-  success: false,
-  width: 100,
-  children: null,
 };
 
 /** Bootstrap like tabs. */
@@ -149,7 +138,12 @@ Tabs.propTypes = {
 };
 
 /** Tasks of a deposit with their status icons. */
-export function TaskList({ state, small, onTranscodeInfo, itemClassName }) {
+export function TaskList({
+  state = {},
+  small = false,
+  onTranscodeInfo,
+  itemClassName = null,
+}) {
   return orderTasks(state).map(([task, status]) => {
     const content = (
       <>
@@ -185,8 +179,6 @@ TaskList.propTypes = {
   onTranscodeInfo: PropTypes.func.isRequired,
   itemClassName: PropTypes.string,
 };
-
-TaskList.defaultProps = { state: {}, small: false, itemClassName: null };
 
 /** Validation errors returned by the server (``alert alert-danger``). */
 export function ErrorAlerts({ id }) {
@@ -230,7 +222,7 @@ export function ErrorAlerts({ id }) {
 ErrorAlerts.propTypes = { id: PropTypes.string.isRequired };
 
 /** Trusted HTML of the record, sanitized. */
-export function Html({ html, as: Component, className }) {
+export function Html({ html = "", as: Component = "p", className = null }) {
   return (
     <Component
       className={className || undefined}
@@ -245,10 +237,8 @@ Html.propTypes = {
   className: PropTypes.string,
 };
 
-Html.defaultProps = { html: "", as: "p", className: null };
-
 /** A button opening a dialog. */
-export function InfoDialog({ trigger, title, children }) {
+export function InfoDialog({ trigger, title, children = null }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -265,8 +255,6 @@ InfoDialog.propTypes = {
   title: PropTypes.string.isRequired,
   children: PropTypes.node,
 };
-
-InfoDialog.defaultProps = { children: null };
 
 /**
  * Video preview of a deposit, or the processing spinner. A placeholder

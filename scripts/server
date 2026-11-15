@@ -27,7 +27,7 @@ set -e
 
 script_path=$(dirname "$0")
 
-export FLASK_ENV=development
+export FLASK_DEBUG=1
 
 cds run --reload --with-threads \
     --cert "$script_path"/../docker/nginx/test.crt \

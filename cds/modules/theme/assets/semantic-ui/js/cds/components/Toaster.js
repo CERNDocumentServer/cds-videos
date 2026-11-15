@@ -76,7 +76,7 @@ Toast.propTypes = {
 };
 
 /** Container rendering the toasts (``<toaster-container>``), newest on top. */
-export function ToasterContainer({ timeout }) {
+export function ToasterContainer({ timeout = 5000 }) {
   const [toasts, setToasts] = useState([]);
 
   useEffect(() => {
@@ -106,8 +106,4 @@ export function ToasterContainer({ timeout }) {
 
 ToasterContainer.propTypes = {
   timeout: PropTypes.number,
-};
-
-ToasterContainer.defaultProps = {
-  timeout: 5000,
 };

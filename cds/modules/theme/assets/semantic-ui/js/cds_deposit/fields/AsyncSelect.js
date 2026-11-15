@@ -75,14 +75,14 @@ function highlight(text, query) {
  * resolves to items ``{name, value, email}``; ``onSelect`` gets the item.
  */
 export function AsyncSelect({
-  text,
-  placeholder,
+  text = "",
+  placeholder = "",
   fetchOptions,
-  minLength,
-  delay,
-  disabled,
+  minLength = 3,
+  delay = 100,
+  disabled = false,
   onSelect,
-  name,
+  name = undefined,
 }) {
   const [query, setQuery] = useState("");
   const [results, loading, search] = useDebouncedSearch(
@@ -149,35 +149,26 @@ AsyncSelect.propTypes = {
   name: PropTypes.string,
 };
 
-AsyncSelect.defaultProps = {
-  text: "",
-  placeholder: "",
-  minLength: 3,
-  delay: 100,
-  disabled: false,
-  name: undefined,
-};
-
 /**
  * Multiple values with remote suggestions and custom values (tagging with
  * ``,``). The values are objects; ``getName`` gives their label and
  * ``toItem`` builds a custom value.
  */
 export function AsyncMultiSelect({
-  values,
+  values = [],
   getName,
-  getText,
+  getText = null,
   toItem,
   fetchOptions,
-  minLength,
-  delay,
-  disabled,
-  placeholder,
-  allowAdditions,
+  minLength = 1,
+  delay = 100,
+  disabled = false,
+  placeholder = "",
+  allowAdditions = false,
   onChange,
-  noResultsMessage,
-  renderResult,
-  lockedValues,
+  noResultsMessage = () => null,
+  renderResult = null,
+  lockedValues = [],
 }) {
   const [query, setQuery] = useState("");
   const [results, loading, search, setResults] = useDebouncedSearch(
@@ -288,17 +279,4 @@ AsyncMultiSelect.propTypes = {
   noResultsMessage: PropTypes.func,
   renderResult: PropTypes.func,
   lockedValues: PropTypes.array,
-};
-
-AsyncMultiSelect.defaultProps = {
-  values: [],
-  getText: null,
-  minLength: 1,
-  delay: 100,
-  disabled: false,
-  placeholder: "",
-  allowAdditions: false,
-  noResultsMessage: () => null,
-  renderResult: null,
-  lockedValues: [],
 };
