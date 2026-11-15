@@ -67,6 +67,24 @@ To update them, change ``pyproject.toml`` if needed, then update the lock file a
     $ uv lock                                   # after changing pyproject.toml
     $ uv lock --upgrade-package <package-name>  # to upgrade one package
 
+Upgrade an existing database
+============================
+
+A database of the previous stack (Python 3.9, Flask 2.2, Invenio 1.x to 5.x)
+is upgraded with ``scripts/upgrade-database`` instead of
+``cds alembic upgrade heads`` alone. With the configuration of the instance and
+after a backup:
+
+.. code-block:: shell
+
+    $ uv run ./scripts/upgrade-database
+
+It stamps two revisions that the old database already has (the Invenio-Access
+role keys and the Invenio-Pages tables), runs the migrations, then converts
+the encrypted OAuth token columns to text and creates the unique index of the
+head file versions, as in a new database. It can run again safely. Reindex the
+records afterwards if the search mappings changed.
+
 Installation and Setup
 ======================
 

@@ -44,6 +44,7 @@ include scripts/celery
 include scripts/server
 include scripts/setup
 include scripts/setup-tests
+include scripts/upgrade-database
 recursive-include .github *
 recursive-include benchmarks *.py
 recursive-include cds *.config
