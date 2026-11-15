@@ -42,6 +42,26 @@ async function getJSON(request, url) {
   return response.json();
 }
 
+// Deletes a deposit with its videos through the REST API, if it exists
+async function deleteDeposit(page, url) {
+  const found = await page.request.get(url, { headers: JSON_HEADERS });
+  if (!found.ok()) {
+    return;
+  }
+  const { origin } = new URL(url, base.test.info().project.use.baseURL);
+  const cookies = await page.context().cookies(origin);
+  const csrf = cookies.find((cookie) => cookie.name === "csrftoken");
+  const response = await page.request.delete(url, {
+    headers: {
+      ...JSON_HEADERS,
+      "X-CSRFToken": csrf ? csrf.value : "",
+      // The REST API checks the referer of secure requests
+      Referer: `${origin}/`,
+    },
+  });
+  expect([204, 404, 410], `DELETE ${url}`).toContain(response.status());
+}
+
 function hitsTotal(hits) {
   return typeof hits.total === "object" ? hits.total.value : hits.total;
 }
@@ -173,6 +193,7 @@ module.exports = {
   login,
   userMenu,
   getJSON,
+  deleteDeposit,
   hitsTotal,
   selectSort,
   sortControl,
