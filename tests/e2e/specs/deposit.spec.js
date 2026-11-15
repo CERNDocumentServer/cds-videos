@@ -1,6 +1,13 @@
 const path = require("path");
 
-const { test, expect, login, getJSON, strapSelect } = require("../support");
+const {
+  test,
+  expect,
+  login,
+  getJSON,
+  strapSelect,
+  deleteDeposit,
+} = require("../support");
 
 const CLIP = path.join(__dirname, "..", "data", "clip.mp4");
 
@@ -64,8 +71,16 @@ test.describe("uploads of a user", () => {
 
   test("opens the form of a project", async ({ page }) => {
     const api = await getJSON(page.request, "/api/deposits/project/?size=50");
-    const titled = api.hits.hits.find((hit) => hit.metadata.title);
-    test.skip(!titled, "no project with a title");
+    // A draft with videos, other than the uploads of the "new upload" tests
+    const draft = (hit) =>
+      hit.metadata.title &&
+      !hit.metadata.title.title.startsWith("E2E ") &&
+      hit.metadata._deposit.status === "draft";
+    const titled =
+      api.hits.hits.find(
+        (hit) => draft(hit) && (hit.metadata.videos || []).length > 0
+      ) || api.hits.hits.find(draft);
+    test.skip(!titled, "no draft project with a title");
     await page.goto(`/deposit/project/${titled.id}`);
     await expect(page.locator("input[name=title]").first()).toHaveValue(
       titled.metadata.title.title
@@ -89,11 +104,31 @@ test.describe("uploads of a user", () => {
     const videos = (titled.metadata.videos || []).length;
     if (videos > 0) {
       await expect(page.getByText(/Video #1 \(of \d+\)/)).toBeVisible();
+      // The preview of a processed video plays
+      const previews = page.locator("iframe[src*='/preview/video/']");
+      if ((await previews.count()) > 0) {
+        await expect(
+          page
+            .frameLocator("iframe[src*='/preview/video/']")
+            .first()
+            .locator("video")
+        ).toBeAttached();
+      }
     }
   });
 });
 
 test.describe("new upload", () => {
+  // The project of a run that failed before deleting it
+  let created;
+
+  test.afterEach(async ({ page }) => {
+    if (created) {
+      await deleteDeposit(page, `/api/deposits/project/${created}`);
+      created = undefined;
+    }
+  });
+
   // Creates a project, saves it and deletes it
   test("uploads a video, edits, saves and deletes the project", async ({
     page,
@@ -116,6 +151,7 @@ test.describe("new upload", () => {
         timeout: 30 * 1000,
       });
       id = page.url().split("/").pop();
+      created = id;
       await expect(page.getByText(/Video #1/)).toBeVisible();
       await started;
     });
@@ -178,6 +214,7 @@ test.describe("new upload", () => {
         headers: { Accept: "application/json" },
       });
       expect([404, 410]).toContain(response.status());
+      created = undefined;
     });
   });
 });

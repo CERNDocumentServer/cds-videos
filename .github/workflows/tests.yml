@@ -84,3 +84,88 @@ jobs:
       - name: Run tests
         run: |
           uv run --locked ./run-tests.sh
+
+  tests-e2e:
+    # Playwright tests of the React interface (tests/e2e), on a running
+    # instance seeded by tests/e2e/setup.sh
+    runs-on: ubuntu-22.04
+    env:
+      INVENIO_SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
+      # No Celery worker: the tasks of new uploads stay in the queue
+      INVENIO_BROKER_URL: "redis://localhost:6379/5"
+      INVENIO_CELERY_BROKER_URL: "redis://localhost:6379/5"
+      INVENIO_IIIF_CACHE_REDIS_URL: "redis://localhost:6379/4"
+      INVENIO_SECRET_KEY: "e2e-secret-key"
+      E2E_REACT_URL: "https://127.0.0.1:5001"
+
+    steps:
+      - name: Install LDAP dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libsasl2-dev libldap2-dev libssl-dev
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.9"
+          enable-cache: true
+
+      # Playwright needs Node.js 20 or later
+      - name: Use Node.js v20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: |
+          uv sync --locked
+
+      - name: Build project
+        run: |
+          uv run --locked ./scripts/build-assets
+
+      - name: Start services
+        run: |
+          uv run --locked docker-services-cli up --db postgresql14 --search opensearch2 --cache redis
+
+      - name: Set up the instance
+        run: |
+          uv run --locked ./tests/e2e/setup.sh
+
+      - name: Start the server
+        env:
+          FLASK_ENV: development
+        run: |
+          uv run --locked cds run -h 127.0.0.1 -p 5001 --with-threads --no-reload \
+            --cert docker/nginx/test.crt --key docker/nginx/test.key > server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -skf -o /dev/null "$E2E_REACT_URL/login/" && exit 0
+            sleep 2
+          done
+          cat server.log
+          exit 1
+
+      - name: Install Playwright
+        working-directory: tests/e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run end to end tests
+        working-directory: tests/e2e
+        run: |
+          npx playwright test --project=react
+
+      - name: Upload the test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+            server.log
+          retention-days: 7

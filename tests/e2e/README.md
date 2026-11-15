@@ -31,6 +31,25 @@ project with a video (ideally with a description, keywords and subtitles). The
 specs read the records to check from the REST API, so they work with any
 data, and skip the checks the data does not allow.
 
+`setup.sh` prepares such an instance on empty services: the database, the
+indices, the users and fixtures of `scripts/setup` (without the keywords
+harvested from home.cern) and the records of `seed.py`, a published project
+with two videos and a draft project with one, all with the files of processed
+videos.
+
+```bash
+./tests/e2e/setup.sh    # from the root of the repository, in the virtualenv
+```
+
+## Continuous integration
+
+The `tests-e2e` job of `.github/workflows/tests.yml` builds the assets, starts
+PostgreSQL, OpenSearch and Redis with `docker-services-cli`, runs `setup.sh`,
+starts the server on `https://127.0.0.1:5001` and runs the `react` project.
+There is no Celery worker, so the tasks of new uploads stay in the queue. On
+failure the job uploads the HTML report, the traces and the server log as the
+`playwright-report` artifact. Playwright needs Node.js 20 or later.
+
 ## Settings
 
 | Variable                                | Default                   |
@@ -51,4 +70,5 @@ data, and skip the checks the data does not allow.
   hard coding records.
 - Uncaught page errors fail the test.
 - `specs/deposit.spec.js` uploads `data/clip.mp4` (a 2 second test clip) as
-  the admin user, then deletes the project it created.
+  the admin user, then deletes the project it created, also when the test
+  fails midway.
