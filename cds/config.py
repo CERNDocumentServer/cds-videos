@@ -1161,6 +1161,9 @@ SITE_URL = "https://127.0.0.1:5000"
 
 APP_THEME = ["semantic-ui"]
 
+# Build the assets with rspack (Invenio-Assets) instead of webpack, as cds-rdm
+WEBPACKEXT_PROJECT = "invenio_assets.webpack:rspack_project"
+
 ###############################################################################
 # User Profiles
 ###############################################################################
