@@ -24,6 +24,7 @@
 
 """Test previewer."""
 
+from io import BytesIO
 
 import pytest
 from flask import url_for
@@ -175,9 +176,20 @@ def test_preview_video_html5(
     ObjectVersionTag.create(obj, "context_type", "master")
     ObjectVersionTag.create(obj, "preview", "true")
     ObjectVersion.create(bucket=bucket_id, key=filename_2, stream=open(video, "rb"))
+    subtitle = ObjectVersion.create(
+        bucket=bucket_id, key="{}_en.vtt".format(basename), stream=BytesIO(b"WEBVTT")
+    )
+    for key, value in (
+        ("context_type", "subtitle"),
+        ("content_type", "vtt"),
+        ("media_type", "subtitle"),
+        ("language", "en"),
+    ):
+        ObjectVersionTag.create(subtitle, key, value)
 
     success_list = [
         "<video",
+        "srclang='en'",
     ]
 
     if publish:
@@ -189,6 +201,7 @@ def test_preview_video_html5(
     else:
         assert video_1.status == "draft"
         pid = PersistentIdentifier.get("depid", video_1["_deposit"]["id"])
+        video_1["_files"] = video_1.files.dumps()
 
     def assert_preview(expected=None, exception=None, **query_params):
         with previewer_app.test_request_context(query_string=query_params):
