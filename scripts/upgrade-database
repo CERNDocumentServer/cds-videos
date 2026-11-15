@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# This file is part of CDS.
+# Copyright (C) 2026 CERN.
+#
+# CDS is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+
+"""Upgrade a database of the previous stack (Flask 2.2, Invenio 1.x to 5.x).
+
+``cds alembic upgrade heads`` alone fails on such a database. This script:
+
+1. Stamps the invenio-access revision f9843093f686. It was applied, but the
+   new revision graph no longer reaches it from the invenio-accounts head,
+   so alembic would run it again on string role ids.
+2. Stamps the invenio-pages revision 145402e8523a. Invenio-Pages 1.0.0a7
+   created its tables without alembic, as this revision does.
+3. Runs ``alembic upgrade heads``.
+4. Changes the encrypted token columns of Invenio-OAuth2Server and
+   Invenio-OAuthClient from binary to text, as in a new database (the
+   tokens read either way).
+5. Creates the unique index of the head object versions, which an
+   Invenio-Files-REST recipe drops and a new database has.
+
+Each step checks the database first, so the script can run again. Run it
+with the configuration of the instance, after a backup::
+
+    uv run ./scripts/upgrade-database
+"""
+
+import sqlalchemy as sa
+from invenio_app.factory import create_app
+from invenio_db import db
+
+ACCESS_ROLE_FK = "f9843093f686"
+PAGES_TABLES = "145402e8523a"
+PAGES_REVISIONS = {
+    "98e0a418340d",
+    "145402e8523a",
+    "b0f93ca4a147",
+    "9fae3c5404d9",
+    "1737449793",
+    "08a5708005b7",
+}
+TOKEN_COLUMNS = [
+    ("oauth2server_token", "access_token"),
+    ("oauth2server_token", "refresh_token"),
+    ("oauthclient_remotetoken", "access_token"),
+]
+HEAD_INDEX = "ix_uq_partial_files_object_is_head"
+
+
+def stamped(connection):
+    """Revisions in the alembic version table."""
+    return {
+        row[0]
+        for row in connection.execute(sa.text("SELECT version_num FROM alembic_version"))
+    }
+
+
+def column_type(inspector, table, column):
+    """Type of a column, as named by the database."""
+    for info in inspector.get_columns(table):
+        if info["name"] == column:
+            return info["type"]
+
+
+def main():
+    """Upgrade the database."""
+    app = create_app()
+    with app.app_context():
+        alembic = app.extensions["invenio-db"].alembic
+        with db.engine.connect() as connection:
+            revisions = stamped(connection)
+            inspector = sa.inspect(connection)
+            role_id = column_type(inspector, "access_actionsroles", "role_id")
+            has_pages = inspector.has_table("pages_page")
+
+        if ACCESS_ROLE_FK not in revisions and isinstance(role_id, sa.String):
+            print("Stamping invenio-access", ACCESS_ROLE_FK)
+            alembic.stamp(ACCESS_ROLE_FK)
+        if has_pages and not revisions & PAGES_REVISIONS:
+            print("Stamping invenio-pages", PAGES_TABLES)
+            alembic.stamp(PAGES_TABLES)
+
+        print("Upgrading to the heads")
+        alembic.upgrade("heads")
+
+        with db.engine.begin() as connection:
+            inspector = sa.inspect(connection)
+            for table, column in TOKEN_COLUMNS:
+                if isinstance(column_type(inspector, table, column), sa.LargeBinary):
+                    print("Converting {0}.{1} to text".format(table, column))
+                    connection.execute(
+                        sa.text(
+                            "ALTER TABLE {0} ALTER COLUMN {1} TYPE VARCHAR "
+                            "USING convert_from({1}, 'UTF8')".format(table, column)
+                        )
+                    )
+            indexes = [i["name"] for i in inspector.get_indexes("files_object")]
+            if HEAD_INDEX not in indexes:
+                print("Creating", HEAD_INDEX)
+                connection.execute(
+                    sa.text(
+                        "CREATE UNIQUE INDEX {0} ON files_object (bucket_id, key) "
+                        "WHERE is_head".format(HEAD_INDEX)
+                    )
+                )
+        print("Done")
+
+
+if __name__ == "__main__":
+    main()
