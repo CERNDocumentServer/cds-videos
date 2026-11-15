@@ -83,3 +83,6 @@ tmp
 
 # AI files
 CLAUDE.md
+# Playwright end to end tests
+tests/e2e/test-results/
+tests/e2e/playwright-report/

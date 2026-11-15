@@ -1,0 +1,14 @@
+{
+  "name": "cds-videos-e2e",
+  "private": true,
+  "description": "End to end tests of CDS Videos, run against the AngularJS and the React interface",
+  "scripts": {
+    "test": "playwright test",
+    "test:angularjs": "playwright test --project=angularjs",
+    "test:react": "playwright test --project=react",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
