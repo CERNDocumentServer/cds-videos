@@ -15,7 +15,13 @@ import PropTypes from "prop-types";
  * Dialog with a title and a close button, rendered in place with the markup
  * and the styles of the former ``modal-dialog`` (ngModal) directive.
  */
-export function DialogModal({ open, onClose, title, children, className }) {
+export function DialogModal({
+  open,
+  onClose,
+  title = null,
+  children = null,
+  className = null,
+}) {
   return (
     <div
       className={["ng-modal", className].filter(Boolean).join(" ")}
@@ -48,10 +54,4 @@ DialogModal.propTypes = {
   title: PropTypes.node,
   children: PropTypes.node,
   className: PropTypes.string,
-};
-
-DialogModal.defaultProps = {
-  title: null,
-  children: null,
-  className: null,
 };

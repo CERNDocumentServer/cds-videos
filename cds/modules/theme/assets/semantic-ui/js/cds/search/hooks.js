@@ -50,7 +50,7 @@ function SearchStateBridgeComponent({
   currentResultsState,
   updateQueryState,
   searchApi,
-  children,
+  children = null,
 }) {
   const memory = useRef({ results: {}, sortArgs: {}, responses: 0 });
   const params = queryStateToParams(currentQueryState);
@@ -115,8 +115,6 @@ SearchStateBridgeComponent.propTypes = {
   searchApi: PropTypes.object.isRequired,
   children: PropTypes.node,
 };
-
-SearchStateBridgeComponent.defaultProps = { children: null };
 
 export const SearchStateBridge = withState(SearchStateBridgeComponent);
 

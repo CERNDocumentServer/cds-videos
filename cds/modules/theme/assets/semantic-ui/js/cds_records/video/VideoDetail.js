@@ -218,7 +218,7 @@ ChaptersSection.propTypes = {
   onJump: PropTypes.func.isRequired,
 };
 
-function HorizontalChapter({ chapter, frame, onJump }) {
+function HorizontalChapter({ chapter, frame = null, onJump }) {
   const [hover, setHover] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
@@ -328,8 +328,6 @@ HorizontalChapter.propTypes = {
   onJump: PropTypes.func.isRequired,
 };
 
-HorizontalChapter.defaultProps = { frame: null };
-
 /** The video player, with a placeholder until its page has loaded. */
 function PlayerFrame({ title, src }) {
   const [loadedSrc, setLoadedSrc] = useState(null);
@@ -364,9 +362,9 @@ PlayerFrame.propTypes = {
 
 export function VideoDetail({
   record,
-  recordViews,
+  recordViews = undefined,
   previewLines,
-  relatedQueryUrl,
+  relatedQueryUrl = "",
   onDownload,
 }) {
   const metadata = record.metadata;
@@ -911,5 +909,3 @@ VideoDetail.propTypes = {
   relatedQueryUrl: PropTypes.string,
   onDownload: PropTypes.func.isRequired,
 };
-
-VideoDetail.defaultProps = { recordViews: undefined, relatedQueryUrl: "" };

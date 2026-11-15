@@ -338,18 +338,16 @@ export function encodeURIComponentFilter(text) {
 }
 
 export function bytesToHumanReadable(size) {
-  function round(num, precision) {
-    return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
-  }
-  let limit = Math.pow(1024, 4);
-  if (size > limit) {
-    return round(size / limit, 1) + " TB";
-  } else if (size > (limit /= 1024)) {
-    return round(size / limit, 1) + " GB";
-  } else if (size > (limit /= 1024)) {
-    return round(size / limit, 1) + " MB";
-  } else if (size > 1024) {
-    return Math.round(size / 1024) + " KB";
+  const round = (num) => Math.round(num * 10) / 10;
+  const [KB, MB, GB, TB] = [1024, 1024 ** 2, 1024 ** 3, 1024 ** 4];
+  if (size > TB) {
+    return round(size / TB) + " TB";
+  } else if (size > GB) {
+    return round(size / GB) + " GB";
+  } else if (size > MB) {
+    return round(size / MB) + " MB";
+  } else if (size > KB) {
+    return Math.round(size / KB) + " KB";
   }
   return size + " B";
 }

@@ -19,7 +19,7 @@ import PropTypes from "prop-types";
 import { Placeholder } from "semantic-ui-react";
 
 /** A form field: its label and its input. */
-function FieldPlaceholder({ tall }) {
+function FieldPlaceholder({ tall = false }) {
   return (
     <Placeholder fluid className="cds-placeholder cds-placeholder-field">
       <Placeholder.Header>
@@ -35,7 +35,6 @@ function FieldPlaceholder({ tall }) {
 }
 
 FieldPlaceholder.propTypes = { tall: PropTypes.bool };
-FieldPlaceholder.defaultProps = { tall: false };
 
 function PanelPlaceholder({ icon, title, children }) {
   return (

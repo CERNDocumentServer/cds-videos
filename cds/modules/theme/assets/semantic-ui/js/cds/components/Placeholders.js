@@ -23,7 +23,7 @@ function range(count) {
 }
 
 /** A text line, e.g. in place of the result count. */
-export function LinePlaceholder({ className }) {
+export function LinePlaceholder({ className = null }) {
   return (
     <Placeholder
       className={["cds-placeholder cds-placeholder-text", className]
@@ -38,7 +38,6 @@ export function LinePlaceholder({ className }) {
 }
 
 LinePlaceholder.propTypes = { className: PropTypes.string };
-LinePlaceholder.defaultProps = { className: null };
 
 /** A video thumbnail with its title. */
 function VideoCardPlaceholder({ dark }) {
@@ -60,7 +59,12 @@ function VideoCardPlaceholder({ dark }) {
 VideoCardPlaceholder.propTypes = { dark: PropTypes.bool.isRequired };
 
 /** A grid of videos, like the grid templates of ``VideoTemplates``. */
-export function VideoGridPlaceholder({ count, columnClass, perRow, dark }) {
+export function VideoGridPlaceholder({
+  count,
+  columnClass,
+  perRow = 0,
+  dark = false,
+}) {
   return (
     <div className="cds-row cds-search-results" aria-busy="true">
       {range(count).map((index) => (
@@ -83,8 +87,6 @@ VideoGridPlaceholder.propTypes = {
   perRow: PropTypes.number,
   dark: PropTypes.bool,
 };
-
-VideoGridPlaceholder.defaultProps = { perRow: 0, dark: false };
 
 /** The featured video player of the home page. */
 export function FeaturedVideoPlaceholder() {
@@ -122,7 +124,7 @@ export const VIDEO_PLACEHOLDERS = {
 };
 
 /** The facet boxes of the search pages. */
-export function FacetsPlaceholder({ count }) {
+export function FacetsPlaceholder({ count = 3 }) {
   return (
     <div aria-busy="true">
       {range(count).map((index) => (
@@ -144,4 +146,3 @@ export function FacetsPlaceholder({ count }) {
 }
 
 FacetsPlaceholder.propTypes = { count: PropTypes.number };
-FacetsPlaceholder.defaultProps = { count: 3 };

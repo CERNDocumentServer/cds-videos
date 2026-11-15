@@ -58,16 +58,13 @@ theme = WebpackThemeBundle(
                 "cds_search_ui_app": "./js/cds_search_ui/app.js",
             },
             dependencies={
-                "react": "^16.13.0",
-                "react-dom": "^16.13.0",
+                # Same majors as Invenio-Search-UI
+                "react": "^18.3.1",
+                "react-dom": "^18.3.1",
                 "prop-types": "^15.7.2",
-                "semantic-ui-react": "^2.1.0",
+                "semantic-ui-react": "^3.0.0-beta.2",
                 "semantic-ui-less": "^2.4.1",
-                # react-searchkit 3.0.0 is the last release compatible with
-                # react-overridable 0.0.3 (pinned by Invenio-Search-UI 3.0.x).
-                # ``<3.0.1`` resolves to 3.0.0 and wins the version merge
-                # against the ``^3.0.0`` of Invenio-Search-UI.
-                "react-searchkit": "<3.0.1",
+                "react-searchkit": "^4.0.0",
                 "formik": "^2.4.0",
                 # The deposit form state, same ranges as react-searchkit
                 "redux": "^4.0.0",
@@ -81,11 +78,6 @@ theme = WebpackThemeBundle(
                 "dompurify": "^2.4.5",
                 "ckeditor": "4.12.1",
                 "invenio-charts-js": "^0.2.7",
-                # Not used by CDS, but required by Invenio-Search-UI with
-                # ``^4.0.0``: the latest 4.x releases need react-overridable
-                # 1.x while Invenio-Search-UI pins react-overridable 0.0.3, so
-                # keep the last release line compatible with both.
-                "react-invenio-forms": "~4.10.0",
             },
             aliases={
                 "@js/cds": "js/cds",

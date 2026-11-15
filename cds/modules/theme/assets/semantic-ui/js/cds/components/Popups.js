@@ -13,7 +13,7 @@ import PropTypes from "prop-types";
 import { Popup } from "semantic-ui-react";
 
 /** Tooltip on hover with an HTML content (``uib-tooltip-html``). */
-export function Tooltip({ html, position, children }) {
+export function Tooltip({ html, position = "top center", children }) {
   return (
     <Popup
       trigger={children}
@@ -33,13 +33,17 @@ Tooltip.propTypes = {
   children: PropTypes.element.isRequired,
 };
 
-Tooltip.defaultProps = { position: "top center" };
-
 /**
  * Popover opened on click and closed when clicking outside (Bootstrap
  * ``rel="popover"`` links of the record page).
  */
-export function Popover({ title, html, content, position, children }) {
+export function Popover({
+  title = null,
+  html = null,
+  content = null,
+  position = "bottom center",
+  children,
+}) {
   return (
     <Popup
       trigger={children}
@@ -60,11 +64,4 @@ Popover.propTypes = {
   content: PropTypes.node,
   position: PropTypes.string,
   children: PropTypes.element.isRequired,
-};
-
-Popover.defaultProps = {
-  title: null,
-  html: null,
-  content: null,
-  position: "bottom center",
 };

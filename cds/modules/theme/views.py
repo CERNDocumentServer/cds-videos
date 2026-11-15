@@ -25,8 +25,26 @@
 """CDS interface."""
 
 
-from flask import Blueprint
+from flask import Blueprint, current_app, render_template
+from invenio_pages.records.errors import PageNotFoundError
+from invenio_pages.views import create_page_view
 
 blueprint = Blueprint(
     "cds", __name__, template_folder="templates", static_folder="static"
 )
+
+#: Static pages (Invenio-Pages), created by ``cds fixtures pages``
+PAGES = ("/about", "/contact", "/faq", "/guide/search", "/terms")
+
+for url in PAGES:
+    blueprint.add_url_rule(
+        url,
+        endpoint="page_" + url.strip("/").replace("/", "_"),
+        view_func=create_page_view(url),
+    )
+
+
+@blueprint.app_errorhandler(PageNotFoundError)
+def page_not_found(error):
+    """Not found page for the static pages missing from the database."""
+    return render_template(current_app.config["THEME_404_TEMPLATE"]), 404

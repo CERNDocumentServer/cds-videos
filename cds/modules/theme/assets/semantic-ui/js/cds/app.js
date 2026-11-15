@@ -16,7 +16,7 @@
  */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { http } from "./api";
 import { onReady } from "./dom";
@@ -70,12 +70,11 @@ function mountSearchBar() {
   const element = document.getElementById("cds-navbar-search");
   // ``search``: mounted by the search page, ``plain``: rendered by Jinja
   if (!element || element.dataset.mode !== "suggest") return;
-  ReactDOM.render(
+  createRoot(element).render(
     <SearchBarSuggestions
       action={element.dataset.action}
       placeholder={element.dataset.placeholder}
-    />,
-    element
+    />
   );
 }
 
@@ -83,14 +82,13 @@ function mountSearchBar() {
 function mountSearchWidgets() {
   document.querySelectorAll("[data-cds-search-widget]").forEach((element) => {
     const data = element.dataset;
-    ReactDOM.render(
+    createRoot(element).render(
       <SearchWidget
         endpoint={data.endpoint}
         template={data.template}
         loadingMessage={data.loadingMessage || ""}
         centeredLoading={data.centeredLoading !== "false"}
-      />,
-      element
+      />
     );
   });
 }

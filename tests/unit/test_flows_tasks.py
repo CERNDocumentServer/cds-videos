@@ -25,9 +25,9 @@
 
 import threading
 import uuid
+from io import BytesIO
 
 import mock
-from cds.modules.flows.api import FlowService
 import pytest
 from celery import states
 from celery.exceptions import Retry
@@ -50,7 +50,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from invenio_records.models import RecordMetadata
 from jsonschema.exceptions import ValidationError
-from six import BytesIO
+from sqlalchemy import inspect
 from sqlalchemy.orm.exc import ConcurrentModificationError
 from werkzeug.utils import import_string
 
@@ -60,11 +60,12 @@ from cds.modules.deposit.api import (
     deposit_project_resolver,
     deposit_video_resolver,
 )
+from cds.modules.flows.api import FlowService
 from cds.modules.flows.models import FlowMetadata, FlowTaskMetadata
 from cds.modules.flows.tasks import (
     DownloadTask,
-    ExtractFramesTask,
     ExtractChapterFramesTask,
+    ExtractFramesTask,
     ExtractMetadataTask,
     TranscodeVideoTask,
     sync_records_with_deposit_files,
@@ -529,16 +530,16 @@ def test_sync_records_with_deposits(
 
     # insert objects inside the deposit
     ObjectVersion.create(deposit.files.bucket, "obj_1").set_location(
-        "mylocation1", 1, "mychecksum1"
+        "mylocation1", 1, "md5:mychecksum1"
     )
     ObjectVersion.create(deposit.files.bucket, "obj_2").set_location(
-        "mylocation2", 1, "mychecksum2"
+        "mylocation2", 1, "md5:mychecksum2"
     )
     ObjectVersion.create(deposit.files.bucket, "obj_3").set_location(
-        "mylocation3", 1, "mychecksum3"
+        "mylocation3", 1, "md5:mychecksum3"
     )
     obj_4 = ObjectVersion.create(deposit.files.bucket, "obj_4").set_location(
-        "mylocation4", 1, "mychecksum4"
+        "mylocation4", 1, "md5:mychecksum4"
     )
 
     # publish
@@ -550,11 +551,11 @@ def test_sync_records_with_deposits(
 
     # add a new object
     ObjectVersion.create(deposit.files.bucket, "obj_new").set_location(
-        "mylocation_new", 1, "mychecksum"
+        "mylocation_new", 1, "md5:mychecksum"
     )
     # modify obj_1
     ObjectVersion.create(deposit.files.bucket, "obj_new").set_location(
-        "mylocation2.1", 1, "mychecksum2.1"
+        "mylocation2.1", 1, "md5:mychecksum2.1"
     )
     # delete obj_3
     ObjectVersion.delete(deposit.files.bucket, "obj_3")
@@ -672,7 +673,8 @@ def test_extract_chapter_frames_task(app, db, bucket, video, users):
         # ---- Verify chapters.vtt creation ----
         mock_obj_create.assert_called_once()
         vtt_call_args = mock_obj_create.call_args
-        assert vtt_call_args.kwargs["bucket"] == bucket
+        # The task has its own session (Flask-SQLAlchemy 3): compare keys
+        assert inspect(vtt_call_args.kwargs["bucket"]).identity == (bucket.id,)
         assert vtt_call_args.kwargs["key"] == "chapters.vtt"
 
         # Tags applied to chapters.vtt

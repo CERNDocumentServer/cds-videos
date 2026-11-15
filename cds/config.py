@@ -202,7 +202,7 @@ CELERY_BEAT_SCHEDULE = {
 
 CACHE_KEY_PREFIX = "cache::"
 CACHE_REDIS_URL = "redis://localhost:6379/0"
-CACHE_TYPE = "redis"
+CACHE_TYPE = "RedisCache"
 # We use `invenio_cache.cached_unless_authenticated` decorator
 # for cahcing the home page. As a result we use the below config
 # variable from invenio_cache module to define our caching conditions.
@@ -216,8 +216,11 @@ CACHE_IS_AUTHENTICATED_CALLBACK = (
 ###############################################################################
 
 IIIF_CACHE_REDIS_URL = "redis://localhost:16379/0"
-IIIF_CACHE_TIME = "36000"  # 10 hours
+IIIF_CACHE_TIME = 36000  # 10 hours
 IIIF_CACHE_HANDLER = "flask_iiif.cache.redis:ImageRedisCache"
+# Invenio-IIIF handlers without ``pkg_resources``
+IIIF_API_DECORATOR_HANDLER = "cds.modules.files.iiif:protect_api"
+IIIF_IMAGE_OPENER_HANDLER = "cds.modules.files.iiif:image_opener"
 
 ###############################################################################
 # Database
@@ -1119,7 +1122,7 @@ SECURITY_PASSWORD_SINGLE_HASH = True
 # See details on
 # http://flask.pocoo.org/docs/0.12/config/#builtin-configuration-values
 
-APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+TRUSTED_HOSTS = ["localhost", "127.0.0.1"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
     "default-src": ["'self'"],
     "script-src": [

@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { onReady, parseJSON } from "@js/cds/dom";
 import { mountSearchApp } from "@js/cds/search/mount";
@@ -26,15 +26,6 @@ import {
   DEPOSIT_INDEX_TEMPLATES,
 } from "./index/components";
 import { createDepositStore } from "./state/store";
-
-function isIEBelowEdge() {
-  return (
-    navigator.appName === "Microsoft Internet Explorer" ||
-    Boolean(
-      navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/)
-    )
-  );
-}
 
 function maxNumberOfVideos() {
   const element = document.getElementById("max-n-videos-per-project");
@@ -69,16 +60,10 @@ function mountDeposits(element) {
   );
   // No loading bar: the form shows placeholders while loading, and its own
   // spinner during the actions
-  ReactDOM.render(<Deposits store={store} />, element);
+  createRoot(element).render(<Deposits store={store} />);
 }
 
 onReady(() => {
-  // Show a warning if IE (not supported for deposit)
-  const ieWarning = document.getElementById("cds-deposit-ie-warning");
-  if (ieWarning && isIEBelowEdge()) {
-    ieWarning.classList.remove("hidden");
-  }
-
   const deposits = document.getElementById("cds-deposit");
   if (deposits) {
     mountDeposits(deposits);

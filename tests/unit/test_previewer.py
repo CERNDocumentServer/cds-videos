@@ -244,6 +244,8 @@ def test_legacy_embed(previewer_app, db, api_project, video, users):
     login_user(User.query.get(users[0]))
     prepare_videos_for_publish([video_1])
     video_1 = video_1.publish()
+    # The test client has its own session (Flask-SQLAlchemy 3)
+    db.session.commit()
 
     with previewer_app.test_client() as client:
         res = client.get("/video/{0}".format(video_1.report_number))

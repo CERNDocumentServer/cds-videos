@@ -10,7 +10,7 @@ FROM registry.cern.ch/inveniosoftware/almalinux:1
 RUN dnf install -y epel-release
 RUN dnf update -y
 
-RUN cd /tmp && curl -sL  https://rpm.nodesource.com/setup_16.x  -o nodesource_setup.sh && bash nodesource_setup.sh
+RUN cd /tmp && curl -sL  https://rpm.nodesource.com/setup_24.x  -o nodesource_setup.sh && bash nodesource_setup.sh
 RUN dnf install -y nodejs git vim
 
 # OpenLDAP
@@ -24,8 +24,6 @@ RUN mkdir /usr/local/bin/ffmpeg && \
     ln -s /usr/local/bin/ffmpeg/ffprobe /usr/bin/ffprobe
 
 RUN yum clean -y all
-
-RUN pip install "uWSGI==2.0.23" "uwsgi-tools==1.1.1" "uwsgitop==0.11"
 
 # Install Invenio
 ENV WORKING_DIR=/opt/cds_videos
@@ -45,18 +43,21 @@ RUN mkdir -p ${INVENIO_STATIC_FOLDER}
 # Create files folder
 RUN mkdir -p ${INVENIO_INSTANCE_PATH}/files
 
-# Python dependencies at the versions of uv.lock, installed in the system
-# Python next to uWSGI (``--inexact`` keeps the packages not in the lock)
-ENV UV_PROJECT_ENVIRONMENT=/usr/ \
-    UV_SYSTEM_PYTHON=1 \
-    UV_NO_MANAGED_PYTHON=1 \
-    UV_PYTHON_DOWNLOADS=never \
+# Python of .python-version (installed by uv) and the dependencies at the
+# versions of uv.lock, in a virtualenv in ${WORKING_DIR} with uWSGI
+ENV UV_PROJECT_ENVIRONMENT=${WORKING_DIR} \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
+    UV_PYTHON_PREFERENCE=only-managed \
     UV_FROZEN=1 \
     UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_NO_CACHE=1
+ENV PATH=${WORKING_DIR}/bin:${PATH}
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-RUN uv sync --no-dev --inexact
+RUN uv python install && \
+    uv venv --allow-existing ${WORKING_DIR} && \
+    uv sync --no-dev && \
+    uv pip install "uWSGI>=2.0.31" "uwsgi-tools>=1.1.1" "uwsgitop>=0.11"
 
 # Static files and assets
 RUN cds collect -v && cds webpack buildall

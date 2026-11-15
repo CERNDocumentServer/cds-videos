@@ -40,7 +40,7 @@ export function isFirstLoad(state) {
 }
 
 /** ``invenio-search-loading`` */
-export function SearchLoading({ message, className }) {
+export function SearchLoading({ message = "", className = null }) {
   const [state] = useSearch();
   if (!state.loading) {
     return null;
@@ -56,7 +56,6 @@ SearchLoading.propTypes = {
   message: PropTypes.string,
   className: PropTypes.string,
 };
-SearchLoading.defaultProps = { message: "", className: null };
 
 /** ``invenio-search-error`` (cds_search_ui/error.html) */
 export function SearchError() {
@@ -409,7 +408,7 @@ export function SearchRange({ options: userOptions }) {
 SearchRange.propTypes = { options: PropTypes.object.isRequired };
 
 /** ``invenio-search-select-box`` (cds_search_ui/selectbox.html) */
-export function SearchSelectBox({ sortKey, availableOptions, defaultSortBy }) {
+export function SearchSelectBox({ sortKey = "sort", availableOptions }) {
   const [state, store] = useSearch();
   const options = (availableOptions && availableOptions.options) || [];
 
@@ -454,10 +453,7 @@ export function SearchSelectBox({ sortKey, availableOptions, defaultSortBy }) {
 SearchSelectBox.propTypes = {
   sortKey: PropTypes.string,
   availableOptions: PropTypes.object.isRequired,
-  defaultSortBy: PropTypes.string,
 };
-
-SearchSelectBox.defaultProps = { sortKey: "sort", defaultSortBy: undefined };
 
 /** Pages to display, like ``invenio-search-pagination``. */
 export function paginationPages(total, size, page, adjacent = 4) {
@@ -490,7 +486,7 @@ export function paginationPages(total, size, page, adjacent = 4) {
  * ``invenio-search-pagination`` with the CDS template (``variant="cds"``,
  * Previous/Next) or the Invenio one (``variant="invenio"``, < and >).
  */
-export function SearchPagination({ variant, adjacentSize }) {
+export function SearchPagination({ variant = "cds", adjacentSize = 4 }) {
   const [state, store] = useSearch();
   const total = state.results.hits ? state.results.hits.total : 0;
   if (!total) {
@@ -568,15 +564,13 @@ SearchPagination.propTypes = {
   adjacentSize: PropTypes.number,
 };
 
-SearchPagination.defaultProps = { variant: "cds", adjacentSize: 4 };
-
 /**
  * ``invenio-search-results`` rendering a template component, or its
  * placeholder while the search is loading.
  */
 export function SearchResults({
   template: Template,
-  placeholder: TemplatePlaceholder,
+  placeholder: TemplatePlaceholder = null,
   ...props
 }) {
   const [state] = useSearch();
@@ -590,5 +584,3 @@ SearchResults.propTypes = {
   template: PropTypes.elementType.isRequired,
   placeholder: PropTypes.elementType,
 };
-
-SearchResults.defaultProps = { placeholder: null };

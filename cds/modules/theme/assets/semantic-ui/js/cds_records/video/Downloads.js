@@ -33,7 +33,7 @@ import {
 const BIG_FILE_WARNING =
   "<strong>Warning: Big file!</strong><br>As no network or browser is 100% stable, we <em>strongly</em> recommend using a download manager.";
 
-function Checksum({ checksum }) {
+function Checksum({ checksum = "" }) {
   return (
     <Popover title="md5 checksum" content={checksum}>
       <a
@@ -49,9 +49,8 @@ function Checksum({ checksum }) {
 }
 
 Checksum.propTypes = { checksum: PropTypes.string };
-Checksum.defaultProps = { checksum: "" };
 
-function DownloadItem({ file, label, onDownload }) {
+function DownloadItem({ file, label = null, onDownload }) {
   return (
     <div className="download-list-item">
       <span>
@@ -80,10 +79,8 @@ DownloadItem.propTypes = {
   onDownload: PropTypes.func.isRequired,
 };
 
-DownloadItem.defaultProps = { label: null };
-
 /** Collapsible section ("Other video formats", "Thumbnails", ...). */
-function Toggle({ title, open, onToggle, className }) {
+function Toggle({ title, open, onToggle, className = null }) {
   return (
     <div className="cds-row">
       <div className="cds-col-md-12">
@@ -115,8 +112,6 @@ Toggle.propTypes = {
   onToggle: PropTypes.func.isRequired,
   className: PropTypes.string,
 };
-
-Toggle.defaultProps = { className: null };
 
 function FileLinks({ files, show, label }) {
   return (

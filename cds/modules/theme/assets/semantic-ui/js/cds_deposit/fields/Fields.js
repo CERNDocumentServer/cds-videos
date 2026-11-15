@@ -85,16 +85,16 @@ export function useReadonly(extra) {
 }
 
 export function FormGroup({
-  label,
-  required,
-  error,
-  description,
-  className,
-  faIcon,
-  notitle,
-  nbsp,
-  noHelp,
-  children,
+  label = null,
+  required = false,
+  error = null,
+  description = null,
+  className = null,
+  faIcon = null,
+  notitle = false,
+  nbsp = true,
+  noHelp = false,
+  children = null,
 }) {
   return (
     <div
@@ -132,28 +132,15 @@ FormGroup.propTypes = {
   children: PropTypes.node,
 };
 
-FormGroup.defaultProps = {
-  label: null,
-  required: false,
-  error: null,
-  description: null,
-  className: null,
-  faIcon: null,
-  notitle: false,
-  nbsp: true,
-  noHelp: false,
-  children: null,
-};
-
 /* Text input (``default.html``) */
 export function TextField({
   name,
-  label,
-  placeholder,
-  description,
-  required,
-  readonly,
-  notitle,
+  label = null,
+  placeholder = "",
+  description = null,
+  required = false,
+  readonly = false,
+  notitle = false,
 }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly(readonly);
@@ -188,22 +175,13 @@ TextField.propTypes = {
   notitle: PropTypes.bool,
 };
 
-TextField.defaultProps = {
-  label: null,
-  placeholder: "",
-  description: null,
-  required: false,
-  readonly: false,
-  notitle: false,
-};
-
 /* Text area (``textarea.html``) */
 export function TextAreaField({
   name,
-  label,
-  placeholder,
-  description,
-  required,
+  label = null,
+  placeholder = "",
+  description = null,
+  required = false,
 }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly();
@@ -235,22 +213,15 @@ TextAreaField.propTypes = {
   required: PropTypes.bool,
 };
 
-TextAreaField.defaultProps = {
-  label: null,
-  placeholder: "",
-  description: null,
-  required: false,
-};
-
 /* Select with fixed options (``select.html``) */
 export function SelectField({
   name,
-  label,
+  label = null,
   options,
-  description,
-  required,
-  readonly,
-  onChange,
+  description = null,
+  required = false,
+  readonly = false,
+  onChange = null,
 }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly(readonly);
@@ -298,16 +269,8 @@ SelectField.propTypes = {
   onChange: PropTypes.func,
 };
 
-SelectField.defaultProps = {
-  label: null,
-  description: null,
-  required: false,
-  readonly: false,
-  onChange: null,
-};
-
 /* Checkbox (``checkbox.html``) */
-export function CheckboxField({ name, label, description }) {
+export function CheckboxField({ name, label, description = null }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly();
   return (
@@ -337,10 +300,14 @@ CheckboxField.propTypes = {
   description: PropTypes.node,
 };
 
-CheckboxField.defaultProps = { description: null };
-
 /* Date (``datepicker.html``) */
-export function DateField({ name, label, placeholder, description, required }) {
+export function DateField({
+  name,
+  label = null,
+  placeholder = "",
+  description = null,
+  required = false,
+}) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly();
   return (
@@ -372,13 +339,6 @@ DateField.propTypes = {
   placeholder: PropTypes.string,
   description: PropTypes.node,
   required: PropTypes.bool,
-};
-
-DateField.defaultProps = {
-  label: null,
-  placeholder: "",
-  description: null,
-  required: false,
 };
 
 /* CKEditor 4 (``ckeditor.html``) */
@@ -448,7 +408,7 @@ export function sanitizeHtml(html) {
  * The content of an editor while CKEditor loads its plugins and skin: the
  * text is readable at once, in a box of the size of the editor.
  */
-function CKEditorLoading({ html, height }) {
+function CKEditorLoading({ html = "", height }) {
   return (
     <div className="cds-ckeditor-loading" aria-busy="true">
       <div className="cds-ckeditor-loading-toolbar">
@@ -471,8 +431,6 @@ CKEditorLoading.propTypes = {
   height: PropTypes.number.isRequired,
 };
 
-CKEditorLoading.defaultProps = { html: "" };
-
 // CKEditor 4 (about 620 KB) defines ``window.CKEDITOR`` and loads its plugins
 // and skin from ``CKEDITOR_BASEPATH``: load it with the first editor, after
 // the form is shown
@@ -482,7 +440,13 @@ function loadCKEditor() {
   return ckeditor;
 }
 
-export function CKEditorField({ name, label, description, required, config }) {
+export function CKEditorField({
+  name,
+  label = null,
+  description = null,
+  required = false,
+  config,
+}) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly();
   const [ready, setReady] = useState(false);
@@ -597,14 +561,13 @@ CKEditorField.propTypes = {
   config: PropTypes.object.isRequired,
 };
 
-CKEditorField.defaultProps = {
-  label: null,
-  description: null,
-  required: false,
-};
-
 /* Keywords (``uiselectmultiple.html`` with tagging) */
-export function KeywordsField({ name, label, placeholder, description }) {
+export function KeywordsField({
+  name,
+  label = null,
+  placeholder = "",
+  description = null,
+}) {
   const { value, error, setValue, id } = useDepositField(name);
   const disabled = useReadonly();
   const store = useStore();
@@ -644,24 +607,18 @@ KeywordsField.propTypes = {
   description: PropTypes.node,
 };
 
-KeywordsField.defaultProps = {
-  label: null,
-  placeholder: "",
-  description: null,
-};
-
 /* Select with suggestions (``uiselect.html``) */
 export function RemoteSelectField({
   name,
-  errorName,
-  label,
-  placeholder,
-  description,
-  required,
+  errorName = null,
+  label = null,
+  placeholder = "",
+  description = null,
+  required = false,
   fetchOptions,
-  minLength,
-  delay,
-  onSelect,
+  minLength = 3,
+  delay = 100,
+  onSelect = null,
 }) {
   const { value, error, setValue } = useDepositField(name, errorName);
   const disabled = useReadonly();
@@ -717,29 +674,18 @@ RemoteSelectField.propTypes = {
   onSelect: PropTypes.func,
 };
 
-RemoteSelectField.defaultProps = {
-  errorName: null,
-  label: null,
-  placeholder: "",
-  description: null,
-  required: false,
-  minLength: 3,
-  delay: 100,
-  onSelect: null,
-};
-
 /* Arrays (``array.html``) */
 export function ArrayField({
   name,
-  label,
-  required,
-  add,
-  description,
-  inline,
-  firstItemMessage,
-  notitle,
-  startEmpty,
-  newItem,
+  label = null,
+  required = false,
+  add = null,
+  description = null,
+  inline = false,
+  firstItemMessage = null,
+  notitle = false,
+  startEmpty = true,
+  newItem = null,
   renderItem,
 }) {
   const { value, error, setValue, formik, id, dispatch } =
@@ -863,18 +809,6 @@ ArrayField.propTypes = {
   renderItem: PropTypes.func.isRequired,
 };
 
-ArrayField.defaultProps = {
-  label: null,
-  required: false,
-  add: null,
-  description: null,
-  inline: false,
-  firstItemMessage: null,
-  notitle: false,
-  startEmpty: true,
-  newItem: null,
-};
-
 /* Information about custom authors (``custom_authors_dialog.html``) */
 export function CustomAuthorsInfo() {
   const [open, setOpen] = useState(false);
@@ -991,7 +925,7 @@ export function LicensesField() {
 }
 
 /* Fieldset (``fieldset.html``) */
-export function Fieldset({ title, description, children }) {
+export function Fieldset({ title, description = null, children = null }) {
   const [collapsed, setCollapsed] = useState(false);
   const disabled = useReadonly();
   return (
@@ -1033,5 +967,3 @@ Fieldset.propTypes = {
   description: PropTypes.node,
   children: PropTypes.node,
 };
-
-Fieldset.defaultProps = { description: null, children: null };

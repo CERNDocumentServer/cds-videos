@@ -49,9 +49,9 @@ function StrapSelect({
   name,
   label,
   options,
-  readonly,
-  description,
-  onChange,
+  readonly = false,
+  description = null,
+  onChange = null,
 }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly(readonly);
@@ -103,13 +103,7 @@ StrapSelect.propTypes = {
   onChange: PropTypes.func,
 };
 
-StrapSelect.defaultProps = {
-  readonly: false,
-  description: null,
-  onChange: null,
-};
-
-export function CategoryField({ withDescription }) {
+export function CategoryField({ withDescription = false }) {
   const { id } = useDepositForm();
   const dispatch = useDispatch();
   const { formik } = useDepositField("type");
@@ -136,9 +130,8 @@ export function CategoryField({ withDescription }) {
 }
 
 CategoryField.propTypes = { withDescription: PropTypes.bool };
-CategoryField.defaultProps = { withDescription: false };
 
-export function TypeField({ withDescription }) {
+export function TypeField({ withDescription = false }) {
   const { id } = useDepositForm();
   const dispatch = useDispatch();
   const { formik } = useDepositField("type");
@@ -162,4 +155,3 @@ export function TypeField({ withDescription }) {
 }
 
 TypeField.propTypes = { withDescription: PropTypes.bool };
-TypeField.defaultProps = { withDescription: false };

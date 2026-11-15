@@ -32,6 +32,7 @@ from flask import current_app, request, url_for
 from flask_security import login_user
 from helpers import check_deposit_record_files, check_deposit_record_files_not_publsihed
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import (
     Bucket,
     FileInstance,
@@ -129,21 +130,23 @@ def test_serialize_project(app, api_app, es, api_project, users, json_headers):
     """Test the project embedded in the edit page, as the API returns it."""
     (project, video_1, video_2) = api_project
     pid_value = project["_deposit"]["id"]
-    owner = User.query.get(users[0])
 
     with api_app.test_client() as client:
-        login_user(owner)
+        login_user(User.query.get(users[0]))
         res = client.get(
             url_for("invenio_deposit_rest.project_item", pid_value=pid_value),
             headers=json_headers,
         )
         assert res.status_code == 200
         expected = json.loads(res.data.decode("utf-8"))
+    # Each application context has its own session (Flask-SQLAlchemy 3):
+    # release the user row updated by the login
+    db.session.commit()
 
     pid = PersistentIdentifier.get("depid", pid_value)
     record = Project.get_record(pid.object_uuid)
     with app.test_request_context():
-        login_user(owner)
+        login_user(User.query.get(users[0]))
         embedded = json.loads(json.dumps(serialize_project(pid, record)))
 
     assert sorted(embedded) == sorted(expected)
@@ -225,16 +228,16 @@ def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata, u
     assert deposit.has_record() is False
     # insert objects inside the deposit
     ObjectVersion.create(deposit.files.bucket, "obj_1").set_location(
-        "mylocation1", 1, "mychecksum1"
+        "mylocation1", 1, "md5:mychecksum1"
     )
     ObjectVersion.create(deposit.files.bucket, "obj_2").set_location(
-        "mylocation2", 1, "mychecksum2"
+        "mylocation2", 1, "md5:mychecksum2"
     )
     ObjectVersion.create(deposit.files.bucket, "obj_3").set_location(
-        "mylocation3", 1, "mychecksum3"
+        "mylocation3", 1, "md5:mychecksum3"
     )
     obj_4 = ObjectVersion.create(deposit.files.bucket, "obj_4").set_location(
-        "mylocation4", 1, "mychecksum4"
+        "mylocation4", 1, "md5:mychecksum4"
     )
 
     # publish
@@ -256,11 +259,11 @@ def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata, u
 
     # add a new object
     ObjectVersion.create(deposit.files.bucket, "obj_new").set_location(
-        "mylocation_new", 1, "mychecksum"
+        "mylocation_new", 1, "md5:mychecksum"
     )
     # modify obj_1
     ObjectVersion.create(deposit.files.bucket, "obj_1").set_location(
-        "mylocation2.1", 1, "mychecksum2.1"
+        "mylocation2.1", 1, "md5:mychecksum2.1"
     )
     # delete obj_3
     ObjectVersion.delete(deposit.files.bucket, "obj_3")

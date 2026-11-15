@@ -30,12 +30,12 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: ["3.14"]
         db-service: [postgresql14]
         search-service: [opensearch2]
         cache-service: [redis]
         mq-service: [rabbitmq]
-        node-version: [18]
+        node-version: [24]
         include:
           - db-service: postgresql14
             DB_EXTRAS: "postgresql"
@@ -65,10 +65,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
-      - name: Use Node.js v18.x
-        uses: actions/setup-node@v3
+      - name: Use Node.js v24.x
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "24.x"
 
       - name: Install dependencies
         run: |
@@ -110,14 +110,13 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.9"
+          python-version: "3.14"
           enable-cache: true
 
-      # Playwright needs Node.js 20 or later
-      - name: Use Node.js v20.x
+      - name: Use Node.js v24.x
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: "24.x"
 
       - name: Install dependencies
         run: |
@@ -137,7 +136,7 @@ jobs:
 
       - name: Start the server
         env:
-          FLASK_ENV: development
+          FLASK_DEBUG: "1"
         run: |
           uv run --locked cds run -h 127.0.0.1 -p 5001 --with-threads --no-reload \
             --cert docker/nginx/test.crt --key docker/nginx/test.key > server.log 2>&1 &

@@ -93,7 +93,7 @@ export function usePlayerHighlights(transcript, chapters) {
   return { currentTranscriptLine, currentChapter };
 }
 
-function ChapterThumbnail({ chapter, frame }) {
+function ChapterThumbnail({ chapter, frame = null }) {
   const [hovered, setHovered] = useState(false);
   const [failed, setFailed] = useState(false);
   const size = hovered ? "720,405" : "360,203";
@@ -125,8 +125,6 @@ ChapterThumbnail.propTypes = {
   frame: PropTypes.object,
 };
 
-ChapterThumbnail.defaultProps = { frame: null };
-
 export function InThisVideo({
   visible,
   activeTab,
@@ -136,13 +134,13 @@ export function InThisVideo({
   chapterFrames,
   hasTranscripts,
   transcriptsByLanguage,
-  selectedTranscriptLanguage,
+  selectedTranscriptLanguage = null,
   onTranscriptLanguage,
   transcriptSearch,
   onTranscriptSearch,
   filteredTranscript,
-  currentTranscriptLine,
-  currentChapter,
+  currentTranscriptLine = null,
+  currentChapter = null,
 }) {
   return (
     <div
@@ -316,10 +314,4 @@ InThisVideo.propTypes = {
   filteredTranscript: PropTypes.array.isRequired,
   currentTranscriptLine: PropTypes.object,
   currentChapter: PropTypes.object,
-};
-
-InThisVideo.defaultProps = {
-  selectedTranscriptLanguage: null,
-  currentTranscriptLine: null,
-  currentChapter: null,
 };

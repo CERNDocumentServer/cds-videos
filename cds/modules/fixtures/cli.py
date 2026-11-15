@@ -29,7 +29,8 @@ import tempfile
 import uuid
 
 import click
-import pkg_resources
+import importlib.resources
+
 import requests
 from flask import current_app
 from flask.cli import with_appcontext
@@ -37,7 +38,7 @@ from invenio_db import db
 from invenio_files_rest.models import Bucket, Location, ObjectVersion, ObjectVersionTag
 from invenio_indexer.api import RecordIndexer
 from invenio_opendefinition.cli import loadlicenses
-from invenio_pages import Page
+from invenio_pages import PageModel as Page
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records_files.models import RecordsBuckets
 from invenio_sequencegenerator.api import Template
@@ -53,10 +54,10 @@ from ..records.utils import to_string
 
 def _load_json_source(filename):
     """Load json fixture."""
-    source = pkg_resources.resource_filename(
-        "cds.modules.fixtures", "data/{0}".format(filename)
+    source = importlib.resources.files("cds.modules.fixtures").joinpath(
+        "data/{0}".format(filename)
     )
-    with open(source, "r") as fp:
+    with source.open("r") as fp:
         content = json.load(fp)
     return content
 
@@ -140,8 +141,11 @@ def fixtures():
 def records():
     """Load demo records."""
     to_index = []
-    for project_file in pkg_resources.resource_listdir(
-        "cds.modules.fixtures", os.path.join("data", "videos")
+    for project_file in (
+        f.name
+        for f in importlib.resources.files("cds.modules.fixtures")
+        .joinpath(os.path.join("data", "videos"))
+        .iterdir()
     ):
         project_data = _load_json_source(os.path.join("videos", project_file))
         with db.session.begin_nested():
@@ -232,10 +236,9 @@ def pages():
 
     def page_data(page):
         return (
-            pkg_resources.resource_stream(
-                "cds.modules.fixtures", os.path.join("data/pages", page)
-            )
-            .read()
+            importlib.resources.files("cds.modules.fixtures")
+            .joinpath(os.path.join("data/pages", page))
+            .read_bytes()
             .decode("utf8")
         )
 

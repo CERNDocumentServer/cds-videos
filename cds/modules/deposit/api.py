@@ -861,7 +861,7 @@ class Video(CDSDeposit):
     def _rename_subtitles(self):
         """Rename subtitles."""
         # Pattern to extract subtitle's filename and iso language
-        pattern = re.compile(".*_(?P<iso_lang>[a-zA-Z]{2})\.vtt$")
+        pattern = re.compile(r".*_(?P<iso_lang>[a-zA-Z]{2})\.vtt$")
         subtitles = CDSVideosFilesIterator.get_video_subtitles(self)
         for subtitle_file in subtitles:
             subtitle_obj = as_object_version(subtitle_file["version_id"])
@@ -1133,7 +1133,7 @@ class Video(CDSDeposit):
     def _create_tags(self):
         """Create additional tags."""
         # Subtitle file
-        pattern = re.compile(".*_([a-zA-Z]{2})\.vtt$")
+        pattern = re.compile(r".*_([a-zA-Z]{2})\.vtt$")
         objs = [
             o for o in sorted_files_from_bucket(self._bucket) if pattern.match(o.key)
         ]
@@ -1155,7 +1155,7 @@ class Video(CDSDeposit):
                 db.session.refresh(obj)
 
             # Poster frame
-            pattern = re.compile("^poster\.(jpg|png)$")
+            pattern = re.compile(r"^poster\.(jpg|png)$")
             try:
                 poster = [
                     o

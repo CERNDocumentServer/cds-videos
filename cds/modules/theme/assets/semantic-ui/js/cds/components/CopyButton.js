@@ -34,7 +34,12 @@ export function copyToClipboard(text) {
 }
 
 /** Button copying a text, or the value of an input (replaces ngclipboard). */
-export function CopyButton({ text, targetId, children, ...props }) {
+export function CopyButton({
+  text = null,
+  targetId = null,
+  children = null,
+  ...props
+}) {
   const onClick = () => {
     let value = text;
     if (targetId) {
@@ -57,10 +62,4 @@ CopyButton.propTypes = {
   text: PropTypes.string,
   targetId: PropTypes.string,
   children: PropTypes.node,
-};
-
-CopyButton.defaultProps = {
-  text: null,
-  targetId: null,
-  children: null,
 };

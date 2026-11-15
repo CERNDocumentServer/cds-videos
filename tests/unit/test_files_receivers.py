@@ -24,10 +24,11 @@
 
 """CDS files receivers tests."""
 
+from io import BytesIO
+
 from invenio_db import db
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from mock import mock
-from six import BytesIO
 
 from cds.modules.files.receivers import on_download_rename_file
 
