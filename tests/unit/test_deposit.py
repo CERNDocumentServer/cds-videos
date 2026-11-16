@@ -38,9 +38,10 @@ from invenio_files_rest.models import (
     ObjectVersion,
     ObjectVersionTag,
 )
+from invenio_pidstore.models import PersistentIdentifier
 
 from cds.modules.deposit.api import CDSDeposit, Project
-from cds.modules.deposit.views import to_links_js
+from cds.modules.deposit.views import serialize_project, to_links_js
 
 
 def test_deposit_link_factory_has_bucket(
@@ -122,6 +123,50 @@ def test_links_filter(app, es, location, deposit_metadata):
     #     data = client.get(links_type['html']).get_data().decode('utf-8')
     #     for key in links_type:
     #         assert links_type[key] in data
+
+
+def test_serialize_project(app, api_app, es, api_project, users, json_headers):
+    """Test the project embedded in the edit page, as the API returns it."""
+    (project, video_1, video_2) = api_project
+    pid_value = project["_deposit"]["id"]
+    owner = User.query.get(users[0])
+
+    with api_app.test_client() as client:
+        login_user(owner)
+        res = client.get(
+            url_for("invenio_deposit_rest.project_item", pid_value=pid_value),
+            headers=json_headers,
+        )
+        assert res.status_code == 200
+        expected = json.loads(res.data.decode("utf-8"))
+
+    pid = PersistentIdentifier.get("depid", pid_value)
+    record = Project.get_record(pid.object_uuid)
+    with app.test_request_context():
+        login_user(owner)
+        embedded = json.loads(json.dumps(serialize_project(pid, record)))
+
+    assert sorted(embedded) == sorted(expected)
+    for key in expected:
+        if key != "links":
+            assert embedded[key] == expected[key]
+    # The API links of the UI application go through the ``/api`` mount
+    links = embedded["links"]
+    assert sorted(links) == sorted(expected["links"])
+    self_url = "http://localhost/api/deposits/project/{0}".format(pid_value)
+    assert links["self"] == self_url
+    assert links["files"] == self_url + "/files"
+    for action in ("publish", "edit", "discard"):
+        assert links[action] == "{0}/actions/{1}".format(self_url, action)
+    assert links["bucket"] == "http://localhost/api/files/{0}".format(
+        record.files.bucket.id
+    )
+    assert links["html"] == expected["links"]["html"]
+
+    # Nothing is embedded for users who can not read the project
+    with app.test_request_context():
+        login_user(User.query.get(users[1]))
+        assert serialize_project(pid, record) is None
 
 
 def test_publish_process_files(api_app, db, location):

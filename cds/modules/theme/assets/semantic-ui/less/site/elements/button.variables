@@ -1,0 +1,35 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+/*******************************
+    Button (Bootstrap 3 sizes)
+*******************************/
+
+@fontWeight: @normal;
+@lineHeight: 1.42857143em;
+@verticalPadding: 7px;
+@horizontalPadding: 13px;
+
+/* ``btn-default`` look for the basic buttons */
+@basicBackground: #FFFFFF none;
+@basicTextColor: #333333;
+@basicFontWeight: @normal;
+@basicBoxShadow: 0px 0px 0px 1px #CCCCCC inset;
+@basicHoverBackground: #E6E6E6;
+@basicHoverTextColor: #333333;
+@basicHoverBoxShadow: 0px 0px 0px 1px #ADADAD inset;
+@basicFocusBackground: #E6E6E6;
+@basicFocusTextColor: #333333;
+@basicFocusBoxShadow: 0px 0px 0px 1px #8C8C8C inset;
+@basicDownBackground: #D4D4D4;
+@basicDownTextColor: #333333;
+@basicDownBoxShadow: 0px 0px 0px 1px #8C8C8C inset;
+@basicActiveBackground: #E6E6E6;
+@basicActiveTextColor: #333333;

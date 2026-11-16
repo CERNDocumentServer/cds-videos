@@ -1,0 +1,23 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{%- block page_body %}
+  <div class="cds-container">
+    <div class="cds-row">
+      <div class="cds-col-md-12">
+      <h4>Record export <small>{{ format_title }}</small></h4>
+      <div class="ui segment cds-well">
+        <pre>{{ data }}</pre>
+      </div>
+      </div>
+    </div>
+  </div>
+{%- endblock page_body %}

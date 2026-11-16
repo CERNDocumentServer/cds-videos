@@ -46,12 +46,14 @@ include scripts/setup
 include scripts/setup-tests
 recursive-include .github *
 recursive-include benchmarks *.py
+recursive-include cds *.config
 recursive-include cds *.md
 recursive-include cds *.css
 recursive-include cds *.eot
 recursive-include cds *.gif
 recursive-include cds *.gz
 recursive-include cds *.html
+recursive-include cds *.gitkeep
 recursive-include cds *.ico
 recursive-include cds *.jpg
 recursive-include cds *.js
@@ -59,11 +61,12 @@ recursive-include cds *.json
 recursive-include cds *.less
 recursive-include cds *.png
 recursive-include cds *.png
+recursive-include cds *.overrides
 recursive-include cds *.py
-recursive-include cds *.scss
 recursive-include cds *.smil
 recursive-include cds *.svg
 recursive-include cds *.ttf
+recursive-include cds *.variables
 recursive-include cds *.vtt
 recursive-include cds *.woff
 recursive-include cds *.xml

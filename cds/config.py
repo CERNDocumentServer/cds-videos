@@ -279,17 +279,6 @@ SEARCH_DOC_TYPE_DEFAULT = None
 
 # Do not map any keywords.
 SEARCH_ELASTIC_KEYWORD_MAPPING = {}
-# SEARCH UI JS TEMPLATES
-# SEARCH_UI_JSTEMPLATE_RESULTS = 'templates/cds_search_ui/results.html'
-SEARCH_UI_JSTEMPLATE_ERROR = "templates/cds_search_ui/error.html"
-
-# Angular template for featured
-SEARCH_UI_VIDEO_FEATURED = "templates/cds/video/featured.html"
-# Angular template for medium size (used for recent)
-SEARCH_UI_VIDEO_MEDIUM = "templates/cds/video/featured-medium.html"
-# Angular template for small size (used for search results)
-SEARCH_UI_VIDEO_SMALL = "templates/cds/video/small.html"
-HOMEPAGE_VIDEO_SMALL = "templates/cds/video/small_video_card.html"
 
 # Invenio-Stats
 # =============
@@ -537,6 +526,7 @@ RECORDS_UI_ENDPOINTS = dict(
         pid_type="recid",
         route="/record/<pid_value>",
         template="cds_records/record_detail.html",
+        view_imp="cds.modules.records.views:record_view",
         record_class="cds.modules.records.api:CDSRecord",
     ),
     # NOTE: Disable record statistics page
@@ -1166,7 +1156,7 @@ APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {
 }
 SITE_URL = "https://127.0.0.1:5000"
 
-APP_THEME = ["bootstrap3"]
+APP_THEME = ["semantic-ui"]
 
 ###############################################################################
 # User Profiles
@@ -1176,7 +1166,7 @@ APP_THEME = ["bootstrap3"]
 USERPROFILES_PROFILE_TEMPLATE = "cds_theme/profile.html"
 USERPROFILES_EMAIL_ENABLED = False
 # This is needed to ensure the correct template for profile page.
-SETTINGS_TEMPLATE = "invenio_theme/page_settings.html"
+SETTINGS_TEMPLATE = "cds_theme/page_settings.html"
 
 ###############################################################################
 # OAuth
@@ -1372,8 +1362,8 @@ DEPOSIT_DATACITE_MINTING_ENABLED = False
 DEPOSIT_UI_INDEX_TEMPLATE = "cds_deposit/index.html"
 # Template to use for UI.
 DEPOSIT_UI_NEW_TEMPLATE = "cds_deposit/edit.html"
-# The schema form deposit
-DEPOSIT_DEFAULT_SCHEMAFORM = "json/cds_deposit/forms/project.json"
+# The schema form deposit (none: the deposit forms are React components)
+DEPOSIT_DEFAULT_SCHEMAFORM = None
 # Default schema for the deposit
 DEPOSIT_DEFAULT_JSONSCHEMA = "deposits/records/videos/project/project-v1.0.0.json"
 # Deposit schemas
@@ -1381,9 +1371,6 @@ DEPOSIT_JSONSCHEMA = {
     "project": "deposits/records/videos/project/project-v1.0.0.json",
     "video": "deposits/records/videos/video/video-v1.0.0.json",
 }
-# Template for <invenio-records-form> directive
-DEPOSIT_UI_JSTEMPLATE_FORM = "templates/cds_deposit/form.html"
-DEPOSIT_UI_JSTEMPLATE_ACTIONS = "templates/cds_deposit/actions.html"
 DEPOSIT_SEARCH_API = "/api/deposits/project/"
 _CDSDeposit_PID = 'pid(depid,record_class="cds.modules.deposit.api:CDSDeposit")'
 _Project_PID = 'pid(depid,record_class="cds.modules.deposit.api:Project")'

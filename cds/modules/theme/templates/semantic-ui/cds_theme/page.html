@@ -1,0 +1,87 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- set title_prefix = '%s · '|format(title_prefix) if title_prefix else '' -%}
+{%- set title = '%s%s'|format(title_prefix, config.THEME_SITENAME) -%}
+{%- set description = description if description else config.THEME_SITEDESCRIPTION -%}
+{%- set suggest_app = true -%}
+{%- set body_css_classes = ['flex-container', 'cds-navbar-padding-top'] -%}
+{%- set container_class = 'cds-container-fluid' -%}
+
+<!DOCTYPE html>
+<html{% if html_css_classes %} class="{{ html_css_classes|join(' ') }}"{% endif %} lang="{{ current_i18n.locale.language|safe }}" dir="{{ current_i18n.locale.text_direction }}">
+  <head>
+    {%- block head %}
+    {%- block head_meta %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ description }}" />
+    {%- if keywords %}<meta name="keywords" content="{{ keywords }}" />{% endif %}
+    {%- if config.get('THEME_GOOGLE_SITE_VERIFICATION', None) %}
+      {%- for google_id in config.THEME_GOOGLE_SITE_VERIFICATION %}
+    <meta name="google-site-verification" content="{{google_id}}"/>
+      {%- endfor %}
+    {%- endif %}
+    {%- endblock head_meta %}
+    {%- block head_title %}
+    <title>{{title}}</title>
+    {%- endblock head_title %}
+    {%- block head_links %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}"/>
+    {%- if keywords %}<link rel="canonical" href="{{ canonical_url }}"/>{% endif %}
+    {%- block head_links_langs %}
+      {%- if alternate_urls %}
+        {%- for alt_ln, alternate_url in alternate_urls.items() %}
+    <link rel="alternate" hreflang="{{ alt_ln }}" href="{{ alternate_url }}"/>
+        {%- endfor %}
+      {%- endif %}
+    {%- endblock %}
+    {%- block head_apple_icons %}
+    {%- for size in [144, 114, 72, 57] %}
+      {%- set icon_name = 'apple-touch-icon-%d-precomposed.png' | format(size) %}
+    <link rel="apple-touch-icon-precomposed" sizes="{{ size }}x{{ size }}" href="{{ url_for('static', filename=icon_name) }}"/>
+    {%- endfor %}
+    {%- endblock head_apple_icons %}
+    {%- endblock head_links %}
+    {%- block header %}{% endblock header %}
+    {%- block css %}
+      <link href='https://framework.web.cern.ch/framework/2.0/fonts/PTSansWeb/PTSansWeb.css' rel='stylesheet' type='text/css' />
+      {{ webpack['theme.css'] }}
+      {{ webpack['cds_theme_styles.css'] }}
+    {%- endblock css %}
+    {%- endblock head %}
+  </head>
+  <body{% if body_css_classes %} class="{{ body_css_classes|join(' ') }}"{% endif %}{% if g.ln %} lang="{{ g.ln.split('_', 1)[0]|safe }}"{% if rtl_direction %} {{ rtl_direction|safe }}{% endif %}{% endif %} itemscope itemtype="http://schema.org/WebPage">
+    {%- block body %}
+      {%- block body_inner %}
+        {%- block page_header %}
+          {% include "cds_theme/header.html" %}
+        {% endblock page_header %}
+        <div class="flex-item">
+          {%- block page_body %}
+            {% include "invenio_theme/body.html" %}
+          {%- endblock page_body %}
+        </div>
+        {%- block page_footer %}
+          {% include "cds_theme/footer.html" %}
+        {%- endblock page_footer %}
+      {%- endblock body_inner %}
+      {%- block javascript %}
+        {{ webpack['base.js'] }}
+        {{ webpack['theme.js'] }}
+        {{ webpack['i18n_app.js'] }}
+        {% include "cds_theme/scripts.html" %}
+      {% endblock javascript %}
+      {%- block trackingcode %}
+        {% include config.THEME_TRACKINGCODE_TEMPLATE %}
+      {%- endblock %}
+    {%- endblock body %}
+  </body>
+</html>

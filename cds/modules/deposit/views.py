@@ -24,6 +24,7 @@
 
 """CDS interface."""
 
+from urllib.parse import urljoin
 
 from cds.modules.ldap.decorators import require_upload_permission
 from flask import (
@@ -33,6 +34,7 @@ from flask import (
     flash,
     redirect,
     render_template,
+    request,
     url_for,
 )
 from flask_security import current_user, login_required
@@ -42,10 +44,12 @@ from invenio_records_ui.signals import record_viewed
 from invenio_sequencegenerator.api import Sequence, Template
 
 from ..records.permissions import (
+    deposit_read_permission_factory,
     has_admin_permission,
     has_read_record_eos_path_permission,
 )
 from ..records.providers import CDSReportNumberProvider
+from ..records.serializers import cdsdeposit_json_v1
 from .api import CDSDeposit, Video
 from .form import MintReportNumber, ReserveReportNumberForm
 from .resolver import get_video_pid
@@ -53,6 +57,52 @@ from .resolver import get_video_pid
 blueprint = Blueprint(
     "cds_deposit", __name__, template_folder="templates", static_folder="static"
 )
+
+
+def project_api_links(pid, record):
+    """Links of a project, as ``project_links_factory`` gives them in the API.
+
+    The REST endpoints only exist in the API application, so the links are
+    built from the configuration, like ``tolinksjs`` does.
+    """
+    config = current_app.config
+    self_url = urljoin(
+        request.host_url,
+        config["DEPOSIT_RECORDS_API"].format(type="project", pid_value=pid.pid_value),
+    )
+    links = {}
+    try:
+        links["bucket"] = urljoin(
+            request.host_url,
+            "{0}/{1}".format(config["DEPOSIT_FILES_API"], record.files.bucket.id),
+        )
+    except AttributeError:
+        pass
+    links["self"] = self_url
+    links["files"] = self_url + "/files"
+    links["html"] = config["DEPOSIT_UI_ENDPOINT"].format(
+        host=request.host,
+        scheme=request.scheme,
+        type="project",
+        pid_value=pid.pid_value,
+    )
+    for action in ("publish", "edit", "discard"):
+        links[action] = "{0}/actions/{1}".format(self_url, action)
+    return links
+
+
+def serialize_project(pid, record):
+    """The project as ``GET /api/deposits/project/<pid>`` returns it.
+
+    It is embedded in the edit page, so that the form shows the project
+    without waiting for the API.
+    """
+    if not deposit_read_permission_factory(record=record).can():
+        return None
+    links = project_api_links(pid, record)
+    return cdsdeposit_json_v1.transform_record(
+        pid, record, links_factory=lambda pid, **kwargs: links
+    )
 
 
 def project_view(pid, record, template=None, **kwargs):
@@ -68,6 +118,7 @@ def project_view(pid, record, template=None, **kwargs):
         record=record,
         record_type="project",
         current_user_email=current_user.email,
+        project=serialize_project(pid, record),
     )
 
 

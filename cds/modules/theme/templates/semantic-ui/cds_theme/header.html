@@ -1,0 +1,117 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+<header>
+  {%- block navbar %}
+  <nav class="cds-navbar" aria-label="{{ _('Main navigation') }}">
+    <div class="{{ container_class if container_class else 'cds-container-fluid' }} cds-navbar-container">
+      {%- block navbar_header %}
+      <div class="cds-navbar-header">
+        <button type="button" class="cds-navbar-toggle" data-cds-navbar-toggle="#cds-navbar" aria-expanded="false" aria-controls="cds-navbar">
+          <span class="sr-only">{{_('Toggle navigation')}}</span>
+          <span class="bg-w cds-icon-bar"></span>
+          <span class="bg-w cds-icon-bar"></span>
+          <span class="bg-w cds-icon-bar"></span>
+        </button>
+        {%- block brand %}
+          {%- if config.THEME_LOGO %}
+            <a href="/"><img class="cds-navbar-brand" src="{{ url_for('static', filename=config.THEME_LOGO)}}" alt="{{_(config.THEME_SITENAME)}}" /></a>
+          {%- else %}
+            <a class="cds-navbar-brand l-w" href="/"><b>CDS</b> <small class="l-w">Videos</small></a>
+          {%- endif %}
+        {%- endblock %}
+      </div>
+      {%- endblock navbar_header %}
+      {%- block navbar_inner %}
+      <div id="cds-navbar" class="cds-navbar-collapse">
+        {%- block navbar_nav %}
+          {%- if config['THEME_SEARCHBAR'] %}
+            <div class="cds-navbar-form-wrapper">
+              {%- block navbar_search %}
+                <div id="cds-navbar-search"
+                     data-mode="{{ 'suggest' if suggest_app else 'plain' }}"
+                     data-action="{{ config.THEME_SEARCH_ENDPOINT }}"
+                     data-placeholder="{{ _('Search CDS') }}">
+                  <form class="cds-navbar-form" action="{{ config.THEME_SEARCH_ENDPOINT }}" role="search">
+                    <div class="cds-navbar-form-group">
+                      <input autocomplete="off" id="cds-navbar-form-input" type="text" name="q" placeholder="{{ _('Search CDS') }}">
+                    </div>
+                    <button type="submit" class="cds-hidden-xs cds-navbar-form-icon" aria-label="{{ _('Search') }}">
+                      <i class="t-w fa fa-search"></i>
+                    </button>
+                    <button type="submit" class="cds-visible-xs ui basic button cds-navbar-form-icon-xs">
+                      <i class="fa fa-search">Search</i>
+                    </button>
+                  </form>
+                </div>
+              {%- endblock navbar_search %}
+            </div>
+          {%- endif %}
+        {%- endblock navbar_nav %}
+        {%- block navbar_right %}
+          <ul class="cds-navbar-nav">
+           {%- for item in current_menu.submenu('main').children|sort(attribute='order') if item.visible recursive %}
+            {%- if item.children %}
+            <li class="cds-navbar-dropdown{{ ' active' if item.active else ''}}">
+              <div class="ui dropdown cds-navbar-link">
+                {{ item.text|safe }} <b class="cds-caret"></b>
+                <div class="menu">
+                  {%- for child in item.children|sort(attribute='order') if child.visible %}
+                  <a class="item" href="{{ child.url }}">{{ child.text|safe }}</a>
+                  {%- endfor %}
+                </div>
+              </div>
+            </li>
+            {%- else %}
+              <li{{ ' class="active"'|safe if item.active and loop.depth == 1 else '' }}><a class="cds-navbar-link" href="{{ item.url }}">{{ item.text|safe }}</a></li>
+            {%- endif %}
+            {%- endfor %}
+            {%- if config['ACCOUNTS'] %}
+              {%- if not current_user.is_authenticated %}
+                {%- if config.DEBUG -%}
+                  <li><a class="cds-navbar-link" href=" {{url_for_security('login', next=request.path)}}"><strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong></a></li>
+                {%- else %}
+                  <li>
+                    <a class="cds-navbar-link" href="{{url_for('invenio_oauthclient.login', remote_app='cern_cdsvideos_openid', next=request.path)}}">
+                       <strong><i class="fa fa-sign-in"></i> {{_('Log in')}}</strong>
+                    </a>
+                  </li>
+                {%- endif %}
+              {%- else %}
+                {%- if config['USERPROFILES'] %}
+                  <li class="cds-navbar-dropdown">
+                    <div class="ui dropdown cds-navbar-link cds-user-dropdown" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                      <i class="fa fa-user"></i> {{current_user.email}}<span class="cds-caret"></span>
+                      <div class="menu" role="menu">
+                        {%- for item in current_menu.submenu('settings').children if item.visible %}
+                        <a class="item" href="{{ item.url }}">{{ item.text|safe }}</a>
+                        {%- endfor %}
+                        <div class="divider"></div>
+                        <a class="item" href="{{url_for_security('logout')}}"><i class="fa fa-sign-out"></i> {{_('Log out')}}</a>
+                      </div>
+                    </div>
+                  </li>
+                  {%- else %}
+                  <li><a href="{{url_for_security('logout')}}" class="ui basic button"><i class="fa fa-sign-out"></i> {{_('Log out')}}</a></li>
+                {%- endif %}
+              {%- endif %}
+            {%- endif %}
+          </ul>
+        {%- endblock navbar_right %}
+      </div>
+      {%- endblock navbar_inner %}
+    </div>
+  </nav>
+  {%- endblock navbar %}
+  <div id="announcement" class="ui message cds-announcement text-center hidden"></div>
+</header>
+{%- block flashmessages %}
+  {%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}
+  {{ flashed_messages() }}
+{%- endblock %}

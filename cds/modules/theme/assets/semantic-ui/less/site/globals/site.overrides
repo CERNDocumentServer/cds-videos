@@ -1,0 +1,77 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+/* Bootstrap 3 heading margins, kept so that the pages keep their rhythm. */
+h1, h2, h3 {
+  margin-top: 22px;
+  margin-bottom: 11px;
+}
+
+h4, h5, h6 {
+  margin-top: 11px;
+  margin-bottom: 11px;
+}
+
+h1:first-child, h2:first-child, h3:first-child,
+h4:first-child, h5:first-child, h6:first-child {
+  margin-top: 22px;
+}
+
+h4:first-child, h5:first-child, h6:first-child {
+  margin-top: 11px;
+}
+
+h1:last-child, h2:last-child, h3:last-child,
+h4:last-child, h5:last-child, h6:last-child {
+  margin-bottom: 11px;
+}
+
+h6 {
+  font-size: 14px;
+}
+
+/* Bootstrap 3 keeps the paragraph margins on the first and last child. */
+p:first-child {
+  margin-top: 0px;
+}
+
+p:last-child {
+  margin-bottom: 11px;
+}
+
+/* Bootstrap uses floor(100% * 14px / 16px) with the CDS font sizes */
+small,
+.small {
+  font-size: 87%;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+/* Bootstrap 3 scaffolding */
+img {
+  vertical-align: middle;
+  border: 0;
+}
+
+/* Bootstrap secondary text of the headings */
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+h1 small, h2 small, h3 small {
+  font-size: 65%;
+}
+h4 small, h5 small, h6 small {
+  font-size: 75%;
+}

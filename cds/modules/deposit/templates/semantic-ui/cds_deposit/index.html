@@ -1,0 +1,72 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends "cds_theme/page.html" %}
+{%- set title_prefix = _('Deposits') -%}
+
+{%- block javascript %}
+  {{ super() }}
+  {{ webpack["cds_deposit_app.js"] }}
+{%- endblock javascript %}
+
+{%- block body_inner %}
+<div id="cds-deposit-index"
+     data-search-endpoint="{{ config.DEPOSIT_SEARCH_API }}"
+     data-search-headers='{"Accept": "{{ config.DEPOSIT_SEARCH_MIMETYPE|default('application/json')}}"}'>
+  {{super()}}
+</div>
+{%- endblock body_inner %}
+
+{%- block page_header %}
+  {%- set suggest_app = false -%}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_body %}
+<div class="{{container_class}} search-page flex-item py-20">
+    <div class="cds-row">
+      <div class="cds-col-md-offset-3 cds-col-md-9">
+        <div class="cds-row">
+          <div class="cds-col-md-5">
+            <div data-cds-search-component="depositsearchbar" data-placeholder="{{ _('Search uploads...') }}"></div>
+          </div>
+          <div class="cds-col-md-7 text-right">
+             {%- set sort_options = config.get('DEPOSIT_REST_SORT_OPTIONS', {}).get(config.DEPOSIT_UI_SEARCH_INDEX) %}
+             <span data-cds-search-component="sort"
+                  data-sort-key="sort"
+                  data-options='{{ sort_options|format_sortoptions|safe }}'></span>
+             {%- if has_avc_permission() %}
+             <a class="ui orange button" href="{{ url_for('cds_deposit.reserve_report_number') }}">
+               <i class="fa fa-magnet cds-glyph"></i> {{ _('Reserve Report Number') }}
+             </a>
+             {%- endif %}
+            <a class="ui green button" href="{{ url_for('invenio_deposit_ui.new', type='project') }}">
+              <i class="fa fa-arrow-circle-o-up cds-glyph"></i> {{ _("New Upload") }}
+            </a>
+          </div>
+        </div>
+      </div>
+      <div data-cds-search-component="error" data-message="{{ _('Search failed.') }}"></div>
+    </div>
+    <div class="cds-row">
+      <div class="cds-col-md-3">
+        <div data-cds-search-component="facets" data-variant="deposit"></div>
+      </div>
+      <div class="cds-col-md-9">
+          <div id="cds-deposit-ie-warning" class="hidden">
+            <div class="ui negative message" role="alert">IE browser below <b>Edge</b> is not supported! Please use the latest version of Safari, Chrome or Firefox.</div>
+          </div>
+          <div class="cds-list-group" data-cds-search-component="results" data-template="deposit"></div>
+        <div class="text-center my-20">
+          <div data-cds-search-component="pagination" data-variant="invenio"></div>
+        </div>
+      </div>
+    </div>
+</div>
+{%- endblock page_body -%}

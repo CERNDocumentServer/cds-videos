@@ -1,0 +1,57 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends "cds_theme/page.html" %}
+{%- set title_prefix = record.get('title', {}).get('title', 'Project') -%}
+{%- set container_class = '{{container_class}} cds-max-fluid-width' -%}
+
+{%- block css %}
+    {{ super() }}
+    <style>
+      body {
+        background-color: #eee;
+      }
+    </style>
+{%- endblock css %}
+
+{%- block javascript %}
+  <script type="text/javascript">
+  // CKEDITOR static location
+  window.CKEDITOR_BASEPATH = '{{url_for("static", filename="ckeditor/", _external=True)}}';
+  </script>
+  {{ super() }}
+  {{ webpack["cds_deposit_app.js"] }}
+{%- endblock javascript %}
+
+{%- block page_header %}
+  {%- set suggest_app = false -%}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_body %}
+<div id="cds-deposit" class="flex-item"
+  {%- if pid %}
+     data-project-links='{{pid|tolinksjs(record, dep_type=record_type)|tojson}}'
+  {%- else %}
+     data-project-init="/api/deposits/project/"
+  {%- endif %}
+     data-video-extensions=".mp4,.mkv,.mov,.m4v"
+     data-project-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_JSONSCHEMA.project, _external=True) }}"
+     data-video-init="/api/deposits/video/"
+     data-video-schema="{{ url_for('invenio_jsonschemas.get_schema', schema_path=config.DEPOSIT_JSONSCHEMA.video, _external=True) }}"
+     data-show-avc-restricted-fields="{{ record | check_avc_permissions | lower }}"
+     data-is-super-admin="{{ record | check_if_super_admin | lower }}"
+     data-current-user-email="{{ current_user_email | lower }}"
+></div>
+{%- if project %}
+{#- The project as the API returns it, to show the form without waiting #}
+<script type="application/json" id="cds-deposit-project">{{ project|tojson }}</script>
+{%- endif %}
+<input type="hidden" id="max-n-videos-per-project" value="{{ config.DEPOSIT_PROJECT_MAX_N_VIDEOS }}" />
+{%- endblock %}

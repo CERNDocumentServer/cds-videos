@@ -1,0 +1,26 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends "cds_theme/header.html" %}
+
+{%- block navbar_search %}
+  {%- set placeholder = search_input_placeholder|default(_('Search CDS')) %}
+  <div id="cds-navbar-search"
+       data-mode="search"
+       data-cds-search-component="searchbar"
+       data-placeholder="{{ placeholder }}">
+    <form id="cdsSearchFormSuggest" class="cds-navbar-form" role="search">
+      <div class="cds-navbar-form-group">
+        <input id="cds-navbar-form-input" type="text" name="q" placeholder="{{ placeholder }}" autocomplete="off">
+      </div>
+      <button type="button" class="cds-hidden-xs cds-navbar-form-icon"><i class="t-w fa fa-search"></i></button>
+      <button type="button" class="cds-visible-xs ui basic button cds-navbar-form-icon-xs"><i class="fa fa-search"></i>Search</button>
+    </form>
+  </div>
+{%- endblock navbar_search %}

@@ -1,0 +1,1038 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+/*
+ * Components of the deposit pages, with the look of the Bootstrap 3
+ * components used by the previous (AngularJS) interface. As before, the
+ * corners are square: the old theme had unit-less border radius values,
+ * which the browsers ignored.
+ */
+
+@line-height-computed: 22px;
+@font-size-small: 14px;
+@font-size-large: 20px;
+@input-height-base: 36px;
+@input-height-small: 33px;
+@input-border: #ccc;
+@input-border-focus: #66afe9;
+@input-color: #555;
+@input-bg-disabled: @gray-lighter;
+@help-block-color: lighten(@text-color, 25%);
+
+// ``.cds-clearfix();`` uses the ``.cds-clearfix`` class of layout.less
+
+/* Panels (``panel panel-default``) */
+
+.cds-panel {
+  margin-bottom: @line-height-computed;
+  background-color: #fff;
+  border: 1px solid @panel-default-border;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  > .cds-table {
+    margin-bottom: 0;
+  }
+  > .cds-panel-body + .cds-table {
+    border-top: 1px solid #ddd;
+  }
+  > .cds-table > tbody:first-child > tr:first-child th,
+  > .cds-table > tbody:first-child > tr:first-child td {
+    border-top: 0;
+  }
+  > .cds-table > tbody > tr > td:first-child,
+  > .cds-table > tbody > tr > th:first-child {
+    padding-left: 15px;
+  }
+  > .cds-table > tbody > tr > td:last-child,
+  > .cds-table > tbody > tr > th:last-child {
+    padding-right: 15px;
+  }
+}
+
+.cds-panel-heading {
+  padding: 10px 15px;
+  color: @panel-default-text;
+  background-color: @panel-default-heading-bg;
+  border-bottom: 1px solid @panel-default-border;
+  > .cds-row {
+    margin-left: -15px;
+    margin-right: -15px;
+  }
+  a.panel-toggle {
+    display: block;
+    cursor: pointer;
+  }
+}
+
+.cds-panel > .cds-panel-heading:last-child {
+  border-bottom: 0;
+}
+
+.cds-panel-body {
+  padding: 15px;
+  .cds-clearfix();
+}
+
+.cds-panel-danger {
+  border-color: @state-danger-border;
+  > .cds-panel-heading {
+    color: @state-danger-text;
+    background-color: @state-danger-bg;
+    border-color: @state-danger-border;
+  }
+}
+
+.cds-panel-heading-warning {
+  background-color: @brand-warning !important;
+}
+
+/* The video panel heading stays visible when scrolling (``hl-sticky``) */
+.cds-deposit-panel > .cds-sticky-heading {
+  position: sticky;
+  top: @navbar-height + 1px;
+  z-index: 10;
+}
+
+/* Tables (``table``) */
+
+.cds-table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: @line-height-computed;
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  > tbody > tr > th,
+  > tbody > tr > td {
+    padding: 8px;
+    line-height: @line-height-base;
+    vertical-align: top;
+    border-top: 1px solid #ddd;
+  }
+  > tbody > tr > th {
+    font-weight: bold;
+  }
+  > tbody > tr.active > td,
+  > tbody > tr.active > th {
+    background-color: #f5f5f5;
+  }
+  > tbody > tr.warning > td,
+  > tbody > tr.warning > th {
+    background-color: @state-warning-bg;
+  }
+}
+
+:where(.cds-table) th {
+  text-align: left;
+}
+
+.cds-table-bordered {
+  border: 1px solid #ddd;
+  > tbody > tr > th,
+  > tbody > tr > td {
+    border: 1px solid #ddd;
+  }
+}
+
+.cds-table > tbody > tr > td.info,
+.cds-table > tbody > tr > th.info {
+  background-color: @state-info-bg;
+}
+
+/* List groups in panels */
+.cds-panel > .cds-list-group {
+  margin-bottom: 0;
+  .cds-list-group-item {
+    border-width: 1px 0;
+  }
+  &:last-child .cds-list-group-item:last-child {
+    border-bottom: 0;
+  }
+}
+
+.cds-panel > .cds-panel-heading + .cds-list-group .cds-list-group-item:first-child {
+  border-top-width: 0;
+}
+
+/* Forms (``form-group``, ``form-control``, ``help-block``) */
+
+.cds-form-group,
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Bootstrap checkboxes and radios, with element specificity only so that
+   they beat the Semantic UI reset and lose to any class based rule */
+input:where([type="checkbox"], [type="radio"]) {
+  margin: 4px 0 0;
+  line-height: normal;
+}
+
+/* Bootstrap labels, without specificity so that any other rule wins */
+:where(label) {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.cds-form-control,
+.form-control {
+  display: block;
+  width: 100%;
+  height: @input-height-base;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  color: @input-color;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid @input-border;
+  border-radius: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  &:focus {
+    border-color: @input-border-focus;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  }
+  &::placeholder {
+    color: #999;
+    opacity: 1;
+  }
+  &[disabled],
+  &[readonly],
+  fieldset[disabled] & {
+    background-color: @input-bg-disabled;
+    opacity: 1;
+  }
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: not-allowed;
+  }
+}
+
+textarea.cds-form-control,
+textarea.form-control {
+  height: auto;
+}
+
+.cds-form-control.input-sm,
+.form-control.input-sm {
+  height: @input-height-small;
+  padding: 5px 10px;
+  font-size: @font-size-small;
+  line-height: 1.5;
+}
+
+.form-group-lg .form-control {
+  height: 49px;
+  padding: 10px 16px;
+  font-size: @font-size-large;
+  line-height: 1.3333333;
+}
+
+.has-feedback {
+  position: relative;
+  .form-control {
+    padding-right: 45px;
+  }
+}
+
+.form-control-feedback {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: block;
+  width: @input-height-base;
+  height: @input-height-base;
+  line-height: @input-height-base;
+  text-align: center;
+  pointer-events: none;
+}
+
+.form-group-lg .form-control + .form-control-feedback {
+  width: 49px;
+  height: 49px;
+  line-height: 49px;
+}
+
+.help-block {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: @help-block-color;
+}
+
+.has-error {
+  .help-block,
+  .control-label,
+  label {
+    color: @state-danger-text;
+  }
+  .cds-form-control,
+  .form-control {
+    border-color: @state-danger-text;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    &:focus {
+      border-color: darken(@state-danger-text, 10%);
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px lighten(@state-danger-text, 20%);
+    }
+  }
+}
+
+.cds-checkbox {
+  position: relative;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  label {
+    min-height: @line-height-computed;
+    padding-left: 20px;
+    margin-bottom: 0;
+    font-weight: normal !important;
+    cursor: pointer;
+  }
+  input[type="checkbox"] {
+    position: absolute;
+    margin-top: 4px;
+    margin-left: -20px;
+  }
+}
+
+fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+/* Category and type (angular-strap ``bs-select`` buttons) */
+.cds-deposit-strap-select {
+  margin-left: 0 !important;
+  &:not(.has-error) .help-block {
+    color: inherit;
+  }
+  .ui.selection.dropdown {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: @input-height-base;
+    padding: 6px 12px;
+    line-height: @line-height-base;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    box-shadow: none;
+    > .text {
+      color: #333;
+    }
+    > .cds-caret {
+      position: static;
+      margin: 0;
+      opacity: 1;
+    }
+    &:hover,
+    &.active {
+      background-color: #e6e6e6;
+      border-color: #adadad;
+      box-shadow: none;
+    }
+    &.disabled {
+      opacity: 0.65;
+    }
+    .menu {
+      width: 95%;
+      min-width: 160px;
+      max-height: none;
+      padding: 5px 0;
+      margin-top: 2px;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+      border-radius: 0;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+      > .item {
+        padding: 3px 20px !important;
+        line-height: @line-height-base;
+        color: #333;
+        border-top: 0;
+        font-size: @font-size-base;
+        &:hover {
+          background-color: #f5f5f5;
+        }
+        &.active,
+        &.selected {
+          color: #fff;
+          font-weight: normal;
+          background-color: @brand-primary;
+        }
+      }
+    }
+  }
+}
+
+/* Lists (``list-group``) */
+
+.cds-list-group {
+  padding-left: 0;
+  margin-bottom: 20px;
+}
+
+.cds-list-group-item {
+  position: relative;
+  display: block;
+  padding: 10px 15px;
+  margin-bottom: -1px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+a.cds-list-group-item {
+  color: #555;
+  &:hover,
+  &:focus {
+    color: #555;
+    text-decoration: none;
+    background-color: #f5f5f5;
+  }
+}
+
+.cds-list-group-item.active,
+.cds-list-group-item.active:hover,
+.cds-list-group-item.active:focus {
+  z-index: 2;
+  color: #fff;
+  background-color: @brand-primary;
+  border-color: @brand-primary;
+}
+
+.cds-panel-group {
+  margin-bottom: @line-height-computed;
+  .cds-panel {
+    margin-bottom: 0;
+  }
+  .cds-panel-heading {
+    border-bottom: 0;
+  }
+}
+
+/* Font Awesome 4 icons of the settings menu (built with the theme icons) */
+.cds-settings-menu i.icon {
+  display: inline-block;
+  width: 1.28571429em;
+  margin: 0;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-align: center;
+  &.user:before { content: "\f007"; }
+  &.shield:before { content: "\f132"; }
+  &.linkify:before { content: "\f0c1"; }
+  &.codepen:before { content: "\f1cb"; }
+  &.cogs:before { content: "\f085"; }
+  &.key:before { content: "\f084"; }
+}
+
+/* Close button (``close``) */
+
+.cds-close {
+  float: right;
+  font-size: (@font-size-base * 1.5);
+  font-weight: bold;
+  line-height: 1;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: 0.2;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  &:hover,
+  &:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: 0.5;
+  }
+}
+
+/* Alerts (``alert``) */
+
+.cds-alert {
+  padding: 15px;
+  margin-bottom: @line-height-computed;
+  border: 1px solid transparent;
+  h4 {
+    margin-top: 0;
+    color: inherit;
+  }
+  > p,
+  > ul {
+    margin-bottom: 0;
+  }
+  > p + p {
+    margin-top: 5px;
+  }
+}
+
+.cds-alert-dismissible {
+  padding-right: 35px;
+  .cds-close {
+    position: relative;
+    top: -2px;
+    right: -21px;
+    color: inherit;
+  }
+}
+
+.cds-alert-success {
+  color: @state-success-text;
+  background-color: @state-success-bg;
+  border-color: @state-success-border;
+}
+
+.cds-alert-info {
+  color: @state-info-text;
+  background-color: @state-info-bg;
+  border-color: @state-info-border;
+}
+
+.cds-alert-warning {
+  color: @state-warning-text;
+  background-color: @state-warning-bg;
+  border-color: @state-warning-border;
+}
+
+.cds-alert-danger {
+  color: @state-danger-text;
+  background-color: @state-danger-bg;
+  border-color: @state-danger-border;
+}
+
+/* Progress bars (``progress``) */
+
+@keyframes cds-progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+.cds-progress {
+  height: @line-height-computed;
+  margin-bottom: @line-height-computed;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cds-progress-bar {
+  float: left;
+  width: 0%;
+  height: 100%;
+  font-size: @font-size-small;
+  line-height: @line-height-computed;
+  color: #fff;
+  text-align: center;
+  background-color: @brand-primary;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  transition: width 0.6s ease;
+}
+
+.cds-progress-bar-striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40px 40px;
+  &.active {
+    animation: cds-progress-bar-stripes 2s linear infinite;
+  }
+}
+
+.cds-progress-bar-success {
+  background-color: @brand-success;
+}
+
+.cds-progress-bar-danger {
+  background-color: @brand-danger;
+}
+
+.cds-row > .cds-progress {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Badges (``badge``) */
+
+.cds-badge {
+  display: inline-block;
+  min-width: 10px;
+  padding: 3px 7px;
+  font-size: @font-size-small;
+  font-weight: bold;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  background-color: @gray-light;
+  border-radius: 10px;
+}
+
+/* Responsive embeds (``embed-responsive``) */
+
+.cds-embed-responsive {
+  position: relative;
+  display: block;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+  .cds-embed-responsive-item,
+  iframe {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}
+
+.cds-embed-responsive-16by9 {
+  padding-bottom: 56.25%;
+}
+
+/* Jumbotron (``jumbotron``) */
+
+.cds-jumbotron {
+  padding: 30px 15px;
+  margin-bottom: 30px;
+  color: inherit;
+  background-color: @gray-lighter;
+  h1 {
+    color: inherit;
+  }
+  p {
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 200;
+  }
+  @media (min-width: @screen-sm-min) {
+    padding: 48px 60px;
+    h1 {
+      font-size: 72px;
+    }
+  }
+}
+
+/* Buttons: Bootstrap sizes and the CDS ``btn-info`` */
+
+#cds-deposit,
+#cds-deposit-index,
+.cds-report-number-form {
+  .ui.button {
+    margin: 0;
+    vertical-align: middle;
+  }
+}
+
+/* The Semantic buttons have no border: one more pixel of padding instead */
+#cds-deposit,
+#cds-deposit-index,
+.cds-login {
+  .ui.small.button {
+    padding: 6px 11px;
+    font-size: @font-size-small;
+    line-height: 1.5;
+  }
+  .ui.large.button {
+    padding: 11px 17px;
+    font-size: @font-size-large;
+    line-height: 1.3333333;
+  }
+}
+
+.ui.button.cds-btn-info {
+  color: @btn-info-color;
+  background-color: @btn-info-bg;
+  &:hover,
+  &:focus {
+    color: @btn-info-color;
+    background-color: darken(@btn-info-bg, 10%);
+  }
+}
+
+.cds-btn-xs {
+  padding: 1px 5px;
+  font-size: @font-size-small;
+  line-height: 1.5;
+}
+
+.ui.disabled.button,
+.ui.button:disabled {
+  opacity: 0.65 !important;
+}
+
+/* The deposit page */
+
+#cds-deposit {
+  .cds-deposit-panel {
+    max-width: 1000px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .cds-tab-content {
+    background-color: #fff;
+  }
+  .cds-alert-info.ui.message {
+    margin: 0 0 @line-height-computed;
+  }
+  .add-button {
+    cursor: pointer;
+  }
+  .ui.label.cds-label {
+    vertical-align: baseline;
+  }
+}
+
+.cds-deposit-frame-thumbnail {
+  padding: 5px;
+  width: 20%;
+  float: left;
+}
+
+.cds-deposit-thumbnail-pad {
+  .cds-clearfix();
+}
+
+/* Calendar of the date fields (angular-strap ``bs-datepicker``) */
+
+.cds-datepicker-wrapper {
+  position: relative;
+}
+
+.cds-datepicker-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 160px;
+  max-width: 320px;
+  width: 320px;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  font-size: @font-size-base;
+  text-align: left;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+.cds-datepicker-table {
+  table-layout: fixed;
+  width: 100%;
+  height: 100%;
+  th,
+  td {
+    padding: 0;
+  }
+  .dow {
+    font-weight: normal;
+  }
+}
+
+.cds-datepicker-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 6px 12px;
+  margin: 0;
+  font-size: @font-size-base;
+  font-weight: normal;
+  line-height: @line-height-base;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  &:hover {
+    background-color: #e6e6e6;
+    border-color: #adadad;
+  }
+  &.pull-left,
+  &.pull-right {
+    width: auto;
+  }
+  &.today {
+    color: @btn-info-color;
+    background-color: darken(@btn-info-bg, 10%);
+  }
+  &.active {
+    color: #fff;
+    background-color: @brand-primary;
+    border-color: darken(@brand-primary, 5%);
+    .text-muted {
+      color: #fff;
+    }
+  }
+}
+
+/* Autocompletes (``ui-select`` with the bootstrap theme) */
+
+#cds-deposit .ui.selection.dropdown.cds-async-select {
+  height: @input-height-base;
+  min-height: @input-height-base;
+  // ui-select overlapped the next element by one pixel
+  margin-bottom: -1px;
+  padding: 6px 30px 6px 12px;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  box-shadow: none;
+  > .text {
+    left: 0;
+    color: #333;
+  }
+  > .default.text,
+  > input.search::placeholder {
+    color: #999;
+  }
+  > input.search {
+    padding: 6px 30px 6px 12px;
+    line-height: @line-height-base;
+  }
+  > .cds-caret {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    margin-top: -2px;
+  }
+  &:hover {
+    border-color: #adadad;
+  }
+  &.active,
+  &.visible {
+    border-color: @input-border-focus;
+    box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+  }
+  &.disabled {
+    opacity: 1;
+    background-color: @input-bg-disabled;
+  }
+  .menu {
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    border-top-width: 0 !important;
+    border-radius: 0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    > .item {
+      padding: 3px 20px !important;
+      font-size: @font-size-base;
+      line-height: @line-height-base;
+      border-top: 0;
+      &.selected,
+      &:hover {
+        color: #fff;
+        background-color: @brand-primary;
+        small {
+          color: #fff;
+        }
+      }
+    }
+    > .message {
+      padding: 5px;
+      color: #333;
+    }
+  }
+}
+
+#cds-deposit .ui.multiple.selection.dropdown.cds-async-select {
+  height: auto;
+  margin-bottom: 0;
+  min-height: 34px;
+  padding: 3px 3px 0 3px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  > .dropdown.icon,
+  > .cds-caret {
+    display: none;
+  }
+  > .label {
+    display: inline-block;
+    margin: 0 3px 3px 0;
+    padding: 1px 5px;
+    font-size: @font-size-small;
+    font-weight: normal;
+    line-height: 1.5;
+    color: #333;
+    vertical-align: top;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    box-shadow: none;
+    > .delete.icon {
+      float: right;
+      width: auto;
+      height: auto;
+      margin: 0;
+      font-family: inherit;
+      font-size: 1.6em;
+      font-weight: bold;
+      line-height: 0.75;
+      color: #000;
+      text-shadow: 0 1px 0 #fff;
+      opacity: 0.2;
+      &:before {
+        content: "\00a0\00d7";
+      }
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+  }
+  > input.search {
+    width: auto;
+    height: 26px;
+    margin: 0 0 3px 0;
+    padding: 0 0 0 7px;
+    line-height: 26px;
+  }
+  > .text {
+    margin: 0 0 3px 7px;
+    line-height: 26px;
+    padding: 0;
+  }
+  // Where ui-select showed the placeholder of its search input (26.66px
+  // high, with 1px 2px of padding)
+  > .default.text {
+    top: 3px;
+    left: 3px;
+    margin: 0;
+    padding: 1px 2px;
+    line-height: 24.66px;
+  }
+}
+
+/* Input groups (``input-group`` with an ``input-group-btn``) */
+
+/* As ``input-group``: the line box of the button sets the height
+   (14px + 16px * 1.428571429, not a round number) */
+.ui.action.input.cds-input-group {
+  align-items: flex-start;
+}
+
+.ui.action.input.cds-input-group > input {
+  height: @input-height-base;
+  padding: 6px 12px;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  color: @input-color;
+  border: 1px solid @input-border;
+  border-radius: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  &::placeholder {
+    color: #999;
+  }
+  &:focus {
+    border-color: @input-border-focus;
+    border-radius: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  }
+}
+
+.ui.action.input.cds-input-group > .ui.basic.button {
+  display: block;
+  margin-left: -1px;
+  padding: 6px 12px;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  border: 1px solid #ccc;
+  box-shadow: none;
+  &:hover,
+  &:focus {
+    border-color: #adadad;
+    box-shadow: none;
+  }
+  > .fa {
+    display: inline-block;
+  }
+}
+
+/* Font Awesome icons in place of the Bootstrap glyphicons (1em wide) */
+.cds-glyph {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+}
+
+/* The list of the deposits (``media-list``) */
+
+.media-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.media {
+  margin-top: 15px;
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.media,
+.media-body {
+  overflow: hidden;
+  zoom: 1;
+}
+
+.media-body {
+  width: 10000px;
+}
+
+.media-object {
+  display: block;
+}
+
+.media-left {
+  padding-right: 10px;
+}
+
+.media-right {
+  padding-left: 10px;
+}
+
+.media-left,
+.media-right,
+.media-body {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.media-heading {
+  margin-top: 0;
+  margin-bottom: 5px;
+}

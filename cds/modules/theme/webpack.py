@@ -40,72 +40,68 @@ from invenio_assets.webpack import WebpackThemeBundle
 theme = WebpackThemeBundle(
     __name__,
     "assets",
-    default="bootstrap3",
+    default="semantic-ui",
     themes={
-        "bootstrap3": dict(
+        "semantic-ui": dict(
             entry={
                 "cds_theme_app": "./js/cds/app.js",
-                "cds_theme_styles": "./scss/cds/cds.scss",
+                "cds_theme_styles": "./less/cds/cds.less",
                 "cds_deposit_app": "./js/cds_deposit/app.js",
-                "cds_previewer_styles": "./scss/cds_previewer/video.scss",
+                "cds_previewer_styles": "./less/cds_previewer/video.less",
                 "cds_records_app": "./js/cds_records/app.js",
                 "cds_records_stats_app": "./js/cds_records/stats.js",
-                "cds_records_stats_styles": "./scss/cds_records/stats.scss",
+                # The styles of invenio-charts-js are SCSS, built by sass-loader
+                "cds_records_stats_styles": [
+                    "invenio-charts-js/src/styles/styles.scss",
+                    "./less/cds_records/stats.less",
+                ],
                 "cds_search_ui_app": "./js/cds_search_ui/app.js",
             },
             dependencies={
-                "angular": "~1.5.8",
-                "angular-animate": "~1.4.8",
-                "angular-loading-bar": "~0.9.0",
-                "angular-sanitize": "~1.5.8",
-                "angular-elastic": "~2.5.1",
-                "angular-scroll": "~1.0.2",
-                "angular-sticky-plugin": "~0.4.1",
-                "angular-schema-form": "~0.8.13",
-                "angular-lazy-image": "~0.3.2",
-                "angular-local-storage": "~0.5.2",
-                "angular-schema-form-dynamic-select": "~0.13.1",
-                "angular-mass-autocomplete": "~0.5.0",
-                "angular-local-storage": "~0.5.2",
-                "angularjs-toaster": "~2.1.0",
-                "angular-ui-bootstrap": "~2.5.0",
-                "angular-strap": "~2.3.9",
-                "angular-translate": "~2.11.0",
-                "angular-underscore": "~0.0.3",
-                "angular-ui-sortable": "~0.14.3",
-                "d3": "^3.5.17",
-                "invenio-search-js": "^1.5.4",
-                "invenio-charts-js": "^0.2.7",
-                "invenio-records-js": "~0.0.8",
-                # TODO: check if we can remove invenio-files-js
-                "invenio-files-js": "~0.0.2",
-                "ng-file-upload": "~12.0.4",
-                "jquery": "~3.2.1",
-                "jqueryui": "~1.11.1",
-                "ng-dialog": "~0.6.0",
-                "ui-select": "~0.18.1",
-                "clipboard": "~1.5.16",
-                "ngclipboard": "~1.1.1",
-                "lodash": "~4.17.4",
-                "mousetrap": "~1.6.1",
-                "objectpath": "~1.2.1",
-                "tv4": "~1.2.7",
-                "bootstrap-sass": "<3.4.2",
-                "font-awesome": "~4.5.0",
-                "ngmodal": "~2.0.1",
-                "cds": "~0.2.0",
-                "angular-schema-form-ckeditor": "git+https://github.com/CERNDocumentServer/cds-videos-angular-schema-ckeditor",
-                "ckeditor": "4.12.1",
-                "rr-ng-ckeditor": "~0.2.1",
-                "dompurify": "^2.4.5",
-                # needed because ci fails on tests otherwise. not imported in any bundle
+                "react": "^16.13.0",
+                "react-dom": "^16.13.0",
+                "prop-types": "^15.7.2",
+                "semantic-ui-react": "^2.1.0",
                 "semantic-ui-less": "^2.4.1",
+                # react-searchkit 3.0.0 is the last release compatible with
+                # react-overridable 0.0.3 (pinned by Invenio-Search-UI 3.0.x).
+                # ``<3.0.1`` resolves to 3.0.0 and wins the version merge
+                # against the ``^3.0.0`` of Invenio-Search-UI.
+                "react-searchkit": "<3.0.1",
+                "formik": "^2.4.0",
+                # The deposit form state, same ranges as react-searchkit
+                "redux": "^4.0.0",
+                "react-redux": "^7.2.0",
+                "redux-thunk": "^2.3.0",
+                "axios": "^1.7.7",
+                "lodash": "^4.17.4",
+                "qs": "^6.8.0",
+                "d3": "^3.5.17",
                 "vtt.js": "~0.13.0",
+                "dompurify": "^2.4.5",
+                "ckeditor": "4.12.1",
+                "invenio-charts-js": "^0.2.7",
+                # Not used by CDS, but required by Invenio-Search-UI with
+                # ``^4.0.0``: the latest 4.x releases need react-overridable
+                # 1.x while Invenio-Search-UI pins react-overridable 0.0.3, so
+                # keep the last release line compatible with both.
+                "react-invenio-forms": "~4.10.0",
             },
             aliases={
                 "@js/cds": "js/cds",
                 "@js/cds_deposit": "js/cds_deposit",
+                "@js/cds_records": "js/cds_records",
                 "@js/cds_search_ui": "js/cds_search_ui",
+                "@less/cds": "less/cds",
+                # react-searchkit points bundlers to its CommonJS build (its
+                # ``browser`` field), which pulls a second copy of axios and
+                # can not be tree shaken: use its ES modules build.
+                "react-searchkit$": "node_modules/react-searchkit/dist/esm/index.js",
+                # Semantic-UI theme configuration used by Invenio-Theme to
+                # build Semantic UI (``theme.js`` entry point).
+                "../../theme.config$": "less/theme.config",
+                "../../less/site": "less/site",
+                "../../less": "less",
             },
         ),
     },
