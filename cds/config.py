@@ -1280,6 +1280,8 @@ THEME_404_TEMPLATE = "cds_theme/error/404.html"
 THEME_500_TEMPLATE = "cds_theme/error/500.html"
 # Error template
 THEME_ERROR_TEMPLATE = "cds_theme/error/base.html"
+# Base template of the Invenio-Admin panel
+ADMIN_BASE_TEMPLATE = "cds_theme/page_admin.html"
 # Tracking template
 THEME_TRACKINGCODE_TEMPLATE = "cds_theme/trackingcode.html"
 # Matomo tracking code: set None to disabled it
