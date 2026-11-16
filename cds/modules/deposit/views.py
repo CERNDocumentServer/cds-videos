@@ -54,9 +54,7 @@ from .api import CDSDeposit, Video
 from .form import MintReportNumber, ReserveReportNumberForm
 from .resolver import get_video_pid
 
-blueprint = Blueprint(
-    "cds_deposit", __name__, template_folder="templates", static_folder="static"
-)
+blueprint = Blueprint("cds_deposit", __name__, template_folder="templates")
 
 
 def project_api_links(pid, record):

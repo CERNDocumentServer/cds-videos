@@ -124,7 +124,8 @@ const test = base.test.extend({
     const errors = [];
     page.on("pageerror", (error) => errors.push(error));
     await use(page);
-    expect(errors, "uncaught errors in the page").toEqual([]);
+    // The messages, the errors themselves print as ``[Object]``
+    expect(errors.map(String), "uncaught errors in the page").toEqual([]);
   },
 });
 

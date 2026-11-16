@@ -120,42 +120,36 @@
   }
 }
 
-// A description editor while CKEditor loads: the text in a box of the size
-// of the editor (moono-lisa skin and ``contents.css``)
-.cds-ckeditor-loading {
+// A description editor while HugeRTE loads: the text in a box of the size
+// of the editor (oxide skin and ``content.css``)
+.cds-rich-text-loading {
   background-color: #fff;
-  border: 1px solid #d1d1d1;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  min-height: 250px;
 
-  .cds-ckeditor-loading-toolbar {
-    background-color: #f8f8f8;
-    border-bottom: 1px solid #d1d1d1;
-    height: 42px;
-    padding: 14px 8px 0;
+  .cds-rich-text-loading-toolbar {
+    border-bottom: 1px solid #e3e3e3;
+    height: 40px;
+    padding: 14px 12px 0;
 
     .ui.placeholder {
-      background-color: #f8f8f8;
       max-width: 22rem;
-
-      .line,
-      .line:after,
-      .header:after {
-        background-color: #f8f8f8;
-      }
     }
   }
 
-  .cds-ckeditor-loading-content {
-    color: #333;
-    font-family: sans-serif, Arial, Verdana, "Trebuchet MS";
-    font-size: 13px;
-    line-height: 1.6;
-    overflow: auto;
-    padding: 20px;
+  .cds-rich-text-loading-content {
+    color: #222f3e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 1rem;
   }
+}
 
-  .cds-ckeditor-loading-bottom {
-    background-color: #f8f8f8;
-    border-top: 1px solid #d1d1d1;
-    height: 27px;
-  }
+// The editor until HugeRTE has started, under the box above
+.cds-rich-text-starting {
+  height: 0;
+  overflow: hidden;
 }

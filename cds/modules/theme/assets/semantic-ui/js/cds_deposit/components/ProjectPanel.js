@@ -16,15 +16,15 @@ import PropTypes from "prop-types";
 import { EditorsField, RestrictionsBox } from "../fields/Access";
 import { CategoryField, TypeField } from "../fields/CategoryType";
 import {
-  CKEditorField,
   ContributorsField,
   KeywordsField,
   LicensesField,
+  RichTextField,
   TextField,
 } from "../fields/Fields";
 import {
   CONTRIBUTOR_ROLES,
-  PROJECT_CKEDITOR_CONFIG,
+  PROJECT_EDITOR_TOOLBAR,
   SCHEMA_DESCRIPTIONS,
 } from "../fields/options";
 import { TranslationsField } from "../fields/Groups";
@@ -105,14 +105,12 @@ function ProjectFields({ id }) {
     <div className="cds-row">
       <div className="cds-col-sm-6">
         <TextField name="title.title" label="Title" required />
-        <div className="form-ckeditor">
-          <CKEditorField
-            name="description"
-            label="Description"
-            required
-            config={PROJECT_CKEDITOR_CONFIG}
-          />
-        </div>
+        <RichTextField
+          name="description"
+          label="Description"
+          required
+          toolbar={PROJECT_EDITOR_TOOLBAR}
+        />
         <KeywordsField
           name="keywords"
           label="Keywords"

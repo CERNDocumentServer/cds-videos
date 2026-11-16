@@ -22,11 +22,11 @@ import { DEPOSIT_STATUSES, urlBuilder } from "../constants";
 import { RestrictionsBox } from "../fields/Access";
 import {
   CheckboxField,
-  CKEditorField,
   ContributorsField,
   DateField,
   KeywordsField,
   LicensesField,
+  RichTextField,
   SelectField,
   TextField,
 } from "../fields/Fields";
@@ -39,7 +39,7 @@ import {
 import {
   CONTRIBUTOR_ROLES,
   SCHEMA_DESCRIPTIONS,
-  VIDEO_CKEDITOR_CONFIG,
+  VIDEO_EDITOR_TOOLBAR,
   VIDEO_LANGUAGES,
 } from "../fields/options";
 import { taskRepr } from "../filters";
@@ -498,15 +498,13 @@ function BasicInfo({ id }) {
     <>
       <form className="form" onSubmit={(e) => e.preventDefault()}>
         <TextField name="title.title" label="Title" required />
-        <div className="form-ckeditor">
-          <CKEditorField
-            name="description"
-            label="Description"
-            required
-            description="Required."
-            config={VIDEO_CKEDITOR_CONFIG}
-          />
-        </div>
+        <RichTextField
+          name="description"
+          label="Description"
+          required
+          description="Required."
+          toolbar={VIDEO_EDITOR_TOOLBAR}
+        />
         <KeywordsField
           name="keywords"
           label="Keywords"
