@@ -1,0 +1,32 @@
+{#- The Invenio-Admin panel is written for Bootstrap 3, which the Semantic UI
+    theme does not load: add the few styles and behaviours it needs. -#}
+{%- extends "invenio_theme/page_admin.html" %}
+
+{%- block css %}
+  {{ super() }}
+  {{ webpack['cds_admin_styles.css'] }}
+{%- endblock css %}
+
+{%- block javascript %}
+  {{ super() }}
+  <script>
+    // Flask-Admin calls the Bootstrap tooltip before it sets up the filters
+    $.fn.tooltip = $.fn.tooltip || function () { return this; };
+    // Invenio-Theme wraps the Select2 class, which the package exports when
+    // built with webpack. Built with rspack it exports the function that
+    // registers it on jQuery instead.
+    if (!window.select2.prototype.open) {
+      delete $.fn.select2;
+      window.select2(window, $);
+    }
+    // Open and close the Bootstrap dropdowns (header, filters, actions)
+    $(document).on("click", function (event) {
+      var toggle = $(event.target).closest("[data-toggle=dropdown]");
+      $(".dropdown.open").not(toggle.parent()).removeClass("open");
+      if (toggle.length) {
+        event.preventDefault();
+        toggle.parent().toggleClass("open");
+      }
+    });
+  </script>
+{%- endblock javascript %}

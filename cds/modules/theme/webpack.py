@@ -56,6 +56,12 @@ theme = WebpackThemeBundle(
                     "./less/cds_records/stats.less",
                 ],
                 "cds_search_ui_app": "./js/cds_search_ui/app.js",
+                # The Invenio-Admin panel, Font Awesome 4 is a dependency of
+                # its bundle in Invenio-Theme
+                "cds_admin_styles": [
+                    "font-awesome/css/font-awesome.css",
+                    "./less/cds_admin/admin.less",
+                ],
             },
             dependencies={
                 # Same majors as Invenio-Search-UI

@@ -1,0 +1,276 @@
+// The Invenio-Admin panel (Flask-Admin with AdminLTE) is written for
+// Bootstrap 3, which the Semantic UI theme does not load. These are the few
+// Bootstrap rules its pages need to lay out their items.
+
+@border: #ddd;
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.pull-right {
+  float: right !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.clearfix:after,
+.nav:after,
+.form-group:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+// The two icons of the header that only have a Glyphicon
+.glyphicon-user:before,
+.glyphicon-log-out:before {
+  font: normal 14px FontAwesome;
+}
+
+.glyphicon-user:before {
+  content: "\f007";
+}
+
+.glyphicon-log-out:before {
+  content: "\f08b";
+}
+
+.caret {
+  display: inline-block;
+  margin-left: 4px;
+  vertical-align: middle;
+  border-top: 4px solid;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+
+// Header, tabs and dropdowns
+
+.nav,
+.dropdown-menu,
+.pagination {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav > li,
+.pagination > li {
+  position: relative;
+  float: left;
+}
+
+.nav > li > a {
+  display: block;
+  padding: 10px 15px;
+}
+
+.navbar-nav {
+  float: left;
+
+  > li > a {
+    padding: 15px;
+  }
+}
+
+.navbar-custom-menu .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+.nav-tabs {
+  margin-bottom: 0;
+  border-bottom: 1px solid @border;
+
+  > li {
+    margin-bottom: -1px;
+
+    > a {
+      margin-right: 2px;
+      border: 1px solid transparent;
+      border-radius: 4px 4px 0 0;
+    }
+
+    &.active > a {
+      color: #555;
+      border-color: @border @border transparent;
+      background: #fff;
+    }
+  }
+}
+
+.navbar-form {
+  margin: 4px 0;
+  padding: 0 15px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  min-width: 160px;
+  padding: 5px 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+
+  &.pull-right {
+    right: 0;
+    left: auto;
+  }
+
+  > li > a {
+    display: block;
+    padding: 3px 20px;
+    color: #333;
+    white-space: nowrap;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  .divider {
+    height: 1px;
+    margin: 9px 0;
+    background: #e5e5e5;
+  }
+}
+
+.open > .dropdown-menu {
+  display: block;
+}
+
+// Tables
+
+.table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px;
+    border-top: 1px solid @border;
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
+.table-bordered {
+  &,
+  th,
+  td {
+    border: 1px solid @border;
+  }
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background: #f9f9f9;
+}
+
+.table-hover > tbody > tr:hover {
+  background: #f5f5f5;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+  display: block;
+  margin-left: -1px;
+  padding: 6px 12px;
+  border: 1px solid @border;
+}
+
+// Forms and buttons
+
+.form-group {
+  margin: 0 -15px 15px;
+}
+
+.col-md-1,
+.col-md-2,
+.col-md-10,
+.col-lg-6 {
+  position: relative;
+  float: left;
+  padding: 0 15px;
+}
+
+.col-md-1 {
+  width: 8.333%;
+}
+
+.col-md-2 {
+  width: 16.667%;
+}
+
+.col-md-10 {
+  width: 83.333%;
+}
+
+.col-lg-6 {
+  width: 50%;
+}
+
+.col-md-offset-2 {
+  margin-left: 16.667%;
+}
+
+.control-label {
+  padding-top: 7px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 34px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea.form-control {
+  height: auto;
+}
+
+.help-block {
+  display: block;
+  margin-top: 5px;
+  color: #737373;
+}
+
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+  background: #fff;
+  line-height: 1.43;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.btn-primary {
+  border-color: #2e6da4;
+  color: #fff;
+  background: #337ab7;
+}
+
+.btn-danger {
+  border-color: #d43f3a;
+  color: #fff;
+  background: #d9534f;
+}
