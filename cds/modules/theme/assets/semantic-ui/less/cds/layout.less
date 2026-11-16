@@ -1,0 +1,568 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+/*
+ * Layout helpers keeping the page geometry of the previous interface
+ * (Bootstrap 3 containers, 12 columns grid and breakpoints), so that pages
+ * keep the same proportions. Components themselves come from Semantic UI.
+ */
+
+// Containers
+.cds-container-fluid,
+.cds-container {
+  padding-left: (@grid-gutter-width / 2);
+  padding-right: (@grid-gutter-width / 2);
+  margin-left: auto;
+  margin-right: auto;
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.cds-container-fluid {
+  max-width: 1600px;
+}
+
+.cds-container {
+  @media (min-width: @screen-sm-min) {
+    width: 750px;
+  }
+  @media (min-width: @screen-md-min) {
+    width: 970px;
+  }
+  @media (min-width: @screen-lg-min) {
+    width: 1170px;
+  }
+}
+
+.cds-max-fluid-width {
+  max-width: 1600px;
+}
+
+// Grid
+.cds-row {
+  margin-left: -(@grid-gutter-width / 2);
+  margin-right: -(@grid-gutter-width / 2);
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.cds-clearfix {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.cds-columns(@size) {
+  each(range(12), {
+    .cds-col-@{size}-@{value} {
+      float: left;
+      width: percentage((@value / 12));
+    }
+    .cds-col-@{size}-offset-@{value} {
+      margin-left: percentage((@value / 12));
+    }
+  });
+}
+
+[class*="cds-col-"] {
+  position: relative;
+  min-height: 1px;
+  padding-left: (@grid-gutter-width / 2);
+  padding-right: (@grid-gutter-width / 2);
+}
+
+.cds-columns(xs);
+
+@media (min-width: @screen-sm-min) {
+  .cds-columns(sm);
+}
+
+@media (min-width: @screen-md-min) {
+  .cds-columns(md);
+}
+
+@media (min-width: @screen-lg-min) {
+  .cds-columns(lg);
+}
+
+// ``clearfix visible-md-block visible-lg-block``
+.cds-clearfix-md {
+  display: none;
+  @media (min-width: @screen-md-min) {
+    display: block;
+    clear: both;
+  }
+}
+
+// Responsive visibility
+.cds-hidden-xs {
+  @media (max-width: @screen-xs-max) {
+    display: none !important;
+  }
+}
+
+.cds-hidden-sm {
+  @media (max-width: @screen-sm-max) {
+    display: none !important;
+  }
+}
+
+.cds-visible-xs {
+  display: none !important;
+  @media (max-width: @screen-xs-max) {
+    display: block !important;
+  }
+}
+
+// Text and helpers
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+// A button alone on its line: no Semantic UI right margin (as ``btn``),
+// so that it stays centered
+.ui.button.cds-btn-alone {
+  margin: 0;
+}
+
+.text-capitalize,
+.ui.button.text-capitalize {
+  text-transform: capitalize;
+}
+
+.text-italic {
+  font-style: italic;
+}
+
+.text-muted {
+  color: @gray-light;
+}
+
+.text-primary {
+  color: @brand-primary;
+}
+
+.text-success {
+  color: @state-success-text;
+}
+
+.text-warning {
+  color: @state-warning-text;
+}
+
+.text-danger {
+  color: @state-danger-text;
+}
+
+.pull-right {
+  float: right !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.img-responsive {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+
+.cds-list-inline {
+  padding-left: 0;
+  list-style: none;
+  margin-left: -5px;
+  > li {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+ul,
+ol {
+  margin-top: 0;
+  margin-bottom: 11px;
+  ul,
+  ol {
+    margin-bottom: 0;
+  }
+}
+
+mark {
+  background-color: @state-warning-bg;
+  padding: 0.2em;
+}
+
+hr {
+  margin-top: 22px;
+  margin-bottom: 22px;
+  border: 0;
+  border-top: 1px solid @gray-lighter;
+}
+
+pre {
+  display: block;
+  overflow: auto;
+  padding: 10.5px;
+  margin: 0 0 11px;
+  font-size: 15px;
+  line-height: @line-height-base;
+  word-break: break-all;
+  word-wrap: break-word;
+  color: @gray-dark;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+}
+
+// ``.well``
+.ui.segment.cds-well {
+  border-radius: 0;
+  min-height: 20px;
+  padding: 19px;
+  margin: 0 0 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+// Bootstrap like labels, used for the statuses and the categories
+.ui.label.cds-label {
+  display: inline;
+  padding: 0.2em 0.6em 0.3em;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25em;
+  margin: 0;
+  &.cds-label-default {
+    background-color: @gray-light;
+  }
+  &.cds-label-primary {
+    background-color: @brand-primary;
+  }
+  &.cds-label-success {
+    background-color: @brand-success;
+  }
+  &.cds-label-info {
+    background-color: @brand-info;
+  }
+  &.cds-label-warning {
+    background-color: @brand-warning;
+  }
+  &.cds-label-danger {
+    background-color: @brand-danger;
+  }
+}
+
+// Bootstrap like pagination
+.cds-pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 22px 0;
+  border-radius: 0;
+  > li {
+    display: inline;
+    > a {
+      position: relative;
+      float: left;
+      padding: 6px 12px;
+      line-height: @line-height-base;
+      text-decoration: none;
+      color: @brand-primary;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      margin-left: -1px;
+      &:hover,
+      &:focus {
+        z-index: 2;
+        color: darken(@brand-primary, 15%);
+        background-color: @gray-lighter;
+        border-color: #ddd;
+      }
+    }
+    &:first-child > a {
+      margin-left: 0;
+    }
+  }
+  > .active > a {
+    &,
+    &:hover,
+    &:focus {
+      z-index: 3;
+      color: #fff;
+      background-color: @brand-primary;
+      border-color: @brand-primary;
+      cursor: default;
+    }
+  }
+  > .disabled > a {
+    &,
+    &:hover,
+    &:focus {
+      color: @gray-light;
+      background-color: #fff;
+      border-color: #ddd;
+      cursor: not-allowed;
+    }
+  }
+  &.cds-pagination-sm > li > a {
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.search-page .cds-pagination {
+  margin: 0;
+}
+
+// angular-loading-bar look
+#loading-bar,
+#loading-bar-spinner {
+  pointer-events: none;
+  transition: 350ms linear all;
+}
+
+#loading-bar .bar {
+  transition: width 350ms;
+  background: #29d;
+  position: fixed;
+  z-index: 10002;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-bottom-right-radius: 1px;
+  border-top-right-radius: 1px;
+}
+
+#loading-bar .peg {
+  position: absolute;
+  width: 70px;
+  right: 0;
+  top: 0;
+  height: 2px;
+  opacity: 0.45;
+  box-shadow: #29d 1px 0 6px 1px;
+  border-radius: 100%;
+}
+
+#loading-bar-spinner {
+  display: block;
+  position: fixed;
+  z-index: 10002;
+  top: 10px;
+  left: 10px;
+}
+
+#loading-bar-spinner .spinner-icon {
+  width: 14px;
+  height: 14px;
+  border: solid 2px transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+  animation: loading-bar-spinner 400ms linear infinite;
+}
+
+@keyframes loading-bar-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Search suggestions (angular-mass-autocomplete look)
+.ac-container {
+  position: absolute;
+  z-index: 999;
+  left: 0;
+  right: 0;
+  top: 100%;
+  .ac-menu {
+    border: 1px solid #ccc;
+    list-style: none;
+    padding: 0;
+    background-color: white;
+    box-shadow: 0 3px 7px 0px rgba(0, 0, 0, 0.15);
+    margin: 0;
+    text-align: left;
+    .ac-menu-item {
+      border-bottom: 1px solid @bg-gray;
+      margin: 0;
+      padding: 5px;
+      line-height: 35px;
+      &:last-child {
+        border-bottom: 0;
+      }
+      &:hover {
+        background-color: #e0eaff;
+      }
+    }
+    a {
+      padding-left: 5px;
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+    .ac-state-focus {
+      outline: none;
+      background-color: #e0eaff;
+    }
+  }
+}
+
+// Bootstrap like caret, used in the dropdown toggles
+.cds-caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+
+// Bootstrap like hamburger bars of the navbar toggle
+.cds-icon-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 1px;
+  & + .cds-icon-bar {
+    margin-top: 4px;
+  }
+}
+
+// ``btn btn-link btn-sm``
+.cds-btn-link {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  font-family: inherit;
+  color: @brand-primary;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  &:hover,
+  &:focus {
+    color: darken(@brand-primary, 15%);
+    text-decoration: underline;
+    outline: none;
+  }
+  &.cds-btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+// ``form-control[readonly]`` and ``input-group-btn`` look
+.ui.input > input[readonly],
+.ui.input > input[disabled] {
+  background-color: @gray-lighter;
+  opacity: 1;
+}
+
+.ui.action.input.cds-input-group > .ui.button {
+  border-radius: 0;
+  margin: 0;
+}
+
+// Bootstrap like ``nav nav-tabs``
+.ui.tabular.menu.cds-nav-tabs {
+  min-height: 0;
+  margin: 0;
+  border-bottom: 1px solid #ddd;
+  .item {
+    color: @brand-primary;
+    font-weight: normal;
+    display: block;
+    line-height: @line-height-base;
+    padding: 10px 15px;
+    margin-right: 2px;
+    margin-bottom: -1px;
+    border: 1px solid transparent;
+    border-radius: 0;
+    &:hover {
+      color: darken(@brand-primary, 15%);
+      background-color: @gray-lighter;
+      border-color: @gray-lighter @gray-lighter #ddd;
+      text-decoration: none;
+    }
+    &.active,
+    &.active:hover {
+      color: #555;
+      font-weight: normal;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-bottom-color: transparent;
+      cursor: default;
+    }
+  }
+}

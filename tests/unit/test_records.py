@@ -39,6 +39,8 @@ from invenio_db import db
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
+from cds.modules.records.views import serialize_record
+
 
 def test_records_ui_export(app, project_published, video_record_metadata):
     """Test view."""
@@ -306,3 +308,52 @@ def test_videos_search(api_app, indexed_videos):
         res = client.get(search_url, query_string={"q": "Project"})
         assert_hits_len(res, 0)
         assert res.status_code == 200
+
+
+def test_serialize_record(app, api_app, users, api_project_published, json_headers):
+    """Test the record embedded in the record page, as the API returns it."""
+    (project, video_1, _) = api_project_published
+    db.session.commit()
+
+    for deposit in (project, video_1):
+        pid, record = deposit.fetch_published()
+        with app.test_request_context():
+            login_user(User.query.get(users[0]))
+            embedded = json.loads(json.dumps(serialize_record(pid, record)))
+
+        with api_app.test_client() as client:
+            login_user(User.query.get(users[0]))
+            res = client.get(
+                url_for("invenio_records_rest.recid_item", pid_value=pid.pid_value),
+                headers=json_headers,
+            )
+            assert res.status_code == 200
+            expected = json.loads(res.data.decode("utf-8"))
+
+        assert sorted(embedded) == sorted(expected)
+        for key in expected:
+            if key != "links":
+                assert embedded[key] == expected[key]
+        # The API links of the UI application go through the ``/api`` mount
+        links = embedded["links"]
+        assert sorted(links) == sorted(expected["links"])
+        assert links["self"] == "http://localhost/api/record/{0}".format(pid.pid_value)
+
+    # The owner of the video gets the link to the form of its project
+    assert links["project_edit"] == expected["links"]["project_edit"]
+    assert links["project_edit"].endswith(
+        "/deposit/project/{0}".format(project["_deposit"]["id"])
+    )
+
+    # Nothing is embedded for users who can not read the record
+    pid, record = video_1.fetch_published()
+    record["_access"] = {"read": [User.query.get(users[0]).email]}
+    record.commit()
+    db.session.commit()
+    pid, record = video_1.fetch_published()
+    with app.test_request_context():
+        login_user(User.query.get(users[1]))
+        assert serialize_record(pid, record) is None
+    with app.test_request_context():
+        login_user(User.query.get(users[2]))
+        assert serialize_record(pid, record) is not None

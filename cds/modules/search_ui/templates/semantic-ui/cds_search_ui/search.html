@@ -1,0 +1,85 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{% extends "cds_theme/page.html" %}
+{%- set suggest_app = false -%}
+{%- set title_prefix = _('Search') -%}
+
+{%- block javascript %}
+  {{ super() }}
+  {{ webpack['cds_search_ui_app.js'] }}
+{%- endblock javascript %}
+
+{%- block body_inner %}
+<div id="invenio-search"
+     data-search-endpoint="{{ config.SEARCH_UI_SEARCH_API }}"
+     data-search-extra-params='{% if config.SEARCH_UI_SEARCH_EXTRA_PARAMS %}{{config.SEARCH_UI_SEARCH_EXTRA_PARAMS|tojson}}{% endif %}'
+     data-search-hidden-params='{% if search_hidden_params %}{{search_hidden_params|tojson}}{% endif %}'
+     data-search-headers='{"Accept": "{{ config.SEARCH_UI_SEARCH_MIMETYPE|default('application/json')}}"}'>
+  {{super()}}
+</div>
+{%- endblock body_inner %}
+
+{%- block page_header %}
+  {% include "cds_search_ui/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_body %}
+  <div class="flex-item py-20">
+    <div class="{{container_class}} flex-item search-page cds-search-page">
+      <div class="cds-row">
+        <div class="cds-col-md-3">
+          {%- block search_facets %}
+            <div data-cds-search-component="range"
+                 data-options='{"histogramId": "#year_hist",
+                 "selectionId": "#year_select",
+                 "name": "years",
+                 "barColor": "#ccc",
+                 "showBarOnEmpty": true,
+                 "selectColor": "#0c63aa"}'></div>
+            <div data-cds-search-component="facets"></div>
+          {%- endblock search_facets %}
+        </div>
+        {%- block search_body %}
+          <div class="cds-col-md-9">
+            {%- block search_header %}
+              <div class="cds-row">
+                {%- block search_count %}
+                  <div class="cds-col-md-12 text-center pb-20 cds-search-header">
+                    <div data-cds-search-component="count"></div>
+                    {%- set sort_options = config.get('RECORDS_REST_SORT_OPTIONS', {}).get(config.SEARCH_UI_SEARCH_INDEX) %}
+                    {%- if sort_options %}
+                      <div data-cds-search-component="sort"
+                           data-sort-key="sort"
+                           data-options='{{ sort_options|format_sortoptions|safe }}'></div>
+                    {%- endif %}
+                  </div>
+                {%- endblock search_count %}
+                {%- block search_pagination_top %}{%- endblock search_pagination_top %}
+              </div>
+            {%- endblock search_header %}
+            {%- block search_error %}
+              <div data-cds-search-component="error" data-message="{{ _('Search failed.') }}"></div>
+            {%- endblock search_error %}
+            {#- The results show placeholders while loading #}
+            {%- block search_loading %}{%- endblock search_loading %}
+            {%- block search_results %}
+              <div data-cds-search-component="results" data-template="small"></div>
+            {%- endblock search_results %}
+            {%- block search_pagination_bottom %}
+              <div class="text-center pt-30 pb-30">
+                <div data-cds-search-component="pagination"></div>
+              </div>
+            {%- endblock search_pagination_bottom %}
+          </div>
+        {%- endblock search_body %}
+      </div>
+    </div>
+  </div>
+{%- endblock page_body -%}

@@ -1,0 +1,105 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+/*******************************
+     CDS Videos site variables
+ *******************************
+ * The values below mirror the Bootstrap 3 variables used by the previous
+ * (AngularJS) interface (see scss/cds/variables.scss of the bootstrap3
+ * theme), so that the Semantic UI components look like the old ones.
+ */
+
+/*--- Fonts ---*/
+@fontName          : 'PT Sans';
+@fontSmoothing     : antialiased;
+@importGoogleFonts : false;
+@headerFont        : @fontName, sans-serif;
+@pageFont          : @fontName, sans-serif;
+
+/*--- Base sizes: Bootstrap used a 16px base font size ---*/
+@emSize   : 16px;
+@fontSize : 16px;
+@lineHeight : 1.42857143;
+
+/*--- Headers: Bootstrap 3 sizes for a 16px base ---*/
+@headerFontWeight : 500;
+@headerLineHeight : 1.1;
+@h1 : unit((41 / 16), rem);
+@h2 : unit((34 / 16), rem);
+@h3 : unit((28 / 16), rem);
+@h4 : unit((20 / 16), rem);
+@h5 : unit((16 / 16), rem);
+
+/*--- Paragraphs ---*/
+@paragraphMargin : 0px 0px 11px;
+@paragraphLineHeight : inherit;
+
+/*--- Brand colors ---*/
+@cdsBrandPrimary   : #0c63aa;
+@cdsPrimaryColor   : #111111;
+@cdsGray           : #586069;
+@cdsBgGray         : #eaecef;
+@cdsNavbarBg       : #232323;
+@cdsBtnInfoBg      : #e7e8ea;
+@cdsBtnInfoColor   : #464a4e;
+@cdsBtnBorderColor : #cccccc;
+
+@primaryColor     : @cdsBrandPrimary;
+@secondaryColor   : @cdsPrimaryColor;
+@brandColor       : @cdsBrandPrimary;
+
+/* Bootstrap 3 contextual colors */
+@green  : #5cb85c;
+@orange : #f0ad4e;
+@red    : #d9534f;
+@teal   : #5bc0de;
+@grey   : #777777;
+
+@textColor      : #333333;
+@linkColor      : @cdsBrandPrimary;
+@linkHoverColor : darken(@cdsBrandPrimary, 15%);
+@mutedTextColor : #777777;
+
+/*--- Borders: the old theme intentionally had square corners ---*/
+@absoluteBorderRadius : 0px;
+@relativeBorderRadius : 0px;
+@defaultBorderRadius  : 0px;
+@circularRadius       : 500rem;
+
+/*--- Bootstrap 3 alert colors for messages ---*/
+@positiveBackgroundColor : #dff0d8;
+@positiveBorderColor     : #d6e9c6;
+@positiveHeaderColor     : #3c763d;
+@positiveTextColor       : #3c763d;
+
+@negativeBackgroundColor : #f2dede;
+@negativeBorderColor     : #ebccd1;
+@negativeHeaderColor     : #a94442;
+@negativeTextColor       : #a94442;
+
+@infoBackgroundColor : #d9edf7;
+@infoBorderColor     : #bce8f1;
+@infoHeaderColor     : #31708f;
+@infoTextColor       : #31708f;
+
+@warningBackgroundColor : #fcf8e3;
+@warningBorderColor     : #faebcc;
+@warningHeaderColor     : #8a6d3b;
+@warningTextColor       : #8a6d3b;
+
+/*--- Breakpoints: Bootstrap 3 values ---*/
+@mobileBreakpoint            : 320px;
+@tabletBreakpoint            : 768px;
+@computerBreakpoint          : 992px;
+@largeMonitorBreakpoint      : 1200px;
+@widescreenMonitorBreakpoint : 1920px;
+
+/*--- No minimum page width (Bootstrap had none) ---*/
+@pageMinWidth : 0px;

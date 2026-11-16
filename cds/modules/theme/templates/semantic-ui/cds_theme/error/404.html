@@ -1,0 +1,18 @@
+{% extends config.THEME_BASE_TEMPLATE %}
+
+{%- block page_header %}{% endblock page_header %}
+{% block page_body %}
+  <div class="cds-404 flex-container cds-cover">
+    <div class="flex-item py-20">
+      <div class="cds-container">
+        <div class="text-center">
+          <p class="f1 t-w">CDS</p>
+          <p class="glitch" data-text="404">404</p>
+          <p class="cds-not-found-label f1 t-w pa-5 mb-40 cds-hidden-sm">{{_('Page not found.')}}</p>
+          <p class="mt-40 cds-hidden-sm"><a href="/" title="{{_('Back to home')}}" class="ui basic button cds-btn-alone">Back to safety</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{%- block page_footer %}{%- endblock page_footer %}

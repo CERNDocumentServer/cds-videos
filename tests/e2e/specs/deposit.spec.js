@@ -76,6 +76,15 @@ test.describe("uploads of a user", () => {
     await expect(
       page.getByRole("button", { name: "Publish Project and Videos" })
     ).toBeVisible();
+    // The description editors load (in collapsed panels too)
+    await expect(
+      page
+        .getByRole("application", {
+          name: /Rich Text Editor/,
+          includeHidden: true,
+        })
+        .first()
+    ).toBeAttached();
     // One panel per video
     const videos = (titled.metadata.videos || []).length;
     if (videos > 0) {

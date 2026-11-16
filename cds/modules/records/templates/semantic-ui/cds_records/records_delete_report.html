@@ -1,0 +1,35 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends config.RECORDS_UI_BASE_TEMPLATE %}
+
+{% set report_class = dict(INFO='cds-alert-success', ERROR='cds-alert-danger', WARN='cds-alert-warning') %}
+
+{%- block page_body %}
+<div class="cds-container record-admin">
+  <div class="cds-row">
+    <div class="cds-col-xs-12">
+      <h1>Deletion report</h1>
+      <div class="cds-alert cds-alert-warning">
+        <p>Pay special attention to this report, it's for your own good!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cds-row">
+    {%- for line in report %}
+    <div class="cds-alert {{ report_class[line[0]] }}">
+      <p>
+        {{ line[1] }}
+      </p>
+    </div>
+    {%- endfor %}
+  </div>
+</div>
+{%- endblock page_body %}

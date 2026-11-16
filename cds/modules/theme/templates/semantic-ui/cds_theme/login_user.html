@@ -1,0 +1,81 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{% extends config.COVER_TEMPLATE %}
+{%- set title_prefix = _('Login') -%}
+{%- from "cds_theme/_macros.html" import cds_oauth_button %}
+
+{#- Bootstrap like large field with an icon (``invenio_accounts`` macro) -#}
+{%- macro render_field(field, icon="", autofocus=False, errormsg=True, size="form-group-lg") %}
+  <div class="form-group {{size}}{% if icon %} has-feedback{% endif %}{% if field.errors and errormsg %} has-error{% endif %}">
+    {%- set extras = dict(autofocus="") if autofocus else dict() %}
+    {{field(class_="form-control", placeholder=_(field.label.text | string), **extras)}}
+    {%- if icon %}
+    <i class="{{icon}} form-control-feedback" aria-hidden="true" ></i>
+    {%- endif%}
+  </div>
+  {%- if field.errors and errormsg %}
+  <div class="text-danger text-left" role="alert">
+    {%- for error in field.errors %}
+    <p>{{error}}</p>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+{%- endmacro %}
+
+{%- macro form_errors(form) %}
+  {%- if form.errors %}
+  <div class="cds-alert cds-alert-danger cds-alert-dismissible text-left" role="alert">
+  <button type="button" class="cds-close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {%- for key, err_obj in form.errors.items() recursive %}
+          {% if err_obj is mapping %}
+              {{ loop(err_obj.items()) }}
+          {% else %}
+              {% for single_message in err_obj %}
+                <p>{{ single_message }}</p>
+              {% endfor %}
+          {% endif %}
+      {%- endfor %}
+  </div>
+  {%- endif %}
+{%- endmacro %}
+
+{%- block page_body -%}
+  <div class="cds-login">
+    {%- block flashmessages %}
+      {%- from "invenio_theme/macros/messages.html" import flashed_messages with context -%}
+      {{ flashed_messages() }}
+    {%- endblock flashmessages %}
+    <div class="cds-col-md-4 cds-col-md-offset-4">
+      <div class="cds-panel">
+        <div class="cds-panel-body">
+          <h3 class="text-center panel-free-title">{{_('Log In') }}</h3>
+          {% if config.OAUTHCLIENT_REMOTE_APPS %}
+            {% for name in config.OAUTHCLIENT_REMOTE_APPS.keys() %}
+              {{cds_oauth_button(name, next=request.args.get('next') or url_for('cds_home.index')) }}
+            {% endfor %}
+          {% endif %}
+          {%- if config.DEBUG -%}
+            <h3 align="center">&mdash; OR &mdash;</h3>
+            {%- with form = login_user_form %}
+              <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+              {{form.hidden_tag()}}
+              {{form_errors(form)}}
+              {{ render_field(form.email, icon="fa fa-user", autofocus=True, errormsg=False) }}
+              {{ render_field(form.password, icon="fa fa-lock", errormsg=False) }}
+              <button type="submit" class="ui fluid large primary button"><i class="fa fa-sign-in"></i> {{_('Log In')}}</button>
+              </form>
+            {%- endwith %}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endblock -%}
+{%- block page_footer %}{%- endblock page_footer %}

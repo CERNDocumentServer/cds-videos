@@ -1,0 +1,161 @@
+/*
+ * This file is part of CDS.
+ * Copyright (C) 2026 CERN.
+ *
+ * CDS is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+
+// Semantic UI placeholders shown while the search pages and the deposit form
+// are loading, sized like the content they stand for.
+
+// The placeholder draws its shapes by masking a shimmer with the background
+// color, so on a dark section the mask has to match that section.
+.cds-placeholder-mask(@color) {
+  &,
+  > :before,
+  .image.header:after,
+  .line,
+  .line:after {
+    background-color: @color;
+  }
+}
+
+.ui.placeholder.cds-placeholder {
+  // Less space between an image and the lines below it
+  .paragraph:not(:first-child):before {
+    height: 0.75em;
+  }
+
+  // Thumbnails of the video templates (``13em`` of their 18px titles)
+  .image.cds-placeholder-thumbnail:not(.header) {
+    height: 234px;
+  }
+
+  // Video preview of the deposit form
+  .image.cds-placeholder-preview:not(.header) {
+    height: 0;
+    overflow: hidden;
+    padding-top: 56.25%;
+  }
+}
+
+.ui.inverted.placeholder.cds-placeholder-dark {
+  .cds-placeholder-mask(@cds-primary-color);
+}
+
+.ui.inverted.placeholder.cds-placeholder-black {
+  .cds-placeholder-mask(#000);
+}
+
+// The featured video player of the home page, a 16:9 box as tall as the
+// player area
+.ui.placeholder.cds-placeholder-player {
+  aspect-ratio: 16 / 9;
+  height: 100%;
+  margin: 0 auto;
+  max-width: 100%;
+
+  .image:not(.header) {
+    height: 100%;
+  }
+}
+
+// A line of text, like the result count
+.ui.placeholder.cds-placeholder-text {
+  max-width: 30rem;
+  padding-top: 0.25em;
+}
+
+// The count shares a flex row with the sort menu, so it needs a width
+.ui.placeholder.cds-placeholder-count {
+  width: 9rem;
+}
+
+// Fields of the deposit form: a label and an input
+.ui.placeholder.cds-placeholder-field {
+  .image:not(:first-child):before {
+    height: 0.5em;
+  }
+
+  .image.cds-placeholder-input:not(.header) {
+    height: calc(34px + 0.5em);
+  }
+
+  .image.cds-placeholder-input-tall:not(.header) {
+    height: calc(160px + 0.5em);
+  }
+}
+
+.ui.placeholder.cds-placeholder-centered {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 26rem;
+}
+
+// The video player of the record page, until its page has loaded (its box
+// comes from ``.cds-video-iframe``)
+.ui.placeholder.cds-placeholder-player-overlay {
+  z-index: 1;
+
+  .image:not(.header) {
+    height: 100%;
+  }
+}
+
+// The video player of the deposit form, until its page has loaded
+.ui.placeholder.cds-placeholder-player-loading {
+  height: 100%;
+  left: 0;
+  max-width: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+
+  .image:not(.header) {
+    height: 100%;
+  }
+}
+
+// A description editor while CKEditor loads: the text in a box of the size
+// of the editor (moono-lisa skin and ``contents.css``)
+.cds-ckeditor-loading {
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+
+  .cds-ckeditor-loading-toolbar {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #d1d1d1;
+    height: 42px;
+    padding: 14px 8px 0;
+
+    .ui.placeholder {
+      background-color: #f8f8f8;
+      max-width: 22rem;
+
+      .line,
+      .line:after,
+      .header:after {
+        background-color: #f8f8f8;
+      }
+    }
+  }
+
+  .cds-ckeditor-loading-content {
+    color: #333;
+    font-family: sans-serif, Arial, Verdana, "Trebuchet MS";
+    font-size: 13px;
+    line-height: 1.6;
+    overflow: auto;
+    padding: 20px;
+  }
+
+  .cds-ckeditor-loading-bottom {
+    background-color: #f8f8f8;
+    border-top: 1px solid #d1d1d1;
+    height: 27px;
+  }
+}

@@ -1,0 +1,33 @@
+/*!
+ *  Font Awesome 4.5.0 by @davegandy - http://fontawesome.io - @fontawesome
+ *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
+ */
+
+// ``font-awesome/less/font-awesome.less`` without the SVG font: only very old
+// iOS Safari used it, and the webpack configuration of Invenio inlines every
+// SVG in the CSS (about 480 KB for this font).
+
+@import "~font-awesome/less/variables.less";
+@import "~font-awesome/less/mixins.less";
+
+// ``path.less``
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('@{fa-font-path}/fontawesome-webfont.eot?v=@{fa-version}');
+  src: url('@{fa-font-path}/fontawesome-webfont.eot?#iefix&v=@{fa-version}') format('embedded-opentype'),
+    url('@{fa-font-path}/fontawesome-webfont.woff2?v=@{fa-version}') format('woff2'),
+    url('@{fa-font-path}/fontawesome-webfont.woff?v=@{fa-version}') format('woff'),
+    url('@{fa-font-path}/fontawesome-webfont.ttf?v=@{fa-version}') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@import "~font-awesome/less/core.less";
+@import "~font-awesome/less/larger.less";
+@import "~font-awesome/less/fixed-width.less";
+@import "~font-awesome/less/list.less";
+@import "~font-awesome/less/bordered-pulled.less";
+@import "~font-awesome/less/animated.less";
+@import "~font-awesome/less/rotated-flipped.less";
+@import "~font-awesome/less/stacked.less";
+@import "~font-awesome/less/icons.less";

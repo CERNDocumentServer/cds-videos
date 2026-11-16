@@ -1,0 +1,49 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{%- extends 'cds_theme/page.html' %}
+
+{%- set title_prefix = '%s · %s'|format(_('Stats'), record.title.title|striptags|striptags) -%}
+
+{%- block css %}
+  {{ super() }}
+  {{webpack['cds_records_stats_styles.css']}}
+{%- endblock css %}
+
+{%- block javascript %}
+  {{ super() }}
+  {{webpack['cds_records_stats_app.js']}}
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      getStats({{ record | tojson }})
+    });
+  </script>
+{%- endblock javascript %}
+
+{%- block page_header %}
+  {% include "cds_home/header.html" %}
+{%- endblock page_header %}
+
+{%- block page_footer %}
+  {% include "cds_home/footer.html" %}
+{%- endblock page_footer %}
+
+{%- block page_body %}
+<div class='cds-container'>
+  <div class='cds-row'>
+    <div class='cds-col-lg-12'>
+      <h2>Page Views</h2>
+      <div class='pageview'>
+        <i id="pageview-loading-spinner" class="fa fa-spinner fa-spin"></i>
+        <p id="pageviews-error-message" style="display: none;">There was a problem while rendering pageviews data. We are investigating the issue.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endblock page_body %}

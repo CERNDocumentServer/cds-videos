@@ -1,0 +1,64 @@
+{#
+  This file is part of CDS.
+  Copyright (C) 2026 CERN.
+
+  CDS is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+#}
+{#- The settings pages, with the layout of the previous (bootstrap3) theme. -#}
+{%- extends config.THEME_BASE_TEMPLATE %}
+
+{%- block page_body scoped %}
+<div class="cds-container">
+  <div class="cds-row">
+      <div class="cds-col-sm-3 cds-col-md-3 col-pad-left-0">
+        {%- block settings_menu scoped %}
+        <div class="cds-panel-group cds-settings-menu">
+          <div class="cds-panel">
+            <div class="cds-panel-heading"><strong>{{ _('Settings') }}</strong></div>
+            <ul class="cds-list-group">
+            {%- for item in current_menu.submenu('settings').children if item.visible %}
+            {%- block settings_menu_item scoped %}
+              <a
+                href="{{ item.url }}"
+                class="cds-list-group-item {% if item.active %}active{% endif %}"
+                {% if item.active %} aria-current="page" {% endif %}
+              >
+                {{ item.text|safe }}
+              </a>
+            {%- endblock %}
+            {%- endfor %}
+            </ul>
+          </div>
+        </div>
+        {%- endblock %}
+      </div>
+      <div class="cds-col-sm-9 cds-col-md-9 col-pad-right-0">
+        {%- block settings_content scoped %}
+        <div class="cds-panel-group panel-bot-margin">
+          <div class="cds-panel">
+            <div class="cds-panel-heading">
+              {%- block settings_content_title scoped %}
+              {%- if panel_icon %}
+              {%- block settings_content_title_icon scoped %}
+              <i class="{{panel_icon}}"></i>
+              {%- endblock %}
+              {%- endif %}
+              <strong>{{ panel_title|default("") }}</strong>
+              {%- endblock %}
+            </div>
+            {%- block settings_body scoped %}
+            <div class="cds-panel-body">
+              {%- block settings_form scoped %}
+              {%- endblock settings_form %}
+            </div>
+            {%- endblock settings_body %}
+          </div>
+        </div>
+        {%- endblock %}
+      </div>
+  </div>
+</div>
+{%- endblock %}

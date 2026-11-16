@@ -33,11 +33,15 @@ from flask import (
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
+from invenio_records_ui.signals import record_viewed
 from werkzeug.utils import import_string
 
 from ..deposit.api import Project, Video
 from ..deposit.fetcher import deposit_fetcher
 from .forms import RecordDeleteForm
+from .links import record_ui_link_factory
+from .permissions import record_read_permission_factory
+from .serializers import json_v1
 from .utils import delete_project_record, delete_video_record, is_project_record
 
 blueprint = Blueprint(
@@ -54,6 +58,36 @@ def pidstatus_title(pid):
     if pid:
         return PIDStatus(pid.status).title
     return None
+
+
+def serialize_record(pid, record):
+    """The record as ``GET /api/record/<pid_value>`` returns it.
+
+    It is embedded in the record page, so that the page shows the record
+    without waiting for the API. Nothing is embedded for the users who can
+    not read the record with the API.
+    """
+    if not record_read_permission_factory(record=record).can():
+        return None
+    links = record_ui_link_factory(pid, record)
+    return json_v1.transform_record(
+        pid, record, links_factory=lambda pid, **kwargs: links
+    )
+
+
+def record_view(pid, record, template=None, **kwargs):
+    """Record page: ``default_view_method`` with the embedded record."""
+    record_viewed.send(
+        current_app._get_current_object(),
+        pid=pid,
+        record=record,
+    )
+    return render_template(
+        template,
+        pid=pid,
+        record=record,
+        record_json=serialize_record(pid, record),
+    )
 
 
 # NOTE: Disable record statistics page
