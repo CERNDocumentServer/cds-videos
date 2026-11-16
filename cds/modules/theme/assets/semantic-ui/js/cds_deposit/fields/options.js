@@ -607,42 +607,16 @@ export const RESOURCE_TYPES = [
   },
 ];
 
-export const PROJECT_CKEDITOR_CONFIG = {
-  autoParagraph: false,
-  enterMode: 2,
-  entities: false,
-  height: 200,
-  allowedContent: true,
-  forcePasteAsPlainText: false,
-  extraAllowedContent: "*{color}; *[style]",
-  disableAutoInline: true,
-  extraPlugins: "colorbutton",
-  toolbar: [
-    ["PasteText", "PasteFromWord"],
-    ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
-    ["TextColor"],
-    ["NumberedList", "BulletedList", "Blockquote"],
-    ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-    ["Source"],
-  ],
-  disableNativeSpellChecker: false,
-  removePlugins: "elementspath",
-  removeButtons: "",
-};
+/* The toolbars of the descriptions (the CKEditor 4 ones before). */
+export const PROJECT_EDITOR_TOOLBAR =
+  "pastetext | bold italic strikethrough subscript superscript | forecolor" +
+  " | numlist bullist blockquote | undo redo | searchreplace removeformat" +
+  " | code";
 
-export const VIDEO_CKEDITOR_CONFIG = {
-  ...PROJECT_CKEDITOR_CONFIG,
-  extraPlugins: "colorbutton,link",
-  toolbar: [
-    ["PasteText", "PasteFromWord"],
-    ["Bold", "Italic", "Strike", "-", "Subscript", "Superscript"],
-    ["Link", "Unlink"],
-    ["TextColor"],
-    ["NumberedList", "BulletedList", "Blockquote"],
-    ["Undo", "Redo", "-", "Find", "Replace", "-", "RemoveFormat"],
-    ["Source"],
-  ],
-};
+export const VIDEO_EDITOR_TOOLBAR =
+  "pastetext | bold italic strikethrough subscript superscript" +
+  " | link unlink | forecolor | numlist bullist blockquote | undo redo" +
+  " | searchreplace removeformat | code";
 
 /* Descriptions coming from the JSON schemas of the deposits. */
 export const SCHEMA_DESCRIPTIONS = {

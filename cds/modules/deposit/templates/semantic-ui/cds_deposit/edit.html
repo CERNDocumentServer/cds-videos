@@ -21,10 +21,6 @@
 {%- endblock css %}
 
 {%- block javascript %}
-  <script type="text/javascript">
-  // CKEDITOR static location
-  window.CKEDITOR_BASEPATH = '{{url_for("static", filename="ckeditor/", _external=True)}}';
-  </script>
   {{ super() }}
   {{ webpack["cds_deposit_app.js"] }}
 {%- endblock javascript %}

@@ -82,7 +82,10 @@ theme = WebpackThemeBundle(
                 "d3": "^3.5.17",
                 "vtt.js": "~0.13.0",
                 "dompurify": "^2.4.5",
-                "ckeditor": "4.12.1",
+                # The editor of the descriptions, same ranges as
+                # Invenio-Administration (which copies its skins)
+                "hugerte": "^1.0.10",
+                "@hugerte/hugerte-react": "^2.0.2",
                 "invenio-charts-js": "^0.2.7",
             },
             aliases={

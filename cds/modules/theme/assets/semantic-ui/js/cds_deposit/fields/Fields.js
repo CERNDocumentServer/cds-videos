@@ -17,11 +17,10 @@
  * record), and marks the deposit dirty.
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { Suspense, lazy, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { getIn, useFormikContext } from "formik";
 import _toPath from "lodash/toPath";
-import DOMPurify from "dompurify";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { Placeholder } from "semantic-ui-react";
 
@@ -31,6 +30,7 @@ import { parseAutocomplete } from "../filters";
 import { removeBackendError, setRecordValue } from "../state/deposit";
 import { isPublished } from "../state/records";
 import { registerField } from "../state/registry";
+import { sanitizeHtml } from "./sanitize";
 import { AsyncMultiSelect, AsyncSelect } from "./AsyncSelect";
 import {
   autocompleteAuthors,
@@ -341,189 +341,45 @@ DateField.propTypes = {
   required: PropTypes.bool,
 };
 
-/* CKEditor 4 (``ckeditor.html``) */
-
-const SANITIZE_CONFIG = {
-  ALLOWED_TAGS: [
-    "a",
-    "abbr",
-    "acronym",
-    "b",
-    "blockquote",
-    "br",
-    "code",
-    "col",
-    "colgroup",
-    "div",
-    "table",
-    "tbody",
-    "tfoot",
-    "thead",
-    "td",
-    "th",
-    "tr",
-    "em",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "i",
-    "li",
-    "ol",
-    "p",
-    "pre",
-    "s",
-    "span",
-    "strike",
-    "strong",
-    "sub",
-    "sup",
-    "u",
-    "ul",
-  ],
-  ALLOWED_ATTR: [
-    "style",
-    "dir",
-    "lang",
-    "color",
-    "href",
-    "title",
-    "target",
-    "rel",
-  ],
-  ALLOW_STYLE: true,
-  ALLOW_DATA_ATTR: false,
-};
-
-/** Sanitize the HTML of the editor (``ckeditor-sanitizer.js``). */
-export function sanitizeHtml(html) {
-  if (!html || typeof html !== "string") {
-    return html;
-  }
-  return DOMPurify.sanitize(html, SANITIZE_CONFIG);
-}
+/* Rich text, the descriptions (``ckeditor.html`` before) */
 
 /**
- * The content of an editor while CKEditor loads its plugins and skin: the
- * text is readable at once, in a box of the size of the editor.
+ * The content of an editor while HugeRTE loads: the text is readable at
+ * once, in a box of the size of the editor.
  */
-function CKEditorLoading({ html = "", height }) {
+function RichTextLoading({ html = "" }) {
   return (
-    <div className="cds-ckeditor-loading" aria-busy="true">
-      <div className="cds-ckeditor-loading-toolbar">
+    <div className="cds-rich-text-loading" aria-busy="true">
+      <div className="cds-rich-text-loading-toolbar">
         <Placeholder className="cds-placeholder">
           <Placeholder.Line length="full" />
         </Placeholder>
       </div>
       <div
-        className="cds-ckeditor-loading-content"
-        style={{ height }}
+        className="cds-rich-text-loading-content"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(html || "") }}
       />
-      <div className="cds-ckeditor-loading-bottom" />
     </div>
   );
 }
 
-CKEditorLoading.propTypes = {
-  html: PropTypes.string,
-  height: PropTypes.number.isRequired,
-};
+RichTextLoading.propTypes = { html: PropTypes.string };
 
-// CKEditor 4 (about 620 KB) defines ``window.CKEDITOR`` and loads its plugins
-// and skin from ``CKEDITOR_BASEPATH``: load it with the first editor, after
-// the form is shown
-let ckeditor;
-function loadCKEditor() {
-  ckeditor = ckeditor || import("ckeditor").then(() => window.CKEDITOR);
-  return ckeditor;
-}
+// HugeRTE (about 1 MB) is loaded with the first editor, after the form is
+// shown
+const RichTextEditor = lazy(() => import("./RichTextEditor"));
 
-export function CKEditorField({
+export function RichTextField({
   name,
   label = null,
   description = null,
   required = false,
-  config,
+  toolbar,
 }) {
   const { value, error, setValue } = useDepositField(name);
   const disabled = useReadonly();
   const [ready, setReady] = useState(false);
-  const textarea = useRef(null);
-  const editor = useRef(null);
-  const settingData = useRef(false);
-  const latest = useRef({ value, setValue, disabled });
-  latest.current = { value, setValue, disabled };
-
-  useEffect(() => {
-    let active = true;
-    let instance = null;
-    loadCKEditor().then((CKEDITOR) => {
-      if (!active || !CKEDITOR || !textarea.current) return;
-      instance = CKEDITOR.replace(textarea.current, {
-        // The default width of ng-ckeditor (the borders overflow the field)
-        width: "100%",
-        ...config,
-        readOnly: latest.current.disabled,
-      });
-      editor.current = instance;
-      const onChange = () => {
-        if (settingData.current) return;
-        const data = sanitizeHtml(instance.getData());
-        if (data !== (latest.current.value || "")) {
-          latest.current.setValue(data);
-        }
-      };
-      instance.on("change", onChange);
-      instance.on("instanceReady", () => {
-        settingData.current = true;
-        // An empty value is an empty paragraph, as with ng-ckeditor
-        instance.setData(latest.current.value || "<p></p>", {
-          callback: () => {
-            settingData.current = false;
-            setReady(true);
-          },
-        });
-      });
-    });
-    return () => {
-      active = false;
-      if (instance) {
-        try {
-          instance.destroy(true);
-        } catch (e) {
-          // Already destroyed
-        }
-      }
-      editor.current = null;
-    };
-    // The editor is created once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Values changed from outside (inherited or extracted metadata, saves)
-  useEffect(() => {
-    const instance = editor.current;
-    if (!instance || instance.status !== "ready") return;
-    const current = sanitizeHtml(instance.getData());
-    if ((value || "") !== current) {
-      settingData.current = true;
-      instance.setData(value || "<p></p>", {
-        callback: () => {
-          settingData.current = false;
-        },
-      });
-    }
-  }, [value]);
-
-  useEffect(() => {
-    const instance = editor.current;
-    if (instance && instance.status === "ready") {
-      instance.setReadOnly(disabled);
-    }
-  }, [disabled]);
-
+  const loading = <RichTextLoading html={value} />;
   return (
     <div
       className={["field cds-form-group", error && "has-error"]
@@ -539,26 +395,29 @@ export function CKEditorField({
           {label}
         </label>
       )}
-      {!ready && <CKEditorLoading html={value} height={config.height} />}
-      <textarea
-        ref={textarea}
-        className="cds-form-control"
-        style={{ backgroundColor: "white", display: "none" }}
-        // The content is set when the editor is ready (one undo step, as before)
-        defaultValue=""
-        disabled={disabled}
-      />
+      <Suspense fallback={loading}>
+        {!ready && loading}
+        <div className={ready ? undefined : "cds-rich-text-starting"}>
+          <RichTextEditor
+            value={value}
+            disabled={disabled}
+            toolbar={toolbar}
+            onChange={setValue}
+            onReady={() => setReady(true)}
+          />
+        </div>
+      </Suspense>
       <span className="help-block">{error || description}</span>
     </div>
   );
 }
 
-CKEditorField.propTypes = {
+RichTextField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
   description: PropTypes.node,
   required: PropTypes.bool,
-  config: PropTypes.object.isRequired,
+  toolbar: PropTypes.string.isRequired,
 };
 
 /* Keywords (``uiselectmultiple.html`` with tagging) */
