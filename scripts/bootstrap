@@ -30,5 +30,4 @@ script_path=$(dirname "$0")
 # Python dependencies at the versions of uv.lock, in .venv
 uv sync --frozen
 
-uv run --frozen cds collect -v
-uv run --frozen cds webpack buildall
+uv run --frozen ./scripts/build-assets
