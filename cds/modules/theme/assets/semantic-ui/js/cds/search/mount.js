@@ -21,26 +21,26 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 
-import { LoadingBar } from "../components/LoadingBar";
-import { VIDEO_PLACEHOLDERS } from "../components/Placeholders";
-import { SearchBarSuggestions } from "../components/SearchBarSuggestions";
-import { VIDEO_TEMPLATES } from "../components/VideoTemplates";
-import { parseJSON } from "../dom";
-import {
-  DepositSearchFacets,
-  SearchCount,
-  SearchError,
-  SearchFacets,
-  SearchLoading,
-  SearchPagination,
-  SearchRange,
-  SearchResults,
-  SearchSelectBox,
-} from "./components";
+import { LoadingBar } from "@js/cds/shared/components/LoadingBar";
+import { SearchBarSuggestions } from "@js/cds/header/SearchBarSuggestions";
+import { parseJSON } from "@js/cds/shared/dom";
+
+import { VIDEO_PLACEHOLDERS } from "./components/Placeholders";
+import { VIDEO_TEMPLATES } from "./components/VideoTemplates";
 import { useSearch } from "./hooks";
 import { SearchApp } from "./SearchApp";
+import {
+  SearchCount,
+  SearchError,
+  SearchLoading,
+} from "./components/SearchStatus";
+import { DepositSearchFacets, SearchFacets } from "./components/SearchFacets";
+import { SearchRange } from "./components/SearchRange";
+import { SearchSelectBox } from "./components/SearchSelectBox";
+import { SearchPagination } from "./components/SearchPagination";
+import { SearchResults } from "./components/SearchResults";
 
-/** Mount the loading bar once per page (``angular-loading-bar``). */
+/** Mount the loading bar once per page. */
 export function mountLoadingBar() {
   if (document.getElementById("cds-loading-bar-root")) {
     return;
@@ -52,7 +52,7 @@ export function mountLoadingBar() {
 }
 
 /**
- * Search bar of the header wired to the search (``invenio-search-bar``):
+ * Search bar of the header wired to the search:
  * the input follows the query of the search, the search runs on enter or
  * on click.
  */

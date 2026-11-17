@@ -11,7 +11,7 @@
 /*
  * Bridge between the react-searchkit state and the CDS search components.
  *
- * The components read the search as the former templates did: the current
+ * The components read the search state: the current
  * parameters (``{page, size, q, sort, <facet>: [...]}``), the REST API
  * response and its loading and error states. They change the search through
  * ``changeParams`` and ``setArgs``, which update the react-searchkit query
