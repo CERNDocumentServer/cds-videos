@@ -10,6 +10,8 @@
 
 CDS.egg-info
 .venv
+node_modules
+**/node_modules
 
 .dockerignore
 Dockerfile

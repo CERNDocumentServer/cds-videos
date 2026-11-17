@@ -1163,6 +1163,9 @@ APP_THEME = ["semantic-ui"]
 
 # Build the assets with rspack (Invenio-Assets) instead of webpack, as cds-rdm
 WEBPACKEXT_PROJECT = "invenio_assets.webpack:rspack_project"
+# Install the JavaScript packages with pnpm, from the pnpm-lock.yaml of the
+# repository (see scripts/build-assets and scripts/lock-assets)
+WEBPACKEXT_NPM_PKG_CLS = "pynpm:PNPMPackage"
 
 ###############################################################################
 # User Profiles

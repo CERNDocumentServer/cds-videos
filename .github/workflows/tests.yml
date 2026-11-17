@@ -35,7 +35,6 @@ jobs:
         search-service: [opensearch2]
         cache-service: [redis]
         mq-service: [rabbitmq]
-        node-version: [24]
         include:
           - db-service: postgresql14
             DB_EXTRAS: "postgresql"
@@ -65,10 +64,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
-      - name: Use Node.js v24.x
-        uses: actions/setup-node@v4
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@v3
         with:
-          node-version: "24.x"
+          version: 11
+          runtime: node@24
+          cache: true
+          cache-dependency-path: pnpm-lock.yaml
+          install: false
 
       - name: Install dependencies
         run: |
@@ -113,10 +116,14 @@ jobs:
           python-version: "3.14"
           enable-cache: true
 
-      - name: Use Node.js v24.x
-        uses: actions/setup-node@v4
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@v3
         with:
-          node-version: "24.x"
+          version: 11
+          runtime: node@24
+          cache: true
+          cache-dependency-path: pnpm-lock.yaml
+          install: false
 
       - name: Install dependencies
         run: |

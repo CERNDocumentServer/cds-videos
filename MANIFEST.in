@@ -36,9 +36,11 @@ include COPYING
 include Dockerfile
 include Dockerfile.base
 include babel.ini
+include pnpm-lock.yaml
 include pytest.ini
 include scripts/assets-watch
 include scripts/build-assets
+include scripts/lock-assets
 include scripts/bootstrap
 include scripts/celery
 include scripts/server

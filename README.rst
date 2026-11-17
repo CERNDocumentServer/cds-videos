@@ -49,7 +49,9 @@ Ensure that the following dependencies are installed with the specified versions
    The Python package and project manager, see the `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
    It installs Python 3.14 (set in ``.python-version``) when it is not available.
 
-2. **Node.js v24**
+2. **Node.js v24 and pnpm v11**
+   The JavaScript packages are installed with pnpm, for example with
+   ``npm install --global pnpm@11``.
 
 3. **FFmpeg v5.0**
 
@@ -66,6 +68,17 @@ To update them, change ``pyproject.toml`` if needed, then update the lock file a
 
     $ uv lock                                   # after changing pyproject.toml
     $ uv lock --upgrade-package <package-name>  # to upgrade one package
+
+The JavaScript dependencies come from the Invenio modules and
+``cds/modules/theme/webpack.py``. The ``package.json`` generated from them and
+its ``pnpm-lock.yaml`` are committed, and ``scripts/build-assets`` (also run by
+the Docker image) fails if the generated ``package.json`` differs. After
+changing a JavaScript dependency or upgrading an Invenio module, update both
+files and commit them:
+
+.. code-block:: shell
+
+    $ uv run ./scripts/lock-assets
 
 Upgrade an existing database
 ============================
