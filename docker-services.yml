@@ -43,7 +43,7 @@ services:
       - "INVENIO_OAUTHCLIENT_REMOTE_APPS={}"
       - "INVENIO_LOG_USER_ACTIONS_ENABLED=False"
       - "INVENIO_ACCOUNTS_LOCAL_LOGIN_ENABLED=True"
-      - "INVENIO_IIIF_GIF_TEMP_FOLDER_PATH=/opt/cds_videos/var/instance/files"
+      - "INVENIO_IIIF_GIF_TEMP_FOLDER_PATH=/opt/invenio/var/instance/files"
   lb:
     build: ./docker/haproxy/
     image: cds-videos-lb
