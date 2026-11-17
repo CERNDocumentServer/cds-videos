@@ -19,14 +19,18 @@ export function cleanHtmlFromTitle(title) {
 }
 
 /**
- * Turn the timestamps of a description (``0:00``, ``00:00:00``...) into
- * links seeking the player. The clicks are handled by the description
- * container (``data-seconds``).
+ * Turn the timestamps starting a line of a description (``0:00``,
+ * ``00:00:00``...) into links seeking the player, as the chapters found by
+ * ``parse_video_chapters``: a line starts the description, or follows a
+ * newline, a ``<br>`` or an opening ``<p>``, ``<div>`` or ``<li>``. Other
+ * times ("served at 10:30") stay text. The clicks are handled by the
+ * description container (``data-seconds``).
  */
 export function processDescriptionWithClickableTimestamps(description) {
   if (!description) return description;
-  const pattern = /(\d{1,2}:(?:\d{1,2}:)?\d{1,2})/g;
-  return description.replace(pattern, (match) => {
+  const pattern =
+    /(^|\n|<br\s*\/?>|<(?:p|div|li)\b[^>]*>)(\s*)(\d{1,2}:(?:\d{1,2}:)?\d{1,2})(?!\d)/gi;
+  return description.replace(pattern, (whole, lineStart, space, match) => {
     const timeParts = match.split(":");
     let totalSeconds;
     if (timeParts.length === 2) {
@@ -36,9 +40,9 @@ export function processDescriptionWithClickableTimestamps(description) {
       const [hours, minutes, seconds] = timeParts.map(Number);
       totalSeconds = hours * 3600 + minutes * 60 + seconds;
     } else {
-      return match;
+      return whole;
     }
-    return `<a href="javascript:void(0)" class="timestamp-link" data-seconds="${totalSeconds}" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
+    return `${lineStart}${space}<a href="javascript:void(0)" class="timestamp-link" data-seconds="${totalSeconds}" style="color: #2196F3; font-weight: 600; cursor: pointer;">${match}</a>`;
   });
 }
 

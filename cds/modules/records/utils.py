@@ -516,6 +516,11 @@ def parse_video_chapters(description):
     html_tag_remover = HTMLTagRemover()
     if not description:
         return []
+    # A chapter starts a line: in HTML, lines end with <br> or a paragraph.
+    # CKEditor 4 wrote a newline after <br>, HugeRTE does not.
+    description = re.sub(
+        r"<br\s*/?>|</?(?:p|div|li)\b[^>]*>", "\n", description, flags=re.IGNORECASE
+    )
 
     # Regex pattern to match timestamp formats:
     # - 0:00, 00:00, 0:0, 00:0, 0:00:00, 00:00:00, etc.

@@ -360,3 +360,24 @@ def test_serialize_record(app, api_app, users, api_project_published, json_heade
     with app.test_request_context():
         login_user(User.query.get(users[2]))
         assert serialize_record(pid, record) is not None
+
+
+def test_parse_video_chapters_html():
+    """Chapters are found in the HTML of both description editors."""
+    from cds.modules.records.utils import parse_video_chapters
+
+    expected = [("00:00", "Intro"), ("01:30", "Results"), ("02:15", "Summary")]
+    descriptions = [
+        # HugeRTE: no newline after <br>, the first chapter right after <p>
+        "<p><strong>Talk</strong></p>\n<p>00:00 Intro<br>01:30 Results<br>"
+        "02:15 <em>Summary</em><br><br></p>",
+        # CKEditor 4
+        "Talk<br />\n00:00 Intro<br />\n01:30 Results<br />\n02:15 Summary",
+        # Plain text
+        "Talk\n00:00 Intro\n01:30 Results\n02:15 Summary",
+    ]
+    for description in descriptions:
+        chapters = parse_video_chapters(description)
+        assert [(c["timestamp"], c["title"]) for c in chapters] == expected
+    # A time inside a sentence is not a chapter
+    assert parse_video_chapters("<p>Coffee will be served at 10:30</p>") == []
