@@ -36,7 +36,7 @@ services:
       file: docker-services.yml
       service: frontend
     volumes:
-      - static_data:/opt/cds_videos/var/instance/static
+      - static_data:/opt/invenio/var/instance/static
     links:
       - web
   # Application
@@ -49,8 +49,8 @@ services:
     ports:
       - "${DOCKER_SERVICES_IP_BIND:-127.0.0.1}:5000"
     volumes:
-      - static_data:/opt/cds_videos/var/instance/static
-      - files_data:/opt/cds_videos/var/instance/files
+      - static_data:/opt/invenio/var/instance/static
+      - files_data:/opt/invenio/var/instance/files
     links:
       - cache
       - search
@@ -65,7 +65,7 @@ services:
     command: ["celery -A invenio_app.celery worker --loglevel=INFO"]
     image: cds-videos-worker
     volumes:
-      - files_data:/opt/cds_videos/var/instance/files
+      - files_data:/opt/invenio/var/instance/files
     links:
       - cache
       - search
