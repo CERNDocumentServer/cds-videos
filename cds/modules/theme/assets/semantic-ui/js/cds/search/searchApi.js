@@ -10,7 +10,7 @@
 
 import { InvenioSearchApi } from "react-searchkit";
 
-import { setupInterceptors } from "../api";
+import { setupInterceptors } from "@js/cds/shared/api";
 import { hiddenParamsOf, queryStateToParams, toRequestParams } from "./params";
 
 /**

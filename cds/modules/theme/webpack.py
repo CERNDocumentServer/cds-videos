@@ -44,18 +44,18 @@ theme = WebpackThemeBundle(
     themes={
         "semantic-ui": dict(
             entry={
-                "cds_theme_app": "./js/cds/app.js",
+                "cds_theme_app": "./js/cds/entries/theme.js",
                 "cds_theme_styles": "./less/cds/cds.less",
-                "cds_deposit_app": "./js/cds_deposit/app.js",
+                "cds_deposit_app": "./js/cds/entries/deposit.js",
                 "cds_previewer_styles": "./less/cds_previewer/video.less",
-                "cds_records_app": "./js/cds_records/app.js",
-                "cds_records_stats_app": "./js/cds_records/stats.js",
+                "cds_records_app": "./js/cds/entries/record.js",
+                "cds_records_stats_app": "./js/cds/entries/recordStats.js",
                 # The styles of invenio-charts-js are SCSS, built by sass-loader
                 "cds_records_stats_styles": [
                     "invenio-charts-js/src/styles/styles.scss",
                     "./less/cds_records/stats.less",
                 ],
-                "cds_search_ui_app": "./js/cds_search_ui/app.js",
+                "cds_search_ui_app": "./js/cds/entries/search.js",
                 # The Invenio-Admin panel, Font Awesome 4 is a dependency of
                 # its bundle in Invenio-Theme
                 "cds_admin_styles": [
@@ -78,6 +78,8 @@ theme = WebpackThemeBundle(
                 "redux-thunk": "^2.3.0",
                 "axios": "^1.7.7",
                 "lodash": "^4.17.4",
+                # Same range as semantic-ui-react, so one copy
+                "clsx": "^1.1.1",
                 "qs": "^6.8.0",
                 "d3": "^3.5.17",
                 "vtt.js": "~0.13.0",
@@ -90,9 +92,6 @@ theme = WebpackThemeBundle(
             },
             aliases={
                 "@js/cds": "js/cds",
-                "@js/cds_deposit": "js/cds_deposit",
-                "@js/cds_records": "js/cds_records",
-                "@js/cds_search_ui": "js/cds_search_ui",
                 "@less/cds": "less/cds",
                 # react-searchkit points bundlers to its CommonJS build (its
                 # ``browser`` field), which pulls a second copy of axios and
