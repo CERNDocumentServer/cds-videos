@@ -12,6 +12,7 @@
 
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { Icon, Message } from "semantic-ui-react";
 
 import { prevent } from "@js/cds/shared/dom";
 
@@ -47,6 +48,15 @@ import { LicensesField } from "../fields/LicensesField";
 
 /* Tabs */
 
+/* Under the video description: the chapters are lines starting with a time */
+const CHAPTERS_NOTE = (
+  <Message info size="tiny">
+    <Icon name="info circle" />
+    <strong>Chapters:</strong> start a line with a time and a title, e.g.{" "}
+    <code>0:00 Introduction</code>. A time inside a sentence is not a chapter.
+  </Message>
+);
+
 function BasicInfo({ id }) {
   const { showAvcRestrictedFields } = useConfig();
   return (
@@ -60,6 +70,7 @@ function BasicInfo({ id }) {
           description="Required."
           toolbar={VIDEO_EDITOR_TOOLBAR}
         />
+        {CHAPTERS_NOTE}
         <KeywordsField
           name="keywords"
           label="Keywords"
