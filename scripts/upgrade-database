@@ -25,11 +25,25 @@
 5. Creates the unique index of the head object versions, which an
    Invenio-Files-REST recipe drops and a new database has.
 
+It refuses to run when the time zone of the database session is not UTC.
+The migrations change the naive datetime columns to datetimes with a time
+zone, and PostgreSQL reads the existing values (UTC) in the time zone of
+the session: any other one would shift them. Invenio-DB sets UTC on the
+connections only when SQLALCHEMY_ENGINE_OPTIONS is not configured, so set
+it there too, e.g.::
+
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_recycle": 3600,
+        "connect_args": {"options": "-c timezone=UTC"},
+    }
+
 Each step checks the database first, so the script can run again. Run it
 with the configuration of the instance, after a backup::
 
     uv run ./scripts/upgrade-database
 """
+
+import sys
 
 import sqlalchemy as sa
 from invenio_app.factory import create_app
@@ -61,6 +75,12 @@ def stamped(connection):
     }
 
 
+def is_utc(connection):
+    """Whether the time zone of the session is UTC."""
+    name = connection.execute(sa.text("SHOW timezone")).scalar()
+    return name.upper() in {"UTC", "ETC/UTC", "UCT", "ETC/UCT", "ZULU", "GMT"}
+
+
 def column_type(inspector, table, column):
     """Type of a column, as named by the database."""
     for info in inspector.get_columns(table):
@@ -74,6 +94,14 @@ def main():
     with app.app_context():
         alembic = app.extensions["invenio-db"].alembic
         with db.engine.connect() as connection:
+            if not is_utc(connection):
+                name = connection.execute(sa.text("SHOW timezone")).scalar()
+                sys.exit(
+                    "The time zone of the database session is {0}, not UTC: the "
+                    "migrations would shift the stored datetimes. Add "
+                    "\"connect_args\": {{\"options\": \"-c timezone=UTC\"}} to "
+                    "SQLALCHEMY_ENGINE_OPTIONS.".format(name)
+                )
             revisions = stamped(connection)
             inspector = sa.inspect(connection)
             role_id = column_type(inspector, "access_actionsroles", "role_id")
