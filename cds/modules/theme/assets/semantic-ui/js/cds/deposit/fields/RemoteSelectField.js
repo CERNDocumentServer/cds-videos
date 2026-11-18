@@ -26,7 +26,7 @@ export function RemoteSelectField({
   description = null,
   required = false,
   fetchOptions,
-  minLength = 3,
+  minLength = 2,
   delay = 100,
   onSelect = null,
 }) {
