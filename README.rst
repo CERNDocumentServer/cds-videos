@@ -26,6 +26,7 @@ Table of Contents
      - `2. Start Docker <#2-start-docker>`_
      - `3. Run Setup Scripts <#3-run-setup-scripts>`_
      - `4. Local Development <#4-local-development>`_
+- `Frontend <#frontend>`_
 - `Testing <#testing>`_
 - `Publish Video through REST API <#publish-video-through-rest-api>`_
      - `Generate a Personal Access Token <#generate-a-personal-access-token>`_
@@ -211,6 +212,24 @@ To facilitate local development, open multiple terminal sessions and run the fol
      uv run ./scripts/assets-watch
 
 
+Frontend
+========
+
+The pages are rendered by Flask with Jinja, and React with Semantic UI
+renders their interactive parts (search, record pages, upload form). The
+JavaScript packages are installed with pnpm from the committed
+``package.json`` and ``pnpm-lock.yaml``, and bundled with rspack.
+
+- ``./scripts/build-assets`` installs and builds the assets
+- ``./scripts/lock-assets`` updates the lock file after a change of the
+  JavaScript dependencies (``cds/modules/theme/webpack.py`` or an Invenio
+  module)
+
+`ARCHITECTURE.rst <ARCHITECTURE.rst>`_ describes the structure of the
+frontend code, the data flow between the pages and React, and the
+conventions to follow.
+
+
 Testing
 =======
 
@@ -236,6 +255,9 @@ To run the tests, follow these steps:
    .. code-block:: bash
 
       uv run ./run-tests.sh tests/unit/test_example.py -k "test_specific_function"
+
+3. **End to end tests** of the user interface run with Playwright, see
+   `tests/e2e/README.md <tests/e2e/README.md>`_.
 
 
 Publish Video through REST API
