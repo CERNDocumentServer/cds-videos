@@ -20,9 +20,19 @@
 """DOI field."""
 
 
+from contextvars import ContextVar
+
 import idutils
 from invenio_i18n import lazy_gettext as _
 from marshmallow import fields
+
+doi_context = ContextVar("doi_context", default={})
+"""DOI rules of the record being loaded, set by the deposit loader.
+
+Keys: ``doi_required``, ``required_doi``, ``allowed_dois``,
+``managed_prefixes``, ``banned_prefixes``. Replaces the ``context`` of
+marshmallow schemas, deprecated in marshmallow 3 and removed in 4.
+"""
 
 
 class DOI(fields.String):
@@ -63,7 +73,7 @@ class DOI(fields.String):
         """Deserialize DOI value."""
         value = super(DOI, self)._deserialize(value, attr, data, **kwargs)
         value = value.strip()
-        if value == "" and not (self.required or self.context.get("doi_required")):
+        if value == "" and not (self.required or doi_context.get().get("doi_required")):
             return value
         if not idutils.is_doi(value):
             self.make_error("invalid_doi")
@@ -73,10 +83,11 @@ class DOI(fields.String):
         """Validate DOI value."""
         super(DOI, self)._validate(value)
 
-        required_doi = self.context.get("required_doi", self.required_doi)
-        allowed_dois = self.context.get("allowed_dois", self.allowed_dois)
-        managed_prefixes = self.context.get("managed_prefixes", self.managed_prefixes)
-        banned_prefixes = self.context.get("banned_prefixes", self.banned_prefixes)
+        context = doi_context.get()
+        required_doi = context.get("required_doi", self.required_doi)
+        allowed_dois = context.get("allowed_dois", self.allowed_dois)
+        managed_prefixes = context.get("managed_prefixes", self.managed_prefixes)
+        banned_prefixes = context.get("banned_prefixes", self.banned_prefixes)
 
         # First check for required DOI.
         if required_doi:

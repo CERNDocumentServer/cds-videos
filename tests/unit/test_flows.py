@@ -41,6 +41,7 @@ from helpers import (
     mock_current_user,
 )
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
@@ -184,7 +185,7 @@ def test_avc_workflow_pass(
             "cds_flows.flow_feedback_item", flow_id=flow_id, receiver_id="avc"
         )
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 200
     # check feedback from another user without access
@@ -193,11 +194,11 @@ def test_avc_workflow_pass(
             "cds_flows.flow_feedback_item", flow_id=flow_id, receiver_id="avc"
         )
     with api_app.test_client() as client:
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         resp = client.get(url, headers=json_headers)
         assert resp.status_code == 403
     # check feedback from another user with access
-    user_2 = User.query.get(users[1])
+    user_2 = db.session.get(User, users[1])
     user_2_id = str(user_2.id)
     user_2_email = user_2.email
     project = deposit_project_resolver(project["_deposit"]["id"])

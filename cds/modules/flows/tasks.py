@@ -788,7 +788,7 @@ class ExtractChapterFramesTask(AVCTask):
 
         # If no valid chapter seconds, remove the chapters.vtt file
         if not valid_chapter_seconds:
-            master_obj = ObjectVersion.query.get(version_id)
+            master_obj = db.session.get(ObjectVersion, version_id)
             vtt_objs = ObjectVersion.get_versions(master_obj.bucket_id, "chapters.vtt")
             for vtt_obj in vtt_objs:
                 dispose_object_version(vtt_obj)
@@ -1257,7 +1257,7 @@ def patch_record(recid, patch, validator=None):
     """Patch a record."""
     with db.session.begin_nested():
         record = Record.get_record(recid)
-        record = record.patch(patch)
+        record = Record(jsonpatch.apply_patch(dict(record), patch), model=record.model)
         if validator:
             validator = import_string(validator)
         record.commit(validator=validator)

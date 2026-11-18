@@ -53,8 +53,8 @@ class CDSJSONSerializer(JSONSerializer):
     html_tag_remover = HTMLTagRemover()
 
     def dump(self, obj, context=None):
-        """Serialize object with schema."""
-        return self.schema_class(context=context).dump(obj)
+        """Serialize object with schema (no schema reads the context)."""
+        return self.schema_class().dump(obj)
 
     def _sanitize_metadata(self, metadata):
         """Sanitize title, description and translations in metadata."""

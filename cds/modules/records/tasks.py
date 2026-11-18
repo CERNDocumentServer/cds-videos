@@ -47,6 +47,7 @@ from requests.exceptions import RequestException
 from cds.modules.ffmpeg import ff_probe_all
 from cds.modules.records.api import CDSVideosFilesIterator
 from cds.modules.records.utils import format_pid_link, is_deposit, is_record
+from cds.modules.utc import utcnow
 
 from ..opencast.utils import can_be_transcoded
 from .api import CDSRecord, Keyword
@@ -355,10 +356,10 @@ def subformats_integrity_report(start_date=None, end_date=None):
         return "\n".join(lines)
 
     cache = current_cache.get("task_subformats_integrity:details") or {}
-    two_days_ago = datetime.utcnow() - timedelta(days=2)
+    two_days_ago = utcnow() - timedelta(days=2)
     if "start_date" not in cache:
         # Set the start date to 4 days ago
-        cache["start_date"] = datetime.utcnow() - timedelta(days=4)
+        cache["start_date"] = utcnow() - timedelta(days=4)
 
     record_uuids = _filter_by_last_created(
         _get_all_records_with_bucket(),
@@ -484,7 +485,7 @@ def missing_subformats_report(start_date=None, end_date=None):
     cache = current_cache.get("task_missing_subformats:details") or {}
     if "end_date" not in cache:
         # Set the end date to 7 days ago
-        cache["end_date"] = datetime.utcnow() - timedelta(days=7)
+        cache["end_date"] = utcnow() - timedelta(days=7)
 
     record_uuids = _filter_by_last_created(
         _get_all_records_with_bucket(),
@@ -539,7 +540,7 @@ def missing_subformats_report(start_date=None, end_date=None):
                     }
                 )
 
-    cache["end_date"] = datetime.utcnow()
+    cache["end_date"] = utcnow()
     current_cache.set("task_missing_subformats:details", cache, timeout=-1)
 
     if report:

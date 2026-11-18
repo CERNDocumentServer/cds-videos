@@ -40,6 +40,7 @@ from helpers import (
     transcode_task,
 )
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import (
     Bucket,
     FileInstance,
@@ -543,7 +544,7 @@ def test_sync_records_with_deposits(
     )
 
     # publish
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     prepare_videos_for_publish([deposit])
     deposit = deposit.publish()
     _, record = deposit.fetch_published()

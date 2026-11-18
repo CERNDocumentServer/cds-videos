@@ -23,7 +23,7 @@
 """VTT serializer for records."""
 
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app, render_template, url_for
 from invenio_iiif.utils import ui_iiif_image_url
@@ -101,6 +101,6 @@ class VTT(object):
     @staticmethod
     def time_format(seconds):
         """Helper function to convert seconds to vtt time format."""
-        d = datetime.utcfromtimestamp(seconds)
+        d = datetime.fromtimestamp(seconds, timezone.utc)
         s = d.strftime("%H:%M:%S.%f")
         return s[:-3]

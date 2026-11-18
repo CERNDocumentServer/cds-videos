@@ -35,6 +35,7 @@ from helpers import prepare_videos_for_publish
 from invenio_access import Permission
 from invenio_access.models import ActionRoles
 from invenio_accounts.models import Role, User
+from invenio_db import db
 
 from cds.modules.deposit.api import deposit_video_resolver
 from cds.modules.records.permissions import (
@@ -47,7 +48,7 @@ from cds.modules.records.permissions import (
 def test_has_upload_permission_external_user(app, external_user):
     """Test that external user without cern-user role cannot upload."""
     with app.test_request_context():
-        user = User.query.get(external_user)
+        user = db.session.get(User, external_user)
         login_user(user)
 
         # Test has_upload_permission function directly
@@ -61,7 +62,7 @@ def test_has_upload_permission_external_user(app, external_user):
 def test_has_upload_permission_cern_user(app, users):
     """Test that authenticated user with cern-user role can upload."""
     with app.test_request_context():
-        user = User.query.get(users[0])
+        user = db.session.get(User, users[0])
         login_user(user)
 
         # Test has_upload_permission function directly
@@ -75,7 +76,7 @@ def test_has_upload_permission_cern_user(app, users):
 def test_record_create_permission_external_user(app, external_user, deposit_metadata):
     """Test record create permission for external user without role."""
     with app.test_request_context():
-        user = User.query.get(external_user)
+        user = db.session.get(User, external_user)
         login_user(user)
 
         # Test creating a record permission
@@ -88,7 +89,7 @@ def test_project_rest_api_external_user_can_create(
 ):
     """Test project creation via REST API for external user without role."""
     with api_app.test_client() as client:
-        user = User.query.get(external_user)
+        user = db.session.get(User, external_user)
         login_user(user)
 
         # Try to create a project via REST API
@@ -106,7 +107,7 @@ def test_video_rest_api_external_user(
 ):
     """Test video creation via REST API for external user without role."""
     with api_app.test_client() as client:
-        user = User.query.get(external_user)
+        user = db.session.get(User, external_user)
         login_user(user)
 
         # Try to create a video via REST API
@@ -136,7 +137,7 @@ def test_anonymous_user_has_upload_permission(app):
 def test_external_user_role_assignment(app, db, external_user):
     """Test that we can dynamically add cern-user role to external user."""
     with app.test_request_context():
-        user = User.query.get(external_user)
+        user = db.session.get(User, external_user)
         login_user(user)
 
         # Initially should not have upload permission
@@ -272,7 +273,7 @@ def test_external_user_deposit_operations(
     """Tests for external user deposit operations and permissions."""
     with api_app.test_request_context():
         # Setup: Create project and video as CERN user
-        cern_user = User.query.get(users[0])
+        cern_user = db.session.get(User, users[0])
         login_user(cern_user)
 
         with api_app.test_client() as client:
@@ -299,7 +300,7 @@ def test_external_user_deposit_operations(
 
             # Switch to external user for testing
             logout_user()
-            ext_user = User.query.get(external_user)
+            ext_user = db.session.get(User, external_user)
             login_user(ext_user)
 
             # Test 1: Project creation - should be forbidden
@@ -391,8 +392,8 @@ def test_external_user_update_access_without_upload_permission(
                 identity.provides.add(UserNeed(current_user.email))
 
     (_, video_1, _) = api_project
-    cern_user = User.query.get(users[0])
-    ext_user = User.query.get(external_user)
+    cern_user = db.session.get(User, users[0])
+    ext_user = db.session.get(User, external_user)
 
     # Prepare videos for publishing
     prepare_videos_for_publish([video_1])

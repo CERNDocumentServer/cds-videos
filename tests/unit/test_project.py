@@ -101,7 +101,7 @@ def test_publish_all_videos(api_app, api_project, users):
     assert project["_deposit"]["status"] == "draft"
     # publish project
     prepare_videos_for_publish([video_1, video_2], with_files=True)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     new_project = project.publish()
     # check project and all video are published
     assert new_project["_deposit"]["status"] == "published"
@@ -122,7 +122,7 @@ def test_publish_one_video(api_app, api_project, users):
     # [publish project]
     prepare_videos_for_publish([video_1, video_2], with_files=True)
     # publish one video
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1 = video_1.publish()
     project = video_1.project
     # publish the project (with one video still not publish)
@@ -172,7 +172,7 @@ def test_add_video(
     """Test add video."""
     project_data = deepcopy(project_deposit_metadata)
 
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
 
     # create empty project
     project = Project.create(project_data).commit()
@@ -266,7 +266,7 @@ def test_project_edit(app, project_published, users):
         deposit_video_resolver(record_video_resolver(id_)["_deposit"]["id"])
         for id_ in new_project.video_ids
     ]
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     assert len(videos) == 2
     for i, video in enumerate(videos):
         assert video["_deposit"]["status"] == "published"
@@ -345,7 +345,7 @@ def test_project_delete_one_video_published(api_app, api_project, force, users):
     prepare_videos_for_publish([video_1, video_2], with_files=True)
 
     # publish video_2
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_2 = video_2.publish()
 
     project_id = project.id
@@ -398,7 +398,7 @@ def test_inheritance(api_app, api_project, users):
     assert "type" in project
 
     # Publish the video
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     prepare_videos_for_publish([video], with_files=True)
     video = video.publish()
     assert "category" in video
@@ -468,7 +468,7 @@ def test_project_publish_with_workflow(api_app, users, api_project, es, local_fi
 
     check("draft", "draft", "draft")
 
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_2 = deposit_video_resolver(video_2_depid)
     video_2.publish()
     check("draft", "draft", "published")
@@ -499,7 +499,7 @@ def test_project_permissions(es, location, deposit_metadata, users):
     """Test deposit permissions."""
     deposit = Project.create(deposit_metadata)
     deposit.commit()
-    user = User.query.get(users[0])
+    user = db.session.get(User, users[0])
     login_user(user)
     assert not has_update_permission(user, deposit)
     deposit["_access"] = {"update": [user.id]}
@@ -515,7 +515,7 @@ def test_project_partial_validation(
     if "category" in deposit_metadata:
         del deposit_metadata["category"]
     with api_app.test_request_context():
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         project = Project.create(deposit_metadata)
         video_1["_project_id"] = project["_deposit"]["id"]
         video_1 = Video.create(video_1)

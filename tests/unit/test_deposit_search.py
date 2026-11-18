@@ -29,6 +29,7 @@ from flask import url_for
 from flask_security import login_user
 from helpers import new_project
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
@@ -44,7 +45,7 @@ def test_aggregations(api_app, es, users, location, db, deposit_metadata, json_h
     current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 

@@ -71,7 +71,7 @@ def test_video_publish_registering_the_datacite(
     api_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"] = True
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # [[ CREATE NEW PROJECT ]]
         project_dict = _create_new_project(
@@ -127,7 +127,7 @@ def test_video_publish_registering_the_datacite_if_fail(
     api_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"] = True
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # [[ CREATE NEW PROJECT ]]
         project_dict = _create_new_project(
@@ -178,7 +178,7 @@ def test_video_publish_registering_the_datacite_not_local(
     api_app.config["DEPOSIT_DATACITE_MINTING_ENABLED"] = True
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         project_deposit_metadata["keywords"] = [
             {
@@ -293,12 +293,12 @@ def test_video_access_rights_based_on_user_id(
         assert client.get(deposit_url).status_code == 401
         assert client.post(publish_url).status_code == 401
         # User is the creator of the deposit, so everything is fine
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         assert client.get(deposit_url).status_code == 200
         assert client.post(publish_url).status_code == 202
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         publish_url = url_for(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
         )
@@ -329,7 +329,7 @@ def test_video_access_rights_based_on_egroup(
         video_1["_access"] = {"update": ["test-egroup@cern.ch"]}
         video_1.commit()
         db.session.commit()
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         deposit_url = url_for("invenio_deposit_rest.video_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
@@ -345,7 +345,7 @@ def test_video_access_rights_based_admin(mock_datacite, api_app, users, api_proj
     cds_depid = video_1["_deposit"]["id"]
     with api_app.test_client() as client:
         prepare_videos_for_publish([video_1, video_2])
-        login_user(User.query.get(users[2]))
+        login_user(db.session.get(User, users[2]))
         deposit_url = url_for("invenio_deposit_rest.video_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.video_actions", pid_value=cds_depid, action="publish"
@@ -375,7 +375,7 @@ def test_video_publish_edit_publish_again(
 
     with api_app.test_request_context():
         with api_app.test_client() as client:
-            login_user(User.query.get(users[0]))
+            login_user(db.session.get(User, users[0]))
 
             # [[ CREATE A NEW PROJECT ]]
             project_dict = _create_new_project(
@@ -548,7 +548,7 @@ def test_mint_doi_with_cli(
 
     with api_app.test_client() as client:
         # Log in as the first user
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # Create a new project
         project_dict = _create_new_project(
@@ -606,7 +606,7 @@ def test_additional_files(
 
     with api_app.test_client() as client:
         # Log in as the first user
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # Create a new project
         project_dict = _create_new_project(

@@ -28,6 +28,7 @@
 from flask_security import login_user
 from helpers import prepare_videos_for_publish
 from invenio_accounts.models import User
+from invenio_db import db
 
 from cds.modules.deposit.api import (
     Project,
@@ -63,7 +64,7 @@ def check_deposit(dep, expected_rn):
 
 def test_one_video(db, api_project, users, current_year):
     """Test one video."""
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     project, video_1, video_2 = api_project
     prepare_videos_for_publish([video_1, video_2])
     check_deposit(video_1.publish(), "CERN-MOVIE-{0}-1-1".format(current_year))
@@ -71,7 +72,7 @@ def test_one_video(db, api_project, users, current_year):
 
 def test_only_videos(db, api_project, users, current_year):
     """Test only videos."""
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     for i, video in enumerate([video_1, video_2]):
@@ -81,7 +82,7 @@ def test_only_videos(db, api_project, users, current_year):
 
 def test_only_project(db, api_project, users, current_year):
     """Test only project."""
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     check_deposit(project.publish(), "CERN-MOVIE-{0}-1".format(current_year))
@@ -89,7 +90,7 @@ def test_only_project(db, api_project, users, current_year):
 
 def test_project_and_videos(db, api_project, users, current_year):
     """Test project and video."""
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     project = project.publish()
@@ -100,7 +101,7 @@ def test_project_and_videos(db, api_project, users, current_year):
 
 def test_video_then_project(db, api_project, users, current_year):
     """Test video and then project."""
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
     video_1 = video_1.publish()

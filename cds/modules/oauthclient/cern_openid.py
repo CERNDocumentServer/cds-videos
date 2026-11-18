@@ -27,7 +27,7 @@
 Copied from invenio-oauthclient, extended with e-groups fetching.
 """
 
-from datetime import datetime, timedelta
+
 from urllib.parse import quote
 
 from flask import Blueprint, current_app, flash, g, redirect, session, url_for
@@ -46,6 +46,8 @@ from invenio_oauthclient.models import RemoteAccount
 from invenio_oauthclient.oauth import oauth_link_external_id, oauth_unlink_external_id
 from invenio_oauthclient.proxies import current_oauthclient
 from jwt import decode
+
+from cds.modules.utc import utcnow
 
 cern_openid_blueprint = Blueprint("cern_openid_oauth", __name__)
 
@@ -93,7 +95,7 @@ def fetch_extra_data(resource):
 
 def account_roles_and_extra_data(account, resource, refresh_timedelta=None):
     """Fetch account roles and extra data from resource if necessary."""
-    updated = datetime.utcnow()
+    updated = utcnow()
     modified_since = updated
     if refresh_timedelta is not None:
         modified_since += refresh_timedelta

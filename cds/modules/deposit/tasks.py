@@ -25,7 +25,7 @@
 """Deposit tasks."""
 
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from celery import shared_task
 from flask import current_app
@@ -37,6 +37,8 @@ from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_records.models import RecordMetadata
 from invenio_records_files.api import Record
+
+from cds.modules.utc import utcnow
 
 from ...modules.records.minters import is_local_doi
 from ...modules.records.serializers import datacite_v41
@@ -93,7 +95,7 @@ def index_deposit_projects(start_date=None):
     cache = current_cache.get("task_index_deposit_projects:details") or {}
     if "update_date" not in cache:
         # Set the update date by default to 10 minutes ago
-        cache["update_date"] = datetime.utcnow() - timedelta(minutes=10)
+        cache["update_date"] = utcnow() - timedelta(minutes=10)
 
     start_date = start_date or cache["update_date"]
     records = RecordMetadata.query.filter(
@@ -110,5 +112,5 @@ def index_deposit_projects(start_date=None):
     if projects_ids:
         RecordIndexer().bulk_index(iter(projects_ids))
 
-    cache["update_date"] = datetime.utcnow()
+    cache["update_date"] = utcnow()
     current_cache.set("task_index_deposit_projects:details", cache, timeout=-1)

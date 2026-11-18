@@ -147,7 +147,7 @@ def test_records_rest(
     current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         url = url_for("invenio_records_rest.recid_item", pid_value=pid.pid_value)
         url2 = url_for("invenio_records_rest.recid_item", pid_value=vid.pid_value)
 
@@ -318,11 +318,11 @@ def test_serialize_record(app, api_app, users, api_project_published, json_heade
     for deposit in (project, video_1):
         pid, record = deposit.fetch_published()
         with app.test_request_context():
-            login_user(User.query.get(users[0]))
+            login_user(db.session.get(User, users[0]))
             embedded = json.loads(json.dumps(serialize_record(pid, record)))
 
         with api_app.test_client() as client:
-            login_user(User.query.get(users[0]))
+            login_user(db.session.get(User, users[0]))
             res = client.get(
                 url_for("invenio_records_rest.recid_item", pid_value=pid.pid_value),
                 headers=json_headers,
@@ -350,15 +350,15 @@ def test_serialize_record(app, api_app, users, api_project_published, json_heade
 
     # Nothing is embedded for users who can not read the record
     pid, record = video_1.fetch_published()
-    record["_access"] = {"read": [User.query.get(users[0]).email]}
+    record["_access"] = {"read": [db.session.get(User, users[0]).email]}
     record.commit()
     db.session.commit()
     pid, record = video_1.fetch_published()
     with app.test_request_context():
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         assert serialize_record(pid, record) is None
     with app.test_request_context():
-        login_user(User.query.get(users[2]))
+        login_user(db.session.get(User, users[2]))
         assert serialize_record(pid, record) is not None
 
 

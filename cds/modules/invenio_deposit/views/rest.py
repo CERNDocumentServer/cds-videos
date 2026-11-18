@@ -326,13 +326,8 @@ class DepositFileResource(ContentNegotiatedMethodView):
 
     view_name = "{0}_file"
 
-    get_args = dict(
-        version_id=fields.UUID(
-            location="headers",
-            load_from="version_id",
-        ),
-    )
-    """GET query arguments."""
+    get_args = dict(version_id=fields.UUID(load_default=None))
+    """GET arguments, from the ``version_id`` header."""
 
     def __init__(self, serializers, pid_type, ctx, *args, **kwargs):
         """Constructor."""
@@ -340,7 +335,7 @@ class DepositFileResource(ContentNegotiatedMethodView):
         for key, value in ctx.items():
             setattr(self, key, value)
 
-    @use_kwargs(get_args)
+    @use_kwargs(get_args, location="headers")
     @pass_record
     @need_record_permission("read_permission_factory")
     def get(self, pid, record, key, version_id, **kwargs):

@@ -21,15 +21,16 @@
 
 import json
 
-from flask import current_app, has_request_context, request
+from flask import current_app, request
 from invenio_rest.errors import RESTValidationError
 from marshmallow import ValidationError
+
+from ...records.serializers.schemas.doi import doi_context
 
 
 def _doi_context():
     """Configure DOI Context."""
-    # Replace refs when we are in request context.
-    context = dict(replace_refs=has_request_context())
+    context = {}
 
     # DOI validation context
     if request and request.view_args and request.view_args.get("pid_value"):
@@ -55,18 +56,13 @@ def marshmallow_loader(schema_class, partial=False):
     """Marshmallow loader."""
 
     def schema_loader():
-        request_json = request.get_json()
-        context = _doi_context()
+        token = doi_context.set(_doi_context())
         try:
-            request_json = request.get_json()
-            context = _doi_context()
-            valid_data = schema_class(context=context, partial=partial).load(
-                request_json
-            )
+            return schema_class(partial=partial).load(request.get_json())
         except ValidationError as e:
             raise MarshmallowErrors(e)
-
-        return valid_data
+        finally:
+            doi_context.reset(token)
 
     return schema_loader
 

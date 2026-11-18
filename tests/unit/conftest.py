@@ -95,6 +95,7 @@ def app():
     app = create_app(
         DEBUG_TB_ENABLED=False,
         TESTING=True,
+        SECRET_KEY="test-secret-key",
         CELERY_TASK_ALWAYS_EAGER=True,
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             "SQLALCHEMY_DATABASE_URI",
@@ -158,8 +159,10 @@ def api_app(app):
 @pytest.yield_fixture()
 def db(app):
     """Setup database."""
-    if not database_exists(str(db_.engine.url)):
-        create_database(str(db_.engine.url))
+    # str() of a SQLAlchemy 2 URL hides the password ("***")
+    db_url = db_.engine.url.render_as_string(hide_password=False)
+    if not database_exists(db_url):
+        create_database(db_url)
     db_.create_all()
     yield db_
     db_.session.remove()
@@ -237,7 +240,7 @@ def external_user(app, db):
 @pytest.fixture()
 def u_email(db, users):
     """Valid user email."""
-    user = User.query.get(users[0])
+    user = db.session.get(User, users[0])
     return user.email
 
 
@@ -247,7 +250,7 @@ def cds_depid(api_app, users, db, bucket, deposit_metadata):
     record = {"title": {"title": "fuu"}}
     record.update(deposit_metadata)
     with api_app.test_request_context():
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         deposit = Project.create(record)
         deposit["_access"] = {"update": ["test-egroup@cern.ch"]}
         deposit.commit()
@@ -645,7 +648,7 @@ def project_published(api_app, api_project, users):
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
         # login as user_1
-        login_user(User.query.get(users[0]))
+        login_user(db_.session.get(User, users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = [record_resolver.resolve(id_)[1] for id_ in new_project.video_ids]
@@ -662,7 +665,7 @@ def api_project_published(api_app, api_project, users):
     """New published project with videos."""
     (project, video_1, video_2) = api_project
     with api_app.test_request_context():
-        login_user(User.query.get(users[0]))
+        login_user(db_.session.get(User, users[0]))
         prepare_videos_for_publish([video_1, video_2])
         new_project = project.publish()
         new_videos = [record_resolver.resolve(id_)[1] for id_ in new_project.video_ids]
@@ -684,7 +687,7 @@ def video_published(app, project_published):
 def access_token(api_app, db, users):
     """Fixture that create an access token."""
     with db.session.begin_nested():
-        tester_id = User.query.get(users[0]).id
+        tester_id = db.session.get(User, users[0]).id
         token = Token.create_personal(
             "test-personal-{0}".format(tester_id),
             tester_id,

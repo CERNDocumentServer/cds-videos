@@ -26,7 +26,6 @@
 
 import os
 import time
-from datetime import datetime
 from xml.etree import ElementTree
 
 import requests
@@ -35,6 +34,7 @@ from invenio_files_rest.models import ObjectVersionTag
 from requests_toolbelt import MultipartEncoder
 
 from cds.modules.opencast.error import RequestError
+from cds.modules.utc import utcnow
 from cds.modules.xrootd.utils import file_opener_xrootd, file_size_xrootd
 
 
@@ -150,7 +150,7 @@ class OpenCast:
             qualities=" - ".join(qualities),
         )
 
-        now = datetime.utcnow()
+        now = utcnow()
         start = now.strftime("%Y-%m-%dT%H:%M:%S")
         form_data = dict(
             mediaPackage=media_package_xml,
