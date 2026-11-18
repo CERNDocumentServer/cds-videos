@@ -25,6 +25,12 @@
 Changes
 =======
 
+Version 3.0.1 (2026-11-18)
+
+- deposit: the contributors search from the second character, and the
+  author and licence fields show when they search (spinner and
+  "Searching..." in the menu)
+
 Version 3.0.0 (2026-11-18)
 
 Major release: a new user interface and a new Python stack. The database
