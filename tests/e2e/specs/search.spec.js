@@ -70,8 +70,13 @@ test.describe("search page", () => {
     ).toBeVisible();
   });
 
-  test("shows that nothing matches a query", async ({ page }) => {
-    await page.goto("/search?q=zzzz-no-such-video-zzzz");
+  test("shows that nothing matches a query", async ({ page, request }) => {
+    // One word: the words of a query are ORed, so "no-such-video" would
+    // find the videos
+    const query = "zzzznosuchvideozzzz";
+    const api = await getJSON(request, `/api/records/?q=${query}`);
+    expect(hitsTotal(api.hits)).toBe(0);
+    await page.goto(`/search?q=${query}`);
     await expect(page.getByText(/no results/i).first()).toBeVisible();
     await expect(page.locator("a[href^='/record/']")).toHaveCount(0);
   });

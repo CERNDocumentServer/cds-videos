@@ -28,6 +28,9 @@
 import json
 
 from flask import url_for
+from flask_security import login_user
+from helpers import create_category
+from invenio_accounts.models import User
 from invenio_search import current_search_client
 
 
@@ -94,3 +97,52 @@ def test_suggest_category_from_url(
         assert len(data["suggest-name"][0]["options"]) == 1
         assert len(data["suggest-name"][0]["options"][0]["_source"]["types"]) == 1
         assert "video" in data["suggest-name"][0]["options"][0]["_source"]["types"]
+
+
+def test_categories_visible_to_their_egroups(
+    api_app, db, es, location, indexer, pidstore, users, json_headers
+):
+    """The restricted categories are listed for their e-groups and admins."""
+    egroup = "atlas-readers@cern.ch"
+    create_category(
+        api_app=api_app,
+        db=db,
+        data={"name": "open", "types": ["video"], "_record_type": ["video"]},
+    )
+    create_category(
+        api_app=api_app,
+        db=db,
+        data={
+            "name": "atlas",
+            "types": ["video"],
+            "_record_type": ["video"],
+            "_access": {"read": [egroup]},
+        },
+    )
+    datastore = api_app.extensions["security"].datastore
+    with db.session.begin_nested():
+        role = datastore.create_role(id=egroup, name=egroup)
+        datastore.add_role_to_user(db.session.get(User, users[1]), role)
+    db.session.commit()
+    current_search_client.indices.refresh()
+    superadmin = User.query.filter_by(email="superadmin@inveniosoftware.org").one()
+
+    with api_app.test_request_context():
+        url = url_for("invenio_records_rest.catid_list")
+
+    def names(user_id=None):
+        with api_app.test_client() as client:
+            if user_id:
+                login_user(db.session.get(User, user_id))
+            res = client.get(url, headers=json_headers)
+            assert res.status_code == 200
+            hits = json.loads(res.data.decode("utf-8"))["hits"]["hits"]
+            return sorted(hit["metadata"]["name"] for hit in hits)
+
+    # Anonymous and users outside of the e-group
+    assert names() == ["open"]
+    assert names(users[0]) == ["open"]
+    # Members of the e-group
+    assert names(users[1]) == ["atlas", "open"]
+    # Super admins
+    assert names(superadmin.id) == ["atlas", "open"]
