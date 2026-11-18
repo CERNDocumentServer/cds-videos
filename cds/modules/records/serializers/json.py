@@ -31,6 +31,7 @@ from ..permissions import (
     has_read_record_eos_path_permission,
     has_read_record_permission,
     has_update_permission,
+    is_public,
 )
 from ..utils import HTMLTagRemover, parse_video_chapters
 
@@ -90,9 +91,18 @@ class CDSJSONSerializer(JSONSerializer):
         return metadata
 
     def _remove_internal_fields(self, record, metadata):
-        """Remove _access from the metadata if the user doesn't have update permissions on the record."""
-        if not has_update_permission(current_user, record):
-            metadata.pop("_access", None)
+        """Remove the internal fields for the users who cannot edit the record.
+
+        Everyone gets ``_access.status``, ``public`` or ``restricted`` from
+        ``_access.read``. Only the users who can edit the record get who can
+        read and edit it (``_access.read`` and ``_access.update``),
+        ``_buckets`` and ``_cds``.
+        """
+        status = "public" if is_public(metadata, "read") else "restricted"
+        if has_update_permission(current_user, record):
+            metadata["_access"] = dict(metadata.get("_access") or {}, status=status)
+        else:
+            metadata["_access"] = {"status": status}
             metadata.pop("_buckets", None)
             metadata.pop("_cds", None)
         return metadata
@@ -116,8 +126,9 @@ class CDSJSONSerializer(JSONSerializer):
                 metadata = self._sanitize_metadata(metadata)
                 metadata = self._remove_internal_fields(record, metadata)
                 if has_request_context():
+                    # The videos of a project, with the same access fields
                     metadata["videos"] = [
-                        video
+                        self._remove_internal_fields(video, dict(video))
                         for video in metadata["videos"]
                         if has_read_record_permission(current_user, video)
                     ]

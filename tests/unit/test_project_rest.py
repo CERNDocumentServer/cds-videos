@@ -1073,7 +1073,7 @@ def test_sync_access_rights(
         res = client.get(url_for("invenio_records_rest.recid_item", pid_value=recid))
         assert res.status_code == 200
         data = json.loads(res.data.decode("utf-8"))
-        assert data["metadata"]["_access"] == access_rights
+        assert data["metadata"]["_access"] == dict(access_rights, status="public")
 
     def check_video_access_rights(video_depid):
         # check video has same access rights of the project
