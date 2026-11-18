@@ -16,6 +16,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 
+import { chapterFrameUrl } from "@js/cds/shared/utils/images";
 import { isoToLanguage } from "@js/cds/shared/utils/languages";
 
 import {
@@ -94,17 +95,16 @@ export function usePlayerHighlights(transcript, chapters) {
 }
 
 function ChapterThumbnail({ chapter, frame = null }) {
-  const [hovered, setHovered] = useState(false);
   const [failed, setFailed] = useState(false);
-  const size = hovered ? "720,405" : "360,203";
   return (
     <div className="chapter-thumbnail">
       <div className={`thumbnail-container${frame ? "" : " is-placeholder"}`}>
         {frame && !failed && (
+          // The same image as the chapters under the player. Lazy, as the
+          // panel stays in the page hidden until it is opened
           <img
-            src={`/api/iiif/v2/${frame.bucket_id}:${frame.version_id}:${frame.key}/full/${size}/0/default.jpg`}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            src={chapterFrameUrl(frame)}
+            loading="lazy"
             alt={`Chapter ${chapter.timestamp}`}
             onError={() => setFailed(true)}
           />
