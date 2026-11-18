@@ -13,6 +13,8 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
+import { chapterFrameUrl } from "@js/cds/shared/utils/images";
+
 import { cleanHtmlFromTitle } from "./metadata";
 
 export function ChaptersSection({
@@ -117,7 +119,7 @@ function HorizontalChapter({ chapter, frame = null, onJump }) {
       >
         {frame && !failed && (
           <img
-            src={`/api/iiif/v2/${frame.bucket_id}:${frame.version_id}:${frame.key}/full/320,180/0/default.jpg`}
+            src={chapterFrameUrl(frame)}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             alt={`Chapter ${chapter.timestamp}`}
             onError={() => setFailed(true)}

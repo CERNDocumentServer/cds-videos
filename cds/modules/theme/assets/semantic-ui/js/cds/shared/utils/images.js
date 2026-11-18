@@ -21,6 +21,18 @@ const iiifTemplate = _template(
 
 export const NOT_FOUND_IMAGE = "/static/img/not_found.png";
 
+/**
+ * IIIF image of a chapter frame.
+ *
+ * One size for every list of chapters (the strip under the player and the
+ * "In this video" panel), so the browser downloads each frame once and
+ * reuses it. 320 pixels covers both at the size they are displayed, up to
+ * 240 pixels wide.
+ */
+export function chapterFrameUrl(frame) {
+  return `/api/iiif/v2/${frame.bucket_id}:${frame.version_id}:${frame.key}/full/320,180/0/default.jpg`;
+}
+
 /** IIIF thumbnail of a record. */
 export function iiif(record, showGif, size) {
   try {
