@@ -123,12 +123,10 @@ export function getAllFilesExcept(files, types) {
   return files.filter((file) => types.indexOf(file.media_type) === -1);
 }
 
+/** ``_access.status`` of the REST API: everyone gets it, only the editors
+ * get who can read the record (``_access.read``). */
 export function isPublic(record) {
-  return (
-    _get(record, "_access") === undefined ||
-    _get(record, "_access.read") === undefined ||
-    _get(record, "_access.read").length === 0
-  );
+  return _get(record, "_access.status") !== "restricted";
 }
 
 /** Subtitle files of a record usable as transcripts (``vtt`` subtitles). */

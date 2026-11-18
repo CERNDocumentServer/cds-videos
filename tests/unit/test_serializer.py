@@ -27,6 +27,8 @@
 
 import xml.etree.ElementTree as ET
 
+import pytest
+
 from cds.modules.deposit.api import Video
 from cds.modules.records.serializers.drupal import VideoDrupal
 from cds.modules.records.serializers.json import CDSJSONSerializer
@@ -215,3 +217,60 @@ def test_cds_json_serializer_sanitization(video_record_metadata):
     assert "_access" not in result
     assert "_buckets" not in result
     assert "_cds" not in result
+
+
+@pytest.mark.parametrize(
+    "read, status",
+    [(["e-group@cern.ch"], "restricted"), ([], "public"), (None, "public")],
+)
+def test_cds_json_serializer_access_status(
+    app, db, location, monkeypatch, read, status
+):
+    """Everyone gets the access status, only the editors who can read and edit."""
+    access = {"update": ["editor@cern.ch"]}
+    if read is not None:
+        access["read"] = read
+    record = CDSRecord.create(
+        {"title": {"title": "Video"}, "_access": access, "_cds": {"state": {}}}
+    )
+    serializer = CDSJSONSerializer()
+    pid = Mock(pid_value="1")
+    module = "cds.modules.records.serializers.json"
+
+    with app.test_request_context():
+        monkeypatch.setattr(f"{module}.has_update_permission", lambda *_: False)
+        metadata = serializer.preprocess_record(pid, record)["metadata"]
+        assert metadata["_access"] == {"status": status}
+        assert "_buckets" not in metadata
+        assert "_cds" not in metadata
+
+        monkeypatch.setattr(f"{module}.has_update_permission", lambda *_: True)
+        metadata = serializer.preprocess_record(pid, record)["metadata"]
+        assert metadata["_access"] == dict(access, status=status)
+
+
+def test_cds_json_serializer_access_of_project_videos(app, db, location, monkeypatch):
+    """The videos of a project have the same access fields as the records."""
+    restricted = {"read": ["e-group@cern.ch"], "update": ["editor@cern.ch"]}
+    project = CDSRecord.create(
+        {
+            "title": {"title": "Project"},
+            "videos": [
+                {"title": {"title": "Restricted"}, "_access": restricted},
+                {"title": {"title": "Public"}, "_cds": {"state": {}}},
+            ],
+        }
+    )
+    module = "cds.modules.records.serializers.json"
+    monkeypatch.setattr(f"{module}.has_update_permission", lambda *_: False)
+    monkeypatch.setattr(f"{module}.has_read_record_permission", lambda *_: True)
+
+    with app.test_request_context():
+        metadata = CDSJSONSerializer().preprocess_record(Mock(pid_value="1"), project)[
+            "metadata"
+        ]
+    assert [video["_access"] for video in metadata["videos"]] == [
+        {"status": "restricted"},
+        {"status": "public"},
+    ]
+    assert "_cds" not in metadata["videos"][1]

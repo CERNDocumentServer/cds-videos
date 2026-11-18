@@ -124,15 +124,21 @@ test.describe("restricted record", () => {
     await expectRefused(page, `/deposit/project/${depositId}`);
   });
 
-  // The record serializer removes ``_access`` for the users who cannot edit
-  // the record, so both interfaces label it "Public" for the e-group members
-  test.fixme("is labelled restricted for the members of its e-group", async ({
+  test("is labelled restricted for the members of its e-group", async ({
     page,
+    ui,
     users,
   }) => {
+    test.skip(ui === "angularjs", "fixed on the React branch only");
     await login(page, users.reader);
+    // They know that the record is restricted, not who can read or edit it
+    const api = await getJSON(page.request, `/api/record/${video.id}`);
+    expect(api.metadata._access).toEqual({ status: "restricted" });
     await page.goto(`/record/${video.id}`);
-    await expect(page.getByText("Restricted", { exact: true })).toBeVisible();
+    await expect(recordTitle(page, video.metadata.title.title)).toBeVisible();
+    await expect(
+      page.getByText("Restricted", { exact: true }).first()
+    ).toBeVisible();
   });
 
   for (const role of ["user", "admin"]) {
