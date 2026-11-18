@@ -11,7 +11,8 @@
 
 # An instance for the end to end tests, on empty services: the database, the
 # indices, the users and fixtures of scripts/setup (without the keywords
-# harvested from home.cern) and the records of seed.py.
+# harvested from home.cern), the users of the access tests and the records of
+# seed.py.
 
 set -o errexit
 set -o nounset
@@ -29,6 +30,13 @@ cds roles create admin
 cds roles create cern-user
 cds roles add test@test.ch cern-user
 cds roles add admin@test.ch admin
+# For the access tests: a member of the e-group of the restricted record of
+# seed.py, and a user who can upload but has no access to that record
+cds users create reader@test.ch -a --password=123456
+cds users create other@test.ch -a --password=123456
+cds roles create e2e-readers@cern.ch
+cds roles add reader@test.ch e2e-readers@cern.ch
+cds roles add other@test.ch cern-user
 cds access allow deposit-admin-access role admin
 cds access allow superuser-access role admin
 cds access allow videos-upload-access role cern-user

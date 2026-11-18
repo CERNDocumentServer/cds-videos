@@ -10,7 +10,7 @@ const base = require("@playwright/test");
 const { expect } = base;
 const env = process.env;
 
-// The users of ``scripts/setup``
+// The users of ``setup.sh``
 const USERS = {
   user: {
     email: env.E2E_USER_EMAIL || "test@test.ch",
@@ -20,7 +20,21 @@ const USERS = {
     email: env.E2E_ADMIN_EMAIL || "admin@test.ch",
     password: env.E2E_ADMIN_PASSWORD || "123456",
   },
+  // Member of the e-group that can read the restricted record, without the
+  // upload permission
+  reader: {
+    email: env.E2E_READER_EMAIL || "reader@test.ch",
+    password: env.E2E_READER_PASSWORD || "123456",
+  },
+  // Can upload, without access to the records of the other users
+  other: {
+    email: env.E2E_OTHER_EMAIL || "other@test.ch",
+    password: env.E2E_OTHER_PASSWORD || "123456",
+  },
 };
+
+// The e-group of the restricted record of ``seed.py``
+const READERS = env.E2E_READERS_EGROUP || "e2e-readers@cern.ch";
 
 const JSON_HEADERS = { Accept: "application/json" };
 
@@ -66,15 +80,29 @@ function hitsTotal(hits) {
   return typeof hits.total === "object" ? hits.total.value : hits.total;
 }
 
-// Published records to test with, read from the REST API as an admin
+function isRestricted(hit) {
+  return ((hit.metadata._access || {}).read || []).length > 0;
+}
+
+// The project and the deposit of a published video, as an admin
+async function loadProject(request, video) {
+  const deposit = await getJSON(
+    request,
+    `/api/deposits/project/${video.metadata._project_id}`
+  );
+  return getJSON(request, `/api/record/${deposit.metadata._deposit.pid.value}`);
+}
+
+// Published records to test with, read from the REST API: the public ones
+// as an anonymous user, the restricted ones as an admin
 async function loadData(browser, baseURL) {
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
   });
   const page = await context.newPage();
-  await login(page, USERS.admin);
   const search = await getJSON(context.request, "/api/records/?size=100");
+  await login(page, USERS.admin);
   const videos = search.hits.hits;
   if (videos.length === 0) {
     throw new Error("The tests need at least one published video");
@@ -87,14 +115,16 @@ async function loadData(browser, baseURL) {
         (hit.metadata.keywords || []).length > 0 &&
         hit.metadata._project_id
     ) || videos[0];
-  const deposit = await getJSON(
-    context.request,
-    `/api/deposits/project/${video.metadata._project_id}`
+  const project = await loadProject(context.request, video);
+  // A restricted video of a restricted project, if any
+  const all = await getJSON(context.request, "/api/records/?size=100");
+  const hidden = all.hits.hits.find(
+    (hit) => isRestricted(hit) && hit.metadata._project_id
   );
-  const project = await getJSON(
-    context.request,
-    `/api/record/${deposit.metadata._deposit.pid.value}`
-  );
+  const restricted = hidden && {
+    video: hidden,
+    project: await loadProject(context.request, hidden),
+  };
   await context.close();
   return {
     total: hitsTotal(search.hits),
@@ -102,6 +132,7 @@ async function loadData(browser, baseURL) {
     videos,
     video,
     project,
+    restricted,
   };
 }
 
@@ -169,6 +200,30 @@ async function strapSelect(page, ui, index, label) {
   }
 }
 
+// The labels of the options of a strap select (index 0 or 1)
+async function strapOptions(page, ui, index) {
+  if (ui === "angularjs") {
+    await page
+      .locator(".cds-deposit-strap-select button:visible")
+      .nth(index)
+      .click();
+    const options = page.locator("ul.dropdown-menu:visible a");
+    await expect(options.first()).toBeVisible();
+    const labels = await options.allTextContents();
+    await page.keyboard.press("Escape");
+    return labels.map((label) => label.trim());
+  }
+  const dropdown = page
+    .locator(".cds-deposit-strap-select .ui.dropdown:visible")
+    .nth(index);
+  await dropdown.click();
+  const options = dropdown.getByRole("option");
+  await expect(options.first()).toBeVisible();
+  const labels = await options.allTextContents();
+  await page.keyboard.press("Escape");
+  return labels.map((label) => label.trim());
+}
+
 // The title of a record page
 function recordTitle(page, title) {
   return page.getByRole("heading", { level: 1, name: title, exact: true });
@@ -191,6 +246,8 @@ function searchParams(page) {
 module.exports = {
   test,
   expect,
+  READERS,
+  isRestricted,
   login,
   userMenu,
   getJSON,
@@ -199,6 +256,7 @@ module.exports = {
   selectSort,
   sortControl,
   strapSelect,
+  strapOptions,
   recordTitle,
   facetValue,
   escapeRegExp,
