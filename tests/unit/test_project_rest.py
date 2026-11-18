@@ -90,7 +90,7 @@ def test_simple_workflow(
     project_deposit_metadata["_access"]["update"].append("test@videos.ch")
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # [[ CREATE NEW PROJECT ]]
         res = client.post(
@@ -103,7 +103,7 @@ def test_simple_workflow(
         assert res.status_code == 201
         project_dict = json.loads(res.data.decode("utf-8"))
         assert project_dict["metadata"]["videos"] == []
-        assert User.query.get(users[0]).email in project_dict["metadata"]["_access"]["update"] 
+        assert db.session.get(User, users[0]).email in project_dict["metadata"]["_access"]["update"] 
         assert "test@videos.ch" in project_dict["metadata"]["_access"]["update"] 
         assert project_dict["metadata"]["title"]["title"] == "my project"
         assert project_dict["links"]["bucket"].startswith("http://localhost/files/")
@@ -433,7 +433,7 @@ def test_publish_project_check_indexed(
 ):
     """Test create a project and check project and videos are indexed."""
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # [[ GET EMPTY PROJECT LIST ]]
         res = client.get(
@@ -534,7 +534,7 @@ def test_boolean_fields_are_indexed(api_app, es, api_project, users, json_header
     """Test boolean fields (i.e. featured and vr) are indexed."""
     (project, video_1, video_2) = api_project
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # [[ PUBLISH THE PROJECT ]]
         prepare_videos_for_publish([video_1, video_2])
@@ -624,12 +624,12 @@ def test_project_access_rights_based_on_user_id(api_app, users, api_project):
         assert client.get(deposit_url).status_code == 401
         assert client.post(publish_url).status_code == 401
         # User is the creator of the deposit, so everything is fine
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         assert client.get(deposit_url).status_code == 200
         assert client.post(publish_url).status_code == 202
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         deposit_url = url_for("invenio_deposit_rest.project_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.project_actions",
@@ -659,7 +659,7 @@ def test_project_access_rights_based_on_egroup(api_app, users, api_project):
         project["_access"] = {"update": ["test-egroup@cern.ch"]}
         project.commit()
         db.session.commit()
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         deposit_url = url_for("invenio_deposit_rest.project_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.project_actions",
@@ -676,7 +676,7 @@ def test_project_access_rights_based_admin(api_app, users, api_project):
     cds_depid = project["_deposit"]["id"]
     with api_app.test_client() as client:
         prepare_videos_for_publish([video_1, video_2])
-        login_user(User.query.get(users[2]))
+        login_user(db.session.get(User, users[2]))
         deposit_url = url_for("invenio_deposit_rest.project_item", pid_value=cds_depid)
         publish_url = url_for(
             "invenio_deposit_rest.project_actions",
@@ -695,7 +695,7 @@ def test_deleted(api_app, es, db, location, api_project, users, json_headers):
         return [video["_deposit"]["id"] for video in project["videos"]]
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # check project contains both videos
         pid = project["_deposit"]["id"]
@@ -824,7 +824,7 @@ def test_default_order(
         assert hits == orders
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # test order: title descending
         res = client.get(
@@ -885,7 +885,7 @@ def test_search_excluded_fields(
                 }
             ],
         )
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         project = project.publish()
 
         video = project.videos[0]
@@ -954,7 +954,7 @@ def test_aggregations(api_app, es, users, location, db, deposit_metadata, json_h
         },
     )
     prepare_videos_for_publish([video_1, video_2])
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     project_2 = project_2.publish()
     project_2.commit()
     db.session.commit()
@@ -994,7 +994,7 @@ def test_aggregations(api_app, es, users, location, db, deposit_metadata, json_h
         assert res["doc_count"] == doc_count
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # test: get all
         res = client.get(
@@ -1094,7 +1094,7 @@ def test_sync_access_rights(
         assert data["metadata"]["_access"] == access_rights
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # create a new video
         video_metadata = deepcopy(video_deposit_metadata)
@@ -1140,7 +1140,7 @@ def test_sync_access_rights(
         del project_dict["_files"]
         project_dict["title"]["title"] = "changed.. 2"
         # user1 can now access to the project
-        access_rights["update"] = [User.query.get(users[1]).email]
+        access_rights["update"] = [db.session.get(User, users[1]).email]
         project_dict["_access"] = deepcopy(access_rights)
         res = client.put(
             url_for("invenio_deposit_rest.project_item", pid_value=project_depid),
@@ -1156,7 +1156,7 @@ def test_sync_access_rights(
         check_project_access_rights(project_depid)
 
     with api_app.test_client() as client:
-        user_2 = User.query.get(users[1])
+        user_2 = db.session.get(User, users[1])
         user_2_id = str(user_2.id)
         user_2_email = user_2.email
 
@@ -1195,10 +1195,10 @@ def test_sync_owners(
     json_partial_video_headers,
 ):
     """Test default project order."""
-    user_1 = User.query.get(users[0])
+    user_1 = db.session.get(User, users[0])
     user_1_id = str(user_1.id)
     user_1_email = user_1.email
-    user_2 = User.query.get(users[1])
+    user_2 = db.session.get(User, users[1])
     user_2_id = str(user_2.id)
     user_2_email = user_2.email
 
@@ -1294,19 +1294,19 @@ def test_project_edit_links(api_app, app, project_published, json_headers, users
 
     # check user2 can't see links
     with api_app.test_client() as client:
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         check_links(url_video_1, False)
         check_links(url_project, False)
 
     # check user1 (owner) can see links
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         project_link_1 = check_links(url_video_1, True)
         project_link_2 = check_links(url_project, True)
         assert project_link_1 == project_link_2
     # check project links
     with app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         res = client.get(project_link_1, headers=json_headers, follow_redirects=True)
         assert res.status_code == 200
 
@@ -1324,7 +1324,7 @@ def test_modified_by(api_app, api_project, users, json_headers):
     assert "modified_by" not in video_2["_cds"]
     assert "modified_by" not in project["_cds"]
 
-    user_1 = User.query.get(users[0])
+    user_1 = db.session.get(User, users[0])
     with api_app.test_client() as client:
         # login as user_1
         login_user(user_1)

@@ -106,7 +106,7 @@ def test_video_publish_and_edit(api_project, users):
     # update video
 
     # [publish the video 1]
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     prepare_videos_for_publish([video_1])
     video_1 = video_1.publish()
 
@@ -196,7 +196,7 @@ def test_delete_video_published(api_project, force, users):
     (project, video_1, video_2) = api_project
     prepare_videos_for_publish([video_1, video_2])
 
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_2 = video_2.publish()
 
     project_id = project.id
@@ -419,7 +419,7 @@ def test_video_publish_with_no_category(api_project, users):
     assert "type" in project
     project.commit()
     db.session.commit()
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     with pytest.raises(ValidationError):
         video_1.publish()
 
@@ -435,7 +435,7 @@ def test_video_publish_with_no_type(api_project, users):
     project.commit()
     db.session.commit()
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     with pytest.raises(ValidationError):
         video_1.publish()
 
@@ -451,7 +451,7 @@ def test_video_publish_with_category_and_type(api_project, users):
     project.commit()
     db.session.commit()
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1.publish()
     assert video_1["_deposit"]["status"] == "published"
 
@@ -533,7 +533,7 @@ def test_deposit_vtt_tags(api_app, db, api_project, users):
     # publish the video
     prepare_videos_for_publish([video_1])
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1 = video_1.publish()
 
     # check tags
@@ -614,7 +614,7 @@ def test_deposit_poster_tags(api_app, db, api_project, users):
     # publish the video
     prepare_videos_for_publish([video_1])
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1 = video_1.publish()
 
     # check tags
@@ -673,7 +673,7 @@ def test_deposit_smil_tag_generation(api_app, db, api_project, users):
     # publish the video
     prepare_videos_for_publish([video_1])
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1 = video_1.publish()
 
     # check smil
@@ -705,7 +705,7 @@ def test_video_name_after_publish(api_app, db, api_project, users):
     # publish the video
     prepare_videos_for_publish([video_1])
     video_1 = deposit_video_resolver(video_1_depid)
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     video_1 = video_1.publish()
 
     _, record = video_1.fetch_published()

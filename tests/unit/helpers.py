@@ -276,7 +276,7 @@ def new_project(app, users, db, deposit_metadata, project_data=None):
     project_video_2.update(deposit_metadata)
     indexer = RecordIndexer()
     with app.test_request_context():
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # create empty project
         project = Project.create(project_data).commit()
@@ -561,6 +561,7 @@ def mock_compute_status(cls, statuses):
 
 
 class TestFlow(FlowService):
+    __test__ = False  # a flow for the tests, not a test class
 
     def build_steps(self):
         self._tasks.append((sse_simple_add(), {"x": 1, "y": 2}))

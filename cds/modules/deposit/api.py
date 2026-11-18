@@ -85,6 +85,7 @@ from ..records.utils import (
 )
 from ..records.validators import PartialDraft4Validator
 from ..records.permissions import is_public
+from ..utc import utcnow
 from .errors import DiscardConflict
 from .resolver import get_video_pid
 
@@ -348,7 +349,7 @@ class CDSDeposit(Deposit):
                 "No current user found, keeping previous value for" " _cds.modified_by"
             )
         if "publication_date" not in self:
-            now = datetime.datetime.utcnow().date().isoformat()
+            now = utcnow().date().isoformat()
             self["publication_date"] = now
         return super(CDSDeposit, self).publish(pid=pid, id_=id_, **kwargs)
 

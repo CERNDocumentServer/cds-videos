@@ -59,7 +59,7 @@ def test_deposit_link_factory_has_bucket(
 ):
     """Test bucket link factory retrieval of a bucket."""
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
 
         # Test links for project
         res = client.post(
@@ -132,7 +132,7 @@ def test_serialize_project(app, api_app, es, api_project, users, json_headers):
     pid_value = project["_deposit"]["id"]
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         res = client.get(
             url_for("invenio_deposit_rest.project_item", pid_value=pid_value),
             headers=json_headers,
@@ -146,7 +146,7 @@ def test_serialize_project(app, api_app, es, api_project, users, json_headers):
     pid = PersistentIdentifier.get("depid", pid_value)
     record = Project.get_record(pid.object_uuid)
     with app.test_request_context():
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         embedded = json.loads(json.dumps(serialize_project(pid, record)))
 
     assert sorted(embedded) == sorted(expected)
@@ -168,7 +168,7 @@ def test_serialize_project(app, api_app, es, api_project, users, json_headers):
 
     # Nothing is embedded for users who can not read the project
     with app.test_request_context():
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         assert serialize_project(pid, record) is None
 
 
@@ -241,7 +241,7 @@ def test_deposit_prepare_edit(api_app, db, location, project_deposit_metadata, u
     )
 
     # publish
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     deposit = deposit.publish()
     _, record = deposit.fetch_published()
     assert deposit.is_published() is True

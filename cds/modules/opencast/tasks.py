@@ -364,7 +364,7 @@ def on_transcoding_completed(
     bucket = None
     bucket_was_locked = False
 
-    flow_task = FlowTaskMetadata.query.get(flow_task_id)
+    flow_task = db.session.get(FlowTaskMetadata, flow_task_id)
     if not flow_task:
         return
     set_revoke_handler(
@@ -492,7 +492,7 @@ def on_celery_task_failed(request, exc, traceback, data, **kwargs):
 def _set_flow_tasks_to_failed(flow_tasks_ids_with_error):
     """Set the given Flow Task to failed."""
     for id_, error in flow_tasks_ids_with_error:
-        flow_task = FlowTaskMetadata.query.get(id_)
+        flow_task = db.session.get(FlowTaskMetadata, id_)
         flow_task.status = FlowTaskStatus.FAILURE
         flow_task.message = error
 

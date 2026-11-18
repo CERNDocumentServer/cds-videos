@@ -44,6 +44,7 @@ from invenio_records.signals import after_record_update, before_record_update
 from invenio_records_files.api import Record
 from invenio_records_files.models import RecordsBuckets
 from invenio_search.engine import search
+from jsonpatch import apply_patch
 from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.local import LocalProxy
 
@@ -490,14 +491,15 @@ class Deposit(Record):
 
     @has_status
     @preserve
-    def patch(self, *args, **kwargs):
+    def patch(self, operations):
         """Patch only drafts.
 
         Status required: ``'draft'``.
 
-        Meta information inside `_deposit` are preserved.
+        Meta information inside `_deposit` are preserved. Applies the JSON
+        patch as ``Record.patch``, which Invenio-Records deprecates.
         """
-        return super(Deposit, self).patch(*args, **kwargs)
+        return self.__class__(apply_patch(dict(self), operations), model=self.model)
 
     def _create_bucket(self):
         """Override bucket creation."""

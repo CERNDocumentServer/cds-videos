@@ -29,5 +29,5 @@ class CDSDataCite41Serializer(DataCite41Serializer):
     """Drupal serializer for records."""
 
     def dump(self, obj, context=None):
-        """Serialize object with schema."""
-        return self.schema_class(context=context).dump(obj)
+        """Serialize object with schema (no schema reads the context)."""
+        return self.schema_class().dump(obj)

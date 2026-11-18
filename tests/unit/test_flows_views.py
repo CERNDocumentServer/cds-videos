@@ -44,6 +44,7 @@ from helpers import (
     mock_current_user,
 )
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import Bucket, ObjectVersion, ObjectVersionTag
 from invenio_records.models import RecordMetadata
 
@@ -75,7 +76,7 @@ def check_restart_avc_workflow(
     assert ObjectVersionTag.query.count() == 2 * get_tag_count()
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
     # check elasticsearch
@@ -96,7 +97,7 @@ def check_restart_avc_workflow(
         assert resp.status_code == 401
 
     # check feedback from another user without access
-    user_2 = User.query.get(users[1])
+    user_2 = db.session.get(User, users[1])
     user_2_email = user_2.email
     with api_app.test_request_context():
         url = url_for(
@@ -109,7 +110,7 @@ def check_restart_avc_workflow(
         assert resp.status_code == 403
 
     # check feedback from another user with access
-    user_2 = User.query.get(users[1])
+    user_2 = db.session.get(User, users[1])
     user_2_id = str(user_2.id)
     user_2_email = user_2.email
     project = deposit_video_resolver(video_1_depid).project
@@ -164,7 +165,7 @@ def check_video_transcode_delete(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
     # check bucket size
@@ -191,7 +192,7 @@ def check_video_transcode_delete(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
 
@@ -225,7 +226,7 @@ def check_video_transcode_restart(
     assert ObjectVersionTag.query.count() == get_tag_count() + 14
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
     # check task id is changed
@@ -263,7 +264,7 @@ def check_video_frames(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
 
@@ -293,7 +294,7 @@ def check_video_download(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is not there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
 
@@ -320,7 +321,7 @@ def check_video_metadata_extraction(
     assert ObjectVersionTag.query.count() == get_tag_count()
 
     # check extracted metadata is not there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" not in record.json["_cds"]
 
 
@@ -364,7 +365,7 @@ def test_avc_workflow_delete(
         data = json.loads(resp.data.decode("utf-8"))
 
     # check extracted metadata is there
-    record = RecordMetadata.query.get(video_1_id)
+    record = db.session.get(RecordMetadata, video_1_id)
     assert "extracted_metadata" in record.json["_cds"]
 
     assert ObjectVersion.query.count() == get_object_count()
@@ -465,7 +466,7 @@ def test_flows_delete(
         #     payload['version_id'] = str(local_file)
 
         # run the workflow!
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         resp = client.post(url, headers=json_headers, data=json.dumps(payload))
 
         # check event is created
@@ -518,7 +519,7 @@ def test_flows_reload_master(
         )
 
         # run the workflow!
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         resp = client.post(
             url_run_workflow, headers=json_headers, data=json.dumps(payload)
         )

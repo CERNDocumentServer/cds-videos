@@ -31,6 +31,7 @@ import pytest
 from flask_principal import RoleNeed, identity_loaded
 from flask_security import login_user
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_records.api import Record
 
 from cds.modules.records.permissions import (
@@ -104,7 +105,7 @@ def test_record_access(db, users, access, action, is_allowed):
         identity.provides |= set(roles)
 
     def login_and_test(user_id):
-        login_user(User.query.get(user_id))
+        login_user(db.session.get(User, user_id))
 
         # Create record
         id = uuid.uuid4()

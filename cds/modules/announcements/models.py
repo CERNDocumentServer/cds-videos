@@ -28,7 +28,8 @@ from datetime import datetime
 
 from invenio_db import db
 from sqlalchemy import and_, or_
-from sqlalchemy_utils.models import Timestamp
+
+from cds.modules.utc import Timestamp
 
 
 class Announcement(db.Model, Timestamp):

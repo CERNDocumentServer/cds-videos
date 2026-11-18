@@ -31,6 +31,7 @@ from flask import url_for
 from flask_security import login_user
 from helpers import new_project, prepare_videos_for_publish
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_files_rest.models import ObjectVersion, ObjectVersionTag
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.models import RecordsBuckets
@@ -83,7 +84,7 @@ def test_preview_video(
     success_list = ["new THEOplayer.Player", "player.source"]
 
     if publish:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         prepare_videos_for_publish([video_1])
         video_1 = video_1.publish()
         assert video_1.status == "published"
@@ -193,7 +194,7 @@ def test_preview_video_html5(
     ]
 
     if publish:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         prepare_videos_for_publish([video_1])
         video_1 = video_1.publish()
         assert video_1.status == "published"
@@ -241,7 +242,7 @@ def test_legacy_embed(previewer_app, db, api_project, video, users):
     obj = ObjectVersion.create(bucket=bucket_id, key=filename, stream=open(video, "rb"))
     ObjectVersionTag.create(obj, "context_type", "master")
     ObjectVersionTag.create(obj, "preview", "true")
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     prepare_videos_for_publish([video_1])
     video_1 = video_1.publish()
     # The test client has its own session (Flask-SQLAlchemy 3)
@@ -313,7 +314,7 @@ def test_smil_generation(previewer_app, db, api_project, video, users):
     )
 
     # publish video
-    login_user(User.query.get(users[0]))
+    login_user(db.session.get(User, users[0]))
     prepare_videos_for_publish([video_1])
     video_1.publish()
     _, video_record = video_1.fetch_published()

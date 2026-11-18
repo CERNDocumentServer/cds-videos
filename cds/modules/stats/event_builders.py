@@ -7,11 +7,12 @@
 
 """Custom event builders for the CDS Videos statistics."""
 
-import datetime
 from os.path import splitext
 
 from invenio_search.engine import dsl
 from invenio_stats.utils import get_user
+
+from cds.modules.utc import utcnow
 
 
 def file_download_event_builder(event, sender_app, obj=None, record=None, **kwargs):
@@ -32,7 +33,7 @@ def file_download_event_builder(event, sender_app, obj=None, record=None, **kwar
     event.update(
         {
             # When:
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": utcnow().isoformat(),
             # What:
             "format": content_type,
             "type": media_type,
@@ -65,7 +66,7 @@ def media_record_view_event_builder(event, sender_app, obj=None, record=None, **
     event.update(
         {
             # When:
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": utcnow().isoformat(),
             # What:
             "recid": str(recid),
             "format": content_type,
@@ -91,7 +92,7 @@ def record_view_event_builder(event, sender_app, pid=None, record=None, **kwargs
     event.update(
         {
             # When:
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": utcnow().isoformat(),
             # What:
             "record_id": str(record.id),
             "pid_type": pid.pid_type,

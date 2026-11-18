@@ -31,6 +31,7 @@ from flask import g, url_for
 from flask_principal import RoleNeed, UserNeed, identity_loaded
 from flask_security import login_user
 from invenio_accounts.models import User
+from invenio_db import db
 from invenio_indexer.api import RecordIndexer
 from invenio_search import current_search_client
 
@@ -83,7 +84,7 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
     current_search_client.indices.refresh()
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[0]))
+        login_user(db.session.get(User, users[0]))
         url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 
@@ -94,10 +95,10 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
     @identity_loaded.connect
     def mock_identity_provides(sender, identity):
         """Add additional group to the user."""
-        identity.provides |= set([RoleNeed(User.query.get(users[1]).email)])
+        identity.provides |= set([RoleNeed(db.session.get(User, users[1]).email)])
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[1]))
+        login_user(db.session.get(User, users[1]))
         url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
 
@@ -108,7 +109,7 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
         # Add user1 as editor for this deposit
         # Check that user1 email is case insensitive
         proj = api_project[0]
-        proj["_access"] = {"update": [User.query.get(users[1]).email.capitalize()]}
+        proj["_access"] = {"update": [db.session.get(User, users[1]).email.capitalize()]}
         proj.commit()
         RecordIndexer().index(proj)
         current_search_client.indices.refresh()
@@ -126,7 +127,7 @@ def test_deposit_search(api_app, es, users, api_project, json_headers):
         identity.provides |= set([RoleNeed("superuser")])
 
     with api_app.test_client() as client:
-        login_user(User.query.get(users[2]))
+        login_user(db.session.get(User, users[2]))
         url = url_for("invenio_deposit_rest.project_list", q="")
         res = client.get(url, headers=json_headers)
         assert res.status_code == 200
