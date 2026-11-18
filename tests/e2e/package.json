@@ -2,6 +2,9 @@
   "name": "cds-videos-e2e",
   "private": true,
   "description": "End to end tests of CDS Videos, run against the AngularJS and the React interface",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "test": "playwright test",
     "test:angularjs": "playwright test --project=angularjs",

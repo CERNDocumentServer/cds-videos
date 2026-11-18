@@ -45,10 +45,11 @@ videos.
 
 The `tests-e2e` job of `.github/workflows/tests.yml` builds the assets, starts
 PostgreSQL, OpenSearch and Redis with `docker-services-cli`, runs `setup.sh`,
-starts the server on `https://127.0.0.1:5001` and runs the `react` project.
-There is no Celery worker, so the tasks of new uploads stay in the queue. On
-failure the job uploads the HTML report, the traces and the server log as the
-`playwright-report` artifact. Playwright needs Node.js 20 or later.
+starts the server on `https://127.0.0.1:5001` and runs the `react` project,
+once per LTS line of Node.js (24 and 26). There is no Celery worker, so the
+tasks of new uploads stay in the queue. On failure the job uploads the HTML
+report, the traces and the server log as the `playwright-report-node-<version>`
+artifact. The tests need Node.js 24 or later.
 
 ## Settings
 

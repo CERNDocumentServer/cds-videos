@@ -28,9 +28,13 @@ on:
 jobs:
   Tests:
     runs-on: ubuntu-22.04
+    # Python 3.15 is not supported yet: its job may fail without failing the
+    # workflow
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.14", "3.15"]
         db-service: [postgresql14]
         search-service: [opensearch2]
         cache-service: [redis]
@@ -38,6 +42,8 @@ jobs:
         include:
           - db-service: postgresql14
             DB_EXTRAS: "postgresql"
+          - python-version: "3.15"
+            experimental: true
 
     env:
       DB: ${{ matrix.db-service }}
@@ -90,8 +96,13 @@ jobs:
 
   tests-e2e:
     # Playwright tests of the React interface (tests/e2e), on a running
-    # instance seeded by tests/e2e/setup.sh
+    # instance seeded by tests/e2e/setup.sh, with the LTS lines of Node.js
+    name: tests-e2e (Node.js ${{ matrix.node-version }})
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["24", "26"]
     env:
       INVENIO_SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
       # No Celery worker: the tasks of new uploads stay in the queue
@@ -116,11 +127,17 @@ jobs:
           python-version: "3.14"
           enable-cache: true
 
+      # The runner's Node.js (20) runs Playwright otherwise
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@v3
         with:
           version: 11
-          runtime: node@24
+          runtime: node@${{ matrix.node-version }}
           cache: true
           cache-dependency-path: pnpm-lock.yaml
           install: false
@@ -158,6 +175,7 @@ jobs:
         working-directory: tests/e2e
         run: |
           npm install
+          node --version
           npx playwright install --with-deps chromium
 
       - name: Run end to end tests
@@ -169,7 +187,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-node-${{ matrix.node-version }}
           path: |
             tests/e2e/playwright-report/
             tests/e2e/test-results/
