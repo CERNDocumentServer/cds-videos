@@ -72,7 +72,7 @@ export function ContributorsField({ roles }) {
             placeholder="Author name"
             required
             fetchOptions={fetchAuthors}
-            minLength={3}
+            minLength={2}
             delay={500}
             onSelect={(item, setValue) => {
               // The whole contributor is replaced (as with ui-select)

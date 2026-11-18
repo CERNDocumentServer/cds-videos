@@ -33,9 +33,10 @@ function useDebouncedSearch(fetchOptions, delay, minLength) {
       setLoading(false);
       return;
     }
+    // Searching from the first key press, not only once the delay is over
+    const current = ++request.current;
+    setLoading(true);
     timer.current = setTimeout(async () => {
-      const current = ++request.current;
-      setLoading(true);
       let items = [];
       try {
         items = (await fetchOptions(query)) || [];
@@ -69,15 +70,23 @@ function highlight(text, query) {
   );
 }
 
+/** The message of the menu when it has no suggestions. */
+function searchStatus(query, minLength, loading) {
+  if (!query) return null;
+  if (query.length < minLength) return `Type at least ${minLength} characters`;
+  return loading ? "Searching..." : "No results found.";
+}
+
 /**
  * Single value select with remote suggestions. ``fetchOptions(query)``
- * resolves to items ``{name, value, email}``; ``onSelect`` gets the item.
+ * resolves to items ``{name, value, email}``, ``onSelect`` gets the item.
+ * While it searches, a spinner replaces the caret and the menu says so.
  */
 export function AsyncSelect({
   text = "",
   placeholder = "",
   fetchOptions,
-  minLength = 3,
+  minLength = 2,
   delay = 100,
   disabled = false,
   onSelect,
@@ -108,10 +117,20 @@ export function AsyncSelect({
     <Dropdown
       fluid
       selection
-      icon={<span className="cds-caret" />}
+      icon={
+        // Semantic UI only animates an i.icon of a loading dropdown, not
+        // the caret
+        loading ? (
+          <i
+            className="cds-async-select-spinner notched circle loading icon"
+            aria-label="Searching"
+          />
+        ) : (
+          <span className="cds-caret" />
+        )
+      }
       name={name}
       disabled={disabled}
-      loading={loading}
       placeholder={placeholder}
       options={options}
       value={text ? "__current" : null}
@@ -119,7 +138,7 @@ export function AsyncSelect({
       searchQuery={query}
       selectOnBlur={false}
       selectOnNavigation={false}
-      noResultsMessage={null}
+      noResultsMessage={searchStatus(query, minLength, loading)}
       search={(opts) => opts.filter((option) => option.key !== "__current")}
       onSearchChange={(e, data) => {
         setQuery(data.searchQuery);
