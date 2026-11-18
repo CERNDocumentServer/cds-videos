@@ -25,6 +25,87 @@
 Changes
 =======
 
+Version 3.0.0 (2026-11-18)
+
+Major release: a new user interface and a new Python stack. The database
+must be upgraded with ``scripts/upgrade-database`` and the assets built
+with pnpm and rspack (see the upgrade notes).
+
+Upgrade notes:
+
+- Python 3.14, Node.js 24 (20.19 at least) and pnpm 11. The Docker image is
+  built on ``ghcr.io/inveniosoftware/invenio:debian-python3.14`` and the
+  instance moves from ``/opt/cds_videos`` to ``/opt/invenio``
+- the Python dependencies are locked in ``uv.lock`` (``pyproject.toml``
+  replaces ``setup.cfg``, ``setup.py`` and ``requirements.txt``), the
+  JavaScript ones in the committed ``package.json`` and ``pnpm-lock.yaml``
+- run ``scripts/upgrade-database`` once on a database of 2.x: it stamps
+  two revisions alembic no longer reaches, runs ``alembic upgrade heads``
+  (UTC aware datetimes, JSON to JSONB for the record history and the
+  remote accounts, user profiles moved into the users table), converts
+  the encrypted token columns and restores a unique index of the files.
+  It cannot be reverted, back up the database first. No reindex needed.
+  It stops unless the database session is in UTC: when
+  ``SQLALCHEMY_ENGINE_OPTIONS`` is configured, add
+  ``"connect_args": {"options": "-c timezone=UTC"}`` to it
+- configuration: ``CACHE_TYPE = "RedisCache"`` (Flask-Caching 2),
+  ``TRUSTED_HOSTS`` replaces ``APP_ALLOWED_HOSTS``, ``FLASK_DEBUG``
+  replaces ``FLASK_ENV``
+- the production image installs the ``xrootd`` extra with invenio-xrootd 3
+- additional files with an extension only the MIME tables of Python 3.14
+  know (``.md`` for example) are now accepted, 2.x rejected them as
+  unsupported
+
+User interface:
+
+- ui: replace AngularJS by a React and Semantic UI interface, with the same
+  pages and behaviour. The pages show from the first render (embedded
+  records, placeholders while loading) and load less JavaScript and CSS
+- deposit: the form state is a Redux store, saves run one at a time and
+  always send the latest record (fixes the type lost when the category and
+  the type were saved at once)
+- deposit: publishing a video saves the project and the draft videos first
+- deposit: replace CKEditor 4 (end of life) by HugeRTE for the descriptions
+- deposit: a published video can be collapsed from its sticky header
+- deposit: the video description explains how to write chapters
+- admin: keep the static pages editor in the Invenio-Admin panel and lay it
+  out with the Semantic UI theme
+- ui: build the assets with rspack and install them with pnpm
+
+Fixes:
+
+- records: restricted records are labelled restricted for their readers.
+  Everyone gets ``_access.status``, only the editors get who can read and
+  edit (also for the videos embedded in a project)
+- records: find the chapters in descriptions saved by the new editor, and
+  link only the timestamps starting a line of a description
+- records: the video links no longer load the project deposit
+  (``GET /api/record/<id>`` from about 0.35 s to 0.06 s)
+- records: each chapter frame is loaded once, at one size, instead of
+  two or three times per record page
+- deposit: fetch the project without the browser cache, so the task states
+  are not reset after an upload
+- deposit: reading a file with ``GET /api/deposits/<pid>/files/<key>``
+  failed with a 500 (webargs 8)
+- previewer: fix the subtitles of the local player and of deposit previews
+- global: fix the deprecations of SQLAlchemy 2, Invenio-Records, Python 3.12
+  and marshmallow 4
+
+Dependencies:
+
+- latest major versions of the Invenio modules, Flask 3.1, Werkzeug 3.1,
+  SQLAlchemy 2.0, Flask-SQLAlchemy 3.1, React 18, semantic-ui-react 3 and
+  react-searchkit 4
+
+Tests and documentation:
+
+- tests: Playwright end to end tests of the user interface, including who
+  can see the records, the deposits and the categories
+- ci: end to end tests on Node.js 24 and 26, unit tests on Python 3.14 and
+  3.15 (allowed to fail)
+- docs: ``ARCHITECTURE.rst`` describes the frontend architecture and
+  conventions
+
 Version 2.15.0 (2026-10-29)
 
 - feat(files): add support for EOS storage offloading
