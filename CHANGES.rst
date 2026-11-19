@@ -25,6 +25,18 @@
 Changes
 =======
 
+Version 3.1.0 (2026-11-19)
+
+- deposit: the contributor menu shows the format of a contributor who is
+  not in the CERN directory ("Lastname, Firstname") and offers to add
+  them once both names are typed, after the directory results. An empty
+  contributor or licence field no longer opens on an empty line
+- deposit: the searched fields (contributor name, licence) have no caret,
+  only a spinner while they search
+- deposit: opening a filled contributor or licence searches from its
+  value, which can be edited, and a contributor keeps its role when its
+  name changes
+
 Version 3.0.1 (2026-11-18)
 
 - deposit: the contributors search from the second character, and the
