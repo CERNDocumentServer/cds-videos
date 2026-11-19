@@ -16,7 +16,7 @@ import { DialogModal } from "@js/cds/shared/components/DialogModal";
 import { prevent } from "@js/cds/shared/dom";
 
 import { removeBackendError } from "../state/deposit";
-import { autocompleteAuthors } from "./autocomplete";
+import { authorFromUser, autocompleteAuthors } from "./autocomplete";
 import { useDepositForm } from "./formContext";
 import { SelectField } from "./BasicFields";
 import { RemoteSelectField } from "./RemoteSelectField";
@@ -52,8 +52,9 @@ export function CustomAuthorsInfo() {
 export function ContributorsField({ roles }) {
   const { id } = useDepositForm();
   const dispatch = useDispatch();
+  // The typed author is the "Add" item of the menu, not a suggestion
   const [fetchAuthors] = useState(() =>
-    autocompleteAuthors("/api/ldap/cern-users/")
+    autocompleteAuthors("/api/ldap/cern-users/", { withUserInput: false })
   );
   return (
     <ArrayField
@@ -74,6 +75,13 @@ export function ContributorsField({ roles }) {
             fetchOptions={fetchAuthors}
             minLength={2}
             delay={500}
+            toAddition={authorFromUser}
+            hint={
+              <>
+                Search the CERN directory, or add someone else as{" "}
+                <b>Lastname, Firstname</b>
+              </>
+            }
             onSelect={(item, setValue) => {
               // The whole contributor is replaced (as with ui-select)
               setValue(item.value);

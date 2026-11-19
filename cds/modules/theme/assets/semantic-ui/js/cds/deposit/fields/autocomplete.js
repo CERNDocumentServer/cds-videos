@@ -103,28 +103,34 @@ function formAuthor(author) {
   };
 }
 
-/** Match "Lastname, Firstname". */
-function authorFromUser(query) {
+/** Author typed as "Lastname, Firstname" (both names), or ``null``. */
+export function authorFromUser(query) {
   const authorName = query.match(/^(.*),(.*)$/);
   if (!authorName || authorName.length !== 3) {
     return null;
   }
+  const lastName = authorName[1].trim();
+  const firstName = authorName[2].trim();
+  // Both names, not "Doe," while the first name is still to type
+  if (!lastName || !firstName) {
+    return null;
+  }
   return formAuthor({
-    name:
-      _capitalize(authorName[1].trim()) +
-      ", " +
-      _capitalize(authorName[2].trim()),
+    name: _capitalize(lastName) + ", " + _capitalize(firstName),
   });
 }
 
-/** People and e-groups of the CERN directory. */
-export function autocompleteAuthors(url, extraParams) {
+/**
+ * People and e-groups of the CERN directory. A query "Lastname, Firstname"
+ * also gives that author first, unless ``withUserInput`` is false.
+ */
+export function autocompleteAuthors(url, { withUserInput = true } = {}) {
   return autocomplete(
     url,
     (query) => {
       const userInput = authorFromUser(query);
       const search = userInput ? userInput.name : query;
-      return { query: stripCommas(search), ...(extraParams || {}) };
+      return { query: stripCommas(search) };
     },
     (response, query) => {
       const userInput = authorFromUser(query);
@@ -147,7 +153,9 @@ export function autocompleteAuthors(url, extraParams) {
         }
         return formAuthor(valueObj);
       });
-      prependUserInput(userInput, suggestions);
+      if (withUserInput) {
+        prependUserInput(userInput, suggestions);
+      }
       return suggestions;
     },
     50
