@@ -29,6 +29,8 @@ export function RemoteSelectField({
   minLength = 2,
   delay = 100,
   onSelect = null,
+  toAddition = null,
+  hint = null,
 }) {
   const { value, error, setValue } = useDepositField(name, errorName);
   const disabled = useReadonly();
@@ -52,6 +54,8 @@ export function RemoteSelectField({
         onSelect={(item) =>
           onSelect ? onSelect(item, setValue) : setValue(item.value)
         }
+        toAddition={toAddition}
+        hint={hint}
       />
     </FormGroup>
   );
@@ -68,4 +72,6 @@ RemoteSelectField.propTypes = {
   minLength: PropTypes.number,
   delay: PropTypes.number,
   onSelect: PropTypes.func,
+  toAddition: PropTypes.func,
+  hint: PropTypes.node,
 };

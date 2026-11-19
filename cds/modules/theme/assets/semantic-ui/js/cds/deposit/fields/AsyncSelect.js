@@ -15,7 +15,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Dropdown } from "semantic-ui-react";
+import { Dropdown, DropdownHeader } from "semantic-ui-react";
 
 function useDebouncedSearch(fetchOptions, delay, minLength) {
   const [results, setResults] = useState([]);
@@ -70,9 +70,12 @@ function highlight(text, query) {
   );
 }
 
-/** The message of the menu when it has no suggestions. */
-function searchStatus(query, minLength, loading) {
-  if (!query) return null;
+/**
+ * The message of the menu when it has no suggestions. Before typing, the
+ * hint says what to type, else the minimum length.
+ */
+function searchStatus(query, minLength, loading, hint) {
+  if (!query) return hint ? null : `Type at least ${minLength} characters`;
   if (query.length < minLength) return `Type at least ${minLength} characters`;
   return loading ? "Searching..." : "No results found.";
 }
@@ -81,6 +84,11 @@ function searchStatus(query, minLength, loading) {
  * Single value select with remote suggestions. ``fetchOptions(query)``
  * resolves to items ``{name, value, email}``, ``onSelect`` gets the item.
  * While it searches, a spinner replaces the caret and the menu says so.
+ *
+ * ``toAddition(query)`` gives an item for a value that is not in the
+ * suggestions (or ``null``): once the search is done, the menu offers to add
+ * it after the suggestions, with the name it will have. ``hint`` is shown at
+ * the top of the open menu.
  */
 export function AsyncSelect({
   text = "",
@@ -91,6 +99,8 @@ export function AsyncSelect({
   disabled = false,
   onSelect,
   name = undefined,
+  toAddition = null,
+  hint = null,
 }) {
   const [query, setQuery] = useState("");
   const [results, loading, search] = useDebouncedSearch(
@@ -98,21 +108,48 @@ export function AsyncSelect({
     delay,
     minLength
   );
-  const options = [
-    { key: "__current", value: "__current", text: text || "" },
-  ].concat(
-    results.map((item, index) => ({
-      key: `r${index}`,
-      value: `r${index}`,
-      text: item.name,
-      content: (
-        <>
-          <div>{highlight(item.name, query)}</div>
-          {item.email && <small>&lt;{item.email}&gt;</small>}
-        </>
-      ),
-    }))
-  );
+  const addition = toAddition && query ? toAddition(query) : null;
+  // After the suggestions, once they are in (so that it is not picked by
+  // mistake before they arrive), and not when they have it already
+  const showAddition =
+    addition &&
+    !loading &&
+    !results.some(
+      (item) => String(item.name).toUpperCase() === addition.name.toUpperCase()
+    );
+  // The current value is an option only when there is one: an empty option
+  // showed as an empty line
+  const options = (text ? [{ key: "__current", value: "__current", text }] : [])
+    .concat(
+      results.map((item, index) => ({
+        key: `r${index}`,
+        value: `r${index}`,
+        text: item.name,
+        content: (
+          <>
+            <div>{highlight(item.name, query)}</div>
+            {item.email && <small>&lt;{item.email}&gt;</small>}
+          </>
+        ),
+      }))
+    )
+    .concat(
+      showAddition
+        ? [
+            {
+              key: "__addition",
+              value: "__addition",
+              text: addition.name,
+              className: "addition",
+              content: (
+                <>
+                  <i className="plus icon" /> Add <b>{addition.name}</b>
+                </>
+              ),
+            },
+          ]
+        : []
+    );
   return (
     <Dropdown
       fluid
@@ -138,7 +175,12 @@ export function AsyncSelect({
       searchQuery={query}
       selectOnBlur={false}
       selectOnNavigation={false}
-      noResultsMessage={searchStatus(query, minLength, loading)}
+      noResultsMessage={searchStatus(query, minLength, loading, hint)}
+      header={
+        hint ? (
+          <DropdownHeader className="cds-async-select-hint" content={hint} />
+        ) : undefined
+      }
       search={(opts) => opts.filter((option) => option.key !== "__current")}
       onSearchChange={(e, data) => {
         setQuery(data.searchQuery);
@@ -148,6 +190,8 @@ export function AsyncSelect({
         const match = /^r(\d+)$/.exec(data.value);
         if (match) {
           onSelect(results[parseInt(match[1], 10)]);
+        } else if (data.value === "__addition" && addition) {
+          onSelect(addition);
         }
         setQuery("");
       }}
@@ -165,6 +209,8 @@ AsyncSelect.propTypes = {
   disabled: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
   name: PropTypes.string,
+  toAddition: PropTypes.func,
+  hint: PropTypes.node,
 };
 
 /**
