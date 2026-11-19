@@ -25,6 +25,13 @@
 Changes
 =======
 
+Version 3.1.1 (2026-11-19)
+
+- sentry: logging still works on legacy Sentry servers with the new SDK
+- global: invenio-userprofiles 7.0.4, whose user profiles migration no
+  longer fails on names with an apostrophe or a colon, nor saves missing
+  usernames as 'None'
+
 Version 3.1.0 (2026-11-19)
 
 - deposit: the contributor menu shows the format of a contributor who is
