@@ -126,6 +126,8 @@ jobs:
         with:
           python-version: "3.14"
           enable-cache: true
+          # The server started with uv run still runs when the job ends
+          prune-cache: false
 
       # The runner's Node.js (20) runs Playwright otherwise
       - name: Set up Node.js
