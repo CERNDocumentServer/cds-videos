@@ -155,16 +155,14 @@ export function AsyncSelect({
       fluid
       selection
       icon={
-        // Semantic UI only animates an i.icon of a loading dropdown, not
-        // the caret
+        // No caret, the field is searched. A spinner while it searches
+        // (Semantic UI only animates an i.icon of a loading dropdown)
         loading ? (
           <i
             className="cds-async-select-spinner notched circle loading icon"
             aria-label="Searching"
           />
-        ) : (
-          <span className="cds-caret" />
-        )
+        ) : null
       }
       name={name}
       disabled={disabled}
