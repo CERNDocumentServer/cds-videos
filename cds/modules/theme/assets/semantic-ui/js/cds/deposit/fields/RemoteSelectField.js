@@ -52,7 +52,7 @@ export function RemoteSelectField({
         delay={delay}
         disabled={disabled}
         onSelect={(item) =>
-          onSelect ? onSelect(item, setValue) : setValue(item.value)
+          onSelect ? onSelect(item, setValue, value) : setValue(item.value)
         }
         toAddition={toAddition}
         hint={hint}

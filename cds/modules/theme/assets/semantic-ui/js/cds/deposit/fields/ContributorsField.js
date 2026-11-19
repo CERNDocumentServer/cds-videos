@@ -82,9 +82,13 @@ export function ContributorsField({ roles }) {
                 <b>Lastname, Firstname</b>
               </>
             }
-            onSelect={(item, setValue) => {
-              // The whole contributor is replaced (as with ui-select)
-              setValue(item.value);
+            onSelect={(item, setValue, current) => {
+              // Another person, or the name edited: the role stays
+              setValue(
+                current && current.role
+                  ? { ...item.value, role: current.role }
+                  : item.value
+              );
               dispatch(removeBackendError(id, `${path}.name`));
             }}
           />
