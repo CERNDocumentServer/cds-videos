@@ -33,6 +33,7 @@ from celery.schedules import crontab
 from flask import current_app, session
 from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
+from invenio_logging.sentry import LegacyStoreTransport
 from invenio_oauthclient.contrib import cern_openid
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
@@ -250,6 +251,10 @@ LOGGING_SENTRY_PYWARNINGS = False
 """Enable logging of Python warnings to Sentry."""
 LOGGING_SENTRY_CELERY = False
 """Configure Celery to send logging to Sentry."""
+# Required for sentry-sdk 2.x with pre-envelope Sentry servers (e.g. 9.x)
+# See:
+# https://github.com/inveniosoftware/invenio-logging/blob/101734e/invenio_logging/sentry.py#L139
+LOGGING_SENTRY_INIT_KWARGS = {"transport": LegacyStoreTransport}
 SENTRY_DSN = None
 """Set SENTRY_DSN environment variable."""
 # Sentry uses env var SENTRY_ENVIRONMENT and SENTRY_RELEASE
