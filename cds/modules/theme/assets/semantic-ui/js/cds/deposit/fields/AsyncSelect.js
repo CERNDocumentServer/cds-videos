@@ -74,8 +74,10 @@ function highlight(text, query) {
  * The message of the menu when it has no suggestions. Before typing, the
  * hint says what to type, else the minimum length.
  */
-function searchStatus(query, minLength, loading, hint) {
+function searchStatus(query, minLength, loading, hint, text) {
   if (!query) return hint ? null : `Type at least ${minLength} characters`;
+  // The text of the value, not edited yet
+  if (query === text && !loading) return null;
   if (query.length < minLength) return `Type at least ${minLength} characters`;
   return loading ? "Searching..." : "No results found.";
 }
@@ -84,6 +86,8 @@ function searchStatus(query, minLength, loading, hint) {
  * Single value select with remote suggestions. ``fetchOptions(query)``
  * resolves to items ``{name, value, email}``, ``onSelect`` gets the item.
  * While it searches, a spinner replaces the caret and the menu says so.
+ * Opening a filled field searches its text, selected: typing replaces it,
+ * the arrow keys edit it.
  *
  * ``toAddition(query)`` gives an item for a value that is not in the
  * suggestions (or ``null``): once the search is done, the menu offers to add
@@ -102,7 +106,14 @@ export function AsyncSelect({
   toAddition = null,
   hint = null,
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQueryState] = useState("");
+  // The latest query, also when the Dropdown opens on a search change (it
+  // calls onOpen right after onSearchChange, before a new render)
+  const queryRef = useRef("");
+  const setQuery = (value) => {
+    queryRef.current = value;
+    setQueryState(value);
+  };
   const [results, loading, search] = useDebouncedSearch(
     fetchOptions,
     delay,
@@ -114,6 +125,7 @@ export function AsyncSelect({
   const showAddition =
     addition &&
     !loading &&
+    addition.name.toUpperCase() !== text.toUpperCase() &&
     !results.some(
       (item) => String(item.name).toUpperCase() === addition.name.toUpperCase()
     );
@@ -150,6 +162,21 @@ export function AsyncSelect({
           ]
         : []
     );
+  const startFromText = (e) => {
+    // Not when the field opens because a key was typed in it
+    if (!text || queryRef.current) return;
+    setQuery(text);
+    search(text);
+    const root = e && e.currentTarget;
+    setTimeout(() => {
+      const input =
+        (root && root.querySelector && root.querySelector("input.search")) ||
+        document.activeElement;
+      if (input && input.classList.contains("search")) {
+        input.setSelectionRange(0, input.value.length);
+      }
+    }, 0);
+  };
   return (
     <Dropdown
       fluid
@@ -173,7 +200,7 @@ export function AsyncSelect({
       searchQuery={query}
       selectOnBlur={false}
       selectOnNavigation={false}
-      noResultsMessage={searchStatus(query, minLength, loading, hint)}
+      noResultsMessage={searchStatus(query, minLength, loading, hint, text)}
       header={
         hint ? (
           <DropdownHeader className="cds-async-select-hint" content={hint} />
@@ -183,6 +210,12 @@ export function AsyncSelect({
       onSearchChange={(e, data) => {
         setQuery(data.searchQuery);
         search(data.searchQuery);
+      }}
+      onOpen={startFromText}
+      // Closing without a choice keeps the value, and shows it again
+      onClose={() => {
+        setQuery("");
+        search("");
       }}
       onChange={(e, data) => {
         const match = /^r(\d+)$/.exec(data.value);
