@@ -33,7 +33,6 @@ from celery.schedules import crontab
 from flask import current_app, session
 from flask_login import current_user
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
-from invenio_logging.sentry import LegacyStoreTransport
 from invenio_oauthclient.contrib import cern_openid
 from invenio_opendefinition.config import OPENDEFINITION_REST_ENDPOINTS
 from invenio_records_rest.facets import range_filter, terms_filter
@@ -251,10 +250,22 @@ LOGGING_SENTRY_PYWARNINGS = False
 """Enable logging of Python warnings to Sentry."""
 LOGGING_SENTRY_CELERY = False
 """Configure Celery to send logging to Sentry."""
-# Required for sentry-sdk 2.x with pre-envelope Sentry servers (e.g. 9.x)
-# See:
-# https://github.com/inveniosoftware/invenio-logging/blob/101734e/invenio_logging/sentry.py#L139
-LOGGING_SENTRY_INIT_KWARGS = {"transport": LegacyStoreTransport}
+LOGGING_SENTRY_INIT_KWARGS = {
+    # User-facing 404 errors don't need to be logged.
+    "ignore_errors": ["werkzeug.exceptions.NotFound"],
+    "data_collection": {"user_info": True},
+}
+"""
+Custom args for the Sentry SDK.
+
+data_collection.user_info is True by default, but we keep this here just to be explicit and
+clarify what is happening. This transmits the CDS ID, email, and username of the logged-in
+user, as well as the real client IP address. It does not transmit additional CERN-specific
+data like group membership.
+
+For detailed docs, see: https://docs.sentry.io/platforms/python/integrations/flask/#configure
+and https://docs.sentry.io/platforms/python/data-management/data-collected/#information-about-logged-in-user
+"""
 SENTRY_DSN = None
 """Set SENTRY_DSN environment variable."""
 # Sentry uses env var SENTRY_ENVIRONMENT and SENTRY_RELEASE
