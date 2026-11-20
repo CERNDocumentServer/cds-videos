@@ -50,10 +50,12 @@ export function RelatedEventSection({ record, relatedQueryUrl = "" }) {
     })[0] || {};
   const endpoint = (relatedQueryUrl || "").replace(
     "%s",
-    "related_identifiers.identifier:" +
-      indicoIdentifier.identifier +
-      " AND -recid:" +
-      record.metadata.recid
+    encodeURIComponent(
+      "related_identifiers.identifier:" +
+        indicoIdentifier.identifier +
+        " AND -recid:" +
+        record.metadata.recid
+    )
   );
   return (
     <div>
