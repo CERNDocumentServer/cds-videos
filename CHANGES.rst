@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 3.1.2 (2026-11-20)
+
+- fix(ui): unencoded URLs causing errors
+
 Version 3.1.1 (2026-11-19)
 
 - sentry: logging still works on legacy Sentry servers with the new SDK
