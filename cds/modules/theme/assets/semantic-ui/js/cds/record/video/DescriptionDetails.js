@@ -33,7 +33,11 @@ export function Contributors({ record }) {
           <ul>
             {contribs.map((contrib, index) => (
               <li key={index}>
-                <a href={`/search?q=contributors.name:"${contrib.name}"`}>
+                <a
+                  href={`/search?q=contributors.name:"${encodeURIComponent(
+                    contrib.name
+                  )}"`}
+                >
                   {contrib.name}
                 </a>{" "}
                 {contrib.affiliations

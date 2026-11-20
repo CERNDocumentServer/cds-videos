@@ -85,7 +85,8 @@
   {% if record['keywords'] %}
     {% set keywords = [] %}
     {% for keyword in record['keywords'] %}
-      {% set keywords = keywords.append(keyword['name']) %}
+      {#- Escape backslashes and quotes #}
+      {% set keywords = keywords.append(keyword['name']|replace('\\', '\\\\')|replace('"', '\\"')) %}
     {% endfor %}
     {% set refer_query = '( keywords.name:"%s" ) %s ' % ('" OR keywords.name:"'.join(keywords), refer_query) %}
   {% else %}
@@ -130,7 +131,7 @@
       </div>
       <!-- List group -->
       <div data-cds-search-widget
-           data-endpoint="{{ config.CDS_RECORDS_RELATED_QUERY % refer_query }}"
+           data-endpoint="{{ config.CDS_RECORDS_RELATED_QUERY % (refer_query|urlencode) }}"
            data-template="medium"
            data-loading-message=""></div>
     </div>
