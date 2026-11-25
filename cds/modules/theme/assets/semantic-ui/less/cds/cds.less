@@ -1167,6 +1167,12 @@ body footer {
       height: 30px;
       font-size: 14px;
     }
+
+    // The placeholder of Semantic UI (rgba(191, 191, 191, 0.87)) is too faint
+    // on white: #767676 has the 4.5:1 contrast of WCAG AA
+    .ui.input > input::placeholder {
+      color: #767676;
+    }
   }
 
   .in-this-video-header {
