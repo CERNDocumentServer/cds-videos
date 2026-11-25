@@ -34,6 +34,25 @@ from markupsafe import Markup
 from wtforms import SelectField, TextAreaField
 
 
+def _search_placeholder(self):
+    """Return the labels of the searchable columns, for the search box.
+
+    Flask-Admin 1.6.1 joins them with ``str.join``, which refuses the lazy
+    strings of Flask-Babel (the user identities view of Invenio-Accounts):
+    /admin/useridentity/ failed with a TypeError.
+    """
+    if not self.column_searchable_list:
+        return None
+    return ", ".join(
+        str(self.column_labels.get(getattr(c, "key", c), getattr(c, "key", c)))
+        for c in self.column_searchable_list
+    )
+
+
+# This module is loaded at startup (invenio_admin.views entry point cds_pages)
+ModelView.search_placeholder = _search_placeholder
+
+
 class PagesModelView(ModelView):
     """Static pages admin view."""
 
