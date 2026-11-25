@@ -219,11 +219,10 @@ export function SearchBarSuggestions({
     lastSelected.current = selected.value;
     setValue(selected.value);
     if (inSearch) {
+      // Choosing a suggestion runs the search, as Enter does
       clearTimeout(timers.current.model);
-      timers.current.model = setTimeout(
-        () => store.setUserQuery(selected.value),
-        500
-      );
+      store.setUserQuery(selected.value);
+      store.setArgs({ q: selected.value });
     }
     hide();
     onSelect(selected);
