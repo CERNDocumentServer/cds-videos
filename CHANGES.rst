@@ -25,6 +25,15 @@
 Changes
 =======
 
+Version 3.1.3 (2026-11-26)
+
+- fix(search): run the search when a suggestion is chosen on the search page
+- fix(ui): show the mobile Search button label in the page font
+- fix(ui): contrast of the transcript search placeholder
+- fix(admin): search box of the views with lazy column labels
+- fix(player): hide the THEOplayer right click menu
+- fix(ui): menu button on the right of the logo on small screens
+
 Version 3.1.2 (2026-11-20)
 
 - fix(ui): unencoded URLs causing errors
