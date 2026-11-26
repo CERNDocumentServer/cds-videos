@@ -363,14 +363,7 @@ export function SearchBarSuggestions({
         className="cds-visible-xs ui basic button cds-navbar-form-icon-xs"
         onClick={inSearch ? updateQuery : undefined}
       >
-        {inSearch ? (
-          <>
-            <i className="fa fa-search" />
-            Search
-          </>
-        ) : (
-          <i className="fa fa-search">Search</i>
-        )}
+        <i className="fa fa-search" aria-hidden="true" /> Search
       </button>
     </form>
   );
