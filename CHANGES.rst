@@ -25,6 +25,10 @@
 Changes
 =======
 
+Version 3.1.4 (2026-11-26)
+
+- fix(ui): mobile search bar layout and Search button label
+
 Version 3.1.3 (2026-11-26)
 
 - fix(search): run the search when a suggestion is chosen on the search page
