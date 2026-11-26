@@ -1039,6 +1039,29 @@ body footer {
     .cds-navbar-form-wrapper {
       padding: 10px 0;
     }
+    // as in 2.x: a white search box on the full width, the Search button below it
+    .cds-navbar-form-wrapper #cds-navbar-search {
+      max-width: none;
+    }
+    .cds-navbar-form,
+    .cds-navbar-form.cds-active-search {
+      max-width: none;
+      flex-wrap: wrap;
+      padding: 0;
+      background-color: transparent !important;
+    }
+    .cds-navbar-form-group {
+      flex: 1 1 100%;
+      background-color: #fff;
+      border-radius: 3px;
+      input::placeholder {
+        color: #767676;
+      }
+    }
+    .ui.button.cds-navbar-form-icon-xs {
+      width: 100%;
+      margin: 10px 0 0;
+    }
     .cds-navbar-nav {
       flex-direction: column;
       align-items: stretch;
