@@ -5,24 +5,41 @@
         "type": "object",
         "properties": {
           "project": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "study": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "experiment": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "accelerator": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "facility": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           }
         }
       },
       "report_number": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "accent_analyzer",
+        "search_analyzer": "accent_analyzer",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
       "_created": {
         "type": "date"
@@ -71,10 +88,19 @@
       "title": {
         "properties": {
           "subtitle": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "title": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "source": {
             "type": "text"
@@ -150,7 +176,14 @@
             "type": "text"
           },
           "name": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },
@@ -255,7 +288,9 @@
       "translations": {
         "properties": {
           "description": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "language": {
             "type": "text"
@@ -266,10 +301,14 @@
                 "type": "text"
               },
               "subtitle": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "title": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               }
             }
           }
@@ -286,7 +325,9 @@
         }
       },
       "description": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "accent_analyzer",
+        "search_analyzer": "accent_analyzer"
       },
       "contributors": {
         "properties": {
@@ -313,7 +354,9 @@
             "type": "text"
           },
           "name": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           }
         }
       },
@@ -463,6 +506,30 @@
       },
       "additional_languages": {
         "type": "text"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "strip_special_chars": {
+          "type": "pattern_replace",
+          "pattern": "[\\p{Punct}\\p{S}]",
+          "replacement": " "
+        }
+      },
+      "analyzer": {
+        "accent_analyzer": {
+          "tokenizer": "standard",
+          "type": "custom",
+          "char_filter": [
+            "strip_special_chars"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
       }
     }
   }

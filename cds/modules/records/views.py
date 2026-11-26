@@ -25,6 +25,7 @@ from flask import (
     abort,
     current_app,
     flash,
+    jsonify,
     make_response,
     render_template,
     request,
@@ -32,6 +33,7 @@ from flask import (
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
+from invenio_records_rest.errors import SuggestNoCompletionsRESTError
 from invenio_records_ui.signals import record_viewed
 from werkzeug.utils import import_string
 
@@ -40,6 +42,7 @@ from ..deposit.fetcher import deposit_fetcher
 from .forms import RecordDeleteForm
 from .links import record_ui_link_factory
 from .permissions import record_read_permission_factory
+from .search import title_suggest_search
 from .serializers import json_v1
 from .utils import delete_project_record, delete_video_record, is_project_record
 
@@ -49,6 +52,19 @@ blueprint = Blueprint(
     template_folder="templates",
     static_folder="static",
 )
+
+
+@blueprint.route("/records/_suggest", methods=["GET"])
+def records_title_suggest():
+    """Title typeahead with the same access filter as normal search."""
+    qstr = request.values.get("suggest-title")
+    if not qstr:
+        raise SuggestNoCompletionsRESTError("suggest-title")
+    size = request.values.get("size", type=int)
+    options = title_suggest_search(qstr, size=size)
+    # Shape matches the old completion response so SearchBarSuggestions.js
+    # keeps working unchanged.
+    return make_response(jsonify({"suggest-title": [{"options": options}]}))
 
 
 @blueprint.app_template_filter("pidstatus")

@@ -24,18 +24,26 @@ const HISTORY_ICON = '<i class="fa fa-history text-primary pr-5"></i> ';
 
 const DEBOUNCE = { attach: 300, suggest: 200, blur: 150 };
 
-/** Remote suggestions: record titles followed by the search history. */
+/** Remote suggestions: title completion, then search history. */
 export async function suggestStateRemote(term) {
-  const response = await http.get("/api/records/", {
-    params: { q: term },
+  const response = await http.get("/api/records/_suggest", {
+    params: { "suggest-title": term, size: 10 },
     ignoreLoadingBar: true,
   });
-  return (response.data.hits.hits || [])
-    .map((hit) => ({
-      label: hit.metadata.title.title,
-      value: hit.metadata.title.title,
-    }))
-    .concat(storage.get(HISTORY_PREFIX, HISTORY_KEY) || []);
+  const options =
+    (response.data["suggest-title"] &&
+      response.data["suggest-title"][0] &&
+      response.data["suggest-title"][0].options) ||
+    [];
+  const titles = options
+    .map((opt) => {
+      const title =
+        (opt._source && opt._source.title && opt._source.title.title) ||
+        opt.text;
+      return title ? { label: title, value: title } : null;
+    })
+    .filter(Boolean);
+  return titles.concat(storage.get(HISTORY_PREFIX, HISTORY_KEY) || []);
 }
 
 /** Store a search in the history (``searchSuggestions.onSelect``). */

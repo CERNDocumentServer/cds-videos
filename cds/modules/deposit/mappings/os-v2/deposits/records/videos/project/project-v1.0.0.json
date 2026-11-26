@@ -2,7 +2,14 @@
   "mappings": {
     "properties": {
       "report_number": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "accent_analyzer",
+        "search_analyzer": "accent_analyzer",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
       "_created": {
         "type": "date"
@@ -39,16 +46,22 @@
         }
       },
       "description": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "accent_analyzer",
+        "search_analyzer": "accent_analyzer"
       },
       "keywords": {
         "type": "object",
         "properties": {
           "key_id": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "name": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           }
         }
       },
@@ -56,30 +69,44 @@
         "type": "object",
         "properties": {
           "role": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "ids": {
             "type": "object",
             "properties": {
               "value": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "source": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               }
             }
           },
           "affiliations": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "name": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "email": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "contribution": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           }
         }
       },
@@ -135,31 +162,45 @@
         "type": "object",
         "properties": {
           "_project_id": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "contributors": {
             "properties": {
               "affiliations": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "email": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "ids": {
                 "properties": {
                   "source": {
-                    "type": "text"
+                    "type": "text",
+                    "analyzer": "accent_analyzer",
+                    "search_analyzer": "accent_analyzer"
                   },
                   "value": {
-                    "type": "text"
+                    "type": "text",
+                    "analyzer": "accent_analyzer",
+                    "search_analyzer": "accent_analyzer"
                   }
                 }
               },
               "name": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "role": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               }
             }
           }
@@ -183,22 +224,32 @@
         "type": "object",
         "properties": {
           "description": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "language": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "title": {
             "type": "object",
             "properties": {
               "source": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "subtitle": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               },
               "title": {
-                "type": "text"
+                "type": "text",
+                "analyzer": "accent_analyzer",
+                "search_analyzer": "accent_analyzer"
               }
             }
           }
@@ -253,13 +304,19 @@
         "type": "object",
         "properties": {
           "subtitle": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "source": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           },
           "title": {
             "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer",
             "fields": {
               "raw": {
                 "type": "keyword"
@@ -284,6 +341,30 @@
           "deposit": {
             "type": "text"
           }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "strip_special_chars": {
+          "type": "pattern_replace",
+          "pattern": "[\\p{Punct}\\p{S}]",
+          "replacement": " "
+        }
+      },
+      "analyzer": {
+        "accent_analyzer": {
+          "tokenizer": "standard",
+          "type": "custom",
+          "char_filter": [
+            "strip_special_chars"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
         }
       }
     }

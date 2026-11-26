@@ -54,7 +54,14 @@ def test_aggregations(api_app, es, users, location, db, deposit_metadata, json_h
         assert len(data["aggregations"]["created_by"]["buckets"]) == 1
         assert data["aggregations"]["created_by"]["buckets"][0]["key"] == users[0]
 
-        # Invalid query syntax (Invalid ES syntax)
+        # Messy Lucene-ish syntax must not 400 (Phase 1: simple_query_string)
         url = url_for("invenio_deposit_rest.project_list")
-        res = client.get(url, headers=json_headers, query_string=dict(q="title/back"))
-        assert res.status_code == 400
+        for q in (
+            "title/back",
+            "Prize: Steven",
+            'Nobel Prize "for development" : Steven Chu',
+            "Francois cafe",
+            "title.title:my project",
+        ):
+            res = client.get(url, headers=json_headers, query_string=dict(q=q))
+            assert res.status_code == 200, q

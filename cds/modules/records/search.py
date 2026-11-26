@@ -24,6 +24,7 @@
 
 """Configuration for records search."""
 
+import re
 
 from flask import current_app, g, request
 from flask_login import current_user
@@ -34,6 +35,43 @@ from invenio_search.api import DefaultFilter
 from invenio_search.engine import dsl
 
 from .utils import get_user_provides
+
+# System / facet fields used as Lucene filters but not always in Meta.fields.
+_EXTRA_FILTER_FIELDS = frozenset(
+    {
+        "featured",
+        "vr",
+        "_deposit.id",
+        "_deposit.created_by",
+        "category",
+        "type",
+        "language",
+    }
+)
+
+
+def _filter_field_names(search_obj):
+    """Field names that may appear as ``field:value`` in a query."""
+    names = set(_EXTRA_FILTER_FIELDS)
+    for field in getattr(search_obj.Meta, "fields", ()):
+        names.add(field.split("^", 1)[0])
+    return names
+
+
+def _looks_like_field_filter(qstr, search_obj):
+    """True only for known ``field:…`` filters, not title text with a colon.
+
+    Allows optional spaces after the colon (``title.title: "Higgs"``) and a
+    leading ``(``. Unknown prefixes like ``Prize:Steven`` stay on the free-text
+    path.
+    """
+    if not qstr:
+        return False
+    names = sorted(_filter_field_names(search_obj), key=len, reverse=True)
+    pattern = r"(?:^|\s|\()(?:{0})\s*:".format(
+        "|".join(re.escape(name) for name in names)
+    )
+    return re.search(pattern, qstr) is not None
 
 
 def lowercase_filter(field_name):
@@ -90,12 +128,24 @@ class RecordVideosSearch(RecordsSearch):
             "contributors.email",
             "contributors.name",
             "description^5",
+            "doi^8",
             "keywords.name",
-            #"publication_date",  # auto-mapped as a date, and not text. Requires mappings change
-            "report_number",
+            "language",
+            "legacy_recid",
+            "publication_date",
+            "report_number^8",
             "title.title^10",
             "title.subtitle",
+            "translations.description^3",
+            "translations.title.title^5",
+            "translations.title.subtitle",
             "type",
+        )
+        # Extra phrase boosts for exact-ish ranking (#1822)
+        phrase_fields = (
+            ("title.title", 25),
+            ("description", 10),
+            ("translations.title.title", 15),
         )
         default_filter = DefaultFilter(cern_filter)
 
@@ -138,14 +188,82 @@ def query_to_objects(query, cls):
     return cls.get_records(ids)
 
 
+def title_suggest_search(qstr, size=10):
+    """Title typeahead via filtered search (same access as ``/api/records/``).
+
+    Completion suggesters ignore query filters, so we use ``RecordVideosSearch``
+    (``cern_filter``) with a prefix query on ``title.title`` instead.
+    """
+    size = size or 10
+    search = (
+        RecordVideosSearch()
+        .source(["title"])
+        .params(size=size)
+        .query("match_phrase_prefix", **{"title.title": qstr})
+    )
+    options = []
+    for hit in search.execute():
+        title = (hit.to_dict().get("title") or {}).get("title")
+        if not title:
+            continue
+        options.append({"text": title, "_source": {"title": {"title": title}}})
+    return options
+
+
 def query_parser_with_fields(search_obj, qstr=None):
-    """Custom query parser with fields."""
-    if qstr:
-        extra_params = {
-            "fields": getattr(search_obj.Meta, "fields", []),
-        }
-        return dsl.Q("query_string", query=qstr, **extra_params)
-    return dsl.Q()
+    """Custom query parser with boosted fields.
+
+    Uses ``simple_query_string`` so pasted titles with quotes/colons do not
+    raise OpenSearch syntax errors (unlike ``query_string``).
+
+    Do **not** search ``*``: long pastes × all mapped fields exceed
+    ``indices.query.bool.max_clause_count`` (1024). Prefer an explicit boosted
+    field list instead (ILS-style catch-all is unsafe at paste length).
+
+    Adds optional ``match_phrase`` should-clauses (``Meta.phrase_fields``) so
+    exact phrases in titles/descriptions rank above loose word matches.
+    """
+    if not qstr:
+        return dsl.Q()
+    fields = list(getattr(search_obj.Meta, "fields", ()))
+    # Known field filters still need query_string. Free text uses
+    # simple_query_string so quotes/colons in titles do not 500.
+    if _looks_like_field_filter(qstr, search_obj):
+        base = dsl.Q(
+            "query_string",
+            query=qstr,
+            fields=fields,
+            lenient=True,
+        )
+    else:
+        # Disable NOT: bare ``-`` in report numbers (CERN-VIDEO-1997-001)
+        # would otherwise mean exclusion and match the wrong set of docs.
+        base = dsl.Q(
+            "simple_query_string",
+            query=qstr,
+            fields=fields,
+            lenient=True,
+            # AND so hyphenated report numbers (hyphens stripped by analyzer)
+            # do not become a giant OR of CERN|VIDEO|1997|001 matching everything.
+            # Disable NOT so bare ``-`` is not an exclusion operator.
+            default_operator="and",
+            flags="AND|OR|PREFIX|PHRASE|PRECEDENCE|ESCAPE|WHITESPACE|FUZZY|NEAR|SLOP",
+        )
+    should = []
+    for field, boost in getattr(search_obj.Meta, "phrase_fields", ()):
+        should.append(
+            dsl.Q("match_phrase", **{field: {"query": qstr, "boost": boost}})
+        )
+    for field, boost in getattr(
+        search_obj.Meta,
+        "exact_fields",
+        (("report_number.raw", 30),),
+    ):
+        should.append(dsl.Q("term", **{field: {"value": qstr, "boost": boost}}))
+    if not should:
+        return base
+    # Prefer exact report_number/DOI hits even when free-text parsing is weak.
+    return dsl.Q("bool", should=[base, *should], minimum_should_match=1)
 
 
 def videos_search_factory(_, search_obj, query_parser=None):

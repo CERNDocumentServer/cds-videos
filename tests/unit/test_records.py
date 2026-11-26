@@ -310,6 +310,420 @@ def test_videos_search(api_app, indexed_videos):
         assert res.status_code == 200
 
 
+def test_videos_search_tolerates_lucene_special_chars(api_app, indexed_videos):
+    """Pasted titles with quotes/colons must not 400 (#1743 / #2025 Phase 1)."""
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+        for q in (
+            'Prize: Steven',
+            'light" :',
+            '"for development',
+            'Nobel Prize in Physics 1997 "for development of methods" : Steven Chu',
+        ):
+            res = client.get(search_url, query_string={"q": q})
+            assert res.status_code == 200, q
+
+
+def test_videos_search_improvement_examples(api_app, es, db):
+    """Examples of queries that work after the search improvements (#2025)."""
+    import copy
+
+    from helpers import create_record
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "description": "Search improvements fixture",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+    }
+
+    accented = copy.deepcopy(base)
+    accented.update(
+        {
+            "title": {"title": "François CERN café"},
+            "description": "Accent folding demo video",
+            "doi": "10.1234/francois-cafe",
+            "report_number": ["CERN-MOVIE-2024-42"],
+            "legacy_recid": 991122,
+            "translations": [
+                {
+                    "language": "en",
+                    "title": {"title": "Only In Translation Higgs"},
+                    "description": "translation-only string",
+                }
+            ],
+        }
+    )
+
+    nobel = copy.deepcopy(base)
+    nobel.update(
+        {
+            "title": {
+                "title": (
+                    'Nobel Prize in Physics 1997 "for development of methods" '
+                    ": Steven Chu"
+                )
+            },
+            "description": "Pasted title with quotes and colon",
+            "report_number": ["CERN-MOVIE-1997-01"],
+        }
+    )
+
+    phrase = copy.deepcopy(base)
+    phrase.update(
+        {
+            "title": {"title": "the higgs boson discovery talk"},
+            "description": "exact phrase ranking fixture",
+            "report_number": ["CERN-MOVIE-2012-07"],
+        }
+    )
+
+    created = [create_record(r) for r in (accented, nobel, phrase)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+
+        # Accents match either way (François ↔ Francois, café ↔ cafe)
+        res = client.get(search_url, query_string={"q": "Francois cafe"})
+        assert_hits_len(res, 1)
+
+        # DOI / legacy id / report number are findable
+        res = client.get(search_url, query_string={"q": "10.1234/francois-cafe"})
+        assert_hits_len(res, 1)
+        res = client.get(search_url, query_string={"q": "991122"})
+        assert_hits_len(res, 1)
+        res = client.get(search_url, query_string={"q": "CERN-MOVIE-2024-42"})
+        assert_hits_len(res, 1)
+
+        # Translation-only string is searchable
+        res = client.get(search_url, query_string={"q": "Only In Translation Higgs"})
+        assert_hits_len(res, 1)
+
+        # Pasted Nobel title with quotes/colon finds the record (not just 200)
+        res = client.get(
+            search_url,
+            query_string={
+                "q": (
+                    'Nobel Prize in Physics 1997 "for development of methods" '
+                    ": Steven Chu"
+                )
+            },
+        )
+        assert_hits_len(res, 1)
+
+        # Known field filter still uses the strict path and scopes to title
+        res = client.get(
+            search_url, query_string={"q": 'title.title:"the higgs boson discovery"'}
+        )
+        assert_hits_len(res, 1)
+        res = client.get(
+            search_url, query_string={"q": 'title.title:"Accent folding demo"'}
+        )
+        assert_hits_len(res, 0)
+
+        # Accents work the other way too (query with accents → ASCII title)
+        res = client.get(search_url, query_string={"q": "François café"})
+        assert_hits_len(res, 1)
+
+        # Field filter still works with a space after the colon
+        res = client.get(
+            search_url, query_string={"q": 'title.title: "the higgs boson discovery"'}
+        )
+        assert_hits_len(res, 1)
+
+
+def test_videos_search_keywords_contributors_and_description(api_app, es, db):
+    """Keywords, contributors, and description-only text are searchable."""
+    import copy
+
+    from helpers import create_record
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "description": "generic fixture description",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+        "title": {"title": "Plain title without markers"},
+        "report_number": ["CERN-MOVIE-KW-1"],
+    }
+    tagged = copy.deepcopy(base)
+    tagged.update(
+        {
+            "title": {"title": "Keyword fixture video"},
+            "description": "mentions antimatter nowhere else",
+            "keywords": [{"name": "DarkMatterTag", "source": "CERN"}],
+            "contributors": [
+                {"name": "Curie, Marie", "role": "Speaker"},
+                {"name": "Do, John", "role": "Camera Operator"},
+            ],
+            "report_number": ["CERN-MOVIE-KW-2"],
+        }
+    )
+    other = copy.deepcopy(base)
+    other["report_number"] = ["CERN-MOVIE-KW-3"]
+
+    created = [create_record(r) for r in (tagged, other)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+
+        res = client.get(search_url, query_string={"q": "DarkMatterTag"})
+        assert_hits_len(res, 1)
+        res = client.get(search_url, query_string={"q": "Curie"})
+        assert_hits_len(res, 1)
+        res = client.get(search_url, query_string={"q": "antimatter nowhere else"})
+        assert_hits_len(res, 1)
+
+
+def test_videos_search_report_number_is_exclusive(api_app, es, db):
+    """Hyphenated report numbers must hit one record, not everything (#2025)."""
+    import copy
+
+    from helpers import create_record, get_json
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "description": "Report number exclusivity fixture",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+    }
+    target = copy.deepcopy(base)
+    target.update(
+        {
+            "title": {"title": "Report number target video"},
+            "report_number": ["CERN-VIDEO-1997-001"],
+        }
+    )
+    decoy = copy.deepcopy(base)
+    decoy.update(
+        {
+            "title": {"title": "Report number decoy video"},
+            "report_number": ["CERN-VIDEO-2012-099"],
+            "description": "Mentions CERN and VIDEO and 1997 elsewhere",
+        }
+    )
+
+    created = [create_record(r) for r in (target, decoy)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+        res = client.get(search_url, query_string={"q": "CERN-VIDEO-1997-001"})
+        assert_hits_len(res, 1)
+        hit = get_json(res)["hits"]["hits"][0]["metadata"]
+        assert hit["report_number"] == ["CERN-VIDEO-1997-001"]
+
+
+def test_videos_search_phrase_ranks_title_above_scattered(api_app, es, db):
+    """Exact title phrases rank above the same words scattered in description."""
+    import copy
+
+    from helpers import create_record, get_json
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+    }
+    exact = copy.deepcopy(base)
+    exact.update(
+        {
+            "title": {"title": "quantum chromodynamics primer"},
+            "description": "unrelated abstract text",
+            "report_number": ["CERN-MOVIE-PHRASE-1"],
+        }
+    )
+    scattered = copy.deepcopy(base)
+    scattered.update(
+        {
+            "title": {"title": "Something else entirely"},
+            "description": "primer notes about chromodynamics in quantum labs",
+            "report_number": ["CERN-MOVIE-PHRASE-2"],
+        }
+    )
+
+    created = [create_record(r) for r in (exact, scattered)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+        res = client.get(
+            search_url, query_string={"q": "quantum chromodynamics primer"}
+        )
+        assert res.status_code == 200
+        hits = get_json(res)["hits"]["hits"]
+        assert len(hits) >= 2
+        assert hits[0]["metadata"]["title"]["title"] == "quantum chromodynamics primer"
+
+
+def test_videos_search_hides_restricted(api_app, es, db):
+    """Restricted videos stay out of anonymous search results."""
+    import copy
+
+    from helpers import create_record, get_json
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "description": "Access filter search fixture",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+    }
+    public = copy.deepcopy(base)
+    public.update(
+        {
+            "title": {"title": "Public Access Zeta"},
+            "report_number": ["CERN-MOVIE-ACCESS-1"],
+        }
+    )
+    restricted = copy.deepcopy(base)
+    restricted.update(
+        {
+            "title": {"title": "Secret Access Zeta"},
+            "report_number": ["CERN-MOVIE-ACCESS-2"],
+            "_access": {"read": ["search-secret-group"]},
+        }
+    )
+
+    created = [create_record(r) for r in (public, restricted)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    with api_app.test_client() as client:
+        search_url = url_for("invenio_records_rest.recid_list")
+        res = client.get(search_url, query_string={"q": "Access Zeta"})
+        assert_hits_len(res, 1)
+        assert get_json(res)["hits"]["hits"][0]["metadata"]["title"]["title"] == (
+            "Public Access Zeta"
+        )
+
+
+def test_videos_title_suggest(api_app, indexed_videos, json_headers):
+    """Title suggest uses filtered search on /records/_suggest."""
+    with api_app.test_client() as client:
+        url = url_for("cds_records.records_title_suggest")
+        res = client.get(
+            url,
+            headers=json_headers,
+            query_string={"suggest-title": "vid", "size": 10},
+        )
+        assert res.status_code == 200
+        data = res.get_json()
+        assert "suggest-title" in data
+        options = data["suggest-title"][0]["options"]
+        assert options
+        assert any("Video" in (o.get("text") or "") for o in options)
+
+
+def test_videos_title_suggest_respects_access(api_app, es, db, users, json_headers):
+    """Restricted titles stay out of suggest unless the user can see them."""
+    import copy
+
+    from flask_principal import RoleNeed, identity_loaded
+    from helpers import create_record
+
+    base = {
+        "date": "2017-01-16",
+        "duration": "00:01:00",
+        "description": "Suggest access fixture",
+        "publication_date": "2017-03-09",
+        "$schema": "https://cds.cern.ch/schemas/records/videos/video/video-v1.0.0.json",
+        "type": "Type",
+        "category": "Category",
+        "contributors": [{"name": "Do, John", "role": "Camera Operator"}],
+        "copyright": {"holder": "CERN", "year": "2017"},
+        "license": [{"license": "CERN"}],
+        "language": "en",
+    }
+    public = copy.deepcopy(base)
+    public["title"] = {"title": "Public Suggest Alpha"}
+    public["report_number"] = ["CERN-MOVIE-SUGGEST-1"]
+    restricted = copy.deepcopy(base)
+    restricted["title"] = {"title": "Secret Suggest Alpha"}
+    restricted["report_number"] = ["CERN-MOVIE-SUGGEST-2"]
+    restricted["_access"] = {"read": ["suggest-secret-group"]}
+
+    created = [create_record(r) for r in (public, restricted)]
+    db.session.commit()
+    RecordIndexer().bulk_index([record.id for _, record in created])
+    RecordIndexer().process_bulk_queue()
+    current_search_client.indices.refresh()
+
+    url = url_for("cds_records.records_title_suggest")
+    with api_app.test_client() as client:
+        res = client.get(
+            url, headers=json_headers, query_string={"suggest-title": "Suggest Alpha"}
+        )
+        assert res.status_code == 200
+        titles = [o["text"] for o in res.get_json()["suggest-title"][0]["options"]]
+        assert "Public Suggest Alpha" in titles
+        assert "Secret Suggest Alpha" not in titles
+
+    @identity_loaded.connect
+    def _grant_secret_group(sender, identity):
+        identity.provides.add(RoleNeed("suggest-secret-group"))
+
+    with api_app.test_client() as client:
+        login_user(db.session.get(User, users[0]))
+        res = client.get(
+            url, headers=json_headers, query_string={"suggest-title": "Suggest Alpha"}
+        )
+        assert res.status_code == 200
+        titles = [o["text"] for o in res.get_json()["suggest-title"][0]["options"]]
+        assert "Public Suggest Alpha" in titles
+        assert "Secret Suggest Alpha" in titles
+
+
 def test_serialize_record(app, api_app, users, api_project_published, json_headers):
     """Test the record embedded in the record page, as the API returns it."""
     (project, video_1, _) = api_project_published

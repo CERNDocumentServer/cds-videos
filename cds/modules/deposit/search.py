@@ -95,9 +95,12 @@ class DepositVideosSearch(RecordsSearch):
             "contributors.email",
             "contributors.name",
             "description^5",
+            "doi^8",
             "keywords.name",
-            #"publication_date",  # auto-mapped as a date, and not text. Requires mappings change
-            "report_number",
+            "language",
+            "legacy_recid",
+            "publication_date",
+            "report_number^8",
             "title.title^10",
             "type",
             "videos.accelerator_experiment.project",
@@ -109,11 +112,26 @@ class DepositVideosSearch(RecordsSearch):
             "videos.contributors.email",
             "videos.contributors.name",
             "videos.description^5",
+            "videos.doi^8",
             "videos.keywords.name",
-            #"videos.publication_date",  # auto-mapped as a date, and not text. Requires mappings change
-            "videos.report_number",
+            "videos.language",
+            "videos.legacy_recid",
+            "videos.publication_date",
+            "videos.report_number^8",
             "videos.title.title^10",
             "videos.title.subtitle",
+            "videos.translations.description^3",
+            "videos.translations.title.title^5",
+            "videos.translations.title.subtitle",
             "videos.type",
+            "translations.description^3",
+            "translations.title.title^5",
+            "translations.title.subtitle",
+        )
+        phrase_fields = (
+            ("title.title", 25),
+            ("description", 10),
+            ("videos.title.title", 25),
+            ("videos.description", 10),
         )
         default_filter = DefaultFilter(cern_filter)
