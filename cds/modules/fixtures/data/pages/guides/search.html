@@ -8,7 +8,7 @@
 
 <p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=dark%20matter"><code>dark matter</code></a></p>
 
-<p>Results will match records with the <em>terms</em> <code>dark</code> <em>or</em> <code>matter</code> in <em>any field</em>.
+<p>Results will match records with the <em>terms</em> <code>dark</code> <em>or</em> <code>matter</code> across the usual metadata fields (title, description, contributors, keywords, DOI, report number, translations, …). Exact title/description phrases are ranked higher than loose word matches.
 
 <!-- Note that stemming is applied so e.g. <code>science</code> will also match <code>sciences</code>. Search results are ranked according to an algorithm that takes your query terms into account.</p> -->
 
@@ -20,12 +20,27 @@
 
 <p><strong>Examples:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=-dark%20%2Bmatter"><code>-dark +matter</code></a> or <a href="https://videos.cern.ch/search?page=1&size=21&q=NOT%20dark%20AND%20matter"><code>NOT dark AND matter</code></a></p>
 
+<h3 id="pastedtitles">Pasted titles and special characters</h3>
+
+<p>You can paste a full title that contains quotes, colons, or other punctuation. Search treats that text as words to find, not as Lucene syntax, so it no longer errors out.</p>
+
+<p><strong>Example:</strong> <code>Nobel Prize in Physics 1997 "for development of methods" : Steven Chu</code></p>
+
+<h3 id="accents">Accents</h3>
+
+<p>Accents match either way. Searching <code>Francois</code> also finds <code>François</code>, and <code>cafe</code> finds <code>café</code> (and the other way around).</p>
+
+<p><strong>Examples:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=Francois"><code>Francois</code></a>, <a href="https://videos.cern.ch/search?page=1&size=21&q=Geneve"><code>Geneve</code></a></p>
+
+<h3 id="titlesuggest">Title suggestions</h3>
+
+<p>The search box in the header suggests video titles as you type. It uses the same access rules as normal search, so you only see titles you are allowed to open.</p>
 
 <h3 id="phrasesearch">Phrase search</h3>
 
 <p><strong>Example:</strong> <a href="https://videos.cern.ch/search?page=1&size=21&q=%22dark%20matter%22"><code>"dark matter"</code></a></p>
 
-<p>Results will match records with the <em>phrase</em> <code>dark matter</code> in <em>any field</em>.</p>
+<p>Results will match records with the <em>phrase</em> <code>dark matter</code>. Phrase matches in the title are ranked above the same words scattered across other fields.</p>
 
 <h3 id="fieldsearch">Field search</h3>
 
@@ -266,19 +281,30 @@ of what each data type means and what is possible.</p>
   <td>string</td>
   <td>An account of the resource. Description may include but is not limited to: an abstract, a table of contents, a graphical representation, or a free-text account of the resource</td>
 </tr>
-<!--<tr>
-<td><code>doi</code></td><td>string (exact)</td><td></td>
+<tr>
+  <td><code>doi</code></td>
+  <td>string</td>
+  <td>Digital Object Identifier</td>
 </tr>
--->
 <tr>
   <td><code>duration</code></td>
   <td>string</td>
   <td>Duration</td>
 </tr>
 <tr>
+  <td><code>keywords.name</code></td>
+  <td>string</td>
+  <td>Keyword / tag name</td>
+</tr>
+<tr>
   <td><code>language</code></td>
   <td>CV</td>
   <td>A language of the resource, e.g. en for english, fr for french, es for spanish</td>
+</tr>
+<tr>
+  <td><code>legacy_recid</code></td>
+  <td>number</td>
+  <td>Legacy CDS record id</td>
 </tr>
 <tr>
   <td><code>license.\*</code></td>
@@ -349,6 +375,16 @@ of what each data type means and what is possible.</p>
   <td>A name given to the resource. Typically, a Title will be a name by which the resource is formally known</td>
   <td></td>
   <td></td>
+</tr>
+<tr>
+  <td><code>translations.title.title</code></td>
+  <td>string</td>
+  <td>Translated title</td>
+</tr>
+<tr>
+  <td><code>translations.description</code></td>
+  <td>string</td>
+  <td>Translated description</td>
 </tr>
 <tr>
   <td><code>type</code></td>

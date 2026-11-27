@@ -181,13 +181,22 @@
       "title": {
         "properties": {
           "title": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "source": {
             "type": "text"
           },
           "subtitle": {
-            "type": "text"
+            "type": "text",
+            "analyzer": "accent_analyzer",
+            "search_analyzer": "accent_analyzer"
           }
         }
       },
@@ -227,7 +236,9 @@
         "type": "text"
       },
       "description": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "accent_analyzer",
+        "search_analyzer": "accent_analyzer"
       },
       "_oai": {
         "properties": {
@@ -295,6 +306,30 @@
       },
       "publication_date": {
         "type": "text"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "strip_special_chars": {
+          "type": "pattern_replace",
+          "pattern": "[\\p{Punct}\\p{S}]",
+          "replacement": " "
+        }
+      },
+      "analyzer": {
+        "accent_analyzer": {
+          "tokenizer": "standard",
+          "type": "custom",
+          "char_filter": [
+            "strip_special_chars"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
       }
     }
   }
